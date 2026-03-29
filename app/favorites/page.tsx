@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { getAllMasters } from '@/services/masters';
-import BottomNav from '@/components/common/BottomNav';
+import { getAllMasters } from '../../services/masters';
+import BottomNav from '../../components/common/BottomNav';
 
 export default function FavoritesPage() {
   const masters = getAllMasters();
