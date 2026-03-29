@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import BottomNav from '@/components/common/BottomNav';
+import BottomNav from '../../components/common/BottomNav';
 
 const chats = [
   {
@@ -90,7 +90,7 @@ export default function MessagesPage() {
                     </span>
                   </div>
 
-                  <p className="mt-1 line-clamp-2 text-sm leading-5 text-[#5f564d]">
+                  <p className="mt-1 text-sm leading-5 text-[#5f564d]">
                     {chat.lastMessage}
                   </p>
                 </div>
