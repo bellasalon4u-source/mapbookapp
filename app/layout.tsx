@@ -1,6 +1,8 @@
+import './globals.css';
+
 export const metadata = {
-  title: "MapBook",
-  description: "MapBook service booking map app",
+  title: 'MapBook',
+  description: 'MapBook service booking map app',
 };
 
 export default function RootLayout({
