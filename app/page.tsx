@@ -1,69 +1,85 @@
-"use client";
-
-import { useEffect, useRef } from "react";
-
-declare global {
-  interface Window {
-    google: any;
-  }
-}
+import Link from 'next/link';
+import { getAllMasters } from '@/services/masters';
+import { categories } from '@/lib/data';
 
 export default function HomePage() {
-  const mapRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-    if (!apiKey || !mapRef.current) return;
-
-    const existingScript = document.getElementById("google-maps-script");
-
-    const initMap = () => {
-      if (!window.google || !mapRef.current) return;
-
-      const center = { lat: 51.5074, lng: -0.1278 };
-
-      const map = new window.google.maps.Map(mapRef.current, {
-        center,
-        zoom: 12,
-      });
-
-      new window.google.maps.Marker({
-        position: center,
-        map,
-        title: "MapBook London",
-      });
-    };
-
-    if (existingScript) {
-      initMap();
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = "google-maps-script";
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
-    script.async = true;
-    script.defer = true;
-    script.onload = initMap;
-    document.body.appendChild(script);
-  }, []);
+  const masters = getAllMasters();
 
   return (
-    <main style={{ minHeight: "100vh", fontFamily: "Arial, sans-serif" }}>
-      <div style={{ padding: 16 }}>
-        <h1 style={{ fontSize: 36, marginBottom: 8 }}>MapBook</h1>
-        <p style={{ marginBottom: 16 }}>Service booking map app</p>
-      </div>
+    <main className="min-h-screen bg-[#fcf8f2] px-4 py-6">
+      <div className="mx-auto max-w-md">
+        <h1 className="text-3xl font-bold text-[#1d1712]">MapBook</h1>
+        <p className="mt-2 text-sm text-[#7a7065]">
+          Find beauty and wellness services near you
+        </p>
 
-      <div
-        ref={mapRef}
-        style={{
-          width: "100%",
-          height: "75vh",
-          borderTop: "1px solid #ddd",
-        }}
-      />
+        <div className="mt-4 flex gap-2">
+          <input
+            type="text"
+            placeholder="Search services, masters, area..."
+            className="flex-1 rounded-2xl border border-[#eadfce] bg-white px-4 py-3 outline-none"
+          />
+          <button className="rounded-2xl bg-[#2f241c] px-4 py-3 text-white">
+            🎤
+          </button>
+        </div>
+
+        <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+          {categories.map((category) => (
+            <button
+              key={category}
+              className="whitespace-nowrap rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#4e463d] border border-[#efe4d7]"
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-6 space-y-4">
+          {masters.map((master) => (
+            <Link
+              key={master.id}
+              href={`/master/${master.id}`}
+              className="block overflow-hidden rounded-3xl border border-[#efe4d7] bg-white"
+            >
+              <img
+                src={master.avatar}
+                alt={master.name}
+                className="h-48 w-full object-cover"
+              />
+
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-bold text-[#1d1712]">
+                      {master.name}
+                    </h2>
+                    <p className="text-sm text-[#7a7065]">
+                      {master.title} • {master.city}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl bg-[#f2e9dc] px-3 py-2 text-sm font-bold text-[#463b31]">
+                    {master.rating} ★
+                  </div>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="rounded-full bg-[#2f241c] px-3 py-2 text-sm font-bold text-white">
+                    from £{master.priceFrom}
+                  </div>
+
+                  {master.availableNow && (
+                    <div className="rounded-full bg-[#edf7ee] px-3 py-2 text-sm font-semibold text-[#256b43]">
+                      ● Available now
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
     </main>
   );
 }
