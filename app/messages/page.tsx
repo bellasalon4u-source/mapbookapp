@@ -84,42 +84,4 @@ export default function MessagesPage() {
                     <h2 className="truncate text-base font-bold text-[#1d1712]">
                       {chat.name}
                     </h2>
-                    <span className="whitespace-nowrap text-xs text-[#7a7065]">
-                      {chat.time}
-                    </span>
-                  </div>
-
-                  <p className="mt-1 line-clamp-2 text-sm leading-5 text-[#5f564d]">
-                    {chat.lastMessage}
-                  </p>
-                </div>
-
-                {chat.unread > 0 && (
-                  <div className="flex h-7 min-w-[28px] items-center justify-center rounded-full bg-red-600 px-2 text-xs font-bold text-white">
-                    {chat.unread}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-8 grid grid-cols-2 gap-3">
-          <Link
-            href="/"
-            className="rounded-2xl border border-[#e7dac8] bg-white px-4 py-4 text-center text-sm font-bold text-[#2f241c]"
-          >
-            Home
-          </Link>
-
-          <Link
-            href="/booking-success"
-            className="rounded-2xl bg-[#2f241c] px-4 py-4 text-center text-sm font-bold text-white"
-          >
-            Last booking
-          </Link>
-        </div>
-      </div>
-    </main>
-  );
-}
+                    <span className="whitespace-nowrap text-xs text-[#7
