@@ -23,6 +23,12 @@ export default function HomePage() {
           <button className="rounded-2xl bg-[#2f241c] px-4 py-3 text-white">
             🎤
           </button>
+          <Link
+            href="/favorites"
+            className="rounded-2xl border border-[#eadfce] bg-white px-4 py-3 text-[#2f241c]"
+          >
+            ♥
+          </Link>
         </div>
 
         <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
@@ -39,7 +45,7 @@ export default function HomePage() {
         <section className="mt-6">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-2xl font-bold text-[#1d1712]">Map view</h2>
-            <button className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#4e463d] border border-[#efe4d7]">
+            <button className="rounded-full border border-[#efe4d7] bg-white px-4 py-2 text-sm font-semibold text-[#4e463d]">
               Filters
             </button>
           </div>
@@ -87,65 +93,4 @@ export default function HomePage() {
                 <p className="text-sm font-semibold text-[#2f241c]">from £45</p>
 
                 <Link
-                  href="/master/bella-keratin-studio"
-                  className="rounded-2xl bg-[#2f241c] px-4 py-2 text-sm font-bold text-white"
-                >
-                  Open
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-6">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-[#1d1712]">Recommended</h2>
-            <button className="text-sm font-semibold text-[#7a7065]">
-              View all
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {masters.map((master) => (
-              <Link
-                key={master.id}
-                href={`/master/${master.id}`}
-                className="block overflow-hidden rounded-3xl border border-[#efe4d7] bg-white"
-              >
-                <img
-                  src={master.avatar}
-                  alt={master.name}
-                  className="h-48 w-full object-cover"
-                />
-
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h2 className="text-lg font-bold text-[#1d1712]">
-                        {master.name}
-                      </h2>
-                      <p className="text-sm text-[#7a7065]">
-                        {master.title} • {master.city}
-                      </p>
-                    </div>
-
-                    <div className="rounded-xl bg-[#f2e9dc] px-3 py-2 text-sm font-bold text-[#463b31]">
-                      {master.rating} ★
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="rounded-full bg-[#2f241c] px-3 py-2 text-sm font-bold text-white">
-                      from £{master.priceFrom}
-                    </div>
-
-                    {master.availableNow && (
-                      <div className="rounded-full bg-[#edf7ee] px-3 py-2 text-sm font-semibold text-[#256b43]">
-                        ● Available now
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </
+                  href="/
