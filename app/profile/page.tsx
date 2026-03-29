@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BottomNav from '@/components/common/BottomNav';
 
 export default function ProfilePage() {
   return (
@@ -84,6 +85,8 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
+
+      <BottomNav active="profile" />
     </main>
   );
 }
