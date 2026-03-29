@@ -152,9 +152,12 @@ export default function BookingPage({ params }: Props) {
             <p className="mt-1 text-2xl font-bold text-[#1f1813]">£5</p>
           </div>
 
-          <button className="rounded-2xl bg-red-600 px-6 py-4 text-sm font-bold text-white">
+          <Link
+            href="/booking-success"
+            className="rounded-2xl bg-red-600 px-6 py-4 text-sm font-bold text-white"
+          >
             Confirm booking
-          </button>
+          </Link>
         </div>
       </div>
     </main>
