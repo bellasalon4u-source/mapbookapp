@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getMasterById } from '@/services/masters';
+import { getMasterById } from '../../../services/masters';
 
 type Props = {
   params: {
@@ -63,7 +63,7 @@ export default function BookingPage({ params }: Props) {
                 className={`rounded-2xl px-4 py-3 text-sm font-semibold ${
                   index === 0
                     ? 'bg-[#2f241c] text-white'
-                    : 'bg-white text-[#4e463d] border border-[#efe4d7]'
+                    : 'border border-[#efe4d7] bg-white text-[#4e463d]'
                 }`}
               >
                 {date}
@@ -81,7 +81,7 @@ export default function BookingPage({ params }: Props) {
                 className={`rounded-2xl px-4 py-3 text-sm font-semibold ${
                   index === 1
                     ? 'bg-red-600 text-white'
-                    : 'bg-white text-[#4e463d] border border-[#efe4d7]'
+                    : 'border border-[#efe4d7] bg-white text-[#4e463d]'
                 }`}
               >
                 {time}
