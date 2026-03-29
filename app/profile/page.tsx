@@ -62,6 +62,13 @@ export default function ProfilePage() {
           </Link>
 
           <Link
+            href="/favorites"
+            className="block rounded-3xl border border-[#efe4d7] bg-white px-5 py-4 text-sm font-bold text-[#1d1712]"
+          >
+            Liked pins
+          </Link>
+
+          <Link
             href="/booking-success"
             className="block rounded-3xl border border-[#efe4d7] bg-white px-5 py-4 text-sm font-bold text-[#1d1712]"
           >
