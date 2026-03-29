@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BottomNav from '@/components/common/BottomNav';
 
 const chats = [
   {
@@ -84,4 +85,28 @@ export default function MessagesPage() {
                     <h2 className="truncate text-base font-bold text-[#1d1712]">
                       {chat.name}
                     </h2>
-                    <span className="whitespace-nowrap text-xs text-[#7
+                    <span className="whitespace-nowrap text-xs text-[#7a7065]">
+                      {chat.time}
+                    </span>
+                  </div>
+
+                  <p className="mt-1 line-clamp-2 text-sm leading-5 text-[#5f564d]">
+                    {chat.lastMessage}
+                  </p>
+                </div>
+
+                {chat.unread > 0 && (
+                  <div className="flex h-7 min-w-[28px] items-center justify-center rounded-full bg-red-600 px-2 text-xs font-bold text-white">
+                    {chat.unread}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <BottomNav active="messages" />
+    </main>
+  );
+}
