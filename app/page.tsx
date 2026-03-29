@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import { getAllMasters } from '@/services/masters';
 import { categories } from '@/lib/data';
+import BottomNav from '@/components/common/BottomNav';
 
 export default function HomePage() {
   const masters = getAllMasters();
 
   return (
-    <main className="min-h-screen bg-[#fcf8f2] px-4 py-6">
+    <main className="min-h-screen bg-[#fcf8f2] px-4 py-6 pb-24">
       <div className="mx-auto max-w-md">
         <h1 className="text-3xl font-bold text-[#1d1712]">MapBook</h1>
         <p className="mt-2 text-sm text-[#7a7065]">
@@ -28,7 +29,7 @@ export default function HomePage() {
           {categories.map((category) => (
             <button
               key={category}
-              className="whitespace-nowrap rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#4e463d] border border-[#efe4d7]"
+              className="whitespace-nowrap rounded-full border border-[#efe4d7] bg-white px-4 py-2 text-sm font-semibold text-[#4e463d]"
             >
               {category}
             </button>
@@ -80,6 +81,8 @@ export default function HomePage() {
           ))}
         </div>
       </div>
+
+      <BottomNav active="home" />
     </main>
   );
 }
