@@ -36,53 +36,116 @@ export default function HomePage() {
           ))}
         </div>
 
-        <div className="mt-6 space-y-4">
-          {masters.map((master) => (
-            <Link
-              key={master.id}
-              href={`/master/${master.id}`}
-              className="block overflow-hidden rounded-3xl border border-[#efe4d7] bg-white"
-            >
-              <img
-                src={master.avatar}
-                alt={master.name}
-                className="h-48 w-full object-cover"
-              />
+        <section className="mt-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-[#1d1712]">Map view</h2>
+            <button className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#4e463d] border border-[#efe4d7]">
+              Filters
+            </button>
+          </div>
 
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h2 className="text-lg font-bold text-[#1d1712]">
-                      {master.name}
-                    </h2>
-                    <p className="text-sm text-[#7a7065]">
-                      {master.title} • {master.city}
-                    </p>
-                  </div>
+          <div className="relative h-[360px] overflow-hidden rounded-[32px] border border-[#e8dccb] bg-[#eadfce]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,#f6eee3_0%,#eadfce_45%,#e2d4c0_100%)]" />
 
-                  <div className="rounded-xl bg-[#f2e9dc] px-3 py-2 text-sm font-bold text-[#463b31]">
-                    {master.rating} ★
-                  </div>
+            <div className="absolute left-[8%] top-[16%] h-24 w-24 rounded-full bg-white/20 blur-2xl" />
+            <div className="absolute right-[12%] top-[28%] h-20 w-20 rounded-full bg-white/20 blur-2xl" />
+            <div className="absolute bottom-[18%] left-[20%] h-28 w-28 rounded-full bg-white/20 blur-2xl" />
+
+            <div className="absolute left-6 top-8 rounded-full bg-[#2f241c] px-4 py-2 text-sm font-bold text-white shadow-lg">
+              £45 · 4.9
+            </div>
+
+            <div className="absolute right-8 top-20 rounded-full bg-white px-4 py-2 text-sm font-bold text-[#2f241c] shadow-lg">
+              £65 · 4.8
+            </div>
+
+            <div className="absolute left-16 bottom-24 rounded-full bg-red-600 px-4 py-2 text-sm font-bold text-white shadow-lg">
+              Book now
+            </div>
+
+            <div className="absolute right-10 bottom-12 rounded-full bg-[#2f241c] px-4 py-2 text-sm font-bold text-white shadow-lg">
+              £55 · 4.7
+            </div>
+
+            <div className="absolute bottom-4 left-4 right-4 rounded-[28px] border border-[#efe4d7] bg-white/95 p-4 backdrop-blur">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-bold text-[#1d1712]">
+                    Bella Keratin Studio
+                  </h3>
+                  <p className="mt-1 text-sm text-[#7a7065]">
+                    Hair Extensions Specialist • London
+                  </p>
                 </div>
 
-                <div className="mt-3 flex items-center justify-between">
-                  <div className="rounded-full bg-[#2f241c] px-3 py-2 text-sm font-bold text-white">
-                    from £{master.priceFrom}
-                  </div>
-
-                  {master.availableNow && (
-                    <div className="rounded-full bg-[#edf7ee] px-3 py-2 text-sm font-semibold text-[#256b43]">
-                      ● Available now
-                    </div>
-                  )}
+                <div className="rounded-xl bg-[#edf7ee] px-3 py-2 text-xs font-bold text-[#256b43]">
+                  ● Available now
                 </div>
               </div>
-            </Link>
-          ))}
-        </div>
-      </div>
 
-      <BottomNav active="home" />
-    </main>
-  );
-}
+              <div className="mt-3 flex items-center justify-between">
+                <p className="text-sm font-semibold text-[#2f241c]">from £45</p>
+
+                <Link
+                  href="/master/bella-keratin-studio"
+                  className="rounded-2xl bg-[#2f241c] px-4 py-2 text-sm font-bold text-white"
+                >
+                  Open
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-[#1d1712]">Recommended</h2>
+            <button className="text-sm font-semibold text-[#7a7065]">
+              View all
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {masters.map((master) => (
+              <Link
+                key={master.id}
+                href={`/master/${master.id}`}
+                className="block overflow-hidden rounded-3xl border border-[#efe4d7] bg-white"
+              >
+                <img
+                  src={master.avatar}
+                  alt={master.name}
+                  className="h-48 w-full object-cover"
+                />
+
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-lg font-bold text-[#1d1712]">
+                        {master.name}
+                      </h2>
+                      <p className="text-sm text-[#7a7065]">
+                        {master.title} • {master.city}
+                      </p>
+                    </div>
+
+                    <div className="rounded-xl bg-[#f2e9dc] px-3 py-2 text-sm font-bold text-[#463b31]">
+                      {master.rating} ★
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="rounded-full bg-[#2f241c] px-3 py-2 text-sm font-bold text-white">
+                      from £{master.priceFrom}
+                    </div>
+
+                    {master.availableNow && (
+                      <div className="rounded-full bg-[#edf7ee] px-3 py-2 text-sm font-semibold text-[#256b43]">
+                        ● Available now
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </
