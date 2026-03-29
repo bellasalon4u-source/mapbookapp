@@ -1,4 +1,4 @@
-import { masters } from '@/lib/data';
+import { masters } from '../lib/data';
 
 export function getAllMasters() {
   return masters;
