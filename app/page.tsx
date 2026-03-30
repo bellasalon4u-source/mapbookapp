@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import RealMap from '../components/RealMap';
 import { getAllMasters } from '../services/masters';
@@ -8,17 +8,6 @@ import { getAllMasters } from '../services/masters';
 export default function HomePage() {
   const router = useRouter();
   const masters = useMemo(() => getAllMasters(), []);
-  const [selectedMasterId, setSelectedMasterId] = useState('');
-  const [likedIds, setLikedIds] = useState<string[]>([]);
-
-  const selectedMaster =
-    masters.find((master) => master.id === selectedMasterId) || null;
-
-  function toggleLike(id: string) {
-    setLikedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  }
 
   return (
     <main
@@ -117,180 +106,8 @@ export default function HomePage() {
         <section style={{ marginTop: 28 }}>
           <h2 style={{ fontSize: 34, margin: 0, fontWeight: 800 }}>Map view</h2>
 
-          <div style={{ marginTop: 12, position: 'relative' }}>
-            <RealMap
-              masters={masters}
-              selectedMasterId={selectedMasterId}
-              onSelectMaster={setSelectedMasterId}
-            />
-
-            {selectedMaster && (
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 12,
-                  right: 12,
-                  bottom: 12,
-                  background: '#fff',
-                  borderRadius: 24,
-                  border: '1px solid #eadfd2',
-                  padding: 14,
-                  boxShadow: '0 12px 24px rgba(0,0,0,0.14)',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                  }}
-                >
-                  <img
-                    src={selectedMaster.avatar}
-                    alt={selectedMaster.name}
-                    style={{
-                      width: 62,
-                      height: 62,
-                      borderRadius: 18,
-                      objectFit: 'cover',
-                      flexShrink: 0,
-                      display: 'block',
-                    }}
-                  />
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 18,
-                        fontWeight: 800,
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {selectedMaster.name}
-                    </div>
-
-                    <div
-                      style={{
-                        color: '#786d61',
-                        marginTop: 4,
-                        fontSize: 14,
-                      }}
-                    >
-                      {selectedMaster.title}
-                    </div>
-
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: 8,
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        marginTop: 8,
-                      }}
-                    >
-                      <span
-                        style={{
-                          background: '#2f241c',
-                          color: '#fff',
-                          padding: '7px 10px',
-                          borderRadius: 999,
-                          fontWeight: 800,
-                          fontSize: 13,
-                        }}
-                      >
-                        from £{selectedMaster.priceFrom}
-                      </span>
-
-                      <span
-                        style={{
-                          background: '#f2e9dc',
-                          color: '#463b31',
-                          padding: '7px 10px',
-                          borderRadius: 999,
-                          fontWeight: 800,
-                          fontSize: 13,
-                        }}
-                      >
-                        {selectedMaster.rating} ★
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleLike(selectedMaster.id);
-                    }}
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 999,
-                      border: '1px solid #eadfd2',
-                      background: '#fff',
-                      fontSize: 22,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {likedIds.includes(selectedMaster.id) ? '♥' : '♡'}
-                  </button>
-                </div>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    gap: 10,
-                    marginTop: 14,
-                  }}
-                >
-                  <div
-                    style={{
-                      background: selectedMaster.availableNow ? '#edf7ee' : '#fdecec',
-                      color: selectedMaster.availableNow ? '#1f8f45' : '#c53434',
-                      padding: '10px 12px',
-                      borderRadius: 14,
-                      fontWeight: 700,
-                      fontSize: 13,
-                    }}
-                  >
-                    {selectedMaster.availableNow ? '● Available now' : '● Not available now'}
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button
-                      onClick={() => router.push(`/master/${selectedMaster.id}`)}
-                      style={{
-                        border: '1px solid #d8cfc3',
-                        background: '#fff',
-                        color: '#2f241c',
-                        padding: '12px 14px',
-                        borderRadius: 14,
-                        fontWeight: 800,
-                        fontSize: 14,
-                      }}
-                    >
-                      Open
-                    </button>
-
-                    <button
-                      onClick={() => router.push(`/booking/${selectedMaster.id}`)}
-                      style={{
-                        border: 'none',
-                        background: '#e52323',
-                        color: '#fff',
-                        padding: '12px 14px',
-                        borderRadius: 14,
-                        fontWeight: 800,
-                        fontSize: 14,
-                      }}
-                    >
-                      Book now
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+          <div style={{ marginTop: 12 }}>
+            <RealMap masters={masters} />
           </div>
         </section>
 
@@ -363,10 +180,7 @@ export default function HomePage() {
                     </div>
 
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleLike(master.id);
-                      }}
+                      type="button"
                       style={{
                         width: 42,
                         height: 42,
@@ -376,7 +190,7 @@ export default function HomePage() {
                         fontSize: 22,
                       }}
                     >
-                      {likedIds.includes(master.id) ? '♥' : '♡'}
+                      ♡
                     </button>
                   </div>
                 </div>
