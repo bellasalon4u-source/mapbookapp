@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 type MasterPin = {
   id: string;
@@ -22,8 +22,8 @@ const fallbackCoords = [
   { lat: 51.5154, lng: -0.0721 },
   { lat: 51.5033, lng: -0.1195 },
   { lat: 51.5231, lng: -0.1586 },
-  { lat: 51.4952, lng: -0.146 },
-  { lat: 51.538, lng: -0.1426 },
+  { lat: 51.4952, lng: -0.1460 },
+  { lat: 51.5380, lng: -0.1426 },
 ];
 
 export default function RealMap({
@@ -32,19 +32,17 @@ export default function RealMap({
   onSelectMaster,
 }: RealMapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const leafletMapRef = useRef<any>(null);
-  const layerGroupRef = useRef<any>(null);
-  const [mapReady, setMapReady] = useState(false);
+  const mapInstanceRef = useRef<any>(null);
+  const markersLayerRef = useRef<any>(null);
 
   useEffect(() => {
-    let mounted = true;
+    let cancelled = false;
 
-    async function initMap() {
-      if (!mapRef.current || leafletMapRef.current) return;
+    async function setupMap() {
+      if (!mapRef.current || mapInstanceRef.current) return;
 
       const L = (await import('leaflet')).default;
-
-      if (!mounted || !mapRef.current) return;
+      if (cancelled || !mapRef.current) return;
 
       const map = L.map(mapRef.current, {
         center: [51.5074, -0.1278],
@@ -52,36 +50,45 @@ export default function RealMap({
         zoomControl: true,
       });
 
-      leafletMapRef.current = map;
-
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
 
-      layerGroupRef.current = L.layerGroup().addTo(map);
-      setMapReady(true);
+      const markersLayer = L.layerGroup().addTo(map);
+
+      mapInstanceRef.current = map;
+      markersLayerRef.current = markersLayer;
+
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 300);
     }
 
-    initMap();
+    setupMap();
 
     return () => {
-      mounted = false;
-      if (leafletMapRef.current) {
-        leafletMapRef.current.remove();
-        leafletMapRef.current = null;
+      cancelled = true;
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        markersLayerRef.current = null;
       }
     };
   }, []);
 
   useEffect(() => {
-    async function drawPins() {
-      if (!mapReady || !leafletMapRef.current || !layerGroupRef.current) return;
+    let cancelled = false;
+
+    async function renderMarkers() {
+      const map = mapInstanceRef.current;
+      const markersLayer = markersLayerRef.current;
+
+      if (!map || !markersLayer) return;
 
       const L = (await import('leaflet')).default;
-      const map = leafletMapRef.current;
-      const layerGroup = layerGroupRef.current;
+      if (cancelled) return;
 
-      layerGroup.clearLayers();
+      markersLayer.clearLayers();
 
       const points =
         masters && masters.length > 0
@@ -103,40 +110,53 @@ export default function RealMap({
 
       points.forEach((master) => {
         const isSelected = selectedMasterId === master.id;
-        const fillColor = master.availableNow ? '#12b347' : '#e52323';
+        const fillColor = master.availableNow ? '#16c251' : '#ef2b2b';
 
-        const point = L.circleMarker([master.lat, master.lng], {
+        const marker = L.circleMarker([master.lat, master.lng], {
           radius: isSelected ? 14 : 10,
           color: '#2f241c',
           weight: isSelected ? 4 : 3,
           fillColor,
           fillOpacity: 1,
-        }).addTo(layerGroup);
-
-        point.on('click', () => {
-          if (onSelectMaster) onSelectMaster(master.id);
         });
 
+        marker.on('click', () => {
+          if (onSelectMaster) {
+            onSelectMaster(master.id);
+          }
+        });
+
+        marker.addTo(markersLayer);
         bounds.push([master.lat, master.lng]);
       });
 
-      if (points.length > 1 && !selectedMasterId) {
-        map.fitBounds(bounds, { padding: [40, 40] });
+      if (points.length > 1) {
+        if (selectedMasterId) {
+          const active = points.find((item) => item.id === selectedMasterId);
+          if (active) {
+            map.flyTo([active.lat, active.lng], 13, {
+              animate: true,
+              duration: 0.6,
+            });
+          }
+        } else {
+          map.fitBounds(bounds, { padding: [40, 40] });
+        }
+      } else if (points.length === 1) {
+        map.setView([points[0].lat, points[0].lng], 13);
       }
 
-      if (selectedMasterId) {
-        const active = points.find((item) => item.id === selectedMasterId);
-        if (active) {
-          map.flyTo([active.lat, active.lng], 13, {
-            animate: true,
-            duration: 0.6,
-          });
-        }
-      }
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
     }
 
-    drawPins();
-  }, [mapReady, masters, selectedMasterId, onSelectMaster]);
+    renderMarkers();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [masters, selectedMasterId, onSelectMaster]);
 
   return (
     <div
@@ -147,6 +167,7 @@ export default function RealMap({
         borderRadius: '28px',
         overflow: 'hidden',
         border: '1px solid #e4d5c2',
+        position: 'relative',
       }}
     />
   );
