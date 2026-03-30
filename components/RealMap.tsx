@@ -1,42 +1,54 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import L from 'leaflet';
 
 export default function RealMap() {
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const leafletMapRef = useRef<L.Map | null>(null);
+  const leafletMapRef = useRef<any>(null);
 
   useEffect(() => {
-    if (!mapRef.current || leafletMapRef.current) return;
+    let mounted = true;
 
-    const map = L.map(mapRef.current, {
-      center: [51.5074, -0.1278],
-      zoom: 12,
-      zoomControl: true,
-    });
+    async function initMap() {
+      if (!mapRef.current || leafletMapRef.current) return;
 
-    leafletMapRef.current = map;
+      const L = (await import('leaflet')).default;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
+      if (!mounted || !mapRef.current) return;
 
-    const point = L.circleMarker([51.5074, -0.1278], {
-      radius: 10,
-      color: '#2f241c',
-      weight: 3,
-      fillColor: '#d92f2f',
-      fillOpacity: 1,
-    }).addTo(map);
+      const map = L.map(mapRef.current, {
+        center: [51.5074, -0.1278],
+        zoom: 12,
+        zoomControl: true,
+      });
 
-    point.bindPopup(
-      '<b>Bella Keratin Studio</b><br/>Hair Extensions Specialist'
-    );
+      leafletMapRef.current = map;
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map);
+
+      const point = L.circleMarker([51.5074, -0.1278], {
+        radius: 10,
+        color: '#2f241c',
+        weight: 3,
+        fillColor: '#d92f2f',
+        fillOpacity: 1,
+      }).addTo(map);
+
+      point.bindPopup(
+        '<b>Bella Keratin Studio</b><br/>Hair Extensions Specialist'
+      );
+    }
+
+    initMap();
 
     return () => {
-      map.remove();
-      leafletMapRef.current = null;
+      mounted = false;
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
     };
   }, []);
 
