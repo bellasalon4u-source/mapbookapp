@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type MasterItem = {
   id: string;
@@ -47,6 +47,7 @@ export default function RealMap({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
   const layerRef = useRef<any>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let disposed = false;
@@ -71,6 +72,7 @@ export default function RealMap({
 
       mapRef.current = map;
       layerRef.current = layer;
+      setReady(true);
 
       setTimeout(() => {
         map.invalidateSize();
@@ -93,7 +95,7 @@ export default function RealMap({
     let cancelled = false;
 
     async function drawMarkers() {
-      if (!mapRef.current || !layerRef.current) return;
+      if (!ready || !mapRef.current || !layerRef.current) return;
 
       const L = (await import('leaflet')).default;
       if (cancelled) return;
@@ -226,7 +228,7 @@ export default function RealMap({
     return () => {
       cancelled = true;
     };
-  }, [masters, selectedMasterId, onSelectMaster]);
+  }, [ready, masters, selectedMasterId, onSelectMaster]);
 
   return (
     <div
