@@ -2,35 +2,32 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-type MasterPin = {
+type MasterItem = {
   id: string;
   name: string;
   title: string;
+  city?: string;
+  avatar?: string;
+  rating?: number;
+  priceFrom?: number;
+  availableNow?: boolean;
   lat?: number;
   lng?: number;
-  availableNow?: boolean;
 };
 
 type RealMapProps = {
-  masters: MasterPin[];
-  selectedMasterId?: string;
-  onSelectMaster?: (id: string) => void;
+  masters: MasterItem[];
 };
 
-type Point = {
-  id: string;
-  name: string;
-  title: string;
+type Point = MasterItem & {
   lat: number;
   lng: number;
-  availableNow?: boolean;
 };
 
 type ScreenPoint = {
   id: string;
   x: number;
   y: number;
-  availableNow?: boolean;
 };
 
 const fallbackCoords = [
@@ -42,36 +39,25 @@ const fallbackCoords = [
   { lat: 51.5380, lng: -0.1426 },
 ];
 
-export default function RealMap({
-  masters,
-  selectedMasterId,
-  onSelectMaster,
-}: RealMapProps) {
+export default function RealMap({ masters }: RealMapProps) {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
 
-  const [isReady, setIsReady] = useState(false);
+  const [ready, setReady] = useState(false);
   const [screenPoints, setScreenPoints] = useState<ScreenPoint[]>([]);
+  const [selectedId, setSelectedId] = useState<string>('');
 
   const points: Point[] = useMemo(() => {
-    if (masters && masters.length > 0) {
-      return masters.map((master, index) => ({
-        ...master,
-        lat: master.lat ?? fallbackCoords[index % fallbackCoords.length].lat,
-        lng: master.lng ?? fallbackCoords[index % fallbackCoords.length].lng,
-      })) as Point[];
-    }
-
-    return fallbackCoords.map((coord, index) => ({
-      id: `fallback-${index}`,
-      name: `Master ${index + 1}`,
-      title: 'Beauty specialist',
-      availableNow: false,
-      lat: coord.lat,
-      lng: coord.lng,
+    return masters.map((master, index) => ({
+      ...master,
+      lat: master.lat ?? fallbackCoords[index % fallbackCoords.length].lat,
+      lng: master.lng ?? fallbackCoords[index % fallbackCoords.length].lng,
     }));
   }, [masters]);
+
+  const selectedMaster =
+    points.find((item) => item.id === selectedId) || null;
 
   useEffect(() => {
     let disposed = false;
@@ -94,11 +80,11 @@ export default function RealMap({
       }).addTo(map);
 
       mapRef.current = map;
-      setIsReady(true);
+      setReady(true);
 
       setTimeout(() => {
         map.invalidateSize();
-      }, 250);
+      }, 300);
     }
 
     initMap();
@@ -113,43 +99,38 @@ export default function RealMap({
   }, []);
 
   useEffect(() => {
-    if (!isReady || !mapRef.current) return;
+    if (!ready || !mapRef.current || points.length === 0) return;
 
     const map = mapRef.current;
     const bounds = points.map((p) => [p.lat, p.lng]);
 
-    if (points.length > 1) {
-      if (selectedMasterId) {
-        const active = points.find((p) => p.id === selectedMasterId);
-        if (active) {
-          map.flyTo([active.lat, active.lng], 13, {
-            animate: true,
-            duration: 0.6,
-          });
-        }
-      } else {
-        map.fitBounds(bounds, { padding: [40, 40] });
+    if (selectedId) {
+      const active = points.find((p) => p.id === selectedId);
+      if (active) {
+        map.flyTo([active.lat, active.lng], 13, {
+          animate: true,
+          duration: 0.5,
+        });
       }
-    } else if (points.length === 1) {
-      map.setView([points[0].lat, points[0].lng], 13);
+    } else if (bounds.length > 1) {
+      map.fitBounds(bounds, { padding: [40, 40] });
+    } else if (bounds.length === 1) {
+      map.setView(bounds[0], 13);
     }
-  }, [isReady, points, selectedMasterId]);
+  }, [ready, points, selectedId]);
 
   useEffect(() => {
-    if (!isReady || !mapRef.current || !wrapperRef.current) return;
+    if (!ready || !mapRef.current || !wrapperRef.current) return;
 
     const map = mapRef.current;
 
     const updatePositions = () => {
-      if (!wrapperRef.current) return;
-
-      const next: ScreenPoint[] = points.map((point) => {
+      const next = points.map((point) => {
         const projected = map.latLngToContainerPoint([point.lat, point.lng]);
         return {
           id: point.id,
           x: projected.x,
           y: projected.y,
-          availableNow: point.availableNow,
         };
       });
 
@@ -161,7 +142,6 @@ export default function RealMap({
     map.on('move', updatePositions);
     map.on('zoom', updatePositions);
     map.on('resize', updatePositions);
-    map.on('load', updatePositions);
 
     setTimeout(updatePositions, 120);
     window.addEventListener('resize', updatePositions);
@@ -170,10 +150,9 @@ export default function RealMap({
       map.off('move', updatePositions);
       map.off('zoom', updatePositions);
       map.off('resize', updatePositions);
-      map.off('load', updatePositions);
       window.removeEventListener('resize', updatePositions);
     };
-  }, [isReady, points]);
+  }, [ready, points]);
 
   return (
     <div
@@ -203,13 +182,17 @@ export default function RealMap({
         }}
       >
         {screenPoints.map((point) => {
-          const selected = selectedMasterId === point.id;
+          const master = points.find((m) => m.id === point.id);
+          if (!master) return null;
+
+          const selected = selectedId === point.id;
           const size = selected ? 30 : 24;
 
           return (
             <button
               key={point.id}
-              onClick={() => onSelectMaster?.(point.id)}
+              type="button"
+              onClick={() => setSelectedId(point.id)}
               style={{
                 position: 'absolute',
                 left: point.x,
@@ -219,7 +202,7 @@ export default function RealMap({
                 height: size,
                 borderRadius: 999,
                 border: `${selected ? 4 : 3}px solid #2f241c`,
-                background: point.availableNow ? '#18c24f' : '#ef2b2b',
+                background: master.availableNow ? '#18c24f' : '#ef2b2b',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
                 pointerEvents: 'auto',
                 padding: 0,
@@ -229,6 +212,175 @@ export default function RealMap({
           );
         })}
       </div>
+
+      {selectedMaster && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 12,
+            right: 12,
+            bottom: 12,
+            background: '#ffffff',
+            borderRadius: 24,
+            border: '1px solid #eadfd2',
+            padding: 14,
+            boxShadow: '0 12px 24px rgba(0,0,0,0.14)',
+            zIndex: 30,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+            }}
+          >
+            <img
+              src={selectedMaster.avatar || 'https://via.placeholder.com/80'}
+              alt={selectedMaster.name}
+              style={{
+                width: 62,
+                height: 62,
+                borderRadius: 18,
+                objectFit: 'cover',
+                flexShrink: 0,
+                display: 'block',
+              }}
+            />
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 800,
+                  lineHeight: 1.2,
+                }}
+              >
+                {selectedMaster.name}
+              </div>
+
+              <div
+                style={{
+                  color: '#786d61',
+                  marginTop: 4,
+                  fontSize: 14,
+                }}
+              >
+                {selectedMaster.title}
+                {selectedMaster.city ? ` • ${selectedMaster.city}` : ''}
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 8,
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  marginTop: 8,
+                }}
+              >
+                <span
+                  style={{
+                    background: '#2f241c',
+                    color: '#fff',
+                    padding: '7px 10px',
+                    borderRadius: 999,
+                    fontWeight: 800,
+                    fontSize: 13,
+                  }}
+                >
+                  from £{selectedMaster.priceFrom ?? 0}
+                </span>
+
+                <span
+                  style={{
+                    background: '#f2e9dc',
+                    color: '#463b31',
+                    padding: '7px 10px',
+                    borderRadius: 999,
+                    fontWeight: 800,
+                    fontSize: 13,
+                  }}
+                >
+                  {selectedMaster.rating ?? 0} ★
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 999,
+                border: '1px solid #eadfd2',
+                background: '#fff',
+                fontSize: 22,
+                flexShrink: 0,
+              }}
+            >
+              ♡
+            </button>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 10,
+              marginTop: 14,
+            }}
+          >
+            <div
+              style={{
+                background: selectedMaster.availableNow ? '#edf7ee' : '#fdecec',
+                color: selectedMaster.availableNow ? '#1f8f45' : '#c53434',
+                padding: '10px 12px',
+                borderRadius: 14,
+                fontWeight: 700,
+                fontSize: 13,
+              }}
+            >
+              {selectedMaster.availableNow ? '● Available now' : '● Not available now'}
+            </div>
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              <a
+                href={`/master/${selectedMaster.id}`}
+                style={{
+                  textDecoration: 'none',
+                  border: '1px solid #d8cfc3',
+                  background: '#fff',
+                  color: '#2f241c',
+                  padding: '12px 14px',
+                  borderRadius: 14,
+                  fontWeight: 800,
+                  fontSize: 14,
+                }}
+              >
+                Open
+              </a>
+
+              <a
+                href={`/booking/${selectedMaster.id}`}
+                style={{
+                  textDecoration: 'none',
+                  border: 'none',
+                  background: '#e52323',
+                  color: '#fff',
+                  padding: '12px 14px',
+                  borderRadius: 14,
+                  fontWeight: 800,
+                  fontSize: 14,
+                }}
+              >
+                Book now
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
