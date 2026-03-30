@@ -1,17 +1,17 @@
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import RealMap from '../components/RealMap';
 import { getAllMasters } from '../services/masters';
 
 export default function HomePage() {
+  const router = useRouter();
   const masters = useMemo(() => getAllMasters(), []);
-  const [selectedMasterId, setSelectedMasterId] = useState(masters[0]?.id || '');
+  const [selectedMasterId, setSelectedMasterId] = useState('');
   const [likedIds, setLikedIds] = useState<string[]>([]);
 
-  const selectedMaster =
-    masters.find((master) => master.id === selectedMasterId) || masters[0];
+  const selectedMaster = masters.find((master) => master.id === selectedMasterId);
 
   function toggleLike(id: string) {
     setLikedIds((prev) =>
@@ -117,10 +117,15 @@ export default function HomePage() {
           <h2 style={{ fontSize: 34, margin: 0, fontWeight: 800 }}>Map view</h2>
 
           <div style={{ marginTop: 12, position: 'relative' }}>
-            <RealMap masters={masters} onSelectMaster={setSelectedMasterId} />
+            <RealMap
+              masters={masters}
+              selectedMasterId={selectedMasterId}
+              onSelectMaster={setSelectedMasterId}
+            />
 
             {selectedMaster && (
               <div
+                onClick={() => router.push(`/master/${selectedMaster.id}`)}
                 style={{
                   position: 'absolute',
                   left: 12,
@@ -131,25 +136,26 @@ export default function HomePage() {
                   border: '1px solid #eadfd2',
                   padding: 14,
                   boxShadow: '0 12px 24px rgba(0,0,0,0.12)',
+                  cursor: 'pointer',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
-                    gap: 12,
                     alignItems: 'center',
+                    gap: 12,
                   }}
                 >
                   <img
                     src={selectedMaster.avatar}
                     alt={selectedMaster.name}
                     style={{
-                      width: 64,
-                      height: 64,
+                      width: 62,
+                      height: 62,
                       borderRadius: 18,
                       objectFit: 'cover',
-                      flexShrink: 0,
                       display: 'block',
+                      flexShrink: 0,
                     }}
                   />
 
@@ -179,15 +185,15 @@ export default function HomePage() {
                         display: 'flex',
                         gap: 8,
                         alignItems: 'center',
-                        marginTop: 8,
                         flexWrap: 'wrap',
+                        marginTop: 8,
                       }}
                     >
                       <span
                         style={{
                           background: '#2f241c',
                           color: '#fff',
-                          padding: '8px 10px',
+                          padding: '7px 10px',
                           borderRadius: 999,
                           fontWeight: 800,
                           fontSize: 13,
@@ -200,7 +206,7 @@ export default function HomePage() {
                         style={{
                           background: '#f2e9dc',
                           color: '#463b31',
-                          padding: '8px 10px',
+                          padding: '7px 10px',
                           borderRadius: 999,
                           fontWeight: 800,
                           fontSize: 13,
@@ -212,7 +218,10 @@ export default function HomePage() {
                   </div>
 
                   <button
-                    onClick={() => toggleLike(selectedMaster.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleLike(selectedMaster.id);
+                    }}
                     style={{
                       width: 44,
                       height: 44,
@@ -238,48 +247,25 @@ export default function HomePage() {
                 >
                   <div
                     style={{
-                      background: selectedMaster.availableNow ? '#edf7ee' : '#f3ece2',
-                      color: selectedMaster.availableNow ? '#256b43' : '#6d6257',
+                      background: selectedMaster.availableNow ? '#edf7ee' : '#fdecec',
+                      color: selectedMaster.availableNow ? '#1f8f45' : '#c53434',
                       padding: '10px 12px',
                       borderRadius: 14,
                       fontWeight: 700,
                       fontSize: 13,
                     }}
                   >
-                    {selectedMaster.availableNow ? '● Available now' : 'Offline now'}
+                    {selectedMaster.availableNow ? '● Available now' : '● Not available now'}
                   </div>
 
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <Link
-                      href={`/master/${selectedMaster.id}`}
-                      style={{
-                        textDecoration: 'none',
-                        background: '#fff',
-                        color: '#2f241c',
-                        border: '1px solid #d8cfc3',
-                        padding: '12px 14px',
-                        borderRadius: 14,
-                        fontWeight: 800,
-                        fontSize: 14,
-                      }}
-                    >
-                      Open
-                    </Link>
-
-                    <Link
-                      href={`/booking/${selectedMaster.id}`}
-                      style={{
-                        textDecoration: 'none',
-                        background: '#e52323',
-                        color: '#fff',
-                        padding: '12px 14px',
-                        borderRadius: 14,
-                        fontWeight: 800,
-                        fontSize: 14,
-                      }}
-                    >
-                      Book now
-                    </Link>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: '#786d61',
+                      fontWeight: 700,
+                    }}
+                  >
+                    Tap card to open
                   </div>
                 </div>
               </div>
@@ -292,17 +278,16 @@ export default function HomePage() {
 
           <div style={{ display: 'grid', gap: 16, marginTop: 14 }}>
             {masters.map((master) => (
-              <Link
+              <div
                 key={master.id}
-                href={`/master/${master.id}`}
+                onClick={() => router.push(`/master/${master.id}`)}
                 style={{
-                  display: 'block',
                   overflow: 'hidden',
                   borderRadius: 26,
                   background: '#fff',
                   border: '1px solid #eadfd2',
-                  textDecoration: 'none',
                   color: '#1d1712',
+                  cursor: 'pointer',
                 }}
               >
                 <div
@@ -358,7 +343,7 @@ export default function HomePage() {
 
                     <button
                       onClick={(e) => {
-                        e.preventDefault();
+                        e.stopPropagation();
                         toggleLike(master.id);
                       }}
                       style={{
@@ -374,7 +359,7 @@ export default function HomePage() {
                     </button>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </section>
