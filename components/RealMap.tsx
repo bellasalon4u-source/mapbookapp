@@ -190,7 +190,7 @@ export default function RealMap({ masters }: RealMapProps) {
 
           const selected = selectedId === point.id;
           const dotSize = selected ? 30 : 24;
-          const hitSize = 52;
+          const hitSize = 56;
 
           return (
             <button
@@ -234,6 +234,22 @@ export default function RealMap({ masters }: RealMapProps) {
             </button>
           );
         })}
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          top: 8,
+          left: 8,
+          zIndex: 50,
+          background: '#fff9c4',
+          padding: '6px 8px',
+          borderRadius: 10,
+          fontSize: 12,
+          fontWeight: 700,
+        }}
+      >
+        {selectedMaster ? `Selected: ${selectedMaster.name}` : 'Tap any pin'}
       </div>
 
       {selectedMaster && (
