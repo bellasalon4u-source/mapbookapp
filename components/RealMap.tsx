@@ -22,8 +22,15 @@ export default function RealMap() {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(map);
 
-    const marker = L.marker([51.5074, -0.1278]).addTo(map);
-    marker.bindPopup(
+    const point = L.circleMarker([51.5074, -0.1278], {
+      radius: 10,
+      color: '#2f241c',
+      weight: 3,
+      fillColor: '#d92f2f',
+      fillOpacity: 1,
+    }).addTo(map);
+
+    point.bindPopup(
       '<b>Bella Keratin Studio</b><br/>Hair Extensions Specialist'
     );
 
