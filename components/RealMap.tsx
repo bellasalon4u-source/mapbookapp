@@ -39,7 +39,11 @@ function escapeHtml(value: string) {
     .replaceAll("'", '&#039;');
 }
 
-export default function RealMap({ masters }: RealMapProps) {
+export default function RealMap({
+  masters,
+  selectedMasterId,
+  onSelectMaster,
+}: RealMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
   const layerRef = useRef<any>(null);
@@ -121,29 +125,16 @@ export default function RealMap({ masters }: RealMapProps) {
 
       const bounds: [number, number][] = [];
 
-      points.forEach((master, index) => {
-        const fillColor = master.availableNow ? '#18c24f' : '#ef2b2b';
+      points.forEach((master) => {
+        const isSelected = selectedMasterId === master.id;
+        const radius = isSelected ? 14 : 11;
 
-        const icon = L.divIcon({
-          className: '',
-          html: `
-            <div style="
-              width:24px;
-              height:24px;
-              border-radius:999px;
-              background:${fillColor};
-              border:3px solid #2f241c;
-              box-sizing:border-box;
-              box-shadow:0 2px 8px rgba(0,0,0,0.25);
-            "></div>
-          `,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12],
-        });
-
-        const marker = L.marker([master.lat, master.lng], {
-          icon,
-          keyboard: false,
+        const marker = L.circleMarker([master.lat, master.lng], {
+          radius,
+          color: '#2f241c',
+          weight: isSelected ? 4 : 3,
+          fillColor: master.availableNow ? '#18c24f' : '#ef2b2b',
+          fillOpacity: 1,
         });
 
         const name = escapeHtml(master.name || 'Master');
@@ -211,24 +202,23 @@ export default function RealMap({ masters }: RealMapProps) {
         });
 
         marker.on('click', () => {
+          onSelectMaster?.(master.id);
           marker.openPopup();
         });
 
         marker.addTo(layer);
         bounds.push([master.lat, master.lng]);
-
-        if (index === 0) {
-          setTimeout(() => {
-            map.invalidateSize();
-          }, 100);
-        }
       });
 
-      if (bounds.length > 1) {
+      if (points.length > 1) {
         map.fitBounds(bounds, { padding: [40, 40] });
-      } else if (bounds.length === 1) {
+      } else if (points.length === 1) {
         map.setView(bounds[0], 13);
       }
+
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 120);
     }
 
     drawMarkers();
@@ -236,7 +226,7 @@ export default function RealMap({ masters }: RealMapProps) {
     return () => {
       cancelled = true;
     };
-  }, [masters]);
+  }, [masters, selectedMasterId, onSelectMaster]);
 
   return (
     <div
