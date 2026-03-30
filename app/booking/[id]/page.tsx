@@ -10,36 +10,39 @@ type Props = {
   };
 };
 
-type DayState = 'available' | 'partial' | 'full';
+type DayState = 'free' | 'partial' | 'full';
 type SlotState = 'free' | 'busy';
 
-type DayItem = {
+type CalendarDay = {
   id: string;
-  labelTop: string;
-  labelBottom: string;
+  dayNumber: number;
+  weekDay: string;
+  monthLabel: string;
   state: DayState;
   slots: { time: string; state: SlotState }[];
 };
 
-const bookingDays: DayItem[] = [
+const calendarDays: CalendarDay[] = [
   {
     id: '2026-03-26',
-    labelTop: 'Tue',
-    labelBottom: '26',
-    state: 'available',
+    dayNumber: 26,
+    weekDay: 'Thu',
+    monthLabel: 'Mar',
+    state: 'full',
     slots: [
-      { time: '09:00', state: 'free' },
-      { time: '10:30', state: 'free' },
-      { time: '12:00', state: 'free' },
-      { time: '14:00', state: 'free' },
-      { time: '16:30', state: 'free' },
-      { time: '18:00', state: 'free' },
+      { time: '09:00', state: 'busy' },
+      { time: '10:30', state: 'busy' },
+      { time: '12:00', state: 'busy' },
+      { time: '14:00', state: 'busy' },
+      { time: '16:30', state: 'busy' },
+      { time: '18:00', state: 'busy' },
     ],
   },
   {
     id: '2026-03-27',
-    labelTop: 'Wed',
-    labelBottom: '27',
+    dayNumber: 27,
+    weekDay: 'Fri',
+    monthLabel: 'Mar',
     state: 'partial',
     slots: [
       { time: '09:00', state: 'busy' },
@@ -52,36 +55,24 @@ const bookingDays: DayItem[] = [
   },
   {
     id: '2026-03-28',
-    labelTop: 'Thu',
-    labelBottom: '28',
-    state: 'full',
-    slots: [
-      { time: '09:00', state: 'busy' },
-      { time: '10:30', state: 'busy' },
-      { time: '12:00', state: 'busy' },
-      { time: '14:00', state: 'busy' },
-      { time: '16:30', state: 'busy' },
-      { time: '18:00', state: 'busy' },
-    ],
-  },
-  {
-    id: '2026-03-29',
-    labelTop: 'Fri',
-    labelBottom: '29',
-    state: 'available',
+    dayNumber: 28,
+    weekDay: 'Sat',
+    monthLabel: 'Mar',
+    state: 'free',
     slots: [
       { time: '09:00', state: 'free' },
       { time: '10:30', state: 'free' },
       { time: '12:00', state: 'free' },
-      { time: '14:00', state: 'busy' },
+      { time: '14:00', state: 'free' },
       { time: '16:30', state: 'free' },
       { time: '18:00', state: 'free' },
     ],
   },
   {
-    id: '2026-03-30',
-    labelTop: 'Sat',
-    labelBottom: '30',
+    id: '2026-03-29',
+    dayNumber: 29,
+    weekDay: 'Sun',
+    monthLabel: 'Mar',
     state: 'partial',
     slots: [
       { time: '09:00', state: 'busy' },
@@ -92,22 +83,52 @@ const bookingDays: DayItem[] = [
       { time: '18:00', state: 'free' },
     ],
   },
+  {
+    id: '2026-03-30',
+    dayNumber: 30,
+    weekDay: 'Mon',
+    monthLabel: 'Mar',
+    state: 'free',
+    slots: [
+      { time: '09:00', state: 'free' },
+      { time: '10:30', state: 'free' },
+      { time: '12:00', state: 'free' },
+      { time: '14:00', state: 'busy' },
+      { time: '16:30', state: 'free' },
+      { time: '18:00', state: 'free' },
+    ],
+  },
+  {
+    id: '2026-03-31',
+    dayNumber: 31,
+    weekDay: 'Tue',
+    monthLabel: 'Mar',
+    state: 'full',
+    slots: [
+      { time: '09:00', state: 'busy' },
+      { time: '10:30', state: 'busy' },
+      { time: '12:00', state: 'busy' },
+      { time: '14:00', state: 'busy' },
+      { time: '16:30', state: 'busy' },
+      { time: '18:00', state: 'busy' },
+    ],
+  },
 ];
 
-function getDayStyle(state: DayState, active: boolean) {
+function dayColors(state: DayState, active: boolean) {
   if (active) {
     return {
       background: '#2f241c',
-      color: '#fff',
+      color: '#ffffff',
       border: '1px solid #2f241c',
     };
   }
 
-  if (state === 'available') {
+  if (state === 'free') {
     return {
       background: '#edf7ee',
       color: '#256b43',
-      border: '1px solid #cae9d0',
+      border: '1px solid #cfe8d3',
     };
   }
 
@@ -126,11 +147,11 @@ function getDayStyle(state: DayState, active: boolean) {
   };
 }
 
-function getSlotStyle(isActive: boolean, state: SlotState) {
-  if (isActive) {
+function slotColors(active: boolean, state: SlotState) {
+  if (active) {
     return {
       background: '#e52323',
-      color: '#fff',
+      color: '#ffffff',
       border: '1px solid #e52323',
     };
   }
@@ -144,7 +165,7 @@ function getSlotStyle(isActive: boolean, state: SlotState) {
   }
 
   return {
-    background: '#fff',
+    background: '#ffffff',
     color: '#4e463d',
     border: '1px solid #eadfd2',
   };
@@ -152,11 +173,11 @@ function getSlotStyle(isActive: boolean, state: SlotState) {
 
 export default function BookingPage({ params }: Props) {
   const master = useMemo(() => getMasterById(params.id), [params.id]);
+  const firstSelectableDay =
+    calendarDays.find((day) => day.state !== 'full') || calendarDays[0];
 
-  const firstOpenDay =
-    bookingDays.find((day) => day.state !== 'full')?.id || bookingDays[0].id;
-
-  const [selectedDayId, setSelectedDayId] = useState(firstOpenDay);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [selectedDayId, setSelectedDayId] = useState(firstSelectableDay.id);
   const [selectedTime, setSelectedTime] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -196,7 +217,7 @@ export default function BookingPage({ params }: Props) {
   }
 
   const selectedDay =
-    bookingDays.find((day) => day.id === selectedDayId) || bookingDays[0];
+    calendarDays.find((day) => day.id === selectedDayId) || firstSelectableDay;
 
   const isValid =
     selectedDayId.trim() !== '' &&
@@ -336,47 +357,81 @@ export default function BookingPage({ params }: Props) {
             }}
           >
             <div style={{ fontSize: 14, color: '#786d61', fontWeight: 700 }}>
-              Green = free, Grey = partial, Red = full
+              Tap calendar to view available dates
             </div>
+
+            <button
+              onClick={() => setCalendarOpen(true)}
+              style={{
+                width: '100%',
+                marginTop: 14,
+                padding: '18px 18px',
+                borderRadius: 18,
+                border: '1px solid #d8cfc3',
+                background: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: 18,
+                fontWeight: 800,
+                color: '#1d1712',
+              }}
+            >
+              <span>
+                {selectedDay.weekDay} {selectedDay.dayNumber} {selectedDay.monthLabel}
+              </span>
+              <span style={{ fontSize: 20 }}>⌄</span>
+            </button>
 
             <div
               style={{
+                marginTop: 12,
                 display: 'flex',
-                gap: 12,
-                overflowX: 'auto',
-                marginTop: 16,
-                paddingBottom: 8,
+                gap: 8,
+                flexWrap: 'wrap',
+                fontSize: 13,
+                color: '#786d61',
               }}
             >
-              {bookingDays.map((day) => {
-                const active = selectedDayId === day.id;
-                const style = getDayStyle(day.state, active);
-                const isDisabled = day.state === 'full';
-
-                return (
-                  <button
-                    key={day.id}
-                    disabled={isDisabled}
-                    onClick={() => {
-                      setSelectedDayId(day.id);
-                      setSelectedTime('');
-                    }}
-                    style={{
-                      minWidth: 92,
-                      borderRadius: 24,
-                      padding: '18px 16px',
-                      fontWeight: 800,
-                      fontSize: 16,
-                      opacity: isDisabled ? 0.9 : 1,
-                      ...style,
-                    }}
-                  >
-                    {day.labelTop}
-                    <br />
-                    {day.labelBottom}
-                  </button>
-                );
-              })}
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: 999,
+                    background: '#edf7ee',
+                    border: '1px solid #cfe8d3',
+                    display: 'inline-block',
+                  }}
+                />
+                Free
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: 999,
+                    background: '#f3f1ec',
+                    border: '1px solid #ddd5c9',
+                    display: 'inline-block',
+                  }}
+                />
+                Partial
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: 999,
+                    background: '#fdecec',
+                    border: '1px solid #f1caca',
+                    display: 'inline-block',
+                  }}
+                />
+                Full
+              </span>
             </div>
           </div>
         </section>
@@ -397,7 +452,7 @@ export default function BookingPage({ params }: Props) {
             }}
           >
             <div style={{ fontSize: 14, color: '#786d61', fontWeight: 700 }}>
-              Tap any free time slot
+              Red = busy, light = free
             </div>
 
             <div
@@ -409,22 +464,22 @@ export default function BookingPage({ params }: Props) {
               }}
             >
               {selectedDay.slots.map((slot) => {
-                const isActive = selectedTime === slot.time;
-                const isBusy = slot.state === 'busy';
-                const style = getSlotStyle(isActive, slot.state);
+                const active = selectedTime === slot.time;
+                const busy = slot.state === 'busy';
+                const colors = slotColors(active, slot.state);
 
                 return (
                   <button
                     key={slot.time}
-                    disabled={isBusy}
+                    disabled={busy}
                     onClick={() => setSelectedTime(slot.time)}
                     style={{
                       borderRadius: 22,
                       padding: '18px 10px',
                       fontWeight: 800,
                       fontSize: 16,
-                      opacity: isBusy ? 0.9 : 1,
-                      ...style,
+                      opacity: busy ? 0.95 : 1,
+                      ...colors,
                     }}
                   >
                     {slot.time}
@@ -518,7 +573,7 @@ export default function BookingPage({ params }: Props) {
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <span>Date</span>
               <strong style={{ color: '#1d1712' }}>
-                {selectedDay.labelTop} {selectedDay.labelBottom}
+                {selectedDay.weekDay} {selectedDay.dayNumber} {selectedDay.monthLabel}
               </strong>
             </div>
 
@@ -536,6 +591,165 @@ export default function BookingPage({ params }: Props) {
           </div>
         </section>
       </div>
+
+      {calendarOpen && (
+        <div
+          onClick={() => setCalendarOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.35)',
+            zIndex: 50,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            padding: 12,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: 440,
+              background: '#fff',
+              borderRadius: 28,
+              padding: 20,
+              maxHeight: '80vh',
+              overflowY: 'auto',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 18,
+              }}
+            >
+              <div style={{ fontSize: 18, fontWeight: 800 }}>Select available date</div>
+              <button
+                onClick={() => setCalendarOpen(false)}
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 999,
+                  border: '1px solid #e6ddd1',
+                  background: '#fff',
+                  fontSize: 20,
+                  fontWeight: 700,
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ fontSize: 28, fontWeight: 800, textAlign: 'center' }}>Mar ’26</div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                gap: 8,
+                marginTop: 18,
+                color: '#7b7268',
+                textAlign: 'center',
+                fontWeight: 700,
+              }}
+            >
+              <div>M</div>
+              <div>T</div>
+              <div>W</div>
+              <div>T</div>
+              <div>F</div>
+              <div>S</div>
+              <div>S</div>
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                gap: 10,
+                marginTop: 16,
+              }}
+            >
+              <div />
+              <div />
+              <div />
+              {calendarDays.map((day) => {
+                const active = selectedDayId === day.id;
+                const colors = dayColors(day.state, active);
+                const disabled = day.state === 'full';
+
+                return (
+                  <button
+                    key={day.id}
+                    disabled={disabled}
+                    onClick={() => {
+                      setSelectedDayId(day.id);
+                      setSelectedTime('');
+                      setCalendarOpen(false);
+                    }}
+                    style={{
+                      height: 64,
+                      borderRadius: 18,
+                      fontWeight: 800,
+                      fontSize: 24,
+                      ...colors,
+                    }}
+                  >
+                    {day.dayNumber}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div
+              style={{
+                marginTop: 18,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 12,
+                flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ fontSize: 16, fontWeight: 700, color: '#1d1712' }}>
+                {selectedDay.weekDay} {selectedDay.dayNumber} {selectedDay.monthLabel}
+              </div>
+
+              <div
+                style={{
+                  background: '#f2f2f2',
+                  color: '#1d1712',
+                  padding: '10px 14px',
+                  borderRadius: 12,
+                  fontWeight: 700,
+                }}
+              >
+                {selectedTime || 'Choose time below'}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setCalendarOpen(false)}
+              style={{
+                width: '100%',
+                marginTop: 18,
+                background: '#2f36d3',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 16,
+                padding: '16px 18px',
+                fontSize: 18,
+                fontWeight: 800,
+              }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
 
       <div
         style={{
