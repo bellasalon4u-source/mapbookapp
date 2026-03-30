@@ -12,18 +12,19 @@ type MasterPin = {
 
 type RealMapProps = {
   masters: MasterPin[];
+  onSelectMaster?: (id: string) => void;
 };
 
 const fallbackCoords = [
-  { lat: 51.5074, lng: -0.1278 }, // Central London
-  { lat: 51.5154, lng: -0.0721 }, // Liverpool Street
-  { lat: 51.5033, lng: -0.1195 }, // Waterloo
-  { lat: 51.5231, lng: -0.1586 }, // Baker Street
-  { lat: 51.4952, lng: -0.1460 }, // Victoria
-  { lat: 51.5380, lng: -0.1426 }, // Camden
+  { lat: 51.5074, lng: -0.1278 },
+  { lat: 51.5154, lng: -0.0721 },
+  { lat: 51.5033, lng: -0.1195 },
+  { lat: 51.5231, lng: -0.1586 },
+  { lat: 51.4952, lng: -0.146 },
+  { lat: 51.538, lng: -0.1426 },
 ];
 
-export default function RealMap({ masters }: RealMapProps) {
+export default function RealMap({ masters, onSelectMaster }: RealMapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMapRef = useRef<any>(null);
 
@@ -78,6 +79,12 @@ export default function RealMap({ masters }: RealMapProps) {
           fillOpacity: 1,
         }).addTo(map);
 
+        point.on('click', () => {
+          if (onSelectMaster) {
+            onSelectMaster(master.id);
+          }
+        });
+
         point.bindPopup(
           `<div style="min-width:160px">
             <div style="font-weight:700;font-size:14px;margin-bottom:4px;">${master.name}</div>
@@ -103,9 +110,9 @@ export default function RealMap({ masters }: RealMapProps) {
         leafletMapRef.current = null;
       }
     };
-  }, [masters]);
+  }, [masters, onSelectMaster]);
 
-  return
+  return (
     <div
       ref={mapRef}
       style={{
@@ -115,5 +122,6 @@ export default function RealMap({ masters }: RealMapProps) {
         overflow: 'hidden',
         border: '1px solid #e4d5c2',
       }}
-    />;
+    />
+  );
 }
