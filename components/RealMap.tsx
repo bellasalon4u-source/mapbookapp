@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type MasterPin = {
   id: string;
@@ -34,6 +34,7 @@ export default function RealMap({
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMapRef = useRef<any>(null);
   const layerGroupRef = useRef<any>(null);
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -58,6 +59,7 @@ export default function RealMap({
       }).addTo(map);
 
       layerGroupRef.current = L.layerGroup().addTo(map);
+      setMapReady(true);
     }
 
     initMap();
@@ -73,7 +75,7 @@ export default function RealMap({
 
   useEffect(() => {
     async function drawPins() {
-      if (!leafletMapRef.current || !layerGroupRef.current) return;
+      if (!mapReady || !leafletMapRef.current || !layerGroupRef.current) return;
 
       const L = (await import('leaflet')).default;
       const map = leafletMapRef.current;
@@ -101,10 +103,10 @@ export default function RealMap({
 
       points.forEach((master) => {
         const isSelected = selectedMasterId === master.id;
-        const fillColor = master.availableNow ? '#1fb655' : '#e52323';
+        const fillColor = master.availableNow ? '#12b347' : '#e52323';
 
         const point = L.circleMarker([master.lat, master.lng], {
-          radius: isSelected ? 13 : 10,
+          radius: isSelected ? 14 : 10,
           color: '#2f241c',
           weight: isSelected ? 4 : 3,
           fillColor,
@@ -134,7 +136,7 @@ export default function RealMap({
     }
 
     drawPins();
-  }, [masters, selectedMasterId, onSelectMaster]);
+  }, [mapReady, masters, selectedMasterId, onSelectMaster]);
 
   return (
     <div
