@@ -10,29 +10,153 @@ type Props = {
   };
 };
 
-function formatDate(value: string) {
-  if (!value) return 'Not selected';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
+type DayState = 'available' | 'partial' | 'full';
+type SlotState = 'free' | 'busy';
 
-  return date.toLocaleDateString('en-GB', {
-    weekday: 'short',
-    day: '2-digit',
-    month: 'short',
-  });
+type DayItem = {
+  id: string;
+  labelTop: string;
+  labelBottom: string;
+  state: DayState;
+  slots: { time: string; state: SlotState }[];
+};
+
+const bookingDays: DayItem[] = [
+  {
+    id: '2026-03-26',
+    labelTop: 'Tue',
+    labelBottom: '26',
+    state: 'available',
+    slots: [
+      { time: '09:00', state: 'free' },
+      { time: '10:30', state: 'free' },
+      { time: '12:00', state: 'free' },
+      { time: '14:00', state: 'free' },
+      { time: '16:30', state: 'free' },
+      { time: '18:00', state: 'free' },
+    ],
+  },
+  {
+    id: '2026-03-27',
+    labelTop: 'Wed',
+    labelBottom: '27',
+    state: 'partial',
+    slots: [
+      { time: '09:00', state: 'busy' },
+      { time: '10:30', state: 'free' },
+      { time: '12:00', state: 'busy' },
+      { time: '14:00', state: 'free' },
+      { time: '16:30', state: 'free' },
+      { time: '18:00', state: 'busy' },
+    ],
+  },
+  {
+    id: '2026-03-28',
+    labelTop: 'Thu',
+    labelBottom: '28',
+    state: 'full',
+    slots: [
+      { time: '09:00', state: 'busy' },
+      { time: '10:30', state: 'busy' },
+      { time: '12:00', state: 'busy' },
+      { time: '14:00', state: 'busy' },
+      { time: '16:30', state: 'busy' },
+      { time: '18:00', state: 'busy' },
+    ],
+  },
+  {
+    id: '2026-03-29',
+    labelTop: 'Fri',
+    labelBottom: '29',
+    state: 'available',
+    slots: [
+      { time: '09:00', state: 'free' },
+      { time: '10:30', state: 'free' },
+      { time: '12:00', state: 'free' },
+      { time: '14:00', state: 'busy' },
+      { time: '16:30', state: 'free' },
+      { time: '18:00', state: 'free' },
+    ],
+  },
+  {
+    id: '2026-03-30',
+    labelTop: 'Sat',
+    labelBottom: '30',
+    state: 'partial',
+    slots: [
+      { time: '09:00', state: 'busy' },
+      { time: '10:30', state: 'busy' },
+      { time: '12:00', state: 'free' },
+      { time: '14:00', state: 'free' },
+      { time: '16:30', state: 'busy' },
+      { time: '18:00', state: 'free' },
+    ],
+  },
+];
+
+function getDayStyle(state: DayState, active: boolean) {
+  if (active) {
+    return {
+      background: '#2f241c',
+      color: '#fff',
+      border: '1px solid #2f241c',
+    };
+  }
+
+  if (state === 'available') {
+    return {
+      background: '#edf7ee',
+      color: '#256b43',
+      border: '1px solid #cae9d0',
+    };
+  }
+
+  if (state === 'partial') {
+    return {
+      background: '#f3f1ec',
+      color: '#6d6257',
+      border: '1px solid #ddd5c9',
+    };
+  }
+
+  return {
+    background: '#fdecec',
+    color: '#c53434',
+    border: '1px solid #f1caca',
+  };
 }
 
-function formatTime(value: string) {
-  if (!value) return 'Not selected';
-  return value;
+function getSlotStyle(isActive: boolean, state: SlotState) {
+  if (isActive) {
+    return {
+      background: '#e52323',
+      color: '#fff',
+      border: '1px solid #e52323',
+    };
+  }
+
+  if (state === 'busy') {
+    return {
+      background: '#fdecec',
+      color: '#c53434',
+      border: '1px solid #f1caca',
+    };
+  }
+
+  return {
+    background: '#fff',
+    color: '#4e463d',
+    border: '1px solid #eadfd2',
+  };
 }
 
 export default function BookingPage({ params }: Props) {
   const master = useMemo(() => getMasterById(params.id), [params.id]);
 
-  const today = new Date().toISOString().split('T')[0];
+  const firstOpenDay =
+    bookingDays.find((day) => day.state !== 'full')?.id || bookingDays[0].id;
 
-  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedDayId, setSelectedDayId] = useState(firstOpenDay);
   const [selectedTime, setSelectedTime] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -71,8 +195,11 @@ export default function BookingPage({ params }: Props) {
     );
   }
 
+  const selectedDay =
+    bookingDays.find((day) => day.id === selectedDayId) || bookingDays[0];
+
   const isValid =
-    selectedDate.trim() !== '' &&
+    selectedDayId.trim() !== '' &&
     selectedTime.trim() !== '' &&
     fullName.trim() !== '' &&
     phone.trim() !== '' &&
@@ -194,7 +321,10 @@ export default function BookingPage({ params }: Props) {
         </div>
 
         <section style={{ marginTop: 28 }}>
-          <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0 }}>When do you want to book?</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 26 }}>📅</span>
+            <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0 }}>Choose date</h2>
+          </div>
 
           <div
             style={{
@@ -205,138 +335,102 @@ export default function BookingPage({ params }: Props) {
               padding: 16,
             }}
           >
-            <div style={{ fontSize: 15, color: '#786d61', fontWeight: 700 }}>
-              Quick question
+            <div style={{ fontSize: 14, color: '#786d61', fontWeight: 700 }}>
+              Green = free, Grey = partial, Red = full
             </div>
 
-            <div style={{ marginTop: 10, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <button
-                onClick={() => setSelectedDate(today)}
-                style={{
-                  padding: '14px 18px',
-                  borderRadius: 18,
-                  border: '1px solid #eadfd2',
-                  background: selectedDate === today ? '#2f241c' : '#fff',
-                  color: selectedDate === today ? '#fff' : '#1d1712',
-                  fontWeight: 800,
-                  fontSize: 16,
-                }}
-              >
-                Today
-              </button>
+            <div
+              style={{
+                display: 'flex',
+                gap: 12,
+                overflowX: 'auto',
+                marginTop: 16,
+                paddingBottom: 8,
+              }}
+            >
+              {bookingDays.map((day) => {
+                const active = selectedDayId === day.id;
+                const style = getDayStyle(day.state, active);
+                const isDisabled = day.state === 'full';
 
-              <button
-                onClick={() => {
-                  const input = document.getElementById('booking-date') as HTMLInputElement | null;
-                  input?.showPicker?.();
-                  input?.click();
-                }}
-                style={{
-                  padding: '14px 18px',
-                  borderRadius: 18,
-                  border: '1px solid #eadfd2',
-                  background: '#fff',
-                  color: '#1d1712',
-                  fontWeight: 800,
-                  fontSize: 16,
-                }}
-              >
-                Open calendar
-              </button>
+                return (
+                  <button
+                    key={day.id}
+                    disabled={isDisabled}
+                    onClick={() => {
+                      setSelectedDayId(day.id);
+                      setSelectedTime('');
+                    }}
+                    style={{
+                      minWidth: 92,
+                      borderRadius: 24,
+                      padding: '18px 16px',
+                      fontWeight: 800,
+                      fontSize: 16,
+                      opacity: isDisabled ? 0.9 : 1,
+                      ...style,
+                    }}
+                  >
+                    {day.labelTop}
+                    <br />
+                    {day.labelBottom}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section style={{ marginTop: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 26 }}>🕒</span>
+            <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0 }}>Choose time</h2>
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              background: '#fff',
+              borderRadius: 26,
+              border: '1px solid #eadfd2',
+              padding: 16,
+            }}
+          >
+            <div style={{ fontSize: 14, color: '#786d61', fontWeight: 700 }}>
+              Tap any free time slot
             </div>
 
-            <div style={{ marginTop: 18, display: 'grid', gap: 14 }}>
-              <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    marginBottom: 8,
-                    fontWeight: 800,
-                    color: '#1d1712',
-                  }}
-                >
-                  <span>📅</span>
-                  <span>Date</span>
-                </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: 12,
+                marginTop: 16,
+              }}
+            >
+              {selectedDay.slots.map((slot) => {
+                const isActive = selectedTime === slot.time;
+                const isBusy = slot.state === 'busy';
+                const style = getSlotStyle(isActive, slot.state);
 
-                <input
-                  id="booking-date"
-                  type="date"
-                  min={today}
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '16px 18px',
-                    borderRadius: 18,
-                    border: '1px solid #d8cfc3',
-                    fontSize: 16,
-                    boxSizing: 'border-box',
-                    background: '#fff',
-                  }}
-                />
-
-                <div
-                  style={{
-                    marginTop: 10,
-                    display: 'inline-block',
-                    background: '#f2e9dc',
-                    color: '#2f241c',
-                    borderRadius: 14,
-                    padding: '10px 14px',
-                    fontWeight: 800,
-                  }}
-                >
-                  {formatDate(selectedDate)}
-                </div>
-              </div>
-
-              <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    marginBottom: 8,
-                    fontWeight: 800,
-                    color: '#1d1712',
-                  }}
-                >
-                  <span>🕒</span>
-                  <span>Time</span>
-                </div>
-
-                <input
-                  type="time"
-                  value={selectedTime}
-                  onChange={(e) => setSelectedTime(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '16px 18px',
-                    borderRadius: 18,
-                    border: '1px solid #d8cfc3',
-                    fontSize: 16,
-                    boxSizing: 'border-box',
-                    background: '#fff',
-                  }}
-                />
-
-                <div
-                  style={{
-                    marginTop: 10,
-                    display: 'inline-block',
-                    background: '#e52323',
-                    color: '#fff',
-                    borderRadius: 14,
-                    padding: '10px 14px',
-                    fontWeight: 800,
-                  }}
-                >
-                  {formatTime(selectedTime)}
-                </div>
-              </div>
+                return (
+                  <button
+                    key={slot.time}
+                    disabled={isBusy}
+                    onClick={() => setSelectedTime(slot.time)}
+                    style={{
+                      borderRadius: 22,
+                      padding: '18px 10px',
+                      fontWeight: 800,
+                      fontSize: 16,
+                      opacity: isBusy ? 0.9 : 1,
+                      ...style,
+                    }}
+                  >
+                    {slot.time}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -423,12 +517,16 @@ export default function BookingPage({ params }: Props) {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <span>Date</span>
-              <strong style={{ color: '#1d1712' }}>{formatDate(selectedDate)}</strong>
+              <strong style={{ color: '#1d1712' }}>
+                {selectedDay.labelTop} {selectedDay.labelBottom}
+              </strong>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <span>Time</span>
-              <strong style={{ color: '#1d1712' }}>{formatTime(selectedTime)}</strong>
+              <strong style={{ color: '#1d1712' }}>
+                {selectedTime || 'Not selected'}
+              </strong>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
