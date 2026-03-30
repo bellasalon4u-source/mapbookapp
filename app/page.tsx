@@ -8,9 +8,16 @@ import { getAllMasters } from '../services/masters';
 export default function HomePage() {
   const masters = useMemo(() => getAllMasters(), []);
   const [selectedMasterId, setSelectedMasterId] = useState(masters[0]?.id || '');
+  const [likedIds, setLikedIds] = useState<string[]>([]);
 
   const selectedMaster =
     masters.find((master) => master.id === selectedMasterId) || masters[0];
+
+  function toggleLike(id: string) {
+    setLikedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }
 
   return (
     <main
@@ -30,17 +37,34 @@ export default function HomePage() {
         </p>
 
         <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
-          <input
-            type="text"
-            placeholder="Search services, masters, area..."
-            style={{
-              flex: 1,
-              padding: '14px 16px',
-              borderRadius: 16,
-              border: '1px solid #d8cfc3',
-              fontSize: 16,
-            }}
-          />
+          <div style={{ position: 'relative', flex: 1 }}>
+            <input
+              type="text"
+              placeholder="Search services, masters, area..."
+              style={{
+                width: '100%',
+                padding: '14px 16px 14px 46px',
+                borderRadius: 16,
+                border: '1px solid #d8cfc3',
+                fontSize: 16,
+                boxSizing: 'border-box',
+                background: '#fff',
+              }}
+            />
+            <span
+              style={{
+                position: 'absolute',
+                left: 16,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                fontSize: 18,
+                color: '#786d61',
+              }}
+            >
+              🔍
+            </span>
+          </div>
+
           <a
             href="/favorites"
             style={{
@@ -51,6 +75,10 @@ export default function HomePage() {
               textDecoration: 'none',
               color: '#1d1712',
               fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: 56,
             }}
           >
             ♥
@@ -58,90 +86,205 @@ export default function HomePage() {
         </div>
 
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
-          {['Hair', 'Beauty', 'Massage', 'Nails', 'Brows', 'Makeup', 'Wellness'].map(
-            (item) => (
-              <span
-                key={item}
-                style={{
-                  padding: '10px 14px',
-                  borderRadius: 999,
-                  background: '#fff',
-                  border: '1px solid #e6ddd1',
-                  fontWeight: 700,
-                }}
-              >
-                {item}
-              </span>
-            )
-          )}
+          {[
+            'Wellness',
+            'Beauty',
+            'Sport',
+            'Food',
+            'Education',
+            'Transport',
+            'Repair',
+            'Cleaning',
+            'Pets',
+            'Other',
+          ].map((item) => (
+            <span
+              key={item}
+              style={{
+                padding: '10px 14px',
+                borderRadius: 999,
+                background: '#fff',
+                border: '1px solid #e6ddd1',
+                fontWeight: 700,
+              }}
+            >
+              {item}
+            </span>
+          ))}
         </div>
 
         <section style={{ marginTop: 28 }}>
           <h2 style={{ fontSize: 34, margin: 0, fontWeight: 800 }}>Map view</h2>
 
-          <div style={{ marginTop: 12 }}>
+          <div style={{ marginTop: 12, position: 'relative' }}>
             <RealMap masters={masters} onSelectMaster={setSelectedMasterId} />
-          </div>
 
-          {selectedMaster && (
-            <div
-              style={{
-                marginTop: 16,
-                background: '#fff',
-                borderRadius: 22,
-                padding: 16,
-                border: '1px solid #eadfd2',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                <div>
-                  <div style={{ fontSize: 24, fontWeight: 800 }}>{selectedMaster.name}</div>
-                  <div style={{ color: '#786d61', marginTop: 4 }}>
-                    {selectedMaster.title} • {selectedMaster.city}
+            {selectedMaster && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 12,
+                  right: 12,
+                  bottom: 12,
+                  background: '#fff',
+                  borderRadius: 24,
+                  border: '1px solid #eadfd2',
+                  padding: 14,
+                  boxShadow: '0 12px 24px rgba(0,0,0,0.12)',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 12,
+                    alignItems: 'center',
+                  }}
+                >
+                  <img
+                    src={selectedMaster.avatar}
+                    alt={selectedMaster.name}
+                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: 18,
+                      objectFit: 'cover',
+                      flexShrink: 0,
+                      display: 'block',
+                    }}
+                  />
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 18,
+                        fontWeight: 800,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {selectedMaster.name}
+                    </div>
+
+                    <div
+                      style={{
+                        color: '#786d61',
+                        marginTop: 4,
+                        fontSize: 14,
+                      }}
+                    >
+                      {selectedMaster.title}
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: 8,
+                        alignItems: 'center',
+                        marginTop: 8,
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <span
+                        style={{
+                          background: '#2f241c',
+                          color: '#fff',
+                          padding: '8px 10px',
+                          borderRadius: 999,
+                          fontWeight: 800,
+                          fontSize: 13,
+                        }}
+                      >
+                        from £{selectedMaster.priceFrom}
+                      </span>
+
+                      <span
+                        style={{
+                          background: '#f2e9dc',
+                          color: '#463b31',
+                          padding: '8px 10px',
+                          borderRadius: 999,
+                          fontWeight: 800,
+                          fontSize: 13,
+                        }}
+                      >
+                        {selectedMaster.rating} ★
+                      </span>
+                    </div>
                   </div>
+
+                  <button
+                    onClick={() => toggleLike(selectedMaster.id)}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 999,
+                      border: '1px solid #eadfd2',
+                      background: '#fff',
+                      fontSize: 22,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {likedIds.includes(selectedMaster.id) ? '♥' : '♡'}
+                  </button>
                 </div>
 
                 <div
                   style={{
-                    background: selectedMaster.availableNow ? '#edf7ee' : '#f3ece2',
-                    color: selectedMaster.availableNow ? '#256b43' : '#6d6257',
-                    padding: '8px 10px',
-                    borderRadius: 12,
-                    fontSize: 12,
-                    fontWeight: 800,
-                    whiteSpace: 'nowrap',
-                    height: 'fit-content',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 10,
+                    marginTop: 14,
                   }}
                 >
-                  {selectedMaster.availableNow ? '● Available now' : 'Offline'}
+                  <div
+                    style={{
+                      background: selectedMaster.availableNow ? '#edf7ee' : '#f3ece2',
+                      color: selectedMaster.availableNow ? '#256b43' : '#6d6257',
+                      padding: '10px 12px',
+                      borderRadius: 14,
+                      fontWeight: 700,
+                      fontSize: 13,
+                    }}
+                  >
+                    {selectedMaster.availableNow ? '● Available now' : 'Offline now'}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <Link
+                      href={`/master/${selectedMaster.id}`}
+                      style={{
+                        textDecoration: 'none',
+                        background: '#fff',
+                        color: '#2f241c',
+                        border: '1px solid #d8cfc3',
+                        padding: '12px 14px',
+                        borderRadius: 14,
+                        fontWeight: 800,
+                        fontSize: 14,
+                      }}
+                    >
+                      Open
+                    </Link>
+
+                    <Link
+                      href={`/booking/${selectedMaster.id}`}
+                      style={{
+                        textDecoration: 'none',
+                        background: '#e52323',
+                        color: '#fff',
+                        padding: '12px 14px',
+                        borderRadius: 14,
+                        fontWeight: 800,
+                        fontSize: 14,
+                      }}
+                    >
+                      Book now
+                    </Link>
+                  </div>
                 </div>
               </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginTop: 14,
-                }}
-              >
-                <div style={{ fontWeight: 800 }}>from £{selectedMaster.priceFrom}</div>
-                <a
-                  href={`/master/${selectedMaster.id}`}
-                  style={{
-                    background: '#2f241c',
-                    color: '#fff',
-                    textDecoration: 'none',
-                    padding: '10px 16px',
-                    borderRadius: 14,
-                    fontWeight: 800,
-                  }}
-                >
-                  Open
-                </a>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </section>
 
         <section style={{ marginTop: 28 }}>
@@ -213,17 +356,22 @@ export default function HomePage() {
                       from £{master.priceFrom}
                     </div>
 
-                    <div
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleLike(master.id);
+                      }}
                       style={{
-                        background: master.availableNow ? '#edf7ee' : '#f3ece2',
-                        color: master.availableNow ? '#256b43' : '#6d6257',
-                        padding: '10px 14px',
+                        width: 42,
+                        height: 42,
                         borderRadius: 999,
-                        fontWeight: 700,
+                        border: '1px solid #eadfd2',
+                        background: '#fff',
+                        fontSize: 22,
                       }}
                     >
-                      {master.availableNow ? '● Available now' : 'Offline'}
-                    </div>
+                      {likedIds.includes(master.id) ? '♥' : '♡'}
+                    </button>
                   </div>
                 </div>
               </Link>
