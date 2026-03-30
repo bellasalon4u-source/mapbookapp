@@ -1,181 +1,93 @@
-import Link from 'next/link';
-import { getAllMasters } from '../services/masters';
-
 export default function HomePage() {
-  const masters = getAllMasters();
-
   return (
-    <div
+    <main
       style={{
         minHeight: '100vh',
         background: '#fcf8f2',
-        padding: '24px 16px 90px',
+        padding: '24px 16px 100px',
         fontFamily: 'Arial, sans-serif',
+        color: '#1d1712',
       }}
     >
-      <div style={{ maxWidth: '420px', margin: '0 auto' }}>
-        <h1
-          style={{
-            fontSize: '56px',
-            fontWeight: 800,
-            color: '#1d1712',
-            margin: 0,
-            lineHeight: 1,
-          }}
-        >
-          MapBook
-        </h1>
+      <div style={{ maxWidth: 420, margin: '0 auto' }}>
+        <h1 style={{ fontSize: 52, margin: 0, fontWeight: 800 }}>MapBook</h1>
 
-        <p
-          style={{
-            marginTop: '14px',
-            fontSize: '18px',
-            color: '#7a7065',
-            lineHeight: 1.5,
-          }}
-        >
+        <p style={{ fontSize: 20, color: '#6f655b', marginTop: 14 }}>
           Find beauty and wellness services near you
         </p>
 
-        <div
-          style={{
-            display: 'flex',
-            gap: '8px',
-            marginTop: '18px',
-            alignItems: 'stretch',
-          }}
-        >
+        <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
           <input
             type="text"
             placeholder="Search services, masters, area..."
             style={{
               flex: 1,
-              border: '1px solid #eadfce',
-              borderRadius: '18px',
-              background: '#ffffff',
               padding: '14px 16px',
-              fontSize: '16px',
-              outline: 'none',
+              borderRadius: 16,
+              border: '1px solid #d8cfc3',
+              fontSize: 16,
             }}
           />
-
-          <button
-            style={{
-              border: 'none',
-              borderRadius: '18px',
-              background: '#2f241c',
-              color: '#fff',
-              padding: '0 16px',
-              fontSize: '18px',
-              minWidth: '50px',
-            }}
-          >
-            🎤
-          </button>
-
-          <Link
+          <a
             href="/favorites"
             style={{
-              border: '1px solid #eadfce',
-              borderRadius: '18px',
-              background: '#ffffff',
-              color: '#2f241c',
               padding: '14px 16px',
-              fontSize: '18px',
+              borderRadius: 16,
+              border: '1px solid #d8cfc3',
+              background: '#fff',
               textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: '50px',
+              color: '#1d1712',
+              fontWeight: 700,
             }}
           >
             ♥
-          </Link>
+          </a>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            gap: '8px',
-            flexWrap: 'wrap',
-            marginTop: '14px',
-          }}
-        >
-          {['Hair', 'Beauty', 'Massage', 'Nails', 'Brows', 'Makeup', 'Wellness'].map((category) => (
-            <button
-              key={category}
-              style={{
-                border: '1px solid #efe4d7',
-                borderRadius: '999px',
-                background: '#ffffff',
-                padding: '10px 16px',
-                fontSize: '15px',
-                fontWeight: 700,
-                color: '#4e463d',
-              }}
-            >
-              {category}
-            </button>
-          ))}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
+          {['Hair', 'Beauty', 'Massage', 'Nails', 'Brows', 'Makeup', 'Wellness'].map(
+            (item) => (
+              <span
+                key={item}
+                style={{
+                  padding: '10px 14px',
+                  borderRadius: 999,
+                  background: '#fff',
+                  border: '1px solid #e6ddd1',
+                  fontWeight: 700,
+                }}
+              >
+                {item}
+              </span>
+            )
+          )}
         </div>
 
-        <div style={{ marginTop: '28px' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '12px',
-            }}
-          >
-            <h2
-              style={{
-                margin: 0,
-                fontSize: '28px',
-                fontWeight: 800,
-                color: '#1d1712',
-              }}
-            >
-              Map view
-            </h2>
-
-            <button
-              style={{
-                border: '1px solid #efe4d7',
-                borderRadius: '999px',
-                background: '#ffffff',
-                padding: '10px 16px',
-                fontSize: '14px',
-                fontWeight: 700,
-                color: '#4e463d',
-              }}
-            >
-              Filters
-            </button>
-          </div>
+        <section style={{ marginTop: 28 }}>
+          <h2 style={{ fontSize: 34, margin: 0, fontWeight: 800 }}>Map view</h2>
 
           <div
             style={{
-              position: 'relative',
-              height: '360px',
-              overflow: 'hidden',
-              borderRadius: '32px',
-              border: '1px solid #e8dccb',
+              marginTop: 12,
+              height: 260,
+              borderRadius: 28,
               background:
-                'radial-gradient(circle at 20% 20%, #f6eee3 0%, #eadfce 45%, #e2d4c0 100%)',
+                'linear-gradient(135deg, #f3e7d6 0%, #eadcc7 45%, #e2cfb5 100%)',
+              position: 'relative',
+              overflow: 'hidden',
+              border: '1px solid #e4d5c2',
             }}
           >
             <div
               style={{
                 position: 'absolute',
-                left: '24px',
-                top: '30px',
+                left: 24,
+                top: 24,
                 background: '#2f241c',
                 color: '#fff',
-                borderRadius: '999px',
                 padding: '10px 14px',
+                borderRadius: 999,
                 fontWeight: 800,
-                fontSize: '14px',
               }}
             >
               £45 · 4.9
@@ -184,14 +96,13 @@ export default function HomePage() {
             <div
               style={{
                 position: 'absolute',
-                right: '28px',
-                top: '84px',
+                right: 24,
+                top: 74,
                 background: '#fff',
                 color: '#2f241c',
-                borderRadius: '999px',
                 padding: '10px 14px',
+                borderRadius: 999,
                 fontWeight: 800,
-                fontSize: '14px',
               }}
             >
               £65 · 4.8
@@ -200,86 +111,32 @@ export default function HomePage() {
             <div
               style={{
                 position: 'absolute',
-                left: '62px',
-                bottom: '96px',
-                background: '#d92f2f',
-                color: '#fff',
-                borderRadius: '999px',
-                padding: '10px 14px',
-                fontWeight: 800,
-                fontSize: '14px',
-              }}
-            >
-              Book now
-            </div>
-
-            <div
-              style={{
-                position: 'absolute',
-                right: '24px',
-                bottom: '48px',
-                background: '#2f241c',
-                color: '#fff',
-                borderRadius: '999px',
-                padding: '10px 14px',
-                fontWeight: 800,
-                fontSize: '14px',
-              }}
-            >
-              £55 · 4.7
-            </div>
-
-            <div
-              style={{
-                position: 'absolute',
-                left: '16px',
-                right: '16px',
-                bottom: '16px',
-                borderRadius: '28px',
-                border: '1px solid #efe4d7',
+                left: 24,
+                right: 24,
+                bottom: 20,
                 background: 'rgba(255,255,255,0.96)',
-                padding: '16px',
+                borderRadius: 22,
+                padding: 16,
+                border: '1px solid #eadfd2',
               }}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: '12px',
-                  alignItems: 'flex-start',
-                }}
-              >
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
                 <div>
-                  <h3
-                    style={{
-                      margin: 0,
-                      fontSize: '22px',
-                      fontWeight: 800,
-                      color: '#1d1712',
-                    }}
-                  >
-                    Bella Keratin Studio
-                  </h3>
-                  <p
-                    style={{
-                      margin: '6px 0 0',
-                      fontSize: '14px',
-                      color: '#7a7065',
-                    }}
-                  >
+                  <div style={{ fontSize: 24, fontWeight: 800 }}>Bella Keratin Studio</div>
+                  <div style={{ color: '#786d61', marginTop: 4 }}>
                     Hair Extensions Specialist • London
-                  </p>
+                  </div>
                 </div>
-
                 <div
                   style={{
-                    borderRadius: '14px',
                     background: '#edf7ee',
                     color: '#256b43',
                     padding: '8px 10px',
-                    fontSize: '12px',
+                    borderRadius: 12,
+                    fontSize: 12,
                     fontWeight: 800,
                     whiteSpace: 'nowrap',
+                    height: 'fit-content',
                   }}
                 >
                   ● Available now
@@ -288,91 +145,125 @@ export default function HomePage() {
 
               <div
                 style={{
-                  marginTop: '14px',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
+                  marginTop: 14,
                 }}
               >
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: '15px',
-                    fontWeight: 700,
-                    color: '#2f241c',
-                  }}
-                >
-                  from £45
-                </p>
-
-                <Link
+                <div style={{ fontWeight: 800 }}>from £45</div>
+                <a
                   href="/master/bella-keratin-studio"
                   style={{
-                    borderRadius: '16px',
                     background: '#2f241c',
                     color: '#fff',
-                    padding: '10px 16px',
-                    fontSize: '14px',
-                    fontWeight: 800,
                     textDecoration: 'none',
+                    padding: '10px 16px',
+                    borderRadius: 14,
+                    fontWeight: 800,
                   }}
                 >
                   Open
-                </Link>
+                </a>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div style={{ marginTop: '28px' }}>
+        <section style={{ marginTop: 28 }}>
+          <h2 style={{ fontSize: 34, margin: 0, fontWeight: 800 }}>Recommended</h2>
+
           <div
             style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '12px',
+              marginTop: 14,
+              background: '#fff',
+              borderRadius: 26,
+              overflow: 'hidden',
+              border: '1px solid #eadfd2',
             }}
           >
-            <h2
+            <div
               style={{
-                margin: 0,
-                fontSize: '28px',
-                fontWeight: 800,
-                color: '#1d1712',
+                height: 180,
+                background:
+                  'linear-gradient(135deg, #b77288 0%, #d8aab7 50%, #e8cbd2 100%)',
               }}
-            >
-              Recommended
-            </h2>
+            />
 
-            <button
-              style={{
-                border: 'none',
-                background: 'transparent',
-                fontSize: '14px',
-                fontWeight: 700,
-                color: '#7a7065',
-              }}
-            >
-              View all
-            </button>
-          </div>
+            <div style={{ padding: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 24, fontWeight: 800 }}>Bella Keratin Studio</div>
+                  <div style={{ color: '#786d61', marginTop: 4 }}>
+                    Hair Extensions Specialist • London
+                  </div>
+                </div>
+                <div
+                  style={{
+                    background: '#f2e9dc',
+                    color: '#463b31',
+                    padding: '8px 10px',
+                    borderRadius: 12,
+                    fontWeight: 800,
+                    height: 'fit-content',
+                  }}
+                >
+                  4.9 ★
+                </div>
+              </div>
 
-          <div style={{ display: 'grid', gap: '16px' }}>
-            {masters.map((master) => (
-              <Link
-                key={master.id}
-                href={`/master/${master.id}`}
+              <div
                 style={{
-                  display: 'block',
-                  overflow: 'hidden',
-                  borderRadius: '28px',
-                  border: '1px solid #efe4d7',
-                  background: '#fff',
-                  textDecoration: 'none',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: 14,
                 }}
               >
-                <img
-                  src={master.avatar}
-                  alt={master.name}
+                <div
                   style={{
-                    width: '100%',
+                    background: '#2f241c',
+                    color: '#fff',
+                    padding: '10px 14px',
+                    borderRadius: 999,
+                    fontWeight: 800,
+                  }}
+                >
+                  from £45
+                </div>
+
+                <div
+                  style={{
+                    background: '#edf7ee',
+                    color: '#256b43',
+                    padding: '10px 14px',
+                    borderRadius: 999,
+                    fontWeight: 700,
+                  }}
+                >
+                  ● Available now
+                </div>
+              </div>
+
+              <a
+                href="/master/bella-keratin-studio"
+                style={{
+                  display: 'inline-block',
+                  marginTop: 16,
+                  background: '#d92f2f',
+                  color: '#fff',
+                  textDecoration: 'none',
+                  padding: '12px 18px',
+                  borderRadius: 14,
+                  fontWeight: 800,
+                }}
+              >
+                View master
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
