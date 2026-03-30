@@ -1,5 +1,7 @@
+'use client';
+
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { useMemo, useState } from 'react';
 import { getMasterById } from '../../../services/masters';
 
 type Props = {
@@ -8,156 +10,367 @@ type Props = {
   };
 };
 
-const dates = ['Mon 25', 'Tue 26', 'Wed 27', 'Thu 28', 'Fri 29', 'Sat 30'];
+const dates = [
+  'Mon 25',
+  'Tue 26',
+  'Wed 27',
+  'Thu 28',
+  'Fri 29',
+  'Sat 30',
+];
+
 const times = ['09:00', '10:30', '12:00', '14:00', '16:30', '18:00'];
 
 export default function BookingPage({ params }: Props) {
-  const master = getMasterById(params.id);
+  const master = useMemo(() => getMasterById(params.id), [params.id]);
+
+  const [selectedDate, setSelectedDate] = useState(dates[0]);
+  const [selectedTime, setSelectedTime] = useState('10:30');
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
 
   if (!master) {
-    notFound();
+    return (
+      <main
+        style={{
+          minHeight: '100vh',
+          background: '#fcf8f2',
+          padding: '24px 16px',
+          fontFamily: 'Arial, sans-serif',
+          color: '#1d1712',
+        }}
+      >
+        <div style={{ maxWidth: 420, margin: '0 auto' }}>
+          <h1 style={{ fontSize: 32, fontWeight: 800 }}>Master not found</h1>
+          <a
+            href="/"
+            style={{
+              display: 'inline-block',
+              marginTop: 16,
+              textDecoration: 'none',
+              background: '#2f241c',
+              color: '#fff',
+              padding: '12px 16px',
+              borderRadius: 14,
+              fontWeight: 700,
+            }}
+          >
+            Back home
+          </a>
+        </div>
+      </main>
+    );
   }
 
+  const isValid =
+    selectedDate.trim() !== '' &&
+    selectedTime.trim() !== '' &&
+    fullName.trim() !== '' &&
+    phone.trim() !== '' &&
+    email.trim() !== '';
+
+  const confirmHref = isValid ? '/booking-success' : '#';
+
   return (
-    <main className="min-h-screen bg-[#fcf8f2] pb-28">
-      <div className="mx-auto max-w-md px-4 py-6">
-        <div className="flex items-center gap-3">
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#fcf8f2',
+        padding: '24px 16px 120px',
+        fontFamily: 'Arial, sans-serif',
+        color: '#1d1712',
+      }}
+    >
+      <div style={{ maxWidth: 420, margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Link
             href={`/master/${master.id}`}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-xl text-[#241c16] shadow-sm"
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 999,
+              background: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textDecoration: 'none',
+              color: '#1d1712',
+              border: '1px solid #e6ddd1',
+              fontSize: 20,
+              fontWeight: 700,
+            }}
           >
             ←
           </Link>
 
           <div>
-            <h1 className="text-2xl font-bold text-[#1d1712]">Book appointment</h1>
-            <p className="text-sm text-[#7a7065]">{master.name}</p>
+            <div style={{ fontSize: 28, fontWeight: 800 }}>Book appointment</div>
+            <div style={{ color: '#786d61', marginTop: 4 }}>{master.name}</div>
           </div>
         </div>
 
-        <div className="mt-6 rounded-3xl border border-[#efe4d7] bg-white p-4">
-          <div className="flex items-center gap-3">
-            <img
-              src={master.avatar}
-              alt={master.name}
-              className="h-16 w-16 rounded-2xl object-cover"
-            />
-            <div className="flex-1">
-              <h2 className="text-lg font-bold text-[#1d1712]">{master.name}</h2>
-              <p className="text-sm text-[#7a7065]">
-                {master.title} • {master.city}
-              </p>
+        <div
+          style={{
+            marginTop: 20,
+            background: '#fff',
+            borderRadius: 26,
+            border: '1px solid #eadfd2',
+            padding: 16,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+          }}
+        >
+          <img
+            src={master.avatar}
+            alt={master.name}
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: 20,
+              objectFit: 'cover',
+              display: 'block',
+            }}
+          />
+
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 18, fontWeight: 800 }}>{master.name}</div>
+            <div style={{ color: '#786d61', marginTop: 4 }}>
+              {master.title} • {master.city}
             </div>
-            <div className="rounded-xl bg-[#f2e9dc] px-3 py-2 text-sm font-bold text-[#463b31]">
-              {master.rating} ★
-            </div>
+          </div>
+
+          <div
+            style={{
+              background: '#f2e9dc',
+              color: '#463b31',
+              padding: '10px 12px',
+              borderRadius: 14,
+              fontWeight: 800,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {master.rating} ★
           </div>
         </div>
 
-        <section className="mt-6">
-          <h2 className="mb-3 text-xl font-bold text-[#1d1712]">Choose date</h2>
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {dates.map((date, index) => (
-              <button
-                key={date}
-                className={`rounded-2xl px-4 py-3 text-sm font-semibold ${
-                  index === 0
-                    ? 'bg-[#2f241c] text-white'
-                    : 'border border-[#efe4d7] bg-white text-[#4e463d]'
-                }`}
-              >
-                {date}
-              </button>
-            ))}
+        <section style={{ marginTop: 28 }}>
+          <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0 }}>Choose date</h2>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: 12,
+              overflowX: 'auto',
+              marginTop: 16,
+              paddingBottom: 8,
+            }}
+          >
+            {dates.map((date) => {
+              const active = selectedDate === date;
+
+              return (
+                <button
+                  key={date}
+                  onClick={() => setSelectedDate(date)}
+                  style={{
+                    minWidth: 92,
+                    borderRadius: 24,
+                    padding: '18px 16px',
+                    border: active ? '1px solid #2f241c' : '1px solid #eadfd2',
+                    background: active ? '#2f241c' : '#fff',
+                    color: active ? '#fff' : '#4e463d',
+                    fontWeight: 800,
+                    fontSize: 16,
+                  }}
+                >
+                  {date.split(' ')[0]}
+                  <br />
+                  {date.split(' ')[1]}
+                </button>
+              );
+            })}
           </div>
         </section>
 
-        <section className="mt-6">
-          <h2 className="mb-3 text-xl font-bold text-[#1d1712]">Choose time</h2>
-          <div className="grid grid-cols-3 gap-3">
-            {times.map((time, index) => (
-              <button
-                key={time}
-                className={`rounded-2xl px-4 py-3 text-sm font-semibold ${
-                  index === 1
-                    ? 'bg-red-600 text-white'
-                    : 'border border-[#efe4d7] bg-white text-[#4e463d]'
-                }`}
-              >
-                {time}
-              </button>
-            ))}
+        <section style={{ marginTop: 28 }}>
+          <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0 }}>Choose time</h2>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr',
+              gap: 12,
+              marginTop: 16,
+            }}
+          >
+            {times.map((time) => {
+              const active = selectedTime === time;
+
+              return (
+                <button
+                  key={time}
+                  onClick={() => setSelectedTime(time)}
+                  style={{
+                    borderRadius: 22,
+                    padding: '18px 10px',
+                    border: active ? '1px solid #e52323' : '1px solid #eadfd2',
+                    background: active ? '#e52323' : '#fff',
+                    color: active ? '#fff' : '#4e463d',
+                    fontWeight: 800,
+                    fontSize: 16,
+                  }}
+                >
+                  {time}
+                </button>
+              );
+            })}
           </div>
         </section>
 
-        <section className="mt-6">
-          <h2 className="mb-3 text-xl font-bold text-[#1d1712]">Your details</h2>
+        <section style={{ marginTop: 28 }}>
+          <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0 }}>Your details</h2>
 
-          <div className="space-y-3 rounded-3xl border border-[#efe4d7] bg-white p-4">
+          <div
+            style={{
+              marginTop: 16,
+              background: '#fff',
+              borderRadius: 26,
+              border: '1px solid #eadfd2',
+              padding: 16,
+            }}
+          >
             <input
               type="text"
               placeholder="Full name"
-              className="w-full rounded-2xl border border-[#eadfce] px-4 py-3 outline-none"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '16px 18px',
+                borderRadius: 18,
+                border: '1px solid #d8cfc3',
+                fontSize: 16,
+                marginBottom: 12,
+                boxSizing: 'border-box',
+              }}
             />
+
             <input
               type="tel"
               placeholder="Phone number"
-              className="w-full rounded-2xl border border-[#eadfce] px-4 py-3 outline-none"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '16px 18px',
+                borderRadius: 18,
+                border: '1px solid #d8cfc3',
+                fontSize: 16,
+                marginBottom: 12,
+                boxSizing: 'border-box',
+              }}
             />
+
             <input
               type="email"
               placeholder="Email"
-              className="w-full rounded-2xl border border-[#eadfce] px-4 py-3 outline-none"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '16px 18px',
+                borderRadius: 18,
+                border: '1px solid #d8cfc3',
+                fontSize: 16,
+                boxSizing: 'border-box',
+              }}
             />
-
-            <p className="text-xs leading-5 text-[#7a7065]">
-              If the user is already authorized, these details will be filled automatically later.
-            </p>
           </div>
         </section>
 
-        <section className="mt-6 rounded-3xl border border-[#efe4d7] bg-white p-4">
-          <h2 className="text-xl font-bold text-[#1d1712]">Booking summary</h2>
+        <section
+          style={{
+            marginTop: 28,
+            background: '#fff',
+            borderRadius: 26,
+            border: '1px solid #eadfd2',
+            padding: 16,
+          }}
+        >
+          <h2 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>Booking summary</h2>
 
-          <div className="mt-4 space-y-3 text-sm text-[#5f564d]">
-            <div className="flex items-center justify-between">
+          <div style={{ marginTop: 16, display: 'grid', gap: 12, color: '#5f564d' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <span>Service</span>
-              <span className="font-semibold text-[#1d1712]">
-                {master.services[0]?.title}
-              </span>
+              <strong style={{ color: '#1d1712' }}>{master.services[0]?.title || 'Appointment'}</strong>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <span>Date</span>
-              <span className="font-semibold text-[#1d1712]">{dates[0]}</span>
+              <strong style={{ color: '#1d1712' }}>{selectedDate}</strong>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <span>Time</span>
-              <span className="font-semibold text-[#1d1712]">{times[1]}</span>
+              <strong style={{ color: '#1d1712' }}>{selectedTime}</strong>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <span>Secure booking fee</span>
-              <span className="font-semibold text-[#1d1712]">£5</span>
+              <strong style={{ color: '#1d1712' }}>£5</strong>
             </div>
           </div>
         </section>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 border-t border-[#efe5d8] bg-[#fffdf9]">
-        <div className="mx-auto flex max-w-md items-center justify-between px-4 py-4">
+      <div
+        style={{
+          position: 'fixed',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: '#fffdf9',
+          borderTop: '1px solid #eadfd2',
+          padding: '14px 16px',
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 420,
+            margin: '0 auto',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 16,
+          }}
+        >
           <div>
-            <p className="text-xs font-semibold text-[#7d7267]">To confirm</p>
-            <p className="mt-1 text-2xl font-bold text-[#1f1813]">£5</p>
+            <div style={{ color: '#786d61', fontWeight: 700, fontSize: 14 }}>To confirm</div>
+            <div style={{ fontSize: 52, fontWeight: 800, lineHeight: 1, marginTop: 6 }}>£5</div>
           </div>
 
-          <Link
-            href="/booking-success"
-            className="rounded-2xl bg-red-600 px-6 py-4 text-sm font-bold text-white"
+          <a
+            href={confirmHref}
+            onClick={(e) => {
+              if (!isValid) e.preventDefault();
+            }}
+            style={{
+              minWidth: 220,
+              textAlign: 'center',
+              textDecoration: 'none',
+              padding: '22px 20px',
+              borderRadius: 22,
+              background: isValid ? '#e52323' : '#efc3c3',
+              color: '#fff',
+              fontSize: 18,
+              fontWeight: 800,
+              pointerEvents: 'auto',
+            }}
           >
             Confirm booking
-          </Link>
+          </a>
         </div>
       </div>
     </main>
