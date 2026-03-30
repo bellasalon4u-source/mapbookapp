@@ -49,6 +49,7 @@ export default function RealMap({
         center: [51.5074, -0.1278],
         zoom: 12,
         zoomControl: true,
+        tap: false,
       });
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -111,34 +112,67 @@ export default function RealMap({
       points.forEach((master) => {
         const selected = selectedMasterId === master.id;
         const fillColor = master.availableNow ? '#18c24f' : '#ef2b2b';
-        const size = selected ? 28 : 22;
+        const size = selected ? 30 : 24;
         const border = selected ? 4 : 3;
 
         const icon = L.divIcon({
-          className: '',
+          className: 'mapbook-marker-wrap',
           html: `
-            <div style="
-              width:${size}px;
-              height:${size}px;
-              border-radius:999px;
-              background:${fillColor};
-              border:${border}px solid #2f241c;
-              box-sizing:border-box;
-              box-shadow:0 2px 8px rgba(0,0,0,0.25);
-            "></div>
+            <div
+              data-master-id="${master.id}"
+              style="
+                width:${size}px;
+                height:${size}px;
+                border-radius:999px;
+                background:${fillColor};
+                border:${border}px solid #2f241c;
+                box-sizing:border-box;
+                box-shadow:0 2px 8px rgba(0,0,0,0.25);
+                cursor:pointer;
+                touch-action:manipulation;
+              "
+            ></div>
           `,
           iconSize: [size, size],
           iconAnchor: [size / 2, size / 2],
         });
 
-        const marker = L.marker([master.lat, master.lng], { icon });
-
-        marker.on('click', () => {
-          onSelectMaster?.(master.id);
+        const marker = L.marker([master.lat, master.lng], {
+          icon,
+          interactive: true,
+          keyboard: false,
         });
+
+        const selectMaster = () => {
+          onSelectMaster?.(master.id);
+        };
+
+        marker.on('click', selectMaster);
+        marker.on('mousedown', selectMaster);
+        marker.on('touchstart', selectMaster);
 
         marker.addTo(layer);
         bounds.push([master.lat, master.lng]);
+
+        setTimeout(() => {
+          const el = marker.getElement();
+          if (!el) return;
+
+          el.style.pointerEvents = 'auto';
+
+          const target = el.querySelector('[data-master-id]');
+          const node = (target || el) as HTMLElement;
+
+          const domSelect = (event: Event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            selectMaster();
+          };
+
+          node.onclick = domSelect as any;
+          node.ontouchend = domSelect as any;
+          node.onpointerup = domSelect as any;
+        }, 0);
       });
 
       if (points.length > 1) {
