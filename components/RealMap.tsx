@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 type MasterItem = {
   id: string;
@@ -21,17 +21,6 @@ type RealMapProps = {
   onSelectMaster?: (id: string) => void;
 };
 
-type Point = MasterItem & {
-  lat: number;
-  lng: number;
-};
-
-type ScreenPoint = {
-  id: string;
-  x: number;
-  y: number;
-};
-
 const fallbackCoords = [
   { lat: 51.5074, lng: -0.1278 },
   { lat: 51.5154, lng: -0.0721 },
@@ -41,24 +30,19 @@ const fallbackCoords = [
   { lat: 51.5380, lng: -0.1426 },
 ];
 
-export default function RealMap({
-  masters,
-  selectedMasterId,
-  onSelectMaster,
-}: RealMapProps) {
+function escapeHtml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+export default function RealMap({ masters }: RealMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
-
-  const [ready, setReady] = useState(false);
-  const [screenPoints, setScreenPoints] = useState<ScreenPoint[]>([]);
-
-  const points: Point[] = useMemo(() => {
-    return masters.map((master, index) => ({
-      ...master,
-      lat: master.lat ?? fallbackCoords[index % fallbackCoords.length].lat,
-      lng: master.lng ?? fallbackCoords[index % fallbackCoords.length].lng,
-    }));
-  }, [masters]);
+  const layerRef = useRef<any>(null);
 
   useEffect(() => {
     let disposed = false;
@@ -73,20 +57,16 @@ export default function RealMap({
         center: [51.5074, -0.1278],
         zoom: 12,
         zoomControl: true,
-        dragging: false,
-        touchZoom: false,
-        doubleClickZoom: false,
-        scrollWheelZoom: false,
-        boxZoom: false,
-        keyboard: false,
       });
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
 
+      const layer = L.layerGroup().addTo(map);
+
       mapRef.current = map;
-      setReady(true);
+      layerRef.current = layer;
 
       setTimeout(() => {
         map.invalidateSize();
@@ -100,144 +80,174 @@ export default function RealMap({
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
+        layerRef.current = null;
       }
     };
   }, []);
 
   useEffect(() => {
-    if (!ready || !mapRef.current || points.length === 0) return;
+    let cancelled = false;
 
-    const map = mapRef.current;
-    const bounds = points.map((p) => [p.lat, p.lng]);
+    async function drawMarkers() {
+      if (!mapRef.current || !layerRef.current) return;
 
-    if (selectedMasterId) {
-      const active = points.find((p) => p.id === selectedMasterId);
-      if (active) {
-        map.setView([active.lat, active.lng], 13);
-      }
-    } else if (bounds.length > 1) {
-      map.fitBounds(bounds, { padding: [40, 40] });
-    } else if (bounds.length === 1) {
-      map.setView(bounds[0], 13);
-    }
-  }, [ready, points, selectedMasterId]);
+      const L = (await import('leaflet')).default;
+      if (cancelled) return;
 
-  useEffect(() => {
-    if (!ready || !mapRef.current) return;
+      const map = mapRef.current;
+      const layer = layerRef.current;
 
-    const map = mapRef.current;
+      layer.clearLayers();
 
-    const updatePositions = () => {
-      const next = points.map((point) => {
-        const projected = map.latLngToContainerPoint([point.lat, point.lng]);
-        return {
-          id: point.id,
-          x: projected.x,
-          y: projected.y,
-        };
+      const points =
+        masters && masters.length > 0
+          ? masters.map((master, index) => ({
+              ...master,
+              lat: master.lat ?? fallbackCoords[index % fallbackCoords.length].lat,
+              lng: master.lng ?? fallbackCoords[index % fallbackCoords.length].lng,
+            }))
+          : fallbackCoords.map((coord, index) => ({
+              id: `fallback-${index}`,
+              name: `Master ${index + 1}`,
+              title: 'Beauty specialist',
+              city: 'London',
+              avatar: 'https://via.placeholder.com/80',
+              rating: 4.8,
+              priceFrom: 40,
+              availableNow: false,
+              lat: coord.lat,
+              lng: coord.lng,
+            }));
+
+      const bounds: [number, number][] = [];
+
+      points.forEach((master, index) => {
+        const fillColor = master.availableNow ? '#18c24f' : '#ef2b2b';
+
+        const icon = L.divIcon({
+          className: '',
+          html: `
+            <div style="
+              width:24px;
+              height:24px;
+              border-radius:999px;
+              background:${fillColor};
+              border:3px solid #2f241c;
+              box-sizing:border-box;
+              box-shadow:0 2px 8px rgba(0,0,0,0.25);
+            "></div>
+          `,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+        });
+
+        const marker = L.marker([master.lat, master.lng], {
+          icon,
+          keyboard: false,
+        });
+
+        const name = escapeHtml(master.name || 'Master');
+        const title = escapeHtml(master.title || 'Service specialist');
+        const city = escapeHtml(master.city || 'London');
+        const avatar = escapeHtml(
+          master.avatar || 'https://via.placeholder.com/80'
+        );
+        const rating = master.rating ?? 0;
+        const priceFrom = master.priceFrom ?? 0;
+        const statusText = master.availableNow ? 'Available now' : 'Not available now';
+        const statusBg = master.availableNow ? '#edf7ee' : '#fdecec';
+        const statusColor = master.availableNow ? '#1f8f45' : '#c53434';
+
+        const popupHtml = `
+          <div style="width:260px;font-family:Arial,sans-serif;color:#1d1712;">
+            <div style="display:flex;gap:12px;align-items:center;">
+              <img
+                src="${avatar}"
+                alt="${name}"
+                style="width:56px;height:56px;border-radius:16px;object-fit:cover;display:block;"
+              />
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:18px;font-weight:800;line-height:1.2;">${name}</div>
+                <div style="font-size:14px;color:#786d61;margin-top:4px;">${title} • ${city}</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                  <span style="background:#2f241c;color:#fff;padding:6px 10px;border-radius:999px;font-size:13px;font-weight:800;">
+                    from £${priceFrom}
+                  </span>
+                  <span style="background:#f2e9dc;color:#463b31;padding:6px 10px;border-radius:999px;font-size:13px;font-weight:800;">
+                    ${rating} ★
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <span style="background:${statusBg};color:${statusColor};padding:8px 10px;border-radius:12px;font-size:13px;font-weight:700;display:inline-block;">
+                ● ${statusText}
+              </span>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <a
+                href="/master/${master.id}"
+                style="text-decoration:none;border:1px solid #d8cfc3;background:#fff;color:#2f241c;padding:10px 12px;border-radius:12px;font-weight:800;font-size:14px;"
+              >
+                Open
+              </a>
+              <a
+                href="/booking/${master.id}"
+                style="text-decoration:none;background:#e52323;color:#fff;padding:10px 12px;border-radius:12px;font-weight:800;font-size:14px;"
+              >
+                Book now
+              </a>
+            </div>
+          </div>
+        `;
+
+        marker.bindPopup(popupHtml, {
+          closeButton: false,
+          autoPan: true,
+          maxWidth: 290,
+          offset: [0, -8],
+        });
+
+        marker.on('click', () => {
+          marker.openPopup();
+        });
+
+        marker.addTo(layer);
+        bounds.push([master.lat, master.lng]);
+
+        if (index === 0) {
+          setTimeout(() => {
+            map.invalidateSize();
+          }, 100);
+        }
       });
 
-      setScreenPoints(next);
-    };
+      if (bounds.length > 1) {
+        map.fitBounds(bounds, { padding: [40, 40] });
+      } else if (bounds.length === 1) {
+        map.setView(bounds[0], 13);
+      }
+    }
 
-    updatePositions();
-
-    map.on('zoomend', updatePositions);
-    map.on('moveend', updatePositions);
-    map.on('resize', updatePositions);
-
-    setTimeout(updatePositions, 100);
-    setTimeout(updatePositions, 400);
-
-    window.addEventListener('resize', updatePositions);
+    drawMarkers();
 
     return () => {
-      map.off('zoomend', updatePositions);
-      map.off('moveend', updatePositions);
-      map.off('resize', updatePositions);
-      window.removeEventListener('resize', updatePositions);
+      cancelled = true;
     };
-  }, [ready, points]);
+  }, [masters]);
 
   return (
     <div
+      ref={mapContainerRef}
       style={{
-        position: 'relative',
         width: '100%',
         height: '420px',
         borderRadius: '28px',
         overflow: 'hidden',
         border: '1px solid #e4d5c2',
       }}
-    >
-      <div
-        ref={mapContainerRef}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 1,
-        }}
-      />
-
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 50,
-          pointerEvents: 'none',
-        }}
-      >
-        {screenPoints.map((point) => {
-          const master = points.find((m) => m.id === point.id);
-          if (!master) return null;
-
-          const selected = selectedMasterId === point.id;
-          const dotSize = selected ? 30 : 24;
-
-          return (
-            <button
-              key={point.id}
-              type="button"
-              onClick={() => onSelectMaster?.(point.id)}
-              onTouchStart={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onSelectMaster?.(point.id);
-              }}
-              style={{
-                position: 'absolute',
-                left: point.x,
-                top: point.y,
-                transform: 'translate(-50%, -50%)',
-                width: 54,
-                height: 54,
-                border: 'none',
-                background: 'transparent',
-                padding: 0,
-                margin: 0,
-                pointerEvents: 'auto',
-                zIndex: 60,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                touchAction: 'none',
-              }}
-            >
-              <span
-                style={{
-                  display: 'block',
-                  width: dotSize,
-                  height: dotSize,
-                  borderRadius: 999,
-                  border: `${selected ? 4 : 3}px solid #2f241c`,
-                  background: master.availableNow ? '#18c24f' : '#ef2b2b',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
-                }}
-              />
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    />
   );
 }
