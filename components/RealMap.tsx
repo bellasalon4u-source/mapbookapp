@@ -56,8 +56,7 @@ export default function RealMap({ masters }: RealMapProps) {
     }));
   }, [masters]);
 
-  const selectedMaster =
-    points.find((item) => item.id === selectedId) || null;
+  const selectedMaster = points.find((item) => item.id === selectedId) || null;
 
   useEffect(() => {
     let disposed = false;
@@ -120,7 +119,7 @@ export default function RealMap({ masters }: RealMapProps) {
   }, [ready, points, selectedId]);
 
   useEffect(() => {
-    if (!ready || !mapRef.current || !wrapperRef.current) return;
+    if (!ready || !mapRef.current) return;
 
     const map = mapRef.current;
 
@@ -143,7 +142,9 @@ export default function RealMap({ masters }: RealMapProps) {
     map.on('zoom', updatePositions);
     map.on('resize', updatePositions);
 
-    setTimeout(updatePositions, 120);
+    setTimeout(updatePositions, 100);
+    setTimeout(updatePositions, 400);
+
     window.addEventListener('resize', updatePositions);
 
     return () => {
@@ -171,6 +172,7 @@ export default function RealMap({ masters }: RealMapProps) {
         style={{
           position: 'absolute',
           inset: 0,
+          zIndex: 1,
         }}
       />
 
@@ -178,6 +180,7 @@ export default function RealMap({ masters }: RealMapProps) {
         style={{
           position: 'absolute',
           inset: 0,
+          zIndex: 20,
           pointerEvents: 'none',
         }}
       >
@@ -186,29 +189,49 @@ export default function RealMap({ masters }: RealMapProps) {
           if (!master) return null;
 
           const selected = selectedId === point.id;
-          const size = selected ? 30 : 24;
+          const dotSize = selected ? 30 : 24;
+          const hitSize = 52;
 
           return (
             <button
               key={point.id}
               type="button"
               onClick={() => setSelectedId(point.id)}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                setSelectedId(point.id);
+              }}
               style={{
                 position: 'absolute',
                 left: point.x,
                 top: point.y,
                 transform: 'translate(-50%, -50%)',
-                width: size,
-                height: size,
-                borderRadius: 999,
-                border: `${selected ? 4 : 3}px solid #2f241c`,
-                background: master.availableNow ? '#18c24f' : '#ef2b2b',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
-                pointerEvents: 'auto',
+                width: hitSize,
+                height: hitSize,
+                border: 'none',
+                background: 'transparent',
                 padding: 0,
                 margin: 0,
+                pointerEvents: 'auto',
+                zIndex: 30,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                touchAction: 'manipulation',
               }}
-            />
+            >
+              <span
+                style={{
+                  display: 'block',
+                  width: dotSize,
+                  height: dotSize,
+                  borderRadius: 999,
+                  border: `${selected ? 4 : 3}px solid #2f241c`,
+                  background: master.availableNow ? '#18c24f' : '#ef2b2b',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+                }}
+              />
+            </button>
           );
         })}
       </div>
@@ -225,7 +248,7 @@ export default function RealMap({ masters }: RealMapProps) {
             border: '1px solid #eadfd2',
             padding: 14,
             boxShadow: '0 12px 24px rgba(0,0,0,0.14)',
-            zIndex: 30,
+            zIndex: 40,
           }}
         >
           <div
@@ -366,7 +389,6 @@ export default function RealMap({ masters }: RealMapProps) {
                 href={`/booking/${selectedMaster.id}`}
                 style={{
                   textDecoration: 'none',
-                  border: 'none',
                   background: '#e52323',
                   color: '#fff',
                   padding: '12px 14px',
