@@ -1,7 +1,10 @@
-import Link from 'next/link';
+add real master pinsimport Link from 'next/link';
 import RealMap from '../components/RealMap';
+import { getAllMasters } from '../services/masters';
 
 export default function HomePage() {
+  const masters = getAllMasters();
+
   return (
     <main
       style={{
@@ -29,7 +32,6 @@ export default function HomePage() {
               borderRadius: 16,
               border: '1px solid #d8cfc3',
               fontSize: 16,
-              background: '#fff',
             }}
           />
           <a
@@ -71,7 +73,7 @@ export default function HomePage() {
           <h2 style={{ fontSize: 34, margin: 0, fontWeight: 800 }}>Map view</h2>
 
           <div style={{ marginTop: 12 }}>
-            <RealMap />
+            <RealMap masters={masters} />
           </div>
 
           <div
@@ -85,9 +87,9 @@ export default function HomePage() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <div>
-                <div style={{ fontSize: 24, fontWeight: 800 }}>Bella Keratin Studio</div>
+                <div style={{ fontSize: 24, fontWeight: 800 }}>{masters[0]?.name}</div>
                 <div style={{ color: '#786d61', marginTop: 4 }}>
-                  Hair Extensions Specialist • London
+                  {masters[0]?.title} • {masters[0]?.city}
                 </div>
               </div>
 
@@ -115,9 +117,9 @@ export default function HomePage() {
                 marginTop: 14,
               }}
             >
-              <div style={{ fontWeight: 800 }}>from £45</div>
+              <div style={{ fontWeight: 800 }}>from £{masters[0]?.priceFrom}</div>
               <a
-                href="/master/bella-keratin-studio"
+                href={`/master/${masters[0]?.id}`}
                 style={{
                   background: '#2f241c',
                   color: '#fff',
@@ -136,139 +138,89 @@ export default function HomePage() {
         <section style={{ marginTop: 28 }}>
           <h2 style={{ fontSize: 34, margin: 0, fontWeight: 800 }}>Recommended</h2>
 
-          <div
-            style={{
-              marginTop: 14,
-              background: '#fff',
-              borderRadius: 26,
-              overflow: 'hidden',
-              border: '1px solid #eadfd2',
-            }}
-          >
-            <div
-              style={{
-                height: 180,
-                background:
-                  'linear-gradient(135deg, #b77288 0%, #d8aab7 50%, #e8cbd2 100%)',
-              }}
-            />
+          <div style={{ display: 'grid', gap: 16, marginTop: 14 }}>
+            {masters.map((master) => (
+              <Link
+                key={master.id}
+                href={`/master/${master.id}`}
+                style={{
+                  display: 'block',
+                  overflow: 'hidden',
+                  borderRadius: 26,
+                  background: '#fff',
+                  border: '1px solid #eadfd2',
+                  textDecoration: 'none',
+                  color: '#1d1712',
+                }}
+              >
+                <div
+                  style={{
+                    height: 180,
+                    background:
+                      'linear-gradient(135deg, #b77288 0%, #d8aab7 50%, #e8cbd2 100%)',
+                  }}
+                />
 
-            <div style={{ padding: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                <div>
-                  <div style={{ fontSize: 24, fontWeight: 800 }}>Bella Keratin Studio</div>
-                  <div style={{ color: '#786d61', marginTop: 4 }}>
-                    Hair Extensions Specialist • London
+                <div style={{ padding: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                    <div>
+                      <div style={{ fontSize: 24, fontWeight: 800 }}>{master.name}</div>
+                      <div style={{ color: '#786d61', marginTop: 4 }}>
+                        {master.title} • {master.city}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        background: '#f2e9dc',
+                        color: '#463b31',
+                        padding: '8px 10px',
+                        borderRadius: 12,
+                        fontWeight: 800,
+                        height: 'fit-content',
+                      }}
+                    >
+                      {master.rating} ★
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginTop: 14,
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: '#2f241c',
+                        color: '#fff',
+                        padding: '10px 14px',
+                        borderRadius: 999,
+                        fontWeight: 800,
+                      }}
+                    >
+                      from £{master.priceFrom}
+                    </div>
+
+                    <div
+                      style={{
+                        background: '#edf7ee',
+                        color: '#256b43',
+                        padding: '10px 14px',
+                        borderRadius: 999,
+                        fontWeight: 700,
+                      }}
+                    >
+                      ● Available now
+                    </div>
                   </div>
                 </div>
-
-                <div
-                  style={{
-                    background: '#f2e9dc',
-                    color: '#463b31',
-                    padding: '8px 10px',
-                    borderRadius: 12,
-                    fontWeight: 800,
-                    height: 'fit-content',
-                  }}
-                >
-                  4.9 ★
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginTop: 14,
-                }}
-              >
-                <div
-                  style={{
-                    background: '#2f241c',
-                    color: '#fff',
-                    padding: '10px 14px',
-                    borderRadius: 999,
-                    fontWeight: 800,
-                  }}
-                >
-                  from £45
-                </div>
-
-                <div
-                  style={{
-                    background: '#edf7ee',
-                    color: '#256b43',
-                    padding: '10px 14px',
-                    borderRadius: 999,
-                    fontWeight: 700,
-                  }}
-                >
-                  ● Available now
-                </div>
-              </div>
-
-              <a
-                href="/master/bella-keratin-studio"
-                style={{
-                  display: 'inline-block',
-                  marginTop: 16,
-                  background: '#d92f2f',
-                  color: '#fff',
-                  textDecoration: 'none',
-                  padding: '12px 18px',
-                  borderRadius: 14,
-                  fontWeight: 800,
-                }}
-              >
-                View master
-              </a>
-            </div>
+              </Link>
+            ))}
           </div>
         </section>
-
-        <div
-          style={{
-            position: 'fixed',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            borderTop: '1px solid #efe5d8',
-            background: '#fffdf9',
-          }}
-        >
-          <div
-            style={{
-              maxWidth: 420,
-              margin: '0 auto',
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              textAlign: 'center',
-              padding: '14px 16px',
-              fontSize: 14,
-            }}
-          >
-            <Link
-              href="/"
-              style={{ color: '#1d1712', fontWeight: 800, textDecoration: 'none' }}
-            >
-              Home
-            </Link>
-            <Link
-              href="/messages"
-              style={{ color: '#7a7065', textDecoration: 'none' }}
-            >
-              Messages
-            </Link>
-            <Link
-              href="/profile"
-              style={{ color: '#7a7065', textDecoration: 'none' }}
-            >
-              Profile
-            </Link>
-          </div>
-        </div>
       </div>
     </main>
   );
