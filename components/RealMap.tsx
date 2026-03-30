@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type MasterPin = {
   id: string;
@@ -34,15 +34,16 @@ export default function RealMap({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
   const layerRef = useRef<any>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    let destroyed = false;
+    let disposed = false;
 
-    async function init() {
+    async function initMap() {
       if (!containerRef.current || mapRef.current) return;
 
       const L = (await import('leaflet')).default;
-      if (destroyed || !containerRef.current) return;
+      if (disposed || !containerRef.current) return;
 
       const map = L.map(containerRef.current, {
         center: [51.5074, -0.1278],
@@ -58,16 +59,17 @@ export default function RealMap({
 
       mapRef.current = map;
       layerRef.current = layer;
+      setReady(true);
 
       setTimeout(() => {
         map.invalidateSize();
-      }, 200);
+      }, 250);
     }
 
-    init();
+    initMap();
 
     return () => {
-      destroyed = true;
+      disposed = true;
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -79,13 +81,14 @@ export default function RealMap({
   useEffect(() => {
     let cancelled = false;
 
-    async function redraw() {
-      const map = mapRef.current;
-      const layer = layerRef.current;
-      if (!map || !layer) return;
+    async function drawMarkers() {
+      if (!ready || !mapRef.current || !layerRef.current) return;
 
       const L = (await import('leaflet')).default;
       if (cancelled) return;
+
+      const map = mapRef.current;
+      const layer = layerRef.current;
 
       layer.clearLayers();
 
@@ -109,11 +112,12 @@ export default function RealMap({
 
       points.forEach((master) => {
         const selected = selectedMasterId === master.id;
+
         const marker = L.circleMarker([master.lat, master.lng], {
           radius: selected ? 14 : 10,
           color: '#2f241c',
           weight: selected ? 4 : 3,
-          fillColor: master.availableNow ? '#16c251' : '#ef2b2b',
+          fillColor: master.availableNow ? '#18c24f' : '#ef2b2b',
           fillOpacity: 1,
         });
 
@@ -127,7 +131,7 @@ export default function RealMap({
 
       if (points.length > 1) {
         if (selectedMasterId) {
-          const active = points.find((x) => x.id === selectedMasterId);
+          const active = points.find((item) => item.id === selectedMasterId);
           if (active) {
             map.flyTo([active.lat, active.lng], 13, {
               animate: true,
@@ -146,14 +150,14 @@ export default function RealMap({
       }, 100);
     }
 
-    redraw();
+    drawMarkers();
 
     return () => {
       cancelled = true;
     };
-  }, [masters, selectedMasterId, onSelectMaster]);
+  }, [ready, masters, selectedMasterId, onSelectMaster]);
 
-  return (
+  return
     <div
       ref={containerRef}
       style={{
@@ -163,6 +167,5 @@ export default function RealMap({
         overflow: 'hidden',
         border: '1px solid #e4d5c2',
       }}
-    />
-  );
+    />;
 }
