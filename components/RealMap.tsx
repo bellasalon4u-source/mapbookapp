@@ -73,7 +73,6 @@ export default function RealMap({
         center: [51.5074, -0.1278],
         zoom: 12,
         zoomControl: true,
-        tap: false,
         dragging: false,
         touchZoom: false,
         doubleClickZoom: false,
