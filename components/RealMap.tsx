@@ -2,7 +2,19 @@
 
 import { useEffect, useRef } from 'react';
 
-export default function RealMap() {
+type MasterPin = {
+  id: string;
+  name: string;
+  title: string;
+  lat: number;
+  lng: number;
+};
+
+type RealMapProps = {
+  masters: MasterPin[];
+};
+
+export default function RealMap({ masters }: RealMapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMapRef = useRef<any>(null);
 
@@ -28,17 +40,19 @@ export default function RealMap() {
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
 
-      const point = L.circleMarker([51.5074, -0.1278], {
-        radius: 10,
-        color: '#2f241c',
-        weight: 3,
-        fillColor: '#d92f2f',
-        fillOpacity: 1,
-      }).addTo(map);
+      masters.forEach((master) => {
+        const point = L.circleMarker([master.lat, master.lng], {
+          radius: 10,
+          color: '#2f241c',
+          weight: 3,
+          fillColor: '#d92f2f',
+          fillOpacity: 1,
+        }).addTo(map);
 
-      point.bindPopup(
-        '<b>Bella Keratin Studio</b><br/>Hair Extensions Specialist'
-      );
+        point.bindPopup(
+          `<b>${master.name}</b><br/>${master.title}<br/><a href="/master/${master.id}">Open profile</a>`
+        );
+      });
     }
 
     initMap();
@@ -50,7 +64,7 @@ export default function RealMap() {
         leafletMapRef.current = null;
       }
     };
-  }, []);
+  }, [masters]);
 
   return (
     <div
