@@ -10,22 +10,23 @@ type Props = {
   };
 };
 
-const dates = [
-  'Mon 25',
-  'Tue 26',
-  'Wed 27',
-  'Thu 28',
-  'Fri 29',
-  'Sat 30',
-];
+function formatDate(value: string) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
 
-const times = ['09:00', '10:30', '12:00', '14:00', '16:30', '18:00'];
+  return date.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+  });
+}
 
 export default function BookingPage({ params }: Props) {
   const master = useMemo(() => getMasterById(params.id), [params.id]);
 
-  const [selectedDate, setSelectedDate] = useState(dates[0]);
-  const [selectedTime, setSelectedTime] = useState('10:30');
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -70,8 +71,6 @@ export default function BookingPage({ params }: Props) {
     phone.trim() !== '' &&
     email.trim() !== '';
 
-  const confirmHref = isValid ? '/booking-success' : '#';
-
   return (
     <main
       style={{
@@ -99,6 +98,7 @@ export default function BookingPage({ params }: Props) {
               border: '1px solid #e6ddd1',
               fontSize: 20,
               fontWeight: 700,
+              flexShrink: 0,
             }}
           >
             ←
@@ -131,6 +131,7 @@ export default function BookingPage({ params }: Props) {
               borderRadius: 20,
               objectFit: 'cover',
               display: 'block',
+              flexShrink: 0,
             }}
           />
 
@@ -156,76 +157,122 @@ export default function BookingPage({ params }: Props) {
         </div>
 
         <section style={{ marginTop: 28 }}>
-          <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0 }}>Choose date</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 26 }}>📅</span>
+            <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0 }}>Choose date</h2>
+          </div>
 
           <div
             style={{
-              display: 'flex',
-              gap: 12,
-              overflowX: 'auto',
               marginTop: 16,
-              paddingBottom: 8,
+              background: '#fff',
+              borderRadius: 26,
+              border: '1px solid #eadfd2',
+              padding: 16,
             }}
           >
-            {dates.map((date) => {
-              const active = selectedDate === date;
+            <label
+              style={{
+                display: 'block',
+                fontSize: 14,
+                color: '#786d61',
+                fontWeight: 700,
+                marginBottom: 10,
+              }}
+            >
+              Select date from calendar
+            </label>
 
-              return (
-                <button
-                  key={date}
-                  onClick={() => setSelectedDate(date)}
-                  style={{
-                    minWidth: 92,
-                    borderRadius: 24,
-                    padding: '18px 16px',
-                    border: active ? '1px solid #2f241c' : '1px solid #eadfd2',
-                    background: active ? '#2f241c' : '#fff',
-                    color: active ? '#fff' : '#4e463d',
-                    fontWeight: 800,
-                    fontSize: 16,
-                  }}
-                >
-                  {date.split(' ')[0]}
-                  <br />
-                  {date.split(' ')[1]}
-                </button>
-              );
-            })}
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '16px 18px',
+                borderRadius: 18,
+                border: '1px solid #d8cfc3',
+                fontSize: 16,
+                boxSizing: 'border-box',
+                background: '#fff',
+              }}
+            />
+
+            {selectedDate && (
+              <div
+                style={{
+                  marginTop: 12,
+                  display: 'inline-block',
+                  background: '#2f241c',
+                  color: '#fff',
+                  borderRadius: 16,
+                  padding: '10px 14px',
+                  fontWeight: 800,
+                }}
+              >
+                {formatDate(selectedDate)}
+              </div>
+            )}
           </div>
         </section>
 
         <section style={{ marginTop: 28 }}>
-          <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0 }}>Choose time</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 26 }}>🕒</span>
+            <h2 style={{ fontSize: 30, fontWeight: 800, margin: 0 }}>Choose time</h2>
+          </div>
 
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              gap: 12,
               marginTop: 16,
+              background: '#fff',
+              borderRadius: 26,
+              border: '1px solid #eadfd2',
+              padding: 16,
             }}
           >
-            {times.map((time) => {
-              const active = selectedTime === time;
+            <label
+              style={{
+                display: 'block',
+                fontSize: 14,
+                color: '#786d61',
+                fontWeight: 700,
+                marginBottom: 10,
+              }}
+            >
+              Select time
+            </label>
 
-              return (
-                <button
-                  key={time}
-                  onClick={() => setSelectedTime(time)}
-                  style={{
-                    borderRadius: 22,
-                    padding: '18px 10px',
-                    border: active ? '1px solid #e52323' : '1px solid #eadfd2',
-                    background: active ? '#e52323' : '#fff',
-                    color: active ? '#fff' : '#4e463d',
-                    fontWeight: 800,
-                    fontSize: 16,
-                  }}
-                >
-                  {time}
-                </button>
-              );
-            })}
+            <input
+              type="time"
+              value={selectedTime}
+              onChange={(e) => setSelectedTime(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '16px 18px',
+                borderRadius: 18,
+                border: '1px solid #d8cfc3',
+                fontSize: 16,
+                boxSizing: 'border-box',
+                background: '#fff',
+              }}
+            />
+
+            {selectedTime && (
+              <div
+                style={{
+                  marginTop: 12,
+                  display: 'inline-block',
+                  background: '#e52323',
+                  color: '#fff',
+                  borderRadius: 16,
+                  padding: '10px 14px',
+                  fontWeight: 800,
+                }}
+              >
+                {selectedTime}
+              </div>
+            )}
           </div>
         </section>
 
@@ -304,17 +351,23 @@ export default function BookingPage({ params }: Props) {
           <div style={{ marginTop: 16, display: 'grid', gap: 12, color: '#5f564d' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <span>Service</span>
-              <strong style={{ color: '#1d1712' }}>{master.services[0]?.title || 'Appointment'}</strong>
+              <strong style={{ color: '#1d1712' }}>
+                {master.services[0]?.title || 'Appointment'}
+              </strong>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <span>Date</span>
-              <strong style={{ color: '#1d1712' }}>{selectedDate}</strong>
+              <strong style={{ color: '#1d1712' }}>
+                {selectedDate ? formatDate(selectedDate) : 'Not selected'}
+              </strong>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
               <span>Time</span>
-              <strong style={{ color: '#1d1712' }}>{selectedTime}</strong>
+              <strong style={{ color: '#1d1712' }}>
+                {selectedTime || 'Not selected'}
+              </strong>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
@@ -351,8 +404,8 @@ export default function BookingPage({ params }: Props) {
             <div style={{ fontSize: 52, fontWeight: 800, lineHeight: 1, marginTop: 6 }}>£5</div>
           </div>
 
-          <a
-            href={confirmHref}
+          <Link
+            href={isValid ? '/booking-success' : '#'}
             onClick={(e) => {
               if (!isValid) e.preventDefault();
             }}
@@ -366,11 +419,10 @@ export default function BookingPage({ params }: Props) {
               color: '#fff',
               fontSize: 18,
               fontWeight: 800,
-              pointerEvents: 'auto',
             }}
           >
             Confirm booking
-          </a>
+          </Link>
         </div>
       </div>
     </main>
