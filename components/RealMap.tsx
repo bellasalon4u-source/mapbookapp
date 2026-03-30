@@ -85,14 +85,6 @@ export default function RealMap({ masters, onSelectMaster }: RealMapProps) {
           }
         });
 
-        point.bindPopup(
-          `<div style="min-width:160px">
-            <div style="font-weight:700;font-size:14px;margin-bottom:4px;">${master.name}</div>
-            <div style="font-size:12px;color:#6f655b;margin-bottom:8px;">${master.title}</div>
-            <a href="/master/${master.id}" style="display:inline-block;background:#2f241c;color:#fff;text-decoration:none;padding:8px 12px;border-radius:10px;font-size:12px;font-weight:700;">Open profile</a>
-          </div>`
-        );
-
         bounds.push([master.lat, master.lng]);
       });
 
