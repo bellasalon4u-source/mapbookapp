@@ -1,12 +1,11 @@
 import Link from 'next/link';
 import { getAllMasters } from '../services/masters';
-import { categories } from '../lib/data';
 
 export default function HomePage() {
   const masters = getAllMasters();
 
   return (
-    <main
+    <div
       style={{
         minHeight: '100vh',
         background: '#fcf8f2',
@@ -14,10 +13,10 @@ export default function HomePage() {
         fontFamily: 'Arial, sans-serif',
       }}
     >
-      <div style={{ maxWidth: 420, margin: '0 auto' }}>
+      <div style={{ maxWidth: '420px', margin: '0 auto' }}>
         <h1
           style={{
-            fontSize: 56,
+            fontSize: '56px',
             fontWeight: 800,
             color: '#1d1712',
             margin: 0,
@@ -29,8 +28,8 @@ export default function HomePage() {
 
         <p
           style={{
-            marginTop: 14,
-            fontSize: 18,
+            marginTop: '14px',
+            fontSize: '18px',
             color: '#7a7065',
             lineHeight: 1.5,
           }}
@@ -41,8 +40,8 @@ export default function HomePage() {
         <div
           style={{
             display: 'flex',
-            gap: 8,
-            marginTop: 18,
+            gap: '8px',
+            marginTop: '18px',
             alignItems: 'stretch',
           }}
         >
@@ -52,10 +51,10 @@ export default function HomePage() {
             style={{
               flex: 1,
               border: '1px solid #eadfce',
-              borderRadius: 18,
+              borderRadius: '18px',
               background: '#ffffff',
               padding: '14px 16px',
-              fontSize: 16,
+              fontSize: '16px',
               outline: 'none',
             }}
           />
@@ -63,12 +62,12 @@ export default function HomePage() {
           <button
             style={{
               border: 'none',
-              borderRadius: 18,
+              borderRadius: '18px',
               background: '#2f241c',
               color: '#fff',
               padding: '0 16px',
-              fontSize: 18,
-              minWidth: 50,
+              fontSize: '18px',
+              minWidth: '50px',
             }}
           >
             🎤
@@ -78,16 +77,16 @@ export default function HomePage() {
             href="/favorites"
             style={{
               border: '1px solid #eadfce',
-              borderRadius: 18,
+              borderRadius: '18px',
               background: '#ffffff',
               color: '#2f241c',
               padding: '14px 16px',
-              fontSize: 18,
+              fontSize: '18px',
               textDecoration: 'none',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minWidth: 50,
+              minWidth: '50px',
             }}
           >
             ♥
@@ -97,23 +96,20 @@ export default function HomePage() {
         <div
           style={{
             display: 'flex',
-            gap: 8,
-            overflowX: 'auto',
-            paddingBottom: 8,
-            marginTop: 14,
+            gap: '8px',
             flexWrap: 'wrap',
+            marginTop: '14px',
           }}
         >
-          {categories.map((category) => (
+          {['Hair', 'Beauty', 'Massage', 'Nails', 'Brows', 'Makeup', 'Wellness'].map((category) => (
             <button
               key={category}
               style={{
-                whiteSpace: 'nowrap',
                 border: '1px solid #efe4d7',
-                borderRadius: 999,
+                borderRadius: '999px',
                 background: '#ffffff',
                 padding: '10px 16px',
-                fontSize: 15,
+                fontSize: '15px',
                 fontWeight: 700,
                 color: '#4e463d',
               }}
@@ -123,19 +119,19 @@ export default function HomePage() {
           ))}
         </div>
 
-        <section style={{ marginTop: 28 }}>
+        <div style={{ marginTop: '28px' }}>
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: 12,
+              marginBottom: '12px',
             }}
           >
             <h2
               style={{
                 margin: 0,
-                fontSize: 28,
+                fontSize: '28px',
                 fontWeight: 800,
                 color: '#1d1712',
               }}
@@ -146,10 +142,10 @@ export default function HomePage() {
             <button
               style={{
                 border: '1px solid #efe4d7',
-                borderRadius: 999,
+                borderRadius: '999px',
                 background: '#ffffff',
                 padding: '10px 16px',
-                fontSize: 14,
+                fontSize: '14px',
                 fontWeight: 700,
                 color: '#4e463d',
               }}
@@ -161,9 +157,9 @@ export default function HomePage() {
           <div
             style={{
               position: 'relative',
-              height: 360,
+              height: '360px',
               overflow: 'hidden',
-              borderRadius: 32,
+              borderRadius: '32px',
               border: '1px solid #e8dccb',
               background:
                 'radial-gradient(circle at 20% 20%, #f6eee3 0%, #eadfce 45%, #e2d4c0 100%)',
@@ -172,52 +168,14 @@ export default function HomePage() {
             <div
               style={{
                 position: 'absolute',
-                left: '8%',
-                top: '16%',
-                width: 96,
-                height: 96,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.22)',
-                filter: 'blur(20px)',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                right: '12%',
-                top: '28%',
-                width: 80,
-                height: 80,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.22)',
-                filter: 'blur(20px)',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                left: '20%',
-                bottom: '18%',
-                width: 110,
-                height: 110,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.22)',
-                filter: 'blur(20px)',
-              }}
-            />
-
-            <div
-              style={{
-                position: 'absolute',
-                left: 24,
-                top: 30,
+                left: '24px',
+                top: '30px',
                 background: '#2f241c',
                 color: '#fff',
-                borderRadius: 999,
+                borderRadius: '999px',
                 padding: '10px 14px',
                 fontWeight: 800,
-                fontSize: 14,
-                boxShadow: '0 8px 18px rgba(0,0,0,0.15)',
+                fontSize: '14px',
               }}
             >
               £45 · 4.9
@@ -226,15 +184,14 @@ export default function HomePage() {
             <div
               style={{
                 position: 'absolute',
-                right: 28,
-                top: 84,
+                right: '28px',
+                top: '84px',
                 background: '#fff',
                 color: '#2f241c',
-                borderRadius: 999,
+                borderRadius: '999px',
                 padding: '10px 14px',
                 fontWeight: 800,
-                fontSize: 14,
-                boxShadow: '0 8px 18px rgba(0,0,0,0.12)',
+                fontSize: '14px',
               }}
             >
               £65 · 4.8
@@ -243,15 +200,14 @@ export default function HomePage() {
             <div
               style={{
                 position: 'absolute',
-                left: 62,
-                bottom: 96,
+                left: '62px',
+                bottom: '96px',
                 background: '#d92f2f',
                 color: '#fff',
-                borderRadius: 999,
+                borderRadius: '999px',
                 padding: '10px 14px',
                 fontWeight: 800,
-                fontSize: 14,
-                boxShadow: '0 8px 18px rgba(0,0,0,0.15)',
+                fontSize: '14px',
               }}
             >
               Book now
@@ -260,15 +216,14 @@ export default function HomePage() {
             <div
               style={{
                 position: 'absolute',
-                right: 24,
-                bottom: 48,
+                right: '24px',
+                bottom: '48px',
                 background: '#2f241c',
                 color: '#fff',
-                borderRadius: 999,
+                borderRadius: '999px',
                 padding: '10px 14px',
                 fontWeight: 800,
-                fontSize: 14,
-                boxShadow: '0 8px 18px rgba(0,0,0,0.15)',
+                fontSize: '14px',
               }}
             >
               £55 · 4.7
@@ -277,21 +232,20 @@ export default function HomePage() {
             <div
               style={{
                 position: 'absolute',
-                left: 16,
-                right: 16,
-                bottom: 16,
-                borderRadius: 28,
+                left: '16px',
+                right: '16px',
+                bottom: '16px',
+                borderRadius: '28px',
                 border: '1px solid #efe4d7',
                 background: 'rgba(255,255,255,0.96)',
-                padding: 16,
-                backdropFilter: 'blur(6px)',
+                padding: '16px',
               }}
             >
               <div
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  gap: 12,
+                  gap: '12px',
                   alignItems: 'flex-start',
                 }}
               >
@@ -299,7 +253,7 @@ export default function HomePage() {
                   <h3
                     style={{
                       margin: 0,
-                      fontSize: 22,
+                      fontSize: '22px',
                       fontWeight: 800,
                       color: '#1d1712',
                     }}
@@ -309,7 +263,7 @@ export default function HomePage() {
                   <p
                     style={{
                       margin: '6px 0 0',
-                      fontSize: 14,
+                      fontSize: '14px',
                       color: '#7a7065',
                     }}
                   >
@@ -319,11 +273,11 @@ export default function HomePage() {
 
                 <div
                   style={{
-                    borderRadius: 14,
+                    borderRadius: '14px',
                     background: '#edf7ee',
                     color: '#256b43',
                     padding: '8px 10px',
-                    fontSize: 12,
+                    fontSize: '12px',
                     fontWeight: 800,
                     whiteSpace: 'nowrap',
                   }}
@@ -334,7 +288,7 @@ export default function HomePage() {
 
               <div
                 style={{
-                  marginTop: 14,
+                  marginTop: '14px',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -343,7 +297,7 @@ export default function HomePage() {
                 <p
                   style={{
                     margin: 0,
-                    fontSize: 15,
+                    fontSize: '15px',
                     fontWeight: 700,
                     color: '#2f241c',
                   }}
@@ -354,11 +308,11 @@ export default function HomePage() {
                 <Link
                   href="/master/bella-keratin-studio"
                   style={{
-                    borderRadius: 16,
+                    borderRadius: '16px',
                     background: '#2f241c',
                     color: '#fff',
                     padding: '10px 16px',
-                    fontSize: 14,
+                    fontSize: '14px',
                     fontWeight: 800,
                     textDecoration: 'none',
                   }}
@@ -368,21 +322,21 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </section>
+        </div>
 
-        <section style={{ marginTop: 28 }}>
+        <div style={{ marginTop: '28px' }}>
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: 12,
+              marginBottom: '12px',
             }}
           >
             <h2
               style={{
                 margin: 0,
-                fontSize: 28,
+                fontSize: '28px',
                 fontWeight: 800,
                 color: '#1d1712',
               }}
@@ -394,7 +348,7 @@ export default function HomePage() {
               style={{
                 border: 'none',
                 background: 'transparent',
-                fontSize: 14,
+                fontSize: '14px',
                 fontWeight: 700,
                 color: '#7a7065',
               }}
@@ -403,7 +357,7 @@ export default function HomePage() {
             </button>
           </div>
 
-          <div style={{ display: 'grid', gap: 16 }}>
+          <div style={{ display: 'grid', gap: '16px' }}>
             {masters.map((master) => (
               <Link
                 key={master.id}
@@ -411,7 +365,7 @@ export default function HomePage() {
                 style={{
                   display: 'block',
                   overflow: 'hidden',
-                  borderRadius: 28,
+                  borderRadius: '28px',
                   border: '1px solid #efe4d7',
                   background: '#fff',
                   textDecoration: 'none',
@@ -422,23 +376,3 @@ export default function HomePage() {
                   alt={master.name}
                   style={{
                     width: '100%',
-                    height: 190,
-                    objectFit: 'cover',
-                    display: 'block',
-                  }}
-                />
-
-                <div style={{ padding: 16 }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      gap: 12,
-                      alignItems: 'flex-start',
-                    }}
-                  >
-                    <div>
-                      <h2
-                        style={{
-                          margin: 0,
-                          fontSize: 22
