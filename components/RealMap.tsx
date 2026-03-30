@@ -8,10 +8,12 @@ type MasterPin = {
   title: string;
   lat?: number;
   lng?: number;
+  availableNow?: boolean;
 };
 
 type RealMapProps = {
   masters: MasterPin[];
+  selectedMasterId?: string;
   onSelectMaster?: (id: string) => void;
 };
 
@@ -24,9 +26,14 @@ const fallbackCoords = [
   { lat: 51.538, lng: -0.1426 },
 ];
 
-export default function RealMap({ masters, onSelectMaster }: RealMapProps) {
+export default function RealMap({
+  masters,
+  selectedMasterId,
+  onSelectMaster,
+}: RealMapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const leafletMapRef = useRef<any>(null);
+  const layerGroupRef = useRef<any>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -50,47 +57,7 @@ export default function RealMap({ masters, onSelectMaster }: RealMapProps) {
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
 
-      const points =
-        masters && masters.length > 0
-          ? masters.map((master, index) => ({
-              ...master,
-              lat: master.lat ?? fallbackCoords[index % fallbackCoords.length].lat,
-              lng: master.lng ?? fallbackCoords[index % fallbackCoords.length].lng,
-            }))
-          : fallbackCoords.map((coord, index) => ({
-              id: `fallback-${index}`,
-              name: `Master ${index + 1}`,
-              title: 'Beauty specialist',
-              lat: coord.lat,
-              lng: coord.lng,
-            }));
-
-      const bounds: [number, number][] = [];
-
-      points.forEach((master, index) => {
-        const fillColors = ['#d92f2f', '#2f7d4a', '#6f42c1', '#ff8c42', '#0f6efd', '#c2185b'];
-        const fillColor = fillColors[index % fillColors.length];
-
-        const point = L.circleMarker([master.lat, master.lng], {
-          radius: 10,
-          color: '#2f241c',
-          weight: 3,
-          fillColor,
-          fillOpacity: 1,
-        }).addTo(map);
-
-        point.on('click', () => {
-          if (onSelectMaster) {
-            onSelectMaster(master.id);
-          }
-        });
-
-        bounds.push([master.lat, master.lng]);
-      });
-
-      if (bounds.length > 1) {
-        map.fitBounds(bounds, { padding: [40, 40] });
-      }
+      layerGroupRef.current = L.layerGroup().addTo(map);
     }
 
     initMap();
@@ -102,14 +69,79 @@ export default function RealMap({ masters, onSelectMaster }: RealMapProps) {
         leafletMapRef.current = null;
       }
     };
-  }, [masters, onSelectMaster]);
+  }, []);
+
+  useEffect(() => {
+    async function drawPins() {
+      if (!leafletMapRef.current || !layerGroupRef.current) return;
+
+      const L = (await import('leaflet')).default;
+      const map = leafletMapRef.current;
+      const layerGroup = layerGroupRef.current;
+
+      layerGroup.clearLayers();
+
+      const points =
+        masters && masters.length > 0
+          ? masters.map((master, index) => ({
+              ...master,
+              lat: master.lat ?? fallbackCoords[index % fallbackCoords.length].lat,
+              lng: master.lng ?? fallbackCoords[index % fallbackCoords.length].lng,
+            }))
+          : fallbackCoords.map((coord, index) => ({
+              id: `fallback-${index}`,
+              name: `Master ${index + 1}`,
+              title: 'Beauty specialist',
+              availableNow: false,
+              lat: coord.lat,
+              lng: coord.lng,
+            }));
+
+      const bounds: [number, number][] = [];
+
+      points.forEach((master) => {
+        const isSelected = selectedMasterId === master.id;
+        const fillColor = master.availableNow ? '#1fb655' : '#e52323';
+
+        const point = L.circleMarker([master.lat, master.lng], {
+          radius: isSelected ? 13 : 10,
+          color: '#2f241c',
+          weight: isSelected ? 4 : 3,
+          fillColor,
+          fillOpacity: 1,
+        }).addTo(layerGroup);
+
+        point.on('click', () => {
+          if (onSelectMaster) onSelectMaster(master.id);
+        });
+
+        bounds.push([master.lat, master.lng]);
+      });
+
+      if (points.length > 1 && !selectedMasterId) {
+        map.fitBounds(bounds, { padding: [40, 40] });
+      }
+
+      if (selectedMasterId) {
+        const active = points.find((item) => item.id === selectedMasterId);
+        if (active) {
+          map.flyTo([active.lat, active.lng], 13, {
+            animate: true,
+            duration: 0.6,
+          });
+        }
+      }
+    }
+
+    drawPins();
+  }, [masters, selectedMasterId, onSelectMaster]);
 
   return (
     <div
       ref={mapRef}
       style={{
         width: '100%',
-        height: '360px',
+        height: '420px',
         borderRadius: '28px',
         overflow: 'hidden',
         border: '1px solid #e4d5c2',
