@@ -1,9 +1,16 @@
-add real master pinsimport Link from 'next/link';
+'use client';
+
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
 import RealMap from '../components/RealMap';
 import { getAllMasters } from '../services/masters';
 
 export default function HomePage() {
-  const masters = getAllMasters();
+  const masters = useMemo(() => getAllMasters(), []);
+  const [selectedMasterId, setSelectedMasterId] = useState(masters[0]?.id || '');
+
+  const selectedMaster =
+    masters.find((master) => master.id === selectedMasterId) || masters[0];
 
   return (
     <main
@@ -73,66 +80,68 @@ export default function HomePage() {
           <h2 style={{ fontSize: 34, margin: 0, fontWeight: 800 }}>Map view</h2>
 
           <div style={{ marginTop: 12 }}>
-            <RealMap masters={masters} />
+            <RealMap masters={masters} onSelectMaster={setSelectedMasterId} />
           </div>
 
-          <div
-            style={{
-              marginTop: 16,
-              background: '#fff',
-              borderRadius: 22,
-              padding: 16,
-              border: '1px solid #eadfd2',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-              <div>
-                <div style={{ fontSize: 24, fontWeight: 800 }}>{masters[0]?.name}</div>
-                <div style={{ color: '#786d61', marginTop: 4 }}>
-                  {masters[0]?.title} • {masters[0]?.city}
+          {selectedMaster && (
+            <div
+              style={{
+                marginTop: 16,
+                background: '#fff',
+                borderRadius: 22,
+                padding: 16,
+                border: '1px solid #eadfd2',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 24, fontWeight: 800 }}>{selectedMaster.name}</div>
+                  <div style={{ color: '#786d61', marginTop: 4 }}>
+                    {selectedMaster.title} • {selectedMaster.city}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    background: selectedMaster.availableNow ? '#edf7ee' : '#f3ece2',
+                    color: selectedMaster.availableNow ? '#256b43' : '#6d6257',
+                    padding: '8px 10px',
+                    borderRadius: 12,
+                    fontSize: 12,
+                    fontWeight: 800,
+                    whiteSpace: 'nowrap',
+                    height: 'fit-content',
+                  }}
+                >
+                  {selectedMaster.availableNow ? '● Available now' : 'Offline'}
                 </div>
               </div>
 
               <div
                 style={{
-                  background: '#edf7ee',
-                  color: '#256b43',
-                  padding: '8px 10px',
-                  borderRadius: 12,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  whiteSpace: 'nowrap',
-                  height: 'fit-content',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: 14,
                 }}
               >
-                ● Available now
+                <div style={{ fontWeight: 800 }}>from £{selectedMaster.priceFrom}</div>
+                <a
+                  href={`/master/${selectedMaster.id}`}
+                  style={{
+                    background: '#2f241c',
+                    color: '#fff',
+                    textDecoration: 'none',
+                    padding: '10px 16px',
+                    borderRadius: 14,
+                    fontWeight: 800,
+                  }}
+                >
+                  Open
+                </a>
               </div>
             </div>
-
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: 14,
-              }}
-            >
-              <div style={{ fontWeight: 800 }}>from £{masters[0]?.priceFrom}</div>
-              <a
-                href={`/master/${masters[0]?.id}`}
-                style={{
-                  background: '#2f241c',
-                  color: '#fff',
-                  textDecoration: 'none',
-                  padding: '10px 16px',
-                  borderRadius: 14,
-                  fontWeight: 800,
-                }}
-              >
-                Open
-              </a>
-            </div>
-          </div>
+          )}
         </section>
 
         <section style={{ marginTop: 28 }}>
@@ -206,14 +215,14 @@ export default function HomePage() {
 
                     <div
                       style={{
-                        background: '#edf7ee',
-                        color: '#256b43',
+                        background: master.availableNow ? '#edf7ee' : '#f3ece2',
+                        color: master.availableNow ? '#256b43' : '#6d6257',
                         padding: '10px 14px',
                         borderRadius: 999,
                         fontWeight: 700,
                       }}
                     >
-                      ● Available now
+                      {master.availableNow ? '● Available now' : 'Offline'}
                     </div>
                   </div>
                 </div>
