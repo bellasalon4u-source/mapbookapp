@@ -11,7 +11,7 @@ export default function HomePage() {
   const [selectedMasterId, setSelectedMasterId] = useState('');
   const [likedIds, setLikedIds] = useState<string[]>([]);
 
-  const selectedMaster = masters.find((master) => master.id === selectedMasterId);
+  const selectedMaster = masters.find((m) => m.id === selectedMasterId);
 
   function toggleLike(id: string) {
     setLikedIds((prev) =>
