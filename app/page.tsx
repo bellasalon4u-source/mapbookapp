@@ -11,7 +11,8 @@ export default function HomePage() {
   const [selectedMasterId, setSelectedMasterId] = useState('');
   const [likedIds, setLikedIds] = useState<string[]>([]);
 
-  const selectedMaster = masters.find((m) => m.id === selectedMasterId);
+  const selectedMaster =
+    masters.find((master) => master.id === selectedMasterId) || null;
 
   function toggleLike(id: string) {
     setLikedIds((prev) =>
@@ -130,7 +131,7 @@ export default function HomePage() {
                   left: 12,
                   right: 12,
                   bottom: 12,
-                  background: '#ffffff',
+                  background: '#fff',
                   borderRadius: 24,
                   border: '1px solid #eadfd2',
                   padding: 14,
@@ -216,7 +217,10 @@ export default function HomePage() {
                   </div>
 
                   <button
-                    onClick={() => toggleLike(selectedMaster.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleLike(selectedMaster.id);
+                    }}
                     style={{
                       width: 44,
                       height: 44,
@@ -253,20 +257,37 @@ export default function HomePage() {
                     {selectedMaster.availableNow ? '● Available now' : '● Not available now'}
                   </div>
 
-                  <button
-                    onClick={() => router.push(`/master/${selectedMaster.id}`)}
-                    style={{
-                      border: 'none',
-                      background: '#e52323',
-                      color: '#fff',
-                      padding: '12px 16px',
-                      borderRadius: 14,
-                      fontWeight: 800,
-                      fontSize: 14,
-                    }}
-                  >
-                    Open
-                  </button>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      onClick={() => router.push(`/master/${selectedMaster.id}`)}
+                      style={{
+                        border: '1px solid #d8cfc3',
+                        background: '#fff',
+                        color: '#2f241c',
+                        padding: '12px 14px',
+                        borderRadius: 14,
+                        fontWeight: 800,
+                        fontSize: 14,
+                      }}
+                    >
+                      Open
+                    </button>
+
+                    <button
+                      onClick={() => router.push(`/booking/${selectedMaster.id}`)}
+                      style={{
+                        border: 'none',
+                        background: '#e52323',
+                        color: '#fff',
+                        padding: '12px 14px',
+                        borderRadius: 14,
+                        fontWeight: 800,
+                        fontSize: 14,
+                      }}
+                    >
+                      Book now
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
