@@ -125,18 +125,16 @@ export default function HomePage() {
 
             {selectedMaster && (
               <div
-                onClick={() => router.push(`/master/${selectedMaster.id}`)}
                 style={{
                   position: 'absolute',
                   left: 12,
                   right: 12,
                   bottom: 12,
-                  background: '#fff',
+                  background: '#ffffff',
                   borderRadius: 24,
                   border: '1px solid #eadfd2',
                   padding: 14,
-                  boxShadow: '0 12px 24px rgba(0,0,0,0.12)',
-                  cursor: 'pointer',
+                  boxShadow: '0 12px 24px rgba(0,0,0,0.14)',
                 }}
               >
                 <div
@@ -154,8 +152,8 @@ export default function HomePage() {
                       height: 62,
                       borderRadius: 18,
                       objectFit: 'cover',
-                      display: 'block',
                       flexShrink: 0,
+                      display: 'block',
                     }}
                   />
 
@@ -218,10 +216,7 @@ export default function HomePage() {
                   </div>
 
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleLike(selectedMaster.id);
-                    }}
+                    onClick={() => toggleLike(selectedMaster.id)}
                     style={{
                       width: 44,
                       height: 44,
@@ -258,15 +253,20 @@ export default function HomePage() {
                     {selectedMaster.availableNow ? '● Available now' : '● Not available now'}
                   </div>
 
-                  <div
+                  <button
+                    onClick={() => router.push(`/master/${selectedMaster.id}`)}
                     style={{
-                      fontSize: 13,
-                      color: '#786d61',
-                      fontWeight: 700,
+                      border: 'none',
+                      background: '#e52323',
+                      color: '#fff',
+                      padding: '12px 16px',
+                      borderRadius: 14,
+                      fontWeight: 800,
+                      fontSize: 14,
                     }}
                   >
-                    Tap card to open
-                  </div>
+                    Open
+                  </button>
                 </div>
               </div>
             )}
