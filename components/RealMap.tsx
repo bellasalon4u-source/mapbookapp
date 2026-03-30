@@ -34,7 +34,7 @@ export default function RealMap({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
   const layerRef = useRef<any>(null);
-  const [ready, setReady] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     let disposed = false;
@@ -59,11 +59,9 @@ export default function RealMap({
 
       mapRef.current = map;
       layerRef.current = layer;
-      setReady(true);
+      setIsReady(true);
 
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 250);
+      setTimeout(() => map.invalidateSize(), 250);
     }
 
     initMap();
@@ -82,7 +80,7 @@ export default function RealMap({
     let cancelled = false;
 
     async function drawMarkers() {
-      if (!ready || !mapRef.current || !layerRef.current) return;
+      if (!isReady || !mapRef.current || !layerRef.current) return;
 
       const L = (await import('leaflet')).default;
       if (cancelled) return;
@@ -112,14 +110,28 @@ export default function RealMap({
 
       points.forEach((master) => {
         const selected = selectedMasterId === master.id;
+        const fillColor = master.availableNow ? '#18c24f' : '#ef2b2b';
+        const size = selected ? 28 : 22;
+        const border = selected ? 4 : 3;
 
-        const marker = L.circleMarker([master.lat, master.lng], {
-          radius: selected ? 14 : 10,
-          color: '#2f241c',
-          weight: selected ? 4 : 3,
-          fillColor: master.availableNow ? '#18c24f' : '#ef2b2b',
-          fillOpacity: 1,
+        const icon = L.divIcon({
+          className: '',
+          html: `
+            <div style="
+              width:${size}px;
+              height:${size}px;
+              border-radius:999px;
+              background:${fillColor};
+              border:${border}px solid #2f241c;
+              box-sizing:border-box;
+              box-shadow:0 2px 8px rgba(0,0,0,0.25);
+            "></div>
+          `,
+          iconSize: [size, size],
+          iconAnchor: [size / 2, size / 2],
         });
+
+        const marker = L.marker([master.lat, master.lng], { icon });
 
         marker.on('click', () => {
           onSelectMaster?.(master.id);
@@ -145,9 +157,7 @@ export default function RealMap({
         map.setView([points[0].lat, points[0].lng], 13);
       }
 
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 100);
+      setTimeout(() => map.invalidateSize(), 100);
     }
 
     drawMarkers();
@@ -155,9 +165,9 @@ export default function RealMap({
     return () => {
       cancelled = true;
     };
-  }, [ready, masters, selectedMasterId, onSelectMaster]);
+  }, [isReady, masters, selectedMasterId, onSelectMaster]);
 
-  return
+  return (
     <div
       ref={containerRef}
       style={{
@@ -167,5 +177,6 @@ export default function RealMap({
         overflow: 'hidden',
         border: '1px solid #e4d5c2',
       }}
-    />;
+    />
+  );
 }
