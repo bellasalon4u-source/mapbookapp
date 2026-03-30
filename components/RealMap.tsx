@@ -17,6 +17,8 @@ type MasterItem = {
 
 type RealMapProps = {
   masters: MasterItem[];
+  selectedMasterId?: string;
+  onSelectMaster?: (id: string) => void;
 };
 
 type Point = MasterItem & {
@@ -39,13 +41,16 @@ const fallbackCoords = [
   { lat: 51.5380, lng: -0.1426 },
 ];
 
-export default function RealMap({ masters }: RealMapProps) {
+export default function RealMap({
+  masters,
+  selectedMasterId,
+  onSelectMaster,
+}: RealMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
 
   const [ready, setReady] = useState(false);
   const [screenPoints, setScreenPoints] = useState<ScreenPoint[]>([]);
-  const [selectedId, setSelectedId] = useState<string>('');
 
   const points: Point[] = useMemo(() => {
     return masters.map((master, index) => ({
@@ -54,8 +59,6 @@ export default function RealMap({ masters }: RealMapProps) {
       lng: master.lng ?? fallbackCoords[index % fallbackCoords.length].lng,
     }));
   }, [masters]);
-
-  const selectedMaster = points.find((item) => item.id === selectedId) || null;
 
   useEffect(() => {
     let disposed = false;
@@ -108,8 +111,8 @@ export default function RealMap({ masters }: RealMapProps) {
     const map = mapRef.current;
     const bounds = points.map((p) => [p.lat, p.lng]);
 
-    if (selectedId) {
-      const active = points.find((p) => p.id === selectedId);
+    if (selectedMasterId) {
+      const active = points.find((p) => p.id === selectedMasterId);
       if (active) {
         map.setView([active.lat, active.lng], 13);
       }
@@ -118,7 +121,7 @@ export default function RealMap({ masters }: RealMapProps) {
     } else if (bounds.length === 1) {
       map.setView(bounds[0], 13);
     }
-  }, [ready, points, selectedId]);
+  }, [ready, points, selectedMasterId]);
 
   useEffect(() => {
     if (!ready || !mapRef.current) return;
@@ -139,6 +142,7 @@ export default function RealMap({ masters }: RealMapProps) {
     };
 
     updatePositions();
+
     map.on('zoomend', updatePositions);
     map.on('moveend', updatePositions);
     map.on('resize', updatePositions);
@@ -188,18 +192,18 @@ export default function RealMap({ masters }: RealMapProps) {
           const master = points.find((m) => m.id === point.id);
           if (!master) return null;
 
-          const selected = selectedId === point.id;
+          const selected = selectedMasterId === point.id;
           const dotSize = selected ? 30 : 24;
 
           return (
             <button
               key={point.id}
               type="button"
-              onClick={() => setSelectedId(point.id)}
+              onClick={() => onSelectMaster?.(point.id)}
               onTouchStart={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setSelectedId(point.id);
+                onSelectMaster?.(point.id);
               }}
               style={{
                 position: 'absolute',
@@ -235,162 +239,6 @@ export default function RealMap({ masters }: RealMapProps) {
           );
         })}
       </div>
-
-      {selectedMaster && (
-        <div
-          style={{
-            position: 'absolute',
-            left: 12,
-            right: 12,
-            bottom: 12,
-            background: '#ffffff',
-            borderRadius: 24,
-            border: '1px solid #eadfd2',
-            padding: 14,
-            boxShadow: '0 12px 24px rgba(0,0,0,0.14)',
-            zIndex: 70,
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-            }}
-          >
-            <img
-              src={selectedMaster.avatar || 'https://via.placeholder.com/80'}
-              alt={selectedMaster.name}
-              style={{
-                width: 62,
-                height: 62,
-                borderRadius: 18,
-                objectFit: 'cover',
-                flexShrink: 0,
-                display: 'block',
-              }}
-            />
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 18, fontWeight: 800, lineHeight: 1.2 }}>
-                {selectedMaster.name}
-              </div>
-
-              <div style={{ color: '#786d61', marginTop: 4, fontSize: 14 }}>
-                {selectedMaster.title}
-                {selectedMaster.city ? ` • ${selectedMaster.city}` : ''}
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 8,
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  marginTop: 8,
-                }}
-              >
-                <span
-                  style={{
-                    background: '#2f241c',
-                    color: '#fff',
-                    padding: '7px 10px',
-                    borderRadius: 999,
-                    fontWeight: 800,
-                    fontSize: 13,
-                  }}
-                >
-                  from £{selectedMaster.priceFrom ?? 0}
-                </span>
-
-                <span
-                  style={{
-                    background: '#f2e9dc',
-                    color: '#463b31',
-                    padding: '7px 10px',
-                    borderRadius: 999,
-                    fontWeight: 800,
-                    fontSize: 13,
-                  }}
-                >
-                  {selectedMaster.rating ?? 0} ★
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 999,
-                border: '1px solid #eadfd2',
-                background: '#fff',
-                fontSize: 22,
-                flexShrink: 0,
-              }}
-            >
-              ♡
-            </button>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 10,
-              marginTop: 14,
-            }}
-          >
-            <div
-              style={{
-                background: selectedMaster.availableNow ? '#edf7ee' : '#fdecec',
-                color: selectedMaster.availableNow ? '#1f8f45' : '#c53434',
-                padding: '10px 12px',
-                borderRadius: 14,
-                fontWeight: 700,
-                fontSize: 13,
-              }}
-            >
-              {selectedMaster.availableNow ? '● Available now' : '● Not available now'}
-            </div>
-
-            <div style={{ display: 'flex', gap: 8 }}>
-              <a
-                href={`/master/${selectedMaster.id}`}
-                style={{
-                  textDecoration: 'none',
-                  border: '1px solid #d8cfc3',
-                  background: '#fff',
-                  color: '#2f241c',
-                  padding: '12px 14px',
-                  borderRadius: 14,
-                  fontWeight: 800,
-                  fontSize: 14,
-                }}
-              >
-                Open
-              </a>
-
-              <a
-                href={`/booking/${selectedMaster.id}`}
-                style={{
-                  textDecoration: 'none',
-                  background: '#e52323',
-                  color: '#fff',
-                  padding: '12px 14px',
-                  borderRadius: 14,
-                  fontWeight: 800,
-                  fontSize: 14,
-                }}
-              >
-                Book now
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
