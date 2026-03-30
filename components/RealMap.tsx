@@ -31,20 +31,20 @@ export default function RealMap({
   selectedMasterId,
   onSelectMaster,
 }: RealMapProps) {
-  const mapRef = useRef<HTMLDivElement | null>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const markersLayerRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<any>(null);
+  const layerRef = useRef<any>(null);
 
   useEffect(() => {
-    let cancelled = false;
+    let destroyed = false;
 
-    async function setupMap() {
-      if (!mapRef.current || mapInstanceRef.current) return;
+    async function init() {
+      if (!containerRef.current || mapRef.current) return;
 
       const L = (await import('leaflet')).default;
-      if (cancelled || !mapRef.current) return;
+      if (destroyed || !containerRef.current) return;
 
-      const map = L.map(mapRef.current, {
+      const map = L.map(containerRef.current, {
         center: [51.5074, -0.1278],
         zoom: 12,
         zoomControl: true,
@@ -54,24 +54,24 @@ export default function RealMap({
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
 
-      const markersLayer = L.layerGroup().addTo(map);
+      const layer = L.layerGroup().addTo(map);
 
-      mapInstanceRef.current = map;
-      markersLayerRef.current = markersLayer;
+      mapRef.current = map;
+      layerRef.current = layer;
 
       setTimeout(() => {
         map.invalidateSize();
-      }, 300);
+      }, 200);
     }
 
-    setupMap();
+    init();
 
     return () => {
-      cancelled = true;
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-        markersLayerRef.current = null;
+      destroyed = true;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        layerRef.current = null;
       }
     };
   }, []);
@@ -79,16 +79,15 @@ export default function RealMap({
   useEffect(() => {
     let cancelled = false;
 
-    async function renderMarkers() {
-      const map = mapInstanceRef.current;
-      const markersLayer = markersLayerRef.current;
-
-      if (!map || !markersLayer) return;
+    async function redraw() {
+      const map = mapRef.current;
+      const layer = layerRef.current;
+      if (!map || !layer) return;
 
       const L = (await import('leaflet')).default;
       if (cancelled) return;
 
-      markersLayer.clearLayers();
+      layer.clearLayers();
 
       const points =
         masters && masters.length > 0
@@ -109,30 +108,26 @@ export default function RealMap({
       const bounds: [number, number][] = [];
 
       points.forEach((master) => {
-        const isSelected = selectedMasterId === master.id;
-        const fillColor = master.availableNow ? '#16c251' : '#ef2b2b';
-
+        const selected = selectedMasterId === master.id;
         const marker = L.circleMarker([master.lat, master.lng], {
-          radius: isSelected ? 14 : 10,
+          radius: selected ? 14 : 10,
           color: '#2f241c',
-          weight: isSelected ? 4 : 3,
-          fillColor,
+          weight: selected ? 4 : 3,
+          fillColor: master.availableNow ? '#16c251' : '#ef2b2b',
           fillOpacity: 1,
         });
 
         marker.on('click', () => {
-          if (onSelectMaster) {
-            onSelectMaster(master.id);
-          }
+          onSelectMaster?.(master.id);
         });
 
-        marker.addTo(markersLayer);
+        marker.addTo(layer);
         bounds.push([master.lat, master.lng]);
       });
 
       if (points.length > 1) {
         if (selectedMasterId) {
-          const active = points.find((item) => item.id === selectedMasterId);
+          const active = points.find((x) => x.id === selectedMasterId);
           if (active) {
             map.flyTo([active.lat, active.lng], 13, {
               animate: true,
@@ -151,7 +146,7 @@ export default function RealMap({
       }, 100);
     }
 
-    renderMarkers();
+    redraw();
 
     return () => {
       cancelled = true;
@@ -160,14 +155,13 @@ export default function RealMap({
 
   return (
     <div
-      ref={mapRef}
+      ref={containerRef}
       style={{
         width: '100%',
         height: '420px',
         borderRadius: '28px',
         overflow: 'hidden',
         border: '1px solid #e4d5c2',
-        position: 'relative',
       }}
     />
   );
