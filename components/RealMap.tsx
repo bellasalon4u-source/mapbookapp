@@ -40,7 +40,6 @@ const fallbackCoords = [
 ];
 
 export default function RealMap({ masters }: RealMapProps) {
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
 
@@ -72,6 +71,12 @@ export default function RealMap({ masters }: RealMapProps) {
         zoom: 12,
         zoomControl: true,
         tap: false,
+        dragging: false,
+        touchZoom: false,
+        doubleClickZoom: false,
+        scrollWheelZoom: false,
+        boxZoom: false,
+        keyboard: false,
       });
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -106,10 +111,7 @@ export default function RealMap({ masters }: RealMapProps) {
     if (selectedId) {
       const active = points.find((p) => p.id === selectedId);
       if (active) {
-        map.flyTo([active.lat, active.lng], 13, {
-          animate: true,
-          duration: 0.5,
-        });
+        map.setView([active.lat, active.lng], 13);
       }
     } else if (bounds.length > 1) {
       map.fitBounds(bounds, { padding: [40, 40] });
@@ -137,9 +139,8 @@ export default function RealMap({ masters }: RealMapProps) {
     };
 
     updatePositions();
-
-    map.on('move', updatePositions);
-    map.on('zoom', updatePositions);
+    map.on('zoomend', updatePositions);
+    map.on('moveend', updatePositions);
     map.on('resize', updatePositions);
 
     setTimeout(updatePositions, 100);
@@ -148,8 +149,8 @@ export default function RealMap({ masters }: RealMapProps) {
     window.addEventListener('resize', updatePositions);
 
     return () => {
-      map.off('move', updatePositions);
-      map.off('zoom', updatePositions);
+      map.off('zoomend', updatePositions);
+      map.off('moveend', updatePositions);
       map.off('resize', updatePositions);
       window.removeEventListener('resize', updatePositions);
     };
@@ -157,7 +158,6 @@ export default function RealMap({ masters }: RealMapProps) {
 
   return (
     <div
-      ref={wrapperRef}
       style={{
         position: 'relative',
         width: '100%',
@@ -180,7 +180,7 @@ export default function RealMap({ masters }: RealMapProps) {
         style={{
           position: 'absolute',
           inset: 0,
-          zIndex: 20,
+          zIndex: 50,
           pointerEvents: 'none',
         }}
       >
@@ -190,15 +190,15 @@ export default function RealMap({ masters }: RealMapProps) {
 
           const selected = selectedId === point.id;
           const dotSize = selected ? 30 : 24;
-          const hitSize = 56;
 
           return (
             <button
               key={point.id}
               type="button"
               onClick={() => setSelectedId(point.id)}
-              onTouchEnd={(e) => {
+              onTouchStart={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 setSelectedId(point.id);
               }}
               style={{
@@ -206,18 +206,18 @@ export default function RealMap({ masters }: RealMapProps) {
                 left: point.x,
                 top: point.y,
                 transform: 'translate(-50%, -50%)',
-                width: hitSize,
-                height: hitSize,
+                width: 54,
+                height: 54,
                 border: 'none',
                 background: 'transparent',
                 padding: 0,
                 margin: 0,
                 pointerEvents: 'auto',
-                zIndex: 30,
+                zIndex: 60,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                touchAction: 'manipulation',
+                touchAction: 'none',
               }}
             >
               <span
@@ -236,22 +236,6 @@ export default function RealMap({ masters }: RealMapProps) {
         })}
       </div>
 
-      <div
-        style={{
-          position: 'absolute',
-          top: 8,
-          left: 8,
-          zIndex: 50,
-          background: '#fff9c4',
-          padding: '6px 8px',
-          borderRadius: 10,
-          fontSize: 12,
-          fontWeight: 700,
-        }}
-      >
-        {selectedMaster ? `Selected: ${selectedMaster.name}` : 'Tap any pin'}
-      </div>
-
       {selectedMaster && (
         <div
           style={{
@@ -264,7 +248,7 @@ export default function RealMap({ masters }: RealMapProps) {
             border: '1px solid #eadfd2',
             padding: 14,
             boxShadow: '0 12px 24px rgba(0,0,0,0.14)',
-            zIndex: 40,
+            zIndex: 70,
           }}
         >
           <div
@@ -288,23 +272,11 @@ export default function RealMap({ masters }: RealMapProps) {
             />
 
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 800,
-                  lineHeight: 1.2,
-                }}
-              >
+              <div style={{ fontSize: 18, fontWeight: 800, lineHeight: 1.2 }}>
                 {selectedMaster.name}
               </div>
 
-              <div
-                style={{
-                  color: '#786d61',
-                  marginTop: 4,
-                  fontSize: 14,
-                }}
-              >
+              <div style={{ color: '#786d61', marginTop: 4, fontSize: 14 }}>
                 {selectedMaster.title}
                 {selectedMaster.city ? ` • ${selectedMaster.city}` : ''}
               </div>
