@@ -23,23 +23,7 @@ function formatMinutes(minutes: number) {
   return `${m}m`;
 }
 
-const timeSlots = [
-  { value: '09:00', status: 'free' },
-  { value: '10:30', status: 'free' },
-  { value: '11:00', status: 'busy' },
-  { value: '11:20', status: 'free' },
-  { value: '11:40', status: 'free' },
-  { value: '12:00', status: 'busy' },
-  { value: '12:30', status: 'busy' },
-  { value: '12:40', status: 'free' },
-  { value: '13:00', status: 'free' },
-  { value: '13:30', status: 'busy' },
-  { value: '14:00', status: 'free' },
-  { value: '15:30', status: 'free' },
-  { value: '16:00', status: 'free' },
-  { value: '16:30', status: 'free' },
-  { value: '17:00', status: 'free' },
-];
+const timeSlots = ['09:00', '10:30', '11:20', '11:40', '12:40', '13:00', '14:00', '15:30', '16:00', '16:30'];
 
 export default function BookingTimePage() {
   const params = useParams();
@@ -232,30 +216,23 @@ export default function BookingTimePage() {
             }}
           >
             {timeSlots.map((slot) => {
-              const active = selectedTime === slot.value;
-              const busy = slot.status === 'busy';
+              const active = selectedTime === slot;
 
               return (
                 <button
-                  key={slot.value}
-                  disabled={busy}
-                  onClick={() => {
-                    if (busy) return;
-                    setSelectedTime(slot.value);
-                  }}
+                  key={slot}
+                  onClick={() => setSelectedTime(slot)}
                   style={{
                     borderRadius: 20,
                     padding: '18px 12px',
                     fontSize: 18,
                     fontWeight: 800,
-                    border: active ? '2px solid #17a34a' : '1px solid #ebcfcf',
-                    background: busy ? '#f7e4e4' : active ? '#e6f8ec' : '#fff',
-                    color: busy ? '#d15a5a' : active ? '#15803d' : '#1d1712',
-                    textDecoration: busy ? 'line-through' : 'none',
-                    opacity: busy ? 0.9 : 1,
+                    border: active ? '2px solid #16a34a' : '1px solid #ddd2c4',
+                    background: active ? '#dcfce7' : '#fff',
+                    color: active ? '#15803d' : '#1d1712',
                   }}
                 >
-                  {slot.value}
+                  {slot}
                 </button>
               );
             })}
@@ -306,7 +283,7 @@ export default function BookingTimePage() {
             }}
             style={{
               border: 'none',
-              background: selectedTime ? '#17a34a' : '#b7d9bf',
+              background: selectedTime ? '#16a34a' : '#b7d9bf',
               color: '#fff',
               borderRadius: 24,
               padding: '18px 26px',
