@@ -6,93 +6,47 @@ import { getMasterById } from '../../../../services/masters';
 
 type DateStatus = 'free' | 'partial' | 'full';
 
-type CalendarDay = {
-  dayNumber: number;
-  monthKey: string;
-  monthLabel: string;
-  weekday: string;
-  status: DateStatus;
-};
+function getMonthLabel(monthIndex: number) {
+  const labels = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  return labels[monthIndex];
+}
 
-const calendarDays: CalendarDay[] = [
-  { dayNumber: 24, monthKey: '2026-03', monthLabel: 'Mar', weekday: 'Tue', status: 'free' },
-  { dayNumber: 27, monthKey: '2026-03', monthLabel: 'Mar', weekday: 'Fri', status: 'partial' },
-  { dayNumber: 30, monthKey: '2026-03', monthLabel: 'Mar', weekday: 'Mon', status: 'free' },
+function getShortMonthLabel(monthIndex: number) {
+  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return labels[monthIndex];
+}
 
-  { dayNumber: 2, monthKey: '2026-04', monthLabel: 'Apr', weekday: 'Thu', status: 'partial' },
-  { dayNumber: 5, monthKey: '2026-04', monthLabel: 'Apr', weekday: 'Sun', status: 'full' },
-  { dayNumber: 8, monthKey: '2026-04', monthLabel: 'Apr', weekday: 'Wed', status: 'free' },
-  { dayNumber: 12, monthKey: '2026-04', monthLabel: 'Apr', weekday: 'Sun', status: 'free' },
-  { dayNumber: 15, monthKey: '2026-04', monthLabel: 'Apr', weekday: 'Wed', status: 'partial' },
-  { dayNumber: 18, monthKey: '2026-04', monthLabel: 'Apr', weekday: 'Sat', status: 'free' },
-  { dayNumber: 22, monthKey: '2026-04', monthLabel: 'Apr', weekday: 'Wed', status: 'full' },
-  { dayNumber: 24, monthKey: '2026-04', monthLabel: 'Apr', weekday: 'Fri', status: 'free' },
-  { dayNumber: 29, monthKey: '2026-04', monthLabel: 'Apr', weekday: 'Wed', status: 'partial' },
+function getWeekdayShort(date: Date) {
+  const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return labels[date.getDay()];
+}
 
-  { dayNumber: 3, monthKey: '2026-05', monthLabel: 'May', weekday: 'Sun', status: 'free' },
-  { dayNumber: 6, monthKey: '2026-05', monthLabel: 'May', weekday: 'Wed', status: 'partial' },
-  { dayNumber: 10, monthKey: '2026-05', monthLabel: 'May', weekday: 'Sun', status: 'free' },
-  { dayNumber: 14, monthKey: '2026-05', monthLabel: 'May', weekday: 'Thu', status: 'partial' },
-  { dayNumber: 19, monthKey: '2026-05', monthLabel: 'May', weekday: 'Tue', status: 'free' },
-  { dayNumber: 23, monthKey: '2026-05', monthLabel: 'May', weekday: 'Sat', status: 'full' },
-  { dayNumber: 28, monthKey: '2026-05', monthLabel: 'May', weekday: 'Thu', status: 'free' },
+function getDateKey(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
 
-  { dayNumber: 2, monthKey: '2026-06', monthLabel: 'Jun', weekday: 'Tue', status: 'free' },
-  { dayNumber: 6, monthKey: '2026-06', monthLabel: 'Jun', weekday: 'Sat', status: 'partial' },
-  { dayNumber: 11, monthKey: '2026-06', monthLabel: 'Jun', weekday: 'Thu', status: 'free' },
-  { dayNumber: 17, monthKey: '2026-06', monthLabel: 'Jun', weekday: 'Wed', status: 'full' },
-  { dayNumber: 21, monthKey: '2026-06', monthLabel: 'Jun', weekday: 'Sun', status: 'free' },
-  { dayNumber: 26, monthKey: '2026-06', monthLabel: 'Jun', weekday: 'Fri', status: 'partial' },
-
-  { dayNumber: 1, monthKey: '2026-07', monthLabel: 'Jul', weekday: 'Wed', status: 'free' },
-  { dayNumber: 5, monthKey: '2026-07', monthLabel: 'Jul', weekday: 'Sun', status: 'partial' },
-  { dayNumber: 9, monthKey: '2026-07', monthLabel: 'Jul', weekday: 'Thu', status: 'free' },
-  { dayNumber: 15, monthKey: '2026-07', monthLabel: 'Jul', weekday: 'Wed', status: 'full' },
-  { dayNumber: 20, monthKey: '2026-07', monthLabel: 'Jul', weekday: 'Mon', status: 'free' },
-  { dayNumber: 28, monthKey: '2026-07', monthLabel: 'Jul', weekday: 'Tue', status: 'partial' },
-];
-
-const monthLabels: Record<string, string> = {
-  '2026-03': 'March 2026',
-  '2026-04': 'April 2026',
-  '2026-05': 'May 2026',
-  '2026-06': 'June 2026',
-  '2026-07': 'July 2026',
-};
-
-const monthOrder = ['2026-03', '2026-04', '2026-05', '2026-06', '2026-07'];
-
-function getStatusStyles(status: DateStatus, active: boolean) {
-  if (active) {
-    return {
-      background: '#17a34a',
-      color: '#ffffff',
-      border: '2px solid #17a34a',
-      boxShadow: '0 10px 22px rgba(23,163,74,0.25)',
-    };
-  }
-
-  if (status === 'free') {
-    return {
-      background: '#dff8e7',
-      color: '#15803d',
-      border: '1px solid #9fe0b2',
-    };
-  }
-
-  if (status === 'partial') {
-    return {
-      background: '#fff1bf',
-      color: '#b77906',
-      border: '1px solid #f3cf5f',
-    };
-  }
-
-  return {
-    background: '#ffd8dc',
-    color: '#d62839',
-    border: '1px solid #f2a7b0',
-  };
+function sameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
 }
 
 function parseDurationToMinutes(value: string) {
@@ -114,6 +68,60 @@ function formatMinutes(minutes: number) {
   return `${m}m`;
 }
 
+function getStatusForDate(date: Date, today: Date): DateStatus {
+  const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  if (normalizedDate < normalizedToday) return 'full';
+
+  const day = normalizedDate.getDate();
+
+  if (day % 7 === 0) return 'full';
+  if (day % 3 === 0) return 'partial';
+  return 'free';
+}
+
+function getStatusStyles(status: DateStatus, active: boolean, today: boolean) {
+  if (active) {
+    return {
+      background: '#16a34a',
+      color: '#ffffff',
+      border: '2px solid #16a34a',
+      boxShadow: '0 10px 22px rgba(22,163,74,0.25)',
+    };
+  }
+
+  if (today) {
+    return {
+      background: '#dbeafe',
+      color: '#1d4ed8',
+      border: '2px solid #2563eb',
+    };
+  }
+
+  if (status === 'free') {
+    return {
+      background: '#dcfce7',
+      color: '#15803d',
+      border: '1px solid #86efac',
+    };
+  }
+
+  if (status === 'partial') {
+    return {
+      background: '#fef3c7',
+      color: '#b45309',
+      border: '1px solid #fcd34d',
+    };
+  }
+
+  return {
+    background: '#ffe4e6',
+    color: '#e11d48',
+    border: '1px solid #fda4af',
+  };
+}
+
 export default function BookingDatePage() {
   const params = useParams();
   const router = useRouter();
@@ -131,9 +139,13 @@ export default function BookingDatePage() {
     ? master.services.filter((service) => selectedServiceSlugs.includes(service.slug))
     : [];
 
-  const [activeMonthIndex, setActiveMonthIndex] = useState(1);
-  const [selectedDayKey, setSelectedDayKey] = useState('');
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const [activeYear, setActiveYear] = useState(today.getFullYear());
+  const [activeMonth, setActiveMonth] = useState(today.getMonth());
+  const [selectedDateKey, setSelectedDateKey] = useState('');
+  const [pickerMode, setPickerMode] = useState<'closed' | 'year' | 'month'>('closed');
 
   if (!master || !selectedItems.length) {
     return <main style={{ padding: 24 }}>Booking data not found</main>;
@@ -145,11 +157,18 @@ export default function BookingDatePage() {
     0
   );
 
-  const activeMonthKey = monthOrder[activeMonthIndex];
-  const activeMonthDays = calendarDays.filter((day) => day.monthKey === activeMonthKey);
+  const years = Array.from({ length: 3 }, (_, index) => today.getFullYear() + index);
 
-  const selectedDay =
-    calendarDays.find((day) => `${day.monthKey}-${day.dayNumber}` === selectedDayKey) || null;
+  const monthDates = Array.from({ length: 12 }, (_, index) => new Date(activeYear, index, 1));
+
+  const activeMonthDates = Array.from({ length: 31 }, (_, index) => new Date(activeYear, activeMonth, index + 1))
+    .filter((date) => date.getMonth() === activeMonth);
+
+  const selectedDate =
+    selectedDateKey
+      ? activeMonthDates.find((date) => getDateKey(date) === selectedDateKey) ||
+        new Date(selectedDateKey)
+      : null;
 
   return (
     <main
@@ -254,26 +273,14 @@ export default function BookingDatePage() {
               gap: 12,
             }}
           >
-            <div
-              style={{
-                background: '#f7f1e8',
-                borderRadius: 18,
-                padding: 12,
-              }}
-            >
+            <div style={{ background: '#f7f1e8', borderRadius: 18, padding: 12 }}>
               <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>Total duration</div>
               <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
                 {formatMinutes(totalMinutes)}
               </div>
             </div>
 
-            <div
-              style={{
-                background: '#f7f1e8',
-                borderRadius: 18,
-                padding: 12,
-              }}
-            >
+            <div style={{ background: '#f7f1e8', borderRadius: 18, padding: 12 }}>
               <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>Total price</div>
               <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
                 £{totalPrice}
@@ -289,7 +296,6 @@ export default function BookingDatePage() {
             border: '1px solid #e4d8ca',
             borderRadius: 26,
             padding: 18,
-            position: 'relative',
           }}
         >
           <div
@@ -301,15 +307,17 @@ export default function BookingDatePage() {
             }}
           >
             <button
-              disabled={activeMonthIndex === 0}
-              onClick={() => setActiveMonthIndex((prev) => Math.max(prev - 1, 0))}
+              onClick={() => {
+                const prev = new Date(activeYear, activeMonth - 1, 1);
+                setActiveYear(prev.getFullYear());
+                setActiveMonth(prev.getMonth());
+              }}
               style={{
                 width: 42,
                 height: 42,
                 borderRadius: 999,
                 border: '1px solid #e4d8ca',
-                background: activeMonthIndex === 0 ? '#f3eee7' : '#fff',
-                color: activeMonthIndex === 0 ? '#b5aba0' : '#1d1712',
+                background: '#fff',
                 fontSize: 22,
               }}
             >
@@ -317,11 +325,11 @@ export default function BookingDatePage() {
             </button>
 
             <div style={{ fontSize: 24, fontWeight: 800, textAlign: 'center' }}>
-              {monthLabels[activeMonthKey]}
+              {getMonthLabel(activeMonth)} {activeYear}
             </div>
 
             <button
-              onClick={() => setPickerOpen((prev) => !prev)}
+              onClick={() => setPickerMode(pickerMode === 'year' ? 'closed' : 'year')}
               style={{
                 width: 42,
                 height: 42,
@@ -335,19 +343,17 @@ export default function BookingDatePage() {
             </button>
 
             <button
-              disabled={activeMonthIndex === monthOrder.length - 1}
-              onClick={() =>
-                setActiveMonthIndex((prev) => Math.min(prev + 1, monthOrder.length - 1))
-              }
+              onClick={() => {
+                const next = new Date(activeYear, activeMonth + 1, 1);
+                setActiveYear(next.getFullYear());
+                setActiveMonth(next.getMonth());
+              }}
               style={{
                 width: 42,
                 height: 42,
                 borderRadius: 999,
                 border: '1px solid #e4d8ca',
-                background:
-                  activeMonthIndex === monthOrder.length - 1 ? '#f3eee7' : '#fff',
-                color:
-                  activeMonthIndex === monthOrder.length - 1 ? '#b5aba0' : '#1d1712',
+                background: '#fff',
                 fontSize: 22,
               }}
             >
@@ -355,7 +361,11 @@ export default function BookingDatePage() {
             </button>
           </div>
 
-          {pickerOpen && (
+          <div style={{ marginTop: 10, color: '#6c645c', fontSize: 14, fontWeight: 700 }}>
+            Today: {today.getDate()} {getShortMonthLabel(today.getMonth())} {today.getFullYear()}
+          </div>
+
+          {pickerMode === 'year' && (
             <div
               style={{
                 marginTop: 14,
@@ -365,38 +375,69 @@ export default function BookingDatePage() {
                 padding: 14,
               }}
             >
-              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>
-                Choose month
-              </div>
+              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>Choose year</div>
 
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: 10,
-                }}
-              >
-                {monthOrder.map((monthKey, index) => {
-                  const active = activeMonthIndex === index;
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {years.map((year) => {
+                  const active = activeYear === year;
 
                   return (
                     <button
-                      key={monthKey}
+                      key={year}
                       onClick={() => {
-                        setActiveMonthIndex(index);
-                        setPickerOpen(false);
+                        setActiveYear(year);
+                        setPickerMode('month');
                       }}
                       style={{
                         padding: '14px 12px',
                         borderRadius: 18,
-                        border: active ? '2px solid #17a34a' : '1px solid #e4d8ca',
+                        border: active ? '2px solid #16a34a' : '1px solid #e4d8ca',
                         background: active ? '#e6f8ec' : '#fff',
-                        color: '#1d1712',
+                        fontWeight: 800,
+                        fontSize: 16,
+                      }}
+                    >
+                      {year}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {pickerMode === 'month' && (
+            <div
+              style={{
+                marginTop: 14,
+                background: '#fffaf2',
+                border: '1px solid #eadfce',
+                borderRadius: 20,
+                padding: 14,
+              }}
+            >
+              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>Choose month</div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {monthDates.map((date) => {
+                  const active = activeMonth === date.getMonth();
+
+                  return (
+                    <button
+                      key={date.getMonth()}
+                      onClick={() => {
+                        setActiveMonth(date.getMonth());
+                        setPickerMode('closed');
+                      }}
+                      style={{
+                        padding: '14px 12px',
+                        borderRadius: 18,
+                        border: active ? '2px solid #16a34a' : '1px solid #e4d8ca',
+                        background: active ? '#e6f8ec' : '#fff',
                         fontWeight: 800,
                         fontSize: 15,
                       }}
                     >
-                      {monthLabels[monthKey]}
+                      {getMonthLabel(date.getMonth())} {activeYear}
                     </button>
                   );
                 })}
@@ -412,11 +453,13 @@ export default function BookingDatePage() {
               gap: 12,
             }}
           >
-            {activeMonthDays.map((day) => {
-              const key = `${day.monthKey}-${day.dayNumber}`;
-              const active = selectedDayKey === key;
-              const disabled = day.status === 'full';
-              const styles = getStatusStyles(day.status, active);
+            {activeMonthDates.map((date) => {
+              const key = getDateKey(date);
+              const status = getStatusForDate(date, today);
+              const active = selectedDateKey === key;
+              const isToday = sameDay(date, today);
+              const disabled = status === 'full';
+              const styles = getStatusStyles(status, active, isToday);
 
               return (
                 <button
@@ -424,7 +467,7 @@ export default function BookingDatePage() {
                   disabled={disabled}
                   onClick={() => {
                     if (disabled) return;
-                    setSelectedDayKey(key);
+                    setSelectedDateKey(key);
                   }}
                   style={{
                     borderRadius: 20,
@@ -434,12 +477,10 @@ export default function BookingDatePage() {
                     ...styles,
                   }}
                 >
-                  <div style={{ fontSize: 13, fontWeight: 700 }}>{day.weekday}</div>
-                  <div style={{ fontSize: 26, fontWeight: 900, marginTop: 4 }}>
-                    {day.dayNumber}
-                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>{getWeekdayShort(date)}</div>
+                  <div style={{ fontSize: 26, fontWeight: 900, marginTop: 4 }}>{date.getDate()}</div>
                   <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4 }}>
-                    {day.monthLabel}
+                    {getShortMonthLabel(date.getMonth())}
                   </div>
                 </button>
               );
@@ -462,8 +503,8 @@ export default function BookingDatePage() {
                   width: 14,
                   height: 14,
                   borderRadius: 999,
-                  background: '#dff8e7',
-                  border: '1px solid #9fe0b2',
+                  background: '#dcfce7',
+                  border: '1px solid #86efac',
                   display: 'inline-block',
                 }}
               />
@@ -476,8 +517,8 @@ export default function BookingDatePage() {
                   width: 14,
                   height: 14,
                   borderRadius: 999,
-                  background: '#fff1bf',
-                  border: '1px solid #f3cf5f',
+                  background: '#fef3c7',
+                  border: '1px solid #fcd34d',
                   display: 'inline-block',
                 }}
               />
@@ -490,12 +531,26 @@ export default function BookingDatePage() {
                   width: 14,
                   height: 14,
                   borderRadius: 999,
-                  background: '#ffd8dc',
-                  border: '1px solid #f2a7b0',
+                  background: '#ffe4e6',
+                  border: '1px solid #fda4af',
                   display: 'inline-block',
                 }}
               />
               Full
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: 999,
+                  background: '#dbeafe',
+                  border: '1px solid #60a5fa',
+                  display: 'inline-block',
+                }}
+              />
+              Today
             </div>
           </div>
         </div>
@@ -522,29 +577,31 @@ export default function BookingDatePage() {
           }}
         >
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>
-              Selected date
-            </div>
+            <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>Selected date</div>
             <div style={{ fontSize: 22, fontWeight: 900, marginTop: 6 }}>
-              {selectedDay
-                ? `${selectedDay.dayNumber} ${selectedDay.monthLabel}`
+              {selectedDate
+                ? `${selectedDate.getDate()} ${getShortMonthLabel(selectedDate.getMonth())} ${selectedDate.getFullYear()}`
                 : 'Not selected'}
             </div>
           </div>
 
           <button
-            disabled={!selectedDay}
+            disabled={!selectedDate}
             onClick={() => {
-              if (!selectedDay) return;
+              if (!selectedDate) return;
 
               const servicesEncoded = encodeURIComponent(selectedServiceSlugs.join(','));
+              const dateEncoded = encodeURIComponent(
+                `${selectedDate.getDate()} ${getShortMonthLabel(selectedDate.getMonth())} ${selectedDate.getFullYear()}`
+              );
+
               router.push(
-                `/booking/${master.id}/time?services=${servicesEncoded}&date=${selectedDay.dayNumber}%20${selectedDay.monthLabel}`
+                `/booking/${master.id}/time?services=${servicesEncoded}&date=${dateEncoded}`
               );
             }}
             style={{
               border: 'none',
-              background: selectedDay ? '#17a34a' : '#b7d9bf',
+              background: selectedDate ? '#16a34a' : '#b7d9bf',
               color: '#fff',
               borderRadius: 24,
               padding: '18px 26px',
