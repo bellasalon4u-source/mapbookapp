@@ -4,22 +4,54 @@ import { useMemo } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { getMasterById } from '../../../../services/masters';
 
+function parseDurationToMinutes(value: string) {
+  const hourMatch = value.match(/(\d+)\s*h/);
+  const minuteMatch = value.match(/(\d+)\s*m/);
+
+  const hours = hourMatch ? Number(hourMatch[1]) : 0;
+  const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
+
+  return hours * 60 + minutes;
+}
+
+function formatMinutes(minutes: number) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+
+  if (h > 0 && m > 0) return `${h}h ${m}m`;
+  if (h > 0) return `${h}h`;
+  return `${m}m`;
+}
+
 export default function BookingConfirmedPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
-  const serviceSlug = searchParams.get('service') || '';
+
+  const servicesParam = searchParams.get('services') || '';
   const date = searchParams.get('date') || '';
   const time = searchParams.get('time') || '';
+
+  const selectedServiceSlugs = servicesParam
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
 
   if (!master) {
     return <main style={{ padding: 24 }}>Booking not found</main>;
   }
 
-  const service =
-    master.services.find((item) => item.slug === serviceSlug) || master.services[0];
+  const selectedItems = master.services.filter((service) =>
+    selectedServiceSlugs.includes(service.slug)
+  );
+
+  const totalPrice = selectedItems.reduce((sum, item) => sum + item.price, 0);
+  const totalMinutes = selectedItems.reduce(
+    (sum, item) => sum + parseDurationToMinutes(item.duration),
+    0
+  );
 
   return (
     <main
@@ -32,7 +64,7 @@ export default function BookingConfirmedPage() {
       }}
     >
       <div style={{ maxWidth: 420, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginTop: 36 }}>
+        <div style={{ textAlign: 'center', marginTop: 20 }}>
           <div
             style={{
               width: 110,
@@ -65,33 +97,85 @@ export default function BookingConfirmedPage() {
             background: '#fff',
             border: '1px solid #e4d8ca',
             borderRadius: 26,
-            padding: 16,
-            display: 'grid',
-            gridTemplateColumns: '92px 1fr',
-            gap: 14,
-            alignItems: 'center',
+            padding: 18,
           }}
         >
-          <img
-            src={service.image}
-            alt={service.title}
-            style={{
-              width: 92,
-              height: 92,
-              objectFit: 'cover',
-              borderRadius: 18,
-            }}
-          />
+          <div style={{ fontSize: 24, fontWeight: 800 }}>Selected procedures</div>
 
-          <div>
-            <div style={{ fontSize: 22, fontWeight: 800 }}>{service.title}</div>
-            <div style={{ marginTop: 8, fontSize: 16, color: '#6e655d' }}>{service.duration}</div>
-            <div style={{ marginTop: 8, fontSize: 16, color: '#2e9746', fontWeight: 700 }}>
-              📅 {date}
+          <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {selectedItems.map((item) => (
+              <div
+                key={item.slug}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '72px 1fr',
+                  gap: 12,
+                  alignItems: 'center',
+                  padding: 10,
+                  borderRadius: 18,
+                  background: '#faf6ef',
+                }}
+              >
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  style={{
+                    width: 72,
+                    height: 72,
+                    objectFit: 'cover',
+                    borderRadius: 16,
+                  }}
+                />
+
+                <div>
+                  <div style={{ fontSize: 19, fontWeight: 800 }}>{item.title}</div>
+                  <div style={{ marginTop: 6, color: '#6e655d' }}>{item.duration}</div>
+                  <div style={{ marginTop: 6, fontWeight: 800 }}>£{item.price}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div
+            style={{
+              marginTop: 14,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                background: '#f7f1e8',
+                borderRadius: 18,
+                padding: 12,
+              }}
+            >
+              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>Total duration</div>
+              <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
+                {formatMinutes(totalMinutes)}
+              </div>
             </div>
-            <div style={{ marginTop: 6, fontSize: 16, color: '#2e9746', fontWeight: 700 }}>
-              🕒 {time}
+
+            <div
+              style={{
+                background: '#f7f1e8',
+                borderRadius: 18,
+                padding: 12,
+              }}
+            >
+              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>Total price</div>
+              <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
+                £{totalPrice}
+              </div>
             </div>
+          </div>
+
+          <div style={{ marginTop: 16, color: '#2e9746', fontWeight: 800, fontSize: 18 }}>
+            📅 {date}
+          </div>
+          <div style={{ marginTop: 8, color: '#2e9746', fontWeight: 800, fontSize: 18 }}>
+            🕒 {time}
           </div>
         </div>
 
