@@ -7,15 +7,41 @@ import { getMasterById } from '../../../services/masters';
 export default function MasterPage() {
   const params = useParams();
   const router = useRouter();
+
   const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
+
   const [liked, setLiked] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   if (!master) {
     return <main style={{ padding: 24 }}>Master not found</main>;
   }
 
-  const firstService = master.services[0];
+  const openViewer = (index: number) => {
+    setSelectedImageIndex(index);
+    setViewerOpen(true);
+  };
+
+  const closeAllModals = () => {
+    setViewerOpen(false);
+    setGalleryOpen(false);
+    setAvatarOpen(false);
+  };
+
+  const showPrevImage = () => {
+    setSelectedImageIndex((prev) =>
+      prev === 0 ? master.gallery.length - 1 : prev - 1
+    );
+  };
+
+  const showNextImage = () => {
+    setSelectedImageIndex((prev) =>
+      prev === master.gallery.length - 1 ? 0 : prev + 1
+    );
+  };
 
   return (
     <main
@@ -81,6 +107,7 @@ export default function MasterPage() {
               borderRadius: 16,
               padding: '10px 14px',
               fontWeight: 700,
+              fontSize: 16,
             }}
           >
             🖼 Gallery
@@ -97,17 +124,28 @@ export default function MasterPage() {
               alignItems: 'center',
             }}
           >
-            <img
-              src={master.avatar}
-              alt={master.name}
+            <button
+              onClick={() => setAvatarOpen(true)}
               style={{
-                width: 58,
-                height: 58,
-                objectFit: 'cover',
+                padding: 0,
+                border: 'none',
+                background: 'transparent',
                 borderRadius: 999,
-                border: '3px solid #fff',
               }}
-            />
+            >
+              <img
+                src={master.avatar}
+                alt={master.name}
+                style={{
+                  width: 64,
+                  height: 64,
+                  objectFit: 'cover',
+                  borderRadius: 999,
+                  border: '4px solid #fff',
+                  display: 'block',
+                }}
+              />
+            </button>
 
             <div
               style={{
@@ -116,8 +154,9 @@ export default function MasterPage() {
                 borderRadius: 16,
                 padding: '10px 12px',
                 fontWeight: 800,
-                minWidth: 58,
+                minWidth: 64,
                 textAlign: 'center',
+                fontSize: 16,
               }}
             >
               {master.rating.toFixed(1)} ★
@@ -140,9 +179,7 @@ export default function MasterPage() {
           </div>
 
           <button
-            onClick={() =>
-              router.push(`/booking/${master.id}?service=${firstService.slug}`)
-            }
+            onClick={() => router.push(`/booking/${master.id}`)}
             style={{
               position: 'absolute',
               right: 16,
@@ -267,7 +304,7 @@ export default function MasterPage() {
                 </div>
 
                 <button
-                  onClick={() => router.push(`/booking/${master.id}?service=${service.slug}`)}
+                  onClick={() => router.push(`/booking/${master.id}`)}
                   style={{
                     border: 'none',
                     background: '#2e9746',
@@ -288,6 +325,7 @@ export default function MasterPage() {
 
       {galleryOpen && (
         <div
+          onClick={() => setGalleryOpen(false)}
           style={{
             position: 'fixed',
             inset: 0,
@@ -297,7 +335,16 @@ export default function MasterPage() {
             overflowY: 'auto',
           }}
         >
-          <div style={{ maxWidth: 420, margin: '0 auto', background: '#fcf8f2', borderRadius: 24, padding: 18 }}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: 420,
+              margin: '0 auto',
+              background: '#fcf8f2',
+              borderRadius: 28,
+              padding: 18,
+            }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <button
                 onClick={() => setGalleryOpen(false)}
@@ -307,14 +354,19 @@ export default function MasterPage() {
                   borderRadius: 999,
                   border: '1px solid #e3d9cc',
                   background: '#fff',
-                  fontSize: 22,
+                  fontSize: 24,
                 }}
               >
-                ←
+                ✕
               </button>
+
               <div style={{ fontSize: 22, fontWeight: 800 }}>Gallery</div>
+
               <button
-                onClick={() => router.push('/')}
+                onClick={() => {
+                  closeAllModals();
+                  router.push('/');
+                }}
                 style={{
                   width: 46,
                   height: 46,
@@ -337,18 +389,275 @@ export default function MasterPage() {
               }}
             >
               {master.gallery.map((image, index) => (
-                <img
+                <button
                   key={index}
-                  src={image}
-                  alt={`${master.name} ${index + 1}`}
+                  onClick={() => openViewer(index)}
                   style={{
-                    width: '100%',
-                    aspectRatio: '1 / 1',
-                    objectFit: 'cover',
-                    borderRadius: 16,
+                    padding: 0,
+                    border: 'none',
+                    background: 'transparent',
                   }}
-                />
+                >
+                  <img
+                    src={image}
+                    alt={`${master.name} ${index + 1}`}
+                    style={{
+                      width: '100%',
+                      aspectRatio: '1 / 1',
+                      objectFit: 'cover',
+                      borderRadius: 18,
+                      display: 'block',
+                    }}
+                  />
+                </button>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {viewerOpen && (
+        <div
+          onClick={() => setViewerOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.88)',
+            zIndex: 300,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: 420,
+              position: 'relative',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: -8,
+                left: 0,
+                right: 0,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                zIndex: 2,
+              }}
+            >
+              <button
+                onClick={() => setViewerOpen(false)}
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 999,
+                  border: 'none',
+                  background: 'rgba(255,255,255,0.14)',
+                  color: '#fff',
+                  fontSize: 28,
+                }}
+              >
+                ✕
+              </button>
+
+              <button
+                onClick={() => {
+                  closeAllModals();
+                  router.push('/');
+                }}
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 999,
+                  border: 'none',
+                  background: 'rgba(255,255,255,0.14)',
+                  color: '#fff',
+                  fontSize: 22,
+                }}
+              >
+                ⌂
+              </button>
+            </div>
+
+            <div
+              style={{
+                marginTop: 56,
+                position: 'relative',
+                background: 'rgba(255,255,255,0.04)',
+                borderRadius: 28,
+                padding: 14,
+              }}
+            >
+              <img
+                src={master.gallery[selectedImageIndex]}
+                alt={`${master.name} ${selectedImageIndex + 1}`}
+                style={{
+                  width: '100%',
+                  maxWidth: 380,
+                  height: 'auto',
+                  maxHeight: '78vh',
+                  aspectRatio: '1 / 1',
+                  objectFit: 'cover',
+                  borderRadius: 24,
+                  display: 'block',
+                  margin: '0 auto',
+                }}
+              />
+
+              {master.gallery.length > 1 && (
+                <>
+                  <button
+                    onClick={showPrevImage}
+                    style={{
+                      position: 'absolute',
+                      left: 8,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: 48,
+                      height: 48,
+                      borderRadius: 999,
+                      border: 'none',
+                      background: 'rgba(0,0,0,0.42)',
+                      color: '#fff',
+                      fontSize: 28,
+                    }}
+                  >
+                    ‹
+                  </button>
+
+                  <button
+                    onClick={showNextImage}
+                    style={{
+                      position: 'absolute',
+                      right: 8,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: 48,
+                      height: 48,
+                      borderRadius: 999,
+                      border: 'none',
+                      background: 'rgba(0,0,0,0.42)',
+                      color: '#fff',
+                      fontSize: 28,
+                    }}
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+            </div>
+
+            <div
+              style={{
+                marginTop: 14,
+                textAlign: 'center',
+                color: '#fff',
+                fontWeight: 700,
+                fontSize: 16,
+              }}
+            >
+              {selectedImageIndex + 1} / {master.gallery.length}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {avatarOpen && (
+        <div
+          onClick={() => setAvatarOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.88)',
+            zIndex: 310,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: 420,
+              position: 'relative',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: -8,
+                left: 0,
+                right: 0,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                zIndex: 2,
+              }}
+            >
+              <button
+                onClick={() => setAvatarOpen(false)}
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 999,
+                  border: 'none',
+                  background: 'rgba(255,255,255,0.14)',
+                  color: '#fff',
+                  fontSize: 28,
+                }}
+              >
+                ✕
+              </button>
+
+              <button
+                onClick={() => {
+                  closeAllModals();
+                  router.push('/');
+                }}
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 999,
+                  border: 'none',
+                  background: 'rgba(255,255,255,0.14)',
+                  color: '#fff',
+                  fontSize: 22,
+                }}
+              >
+                ⌂
+              </button>
+            </div>
+
+            <div
+              style={{
+                marginTop: 56,
+                background: 'rgba(255,255,255,0.04)',
+                borderRadius: 28,
+                padding: 14,
+              }}
+            >
+              <img
+                src={master.avatar}
+                alt={master.name}
+                style={{
+                  width: '100%',
+                  maxWidth: 380,
+                  height: 'auto',
+                  maxHeight: '78vh',
+                  aspectRatio: '1 / 1',
+                  objectFit: 'cover',
+                  borderRadius: 24,
+                  display: 'block',
+                  margin: '0 auto',
+                }}
+              />
             </div>
           </div>
         </div>
