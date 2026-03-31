@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import RealMap from '../components/RealMap';
 import { getAllMasters } from '../services/masters';
 
@@ -18,6 +19,7 @@ const categories = [
 ];
 
 export default function HomePage() {
+  const router = useRouter();
   const masters = getAllMasters();
 
   const [search, setSearch] = useState('');
@@ -326,6 +328,7 @@ export default function HomePage() {
             }}
           >
             <button
+              onClick={() => router.push('/bookings')}
               style={{
                 border: 'none',
                 background: '#fff',
@@ -345,6 +348,7 @@ export default function HomePage() {
             </button>
 
             <button
+              onClick={() => router.push('/add')}
               style={{
                 width: 94,
                 height: 94,
@@ -366,6 +370,7 @@ export default function HomePage() {
             </button>
 
             <button
+              onClick={() => router.push('/favorites')}
               style={{
                 border: 'none',
                 background: '#fff',
