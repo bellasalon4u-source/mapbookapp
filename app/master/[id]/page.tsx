@@ -1,184 +1,387 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
+'use client';
+
+import { useMemo, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { getMasterById } from '../../../services/masters';
 
-type Props = {
-  params: {
-    id: string;
-  };
-};
-
-export default function MasterPage({ params }: Props) {
-  const master = getMasterById(params.id);
+export default function MasterPage() {
+  const params = useParams();
+  const router = useRouter();
+  const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
+  const [liked, setLiked] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   if (!master) {
-    notFound();
+    return <main style={{ padding: 24 }}>Master not found</main>;
   }
 
   return (
-    <main className="min-h-screen bg-[#fcf8f2] pb-28">
-      <div className="mx-auto max-w-md">
-        <div className="relative">
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#fcf8f2',
+        fontFamily: 'Arial, sans-serif',
+        color: '#1d1712',
+        paddingBottom: 110,
+      }}
+    >
+      <div style={{ maxWidth: 420, margin: '0 auto' }}>
+        <div style={{ position: 'relative' }}>
           <img
-            src={master.avatar}
+            src={master.cover}
             alt={master.name}
-            className="h-80 w-full object-cover"
+            style={{ width: '100%', height: 405, objectFit: 'cover', display: 'block' }}
           />
 
-          <div className="absolute left-4 top-4">
-            <Link
-              href="/"
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-xl text-[#241c16]"
+          <button
+            onClick={() => router.back()}
+            style={{
+              position: 'absolute',
+              top: 20,
+              left: 16,
+              width: 54,
+              height: 54,
+              borderRadius: 999,
+              border: '1px solid #efe6da',
+              background: 'rgba(255,255,255,0.95)',
+              fontSize: 24,
+            }}
+          >
+            ←
+          </button>
+
+          <button
+            onClick={() => router.push('/')}
+            style={{
+              position: 'absolute',
+              top: 20,
+              right: 16,
+              width: 54,
+              height: 54,
+              borderRadius: 999,
+              border: '1px solid #efe6da',
+              background: 'rgba(255,255,255,0.95)',
+              fontSize: 22,
+            }}
+          >
+            ⌂
+          </button>
+
+          <button
+            onClick={() => setGalleryOpen(true)}
+            style={{
+              position: 'absolute',
+              left: 16,
+              bottom: 20,
+              border: 'none',
+              background: 'rgba(33,33,33,0.68)',
+              color: '#fff',
+              borderRadius: 16,
+              padding: '10px 14px',
+              fontWeight: 700,
+            }}
+          >
+            🖼 Gallery
+          </button>
+
+          <div
+            style={{
+              position: 'absolute',
+              top: 20,
+              right: 84,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+              alignItems: 'center',
+            }}
+          >
+            <img
+              src={master.avatar}
+              alt={master.name}
+              style={{
+                width: 58,
+                height: 58,
+                objectFit: 'cover',
+                borderRadius: 999,
+                border: '3px solid #fff',
+              }}
+            />
+
+            <div
+              style={{
+                background: '#efe3cf',
+                color: '#5c4a34',
+                borderRadius: 16,
+                padding: '10px 12px',
+                fontWeight: 800,
+                minWidth: 58,
+                textAlign: 'center',
+              }}
             >
-              ←
-            </Link>
+              {master.rating.toFixed(1)} ★
+            </div>
+
+            <button
+              onClick={() => setLiked((prev) => !prev)}
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 999,
+                border: '1px solid #efe6da',
+                background: 'rgba(255,255,255,0.95)',
+                fontSize: 24,
+                color: liked ? '#d73737' : '#333',
+              }}
+            >
+              {liked ? '♥' : '♡'}
+            </button>
           </div>
 
-          <div className="absolute right-4 top-4 flex gap-2">
-            <button className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-lg text-[#241c16]">
-              ♡
-            </button>
-            <button className="flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-lg text-[#241c16]">
-              ↗
-            </button>
-          </div>
-
-          <div className="absolute bottom-4 right-4 rounded-2xl bg-red-600 px-5 py-3 font-bold text-white shadow-lg">
+          <button
+            onClick={() => router.push(`/booking/${master.id}`)}
+            style={{
+              position: 'absolute',
+              right: 16,
+              bottom: 28,
+              border: 'none',
+              background: '#2e9746',
+              color: '#fff',
+              borderRadius: 22,
+              padding: '18px 28px',
+              fontWeight: 800,
+              fontSize: 18,
+            }}
+          >
             Book now
-          </div>
+          </button>
         </div>
 
-        <div className="px-4 pt-4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h1 className="text-3xl font-bold text-[#1d1712]">
-                {master.name}
-              </h1>
-              <p className="mt-1 text-sm text-[#786d61]">
-                {master.title} • {master.city}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-[#f1e8da] px-3 py-2 text-sm font-bold text-[#463b31]">
-              {master.rating} ★
-            </div>
+        <section style={{ padding: 24 }}>
+          <div style={{ fontSize: 34, fontWeight: 800 }}>{master.name}</div>
+          <div style={{ marginTop: 10, fontSize: 18, color: '#7a7066' }}>
+            {master.title} • {master.city}
           </div>
 
-          <div className="mt-4 flex items-center justify-between gap-3">
-            {master.availableNow ? (
-              <div className="rounded-full bg-[#edf7ee] px-4 py-2 text-sm font-semibold text-[#256b43]">
-                ● Available now
-              </div>
-            ) : (
-              <div className="rounded-full bg-[#f3ece2] px-4 py-2 text-sm font-semibold text-[#6d6257]">
-                Offline now
-              </div>
-            )}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginTop: 18,
+              gap: 12,
+              alignItems: 'center',
+            }}
+          >
+            <div
+              style={{
+                background: '#f2ebe1',
+                color: '#7d756c',
+                borderRadius: 999,
+                padding: '12px 18px',
+                fontWeight: 700,
+              }}
+            >
+              {master.availableNow ? 'Available now' : 'Offline now'}
+            </div>
 
-            <div className="rounded-full bg-[#2f241c] px-4 py-2 text-sm font-bold text-white">
+            <div
+              style={{
+                background: '#3a2b20',
+                color: '#fff',
+                borderRadius: 999,
+                padding: '12px 20px',
+                fontWeight: 800,
+              }}
+            >
               from £{master.priceFrom}
             </div>
           </div>
 
-          <p className="mt-4 text-sm leading-6 text-[#5e554c]">
+          <p style={{ marginTop: 22, fontSize: 18, color: '#5d554d', lineHeight: 1.5 }}>
             {master.description}
           </p>
-        </div>
 
-        <div className="grid grid-cols-2 gap-3 px-4 pt-5">
-          <div className="rounded-3xl bg-[#2f241c] p-4 text-white">
-            <p className="text-xs text-[#d9cdbd]">Reviews</p>
-            <p className="mt-2 text-3xl font-bold">{master.reviewCount}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 20 }}>
+            <div
+              style={{
+                background: '#2f241c',
+                color: '#fff',
+                borderRadius: 26,
+                padding: 22,
+              }}
+            >
+              <div style={{ opacity: 0.9, fontSize: 16 }}>Reviews</div>
+              <div style={{ fontSize: 34, fontWeight: 800, marginTop: 12 }}>{master.reviews}</div>
+            </div>
+
+            <div
+              style={{
+                background: '#efe7dc',
+                color: '#231b15',
+                borderRadius: 26,
+                padding: 22,
+              }}
+            >
+              <div style={{ opacity: 0.7, fontSize: 16 }}>Starting price</div>
+              <div style={{ fontSize: 34, fontWeight: 800, marginTop: 12 }}>£{master.priceFrom}</div>
+            </div>
           </div>
 
-          <div className="rounded-3xl bg-[#f2e9dc] p-4 text-[#241d17]">
-            <p className="text-xs text-[#6e5f51]">Starting price</p>
-            <p className="mt-2 text-3xl font-bold">£{master.priceFrom}</p>
-          </div>
-        </div>
+          <h2 style={{ marginTop: 28, fontSize: 30 }}>Price list</h2>
 
-        <section className="px-4 pt-6">
-          <h2 className="mb-3 text-2xl font-bold text-[#1d1712]">Gallery</h2>
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {master.gallery.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`${master.name} ${index + 1}`}
-                className="h-24 w-24 flex-none rounded-2xl object-cover"
-              />
-            ))}
-          </div>
-        </section>
-
-        <section className="px-4 pt-6">
-          <h2 className="mb-3 text-2xl font-bold text-[#1d1712]">Services</h2>
-          <div className="space-y-3">
+          <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
             {master.services.map((service) => (
               <div
-                key={service.id}
-                className="flex items-center justify-between rounded-3xl border border-[#efe4d7] bg-white p-4"
+                key={service.slug}
+                style={{
+                  background: '#fff',
+                  border: '1px solid #e4d8ca',
+                  borderRadius: 24,
+                  padding: 12,
+                  display: 'grid',
+                  gridTemplateColumns: '96px 1fr auto',
+                  gap: 14,
+                  alignItems: 'center',
+                }}
               >
+                <img
+                  src={service.image}
+                  alt={service.title}
+                  style={{
+                    width: 96,
+                    height: 96,
+                    objectFit: 'cover',
+                    borderRadius: 18,
+                  }}
+                />
+
                 <div>
-                  <h3 className="text-base font-bold text-[#201914]">
-                    {service.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-[#807467]">
-                    {service.duration}
-                  </p>
+                  <div style={{ fontSize: 20, fontWeight: 800 }}>{service.title}</div>
+                  <div style={{ marginTop: 8, color: '#746b62', fontSize: 16 }}>{service.duration}</div>
+                  <div style={{ marginTop: 8, color: '#231b15', fontSize: 17, fontWeight: 700 }}>
+                    from £{service.price}
+                  </div>
                 </div>
 
-                <div className="text-right">
-                  <p className="text-sm font-bold text-[#201914]">
-                    from £{service.priceFrom}
-                  </p>
-                  <p className="mt-1 text-lg text-[#807467]">›</p>
-                </div>
+                <button
+                  onClick={() => router.push(`/booking/${master.id}?service=${service.slug}`)}
+                  style={{
+                    border: 'none',
+                    background: '#2e9746',
+                    color: '#fff',
+                    borderRadius: 18,
+                    padding: '14px 18px',
+                    fontWeight: 800,
+                    fontSize: 16,
+                  }}
+                >
+                  Book
+                </button>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="px-4 pt-6">
-          <h2 className="mb-3 text-2xl font-bold text-[#1d1712]">Reviews</h2>
-          <div className="space-y-3">
-            {master.reviews.map((review) => (
-              <div
-                key={review.id}
-                className="rounded-3xl border border-[#efe4d7] bg-white p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <p className="font-bold text-[#201914]">{review.author}</p>
-                  <p className="text-sm font-semibold text-[#6a5e53]">
-                    {review.rating} ★
-                  </p>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-[#5f564d]">
-                  {review.text}
-                </p>
-              </div>
-            ))}
+        <div
+          style={{
+            position: 'fixed',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: '#fff',
+            borderTop: '1px solid #e6ddd1',
+            padding: '14px 16px',
+          }}
+        >
+          <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 14, alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>Secure booking fee</div>
+              <div style={{ fontSize: 30, fontWeight: 900, marginTop: 6 }}>£5</div>
+            </div>
+            <button
+              onClick={() => router.push(`/booking/${master.id}`)}
+              style={{
+                border: 'none',
+                background: '#2e9746',
+                color: '#fff',
+                borderRadius: 24,
+                padding: '18px 26px',
+                fontWeight: 800,
+                fontSize: 18,
+              }}
+            >
+              Choose service
+            </button>
           </div>
-        </section>
-      </div>
-
-      <div className="fixed bottom-0 left-0 right-0 border-t border-[#efe5d8] bg-[#fffdf9]">
-        <div className="mx-auto flex max-w-md items-center justify-between px-4 py-4">
-          <div>
-            <p className="text-xs font-semibold text-[#7d7267]">
-              Secure booking fee
-            </p>
-            <p className="mt-1 text-2xl font-bold text-[#1f1813]">£5</p>
-          </div>
-
-          <Link
-            href={`/booking/${master.id}`}
-            className="rounded-2xl bg-red-600 px-6 py-4 text-sm font-bold text-white"
-          >
-            Choose date & time
-          </Link>
         </div>
       </div>
+
+      {galleryOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.75)',
+            zIndex: 200,
+            padding: 20,
+            overflowY: 'auto',
+          }}
+        >
+          <div style={{ maxWidth: 420, margin: '0 auto', background: '#fcf8f2', borderRadius: 24, padding: 18 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button
+                onClick={() => setGalleryOpen(false)}
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 999,
+                  border: '1px solid #e3d9cc',
+                  background: '#fff',
+                  fontSize: 22,
+                }}
+              >
+                ←
+              </button>
+              <div style={{ fontSize: 22, fontWeight: 800 }}>Gallery</div>
+              <button
+                onClick={() => router.push('/')}
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 999,
+                  border: '1px solid #e3d9cc',
+                  background: '#fff',
+                  fontSize: 22,
+                }}
+              >
+                ⌂
+              </button>
+            </div>
+
+            <div
+              style={{
+                marginTop: 18,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: 10,
+              }}
+            >
+              {master.gallery.map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`${master.name} ${index + 1}`}
+                  style={{
+                    width: '100%',
+                    aspectRatio: '1 / 1',
+                    objectFit: 'cover',
+                    borderRadius: 16,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
