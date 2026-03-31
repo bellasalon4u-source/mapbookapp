@@ -4,265 +4,391 @@ import { useState } from 'react';
 import RealMap from '../components/RealMap';
 import { getAllMasters } from '../services/masters';
 
-type ReminderOption = '1 hour before' | '3 hours before' | '1 day before' | '2 days before';
-
-type BookingItem = {
-  id: string;
-  master: string;
-  service: string;
-  date: string;
-  time: string;
-  status: 'Confirmed' | 'Pending';
-  reminder: ReminderOption;
-};
+const categories = [
+  { id: 'wellness', label: 'Wellness', icon: '✦' },
+  { id: 'beauty', label: 'Beauty', icon: '◉' },
+  { id: 'sport', label: 'Sport', icon: '●' },
+  { id: 'food', label: 'Food', icon: '◆' },
+  { id: 'education', label: 'Education', icon: '■' },
+  { id: 'transport', label: 'Transport', icon: '▲' },
+  { id: 'repair', label: 'Repair', icon: '⬢' },
+  { id: 'cleaning', label: 'Cleaning', icon: '⬣' },
+  { id: 'pets', label: 'Pets', icon: '✿' },
+  { id: 'other', label: 'Other', icon: '…' },
+];
 
 export default function HomePage() {
   const masters = getAllMasters();
 
-  const [bookings, setBookings] = useState<BookingItem[]>([
-    {
-      id: 'b1',
-      master: 'Bella Keratin Studio',
-      service: 'Keratin Bonds',
-      date: '2026-04-24',
-      time: '12:00',
-      status: 'Confirmed',
-      reminder: '1 hour before',
-    },
-    {
-      id: 'b2',
-      master: 'Camden Brows Bar',
-      service: 'Brow Lamination',
-      date: '2026-04-27',
-      time: '15:30',
-      status: 'Pending',
-      reminder: '1 day before',
-    },
-  ]);
-
-  function updateReminder(id: string, reminder: ReminderOption) {
-    setBookings((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, reminder } : item))
-    );
-  }
+  const [search, setSearch] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState('wellness');
 
   return (
     <main
       style={{
+        position: 'relative',
         minHeight: '100vh',
-        background: '#fcf8f2',
-        padding: '24px 16px 120px',
+        height: '100vh',
+        overflow: 'hidden',
+        background: '#f7f3ec',
         fontFamily: 'Arial, sans-serif',
-        color: '#1d1712',
       }}
     >
-      <div style={{ maxWidth: 420, margin: '0 auto' }}>
-        <h1 style={{ fontSize: 52, margin: 0, fontWeight: 800 }}>MapBook</h1>
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 1,
+        }}
+      >
+        <RealMap masters={masters} />
+      </div>
 
-        <p style={{ fontSize: 20, color: '#6f655b', marginTop: 14 }}>
-          Find beauty and wellness services near you
-        </p>
-
-        <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <input
-              type="text"
-              placeholder="Search services, masters, area..."
-              style={{
-                width: '100%',
-                padding: '14px 16px 14px 46px',
-                borderRadius: 16,
-                border: '1px solid #d8cfc3',
-                fontSize: 16,
-                boxSizing: 'border-box',
-                background: '#fff',
-              }}
-            />
-            <span
-              style={{
-                position: 'absolute',
-                left: 16,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                fontSize: 18,
-                color: '#786d61',
-              }}
-            >
-              🔍
-            </span>
-          </div>
-
-          <button
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 20,
+          pointerEvents: 'none',
+        }}
+      >
+        <div
+          style={{
+            padding: '16px 16px 0',
+            pointerEvents: 'none',
+          }}
+        >
+          <div
             style={{
-              padding: '14px 16px',
-              borderRadius: 16,
-              border: '1px solid #d8cfc3',
-              background: '#fff',
-              minWidth: 56,
-              fontSize: 20,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 10,
+              pointerEvents: 'auto',
             }}
           >
-            ♥
-          </button>
-        </div>
-
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
-          {[
-            'Wellness',
-            'Beauty',
-            'Sport',
-            'Food',
-            'Education',
-            'Transport',
-            'Repair',
-            'Cleaning',
-            'Pets',
-            'Other',
-          ].map((item) => (
-            <span
-              key={item}
+            <button
+              onClick={() => setMenuOpen((prev) => !prev)}
               style={{
-                padding: '10px 14px',
-                borderRadius: 999,
-                background: '#fff',
-                border: '1px solid #e6ddd1',
-                fontWeight: 700,
+                width: 52,
+                height: 52,
+                borderRadius: 18,
+                border: '1px solid rgba(255,255,255,0.7)',
+                background: 'rgba(255,255,255,0.94)',
+                fontSize: 24,
+                color: '#2a231d',
+                boxShadow: '0 8px 22px rgba(0,0,0,0.08)',
               }}
             >
-              {item}
-            </span>
-          ))}
-        </div>
+              ⋮
+            </button>
 
-        <section style={{ marginTop: 28 }}>
-          <h2 style={{ fontSize: 34, margin: 0, fontWeight: 800 }}>Map view</h2>
-          <div style={{ marginTop: 12 }}>
-            <RealMap masters={masters} />
-          </div>
-        </section>
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                background: 'rgba(255,255,255,0.96)',
+                border: '1px solid rgba(230,221,209,0.95)',
+                borderRadius: 22,
+                minHeight: 56,
+                padding: '0 16px',
+                boxShadow: '0 8px 22px rgba(0,0,0,0.08)',
+              }}
+            >
+              <span style={{ fontSize: 24, color: '#6c645c' }}>🔍</span>
 
-        <section style={{ marginTop: 30 }}>
-          <h2 style={{ fontSize: 34, margin: 0, fontWeight: 800 }}>My bookings</h2>
-
-          <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {bookings.map((booking) => (
-              <div
-                key={booking.id}
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search here"
                 style={{
-                  background: '#fff',
-                  border: '1px solid #e4d8ca',
-                  borderRadius: 24,
-                  padding: 16,
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.04)',
+                  flex: 1,
+                  border: 'none',
+                  outline: 'none',
+                  background: 'transparent',
+                  fontSize: 18,
+                  color: '#2b241d',
                 }}
-              >
-                <div
+              />
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <button
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 999,
+                    border: 'none',
+                    background: '#f4efe7',
+                    fontSize: 18,
+                  }}
+                >
+                  🎤
+                </button>
+
+                <button
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 999,
+                    border: 'none',
+                    background: '#f4efe7',
+                    fontSize: 16,
+                  }}
+                >
+                  🖼️
+                </button>
+
+                <button
+                  style={{
+                    minWidth: 46,
+                    height: 34,
+                    borderRadius: 999,
+                    border: 'none',
+                    background: '#f4efe7',
+                    fontSize: 15,
+                    fontWeight: 700,
+                    color: '#2b241d',
+                    padding: '0 10px',
+                  }}
+                >
+                  EN
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: 12,
+              display: 'flex',
+              gap: 12,
+              overflowX: 'auto',
+              paddingBottom: 4,
+              pointerEvents: 'auto',
+              scrollbarWidth: 'none',
+            }}
+          >
+            {categories.slice(0, 4).map((category) => {
+              const active = activeCategory === category.id;
+
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => setActiveCategory(category.id)}
                   style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    gap: 12,
-                    alignItems: 'flex-start',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 14px',
+                    borderRadius: 999,
+                    border: active
+                      ? '1px solid #d8d0c5'
+                      : '1px solid rgba(255,255,255,0.7)',
+                    background: active ? '#fff8ef' : 'rgba(255,255,255,0.94)',
+                    color: '#2a231d',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 6px 18px rgba(0,0,0,0.06)',
                   }}
                 >
-                  <div>
-                    <div style={{ fontSize: 20, fontWeight: 800 }}>{booking.service}</div>
-                    <div style={{ marginTop: 8, fontSize: 16, color: '#746b62' }}>
-                      {booking.master}
-                    </div>
-                  </div>
-
-                  <div
+                  <span
                     style={{
-                      background:
-                        booking.status === 'Confirmed' ? '#dff1e3' : '#f6ead7',
-                      color:
-                        booking.status === 'Confirmed' ? '#248345' : '#9a6a21',
+                      width: 28,
+                      height: 28,
                       borderRadius: 999,
-                      padding: '8px 12px',
-                      fontWeight: 800,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: '#f3ede4',
                       fontSize: 14,
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {booking.status}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 14,
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: 12,
-                  }}
-                >
-                  <div
-                    style={{
-                      background: '#faf6f0',
-                      borderRadius: 18,
-                      padding: 12,
-                    }}
-                  >
-                    <div style={{ color: '#7a7066', fontSize: 14, fontWeight: 700 }}>
-                      Date
-                    </div>
-                    <div style={{ marginTop: 6, fontSize: 18, fontWeight: 800 }}>
-                      {booking.date}
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      background: '#faf6f0',
-                      borderRadius: 18,
-                      padding: 12,
-                    }}
-                  >
-                    <div style={{ color: '#7a7066', fontSize: 14, fontWeight: 700 }}>
-                      Time
-                    </div>
-                    <div style={{ marginTop: 6, fontSize: 18, fontWeight: 800 }}>
-                      {booking.time}
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ marginTop: 16 }}>
-                  <div
-                    style={{
-                      fontSize: 15,
-                      color: '#6c645c',
                       fontWeight: 700,
-                      marginBottom: 8,
                     }}
                   >
-                    Reminder
-                  </div>
-
-                  <select
-                    value={booking.reminder}
-                    onChange={(e) =>
-                      updateReminder(booking.id, e.target.value as ReminderOption)
-                    }
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      borderRadius: 16,
-                      border: '1px solid #ddd2c6',
-                      background: '#fff',
-                      fontSize: 16,
-                    }}
-                  >
-                    <option>1 hour before</option>
-                    <option>3 hours before</option>
-                    <option>1 day before</option>
-                    <option>2 days before</option>
-                  </select>
-                </div>
-              </div>
-            ))}
+                    {category.icon}
+                  </span>
+                  <span style={{ fontSize: 16, fontWeight: 700 }}>{category.label}</span>
+                </button>
+              );
+            })}
           </div>
-        </section>
+        </div>
+
+        {menuOpen && (
+          <div
+            style={{
+              position: 'absolute',
+              left: 16,
+              top: 94,
+              bottom: 108,
+              width: 214,
+              background: 'rgba(255,248,239,0.97)',
+              border: '1px solid #e4d9cc',
+              borderRadius: 28,
+              boxShadow: '0 16px 38px rgba(0,0,0,0.12)',
+              padding: 14,
+              pointerEvents: 'auto',
+              overflowY: 'auto',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                background: '#fff',
+                border: '1px solid #e7ddd0',
+                borderRadius: 18,
+                padding: '12px 14px',
+                marginBottom: 14,
+              }}
+            >
+              <span style={{ fontSize: 20, color: '#6c645c' }}>🔍</span>
+              <span style={{ color: '#746b62', fontSize: 16 }}>Search here</span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {categories.map((category) => {
+                const active = activeCategory === category.id;
+
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => {
+                      setActiveCategory(category.id);
+                      setMenuOpen(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      border: active ? '1px solid #d7cfbf' : '1px solid transparent',
+                      background: active ? '#fff' : 'transparent',
+                      borderRadius: 18,
+                      padding: '10px 10px',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: 999,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: '#f3ede4',
+                        color: '#2a231d',
+                        fontSize: 16,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {category.icon}
+                    </span>
+
+                    <span
+                      style={{
+                        fontSize: 17,
+                        fontWeight: 700,
+                        color: '#231c16',
+                      }}
+                    >
+                      {category.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div
+          style={{
+            position: 'absolute',
+            left: 16,
+            right: 16,
+            bottom: 16,
+            display: 'flex',
+            justifyContent: 'center',
+            pointerEvents: 'auto',
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: 430,
+              background: 'rgba(255,248,239,0.98)',
+              border: '1px solid #e4d9cc',
+              borderRadius: 30,
+              padding: '14px 16px',
+              boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
+              display: 'grid',
+              gridTemplateColumns: '1fr auto 1fr',
+              alignItems: 'end',
+              gap: 10,
+            }}
+          >
+            <button
+              style={{
+                border: 'none',
+                background: '#fff',
+                borderRadius: 22,
+                minHeight: 72,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                color: '#221b15',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+              }}
+            >
+              <span style={{ fontSize: 22 }}>📅</span>
+              <span style={{ fontSize: 16, fontWeight: 700 }}>Bookings</span>
+            </button>
+
+            <button
+              style={{
+                width: 94,
+                height: 94,
+                marginTop: -34,
+                borderRadius: 999,
+                border: '4px solid #efe6d9',
+                background: 'linear-gradient(180deg, #6bbfd0 0%, #4aa9be 100%)',
+                color: '#fff',
+                boxShadow: '0 14px 28px rgba(65,145,163,0.35)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 2,
+              }}
+            >
+              <span style={{ fontSize: 42, lineHeight: 1 }}>+</span>
+              <span style={{ fontSize: 14, fontWeight: 700, marginTop: -2 }}>Add</span>
+            </button>
+
+            <button
+              style={{
+                border: 'none',
+                background: '#fff',
+                borderRadius: 22,
+                minHeight: 72,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                color: '#221b15',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+              }}
+            >
+              <span style={{ fontSize: 22 }}>♥</span>
+              <span style={{ fontSize: 16, fontWeight: 700 }}>Saved</span>
+            </button>
+          </div>
+        </div>
       </div>
     </main>
   );
