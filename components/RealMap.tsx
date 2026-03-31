@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { MasterItem } from '../services/masters';
 
 type RealMapProps = {
@@ -13,18 +13,9 @@ const fallbackCoords = [
   { lat: 51.5154, lng: -0.0721 },
   { lat: 51.5033, lng: -0.1195 },
   { lat: 51.5231, lng: -0.1586 },
-  { lat: 51.4952, lng: -0.146 },
-  { lat: 51.538, lng: -0.1426 },
+  { lat: 51.4952, lng: -0.1460 },
+  { lat: 51.5380, lng: -0.1426 },
 ];
-
-function escapeHtml(value: string) {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
 
 export default function RealMap({
   masters,
@@ -32,23 +23,18 @@ export default function RealMap({
 }: RealMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
-  const markersLayerRef = useRef<any>(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const markersRef = useRef<any[]>([]);
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isMounted) return;
-    if (!mapContainerRef.current) return;
-    if (mapRef.current) return;
-
-    let isCancelled = false;
+    let cancelled = false;
 
     async function initMap() {
+      if (!mapContainerRef.current || mapRef.current) return;
+
       const L = await import('leaflet');
-      if (isCancelled || !mapContainerRef.current) return;
+      await import('leaflet/dist/leaflet.css');
+
+      if (cancelled || !mapContainerRef.current) return;
 
       const map = L.map(mapContainerRef.current, {
         zoomControl: true,
@@ -59,7 +45,6 @@ export default function RealMap({
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
 
-      markersLayerRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
 
       setTimeout(() => {
@@ -70,23 +55,29 @@ export default function RealMap({
     initMap();
 
     return () => {
-      isCancelled = true;
+      cancelled = true;
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
     };
-  }, [isMounted]);
+  }, []);
 
   useEffect(() => {
-    if (!mapRef.current || !markersLayerRef.current) return;
+    let cancelled = false;
 
     async function drawMarkers() {
-      const L = await import('leaflet');
-      const map = mapRef.current;
-      const layer = markersLayerRef.current;
+      if (!mapRef.current) return;
 
-      layer.clearLayers();
+      const L = await import('leaflet');
+      if (cancelled) return;
+
+      const map = mapRef.current;
+
+      markersRef.current.forEach((marker) => {
+        map.removeLayer(marker);
+      });
+      markersRef.current = [];
 
       const preparedMasters = masters.map((master, index) => ({
         ...master,
@@ -95,73 +86,74 @@ export default function RealMap({
       }));
 
       preparedMasters.forEach((master) => {
-        const color = master.availableNow ? '#22c55e' : '#ef4444';
+        const markerHtml = `
+          <div style="
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            background: ${master.availableNow ? '#22c55e' : '#ef4444'};
+            border: 4px solid #2a231d;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+          "></div>
+        `;
 
         const icon = L.divIcon({
+          html: markerHtml,
           className: '',
-          html: `
-            <div style="
-              width: 26px;
-              height: 26px;
-              border-radius: 999px;
-              background: ${color};
-              border: 4px solid #2a231d;
-              box-shadow: 0 4px 10px rgba(0,0,0,0.18);
-            "></div>
-          `,
-          iconSize: [26, 26],
-          iconAnchor: [13, 13],
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
         });
 
-        const popupHtml = `
-          <div style="min-width:220px;font-family:Arial,sans-serif;">
-            <div style="font-size:18px;font-weight:800;color:#1d1712;">
-              ${escapeHtml(master.name)}
+        const marker = L.marker([master.lat, master.lng], { icon }).addTo(map);
+
+        marker.bindPopup(`
+          <div style="font-family: Arial, sans-serif; min-width: 180px;">
+            <div style="font-size: 16px; font-weight: 800; color: #1d1712;">
+              ${master.name}
             </div>
-            <div style="margin-top:6px;font-size:14px;color:#6f655b;">
-              ${escapeHtml(master.title)} • ${escapeHtml(master.city)}
+            <div style="margin-top: 4px; color: #6f655b; font-size: 14px;">
+              ${master.title} • ${master.city}
             </div>
-            <div style="margin-top:10px;font-size:14px;font-weight:700;color:#248345;">
-              ${master.availableNow ? 'Available now' : 'Not available now'}
-            </div>
-            <div style="margin-top:10px;font-size:15px;font-weight:800;color:#1d1712;">
+            <div style="margin-top: 8px; font-weight: 700; color: #1d1712;">
               from £${master.priceFrom}
             </div>
           </div>
-        `;
+        `);
 
-        L.marker([master.lat, master.lng], { icon })
-          .addTo(layer)
-          .bindPopup(popupHtml);
+        markersRef.current.push(marker);
       });
 
       if (preparedMasters.length > 0) {
         const bounds = L.latLngBounds(
           preparedMasters.map((master) => [master.lat, master.lng])
         );
+
         map.fitBounds(bounds, {
-          padding: fullScreen ? [80, 80] : [40, 40],
+          padding: fullScreen ? [90, 90] : [40, 40],
           maxZoom: 13,
         });
       }
 
       setTimeout(() => {
         map.invalidateSize();
-      }, 200);
+      }, 150);
     }
 
     drawMarkers();
+
+    return () => {
+      cancelled = true;
+    };
   }, [masters, fullScreen]);
 
   return (
     <div
       style={{
         width: '100%',
-        height: fullScreen ? '100vh' : 420,
-        minHeight: fullScreen ? '100vh' : 420,
+        height: fullScreen ? '100vh' : '420px',
+        minHeight: fullScreen ? '100vh' : '420px',
         borderRadius: fullScreen ? 0 : 28,
         overflow: 'hidden',
-        position: 'relative',
       }}
     >
       <div
