@@ -190,7 +190,7 @@ export default function BookingServicePage() {
             disabled={!selectedService}
             onClick={() => {
               if (!selectedService) return;
-              router.push(`/booking/${master.id}/time?service=${selectedService.slug}`);
+              router.push(`/booking/${master.id}/date?service=${selectedService.slug}`);
             }}
             style={{
               border: 'none',
@@ -202,7 +202,7 @@ export default function BookingServicePage() {
               fontSize: 18,
             }}
           >
-            Choose date & time
+            Choose date
           </button>
         </div>
       </div>
