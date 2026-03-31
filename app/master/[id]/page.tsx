@@ -360,19 +360,22 @@ export default function MasterPage() {
               marginTop: 20,
             }}
           >
-            <div
+            <button
+              onClick={() => router.push(`/master/${master.id}/reviews`)}
               style={{
                 background: '#2f241c',
                 color: '#fff',
                 borderRadius: 26,
                 padding: 22,
+                border: 'none',
+                textAlign: 'left',
               }}
             >
               <div style={{ opacity: 0.9, fontSize: 16 }}>Reviews</div>
               <div style={{ fontSize: 34, fontWeight: 800, marginTop: 12 }}>
                 {master.reviews}
               </div>
-            </div>
+            </button>
 
             <div
               style={{
