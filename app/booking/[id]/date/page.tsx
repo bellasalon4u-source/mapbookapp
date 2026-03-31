@@ -36,45 +36,62 @@ const calendarDays: CalendarDay[] = [
   { dayNumber: 19, monthKey: '2026-05', monthLabel: 'May', weekday: 'Tue', status: 'free' },
   { dayNumber: 23, monthKey: '2026-05', monthLabel: 'May', weekday: 'Sat', status: 'full' },
   { dayNumber: 28, monthKey: '2026-05', monthLabel: 'May', weekday: 'Thu', status: 'free' },
+
+  { dayNumber: 2, monthKey: '2026-06', monthLabel: 'Jun', weekday: 'Tue', status: 'free' },
+  { dayNumber: 6, monthKey: '2026-06', monthLabel: 'Jun', weekday: 'Sat', status: 'partial' },
+  { dayNumber: 11, monthKey: '2026-06', monthLabel: 'Jun', weekday: 'Thu', status: 'free' },
+  { dayNumber: 17, monthKey: '2026-06', monthLabel: 'Jun', weekday: 'Wed', status: 'full' },
+  { dayNumber: 21, monthKey: '2026-06', monthLabel: 'Jun', weekday: 'Sun', status: 'free' },
+  { dayNumber: 26, monthKey: '2026-06', monthLabel: 'Jun', weekday: 'Fri', status: 'partial' },
+
+  { dayNumber: 1, monthKey: '2026-07', monthLabel: 'Jul', weekday: 'Wed', status: 'free' },
+  { dayNumber: 5, monthKey: '2026-07', monthLabel: 'Jul', weekday: 'Sun', status: 'partial' },
+  { dayNumber: 9, monthKey: '2026-07', monthLabel: 'Jul', weekday: 'Thu', status: 'free' },
+  { dayNumber: 15, monthKey: '2026-07', monthLabel: 'Jul', weekday: 'Wed', status: 'full' },
+  { dayNumber: 20, monthKey: '2026-07', monthLabel: 'Jul', weekday: 'Mon', status: 'free' },
+  { dayNumber: 28, monthKey: '2026-07', monthLabel: 'Jul', weekday: 'Tue', status: 'partial' },
 ];
 
 const monthLabels: Record<string, string> = {
   '2026-03': 'March 2026',
   '2026-04': 'April 2026',
   '2026-05': 'May 2026',
+  '2026-06': 'June 2026',
+  '2026-07': 'July 2026',
 };
 
-const monthOrder = ['2026-03', '2026-04', '2026-05'];
+const monthOrder = ['2026-03', '2026-04', '2026-05', '2026-06', '2026-07'];
 
 function getStatusStyles(status: DateStatus, active: boolean) {
   if (active) {
     return {
-      background: '#2e9746',
-      color: '#fff',
-      border: '2px solid #2e9746',
+      background: '#17a34a',
+      color: '#ffffff',
+      border: '2px solid #17a34a',
+      boxShadow: '0 10px 22px rgba(23,163,74,0.25)',
     };
   }
 
   if (status === 'free') {
     return {
-      background: '#eff8f1',
-      color: '#248345',
-      border: '1px solid #cfe6d5',
+      background: '#dff8e7',
+      color: '#15803d',
+      border: '1px solid #9fe0b2',
     };
   }
 
   if (status === 'partial') {
     return {
-      background: '#f8f1e5',
-      color: '#9b6a18',
-      border: '1px solid #ead8b5',
+      background: '#fff1bf',
+      color: '#b77906',
+      border: '1px solid #f3cf5f',
     };
   }
 
   return {
-    background: '#f4dede',
-    color: '#c94848',
-    border: '1px solid #ebc4c4',
+    background: '#ffd8dc',
+    color: '#d62839',
+    border: '1px solid #f2a7b0',
   };
 }
 
@@ -91,6 +108,7 @@ export default function BookingDatePage() {
 
   const [activeMonthIndex, setActiveMonthIndex] = useState(1);
   const [selectedDayKey, setSelectedDayKey] = useState('');
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   if (!master || !service) {
     return <main style={{ padding: 24 }}>Booking data not found</main>;
@@ -189,12 +207,14 @@ export default function BookingDatePage() {
             border: '1px solid #e4d8ca',
             borderRadius: 26,
             padding: 18,
+            position: 'relative',
           }}
         >
           <div
             style={{
-              display: 'flex',
-              justifyContent: 'space-between',
+              display: 'grid',
+              gridTemplateColumns: '42px 1fr 42px 42px',
+              gap: 10,
               alignItems: 'center',
             }}
           >
@@ -214,9 +234,23 @@ export default function BookingDatePage() {
               ‹
             </button>
 
-            <div style={{ fontSize: 24, fontWeight: 800 }}>
+            <div style={{ fontSize: 24, fontWeight: 800, textAlign: 'center' }}>
               {monthLabels[activeMonthKey]}
             </div>
+
+            <button
+              onClick={() => setPickerOpen((prev) => !prev)}
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 999,
+                border: '1px solid #e4d8ca',
+                background: '#fff',
+                fontSize: 20,
+              }}
+            >
+              📅
+            </button>
 
             <button
               disabled={activeMonthIndex === monthOrder.length - 1}
@@ -238,6 +272,55 @@ export default function BookingDatePage() {
               ›
             </button>
           </div>
+
+          {pickerOpen && (
+            <div
+              style={{
+                marginTop: 14,
+                background: '#fffaf2',
+                border: '1px solid #eadfce',
+                borderRadius: 20,
+                padding: 14,
+              }}
+            >
+              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>
+                Choose month
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 10,
+                }}
+              >
+                {monthOrder.map((monthKey, index) => {
+                  const active = activeMonthIndex === index;
+
+                  return (
+                    <button
+                      key={monthKey}
+                      onClick={() => {
+                        setActiveMonthIndex(index);
+                        setPickerOpen(false);
+                      }}
+                      style={{
+                        padding: '14px 12px',
+                        borderRadius: 18,
+                        border: active ? '2px solid #17a34a' : '1px solid #e4d8ca',
+                        background: active ? '#e6f8ec' : '#fff',
+                        color: '#1d1712',
+                        fontWeight: 800,
+                        fontSize: 15,
+                      }}
+                    >
+                      {monthLabels[monthKey]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div
             style={{
@@ -265,7 +348,7 @@ export default function BookingDatePage() {
                     borderRadius: 20,
                     padding: '14px 10px',
                     textAlign: 'center',
-                    opacity: disabled ? 0.72 : 1,
+                    opacity: disabled ? 0.8 : 1,
                     ...styles,
                   }}
                 >
@@ -297,8 +380,8 @@ export default function BookingDatePage() {
                   width: 14,
                   height: 14,
                   borderRadius: 999,
-                  background: '#eff8f1',
-                  border: '1px solid #cfe6d5',
+                  background: '#dff8e7',
+                  border: '1px solid #9fe0b2',
                   display: 'inline-block',
                 }}
               />
@@ -311,8 +394,8 @@ export default function BookingDatePage() {
                   width: 14,
                   height: 14,
                   borderRadius: 999,
-                  background: '#f8f1e5',
-                  border: '1px solid #ead8b5',
+                  background: '#fff1bf',
+                  border: '1px solid #f3cf5f',
                   display: 'inline-block',
                 }}
               />
@@ -325,8 +408,8 @@ export default function BookingDatePage() {
                   width: 14,
                   height: 14,
                   borderRadius: 999,
-                  background: '#f4dede',
-                  border: '1px solid #ebc4c4',
+                  background: '#ffd8dc',
+                  border: '1px solid #f2a7b0',
                   display: 'inline-block',
                 }}
               />
@@ -378,7 +461,7 @@ export default function BookingDatePage() {
             }}
             style={{
               border: 'none',
-              background: selectedDay ? '#2e9746' : '#b7d9bf',
+              background: selectedDay ? '#17a34a' : '#b7d9bf',
               color: '#fff',
               borderRadius: 24,
               padding: '18px 26px',
