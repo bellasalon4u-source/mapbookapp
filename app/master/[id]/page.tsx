@@ -7,7 +7,6 @@ import { getMasterById } from '../../../services/masters';
 export default function MasterPage() {
   const params = useParams();
   const router = useRouter();
-
   const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
 
   const [liked, setLiked] = useState(false);
@@ -20,27 +19,27 @@ export default function MasterPage() {
     return <main style={{ padding: 24 }}>Master not found</main>;
   }
 
-  const galleryPreview = master.gallery.slice(0, 3);
-  const extraCount = master.gallery.length - 3;
+  const previewImages = master.gallery.slice(0, 3);
+  const extraCount = Math.max(master.gallery.length - 3, 0);
 
   const openViewer = (index: number) => {
     setSelectedImageIndex(index);
     setViewerOpen(true);
   };
 
-  const closeAllModals = () => {
-    setViewerOpen(false);
+  const closeEverything = () => {
     setGalleryOpen(false);
+    setViewerOpen(false);
     setAvatarOpen(false);
   };
 
-  const showPrevImage = () => {
+  const prevImage = () => {
     setSelectedImageIndex((prev) =>
       prev === 0 ? master.gallery.length - 1 : prev - 1
     );
   };
 
-  const showNextImage = () => {
+  const nextImage = () => {
     setSelectedImageIndex((prev) =>
       prev === master.gallery.length - 1 ? 0 : prev + 1
     );
@@ -61,7 +60,21 @@ export default function MasterPage() {
           <img
             src={master.cover}
             alt={master.name}
-            style={{ width: '100%', height: 405, objectFit: 'cover', display: 'block' }}
+            style={{
+              width: '100%',
+              height: 405,
+              objectFit: 'cover',
+              display: 'block',
+            }}
+          />
+
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(255,255,255,0.16)',
+              pointerEvents: 'none',
+            }}
           />
 
           <button
@@ -73,8 +86,8 @@ export default function MasterPage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe6da',
-              background: 'rgba(255,255,255,0.95)',
+              border: '1px solid rgba(239,230,218,0.95)',
+              background: 'rgba(255,255,255,0.96)',
               fontSize: 24,
               zIndex: 5,
             }}
@@ -91,8 +104,8 @@ export default function MasterPage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe6da',
-              background: 'rgba(255,255,255,0.95)',
+              border: '1px solid rgba(239,230,218,0.95)',
+              background: 'rgba(255,255,255,0.96)',
               fontSize: 22,
               zIndex: 5,
             }}
@@ -104,30 +117,30 @@ export default function MasterPage() {
             style={{
               position: 'absolute',
               left: 16,
-              top: 118,
+              top: 112,
               display: 'flex',
               flexDirection: 'column',
               gap: 10,
               zIndex: 4,
             }}
           >
-            {galleryPreview.map((image, index) => {
-              const isLastVisible = index === 2 && extraCount > 0;
+            {previewImages.map((image, index) => {
+              const isLast = index === 2 && extraCount > 0;
 
               return (
                 <button
                   key={index}
                   onClick={() => openViewer(index)}
                   style={{
-                    width: 82,
-                    height: 82,
-                    border: '2px solid rgba(255,255,255,0.82)',
-                    borderRadius: 18,
-                    overflow: 'hidden',
+                    width: 78,
+                    height: 78,
                     padding: 0,
+                    border: '2px solid rgba(255,255,255,0.9)',
+                    borderRadius: 16,
+                    overflow: 'hidden',
                     background: '#fff',
                     position: 'relative',
-                    boxShadow: '0 10px 24px rgba(0,0,0,0.18)',
+                    boxShadow: '0 10px 24px rgba(0,0,0,0.16)',
                   }}
                 >
                   <img
@@ -141,17 +154,18 @@ export default function MasterPage() {
                     }}
                   />
 
-                  {isLastVisible && (
+                  {isLast && (
                     <div
                       style={{
                         position: 'absolute',
                         inset: 0,
-                        background: 'rgba(0,0,0,0.34)',
+                        background: 'rgba(0,0,0,0.32)',
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        alignItems: 'flex-end',
+                        justifyContent: 'flex-end',
+                        padding: 8,
                         color: '#fff',
-                        fontSize: 22,
+                        fontSize: 18,
                         fontWeight: 900,
                       }}
                     >
@@ -165,18 +179,22 @@ export default function MasterPage() {
             <button
               onClick={() => setGalleryOpen(true)}
               style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
                 border: 'none',
-                background: 'rgba(255,255,255,0.95)',
+                background: 'rgba(255,255,255,0.96)',
                 color: '#1d1712',
                 borderRadius: 18,
-                padding: '12px 14px',
+                padding: '12px 16px',
                 fontWeight: 800,
                 fontSize: 17,
-                textAlign: 'left',
-                boxShadow: '0 10px 24px rgba(0,0,0,0.18)',
+                boxShadow: '0 10px 24px rgba(0,0,0,0.16)',
+                width: 'fit-content',
               }}
             >
-              📷 Gallery
+              <span style={{ fontSize: 24, lineHeight: 1 }}>📷</span>
+              <span>Gallery</span>
             </button>
           </div>
 
@@ -211,6 +229,7 @@ export default function MasterPage() {
                   borderRadius: 999,
                   border: '4px solid #fff',
                   display: 'block',
+                  boxShadow: '0 8px 18px rgba(0,0,0,0.14)',
                 }}
               />
             </button>
@@ -220,11 +239,12 @@ export default function MasterPage() {
                 background: '#efe3cf',
                 color: '#5c4a34',
                 borderRadius: 16,
-                padding: '10px 12px',
+                padding: '10px 14px',
                 fontWeight: 800,
-                minWidth: 64,
+                minWidth: 72,
                 textAlign: 'center',
                 fontSize: 16,
+                boxShadow: '0 8px 18px rgba(0,0,0,0.10)',
               }}
             >
               {master.rating.toFixed(1)} ★
@@ -236,10 +256,11 @@ export default function MasterPage() {
                 width: 54,
                 height: 54,
                 borderRadius: 999,
-                border: '1px solid #efe6da',
-                background: 'rgba(255,255,255,0.95)',
+                border: '1px solid rgba(239,230,218,0.95)',
+                background: 'rgba(255,255,255,0.96)',
                 fontSize: 24,
                 color: liked ? '#d73737' : '#333',
+                boxShadow: '0 8px 18px rgba(0,0,0,0.10)',
               }}
             >
               {liked ? '♥' : '♡'}
@@ -260,6 +281,7 @@ export default function MasterPage() {
               fontWeight: 800,
               fontSize: 18,
               zIndex: 4,
+              boxShadow: '0 12px 26px rgba(46,151,70,0.25)',
             }}
           >
             Book now
@@ -268,6 +290,7 @@ export default function MasterPage() {
 
         <section style={{ padding: 24 }}>
           <div style={{ fontSize: 34, fontWeight: 800 }}>{master.name}</div>
+
           <div style={{ marginTop: 10, fontSize: 18, color: '#7a7066' }}>
             {master.title} • {master.city}
           </div>
@@ -306,11 +329,25 @@ export default function MasterPage() {
             </div>
           </div>
 
-          <p style={{ marginTop: 22, fontSize: 18, color: '#5d554d', lineHeight: 1.5 }}>
+          <p
+            style={{
+              marginTop: 22,
+              fontSize: 18,
+              color: '#5d554d',
+              lineHeight: 1.5,
+            }}
+          >
             {master.description}
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 20 }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 16,
+              marginTop: 20,
+            }}
+          >
             <div
               style={{
                 background: '#2f241c',
@@ -320,7 +357,9 @@ export default function MasterPage() {
               }}
             >
               <div style={{ opacity: 0.9, fontSize: 16 }}>Reviews</div>
-              <div style={{ fontSize: 34, fontWeight: 800, marginTop: 12 }}>{master.reviews}</div>
+              <div style={{ fontSize: 34, fontWeight: 800, marginTop: 12 }}>
+                {master.reviews}
+              </div>
             </div>
 
             <div
@@ -332,13 +371,22 @@ export default function MasterPage() {
               }}
             >
               <div style={{ opacity: 0.7, fontSize: 16 }}>Starting price</div>
-              <div style={{ fontSize: 34, fontWeight: 800, marginTop: 12 }}>£{master.priceFrom}</div>
+              <div style={{ fontSize: 34, fontWeight: 800, marginTop: 12 }}>
+                £{master.priceFrom}
+              </div>
             </div>
           </div>
 
           <h2 style={{ marginTop: 28, fontSize: 30 }}>Price list</h2>
 
-          <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div
+            style={{
+              marginTop: 14,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 14,
+            }}
+          >
             {master.services.map((service) => (
               <div
                 key={service.slug}
@@ -365,9 +413,26 @@ export default function MasterPage() {
                 />
 
                 <div>
-                  <div style={{ fontSize: 20, fontWeight: 800 }}>{service.title}</div>
-                  <div style={{ marginTop: 8, color: '#746b62', fontSize: 16 }}>{service.duration}</div>
-                  <div style={{ marginTop: 8, color: '#231b15', fontSize: 17, fontWeight: 700 }}>
+                  <div style={{ fontSize: 20, fontWeight: 800 }}>
+                    {service.title}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 8,
+                      color: '#746b62',
+                      fontSize: 16,
+                    }}
+                  >
+                    {service.duration}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 8,
+                      color: '#231b15',
+                      fontSize: 17,
+                      fontWeight: 700,
+                    }}
+                  >
                     from £{service.price}
                   </div>
                 </div>
@@ -414,7 +479,13 @@ export default function MasterPage() {
               padding: 18,
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <button
                 onClick={() => setGalleryOpen(false)}
                 style={{
@@ -433,7 +504,7 @@ export default function MasterPage() {
 
               <button
                 onClick={() => {
-                  closeAllModals();
+                  closeEverything();
                   router.push('/');
                 }}
                 style={{
@@ -536,7 +607,7 @@ export default function MasterPage() {
 
               <button
                 onClick={() => {
-                  closeAllModals();
+                  closeEverything();
                   router.push('/');
                 }}
                 style={{
@@ -581,7 +652,7 @@ export default function MasterPage() {
               {master.gallery.length > 1 && (
                 <>
                   <button
-                    onClick={showPrevImage}
+                    onClick={prevImage}
                     style={{
                       position: 'absolute',
                       left: 8,
@@ -600,7 +671,7 @@ export default function MasterPage() {
                   </button>
 
                   <button
-                    onClick={showNextImage}
+                    onClick={nextImage}
                     style={{
                       position: 'absolute',
                       right: 8,
@@ -687,7 +758,7 @@ export default function MasterPage() {
 
               <button
                 onClick={() => {
-                  closeAllModals();
+                  closeEverything();
                   router.push('/');
                 }}
                 style={{
