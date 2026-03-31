@@ -20,6 +20,9 @@ export default function MasterPage() {
     return <main style={{ padding: 24 }}>Master not found</main>;
   }
 
+  const galleryPreview = master.gallery.slice(0, 3);
+  const extraCount = master.gallery.length - 3;
+
   const openViewer = (index: number) => {
     setSelectedImageIndex(index);
     setViewerOpen(true);
@@ -73,6 +76,7 @@ export default function MasterPage() {
               border: '1px solid #efe6da',
               background: 'rgba(255,255,255,0.95)',
               fontSize: 24,
+              zIndex: 5,
             }}
           >
             ←
@@ -90,28 +94,91 @@ export default function MasterPage() {
               border: '1px solid #efe6da',
               background: 'rgba(255,255,255,0.95)',
               fontSize: 22,
+              zIndex: 5,
             }}
           >
             ⌂
           </button>
 
-          <button
-            onClick={() => setGalleryOpen(true)}
+          <div
             style={{
               position: 'absolute',
               left: 16,
-              bottom: 20,
-              border: 'none',
-              background: 'rgba(33,33,33,0.68)',
-              color: '#fff',
-              borderRadius: 16,
-              padding: '10px 14px',
-              fontWeight: 700,
-              fontSize: 16,
+              top: 118,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+              zIndex: 4,
             }}
           >
-            🖼 Gallery
-          </button>
+            {galleryPreview.map((image, index) => {
+              const isLastVisible = index === 2 && extraCount > 0;
+
+              return (
+                <button
+                  key={index}
+                  onClick={() => openViewer(index)}
+                  style={{
+                    width: 82,
+                    height: 82,
+                    border: '2px solid rgba(255,255,255,0.82)',
+                    borderRadius: 18,
+                    overflow: 'hidden',
+                    padding: 0,
+                    background: '#fff',
+                    position: 'relative',
+                    boxShadow: '0 10px 24px rgba(0,0,0,0.18)',
+                  }}
+                >
+                  <img
+                    src={image}
+                    alt={`${master.name} ${index + 1}`}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
+                  />
+
+                  {isLastVisible && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'rgba(0,0,0,0.34)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#fff',
+                        fontSize: 22,
+                        fontWeight: 900,
+                      }}
+                    >
+                      +{extraCount}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => setGalleryOpen(true)}
+              style={{
+                border: 'none',
+                background: 'rgba(255,255,255,0.95)',
+                color: '#1d1712',
+                borderRadius: 18,
+                padding: '12px 14px',
+                fontWeight: 800,
+                fontSize: 17,
+                textAlign: 'left',
+                boxShadow: '0 10px 24px rgba(0,0,0,0.18)',
+              }}
+            >
+              📷 Gallery
+            </button>
+          </div>
 
           <div
             style={{
@@ -122,6 +189,7 @@ export default function MasterPage() {
               flexDirection: 'column',
               gap: 10,
               alignItems: 'center',
+              zIndex: 4,
             }}
           >
             <button
@@ -191,6 +259,7 @@ export default function MasterPage() {
               padding: '18px 28px',
               fontWeight: 800,
               fontSize: 18,
+              zIndex: 4,
             }}
           >
             Book now
