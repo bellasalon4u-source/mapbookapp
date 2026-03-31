@@ -1,11 +1,23 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MasterItem } from '../services/masters';
 
 type RealMapProps = {
   masters: MasterItem[];
   fullScreen?: boolean;
+};
+
+type Point = MasterItem & {
+  lat: number;
+  lng: number;
+};
+
+type ScreenPoint = {
+  id: string;
+  x: number;
+  y: number;
+  availableNow?: boolean;
 };
 
 const fallbackCoords = [
@@ -23,29 +35,39 @@ export default function RealMap({
 }: RealMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
+
+  const [ready, setReady] = useState(false);
+  const [screenPoints, setScreenPoints] = useState<ScreenPoint[]>([]);
+
+  const points: Point[] = useMemo(() => {
+    return masters.map((master, index) => ({
+      ...master,
+      lat: master.lat ?? fallbackCoords[index % fallbackCoords.length].lat,
+      lng: master.lng ?? fallbackCoords[index % fallbackCoords.length].lng,
+    }));
+  }, [masters]);
 
   useEffect(() => {
-    let cancelled = false;
+    let disposed = false;
 
     async function initMap() {
       if (!mapContainerRef.current || mapRef.current) return;
 
-      const L = await import('leaflet');
-      await import('leaflet/dist/leaflet.css');
-
-      if (cancelled || !mapContainerRef.current) return;
+      const L = (await import('leaflet')).default;
+      if (disposed || !mapContainerRef.current) return;
 
       const map = L.map(mapContainerRef.current, {
+        center: [51.5074, -0.1278],
+        zoom: 11,
         zoomControl: true,
-        attributionControl: true,
-      }).setView([51.5074, -0.1278], 11);
+      });
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
 
       mapRef.current = map;
+      setReady(true);
 
       setTimeout(() => {
         map.invalidateSize();
@@ -55,7 +77,7 @@ export default function RealMap({
     initMap();
 
     return () => {
-      cancelled = true;
+      disposed = true;
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -64,91 +86,63 @@ export default function RealMap({
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    if (!ready || !mapRef.current || points.length === 0) return;
 
-    async function drawMarkers() {
-      if (!mapRef.current) return;
+    const map = mapRef.current;
+    const bounds = points.map((p) => [p.lat, p.lng]);
 
-      const L = await import('leaflet');
-      if (cancelled) return;
-
-      const map = mapRef.current;
-
-      markersRef.current.forEach((marker) => {
-        map.removeLayer(marker);
+    if (bounds.length > 1) {
+      map.fitBounds(bounds, {
+        padding: fullScreen ? [90, 90] : [40, 40],
+        maxZoom: 13,
       });
-      markersRef.current = [];
-
-      const preparedMasters = masters.map((master, index) => ({
-        ...master,
-        lat: master.lat ?? fallbackCoords[index % fallbackCoords.length].lat,
-        lng: master.lng ?? fallbackCoords[index % fallbackCoords.length].lng,
-      }));
-
-      preparedMasters.forEach((master) => {
-        const markerHtml = `
-          <div style="
-            width: 28px;
-            height: 28px;
-            border-radius: 999px;
-            background: ${master.availableNow ? '#22c55e' : '#ef4444'};
-            border: 4px solid #2a231d;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-          "></div>
-        `;
-
-        const icon = L.divIcon({
-          html: markerHtml,
-          className: '',
-          iconSize: [28, 28],
-          iconAnchor: [14, 14],
-        });
-
-        const marker = L.marker([master.lat, master.lng], { icon }).addTo(map);
-
-        marker.bindPopup(`
-          <div style="font-family: Arial, sans-serif; min-width: 180px;">
-            <div style="font-size: 16px; font-weight: 800; color: #1d1712;">
-              ${master.name}
-            </div>
-            <div style="margin-top: 4px; color: #6f655b; font-size: 14px;">
-              ${master.title} • ${master.city}
-            </div>
-            <div style="margin-top: 8px; font-weight: 700; color: #1d1712;">
-              from £${master.priceFrom}
-            </div>
-          </div>
-        `);
-
-        markersRef.current.push(marker);
-      });
-
-      if (preparedMasters.length > 0) {
-        const bounds = L.latLngBounds(
-          preparedMasters.map((master) => [master.lat, master.lng])
-        );
-
-        map.fitBounds(bounds, {
-          padding: fullScreen ? [90, 90] : [40, 40],
-          maxZoom: 13,
-        });
-      }
-
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 150);
+    } else if (bounds.length === 1) {
+      map.setView(bounds[0], 13);
     }
+  }, [ready, points, fullScreen]);
 
-    drawMarkers();
+  useEffect(() => {
+    if (!ready || !mapRef.current) return;
+
+    const map = mapRef.current;
+
+    const updatePositions = () => {
+      const next = points.map((point) => {
+        const projected = map.latLngToContainerPoint([point.lat, point.lng]);
+        return {
+          id: point.id,
+          x: projected.x,
+          y: projected.y,
+          availableNow: point.availableNow,
+        };
+      });
+
+      setScreenPoints(next);
+    };
+
+    updatePositions();
+
+    map.on('zoomend', updatePositions);
+    map.on('moveend', updatePositions);
+    map.on('resize', updatePositions);
+
+    setTimeout(updatePositions, 100);
+    setTimeout(updatePositions, 400);
+
+    window.addEventListener('resize', updatePositions);
 
     return () => {
-      cancelled = true;
+      map.off('zoomend', updatePositions);
+      map.off('moveend', updatePositions);
+      map.off('resize', updatePositions);
+      window.removeEventListener('resize', updatePositions);
     };
-  }, [masters, fullScreen]);
+  }, [ready, points]);
 
   return (
     <div
       style={{
+        position: 'relative',
         width: '100%',
         height: fullScreen ? '100vh' : '420px',
         minHeight: fullScreen ? '100vh' : '420px',
@@ -159,10 +153,39 @@ export default function RealMap({
       <div
         ref={mapContainerRef}
         style={{
-          width: '100%',
-          height: '100%',
+          position: 'absolute',
+          inset: 0,
+          zIndex: 1,
         }}
       />
+
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 50,
+          pointerEvents: 'none',
+        }}
+      >
+        {screenPoints.map((point) => (
+          <div
+            key={point.id}
+            style={{
+              position: 'absolute',
+              left: point.x,
+              top: point.y,
+              transform: 'translate(-50%, -50%)',
+              width: 30,
+              height: 30,
+              borderRadius: 999,
+              border: '4px solid #2f241c',
+              background: point.availableNow ? '#22c55e' : '#ef4444',
+              boxShadow: '0 4px 10px rgba(0,0,0,0.25)',
+              zIndex: 60,
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
