@@ -34,18 +34,22 @@ export default function BookingConfirmedPage() {
   const date = searchParams.get('date') || '';
   const time = searchParams.get('time') || '';
 
+  if (!master) {
+    return <main style={{ padding: 24 }}>Booking not found</main>;
+  }
+
   const selectedServiceSlugs = servicesParam
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
 
-  if (!master) {
-    return <main style={{ padding: 24 }}>Booking not found</main>;
-  }
-
   const selectedItems = master.services.filter((service) =>
     selectedServiceSlugs.includes(service.slug)
   );
+
+  if (!selectedItems.length) {
+    return <main style={{ padding: 24 }}>Selected procedures not found</main>;
+  }
 
   const totalPrice = selectedItems.reduce((sum, item) => sum + item.price, 0);
   const totalMinutes = selectedItems.reduce(
