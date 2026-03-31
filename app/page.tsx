@@ -42,7 +42,7 @@ export default function HomePage() {
           zIndex: 1,
         }}
       >
-        <RealMap masters={masters} />
+        <RealMap masters={masters} fullScreen />
       </div>
 
       <div
@@ -390,6 +390,32 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      <style jsx global>{`
+        .leaflet-top.leaflet-left {
+          top: 88px !important;
+          left: 10px !important;
+        }
+
+        .leaflet-control-zoom {
+          border: none !important;
+          box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08) !important;
+          overflow: hidden;
+          border-radius: 16px !important;
+        }
+
+        .leaflet-control-zoom a {
+          width: 44px !important;
+          height: 44px !important;
+          line-height: 44px !important;
+          font-size: 24px !important;
+        }
+
+        .leaflet-bottom.leaflet-right,
+        .leaflet-bottom.leaflet-left {
+          bottom: 110px !important;
+        }
+      `}</style>
     </main>
   );
 }
