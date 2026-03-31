@@ -201,8 +201,8 @@ export default function MasterPage() {
           <div
             style={{
               position: 'absolute',
-              top: 20,
-              right: 84,
+              top: 86,
+              right: 16,
               display: 'flex',
               flexDirection: 'column',
               gap: 10,
@@ -213,6 +213,7 @@ export default function MasterPage() {
             <button
               onClick={() => setAvatarOpen(true)}
               style={{
+                position: 'relative',
                 padding: 0,
                 border: 'none',
                 background: 'transparent',
@@ -223,8 +224,8 @@ export default function MasterPage() {
                 src={master.avatar}
                 alt={master.name}
                 style={{
-                  width: 64,
-                  height: 64,
+                  width: 72,
+                  height: 72,
                   objectFit: 'cover',
                   borderRadius: 999,
                   border: '4px solid #fff',
@@ -232,6 +233,33 @@ export default function MasterPage() {
                   boxShadow: '0 8px 18px rgba(0,0,0,0.14)',
                 }}
               />
+
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLiked((prev) => !prev);
+                }}
+                style={{
+                  position: 'absolute',
+                  right: -4,
+                  bottom: -2,
+                  width: 28,
+                  height: 28,
+                  borderRadius: 999,
+                  background: '#fff',
+                  border: '1px solid #e7ddd0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 6px 14px rgba(0,0,0,0.12)',
+                  color: liked ? '#d73737' : '#333',
+                  fontSize: 15,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                {liked ? '♥' : '♡'}
+              </span>
             </button>
 
             <div
@@ -249,22 +277,6 @@ export default function MasterPage() {
             >
               {master.rating.toFixed(1)} ★
             </div>
-
-            <button
-              onClick={() => setLiked((prev) => !prev)}
-              style={{
-                width: 54,
-                height: 54,
-                borderRadius: 999,
-                border: '1px solid rgba(239,230,218,0.95)',
-                background: 'rgba(255,255,255,0.96)',
-                fontSize: 24,
-                color: liked ? '#d73737' : '#333',
-                boxShadow: '0 8px 18px rgba(0,0,0,0.10)',
-              }}
-            >
-              {liked ? '♥' : '♡'}
-            </button>
           </div>
 
           <button
