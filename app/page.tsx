@@ -1,13 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import RealMap from '../components/RealMap';
 import { getAllMasters } from '../services/masters';
 
 export default function HomePage() {
-  const router = useRouter();
-  const masters = useMemo(() => getAllMasters(), []);
+  const masters = getAllMasters();
 
   return (
     <main
@@ -55,24 +52,18 @@ export default function HomePage() {
             </span>
           </div>
 
-          <a
-            href="/favorites"
+          <button
             style={{
               padding: '14px 16px',
               borderRadius: 16,
               border: '1px solid #d8cfc3',
               background: '#fff',
-              textDecoration: 'none',
-              color: '#1d1712',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               minWidth: 56,
+              fontSize: 20,
             }}
           >
             ♥
-          </a>
+          </button>
         </div>
 
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
@@ -105,97 +96,8 @@ export default function HomePage() {
 
         <section style={{ marginTop: 28 }}>
           <h2 style={{ fontSize: 34, margin: 0, fontWeight: 800 }}>Map view</h2>
-
           <div style={{ marginTop: 12 }}>
             <RealMap masters={masters} />
-          </div>
-        </section>
-
-        <section style={{ marginTop: 28 }}>
-          <h2 style={{ fontSize: 34, margin: 0, fontWeight: 800 }}>Recommended</h2>
-
-          <div style={{ display: 'grid', gap: 16, marginTop: 14 }}>
-            {masters.map((master) => (
-              <div
-                key={master.id}
-                onClick={() => router.push(`/master/${master.id}`)}
-                style={{
-                  overflow: 'hidden',
-                  borderRadius: 26,
-                  background: '#fff',
-                  border: '1px solid #eadfd2',
-                  color: '#1d1712',
-                  cursor: 'pointer',
-                }}
-              >
-                <div
-                  style={{
-                    height: 180,
-                    background:
-                      'linear-gradient(135deg, #b77288 0%, #d8aab7 50%, #e8cbd2 100%)',
-                  }}
-                />
-
-                <div style={{ padding: 16 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                    <div>
-                      <div style={{ fontSize: 24, fontWeight: 800 }}>{master.name}</div>
-                      <div style={{ color: '#786d61', marginTop: 4 }}>
-                        {master.title} • {master.city}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        background: '#f2e9dc',
-                        color: '#463b31',
-                        padding: '8px 10px',
-                        borderRadius: 12,
-                        fontWeight: 800,
-                        height: 'fit-content',
-                      }}
-                    >
-                      {master.rating} ★
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginTop: 14,
-                    }}
-                  >
-                    <div
-                      style={{
-                        background: '#2f241c',
-                        color: '#fff',
-                        padding: '10px 14px',
-                        borderRadius: 999,
-                        fontWeight: 800,
-                      }}
-                    >
-                      from £{master.priceFrom}
-                    </div>
-
-                    <button
-                      type="button"
-                      style={{
-                        width: 42,
-                        height: 42,
-                        borderRadius: 999,
-                        border: '1px solid #eadfd2',
-                        background: '#fff',
-                        fontSize: 22,
-                      }}
-                    >
-                      ♡
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
       </div>
