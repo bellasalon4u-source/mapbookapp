@@ -5,6 +5,7 @@ import type { MasterItem } from '../services/masters';
 
 type RealMapProps = {
   masters: MasterItem[];
+  fullScreen?: boolean;
 };
 
 const fallbackCoords = [
@@ -12,12 +13,12 @@ const fallbackCoords = [
   { lat: 51.5154, lng: -0.0721 },
   { lat: 51.5033, lng: -0.1195 },
   { lat: 51.5231, lng: -0.1586 },
-  { lat: 51.4952, lng: -0.1460 },
-  { lat: 51.5380, lng: -0.1426 },
+  { lat: 51.4952, lng: -0.146 },
+  { lat: 51.538, lng: -0.1426 },
 ];
 
 function escapeHtml(value: string) {
-  return String(value)
+  return value
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
@@ -25,396 +26,151 @@ function escapeHtml(value: string) {
     .replaceAll("'", '&#039;');
 }
 
-function getGallery(master: MasterItem) {
-  const gallery = Array.isArray(master.gallery) ? master.gallery.filter(Boolean) : [];
-  if (gallery.length >= 3) return gallery.slice(0, 3);
-  return [master.avatar, master.avatar, master.avatar];
-}
-
-function buildPopupHtml(master: MasterItem) {
-  const [mainImage, thumb1, thumb2] = getGallery(master);
-  const statusColor = master.availableNow ? '#2f8f48' : '#c53b3b';
-  const statusText = master.availableNow ? 'Available now' : 'Not available now';
-
-  return `
-    <div class="mapbook-popup-card">
-      <button class="mapbook-like-btn" type="button">♡</button>
-
-      <div class="mapbook-popup-left">
-        <div class="mapbook-main-image-wrap">
-          <img class="mapbook-main-image" src="${escapeHtml(mainImage)}" alt="${escapeHtml(master.name)}" />
-          <div class="mapbook-gallery-dots"><span></span><span></span><span></span></div>
-        </div>
-        <img class="mapbook-thumb" src="${escapeHtml(thumb1)}" alt="${escapeHtml(master.name)}" />
-        <img class="mapbook-thumb" src="${escapeHtml(thumb2)}" alt="${escapeHtml(master.name)}" />
-      </div>
-
-      <div class="mapbook-popup-right">
-        <div class="mapbook-master-name">${escapeHtml(master.name)}</div>
-        <div class="mapbook-master-subtitle">${escapeHtml(master.title)} • ${escapeHtml(master.city)}</div>
-
-        <div class="mapbook-pills-row">
-          <div class="mapbook-price-pill">from £${master.priceFrom}</div>
-          <div class="mapbook-rating-pill">${master.rating.toFixed(1)} <span class="mapbook-star">★</span></div>
-        </div>
-
-        <div class="mapbook-status-row" style="color:${statusColor};">
-          <span class="mapbook-status-dot" style="background:${statusColor};"></span>
-          ${statusText}
-        </div>
-
-        <div class="mapbook-bottom-buttons">
-          <a class="mapbook-open-btn" href="/master/${escapeHtml(master.id)}">▶ Open</a>
-          <a class="mapbook-book-btn" href="/booking/${escapeHtml(master.id)}">Book now ›</a>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-export default function RealMap({ masters }: RealMapProps) {
+export default function RealMap({
+  masters,
+  fullScreen = false,
+}: RealMapProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
-  const layerRef = useRef<any>(null);
-  const styleAddedRef = useRef(false);
-  const [ready, setReady] = useState(false);
+  const markersLayerRef = useRef<any>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (styleAddedRef.current) return;
-
-    const style = document.createElement('style');
-    style.innerHTML = `
-      .leaflet-popup-content-wrapper {
-        padding: 0 !important;
-        border-radius: 28px !important;
-        overflow: hidden !important;
-        background: transparent !important;
-        box-shadow: none !important;
-      }
-      .leaflet-popup-content {
-        margin: 0 !important;
-        width: 560px !important;
-        max-width: calc(100vw - 36px) !important;
-      }
-      .leaflet-popup-tip {
-        background: #f8f6f2 !important;
-        box-shadow: none !important;
-      }
-      .mapbook-popup-card {
-        position: relative;
-        display: grid;
-        grid-template-columns: 150px 1fr;
-        gap: 18px;
-        background: #f8f6f2;
-        border: 1px solid #e8dfd2;
-        border-radius: 28px;
-        padding: 20px;
-        box-shadow: 0 14px 34px rgba(31, 25, 19, 0.18);
-        font-family: Arial, sans-serif;
-        color: #1f1812;
-      }
-      .mapbook-like-btn {
-        position: absolute;
-        top: 16px;
-        right: 16px;
-        width: 50px;
-        height: 50px;
-        border-radius: 999px;
-        border: 1px solid #e7ddd0;
-        background: rgba(244, 239, 232, 0.86);
-        color: #4f453d;
-        font-size: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .mapbook-popup-left {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-      .mapbook-main-image,
-      .mapbook-thumb {
-        width: 100%;
-        object-fit: cover;
-        display: block;
-      }
-      .mapbook-main-image {
-        height: 150px;
-        border-radius: 18px;
-      }
-      .mapbook-thumb {
-        height: 84px;
-        border-radius: 14px;
-      }
-      .mapbook-main-image-wrap {
-        position: relative;
-      }
-      .mapbook-gallery-dots {
-        position: absolute;
-        left: 50%;
-        bottom: 10px;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 6px;
-      }
-      .mapbook-gallery-dots span {
-        width: 7px;
-        height: 7px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.95);
-      }
-      .mapbook-popup-right {
-        min-width: 0;
-        padding-right: 54px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
-      .mapbook-master-name {
-        font-size: 22px;
-        font-weight: 800;
-        line-height: 1.15;
-      }
-      .mapbook-master-subtitle {
-        color: #786d61;
-        font-size: 15px;
-        margin-top: 6px;
-      }
-      .mapbook-pills-row {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        margin-top: 16px;
-        flex-wrap: wrap;
-      }
-      .mapbook-price-pill {
-        background: #3c2d21;
-        color: #fff;
-        border-radius: 999px;
-        padding: 11px 18px;
-        font-size: 17px;
-        font-weight: 800;
-      }
-      .mapbook-rating-pill {
-        background: #efe3cf;
-        color: #5c4a34;
-        border-radius: 999px;
-        padding: 11px 18px;
-        font-size: 17px;
-        font-weight: 800;
-      }
-      .mapbook-star {
-        color: #d3a32d;
-      }
-      .mapbook-status-row {
-        margin-top: 16px;
-        font-size: 15px;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .mapbook-status-dot {
-        width: 13px;
-        height: 13px;
-        border-radius: 999px;
-        display: inline-block;
-      }
-      .mapbook-bottom-buttons {
-        margin-top: 24px;
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-      .mapbook-open-btn,
-      .mapbook-book-btn {
-        text-decoration: none;
-        border-radius: 18px;
-        padding: 15px 22px;
-        font-size: 18px;
-        font-weight: 800;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 150px;
-      }
-      .mapbook-open-btn {
-        background: linear-gradient(180deg, #a8d9e7 0%, #7fc5d8 100%);
-        color: #fff;
-      }
-      .mapbook-book-btn {
-        background: linear-gradient(180deg, #48ac57 0%, #379944 100%);
-        color: #fff;
-      }
-      @media (max-width: 640px) {
-        .leaflet-popup-content {
-          width: 320px !important;
-        }
-        .mapbook-popup-card {
-          grid-template-columns: 110px 1fr;
-          gap: 14px;
-          padding: 16px;
-          border-radius: 24px;
-        }
-        .mapbook-main-image {
-          height: 118px;
-        }
-        .mapbook-thumb {
-          height: 62px;
-        }
-        .mapbook-master-name {
-          font-size: 18px;
-        }
-        .mapbook-master-subtitle {
-          font-size: 13px;
-        }
-        .mapbook-price-pill,
-        .mapbook-rating-pill {
-          font-size: 14px;
-          padding: 10px 14px;
-        }
-        .mapbook-open-btn,
-        .mapbook-book-btn {
-          min-width: 112px;
-          padding: 13px 16px;
-          font-size: 15px;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    styleAddedRef.current = true;
+    setIsMounted(true);
   }, []);
 
   useEffect(() => {
-    let disposed = false;
+    if (!isMounted) return;
+    if (!mapContainerRef.current) return;
+    if (mapRef.current) return;
+
+    let isCancelled = false;
 
     async function initMap() {
-      if (!mapContainerRef.current || mapRef.current) return;
-      const L = (await import('leaflet')).default;
-      if (disposed || !mapContainerRef.current) return;
+      const L = await import('leaflet');
+      if (isCancelled || !mapContainerRef.current) return;
 
       const map = L.map(mapContainerRef.current, {
-        center: [51.5074, -0.1278],
-        zoom: 12,
         zoomControl: true,
-      });
+        attributionControl: true,
+      }).setView([51.5074, -0.1278], 11);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
 
-      const layer = L.layerGroup().addTo(map);
+      markersLayerRef.current = L.layerGroup().addTo(map);
       mapRef.current = map;
-      layerRef.current = layer;
-      setReady(true);
 
-      setTimeout(() => map.invalidateSize(), 300);
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 300);
     }
 
     initMap();
 
     return () => {
-      disposed = true;
+      isCancelled = true;
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
-        layerRef.current = null;
       }
     };
-  }, []);
+  }, [isMounted]);
 
   useEffect(() => {
-    let cancelled = false;
+    if (!mapRef.current || !markersLayerRef.current) return;
 
     async function drawMarkers() {
-      if (!ready || !mapRef.current || !layerRef.current) return;
-
-      const L = (await import('leaflet')).default;
-      if (cancelled) return;
-
-      const layer = layerRef.current;
+      const L = await import('leaflet');
       const map = mapRef.current;
+      const layer = markersLayerRef.current;
+
       layer.clearLayers();
 
-      const points =
-        masters.length > 0
-          ? masters
-          : fallbackCoords.map((coord, index) => ({
-              id: `fallback-${index}`,
-              name: `Master ${index + 1}`,
-              title: 'Beauty specialist',
-              city: 'London',
-              avatar: 'https://via.placeholder.com/300x200',
-              cover: 'https://via.placeholder.com/1200x800',
-              rating: 4.8,
-              priceFrom: 40,
-              availableNow: false,
-              reviews: 20,
-              description: 'Sample description',
-              address: 'London',
-              phone: '+44 0000 000000',
-              email: 'demo@example.com',
-              social: '@demo',
-              lat: coord.lat,
-              lng: coord.lng,
-              gallery: ['https://via.placeholder.com/300x200'],
-              services: [],
-            }));
+      const preparedMasters = masters.map((master, index) => ({
+        ...master,
+        lat: master.lat ?? fallbackCoords[index % fallbackCoords.length].lat,
+        lng: master.lng ?? fallbackCoords[index % fallbackCoords.length].lng,
+      }));
 
-      const bounds: [number, number][] = [];
+      preparedMasters.forEach((master) => {
+        const color = master.availableNow ? '#22c55e' : '#ef4444';
 
-      points.forEach((master, index) => {
-        const lat = master.lat ?? fallbackCoords[index % fallbackCoords.length].lat;
-        const lng = master.lng ?? fallbackCoords[index % fallbackCoords.length].lng;
-
-        const marker = L.circleMarker([lat, lng], {
-          radius: 11,
-          color: '#2f241c',
-          weight: 3,
-          fillColor: master.availableNow ? '#18c24f' : '#ef2b2b',
-          fillOpacity: 1,
+        const icon = L.divIcon({
+          className: '',
+          html: `
+            <div style="
+              width: 26px;
+              height: 26px;
+              border-radius: 999px;
+              background: ${color};
+              border: 4px solid #2a231d;
+              box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+            "></div>
+          `,
+          iconSize: [26, 26],
+          iconAnchor: [13, 13],
         });
 
-        marker.bindPopup(buildPopupHtml(master), {
-          closeButton: false,
-          autoPan: true,
-          maxWidth: 580,
-          offset: [0, -10],
-        });
+        const popupHtml = `
+          <div style="min-width:220px;font-family:Arial,sans-serif;">
+            <div style="font-size:18px;font-weight:800;color:#1d1712;">
+              ${escapeHtml(master.name)}
+            </div>
+            <div style="margin-top:6px;font-size:14px;color:#6f655b;">
+              ${escapeHtml(master.title)} • ${escapeHtml(master.city)}
+            </div>
+            <div style="margin-top:10px;font-size:14px;font-weight:700;color:#248345;">
+              ${master.availableNow ? 'Available now' : 'Not available now'}
+            </div>
+            <div style="margin-top:10px;font-size:15px;font-weight:800;color:#1d1712;">
+              from £${master.priceFrom}
+            </div>
+          </div>
+        `;
 
-        marker.on('click', () => marker.openPopup());
-
-        marker.addTo(layer);
-        bounds.push([lat, lng]);
+        L.marker([master.lat, master.lng], { icon })
+          .addTo(layer)
+          .bindPopup(popupHtml);
       });
 
-      if (bounds.length > 1) {
-        map.fitBounds(bounds, { padding: [40, 40] });
-      } else if (bounds.length === 1) {
-        map.setView(bounds[0], 13);
+      if (preparedMasters.length > 0) {
+        const bounds = L.latLngBounds(
+          preparedMasters.map((master) => [master.lat, master.lng])
+        );
+        map.fitBounds(bounds, {
+          padding: fullScreen ? [80, 80] : [40, 40],
+          maxZoom: 13,
+        });
       }
 
-      setTimeout(() => map.invalidateSize(), 120);
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 200);
     }
 
     drawMarkers();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [ready, masters]);
+  }, [masters, fullScreen]);
 
   return (
     <div
-      ref={mapContainerRef}
       style={{
         width: '100%',
-        height: '420px',
-        borderRadius: '28px',
+        height: fullScreen ? '100vh' : 420,
+        minHeight: fullScreen ? '100vh' : 420,
+        borderRadius: fullScreen ? 0 : 28,
         overflow: 'hidden',
-        border: '1px solid #e4d5c2',
+        position: 'relative',
       }}
-    />
+    >
+      <div
+        ref={mapContainerRef}
+        style={{
+          width: '100%',
+          height: '100%',
+        }}
+      />
+    </div>
   );
 }
