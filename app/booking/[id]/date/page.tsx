@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { getMasterById } from '../../../../services/masters';
 
-type DateStatus = 'free' | 'partial' | 'full';
+type DateStatus = 'free' | 'full';
 
 function getMonthLabel(monthIndex: number) {
   const labels = [
@@ -77,7 +77,6 @@ function getStatusForDate(date: Date, today: Date): DateStatus {
   const day = normalizedDate.getDate();
 
   if (day % 7 === 0) return 'full';
-  if (day % 3 === 0) return 'partial';
   return 'free';
 }
 
@@ -104,14 +103,6 @@ function getStatusStyles(status: DateStatus, active: boolean, today: boolean) {
       background: '#dcfce7',
       color: '#15803d',
       border: '1px solid #86efac',
-    };
-  }
-
-  if (status === 'partial') {
-    return {
-      background: '#fef3c7',
-      color: '#b45309',
-      border: '1px solid #fcd34d',
     };
   }
 
@@ -158,7 +149,6 @@ export default function BookingDatePage() {
   );
 
   const years = Array.from({ length: 3 }, (_, index) => today.getFullYear() + index);
-
   const monthDates = Array.from({ length: 12 }, (_, index) => new Date(activeYear, index, 1));
 
   const activeMonthDates = Array.from({ length: 31 }, (_, index) => new Date(activeYear, activeMonth, index + 1))
@@ -508,21 +498,7 @@ export default function BookingDatePage() {
                   display: 'inline-block',
                 }}
               />
-              Free
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span
-                style={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: 999,
-                  background: '#fef3c7',
-                  border: '1px solid #fcd34d',
-                  display: 'inline-block',
-                }}
-              />
-              Partial
+              Available
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -536,7 +512,7 @@ export default function BookingDatePage() {
                   display: 'inline-block',
                 }}
               />
-              Full
+              Unavailable
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
