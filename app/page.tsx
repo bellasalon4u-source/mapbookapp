@@ -28,8 +28,9 @@ export default function HomePage() {
     <main
       style={{
         position: 'relative',
-        minHeight: '100vh',
+        width: '100%',
         height: '100vh',
+        minHeight: '100vh',
         overflow: 'hidden',
         background: '#f7f3ec',
         fontFamily: 'Arial, sans-serif',
@@ -55,122 +56,114 @@ export default function HomePage() {
       >
         <div
           style={{
-            padding: '16px 16px 0',
-            pointerEvents: 'none',
+            padding: '18px 14px 0',
           }}
         >
           <div
             style={{
+              pointerEvents: 'auto',
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
               gap: 10,
-              pointerEvents: 'auto',
+              background: 'rgba(255,255,255,0.96)',
+              border: '1px solid #e5dbcf',
+              borderRadius: 24,
+              minHeight: 60,
+              padding: '0 14px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
             }}
           >
-            <button
-              onClick={() => setMenuOpen((prev) => !prev)}
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: 18,
-                border: '1px solid rgba(255,255,255,0.7)',
-                background: 'rgba(255,255,255,0.94)',
-                fontSize: 24,
-                color: '#2a231d',
-                boxShadow: '0 8px 22px rgba(0,0,0,0.08)',
-              }}
-            >
-              ⋮
-            </button>
+            <span style={{ fontSize: 24, color: '#5f564d' }}>🔍</span>
 
-            <div
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search here"
               style={{
                 flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                background: 'rgba(255,255,255,0.96)',
-                border: '1px solid rgba(230,221,209,0.95)',
-                borderRadius: 22,
-                minHeight: 56,
-                padding: '0 16px',
-                boxShadow: '0 8px 22px rgba(0,0,0,0.08)',
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                fontSize: 18,
+                color: '#2b241d',
+                minWidth: 0,
+              }}
+            />
+
+            <button
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 999,
+                border: 'none',
+                background: '#f4ede3',
+                fontSize: 17,
+                flexShrink: 0,
               }}
             >
-              <span style={{ fontSize: 24, color: '#6c645c' }}>🔍</span>
+              🎤
+            </button>
 
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search here"
-                style={{
-                  flex: 1,
-                  border: 'none',
-                  outline: 'none',
-                  background: 'transparent',
-                  fontSize: 18,
-                  color: '#2b241d',
-                }}
-              />
+            <button
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 999,
+                border: 'none',
+                background: '#f4ede3',
+                fontSize: 16,
+                flexShrink: 0,
+              }}
+            >
+              🖼️
+            </button>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <button
-                  style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: 999,
-                    border: 'none',
-                    background: '#f4efe7',
-                    fontSize: 18,
-                  }}
-                >
-                  🎤
-                </button>
-
-                <button
-                  style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: 999,
-                    border: 'none',
-                    background: '#f4efe7',
-                    fontSize: 16,
-                  }}
-                >
-                  🖼️
-                </button>
-
-                <button
-                  style={{
-                    minWidth: 46,
-                    height: 34,
-                    borderRadius: 999,
-                    border: 'none',
-                    background: '#f4efe7',
-                    fontSize: 15,
-                    fontWeight: 700,
-                    color: '#2b241d',
-                    padding: '0 10px',
-                  }}
-                >
-                  EN
-                </button>
-              </div>
-            </div>
+            <button
+              style={{
+                minWidth: 46,
+                height: 36,
+                borderRadius: 999,
+                border: 'none',
+                background: '#f4ede3',
+                fontSize: 14,
+                fontWeight: 800,
+                color: '#2b241d',
+                padding: '0 10px',
+                flexShrink: 0,
+              }}
+            >
+              EN
+            </button>
           </div>
 
           <div
             style={{
               marginTop: 12,
               display: 'flex',
-              gap: 12,
+              gap: 10,
               overflowX: 'auto',
               paddingBottom: 4,
               pointerEvents: 'auto',
               scrollbarWidth: 'none',
             }}
           >
+            <button
+              onClick={() => setMenuOpen((prev) => !prev)}
+              style={{
+                minWidth: 52,
+                height: 52,
+                borderRadius: 999,
+                border: '1px solid #ded4c8',
+                background: 'rgba(255,255,255,0.98)',
+                boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+                fontSize: 24,
+                color: '#2a231d',
+                flexShrink: 0,
+              }}
+            >
+              ⋮
+            </button>
+
             {categories.slice(0, 4).map((category) => {
               const active = activeCategory === category.id;
 
@@ -184,19 +177,18 @@ export default function HomePage() {
                     gap: 10,
                     padding: '10px 14px',
                     borderRadius: 999,
-                    border: active
-                      ? '1px solid #d8d0c5'
-                      : '1px solid rgba(255,255,255,0.7)',
-                    background: active ? '#fff8ef' : 'rgba(255,255,255,0.94)',
+                    border: active ? '1px solid #d7cfbf' : '1px solid #e5dbcf',
+                    background: active ? '#fff7eb' : 'rgba(255,255,255,0.98)',
                     color: '#2a231d',
                     whiteSpace: 'nowrap',
-                    boxShadow: '0 6px 18px rgba(0,0,0,0.06)',
+                    boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+                    flexShrink: 0,
                   }}
                 >
                   <span
                     style={{
-                      width: 28,
-                      height: 28,
+                      width: 30,
+                      height: 30,
                       borderRadius: 999,
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -204,11 +196,15 @@ export default function HomePage() {
                       background: '#f3ede4',
                       fontSize: 14,
                       fontWeight: 700,
+                      flexShrink: 0,
                     }}
                   >
                     {category.icon}
                   </span>
-                  <span style={{ fontSize: 16, fontWeight: 700 }}>{category.label}</span>
+
+                  <span style={{ fontSize: 16, fontWeight: 800 }}>
+                    {category.label}
+                  </span>
                 </button>
               );
             })}
@@ -219,11 +215,11 @@ export default function HomePage() {
           <div
             style={{
               position: 'absolute',
-              left: 16,
-              top: 94,
-              bottom: 108,
-              width: 214,
-              background: 'rgba(255,248,239,0.97)',
+              left: 14,
+              top: 92,
+              bottom: 112,
+              width: 220,
+              background: 'rgba(255,248,239,0.98)',
               border: '1px solid #e4d9cc',
               borderRadius: 28,
               boxShadow: '0 16px 38px rgba(0,0,0,0.12)',
@@ -290,7 +286,7 @@ export default function HomePage() {
                     <span
                       style={{
                         fontSize: 17,
-                        fontWeight: 700,
+                        fontWeight: 800,
                         color: '#231c16',
                       }}
                     >
@@ -306,9 +302,9 @@ export default function HomePage() {
         <div
           style={{
             position: 'absolute',
-            left: 16,
-            right: 16,
-            bottom: 16,
+            left: 14,
+            right: 14,
+            bottom: 14,
             display: 'flex',
             justifyContent: 'center',
             pointerEvents: 'auto',
@@ -334,7 +330,7 @@ export default function HomePage() {
                 border: 'none',
                 background: '#fff',
                 borderRadius: 22,
-                minHeight: 72,
+                minHeight: 74,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -345,7 +341,7 @@ export default function HomePage() {
               }}
             >
               <span style={{ fontSize: 22 }}>📅</span>
-              <span style={{ fontSize: 16, fontWeight: 700 }}>Bookings</span>
+              <span style={{ fontSize: 16, fontWeight: 800 }}>Bookings</span>
             </button>
 
             <button
@@ -366,7 +362,7 @@ export default function HomePage() {
               }}
             >
               <span style={{ fontSize: 42, lineHeight: 1 }}>+</span>
-              <span style={{ fontSize: 14, fontWeight: 700, marginTop: -2 }}>Add</span>
+              <span style={{ fontSize: 14, fontWeight: 800, marginTop: -2 }}>Add</span>
             </button>
 
             <button
@@ -374,7 +370,7 @@ export default function HomePage() {
                 border: 'none',
                 background: '#fff',
                 borderRadius: 22,
-                minHeight: 72,
+                minHeight: 74,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -385,7 +381,7 @@ export default function HomePage() {
               }}
             >
               <span style={{ fontSize: 22 }}>♥</span>
-              <span style={{ fontSize: 16, fontWeight: 700 }}>Saved</span>
+              <span style={{ fontSize: 16, fontWeight: 800 }}>Saved</span>
             </button>
           </div>
         </div>
@@ -393,7 +389,7 @@ export default function HomePage() {
 
       <style jsx global>{`
         .leaflet-top.leaflet-left {
-          top: 88px !important;
+          top: 150px !important;
           left: 10px !important;
         }
 
@@ -413,7 +409,7 @@ export default function HomePage() {
 
         .leaflet-bottom.leaflet-right,
         .leaflet-bottom.leaflet-left {
-          bottom: 110px !important;
+          bottom: 112px !important;
         }
       `}</style>
     </main>
