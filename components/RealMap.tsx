@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type { MasterItem } from '../services/masters';
 
 type RealMapProps = {
@@ -33,6 +34,7 @@ export default function RealMap({
   masters,
   fullScreen = false,
 }: RealMapProps) {
+  const router = useRouter();
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
 
@@ -168,22 +170,41 @@ export default function RealMap({
         }}
       >
         {screenPoints.map((point) => (
-          <div
+          <button
             key={point.id}
+            type="button"
+            onClick={() => router.push(`/master/${point.id}`)}
             style={{
               position: 'absolute',
               left: point.x,
               top: point.y,
               transform: 'translate(-50%, -50%)',
-              width: 30,
-              height: 30,
+              width: 42,
+              height: 42,
               borderRadius: 999,
-              border: '4px solid #2f241c',
-              background: point.availableNow ? '#22c55e' : '#ef4444',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.25)',
+              border: 'none',
+              background: 'transparent',
+              padding: 0,
+              margin: 0,
+              pointerEvents: 'auto',
               zIndex: 60,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
-          />
+          >
+            <span
+              style={{
+                display: 'block',
+                width: 30,
+                height: 30,
+                borderRadius: 999,
+                border: '4px solid #2f241c',
+                background: point.availableNow ? '#22c55e' : '#ef4444',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.25)',
+              }}
+            />
+          </button>
         ))}
       </div>
     </div>
