@@ -1,25 +1,55 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { getMasterById } from '../../../services/masters';
 
 export default function BookingServicePage() {
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
-  const serviceSlugFromQuery = searchParams.get('service') || '';
-
-  const [selectedServiceSlug, setSelectedServiceSlug] = useState(serviceSlugFromQuery);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
   if (!master) {
     return <main style={{ padding: 24 }}>Master not found</main>;
   }
 
-  const selectedService =
-    master.services.find((item) => item.slug === selectedServiceSlug) || null;
+  const toggleService = (slug: string) => {
+    setSelectedServices((prev) =>
+      prev.includes(slug) ? prev.filter((item) => item !== slug) : [...prev, slug]
+    );
+  };
+
+  const selectedItems = master.services.filter((service) =>
+    selectedServices.includes(service.slug)
+  );
+
+  const totalPrice = selectedItems.reduce((sum, item) => sum + item.price, 0);
+
+  const parseDurationToMinutes = (value: string) => {
+    const hourMatch = value.match(/(\d+)\s*h/);
+    const minuteMatch = value.match(/(\d+)\s*m/);
+
+    const hours = hourMatch ? Number(hourMatch[1]) : 0;
+    const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
+
+    return hours * 60 + minutes;
+  };
+
+  const totalMinutes = selectedItems.reduce(
+    (sum, item) => sum + parseDurationToMinutes(item.duration),
+    0
+  );
+
+  const formatMinutes = (minutes: number) => {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+
+    if (h > 0 && m > 0) return `${h}h ${m}m`;
+    if (h > 0) return `${h}h`;
+    return `${m}m`;
+  };
 
   return (
     <main
@@ -28,7 +58,7 @@ export default function BookingServicePage() {
         background: '#fcf8f2',
         fontFamily: 'Arial, sans-serif',
         color: '#1d1712',
-        paddingBottom: 110,
+        paddingBottom: 130,
       }}
     >
       <div style={{ maxWidth: 420, margin: '0 auto', padding: 24 }}>
@@ -54,7 +84,7 @@ export default function BookingServicePage() {
             ←
           </button>
 
-          <div style={{ fontSize: 30, fontWeight: 800 }}>Choose service</div>
+          <div style={{ fontSize: 30, fontWeight: 800 }}>Choose services</div>
 
           <button
             onClick={() => router.push('/')}
@@ -102,16 +132,16 @@ export default function BookingServicePage() {
           </div>
         </div>
 
-        <h2 style={{ marginTop: 28, fontSize: 30 }}>Price list</h2>
+        <h2 style={{ marginTop: 28, fontSize: 30 }}>Services</h2>
 
         <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
           {master.services.map((service) => {
-            const active = selectedServiceSlug === service.slug;
+            const active = selectedServices.includes(service.slug);
 
             return (
               <button
                 key={service.slug}
-                onClick={() => setSelectedServiceSlug(service.slug)}
+                onClick={() => toggleService(service.slug)}
                 style={{
                   width: '100%',
                   textAlign: 'left',
@@ -148,13 +178,21 @@ export default function BookingServicePage() {
 
                 <div
                   style={{
-                    width: 24,
-                    height: 24,
+                    width: 42,
+                    height: 42,
                     borderRadius: 999,
-                    border: active ? '7px solid #2e9746' : '2px solid #d8cdc0',
-                    background: '#fff',
+                    border: active ? 'none' : '2px solid #d8cdc0',
+                    background: active ? '#2e9746' : '#fff',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 24,
+                    fontWeight: 800,
                   }}
-                />
+                >
+                  {active ? '✓' : ''}
+                </div>
               </button>
             );
           })}
@@ -172,37 +210,54 @@ export default function BookingServicePage() {
           padding: '14px 16px',
         }}
       >
-        <div
-          style={{
-            maxWidth: 420,
-            margin: '0 auto',
-            display: 'flex',
-            gap: 14,
-            alignItems: 'center',
-          }}
-        >
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>Hold deposit</div>
-            <div style={{ fontSize: 30, fontWeight: 900, marginTop: 6 }}>£5</div>
+        <div style={{ maxWidth: 420, margin: '0 auto' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 16,
+              marginBottom: 14,
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>
+                Total duration
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>
+                {selectedItems.length ? formatMinutes(totalMinutes) : '0m'}
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>
+                Total price
+              </div>
+              <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>
+                £{totalPrice}
+              </div>
+            </div>
           </div>
 
           <button
-            disabled={!selectedService}
+            disabled={!selectedItems.length}
             onClick={() => {
-              if (!selectedService) return;
-              router.push(`/booking/${master.id}/date?service=${selectedService.slug}`);
+              if (!selectedItems.length) return;
+
+              const servicesParam = encodeURIComponent(selectedServices.join(','));
+              router.push(`/booking/${master.id}/date?services=${servicesParam}`);
             }}
             style={{
+              width: '100%',
               border: 'none',
-              background: selectedService ? '#2e9746' : '#b7d9bf',
+              background: selectedItems.length ? '#2e9746' : '#b7d9bf',
               color: '#fff',
               borderRadius: 24,
               padding: '18px 26px',
               fontWeight: 800,
-              fontSize: 18,
+              fontSize: 20,
             }}
           >
-            Choose date
+            Continue
           </button>
         </div>
       </div>
