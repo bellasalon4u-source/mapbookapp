@@ -15,6 +15,8 @@ export default function MasterPage() {
     return <main style={{ padding: 24 }}>Master not found</main>;
   }
 
+  const firstService = master.services[0];
+
   return (
     <main
       style={{
@@ -138,7 +140,9 @@ export default function MasterPage() {
           </div>
 
           <button
-            onClick={() => router.push(`/booking/${master.id}`)}
+            onClick={() =>
+              router.push(`/booking/${master.id}?service=${firstService.slug}`)
+            }
             style={{
               position: 'absolute',
               right: 16,
