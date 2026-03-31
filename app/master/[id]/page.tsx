@@ -280,39 +280,6 @@ export default function MasterPage() {
             ))}
           </div>
         </section>
-
-        <div
-          style={{
-            position: 'fixed',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: '#fff',
-            borderTop: '1px solid #e6ddd1',
-            padding: '14px 16px',
-          }}
-        >
-          <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 14, alignItems: 'center' }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>Secure booking fee</div>
-              <div style={{ fontSize: 30, fontWeight: 900, marginTop: 6 }}>£5</div>
-            </div>
-            <button
-              onClick={() => router.push(`/booking/${master.id}`)}
-              style={{
-                border: 'none',
-                background: '#2e9746',
-                color: '#fff',
-                borderRadius: 24,
-                padding: '18px 26px',
-                fontWeight: 800,
-                fontSize: 18,
-              }}
-            >
-              Choose service
-            </button>
-          </div>
-        </div>
       </div>
 
       {galleryOpen && (
