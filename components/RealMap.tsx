@@ -37,6 +37,7 @@ export default function RealMap({
   const router = useRouter();
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
+  const didDragRef = useRef(false);
 
   const [ready, setReady] = useState(false);
   const [screenPoints, setScreenPoints] = useState<ScreenPoint[]>([]);
@@ -122,22 +123,48 @@ export default function RealMap({
       setScreenPoints(next);
     };
 
+    const handleDragStart = () => {
+      didDragRef.current = false;
+    };
+
+    const handleDrag = () => {
+      didDragRef.current = true;
+      updatePositions();
+    };
+
+    const handleMove = () => {
+      updatePositions();
+    };
+
+    const handleZoom = () => {
+      updatePositions();
+    };
+
     updatePositions();
 
-    map.on('zoomend', updatePositions);
-    map.on('moveend', updatePositions);
-    map.on('resize', updatePositions);
+    map.on('dragstart', handleDragStart);
+    map.on('drag', handleDrag);
+    map.on('move', handleMove);
+    map.on('moveend', handleMove);
+    map.on('zoom', handleZoom);
+    map.on('zoomend', handleZoom);
+    map.on('resize', handleMove);
+
+    window.addEventListener('resize', handleMove);
 
     setTimeout(updatePositions, 100);
-    setTimeout(updatePositions, 400);
-
-    window.addEventListener('resize', updatePositions);
+    setTimeout(updatePositions, 300);
+    setTimeout(updatePositions, 600);
 
     return () => {
-      map.off('zoomend', updatePositions);
-      map.off('moveend', updatePositions);
-      map.off('resize', updatePositions);
-      window.removeEventListener('resize', updatePositions);
+      map.off('dragstart', handleDragStart);
+      map.off('drag', handleDrag);
+      map.off('move', handleMove);
+      map.off('moveend', handleMove);
+      map.off('zoom', handleZoom);
+      map.off('zoomend', handleZoom);
+      map.off('resize', handleMove);
+      window.removeEventListener('resize', handleMove);
     };
   }, [ready, points]);
 
@@ -173,14 +200,31 @@ export default function RealMap({
           <button
             key={point.id}
             type="button"
-            onClick={() => router.push(`/master/${point.id}`)}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (didDragRef.current) return;
+              router.push(`/master/${point.id}`);
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              didDragRef.current = false;
+            }}
+            onTouchMove={() => {
+              didDragRef.current = true;
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (didDragRef.current) return;
+              router.push(`/master/${point.id}`);
+            }}
             style={{
               position: 'absolute',
               left: point.x,
               top: point.y,
               transform: 'translate(-50%, -50%)',
-              width: 42,
-              height: 42,
+              width: 44,
+              height: 44,
               borderRadius: 999,
               border: 'none',
               background: 'transparent',
@@ -191,6 +235,7 @@ export default function RealMap({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              touchAction: 'manipulation',
             }}
           >
             <span
