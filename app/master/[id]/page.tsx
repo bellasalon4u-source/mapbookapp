@@ -373,7 +373,7 @@ export default function MasterPage() {
                 marginBottom: 14,
               }}
             >
-              Trusted by clients TEST
+              Trusted by clients
             </div>
 
             <div
