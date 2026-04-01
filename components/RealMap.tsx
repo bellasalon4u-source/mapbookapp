@@ -38,116 +38,80 @@ type RealMapProps = {
   fullScreen?: boolean;
 };
 
-const CATEGORY_THEMES: Record<
+const CATEGORY_STYLES: Record<
   string,
   {
-    pin: string;
-    soft: string;
     border: string;
+    soft: string;
     tagBg: string;
     tagText: string;
-    buttonBg: string;
-    buttonText: string;
   }
 > = {
   beauty: {
-    pin: '#ea6f92',
-    soft: '#fff6f8',
-    border: '#f1a7bb',
+    border: '#efb3c4',
+    soft: '#fff7fa',
     tagBg: '#fde8ef',
-    tagText: '#b94b70',
-    buttonBg: '#ffffff',
-    buttonText: '#2a2f36',
+    tagText: '#b84f73',
   },
   wellness: {
-    pin: '#51b36b',
-    soft: '#f4fbf5',
-    border: '#9bd6aa',
-    tagBg: '#e7f7eb',
-    tagText: '#2f8b47',
-    buttonBg: '#ffffff',
-    buttonText: '#2a2f36',
+    border: '#abdcb3',
+    soft: '#f5fcf6',
+    tagBg: '#e9f8ec',
+    tagText: '#348d4e',
   },
   home: {
-    pin: '#d7b47b',
+    border: '#e5cfaa',
     soft: '#fffaf3',
-    border: '#e7cfaa',
     tagBg: '#f9efdd',
-    tagText: '#9b7040',
-    buttonBg: '#ffffff',
-    buttonText: '#2a2f36',
+    tagText: '#9e7343',
   },
   repairs: {
-    pin: '#2f67b8',
-    soft: '#f5f9ff',
-    border: '#9dbcf0',
-    tagBg: '#e7f0ff',
-    tagText: '#29559a',
-    buttonBg: '#ffffff',
-    buttonText: '#2a2f36',
+    border: '#a9c4ef',
+    soft: '#f6f9ff',
+    tagBg: '#e8f0ff',
+    tagText: '#315ea6',
   },
   tech: {
-    pin: '#4e5e73',
-    soft: '#f7f9fc',
-    border: '#b8c3d1',
-    tagBg: '#edf2f8',
-    tagText: '#415167',
-    buttonBg: '#ffffff',
-    buttonText: '#2a2f36',
+    border: '#bcc6d2',
+    soft: '#f8fafc',
+    tagBg: '#eef2f7',
+    tagText: '#445365',
   },
   pets: {
-    pin: '#58a95a',
-    soft: '#f5fbf4',
-    border: '#a7d8a6',
-    tagBg: '#e9f7e7',
-    tagText: '#2f7f35',
-    buttonBg: '#ffffff',
-    buttonText: '#2a2f36',
+    border: '#b7dcae',
+    soft: '#f7fcf5',
+    tagBg: '#ebf7e8',
+    tagText: '#3b8240',
   },
   auto: {
-    pin: '#d9822b',
-    soft: '#fff8f2',
-    border: '#f1c18f',
-    tagBg: '#fdecd9',
-    tagText: '#a45d18',
-    buttonBg: '#ffffff',
-    buttonText: '#2a2f36',
+    border: '#f0c28f',
+    soft: '#fff9f3',
+    tagBg: '#fdeedc',
+    tagText: '#ae651d',
   },
   moving: {
-    pin: '#6c63c9',
-    soft: '#f8f7ff',
-    border: '#b5b1ec',
-    tagBg: '#ecebff',
-    tagText: '#584eb9',
-    buttonBg: '#ffffff',
-    buttonText: '#2a2f36',
+    border: '#c3bdf0',
+    soft: '#faf9ff',
+    tagBg: '#efedff',
+    tagText: '#6658bf',
   },
   activities: {
-    pin: '#c9658e',
-    soft: '#fff7fb',
-    border: '#ecb4cb',
-    tagBg: '#fcebf3',
-    tagText: '#a94772',
-    buttonBg: '#ffffff',
-    buttonText: '#2a2f36',
+    border: '#e7b2c8',
+    soft: '#fff8fb',
+    tagBg: '#fcecf3',
+    tagText: '#ab5176',
   },
   events: {
-    pin: '#cf5d62',
-    soft: '#fff8f8',
-    border: '#efb0b3',
-    tagBg: '#fdeaea',
-    tagText: '#ae4448',
-    buttonBg: '#ffffff',
-    buttonText: '#2a2f36',
+    border: '#efb3b3',
+    soft: '#fff9f9',
+    tagBg: '#fdecec',
+    tagText: '#b04a4a',
   },
   creative: {
-    pin: '#8d68d1',
-    soft: '#faf8ff',
-    border: '#cdbbf0',
-    tagBg: '#f1ebff',
-    tagText: '#7452b3',
-    buttonBg: '#ffffff',
-    buttonText: '#2a2f36',
+    border: '#cbbcf0',
+    soft: '#fbf9ff',
+    tagBg: '#f1ecff',
+    tagText: '#7459b6',
   },
 };
 
@@ -266,43 +230,27 @@ function isAvailableToday(master: Master) {
   );
 }
 
-function createPinIcon({
-  category,
+function createCirclePin({
   available,
   selected,
 }: {
-  category: string;
   available: boolean;
   selected: boolean;
 }) {
-  const theme = CATEGORY_THEMES[category] || CATEGORY_THEMES.beauty;
-  const size = selected ? 34 : 30;
-  const stroke = selected ? 5 : 4;
-  const ring = available ? '#2fbb52' : '#ef5a5a';
+  const size = selected ? 40 : 34;
+  const fill = available ? '#32c255' : '#f05d62';
 
   return L.divIcon({
     className: '',
     html: `
       <div style="
-        position: relative;
         width:${size}px;
         height:${size}px;
         border-radius:999px;
-        background:${theme.pin};
-        border:${stroke}px solid #20242b;
-        box-shadow:0 6px 14px rgba(0,0,0,0.18);
-      ">
-        <div style="
-          position:absolute;
-          right:-2px;
-          bottom:-2px;
-          width:12px;
-          height:12px;
-          border-radius:999px;
-          background:${ring};
-          border:2px solid #ffffff;
-        "></div>
-      </div>
+        background:${fill};
+        border:5px solid #1e232a;
+        box-shadow:0 8px 18px rgba(0,0,0,0.20);
+      "></div>
     `,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
@@ -334,7 +282,7 @@ function FloatingSelectedCard({
   const [point, setPoint] = useState<{ x: number; y: number } | null>(null);
 
   const category = inferCategory(master);
-  const theme = CATEGORY_THEMES[category] || CATEGORY_THEMES.beauty;
+  const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.beauty;
   const available = isAvailableToday(master);
 
   useEffect(() => {
@@ -353,9 +301,11 @@ function FloatingSelectedCard({
 
   if (!point) return null;
 
-  const cardWidth = 270;
-  const left = Math.max(12, Math.min(point.x - 70, map.getSize().x - cardWidth - 12));
-  const top = Math.max(12, point.y - 126);
+  const mapSize = map.getSize();
+  const cardWidth = 288;
+  const desiredLeft = point.x - 120;
+  const left = Math.max(12, Math.min(desiredLeft, mapSize.x - cardWidth - 12));
+  const top = Math.max(14, point.y - 142);
 
   return (
     <div
@@ -365,9 +315,9 @@ function FloatingSelectedCard({
         top,
         width: cardWidth,
         background: '#ffffff',
-        border: `2px solid ${theme.border}`,
-        borderRadius: 24,
-        boxShadow: '0 14px 28px rgba(0,0,0,0.18)',
+        border: `2px solid ${style.border}`,
+        borderRadius: 26,
+        boxShadow: '0 16px 30px rgba(0,0,0,0.18)',
         padding: 12,
         zIndex: 900,
         pointerEvents: 'auto',
@@ -377,35 +327,53 @@ function FloatingSelectedCard({
       <div
         style={{
           position: 'absolute',
-          left: 78,
+          left: Math.max(34, Math.min(point.x - left - 10, cardWidth - 50)),
           bottom: -12,
-          width: 22,
-          height: 22,
+          width: 24,
+          height: 24,
           background: '#ffffff',
-          borderRight: `2px solid ${theme.border}`,
-          borderBottom: `2px solid ${theme.border}`,
+          borderRight: `2px solid ${style.border}`,
+          borderBottom: `2px solid ${style.border}`,
           transform: 'rotate(45deg)',
         }}
       />
 
       <div
         style={{
+          position: 'absolute',
+          left: 22,
+          top: -44,
+          background: '#ffffff',
+          border: `2px solid ${style.border}`,
+          borderRadius: 16,
+          padding: '8px 12px',
+          fontSize: 15,
+          fontWeight: 800,
+          color: '#27313d',
+          boxShadow: '0 10px 18px rgba(0,0,0,0.12)',
+        }}
+      >
+        {getCategoryLabel(category)}
+      </div>
+
+      <div
+        style={{
           display: 'grid',
-          gridTemplateColumns: '70px 1fr auto',
+          gridTemplateColumns: '72px 1fr auto',
           gap: 12,
           alignItems: 'center',
         }}
       >
         <div
           style={{
-            width: 70,
-            height: 70,
-            borderRadius: 18,
+            width: 72,
+            height: 72,
+            borderRadius: 20,
             overflow: 'hidden',
-            border: `3px solid ${theme.soft}`,
-            boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
-            position: 'relative',
+            border: '3px solid #fff',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
             background: '#eee',
+            position: 'relative',
           }}
         >
           <img
@@ -421,24 +389,12 @@ function FloatingSelectedCard({
               display: 'block',
             }}
           />
-          <span
-            style={{
-              position: 'absolute',
-              right: -2,
-              bottom: -2,
-              width: 18,
-              height: 18,
-              borderRadius: 999,
-              background: available ? '#2fbb52' : '#ef5a5a',
-              border: '3px solid #fff',
-            }}
-          />
         </div>
 
         <div style={{ minWidth: 0 }}>
           <div
             style={{
-              fontSize: 16,
+              fontSize: 17,
               fontWeight: 800,
               color: '#1f2430',
               lineHeight: 1.15,
@@ -458,8 +414,8 @@ function FloatingSelectedCard({
           >
             <span
               style={{
-                background: theme.tagBg,
-                color: theme.tagText,
+                background: style.tagBg,
+                color: style.tagText,
                 borderRadius: 999,
                 padding: '6px 10px',
                 fontSize: 12,
@@ -479,21 +435,16 @@ function FloatingSelectedCard({
             >
               {available ? 'Available today' : 'Unavailable today'}
             </span>
-          </div>
 
-          <div
-            style={{
-              marginTop: 10,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              color: '#3f4b59',
-              fontSize: 13,
-              fontWeight: 800,
-            }}
-          >
-            <span style={{ color: '#e3b341' }}>★</span>
-            <span>{(master.rating ?? 4.8).toFixed(1)}</span>
+            <span
+              style={{
+                color: '#1f2430',
+                fontSize: 13,
+                fontWeight: 800,
+              }}
+            >
+              ★ {(master.rating ?? 4.9).toFixed(1)}
+            </span>
           </div>
         </div>
       </div>
@@ -507,9 +458,9 @@ function FloatingSelectedCard({
       >
         <button
           style={{
-            border: `2px solid ${theme.border}`,
-            background: theme.buttonBg,
-            color: theme.buttonText,
+            border: `2px solid ${style.border}`,
+            background: '#ffffff',
+            color: '#2a2f36',
             borderRadius: 16,
             padding: '12px 18px',
             fontSize: 15,
@@ -524,14 +475,14 @@ function FloatingSelectedCard({
         <button
           style={{
             border: 'none',
-            background: '#57b7de',
+            background: '#56b7de',
             color: '#fff',
             borderRadius: 16,
             padding: '12px 18px',
             fontSize: 15,
             fontWeight: 800,
             flex: 1,
-            boxShadow: '0 8px 18px rgba(87,183,222,0.24)',
+            boxShadow: '0 8px 18px rgba(86,183,222,0.24)',
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -601,7 +552,6 @@ export default function RealMap({
 
         {filteredMasters.map((master, index) => {
           const coords = getCoords(master, index);
-          const category = inferCategory(master);
           const available = isAvailableToday(master);
           const selected = String(selectedMasterId) === String(master.id);
 
@@ -609,7 +559,7 @@ export default function RealMap({
             <Marker
               key={String(master.id)}
               position={coords}
-              icon={createPinIcon({ category, available, selected })}
+              icon={createCirclePin({ available, selected })}
               eventHandlers={{
                 click: () => {
                   onMasterSelect?.(master);
