@@ -16,6 +16,54 @@ const categories = [
   { id: 'pets', label: 'Pets', icon: '🐾' },
 ];
 
+function getCategoryLabel(master: any, activeCategory: string) {
+  if (master?.category && typeof master.category === 'string') {
+    return master.category.charAt(0).toUpperCase() + master.category.slice(1);
+  }
+
+  if (master?.title) {
+    const title = String(master.title).toLowerCase();
+    if (
+      title.includes('hair') ||
+      title.includes('beauty') ||
+      title.includes('brow') ||
+      title.includes('lashes') ||
+      title.includes('nails')
+    ) {
+      return 'Beauty';
+    }
+    if (
+      title.includes('massage') ||
+      title.includes('spa') ||
+      title.includes('wellness')
+    ) {
+      return 'Wellness';
+    }
+    if (title.includes('pet') || title.includes('dog') || title.includes('cat')) {
+      return 'Pets';
+    }
+    if (title.includes('clean') || title.includes('repair') || title.includes('home')) {
+      return 'Home';
+    }
+  }
+
+  const match = categories.find((item) => item.id === activeCategory);
+  return match?.label ?? 'Beauty';
+}
+
+function getAvailability(master: any) {
+  const isAvailable =
+    master?.availableNow === true ||
+    master?.availableToday === true ||
+    master?.isAvailableToday === true;
+
+  return {
+    isAvailable,
+    text: isAvailable ? 'Available today' : 'Unavailable today',
+    color: isAvailable ? '#2f9c47' : '#d65a5a',
+  };
+}
+
 export default function HomePage() {
   const router = useRouter();
   const masters = getAllMasters();
@@ -32,7 +80,11 @@ export default function HomePage() {
   const profileMaster = masters[0];
 
   useEffect(() => {
-    const shouldReset = sessionStorage.getItem('mapbook_reset_home');
+    const shouldReset =
+      typeof window !== 'undefined'
+        ? sessionStorage.getItem('mapbook_reset_home')
+        : null;
+
     if (shouldReset === '1') {
       setSelectedMaster(null);
       setRouteSheetOpen(false);
@@ -48,6 +100,14 @@ export default function HomePage() {
   if (!profileMaster) {
     return <main style={{ padding: 24 }}>No providers found</main>;
   }
+
+  const selectedCategory = selectedMaster
+    ? getCategoryLabel(selectedMaster, activeCategory)
+    : null;
+
+  const selectedAvailability = selectedMaster
+    ? getAvailability(selectedMaster)
+    : null;
 
   return (
     <main
@@ -93,8 +153,8 @@ export default function HomePage() {
           pointerEvents: 'none',
           background:
             mapMode === 'satellite'
-              ? 'linear-gradient(180deg, rgba(17,16,13,0.10) 0%, rgba(17,16,13,0.00) 25%, rgba(17,16,13,0.06) 100%)'
-              : 'linear-gradient(180deg, rgba(252,248,242,0.05) 0%, rgba(252,248,242,0.00) 25%, rgba(252,248,242,0.04) 100%)',
+              ? 'linear-gradient(180deg, rgba(16,15,13,0.10) 0%, rgba(16,15,13,0.00) 26%, rgba(16,15,13,0.05) 100%)'
+              : 'linear-gradient(180deg, rgba(252,248,242,0.04) 0%, rgba(252,248,242,0.00) 30%, rgba(252,248,242,0.04) 100%)',
         }}
       >
         <div style={{ padding: '16px 14px 0' }}>
@@ -105,12 +165,12 @@ export default function HomePage() {
               gridTemplateColumns: '1fr auto auto',
               alignItems: 'center',
               gap: 10,
-              background: 'rgba(255,255,255,0.94)',
+              background: 'rgba(255,255,255,0.95)',
               backdropFilter: 'blur(10px)',
               border: '1px solid rgba(231,221,208,0.95)',
               borderRadius: 30,
               padding: '10px 10px 10px 14px',
-              boxShadow: '0 12px 34px rgba(0,0,0,0.10)',
+              boxShadow: '0 10px 28px rgba(0,0,0,0.10)',
             }}
           >
             <div
@@ -145,11 +205,10 @@ export default function HomePage() {
                 height: 48,
                 borderRadius: 999,
                 border: 'none',
-                background: verifiedOnly ? '#2f9c47' : '#f4ede3',
-                color: verifiedOnly ? '#fff' : '#5f564d',
+                background: verifiedOnly ? '#ece4d7' : '#f4ede3',
+                color: verifiedOnly ? '#5a524a' : '#7d7368',
                 fontSize: 21,
                 fontWeight: 800,
-                boxShadow: verifiedOnly ? '0 8px 18px rgba(47,156,71,0.28)' : 'none',
               }}
             >
               ✓
@@ -161,7 +220,7 @@ export default function HomePage() {
                 width: 48,
                 height: 48,
                 borderRadius: 999,
-                border: '2px solid rgba(255,255,255,0.92)',
+                border: '2px solid rgba(255,255,255,0.95)',
                 background: '#f4ede3',
                 overflow: 'hidden',
                 padding: 0,
@@ -200,7 +259,7 @@ export default function HomePage() {
                 borderRadius: 999,
                 border: '1px solid rgba(223,212,199,0.95)',
                 background: 'rgba(255,255,255,0.95)',
-                boxShadow: '0 8px 22px rgba(0,0,0,0.10)',
+                boxShadow: '0 8px 20px rgba(0,0,0,0.09)',
                 fontSize: 24,
                 color: '#2a231d',
                 flexShrink: 0,
@@ -230,9 +289,7 @@ export default function HomePage() {
                       : 'rgba(255,255,255,0.94)',
                     color: '#2a231d',
                     whiteSpace: 'nowrap',
-                    boxShadow: active
-                      ? '0 10px 24px rgba(0,0,0,0.10)'
-                      : '0 8px 20px rgba(0,0,0,0.08)',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
                     flexShrink: 0,
                     fontWeight: 800,
                     fontSize: 17,
@@ -253,8 +310,8 @@ export default function HomePage() {
                 background: 'rgba(255,248,239,0.97)',
                 backdropFilter: 'blur(12px)',
                 border: '1px solid #e4d9cc',
-                borderRadius: 28,
-                boxShadow: '0 20px 42px rgba(0,0,0,0.14)',
+                borderRadius: 26,
+                boxShadow: '0 18px 38px rgba(0,0,0,0.14)',
                 padding: 14,
                 pointerEvents: 'auto',
               }}
@@ -291,10 +348,6 @@ export default function HomePage() {
                       fontWeight: 800,
                       fontSize: 16,
                       color: '#231c16',
-                      boxShadow:
-                        activeCategory === category.id
-                          ? '0 4px 12px rgba(0,0,0,0.05)'
-                          : 'none',
                     }}
                   >
                     <span style={{ width: 22, textAlign: 'center' }}>{category.icon}</span>
@@ -317,11 +370,11 @@ export default function HomePage() {
                 flexDirection: 'column',
                 alignItems: 'flex-start',
                 gap: 4,
-                background: 'rgba(255,255,255,0.94)',
+                background: 'rgba(255,255,255,0.95)',
                 backdropFilter: 'blur(10px)',
                 borderRadius: 24,
                 padding: '14px 18px',
-                boxShadow: '0 10px 26px rgba(0,0,0,0.10)',
+                boxShadow: '0 10px 24px rgba(0,0,0,0.09)',
                 color: '#1d1712',
                 border: '1px solid rgba(231,221,208,0.92)',
               }}
@@ -349,7 +402,17 @@ export default function HomePage() {
         >
           <button
             onClick={() => setMapMode((prev) => (prev === 'map' ? 'satellite' : 'map'))}
-            style={floatingButtonStyle}
+            style={{
+              width: 58,
+              height: 58,
+              borderRadius: 999,
+              border: '1px solid rgba(230,218,203,0.98)',
+              background: 'rgba(255,255,255,0.95)',
+              fontSize: 24,
+              color: '#4b443c',
+              boxShadow: '0 10px 22px rgba(0,0,0,0.10)',
+              backdropFilter: 'blur(10px)',
+            }}
             title="Map style"
           >
             {mapMode === 'satellite' ? '🛰' : '◩'}
@@ -361,159 +424,275 @@ export default function HomePage() {
                 setRouteSheetOpen((prev) => !prev);
               }
             }}
-            style={floatingButtonStyle}
+            style={{
+              width: 58,
+              height: 58,
+              borderRadius: 999,
+              border: '1px solid rgba(230,218,203,0.98)',
+              background: 'rgba(255,255,255,0.95)',
+              fontSize: 24,
+              color: '#4b443c',
+              boxShadow: '0 10px 22px rgba(0,0,0,0.10)',
+              backdropFilter: 'blur(10px)',
+            }}
             title="Route"
           >
             ➤
           </button>
 
-          <button style={floatingButtonStyle} title="My location">
+          <button
+            style={{
+              width: 58,
+              height: 58,
+              borderRadius: 999,
+              border: '1px solid rgba(230,218,203,0.98)',
+              background: 'rgba(255,255,255,0.95)',
+              fontSize: 24,
+              color: '#4b443c',
+              boxShadow: '0 10px 22px rgba(0,0,0,0.10)',
+              backdropFilter: 'blur(10px)',
+            }}
+            title="My location"
+          >
             ◎
           </button>
         </div>
 
         {selectedMaster && (
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: '39%',
-              transform: 'translate(-50%, -50%)',
-              pointerEvents: 'auto',
-              zIndex: 25,
-            }}
-          >
+          <>
             <div
               style={{
-                position: 'relative',
-                background: 'rgba(255,248,239,0.97)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(229,218,204,0.96)',
-                borderRadius: 28,
-                padding: 12,
-                display: 'grid',
-                gridTemplateColumns: '66px 1fr auto',
-                gap: 12,
-                alignItems: 'center',
-                minWidth: 300,
-                boxShadow: '0 20px 42px rgba(0,0,0,0.16)',
+                position: 'absolute',
+                left: '50%',
+                top: '36%',
+                transform: 'translate(-10%, -50%)',
+                pointerEvents: 'none',
+                zIndex: 26,
               }}
             >
-              <div style={{ position: 'relative' }}>
-                <img
-                  src={selectedMaster.avatar}
-                  alt={selectedMaster.name}
-                  style={{
-                    width: 66,
-                    height: 66,
-                    objectFit: 'cover',
-                    borderRadius: 999,
-                    border: '4px solid #fff',
-                    display: 'block',
-                    boxShadow: '0 6px 14px rgba(0,0,0,0.10)',
-                  }}
-                />
+              <div
+                style={{
+                  position: 'relative',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: 92,
+                  height: 52,
+                  padding: '0 18px',
+                  background: '#f7f0e4',
+                  border: '1px solid #b9a993',
+                  borderRadius: 14,
+                  boxShadow: '0 8px 18px rgba(0,0,0,0.10)',
+                  color: '#2b241d',
+                  fontSize: 17,
+                  fontWeight: 800,
+                }}
+              >
+                {selectedCategory}
                 <span
                   style={{
                     position: 'absolute',
-                    right: 1,
-                    bottom: 1,
-                    width: 16,
-                    height: 16,
-                    borderRadius: 999,
-                    background: '#2fbb52',
-                    border: '2px solid #fff',
+                    left: 24,
+                    bottom: -7,
+                    width: 14,
+                    height: 14,
+                    background: '#f7f0e4',
+                    borderRight: '1px solid #b9a993',
+                    borderBottom: '1px solid #b9a993',
+                    transform: 'rotate(45deg)',
                   }}
                 />
               </div>
+            </div>
 
-              <div>
-                <div
-                  style={{
-                    fontSize: 16,
-                    fontWeight: 900,
-                    color: '#1d1712',
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {selectedMaster.name}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 7,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <span
-                    style={{
-                      background: '#f0e3ce',
-                      color: '#7c5d26',
-                      borderRadius: 999,
-                      padding: '5px 10px',
-                      fontSize: 13,
-                      fontWeight: 800,
-                    }}
-                  >
-                    Top rated
-                  </span>
-
-                  <span style={{ fontSize: 14, fontWeight: 900 }}>
-                    ★ {(selectedMaster.rating ?? 4.9).toFixed(1)}
-                  </span>
-
-                  <span style={{ color: '#2f9c47', fontSize: 16, fontWeight: 900 }}>✓</span>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 10,
-                    display: 'flex',
-                    gap: 8,
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      sessionStorage.setItem('mapbook_reset_home', '1');
-                      router.push(`/master/${selectedMaster.id}`);
-                    }}
-                    style={miniCardSecondaryButton}
-                  >
-                    View
-                  </button>
-                  <button
-                    onClick={() => setRouteSheetOpen(true)}
-                    style={miniCardPrimaryButton}
-                  >
-                    Route
-                  </button>
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  setSelectedMaster(null);
-                  setRouteSheetOpen(false);
-                }}
+            <div
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '43%',
+                transform: 'translate(-50%, -50%)',
+                pointerEvents: 'auto',
+                zIndex: 25,
+              }}
+            >
+              <div
                 style={{
-                  alignSelf: 'start',
-                  width: 38,
-                  height: 38,
-                  borderRadius: 999,
-                  border: '1px solid #e3d9cc',
-                  background: '#fff',
-                  fontSize: 20,
-                  color: '#5f564d',
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+                  position: 'relative',
+                  background: 'rgba(255,248,239,0.97)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(229,218,204,0.96)',
+                  borderRadius: 28,
+                  padding: '16px 16px 12px',
+                  display: 'grid',
+                  gridTemplateColumns: '82px 1fr auto',
+                  gap: 14,
+                  alignItems: 'start',
+                  minWidth: 320,
+                  boxShadow: '0 18px 38px rgba(0,0,0,0.16)',
                 }}
               >
-                ✕
-              </button>
+                <div style={{ position: 'relative', paddingTop: 8 }}>
+                  <img
+                    src={selectedMaster.avatar}
+                    alt={selectedMaster.name}
+                    style={{
+                      width: 78,
+                      height: 78,
+                      objectFit: 'cover',
+                      borderRadius: 999,
+                      border: '4px solid #fff',
+                      display: 'block',
+                      boxShadow: '0 6px 14px rgba(0,0,0,0.10)',
+                    }}
+                  />
+                  <span
+                    style={{
+                      position: 'absolute',
+                      right: 2,
+                      bottom: 2,
+                      width: 18,
+                      height: 18,
+                      borderRadius: 999,
+                      background: selectedAvailability?.isAvailable ? '#2fbb52' : '#e84d4d',
+                      border: '3px solid #fff',
+                    }}
+                  />
+                </div>
+
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: 17,
+                      fontWeight: 900,
+                      color: '#1d1712',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {selectedMaster.name}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 10,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: selectedAvailability?.color,
+                        fontSize: 15,
+                        fontWeight: 800,
+                      }}
+                    >
+                      {selectedAvailability?.text}
+                    </span>
+
+                    <span
+                      style={{
+                        color: '#2b241d',
+                        fontSize: 15,
+                        fontWeight: 900,
+                      }}
+                    >
+                      ★ {(selectedMaster.rating ?? 4.9).toFixed(1)}
+                    </span>
+
+                    <span
+                      style={{
+                        color: '#2f9c47',
+                        fontSize: 17,
+                        fontWeight: 900,
+                      }}
+                    >
+                      ✓
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 14,
+                      display: 'flex',
+                      gap: 10,
+                    }}
+                  >
+                    <button
+                      onClick={() => {
+                        sessionStorage.setItem('mapbook_reset_home', '1');
+                        router.push(`/master/${selectedMaster.id}`);
+                      }}
+                      style={{
+                        border: '1px solid #ddd2c4',
+                        background: '#fff',
+                        color: '#2a231d',
+                        borderRadius: 16,
+                        padding: '12px 20px',
+                        fontWeight: 900,
+                        fontSize: 15,
+                        boxShadow: '0 3px 8px rgba(0,0,0,0.04)',
+                      }}
+                    >
+                      View
+                    </button>
+
+                    <button
+                      onClick={() => setRouteSheetOpen(true)}
+                      style={{
+                        border: 'none',
+                        background: '#2ea6c7',
+                        color: '#fff',
+                        borderRadius: 16,
+                        padding: '12px 22px',
+                        fontWeight: 900,
+                        fontSize: 15,
+                        boxShadow: '0 10px 20px rgba(46,166,199,0.18)',
+                      }}
+                    >
+                      Route
+                    </button>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 14,
+                      paddingTop: 12,
+                      borderTop: '1px solid #ece2d7',
+                      fontSize: 13,
+                      color: '#81766c',
+                      display: 'flex',
+                      gap: 8,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <span>Green = available today</span>
+                    <span>•</span>
+                    <span style={{ color: '#b95a5a' }}>Red = unavailable today</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setSelectedMaster(null);
+                    setRouteSheetOpen(false);
+                  }}
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 999,
+                    border: '1px solid #e3d9cc',
+                    background: '#fff',
+                    fontSize: 22,
+                    color: '#6a5f56',
+                    boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {routeSheetOpen && selectedMaster && (
@@ -533,9 +712,9 @@ export default function HomePage() {
                 background: 'rgba(255,248,239,0.98)',
                 backdropFilter: 'blur(12px)',
                 border: '1px solid rgba(231,221,208,0.98)',
-                borderRadius: 32,
+                borderRadius: 30,
                 padding: 14,
-                boxShadow: '0 18px 40px rgba(0,0,0,0.16)',
+                boxShadow: '0 18px 38px rgba(0,0,0,0.16)',
               }}
             >
               <button
@@ -544,8 +723,8 @@ export default function HomePage() {
                   position: 'absolute',
                   top: 12,
                   right: 12,
-                  width: 38,
-                  height: 38,
+                  width: 40,
+                  height: 40,
                   borderRadius: 999,
                   border: '1px solid #e3d9cc',
                   background: '#fff',
@@ -572,7 +751,7 @@ export default function HomePage() {
                   gridTemplateColumns: '1fr auto auto',
                   gap: 12,
                   alignItems: 'center',
-                  paddingRight: 46,
+                  paddingRight: 50,
                 }}
               >
                 <div
@@ -731,7 +910,7 @@ export default function HomePage() {
               border: '1px solid rgba(228,217,204,0.98)',
               borderRadius: 32,
               padding: '14px 16px',
-              boxShadow: '0 16px 36px rgba(0,0,0,0.14)',
+              boxShadow: '0 16px 34px rgba(0,0,0,0.14)',
               display: 'grid',
               gridTemplateColumns: '1fr auto 1fr',
               alignItems: 'end',
@@ -741,7 +920,19 @@ export default function HomePage() {
           >
             <button
               onClick={() => router.push('/bookings')}
-              style={bottomTabStyle}
+              style={{
+                border: 'none',
+                background: '#fff',
+                borderRadius: 24,
+                minHeight: 74,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                color: '#221b15',
+                boxShadow: '0 6px 14px rgba(0,0,0,0.04)',
+              }}
             >
               <span style={{ fontSize: 22 }}>📅</span>
               <span style={{ fontSize: 16, fontWeight: 900 }}>Bookings</span>
@@ -771,7 +962,19 @@ export default function HomePage() {
 
             <button
               onClick={() => router.push('/favorites')}
-              style={bottomTabStyle}
+              style={{
+                border: 'none',
+                background: '#fff',
+                borderRadius: 24,
+                minHeight: 74,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                color: '#221b15',
+                boxShadow: '0 6px 14px rgba(0,0,0,0.04)',
+              }}
             >
               <span style={{ fontSize: 22 }}>♥</span>
               <span style={{ fontSize: 16, fontWeight: 900 }}>Saved</span>
@@ -788,7 +991,7 @@ export default function HomePage() {
 
         .leaflet-control-zoom {
           border: none !important;
-          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.10) !important;
+          box-shadow: 0 10px 22px rgba(0, 0, 0, 0.10) !important;
           overflow: hidden;
           border-radius: 18px !important;
         }
@@ -808,50 +1011,3 @@ export default function HomePage() {
     </main>
   );
 }
-
-const floatingButtonStyle: React.CSSProperties = {
-  width: 58,
-  height: 58,
-  borderRadius: 999,
-  border: '1px solid rgba(230,218,203,0.98)',
-  background: 'rgba(255,255,255,0.95)',
-  fontSize: 24,
-  color: '#4b443c',
-  boxShadow: '0 10px 24px rgba(0,0,0,0.11)',
-  backdropFilter: 'blur(10px)',
-};
-
-const bottomTabStyle: React.CSSProperties = {
-  border: 'none',
-  background: '#fff',
-  borderRadius: 24,
-  minHeight: 74,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 6,
-  color: '#221b15',
-  boxShadow: '0 6px 14px rgba(0,0,0,0.04)',
-};
-
-const miniCardPrimaryButton: React.CSSProperties = {
-  border: 'none',
-  background: '#0f8cab',
-  color: '#fff',
-  borderRadius: 15,
-  padding: '10px 15px',
-  fontWeight: 900,
-  fontSize: 14,
-  boxShadow: '0 8px 18px rgba(15,140,171,0.18)',
-};
-
-const miniCardSecondaryButton: React.CSSProperties = {
-  border: '1px solid #dfd4c7',
-  background: '#fff',
-  color: '#2a231d',
-  borderRadius: 15,
-  padding: '10px 15px',
-  fontWeight: 900,
-  fontSize: 14,
-};
