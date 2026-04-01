@@ -19,11 +19,12 @@ export default function HomePage() {
   const featuredMaster = masters[0];
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('beauty');
-  const [mapMode, setMapMode] = useState<'map' | 'satellite'>('satellite');
+  const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [selectedMasterOpen, setSelectedMasterOpen] = useState(true);
   const [routeSheetOpen, setRouteSheetOpen] = useState(false);
   const [routeMode, setRouteMode] = useState<'drive' | 'transit' | 'walk'>('drive');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const nearbyCount = useMemo(() => masters.length || 82, [masters.length]);
 
@@ -53,21 +54,33 @@ export default function HomePage() {
           zIndex: 1,
           filter:
             mapMode === 'satellite'
-              ? 'contrast(1.02) saturate(0.82) brightness(0.94)'
-              : 'none',
+              ? 'contrast(1.12) saturate(0.72) brightness(0.86)'
+              : 'contrast(1.02) saturate(1.02) brightness(1)',
         }}
       >
         <RealMap masters={masters} fullScreen />
       </div>
 
-      {mapMode === 'satellite' && (
+      {mapMode === 'satellite' ? (
         <div
           style={{
             position: 'absolute',
             inset: 0,
             zIndex: 2,
             background:
-              'linear-gradient(180deg, rgba(252,248,242,0.10) 0%, rgba(252,248,242,0.00) 24%, rgba(252,248,242,0.10) 100%)',
+              'linear-gradient(180deg, rgba(18,28,24,0.18) 0%, rgba(18,28,24,0.06) 30%, rgba(18,28,24,0.12) 100%)',
+            pointerEvents: 'none',
+            mixBlendMode: 'multiply',
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 2,
+            background:
+              'linear-gradient(180deg, rgba(252,248,242,0.08) 0%, rgba(252,248,242,0.00) 30%, rgba(252,248,242,0.08) 100%)',
             pointerEvents: 'none',
           }}
         />
@@ -150,10 +163,7 @@ export default function HomePage() {
               }}
             >
               <img
-                src={
-                  featuredMaster.avatar ||
-                  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80'
-                }
+                src={featuredMaster.avatar}
                 alt="Profile"
                 style={{
                   width: '100%',
@@ -176,6 +186,23 @@ export default function HomePage() {
               scrollbarWidth: 'none',
             }}
           >
+            <button
+              onClick={() => setMenuOpen((prev) => !prev)}
+              style={{
+                minWidth: 52,
+                height: 52,
+                borderRadius: 999,
+                border: '1px solid #ded4c8',
+                background: 'rgba(255,255,255,0.98)',
+                boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+                fontSize: 24,
+                color: '#2a231d',
+                flexShrink: 0,
+              }}
+            >
+              ⋮
+            </button>
+
             {categories.map((category) => {
               const active = activeCategory === category.id;
 
@@ -205,6 +232,49 @@ export default function HomePage() {
               );
             })}
           </div>
+
+          {menuOpen && (
+            <div
+              style={{
+                marginTop: 10,
+                width: 220,
+                background: 'rgba(255,248,239,0.98)',
+                border: '1px solid #e4d9cc',
+                borderRadius: 24,
+                boxShadow: '0 16px 38px rgba(0,0,0,0.12)',
+                padding: 12,
+                pointerEvents: 'auto',
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => {
+                      setActiveCategory(category.id);
+                      setMenuOpen(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      border: 'none',
+                      background: activeCategory === category.id ? '#fff' : 'transparent',
+                      borderRadius: 16,
+                      padding: '12px 12px',
+                      textAlign: 'left',
+                      fontWeight: 800,
+                      fontSize: 16,
+                      color: '#231c16',
+                    }}
+                  >
+                    <span>{category.icon}</span>
+                    <span>{category.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div
             style={{
@@ -250,40 +320,22 @@ export default function HomePage() {
           <button
             onClick={() => setMapMode((prev) => (prev === 'map' ? 'satellite' : 'map'))}
             style={floatingButtonStyle}
+            title="Map style"
           >
-            {mapMode === 'satellite' ? '◫' : '◩'}
+            {mapMode === 'satellite' ? '🛰' : '◩'}
           </button>
 
           <button
             onClick={() => setRouteSheetOpen((prev) => !prev)}
             style={floatingButtonStyle}
+            title="Route"
           >
             ➤
           </button>
 
-          <button style={floatingButtonStyle}>◎</button>
-        </div>
-
-        <div
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: '43%',
-            transform: 'translate(-50%, -50%)',
-            pointerEvents: 'none',
-            zIndex: 22,
-          }}
-        >
-          <div
-            style={{
-              width: 150,
-              height: 6,
-              background: '#2f91d8',
-              borderRadius: 999,
-              transform: 'rotate(-25deg)',
-              boxShadow: '0 0 0 3px rgba(47,145,216,0.12)',
-            }}
-          />
+          <button style={floatingButtonStyle} title="My location">
+            ◎
+          </button>
         </div>
 
         {selectedMasterOpen && (
@@ -299,15 +351,16 @@ export default function HomePage() {
           >
             <div
               style={{
+                position: 'relative',
                 background: 'rgba(255,248,239,0.98)',
                 border: '1px solid #e5dacc',
                 borderRadius: 24,
                 padding: 12,
                 display: 'grid',
-                gridTemplateColumns: '64px 1fr',
+                gridTemplateColumns: '64px 1fr auto',
                 gap: 12,
                 alignItems: 'center',
-                minWidth: 280,
+                minWidth: 290,
                 boxShadow: '0 16px 34px rgba(0,0,0,0.14)',
               }}
             >
@@ -386,6 +439,22 @@ export default function HomePage() {
                   </button>
                 </div>
               </div>
+
+              <button
+                onClick={() => setSelectedMasterOpen(false)}
+                style={{
+                  alignSelf: 'start',
+                  width: 36,
+                  height: 36,
+                  borderRadius: 999,
+                  border: '1px solid #e3d9cc',
+                  background: '#fff',
+                  fontSize: 20,
+                  color: '#5f564d',
+                }}
+              >
+                ✕
+              </button>
             </div>
           </div>
         )}
@@ -403,6 +472,7 @@ export default function HomePage() {
           >
             <div
               style={{
+                position: 'relative',
                 background: 'rgba(255,248,239,0.98)',
                 border: '1px solid #e7ddd0',
                 borderRadius: 30,
@@ -410,6 +480,24 @@ export default function HomePage() {
                 boxShadow: '0 18px 38px rgba(0,0,0,0.16)',
               }}
             >
+              <button
+                onClick={() => setRouteSheetOpen(false)}
+                style={{
+                  position: 'absolute',
+                  top: 12,
+                  right: 12,
+                  width: 38,
+                  height: 38,
+                  borderRadius: 999,
+                  border: '1px solid #e3d9cc',
+                  background: '#fff',
+                  fontSize: 20,
+                  color: '#5f564d',
+                }}
+              >
+                ✕
+              </button>
+
               <div
                 style={{
                   width: 52,
@@ -426,6 +514,7 @@ export default function HomePage() {
                   gridTemplateColumns: '1fr auto auto',
                   gap: 12,
                   alignItems: 'center',
+                  paddingRight: 46,
                 }}
               >
                 <div
@@ -660,6 +749,7 @@ export default function HomePage() {
               gridTemplateColumns: '1fr auto 1fr',
               alignItems: 'end',
               gap: 10,
+              minHeight: 96,
             }}
           >
             <button
