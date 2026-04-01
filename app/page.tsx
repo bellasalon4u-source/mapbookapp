@@ -2,8 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import RealMap from '../components/RealMap';
+import dynamic from 'next/dynamic';
 import { getAllMasters } from '../services/masters';
+
+const RealMap = dynamic(() => import('../components/RealMap'), {
+  ssr: false,
+});
 
 const categories = [
   { id: 'beauty', label: 'Beauty', icon: '✦' },
@@ -69,7 +73,7 @@ export default function HomePage() {
           fullScreen
           mapMode={mapMode}
           selectedMasterId={selectedMaster?.id ?? null}
-          onMasterSelect={(master) => {
+          onMasterSelect={(master: any) => {
             setSelectedMaster(master);
             setRouteSheetOpen(false);
           }}
@@ -291,7 +295,7 @@ export default function HomePage() {
               }}
             >
               <span style={{ fontSize: 16, fontWeight: 800 }}>
-                TEST ✓ {nearbyCount} verified providers nearby
+                ✓ {nearbyCount} verified providers nearby
               </span>
               <span style={{ fontSize: 15, color: '#2f9c47', fontWeight: 700 }}>
                 Available now
