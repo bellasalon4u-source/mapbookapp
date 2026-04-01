@@ -291,7 +291,7 @@ export default function HomePage() {
               }}
             >
               <span style={{ fontSize: 16, fontWeight: 800 }}>
-                ✓ {nearbyCount} verified providers nearby
+                TEST ✓ {nearbyCount} verified providers nearby
               </span>
               <span style={{ fontSize: 15, color: '#2f9c47', fontWeight: 700 }}>
                 Available now
