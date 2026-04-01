@@ -187,7 +187,10 @@ export default function HomePage() {
               return (
                 <button
                   key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
+                  onClick={() => {
+                    setActiveCategory(category.id);
+                    setSelectedMaster(null);
+                  }}
                   style={{
                     border: 'none',
                     background: 'transparent',
@@ -286,7 +289,6 @@ export default function HomePage() {
         <section style={{ padding: '10px 0 0' }}>
           <div
             style={{
-              margin: '0 0 0',
               background: '#ffffff',
               borderTop: '1px solid #e7e1d8',
               borderBottom: '1px solid #e7e1d8',
@@ -302,6 +304,7 @@ export default function HomePage() {
               <RealMap
                 masters={masters}
                 mapMode={mapMode}
+                activeCategory={activeCategory}
                 selectedMasterId={selectedMaster?.id ?? null}
                 onMasterSelect={(master: any) => setSelectedMaster(master)}
                 onMapBackgroundClick={() => setSelectedMaster(null)}
@@ -459,16 +462,6 @@ export default function HomePage() {
                   </div>
                 </div>
               )}
-
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  pointerEvents: 'none',
-                  background:
-                    'linear-gradient(180deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.00) 70%, rgba(255,255,255,0.08) 100%)',
-                }}
-              />
             </div>
           </div>
         </section>
