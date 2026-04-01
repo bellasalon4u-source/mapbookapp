@@ -32,7 +32,11 @@ type RealMapProps = {
   onMapBackgroundClick?: () => void;
 };
 
-function MapClickHandler({ onMapBackgroundClick }: { onMapBackgroundClick?: () => void }) {
+function MapClickHandler({
+  onMapBackgroundClick,
+}: {
+  onMapBackgroundClick?: () => void;
+}) {
   useMapEvents({
     click() {
       onMapBackgroundClick?.();
@@ -124,7 +128,9 @@ export default function RealMap({
             <CircleMarker
               key={master.id ?? `${coords[0]}-${coords[1]}`}
               center={coords}
-              radius={selected ? 16 : 13}
+              radius={selected ? 18 : 15}
+              stroke
+              bubblingMouseEvents={false}
               pathOptions={{
                 color: '#1f1f1f',
                 weight: 4,
@@ -132,8 +138,13 @@ export default function RealMap({
                 fillOpacity: 1,
               }}
               eventHandlers={{
-                click: (e) => {
-                  e.originalEvent.stopPropagation();
+                click: () => {
+                  onMasterSelect?.(master);
+                },
+                mousedown: () => {
+                  onMasterSelect?.(master);
+                },
+                touchstart: () => {
                   onMasterSelect?.(master);
                 },
               }}
