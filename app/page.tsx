@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import RealMap from '../components/RealMap';
 import { getAllMasters } from '../services/masters';
@@ -16,22 +16,32 @@ export default function HomePage() {
   const router = useRouter();
   const masters = getAllMasters();
 
-  const featuredMaster = masters[0];
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('beauty');
   const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const [selectedMasterOpen, setSelectedMasterOpen] = useState(true);
   const [routeSheetOpen, setRouteSheetOpen] = useState(false);
   const [routeMode, setRouteMode] = useState<'drive' | 'transit' | 'walk'>('drive');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
+
+  const profileMaster = masters[0];
+
+  useEffect(() => {
+    const shouldReset = sessionStorage.getItem('mapbook_reset_home');
+    if (shouldReset === '1') {
+      setSelectedMaster(null);
+      setRouteSheetOpen(false);
+      sessionStorage.removeItem('mapbook_reset_home');
+    }
+  }, []);
 
   const nearbyCount = useMemo(() => masters.length || 82, [masters.length]);
 
   const etaText =
     routeMode === 'drive' ? '12 min' : routeMode === 'transit' ? '24 min' : '38 min';
 
-  if (!featuredMaster) {
+  if (!profileMaster) {
     return <main style={{ padding: 24 }}>No providers found</main>;
   }
 
@@ -52,39 +62,23 @@ export default function HomePage() {
           position: 'absolute',
           inset: 0,
           zIndex: 1,
-          filter:
-            mapMode === 'satellite'
-              ? 'contrast(1.12) saturate(0.72) brightness(0.86)'
-              : 'contrast(1.02) saturate(1.02) brightness(1)',
         }}
       >
-        <RealMap masters={masters} fullScreen />
+        <RealMap
+          masters={masters}
+          fullScreen
+          mapMode={mapMode}
+          selectedMasterId={selectedMaster?.id ?? null}
+          onMasterSelect={(master) => {
+            setSelectedMaster(master);
+            setRouteSheetOpen(false);
+          }}
+          onMapBackgroundClick={() => {
+            setSelectedMaster(null);
+            setRouteSheetOpen(false);
+          }}
+        />
       </div>
-
-      {mapMode === 'satellite' ? (
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 2,
-            background:
-              'linear-gradient(180deg, rgba(18,28,24,0.18) 0%, rgba(18,28,24,0.06) 30%, rgba(18,28,24,0.12) 100%)',
-            pointerEvents: 'none',
-            mixBlendMode: 'multiply',
-          }}
-        />
-      ) : (
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 2,
-            background:
-              'linear-gradient(180deg, rgba(252,248,242,0.08) 0%, rgba(252,248,242,0.00) 30%, rgba(252,248,242,0.08) 100%)',
-            pointerEvents: 'none',
-          }}
-        />
-      )}
 
       <div
         style={{
@@ -163,7 +157,7 @@ export default function HomePage() {
               }}
             >
               <img
-                src={featuredMaster.avatar}
+                src={profileMaster.avatar}
                 alt="Profile"
                 style={{
                   width: '100%',
@@ -326,7 +320,11 @@ export default function HomePage() {
           </button>
 
           <button
-            onClick={() => setRouteSheetOpen((prev) => !prev)}
+            onClick={() => {
+              if (selectedMaster) {
+                setRouteSheetOpen((prev) => !prev);
+              }
+            }}
             style={floatingButtonStyle}
             title="Route"
           >
@@ -338,7 +336,7 @@ export default function HomePage() {
           </button>
         </div>
 
-        {selectedMasterOpen && (
+        {selectedMaster && (
           <div
             style={{
               position: 'absolute',
@@ -365,8 +363,8 @@ export default function HomePage() {
               }}
             >
               <img
-                src={featuredMaster.avatar}
-                alt={featuredMaster.name}
+                src={selectedMaster.avatar}
+                alt={selectedMaster.name}
                 style={{
                   width: 64,
                   height: 64,
@@ -386,7 +384,7 @@ export default function HomePage() {
                     lineHeight: 1.2,
                   }}
                 >
-                  {featuredMaster.name}
+                  {selectedMaster.name}
                 </div>
 
                 <div
@@ -412,7 +410,7 @@ export default function HomePage() {
                   </span>
 
                   <span style={{ fontSize: 14, fontWeight: 800 }}>
-                    ★ {featuredMaster.rating.toFixed(1)}
+                    ★ {(selectedMaster.rating ?? 4.9).toFixed(1)}
                   </span>
 
                   <span style={{ color: '#2f9c47', fontSize: 16, fontWeight: 900 }}>✓</span>
@@ -426,7 +424,10 @@ export default function HomePage() {
                   }}
                 >
                   <button
-                    onClick={() => router.push(`/master/${featuredMaster.id}`)}
+                    onClick={() => {
+                      sessionStorage.setItem('mapbook_reset_home', '1');
+                      router.push(`/master/${selectedMaster.id}`);
+                    }}
                     style={miniCardSecondaryButton}
                   >
                     View
@@ -441,7 +442,10 @@ export default function HomePage() {
               </div>
 
               <button
-                onClick={() => setSelectedMasterOpen(false)}
+                onClick={() => {
+                  setSelectedMaster(null);
+                  setRouteSheetOpen(false);
+                }}
                 style={{
                   alignSelf: 'start',
                   width: 36,
@@ -459,7 +463,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {routeSheetOpen && (
+        {routeSheetOpen && selectedMaster && (
           <div
             style={{
               position: 'absolute',
@@ -527,8 +531,8 @@ export default function HomePage() {
                   }}
                 >
                   <img
-                    src={featuredMaster.avatar}
-                    alt={featuredMaster.name}
+                    src={selectedMaster.avatar}
+                    alt={selectedMaster.name}
                     style={{
                       width: 54,
                       height: 54,
@@ -546,7 +550,7 @@ export default function HomePage() {
                         lineHeight: 1.2,
                       }}
                     >
-                      {featuredMaster.name}
+                      {selectedMaster.name}
                     </div>
                     <div
                       style={{
@@ -704,7 +708,7 @@ export default function HomePage() {
                   <button
                     onClick={() => {
                       setRouteSheetOpen(false);
-                      setSelectedMasterOpen(false);
+                      setSelectedMaster(null);
                     }}
                     style={{
                       border: 'none',
