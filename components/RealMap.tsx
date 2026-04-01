@@ -1,257 +1,146 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import type { MasterItem } from '../services/masters';
+import { useMemo } from 'react';
+import {
+  CircleMarker,
+  MapContainer,
+  TileLayer,
+  useMapEvents,
+} from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+
+type MasterLike = {
+  id?: string;
+  lat?: number;
+  lng?: number;
+  latitude?: number;
+  longitude?: number;
+  location?: {
+    lat?: number;
+    lng?: number;
+    latitude?: number;
+    longitude?: number;
+  };
+};
 
 type RealMapProps = {
-  masters: MasterItem[];
+  masters: MasterLike[];
   fullScreen?: boolean;
+  mapMode?: 'map' | 'satellite';
+  selectedMasterId?: string | null;
+  onMasterSelect?: (master: any) => void;
+  onMapBackgroundClick?: () => void;
 };
 
-type Point = MasterItem & {
-  lat: number;
-  lng: number;
-};
+function MapClickHandler({ onMapBackgroundClick }: { onMapBackgroundClick?: () => void }) {
+  useMapEvents({
+    click() {
+      onMapBackgroundClick?.();
+    },
+  });
 
-type ScreenPoint = {
-  id: string;
-  x: number;
-  y: number;
-  availableNow?: boolean;
-};
+  return null;
+}
 
-const fallbackCoords = [
-  { lat: 51.5074, lng: -0.1278 },
-  { lat: 51.5154, lng: -0.0721 },
-  { lat: 51.5033, lng: -0.1195 },
-  { lat: 51.5231, lng: -0.1586 },
-  { lat: 51.4952, lng: -0.1460 },
-  { lat: 51.5380, lng: -0.1426 },
-];
+function getCoords(master: any): [number, number] | null {
+  const lat =
+    master?.lat ??
+    master?.latitude ??
+    master?.location?.lat ??
+    master?.location?.latitude;
+
+  const lng =
+    master?.lng ??
+    master?.longitude ??
+    master?.location?.lng ??
+    master?.location?.longitude;
+
+  if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+
+  return [lat, lng];
+}
 
 export default function RealMap({
   masters,
   fullScreen = false,
+  mapMode = 'map',
+  selectedMasterId = null,
+  onMasterSelect,
+  onMapBackgroundClick,
 }: RealMapProps) {
-  const router = useRouter();
-  const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<any>(null);
-  const didDragRef = useRef(false);
+  const validMasters = useMemo(
+    () => masters.filter((master) => getCoords(master)),
+    [masters]
+  );
 
-  const [ready, setReady] = useState(false);
-  const [screenPoints, setScreenPoints] = useState<ScreenPoint[]>([]);
+  const center = useMemo<[number, number]>(() => {
+    if (!validMasters.length) return [51.5074, -0.1278];
 
-  const points: Point[] = useMemo(() => {
-    return masters.map((master, index) => ({
-      ...master,
-      lat: master.lat ?? fallbackCoords[index % fallbackCoords.length].lat,
-      lng: master.lng ?? fallbackCoords[index % fallbackCoords.length].lng,
-    }));
-  }, [masters]);
+    const coords = validMasters
+      .map((master) => getCoords(master))
+      .filter(Boolean) as [number, number][];
 
-  useEffect(() => {
-    let disposed = false;
+    const avgLat = coords.reduce((sum, item) => sum + item[0], 0) / coords.length;
+    const avgLng = coords.reduce((sum, item) => sum + item[1], 0) / coords.length;
 
-    async function initMap() {
-      if (!mapContainerRef.current || mapRef.current) return;
+    return [avgLat, avgLng];
+  }, [validMasters]);
 
-      const L = (await import('leaflet')).default;
-      if (disposed || !mapContainerRef.current) return;
+  const tileUrl =
+    mapMode === 'satellite'
+      ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
-      const map = L.map(mapContainerRef.current, {
-        center: [51.5074, -0.1278],
-        zoom: 11,
-        zoomControl: true,
-      });
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-      }).addTo(map);
-
-      mapRef.current = map;
-      setReady(true);
-
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 300);
-    }
-
-    initMap();
-
-    return () => {
-      disposed = true;
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!ready || !mapRef.current || points.length === 0) return;
-
-    const map = mapRef.current;
-    const bounds = points.map((p) => [p.lat, p.lng]);
-
-    if (bounds.length > 1) {
-      map.fitBounds(bounds, {
-        padding: fullScreen ? [90, 90] : [40, 40],
-        maxZoom: 13,
-      });
-    } else if (bounds.length === 1) {
-      map.setView(bounds[0], 13);
-    }
-  }, [ready, points, fullScreen]);
-
-  useEffect(() => {
-    if (!ready || !mapRef.current) return;
-
-    const map = mapRef.current;
-
-    const updatePositions = () => {
-      const next = points.map((point) => {
-        const projected = map.latLngToContainerPoint([point.lat, point.lng]);
-        return {
-          id: point.id,
-          x: projected.x,
-          y: projected.y,
-          availableNow: point.availableNow,
-        };
-      });
-
-      setScreenPoints(next);
-    };
-
-    const handleDragStart = () => {
-      didDragRef.current = false;
-    };
-
-    const handleDrag = () => {
-      didDragRef.current = true;
-      updatePositions();
-    };
-
-    const handleMove = () => {
-      updatePositions();
-    };
-
-    const handleZoom = () => {
-      updatePositions();
-    };
-
-    updatePositions();
-
-    map.on('dragstart', handleDragStart);
-    map.on('drag', handleDrag);
-    map.on('move', handleMove);
-    map.on('moveend', handleMove);
-    map.on('zoom', handleZoom);
-    map.on('zoomend', handleZoom);
-    map.on('resize', handleMove);
-
-    window.addEventListener('resize', handleMove);
-
-    setTimeout(updatePositions, 100);
-    setTimeout(updatePositions, 300);
-    setTimeout(updatePositions, 600);
-
-    return () => {
-      map.off('dragstart', handleDragStart);
-      map.off('drag', handleDrag);
-      map.off('move', handleMove);
-      map.off('moveend', handleMove);
-      map.off('zoom', handleZoom);
-      map.off('zoomend', handleZoom);
-      map.off('resize', handleMove);
-      window.removeEventListener('resize', handleMove);
-    };
-  }, [ready, points]);
+  const attribution =
+    mapMode === 'satellite'
+      ? '&copy; Esri'
+      : '&copy; OpenStreetMap contributors';
 
   return (
     <div
       style={{
-        position: 'relative',
         width: '100%',
-        height: fullScreen ? '100vh' : '420px',
-        minHeight: fullScreen ? '100vh' : '420px',
-        borderRadius: fullScreen ? 0 : 28,
-        overflow: 'hidden',
+        height: fullScreen ? '100vh' : '100%',
       }}
     >
-      <div
-        ref={mapContainerRef}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 1,
-        }}
-      />
-
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 50,
-          pointerEvents: 'none',
-        }}
+      <MapContainer
+        center={center}
+        zoom={11}
+        scrollWheelZoom
+        zoomControl
+        style={{ width: '100%', height: '100%' }}
       >
-        {screenPoints.map((point) => (
-          <button
-            key={point.id}
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (didDragRef.current) return;
-              router.push(`/master/${point.id}`);
-            }}
-            onTouchStart={(e) => {
-              e.stopPropagation();
-              didDragRef.current = false;
-            }}
-            onTouchMove={() => {
-              didDragRef.current = true;
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (didDragRef.current) return;
-              router.push(`/master/${point.id}`);
-            }}
-            style={{
-              position: 'absolute',
-              left: point.x,
-              top: point.y,
-              transform: 'translate(-50%, -50%)',
-              width: 44,
-              height: 44,
-              borderRadius: 999,
-              border: 'none',
-              background: 'transparent',
-              padding: 0,
-              margin: 0,
-              pointerEvents: 'auto',
-              zIndex: 60,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              touchAction: 'manipulation',
-            }}
-          >
-            <span
-              style={{
-                display: 'block',
-                width: 30,
-                height: 30,
-                borderRadius: 999,
-                border: '4px solid #2f241c',
-                background: point.availableNow ? '#22c55e' : '#ef4444',
-                boxShadow: '0 4px 10px rgba(0,0,0,0.25)',
+        <TileLayer url={tileUrl} attribution={attribution} />
+
+        <MapClickHandler onMapBackgroundClick={onMapBackgroundClick} />
+
+        {validMasters.map((master: any) => {
+          const coords = getCoords(master);
+          if (!coords) return null;
+
+          const selected = master.id === selectedMasterId;
+
+          return (
+            <CircleMarker
+              key={master.id ?? `${coords[0]}-${coords[1]}`}
+              center={coords}
+              radius={selected ? 16 : 13}
+              pathOptions={{
+                color: '#1f1f1f',
+                weight: 4,
+                fillColor: selected ? '#2fbb52' : '#e84d4d',
+                fillOpacity: 1,
+              }}
+              eventHandlers={{
+                click: (e) => {
+                  e.originalEvent.stopPropagation();
+                  onMasterSelect?.(master);
+                },
               }}
             />
-          </button>
-        ))}
-      </div>
+          );
+        })}
+      </MapContainer>
     </div>
   );
 }
