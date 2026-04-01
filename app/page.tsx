@@ -47,24 +47,6 @@ function getFeaturedCategories() {
     .filter(Boolean);
 }
 
-function getMasterAvailability(master: any) {
-  const isAvailable =
-    master?.availableNow === true ||
-    master?.availableToday === true ||
-    master?.isAvailableToday === true;
-
-  return {
-    isAvailable,
-    text: isAvailable ? 'Available today' : 'Unavailable today',
-    color: isAvailable ? '#2f9c47' : '#d65a5a',
-  };
-}
-
-function getCategoryLabel(categoryId: string) {
-  const found = appCategories.find((c) => c.id === categoryId);
-  return found?.shortLabel || found?.label || 'Beauty';
-}
-
 export default function HomePage() {
   const router = useRouter();
   const masters = getAllMasters();
@@ -87,9 +69,6 @@ export default function HomePage() {
     return unsubscribe;
   }, []);
 
-  const featuredMaster = selectedMaster || masters[0];
-  const featuredAvailability = getMasterAvailability(featuredMaster);
-
   return (
     <main
       style={{
@@ -97,7 +76,7 @@ export default function HomePage() {
         background: '#f5f3ef',
         fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
-        paddingBottom: 110,
+        paddingBottom: 108,
       }}
     >
       <div
@@ -311,7 +290,7 @@ export default function HomePage() {
           >
             <div
               style={{
-                height: 350,
+                height: 430,
                 position: 'relative',
                 overflow: 'hidden',
               }}
@@ -374,109 +353,6 @@ export default function HomePage() {
                   ✕
                 </button>
               </div>
-
-              {selectedMaster && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: 12,
-                    right: 12,
-                    bottom: 12,
-                    zIndex: 35,
-                  }}
-                >
-                  <div
-                    style={{
-                      background: 'rgba(255,255,255,0.97)',
-                      border: '1px solid #ece4d9',
-                      borderRadius: 18,
-                      boxShadow: '0 10px 24px rgba(0,0,0,0.14)',
-                      padding: 12,
-                      display: 'grid',
-                      gridTemplateColumns: '64px 1fr auto',
-                      gap: 12,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: 999,
-                        overflow: 'hidden',
-                        border: '3px solid #fff',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
-                      }}
-                    >
-                      <img
-                        src={selectedMaster.avatar}
-                        alt={selectedMaster.name}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block',
-                        }}
-                      />
-                    </div>
-
-                    <div style={{ minWidth: 0 }}>
-                      <div
-                        style={{
-                          fontSize: 16,
-                          fontWeight: 800,
-                          color: '#253140',
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        {selectedMaster.name}
-                      </div>
-
-                      <div
-                        style={{
-                          marginTop: 6,
-                          display: 'flex',
-                          gap: 6,
-                          flexWrap: 'wrap',
-                          alignItems: 'center',
-                          fontSize: 13,
-                          fontWeight: 700,
-                          color: '#445161',
-                        }}
-                      >
-                        <span>{getCategoryLabel(activeCategory)}</span>
-                        <span>•</span>
-                        <span
-                          style={{
-                            color: getMasterAvailability(selectedMaster).color,
-                          }}
-                        >
-                          {getMasterAvailability(selectedMaster).text}
-                        </span>
-                        <span>★ {(selectedMaster.rating ?? 4.7).toFixed(1)}</span>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() =>
-                        router.push(`/master/${selectedMaster.id}`)
-                      }
-                      style={{
-                        border: 'none',
-                        background: '#3a983d',
-                        color: '#fff',
-                        borderRadius: 10,
-                        padding: '12px 16px',
-                        fontSize: 13,
-                        fontWeight: 800,
-                        boxShadow: '0 6px 14px rgba(58,152,61,0.18)',
-                      }}
-                    >
-                      VIEW
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </section>
@@ -570,113 +446,6 @@ export default function HomePage() {
                 </div>
               </button>
             ))}
-          </div>
-        </section>
-
-        <section style={{ padding: '16px 16px 0' }}>
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 18,
-              padding: 14,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.07)',
-              border: '1px solid #ece7df',
-              display: 'grid',
-              gridTemplateColumns: '98px 1fr auto',
-              gap: 14,
-              alignItems: 'center',
-            }}
-          >
-            <div
-              style={{
-                width: 98,
-                height: 98,
-                borderRadius: 12,
-                overflow: 'hidden',
-                background: '#ddd',
-              }}
-            >
-              <img
-                src={featuredMaster?.avatar || masters[0]?.avatar}
-                alt={featuredMaster?.name || 'Provider'}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  display: 'block',
-                }}
-              />
-            </div>
-
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 16,
-                  fontWeight: 800,
-                  color: '#253140',
-                  lineHeight: 1.2,
-                }}
-              >
-                {featuredMaster?.name || "Mike's Repairs"}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 6,
-                  fontSize: 13,
-                  color: '#43505e',
-                  fontWeight: 700,
-                  display: 'flex',
-                  gap: 6,
-                  flexWrap: 'wrap',
-                }}
-              >
-                <span>{getCategoryLabel(activeCategory)}</span>
-                <span>•</span>
-                <span style={{ color: featuredAvailability.color }}>
-                  {featuredAvailability.text}
-                </span>
-                <span>★ {(featuredMaster?.rating ?? 4.7).toFixed(1)}</span>
-              </div>
-
-              <div
-                style={{
-                  marginTop: 12,
-                  paddingTop: 10,
-                  borderTop: '1px solid #ebe6df',
-                  fontSize: 13,
-                  color: '#43505e',
-                  fontWeight: 700,
-                }}
-              >
-                {activeCategory === 'beauty'
-                  ? 'Hair • Nails • Makeup'
-                  : activeCategory === 'pets'
-                  ? 'Grooming • Dog Walking • Pet Sitting'
-                  : activeCategory === 'tech'
-                  ? 'Phone Repair • Laptop Repair'
-                  : 'Home Repairs • Appliance Repair'}
-              </div>
-            </div>
-
-            <button
-              onClick={() =>
-                router.push(`/master/${featuredMaster?.id || masters[0]?.id}`)
-              }
-              style={{
-                alignSelf: 'end',
-                border: 'none',
-                background: '#3a983d',
-                color: '#fff',
-                borderRadius: 10,
-                padding: '12px 18px',
-                fontSize: 14,
-                fontWeight: 800,
-                boxShadow: '0 6px 16px rgba(58,152,61,0.20)',
-              }}
-            >
-              VIEW ›
-            </button>
           </div>
         </section>
       </div>
