@@ -72,6 +72,8 @@ export default function HomePage() {
   const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
 
+  const unreadMessages = 2;
+
   const featuredMaster = selectedMaster || masters[0];
   const featuredAvailability = getMasterAvailability(featuredMaster);
 
@@ -688,44 +690,98 @@ export default function HomePage() {
             padding: '10px 8px 12px',
           }}
         >
-          {[
-            { label: 'Home', icon: '⌂', active: true, path: '/' },
-            { label: 'Messages', icon: '✉', active: false, path: '/messages' },
-            { label: 'Bookings', icon: '▤', active: false, path: '/bookings' },
-            { label: 'Profile', icon: '◉', active: false, path: '/profile' },
-          ].map((item) => (
-            <button
-              key={item.label}
-              onClick={() => router.push(item.path)}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 5,
-                color: item.active ? '#1f5d99' : '#6e7b8a',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 31,
-                  lineHeight: 1,
-                  fontWeight: 700,
-                }}
-              >
-                {item.icon}
-              </span>
-              <span
-                style={{
-                  fontSize: 12,
-                  fontWeight: item.active ? 800 : 700,
-                }}
-              >
-                {item.label}
-              </span>
-            </button>
-          ))}
+          <button
+            onClick={() => router.push('/')}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 5,
+              color: '#1f5d99',
+            }}
+          >
+            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>⌂</span>
+            <span style={{ fontSize: 12, fontWeight: 800 }}>Home</span>
+          </button>
+
+          <button
+            onClick={() => router.push('/messages')}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 5,
+              color: '#6e7b8a',
+              position: 'relative',
+            }}
+          >
+            <div style={{ position: 'relative' }}>
+              <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>✉</span>
+
+              {unreadMessages > 0 && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: -6,
+                    right: -10,
+                    minWidth: 18,
+                    height: 18,
+                    padding: '0 5px',
+                    borderRadius: 999,
+                    background: '#e53935',
+                    color: '#fff',
+                    fontSize: 11,
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 3px 8px rgba(229,57,53,0.35)',
+                    border: '2px solid #f5f3ef',
+                  }}
+                >
+                  {unreadMessages > 9 ? '9+' : unreadMessages}
+                </span>
+              )}
+            </div>
+
+            <span style={{ fontSize: 12, fontWeight: 700 }}>Messages</span>
+          </button>
+
+          <button
+            onClick={() => router.push('/bookings')}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 5,
+              color: '#6e7b8a',
+            }}
+          >
+            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>▤</span>
+            <span style={{ fontSize: 12, fontWeight: 700 }}>Bookings</span>
+          </button>
+
+          <button
+            onClick={() => router.push('/profile')}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 5,
+              color: '#6e7b8a',
+            }}
+          >
+            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>◉</span>
+            <span style={{ fontSize: 12, fontWeight: 700 }}>Profile</span>
+          </button>
         </div>
       </nav>
     </main>
