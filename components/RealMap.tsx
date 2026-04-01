@@ -144,9 +144,6 @@ export default function RealMap({
                 mousedown: () => {
                   onMasterSelect?.(master);
                 },
-                touchstart: () => {
-                  onMasterSelect?.(master);
-                },
               }}
             />
           );
