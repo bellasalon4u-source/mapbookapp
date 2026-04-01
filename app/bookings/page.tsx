@@ -1,100 +1,163 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 type TabType = 'upcoming' | 'completed' | 'cancelled';
 
-const bookings = [
+type BookingItem = {
+  id: number;
+  masterId: string;
+  service: string;
+  master: string;
+  date: string;
+  time: string;
+  image: string;
+  phone: string;
+  bookingStatus:
+    | 'pending'
+    | 'confirmed'
+    | 'completed'
+    | 'cancelled_by_client'
+    | 'cancelled_by_seller'
+    | 'no_show';
+  reviewStatus: 'locked' | 'available' | 'submitted';
+};
+
+const initialBookings: BookingItem[] = [
   {
     id: 1,
+    masterId: 'bella-keratin-studio',
     service: 'Keratin Bonds',
     master: 'Bella Keratin Studio',
     date: '24 Apr 2026',
     time: '12:00',
-    image: 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=600&q=80',
+    image:
+      'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=600&q=80',
+    phone: '+447700123456',
     bookingStatus: 'pending',
     reviewStatus: 'locked',
   },
   {
     id: 2,
+    masterId: 'camden-brows-bar',
     service: 'Brow Lamination',
     master: 'Camden Brows Bar',
     date: '27 Apr 2026',
     time: '15:30',
-    image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=600&q=80',
+    image:
+      'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=600&q=80',
+    phone: '+447700222333',
     bookingStatus: 'confirmed',
     reviewStatus: 'locked',
   },
   {
     id: 3,
+    masterId: 'olga-beauty-studio',
     service: 'Hair Coloring',
     master: 'Olga Beauty Studio',
     date: '20 Apr 2026',
     time: '16:00',
-    image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
+    image:
+      'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
+    phone: '+447700444555',
     bookingStatus: 'completed',
     reviewStatus: 'available',
   },
   {
     id: 4,
+    masterId: 'bella-keratin-studio',
     service: 'Tape-In Extensions',
     master: 'Bella Keratin Studio',
     date: '18 Apr 2026',
     time: '11:00',
-    image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80',
+    image:
+      'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80',
+    phone: '+447700123456',
     bookingStatus: 'completed',
     reviewStatus: 'submitted',
   },
   {
     id: 5,
+    masterId: 'luxury-hair-london',
     service: 'Nano Ring Extensions',
     master: 'Luxury Hair London',
     date: '15 Apr 2026',
     time: '13:00',
-    image: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80',
+    image:
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80',
+    phone: '+447700777888',
     bookingStatus: 'cancelled_by_client',
     reviewStatus: 'locked',
   },
   {
     id: 6,
+    masterId: 'silk-hair-salon',
     service: 'Hair Botox',
     master: 'Silk Hair Salon',
     date: '12 Apr 2026',
     time: '10:00',
-    image: 'https://images.unsplash.com/photo-1522336284037-91f7da073525?auto=format&fit=crop&w=600&q=80',
+    image:
+      'https://images.unsplash.com/photo-1522336284037-91f7da073525?auto=format&fit=crop&w=600&q=80',
+    phone: '+447700999111',
     bookingStatus: 'cancelled_by_seller',
     reviewStatus: 'locked',
   },
   {
     id: 7,
+    masterId: 'glow-studio',
     service: 'Facial Massage',
     master: 'Glow Studio',
     date: '10 Apr 2026',
     time: '15:00',
-    image: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80',
+    image:
+      'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80',
+    phone: '+447700555666',
     bookingStatus: 'no_show',
     reviewStatus: 'locked',
   },
 ];
 
+const menuButtonStyle: React.CSSProperties = {
+  border: 'none',
+  background: '#f8f8f8',
+  borderRadius: 12,
+  padding: '12px 14px',
+  textAlign: 'left',
+  fontSize: 15,
+  fontWeight: 700,
+  color: '#1d1d1d',
+};
+
 export default function BookingsPage() {
   const router = useRouter();
   const [tab, setTab] = useState<TabType>('upcoming');
+  const [bookings, setBookings] = useState<BookingItem[]>(initialBookings);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
-  const upcomingItems = bookings.filter(
-    (item) => item.bookingStatus === 'pending' || item.bookingStatus === 'confirmed'
+  const upcomingItems = useMemo(
+    () =>
+      bookings.filter(
+        (item) =>
+          item.bookingStatus === 'pending' || item.bookingStatus === 'confirmed'
+      ),
+    [bookings]
   );
 
-  const completedItems = bookings.filter(
-    (item) => item.bookingStatus === 'completed'
+  const completedItems = useMemo(
+    () => bookings.filter((item) => item.bookingStatus === 'completed'),
+    [bookings]
   );
 
-  const cancelledItems = bookings.filter(
-    (item) =>
-      item.bookingStatus === 'cancelled_by_client' ||
-      item.bookingStatus === 'cancelled_by_seller' ||
-      item.bookingStatus === 'no_show'
+  const cancelledItems = useMemo(
+    () =>
+      bookings.filter(
+        (item) =>
+          item.bookingStatus === 'cancelled_by_client' ||
+          item.bookingStatus === 'cancelled_by_seller' ||
+          item.bookingStatus === 'no_show'
+      ),
+    [bookings]
   );
 
   const currentItems =
@@ -104,60 +167,74 @@ export default function BookingsPage() {
       ? completedItems
       : cancelledItems;
 
-  const getStatusBadge = (bookingStatus: string, reviewStatus: string) => {
+  const getStatusBadge = (
+    bookingStatus: BookingItem['bookingStatus'],
+    reviewStatus: BookingItem['reviewStatus']
+  ) => {
     if (bookingStatus === 'pending') {
-      return {
-        text: 'Pending',
-        bg: '#f4e3bf',
-        color: '#9a6a15',
-      };
+      return { text: 'Pending', bg: '#f4e3bf', color: '#9a6a15' };
     }
 
     if (bookingStatus === 'confirmed') {
-      return {
-        text: 'Confirmed',
-        bg: '#dceedd',
-        color: '#1f7d39',
-      };
+      return { text: 'Confirmed', bg: '#dceedd', color: '#1f7d39' };
     }
 
     if (bookingStatus === 'completed' && reviewStatus === 'submitted') {
-      return {
-        text: 'Reviewed',
-        bg: '#dceedd',
-        color: '#1f7d39',
-      };
+      return { text: 'Reviewed', bg: '#dceedd', color: '#1f7d39' };
     }
 
     if (bookingStatus === 'completed') {
-      return {
-        text: 'Completed',
-        bg: '#dceedd',
-        color: '#1f7d39',
-      };
+      return { text: 'Completed', bg: '#dceedd', color: '#1f7d39' };
     }
 
     if (bookingStatus === 'cancelled_by_client') {
-      return {
-        text: 'Cancelled by you',
-        bg: '#f3dfdf',
-        color: '#b14545',
-      };
+      return { text: 'Cancelled by you', bg: '#f3dfdf', color: '#b14545' };
     }
 
     if (bookingStatus === 'cancelled_by_seller') {
-      return {
-        text: 'Cancelled by seller',
-        bg: '#f3dfdf',
-        color: '#b14545',
-      };
+      return { text: 'Cancelled by seller', bg: '#f3dfdf', color: '#b14545' };
     }
 
-    return {
-      text: 'No-show',
-      bg: '#f3dfdf',
-      color: '#b14545',
-    };
+    return { text: 'No-show', bg: '#f3dfdf', color: '#b14545' };
+  };
+
+  const openBooking = (item: BookingItem) => {
+    router.push(`/master/${item.masterId}`);
+  };
+
+  const writeSeller = () => {
+    router.push('/messages');
+  };
+
+  const callSeller = (phone: string) => {
+    window.location.href = `tel:${phone}`;
+  };
+
+  const cancelBooking = (id: number) => {
+    const confirmed = window.confirm('Cancel this booking?');
+    if (!confirmed) return;
+
+    setBookings((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              bookingStatus: 'cancelled_by_client',
+              reviewStatus: 'locked',
+            }
+          : item
+      )
+    );
+    setOpenMenuId(null);
+    setTab('cancelled');
+  };
+
+  const leaveReview = (item: BookingItem) => {
+    router.push(`/master/${item.masterId}/leave-review`);
+  };
+
+  const viewReview = (item: BookingItem) => {
+    router.push(`/master/${item.masterId}/reviews`);
   };
 
   return (
@@ -230,7 +307,10 @@ export default function BookingsPage() {
           ].map((item) => (
             <button
               key={item.key}
-              onClick={() => setTab(item.key as TabType)}
+              onClick={() => {
+                setTab(item.key as TabType);
+                setOpenMenuId(null);
+              }}
               style={{
                 border: 'none',
                 borderRadius: 999,
@@ -258,6 +338,7 @@ export default function BookingsPage() {
                   borderRadius: 24,
                   padding: 16,
                   boxShadow: '0 6px 18px rgba(0,0,0,0.06)',
+                  position: 'relative',
                 }}
               >
                 <div
@@ -282,6 +363,9 @@ export default function BookingsPage() {
                   </div>
 
                   <button
+                    onClick={() =>
+                      setOpenMenuId((prev) => (prev === item.id ? null : item.id))
+                    }
                     style={{
                       border: 'none',
                       background: 'transparent',
@@ -292,6 +376,77 @@ export default function BookingsPage() {
                     ⋯
                   </button>
                 </div>
+
+                {openMenuId === item.id && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 58,
+                      right: 16,
+                      width: 190,
+                      background: '#fff',
+                      border: '1px solid #e8e2d8',
+                      borderRadius: 18,
+                      boxShadow: '0 12px 28px rgba(0,0,0,0.12)',
+                      padding: 8,
+                      zIndex: 10,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 6,
+                    }}
+                  >
+                    <button
+                      onClick={() => openBooking(item)}
+                      style={menuButtonStyle}
+                    >
+                      Open booking
+                    </button>
+
+                    {(item.bookingStatus === 'pending' ||
+                      item.bookingStatus === 'confirmed') && (
+                      <button
+                        onClick={() => cancelBooking(item.id)}
+                        style={{ ...menuButtonStyle, color: '#c33d3d' }}
+                      >
+                        Cancel booking
+                      </button>
+                    )}
+
+                    {item.bookingStatus === 'confirmed' && (
+                      <>
+                        <button onClick={writeSeller} style={menuButtonStyle}>
+                          Write seller
+                        </button>
+                        <button
+                          onClick={() => callSeller(item.phone)}
+                          style={menuButtonStyle}
+                        >
+                          Call seller
+                        </button>
+                      </>
+                    )}
+
+                    {item.bookingStatus === 'completed' &&
+                      item.reviewStatus === 'available' && (
+                        <button
+                          onClick={() => leaveReview(item)}
+                          style={menuButtonStyle}
+                        >
+                          Leave review
+                        </button>
+                      )}
+
+                    {item.bookingStatus === 'completed' &&
+                      item.reviewStatus === 'submitted' && (
+                        <button
+                          onClick={() => viewReview(item)}
+                          style={menuButtonStyle}
+                        >
+                          View review
+                        </button>
+                      )}
+                  </div>
+                )}
 
                 <div
                   style={{
@@ -333,6 +488,7 @@ export default function BookingsPage() {
                   }}
                 >
                   <button
+                    onClick={() => openBooking(item)}
                     style={{
                       flex: '1 1 160px',
                       borderRadius: 16,
@@ -349,6 +505,7 @@ export default function BookingsPage() {
 
                   {item.bookingStatus === 'pending' && (
                     <button
+                      onClick={() => cancelBooking(item.id)}
                       style={{
                         flex: '1 1 160px',
                         borderRadius: 16,
@@ -367,6 +524,7 @@ export default function BookingsPage() {
                   {item.bookingStatus === 'confirmed' && (
                     <>
                       <button
+                        onClick={writeSeller}
                         style={{
                           flex: '1 1 160px',
                           borderRadius: 16,
@@ -382,6 +540,7 @@ export default function BookingsPage() {
                       </button>
 
                       <button
+                        onClick={() => callSeller(item.phone)}
                         style={{
                           flex: '1 1 160px',
                           borderRadius: 16,
@@ -397,6 +556,7 @@ export default function BookingsPage() {
                       </button>
 
                       <button
+                        onClick={() => cancelBooking(item.id)}
                         style={{
                           flex: '1 1 160px',
                           borderRadius: 16,
@@ -413,39 +573,43 @@ export default function BookingsPage() {
                     </>
                   )}
 
-                  {item.bookingStatus === 'completed' && item.reviewStatus === 'available' && (
-                    <button
-                      style={{
-                        flex: '1 1 160px',
-                        borderRadius: 16,
-                        padding: '14px 16px',
-                        background: '#0f8b3f',
-                        color: '#fff',
-                        border: 'none',
-                        fontWeight: 800,
-                        fontSize: 16,
-                      }}
-                    >
-                      Leave review
-                    </button>
-                  )}
+                  {item.bookingStatus === 'completed' &&
+                    item.reviewStatus === 'available' && (
+                      <button
+                        onClick={() => leaveReview(item)}
+                        style={{
+                          flex: '1 1 160px',
+                          borderRadius: 16,
+                          padding: '14px 16px',
+                          background: '#0f8b3f',
+                          color: '#fff',
+                          border: 'none',
+                          fontWeight: 800,
+                          fontSize: 16,
+                        }}
+                      >
+                        Leave review
+                      </button>
+                    )}
 
-                  {item.bookingStatus === 'completed' && item.reviewStatus === 'submitted' && (
-                    <button
-                      style={{
-                        flex: '1 1 160px',
-                        borderRadius: 16,
-                        padding: '14px 16px',
-                        background: '#eef8f0',
-                        color: '#16803a',
-                        border: 'none',
-                        fontWeight: 800,
-                        fontSize: 16,
-                      }}
-                    >
-                      View review
-                    </button>
-                  )}
+                  {item.bookingStatus === 'completed' &&
+                    item.reviewStatus === 'submitted' && (
+                      <button
+                        onClick={() => viewReview(item)}
+                        style={{
+                          flex: '1 1 160px',
+                          borderRadius: 16,
+                          padding: '14px 16px',
+                          background: '#eef8f0',
+                          color: '#16803a',
+                          border: 'none',
+                          fontWeight: 800,
+                          fontSize: 16,
+                        }}
+                      >
+                        View review
+                      </button>
+                    )}
                 </div>
               </div>
             );
