@@ -359,88 +359,124 @@ export default function MasterPage() {
               marginTop: 22,
               border: '1px solid #e6dacb',
               background: '#fffdf9',
-              borderRadius: 22,
-              padding: '18px 20px',
-              display: 'grid',
-              gridTemplateColumns: '1.2fr auto 1fr',
-              alignItems: 'center',
-              gap: 14,
+              borderRadius: 24,
+              padding: '18px 18px 20px',
               boxShadow: '0 8px 22px rgba(0,0,0,0.04)',
               textAlign: 'left',
             }}
           >
             <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                minWidth: 0,
+                fontSize: 15,
+                color: '#7a7066',
+                fontWeight: 700,
+                marginBottom: 14,
               }}
             >
-              <span
+              Trusted by clients
+            </div>
+
+            <div
+              style={{
+                height: 1,
+                background: '#eee4d7',
+                marginBottom: 16,
+              }}
+            />
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1.15fr auto 0.95fr',
+                alignItems: 'center',
+                gap: 14,
+              }}
+            >
+              <div
                 style={{
-                  fontSize: 28,
-                  color: '#b0831a',
-                  lineHeight: 1,
-                  flexShrink: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                  minWidth: 0,
                 }}
               >
-                ★
-              </span>
-
-              <div style={{ minWidth: 0 }}>
                 <div
                   style={{
-                    fontSize: 28,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    minWidth: 0,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 34,
+                      color: '#b0831a',
+                      lineHeight: 1,
+                      flexShrink: 0,
+                    }}
+                  >
+                    ★
+                  </span>
+
+                  <span
+                    style={{
+                      fontSize: 34,
+                      fontWeight: 900,
+                      color: '#231b15',
+                      lineHeight: 1,
+                    }}
+                  >
+                    {master.rating.toFixed(1)}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    color: '#2d9b47',
+                    fontWeight: 800,
+                    fontSize: 16,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <span>{master.reviews}</span>
+                  <span>verified reviews</span>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  width: 1,
+                  height: 68,
+                  background: '#e8dfd4',
+                  justifySelf: 'center',
+                }}
+              />
+
+              <div style={{ textAlign: 'right' }}>
+                <div
+                  style={{
+                    fontSize: 15,
+                    color: '#7a7066',
+                    fontWeight: 700,
+                  }}
+                >
+                  Starting price
+                </div>
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 40,
                     fontWeight: 900,
                     color: '#231b15',
                     lineHeight: 1,
                   }}
                 >
-                  {master.rating.toFixed(1)}
+                  £{master.priceFrom}
                 </div>
-                <div
-                  style={{
-                    marginTop: 4,
-                    fontSize: 17,
-                    color: '#6f655b',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {master.reviews} reviews
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                width: 1,
-                height: 44,
-                background: '#e8dfd4',
-                justifySelf: 'center',
-              }}
-            />
-
-            <div style={{ textAlign: 'right' }}>
-              <div
-                style={{
-                  fontSize: 15,
-                  color: '#7a7066',
-                  fontWeight: 700,
-                }}
-              >
-                Starting price
-              </div>
-              <div
-                style={{
-                  marginTop: 4,
-                  fontSize: 34,
-                  fontWeight: 900,
-                  color: '#231b15',
-                  lineHeight: 1,
-                }}
-              >
-                £{master.priceFrom}
               </div>
             </div>
           </button>
