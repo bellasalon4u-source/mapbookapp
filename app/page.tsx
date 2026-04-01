@@ -1,478 +1,88 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import { getAllMasters } from '../services/masters';
-import { categories as appCategories } from '../services/categories';
-import {
-  getUnreadMessagesCount,
-  subscribeToChatStore,
-} from '../services/chatStore';
 
-const RealMap = dynamic(() => import('../components/RealMap'), {
-  ssr: false,
-});
-
-const popularServices = [
-  {
-    id: 'hair-styling',
-    title: 'Hair Styling',
-    image:
-      'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'phone-repair',
-    title: 'Phone Repair',
-    image:
-      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'appliance-repair',
-    title: 'Appliance Repair',
-    image:
-      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'dog-walking',
-    title: 'Dog Walking',
-    image:
-      'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80',
-  },
+const categories = [
+  'Beauty',
+  'Wellness',
+  'Home',
+  'Repairs',
+  'Tech',
+  'Pets',
+  'Auto',
+  'Moving',
+  'Activities',
+  'Events',
+  'Creative',
 ];
 
-function getFeaturedCategories() {
-  return ['beauty', 'wellness', 'home', 'repairs', 'tech', 'pets']
-    .map((id) => appCategories.find((c) => c.id === id))
-    .filter(Boolean);
-}
+const subcategoriesByCategory: Record<string, string[]> = {
+  Beauty: ['Hair', 'Nails', 'Brows', 'Lashes', 'Makeup', 'Keratin'],
+  Wellness: ['Massage', 'Spa', 'Therapy', 'Recovery', 'Yoga'],
+  Home: ['Cleaning', 'Handyman', 'Plumbing', 'Electrical', 'Furniture assembly'],
+  Repairs: ['Appliance repair', 'Phone repair', 'Laptop repair', 'TV repair', 'Shoe repair'],
+  Tech: ['Phone', 'Laptop', 'Tablet', 'Computer help', 'Setup'],
+  Pets: ['Grooming', 'Dog walking', 'Pet sitting', 'Pet taxi', 'Training'],
+  Auto: ['Car wash', 'Detailing', 'Diagnostics', 'Tire service'],
+  Moving: ['Delivery', 'Moving help', 'Furniture transport', 'Courier'],
+  Activities: ['Fitness', 'Dance', 'Tutor', 'Kids activities'],
+  Events: ['Decorator', 'Host', 'Photographer', 'Makeup for events'],
+  Creative: ['Design', 'Photo', 'Video', 'Editing', 'Content creation'],
+};
 
-export default function HomePage() {
+export default function AddServicePage() {
   const router = useRouter();
-  const masters = getAllMasters();
-  const featuredCategories = useMemo(() => getFeaturedCategories(), []);
 
-  const [search, setSearch] = useState('');
-  const [activeCategory, setActiveCategory] = useState('beauty');
-  const [language, setLanguage] = useState('EN');
-  const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
-  const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
-  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('Beauty');
+  const [subcategory, setSubcategory] = useState('Hair');
+  const [price, setPrice] = useState('');
+  const [location, setLocation] = useState('');
+  const [hours, setHours] = useState('');
+  const [availableToday, setAvailableToday] = useState(true);
 
-  useEffect(() => {
-    const loadUnread = () => {
-      setUnreadMessages(getUnreadMessagesCount());
-    };
+  const [atClient, setAtClient] = useState(true);
+  const [atMyPlace, setAtMyPlace] = useState(false);
+  const [online, setOnline] = useState(false);
 
-    loadUnread();
-    const unsubscribe = subscribeToChatStore(loadUnread);
-    return unsubscribe;
-  }, []);
+  const [cash, setCash] = useState(true);
+  const [card, setCard] = useState(true);
+  const [wallet, setWallet] = useState(false);
+
+  const subcategories = subcategoriesByCategory[category] || [];
+
+  const handleCategoryChange = (value: string) => {
+    setCategory(value);
+    const nextSubs = subcategoriesByCategory[value] || [];
+    setSubcategory(nextSubs[0] || '');
+  };
 
   return (
     <main
       style={{
         minHeight: '100vh',
-        background: '#f5f3ef',
+        background: '#f7f5f1',
         fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
-        paddingBottom: 126,
+        paddingBottom: 120,
       }}
     >
-      <div
-        style={{
-          maxWidth: 430,
-          margin: '0 auto',
-          background: '#f5f3ef',
-        }}
-      >
-        <section style={{ padding: '18px 16px 0' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto auto',
-              gap: 10,
-              alignItems: 'center',
-              background: '#ffffff',
-              borderRadius: 20,
-              padding: '12px 12px 12px 16px',
-              boxShadow: '0 4px 14px rgba(0,0,0,0.08)',
-              border: '1px solid #ece7df',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 20, color: '#9aa0a8' }}>🔎</span>
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search services..."
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                  border: 'none',
-                  outline: 'none',
-                  background: 'transparent',
-                  fontSize: 17,
-                  color: '#2b2f36',
-                }}
-              />
-            </div>
-
-            <button
-              onClick={() =>
-                setLanguage((prev) =>
-                  prev === 'EN' ? 'RU' : prev === 'RU' ? 'UA' : 'EN'
-                )
-              }
-              style={{
-                border: 'none',
-                background: '#f4efe7',
-                color: '#3f3a33',
-                borderRadius: 999,
-                width: 52,
-                height: 52,
-                fontSize: 16,
-                fontWeight: 800,
-              }}
-              title="Change language"
-            >
-              {language}
-            </button>
-
-            <button
-              onClick={() => router.push('/profile')}
-              style={{
-                border: '2px solid #fff',
-                background: '#f4efe7',
-                borderRadius: 999,
-                width: 52,
-                height: 52,
-                padding: 0,
-                overflow: 'hidden',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-              }}
-            >
-              <img
-                src={masters[0]?.avatar}
-                alt="Profile"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  display: 'block',
-                }}
-              />
-            </button>
-          </div>
-        </section>
-
-        <section style={{ padding: '14px 12px 0' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-              gap: 6,
-              alignItems: 'start',
-            }}
-          >
-            {featuredCategories.map((category: any) => {
-              const active = activeCategory === category.id;
-
-              return (
-                <button
-                  key={category.id}
-                  onClick={() => {
-                    setActiveCategory(category.id);
-                    setSelectedMaster(null);
-                  }}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    padding: '0 2px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 6,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 52,
-                      height: 52,
-                      borderRadius: 16,
-                      background: active ? '#f6efe1' : 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 32,
-                    }}
-                  >
-                    <span>{category.icon}</span>
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: active ? 800 : 700,
-                      color: '#253140',
-                      textAlign: 'center',
-                      lineHeight: 1.1,
-                      minHeight: 28,
-                    }}
-                  >
-                    {category.shortLabel || category.label}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 2,
-                      width: 42,
-                      height: 4,
-                      borderRadius: 999,
-                      background: active ? '#eb7d96' : 'transparent',
-                    }}
-                  />
-                </button>
-              );
-            })}
-
-            <button
-              onClick={() => router.push('/categories')}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                padding: '0 2px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 6,
-              }}
-            >
-              <div
-                style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 16,
-                  background: 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 30,
-                  color: '#30343b',
-                  fontWeight: 900,
-                }}
-              >
-                ⋮
-              </div>
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: '#253140',
-                  textAlign: 'center',
-                  minHeight: 28,
-                }}
-              >
-                More
-              </div>
-              <div style={{ width: 42, height: 4 }} />
-            </button>
-          </div>
-        </section>
-
-        <section style={{ padding: '10px 0 0' }}>
-          <div
-            style={{
-              background: '#ffffff',
-              borderTop: '1px solid #e7e1d8',
-              borderBottom: '1px solid #e7e1d8',
-            }}
-          >
-            <div
-              style={{
-                height: 430,
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-            >
-              <RealMap
-                masters={masters}
-                mapMode={mapMode}
-                activeCategory={activeCategory}
-                selectedMasterId={selectedMaster?.id ?? null}
-                onMasterSelect={(master: any) => setSelectedMaster(master)}
-                onMapBackgroundClick={() => setSelectedMaster(null)}
-              />
-
-              <div
-                style={{
-                  position: 'absolute',
-                  right: 12,
-                  top: 12,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 10,
-                  zIndex: 30,
-                }}
-              >
-                <button
-                  onClick={() =>
-                    setMapMode((prev) =>
-                      prev === 'map' ? 'satellite' : 'map'
-                    )
-                  }
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 999,
-                    border: '1px solid #e5ddd1',
-                    background: 'rgba(255,255,255,0.95)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
-                    fontSize: 20,
-                    color: '#3d454f',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                  title="Map style"
-                >
-                  {mapMode === 'satellite' ? '🛰' : '⌖'}
-                </button>
-
-                <button
-                  onClick={() => setSelectedMaster(null)}
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 999,
-                    border: '1px solid #e5ddd1',
-                    background: 'rgba(255,255,255,0.95)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
-                    fontSize: 20,
-                    color: '#3d454f',
-                  }}
-                  title="Clear selection"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section
+      <div style={{ maxWidth: 430, margin: '0 auto' }}>
+        <header
           style={{
-            padding: '14px 16px 0',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 12,
-            }}
-          >
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 18,
-                fontWeight: 800,
-                color: '#223145',
-              }}
-            >
-              Popular Services
-            </h2>
-
-            <button
-              onClick={() => router.push('/services')}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                fontSize: 26,
-                color: '#9aa0a8',
-                lineHeight: 1,
-              }}
-            >
-              ›
-            </button>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-              gap: 10,
-            }}
-          >
-            {popularServices.map((service) => (
-              <button
-                key={service.id}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  padding: 0,
-                  textAlign: 'left',
-                }}
-              >
-                <div
-                  style={{
-                    width: '100%',
-                    aspectRatio: '0.9 / 1',
-                    borderRadius: 10,
-                    overflow: 'hidden',
-                    background: '#ddd',
-                    boxShadow: '0 3px 10px rgba(0,0,0,0.05)',
-                  }}
-                >
-                  <img
-                    src={service.image}
-                    alt={service.title}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
-                    }}
-                  />
-                </div>
-                <div
-                  style={{
-                    marginTop: 8,
-                    fontSize: 12,
-                    lineHeight: 1.2,
-                    fontWeight: 700,
-                    color: '#253140',
-                  }}
-                >
-                  {service.title}
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      <nav
-        style={{
-          position: 'fixed',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(245,243,239,0.98)',
-          borderTop: '1px solid #e3ddd5',
-          backdropFilter: 'blur(10px)',
-          zIndex: 50,
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 430,
-            margin: '0 auto',
+            position: 'sticky',
+            top: 0,
+            zIndex: 30,
+            background: 'rgba(247,245,241,0.98)',
+            backdropFilter: 'blur(10px)',
+            borderBottom: '1px solid #e6dfd5',
+            padding: '16px 16px 14px',
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr 92px 1fr 1fr',
-            alignItems: 'end',
-            padding: '10px 8px 12px',
+            gridTemplateColumns: '44px 1fr',
+            gap: 14,
+            alignItems: 'center',
           }}
         >
           <button
@@ -480,125 +90,608 @@ export default function HomePage() {
             style={{
               border: 'none',
               background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-              color: '#1f5d99',
+              fontSize: 30,
+              color: '#1f2430',
+              lineHeight: 1,
             }}
           >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>⌂</span>
-            <span style={{ fontSize: 12, fontWeight: 800 }}>Home</span>
-          </button>
-
-          <button
-            onClick={() => router.push('/messages')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-              color: '#6e7b8a',
-              position: 'relative',
-            }}
-          >
-            <div style={{ position: 'relative' }}>
-              <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>✉</span>
-
-              {unreadMessages > 0 && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: -6,
-                    right: -10,
-                    minWidth: 18,
-                    height: 18,
-                    padding: '0 5px',
-                    borderRadius: 999,
-                    background: '#e53935',
-                    color: '#fff',
-                    fontSize: 11,
-                    fontWeight: 800,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 3px 8px rgba(229,57,53,0.35)',
-                    border: '2px solid #f5f3ef',
-                  }}
-                >
-                  {unreadMessages > 9 ? '9+' : unreadMessages}
-                </span>
-              )}
-            </div>
-
-            <span style={{ fontSize: 12, fontWeight: 700 }}>Messages</span>
+            ✕
           </button>
 
           <div
             style={{
-              display: 'flex',
-              justifyContent: 'center',
-              transform: 'translateY(-18px)',
+              fontSize: 22,
+              fontWeight: 800,
+              color: '#1f2430',
             }}
           >
-            <button
-              onClick={() => router.push('/add')}
+            Add your service
+          </div>
+        </header>
+
+        <section style={{ padding: '18px 16px 0' }}>
+          <button
+            style={{
+              width: '100%',
+              border: '1px solid #dfe4de',
+              background: '#fff',
+              borderRadius: 18,
+              padding: '18px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
+            }}
+          >
+            <div
               style={{
-                width: 78,
-                height: 78,
-                borderRadius: 999,
-                border: '4px solid #4cab5d',
-                background: '#ffffff',
-                color: '#3f9a4f',
-                boxShadow: '0 10px 24px rgba(0,0,0,0.14)',
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                border: '2px solid #4ea560',
+                color: '#4ea560',
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 2,
+                fontSize: 28,
+                lineHeight: 1,
               }}
-              title="Add service"
             >
-              <span style={{ fontSize: 36, lineHeight: 1, fontWeight: 400 }}>+</span>
-              <span style={{ fontSize: 11, fontWeight: 800 }}>Add</span>
-            </button>
-          </div>
-
-          <button
-            onClick={() => router.push('/bookings')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-              color: '#6e7b8a',
-            }}
-          >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>▤</span>
-            <span style={{ fontSize: 12, fontWeight: 700 }}>Bookings</span>
+              +
+            </div>
+            <span
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: '#2d7b3c',
+              }}
+            >
+              Upload photos
+            </span>
           </button>
+        </section>
 
-          <button
-            onClick={() => router.push('/profile')}
+        <section style={{ padding: '18px 16px 0' }}>
+          <div
             style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-              color: '#6e7b8a',
+              background: '#fff',
+              borderRadius: 22,
+              padding: 18,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
+              border: '1px solid #ebe4da',
             }}
           >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>◉</span>
-            <span style={{ fontSize: 12, fontWeight: 700 }}>Profile</span>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 16,
+                fontWeight: 700,
+                marginBottom: 8,
+              }}
+            >
+              Service title
+            </label>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter service title"
+              style={{
+                width: '100%',
+                border: '1px solid #e7e0d6',
+                borderRadius: 14,
+                padding: '15px 14px',
+                fontSize: 17,
+                outline: 'none',
+                marginBottom: 18,
+                boxSizing: 'border-box',
+              }}
+            />
+
+            <label
+              style={{
+                display: 'block',
+                fontSize: 16,
+                fontWeight: 700,
+                marginBottom: 8,
+              }}
+            >
+              Description
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe your service..."
+              rows={4}
+              style={{
+                width: '100%',
+                border: '1px solid #e7e0d6',
+                borderRadius: 14,
+                padding: '15px 14px',
+                fontSize: 17,
+                outline: 'none',
+                resize: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+        </section>
+
+        <section style={{ padding: '14px 16px 0' }}>
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 22,
+              padding: 18,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
+              border: '1px solid #ebe4da',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                marginBottom: 14,
+              }}
+            >
+              Category
+            </div>
+
+            <select
+              value={category}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              style={{
+                width: '100%',
+                border: '1px solid #e7e0d6',
+                borderRadius: 14,
+                padding: '15px 14px',
+                fontSize: 17,
+                outline: 'none',
+                marginBottom: 14,
+                background: '#fff',
+              }}
+            >
+              {categories.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                marginBottom: 14,
+              }}
+            >
+              Subcategory
+            </div>
+
+            <select
+              value={subcategory}
+              onChange={(e) => setSubcategory(e.target.value)}
+              style={{
+                width: '100%',
+                border: '1px solid #e7e0d6',
+                borderRadius: 14,
+                padding: '15px 14px',
+                fontSize: 17,
+                outline: 'none',
+                background: '#fff',
+              }}
+            >
+              {subcategories.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+        </section>
+
+        <section style={{ padding: '14px 16px 0' }}>
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 22,
+              padding: 18,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
+              border: '1px solid #ebe4da',
+            }}
+          >
+            <label
+              style={{
+                display: 'block',
+                fontSize: 16,
+                fontWeight: 700,
+                marginBottom: 8,
+              }}
+            >
+              Price
+            </label>
+            <input
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="Enter price"
+              style={{
+                width: '100%',
+                border: '1px solid #e7e0d6',
+                borderRadius: 14,
+                padding: '15px 14px',
+                fontSize: 17,
+                outline: 'none',
+                marginBottom: 18,
+                boxSizing: 'border-box',
+              }}
+            />
+
+            <label
+              style={{
+                display: 'block',
+                fontSize: 16,
+                fontWeight: 700,
+                marginBottom: 8,
+              }}
+            >
+              Location / area
+            </label>
+            <input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Select location / area"
+              style={{
+                width: '100%',
+                border: '1px solid #e7e0d6',
+                borderRadius: 14,
+                padding: '15px 14px',
+                fontSize: 17,
+                outline: 'none',
+                marginBottom: 18,
+                boxSizing: 'border-box',
+              }}
+            />
+
+            <label
+              style={{
+                display: 'block',
+                fontSize: 16,
+                fontWeight: 700,
+                marginBottom: 8,
+              }}
+            >
+              Working hours
+            </label>
+            <input
+              value={hours}
+              onChange={(e) => setHours(e.target.value)}
+              placeholder="Select hours"
+              style={{
+                width: '100%',
+                border: '1px solid #e7e0d6',
+                borderRadius: 14,
+                padding: '15px 14px',
+                fontSize: 17,
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+        </section>
+
+        <section style={{ padding: '14px 16px 0' }}>
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 22,
+              padding: 18,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
+              border: '1px solid #ebe4da',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 800,
+                  }}
+                >
+                  Available today
+                </div>
+                <div
+                  style={{
+                    fontSize: 14,
+                    color: '#7a8490',
+                    marginTop: 4,
+                  }}
+                >
+                  This affects the map pin status
+                </div>
+              </div>
+
+              <button
+                onClick={() => setAvailableToday((v) => !v)}
+                style={{
+                  width: 64,
+                  height: 36,
+                  borderRadius: 999,
+                  border: 'none',
+                  background: availableToday ? '#4f91f1' : '#d6dbe2',
+                  position: 'relative',
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 4,
+                    left: availableToday ? 32 : 4,
+                    width: 28,
+                    height: 28,
+                    borderRadius: 999,
+                    background: '#fff',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+                  }}
+                />
+              </button>
+            </div>
+
+            <div
+              style={{
+                marginTop: 18,
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: 10,
+              }}
+            >
+              <button
+                onClick={() => setAtClient((v) => !v)}
+                style={{
+                  borderRadius: 14,
+                  border: atClient ? '2px solid #5aa764' : '1px solid #ddd8cf',
+                  background: atClient ? '#5aa764' : '#faf8f4',
+                  color: atClient ? '#fff' : '#1f2430',
+                  padding: '13px 10px',
+                  fontSize: 15,
+                  fontWeight: 700,
+                }}
+              >
+                At client
+              </button>
+
+              <button
+                onClick={() => setAtMyPlace((v) => !v)}
+                style={{
+                  borderRadius: 14,
+                  border: atMyPlace ? '2px solid #5aa764' : '1px solid #ddd8cf',
+                  background: atMyPlace ? '#5aa764' : '#faf8f4',
+                  color: atMyPlace ? '#fff' : '#1f2430',
+                  padding: '13px 10px',
+                  fontSize: 15,
+                  fontWeight: 700,
+                }}
+              >
+                At my place
+              </button>
+
+              <button
+                onClick={() => setOnline((v) => !v)}
+                style={{
+                  borderRadius: 14,
+                  border: online ? '2px solid #5aa764' : '1px solid #ddd8cf',
+                  background: online ? '#5aa764' : '#faf8f4',
+                  color: online ? '#fff' : '#1f2430',
+                  padding: '13px 10px',
+                  fontSize: 15,
+                  fontWeight: 700,
+                }}
+              >
+                Online
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section style={{ padding: '14px 16px 0' }}>
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 22,
+              padding: 18,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
+              border: '1px solid #ebe4da',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                marginBottom: 6,
+              }}
+            >
+              Payment methods
+            </div>
+
+            <div
+              style={{
+                fontSize: 14,
+                color: '#7a8490',
+                marginBottom: 16,
+              }}
+            >
+              How can clients pay?
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gap: 10,
+              }}
+            >
+              <button
+                onClick={() => setCash((v) => !v)}
+                style={{
+                  borderRadius: 14,
+                  border: cash ? '2px solid #4f91f1' : '1px solid #ddd8cf',
+                  background: cash ? '#eef5ff' : '#fff',
+                  padding: '14px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  fontSize: 16,
+                  fontWeight: 700,
+                  color: '#1f2430',
+                }}
+              >
+                <span style={{ fontSize: 22 }}>💵</span>
+                <span style={{ flex: 1, textAlign: 'left' }}>Cash</span>
+                <span style={{ fontSize: 18 }}>{cash ? '☑' : '☐'}</span>
+              </button>
+
+              <button
+                onClick={() => setCard((v) => !v)}
+                style={{
+                  borderRadius: 14,
+                  border: card ? '2px solid #4f91f1' : '1px solid #ddd8cf',
+                  background: card ? '#eef5ff' : '#fff',
+                  padding: '14px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  fontSize: 16,
+                  fontWeight: 700,
+                  color: '#1f2430',
+                }}
+              >
+                <span style={{ fontSize: 22 }}>💳</span>
+                <span style={{ flex: 1, textAlign: 'left' }}>Card</span>
+                <span style={{ fontSize: 18 }}>{card ? '☑' : '☐'}</span>
+              </button>
+
+              <button
+                onClick={() => setWallet((v) => !v)}
+                style={{
+                  borderRadius: 14,
+                  border: wallet ? '2px solid #4f91f1' : '1px solid #ddd8cf',
+                  background: wallet ? '#eef5ff' : '#fff',
+                  padding: '14px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  fontSize: 16,
+                  fontWeight: 700,
+                  color: '#1f2430',
+                }}
+              >
+                <span style={{ fontSize: 22 }}>👛</span>
+                <span style={{ flex: 1, textAlign: 'left' }}>E-money</span>
+                <span style={{ fontSize: 18 }}>{wallet ? '☑' : '☐'}</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section style={{ padding: '14px 16px 0' }}>
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 22,
+              padding: 18,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
+              border: '1px solid #ebe4da',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                marginBottom: 14,
+              }}
+            >
+              Contact
+            </div>
+
+            <input
+              placeholder="Phone"
+              style={{
+                width: '100%',
+                border: '1px solid #e7e0d6',
+                borderRadius: 14,
+                padding: '15px 14px',
+                fontSize: 17,
+                outline: 'none',
+                marginBottom: 12,
+                boxSizing: 'border-box',
+              }}
+            />
+
+            <input
+              placeholder="WhatsApp"
+              style={{
+                width: '100%',
+                border: '1px solid #e7e0d6',
+                borderRadius: 14,
+                padding: '15px 14px',
+                fontSize: 17,
+                outline: 'none',
+                marginBottom: 12,
+                boxSizing: 'border-box',
+              }}
+            />
+
+            <input
+              placeholder="Telegram"
+              style={{
+                width: '100%',
+                border: '1px solid #e7e0d6',
+                borderRadius: 14,
+                padding: '15px 14px',
+                fontSize: 17,
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+        </section>
+      </div>
+
+      <div
+        style={{
+          position: 'fixed',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(247,245,241,0.98)',
+          borderTop: '1px solid #e6dfd5',
+          backdropFilter: 'blur(10px)',
+          padding: '12px 16px calc(12px + env(safe-area-inset-bottom))',
+        }}
+      >
+        <div style={{ maxWidth: 430, margin: '0 auto' }}>
+          <button
+            onClick={() => router.push('/')}
+            style={{
+              width: '100%',
+              border: 'none',
+              background: 'linear-gradient(180deg, #279ca2 0%, #1f8b91 100%)',
+              color: '#fff',
+              borderRadius: 18,
+              padding: '18px 18px',
+              fontSize: 18,
+              fontWeight: 800,
+              boxShadow: '0 10px 24px rgba(31,139,145,0.24)',
+            }}
+          >
+            Publish service
           </button>
         </div>
-      </nav>
+      </div>
     </main>
   );
 }
