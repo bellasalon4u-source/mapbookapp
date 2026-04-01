@@ -25,10 +25,9 @@ export default function MessagesPage() {
     return unsubscribe;
   }, []);
 
-  const unreadTotal = useMemo(
-    () => getUnreadMessagesCount(),
-    [threads]
-  );
+  const unreadTotal = useMemo(() => {
+    return getUnreadMessagesCount();
+  }, [threads]);
 
   const filteredThreads = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -39,7 +38,7 @@ export default function MessagesPage() {
       return (
         thread.providerName.toLowerCase().includes(q) ||
         thread.category.toLowerCase().includes(q) ||
-        lastMessage?.text?.toLowerCase().includes(q)
+        (lastMessage?.text || '').toLowerCase().includes(q)
       );
     });
   }, [threads, search]);
@@ -59,7 +58,7 @@ export default function MessagesPage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '52px 1fr auto',
+              gridTemplateColumns: '52px 1fr',
               alignItems: 'center',
               gap: 12,
             }}
@@ -210,8 +209,8 @@ export default function MessagesPage() {
                         color: '#5d6875',
                         lineHeight: 1.45,
                         display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 2 as any,
+                        WebkitBoxOrient: 'vertical' as any,
                         overflow: 'hidden',
                       }}
                     >
