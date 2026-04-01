@@ -19,18 +19,20 @@ export default function HomePage() {
   const featuredMaster = masters[0];
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('beauty');
-  const [showRouteSheet, setShowRouteSheet] = useState(true);
-  const [routeMode, setRouteMode] = useState<'drive' | 'transit' | 'walk'>('drive');
   const [mapMode, setMapMode] = useState<'map' | 'satellite'>('satellite');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [selectedMasterOpen, setSelectedMasterOpen] = useState(true);
+  const [routeSheetOpen, setRouteSheetOpen] = useState(false);
+  const [routeMode, setRouteMode] = useState<'drive' | 'transit' | 'walk'>('drive');
 
   const nearbyCount = useMemo(() => masters.length || 82, [masters.length]);
 
   const etaText =
     routeMode === 'drive' ? '12 min' : routeMode === 'transit' ? '24 min' : '38 min';
 
-  const routeModeLabel =
-    routeMode === 'drive' ? 'Drive' : routeMode === 'transit' ? 'Transit' : 'Walk';
+  if (!featuredMaster) {
+    return <main style={{ padding: 24 }}>No providers found</main>;
+  }
 
   return (
     <main
@@ -49,7 +51,10 @@ export default function HomePage() {
           position: 'absolute',
           inset: 0,
           zIndex: 1,
-          filter: mapMode === 'satellite' ? 'contrast(1.02) saturate(0.82) brightness(0.94)' : 'none',
+          filter:
+            mapMode === 'satellite'
+              ? 'contrast(1.02) saturate(0.82) brightness(0.94)'
+              : 'none',
         }}
       >
         <RealMap masters={masters} fullScreen />
@@ -62,7 +67,7 @@ export default function HomePage() {
             inset: 0,
             zIndex: 2,
             background:
-              'linear-gradient(180deg, rgba(252,248,242,0.10) 0%, rgba(252,248,242,0.00) 22%, rgba(252,248,242,0.08) 100%)',
+              'linear-gradient(180deg, rgba(252,248,242,0.10) 0%, rgba(252,248,242,0.00) 24%, rgba(252,248,242,0.10) 100%)',
             pointerEvents: 'none',
           }}
         />
@@ -145,7 +150,10 @@ export default function HomePage() {
               }}
             >
               <img
-                src={featuredMaster?.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80'}
+                src={
+                  featuredMaster.avatar ||
+                  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80'
+                }
                 alt="Profile"
                 style={{
                   width: '100%',
@@ -247,44 +255,48 @@ export default function HomePage() {
           </button>
 
           <button
-            onClick={() => setShowRouteSheet(true)}
+            onClick={() => setRouteSheetOpen((prev) => !prev)}
             style={floatingButtonStyle}
           >
             ➤
           </button>
 
-          <button
-            style={floatingButtonStyle}
-          >
-            ◎
-          </button>
+          <button style={floatingButtonStyle}>◎</button>
         </div>
 
-        {featuredMaster && (
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '43%',
+            transform: 'translate(-50%, -50%)',
+            pointerEvents: 'none',
+            zIndex: 22,
+          }}
+        >
+          <div
+            style={{
+              width: 150,
+              height: 6,
+              background: '#2f91d8',
+              borderRadius: 999,
+              transform: 'rotate(-25deg)',
+              boxShadow: '0 0 0 3px rgba(47,145,216,0.12)',
+            }}
+          />
+        </div>
+
+        {selectedMasterOpen && (
           <div
             style={{
               position: 'absolute',
               left: '50%',
-              top: '41%',
+              top: '38%',
               transform: 'translate(-50%, -50%)',
               pointerEvents: 'auto',
+              zIndex: 25,
             }}
           >
-            <div
-              style={{
-                width: 170,
-                height: 6,
-                background: '#2f91d8',
-                borderRadius: 999,
-                position: 'absolute',
-                left: -130,
-                bottom: -34,
-                transform: 'rotate(-25deg)',
-                opacity: 0.9,
-                boxShadow: '0 0 0 3px rgba(47,145,216,0.12)',
-              }}
-            />
-
             <div
               style={{
                 background: 'rgba(255,248,239,0.98)',
@@ -292,39 +304,25 @@ export default function HomePage() {
                 borderRadius: 24,
                 padding: 12,
                 display: 'grid',
-                gridTemplateColumns: '70px 1fr',
+                gridTemplateColumns: '64px 1fr',
                 gap: 12,
                 alignItems: 'center',
-                minWidth: 270,
+                minWidth: 280,
                 boxShadow: '0 16px 34px rgba(0,0,0,0.14)',
               }}
             >
-              <div style={{ position: 'relative' }}>
-                <img
-                  src={featuredMaster.avatar}
-                  alt={featuredMaster.name}
-                  style={{
-                    width: 70,
-                    height: 70,
-                    objectFit: 'cover',
-                    borderRadius: 999,
-                    border: '4px solid #fff',
-                    display: 'block',
-                  }}
-                />
-                <span
-                  style={{
-                    position: 'absolute',
-                    right: -2,
-                    bottom: -2,
-                    width: 24,
-                    height: 24,
-                    borderRadius: 999,
-                    background: '#2f9c47',
-                    border: '3px solid #fff',
-                  }}
-                />
-              </div>
+              <img
+                src={featuredMaster.avatar}
+                alt={featuredMaster.name}
+                style={{
+                  width: 64,
+                  height: 64,
+                  objectFit: 'cover',
+                  borderRadius: 999,
+                  border: '4px solid #fff',
+                  display: 'block',
+                }}
+              />
 
               <div>
                 <div
@@ -364,44 +362,35 @@ export default function HomePage() {
                     ★ {featuredMaster.rating.toFixed(1)}
                   </span>
 
-                  <span style={{ color: '#2f9c47', fontSize: 16, fontWeight: 900 }}>
-                    ✓
-                  </span>
+                  <span style={{ color: '#2f9c47', fontSize: 16, fontWeight: 900 }}>✓</span>
                 </div>
 
                 <div
                   style={{
-                    marginTop: 6,
-                    color: '#2f9c47',
-                    fontSize: 14,
-                    fontWeight: 700,
+                    marginTop: 8,
+                    display: 'flex',
+                    gap: 8,
                   }}
                 >
-                  Available now
+                  <button
+                    onClick={() => router.push(`/master/${featuredMaster.id}`)}
+                    style={miniCardSecondaryButton}
+                  >
+                    View
+                  </button>
+                  <button
+                    onClick={() => setRouteSheetOpen(true)}
+                    style={miniCardPrimaryButton}
+                  >
+                    Route
+                  </button>
                 </div>
               </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 10,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                background: 'rgba(255,248,239,0.98)',
-                borderRadius: 18,
-                padding: '10px 14px',
-                boxShadow: '0 12px 26px rgba(0,0,0,0.12)',
-                border: '1px solid #e5dacc',
-                marginLeft: 46,
-              }}
-            >
-              <span style={{ fontWeight: 800, fontSize: 18 }}>{etaText}</span>
             </div>
           </div>
         )}
 
-        {showRouteSheet && featuredMaster && (
+        {routeSheetOpen && (
           <div
             style={{
               position: 'absolute',
@@ -409,6 +398,7 @@ export default function HomePage() {
               right: 14,
               bottom: 104,
               pointerEvents: 'auto',
+              zIndex: 30,
             }}
           >
             <div
@@ -576,7 +566,8 @@ export default function HomePage() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  gap: 12,
+                  gap: 10,
+                  flexWrap: 'wrap',
                 }}
               >
                 <div>
@@ -597,24 +588,48 @@ export default function HomePage() {
                       color: '#1d1712',
                     }}
                   >
-                    {routeModeLabel}
+                    {routeMode === 'drive'
+                      ? 'Drive'
+                      : routeMode === 'transit'
+                      ? 'Transit'
+                      : 'Walk'}
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setShowRouteSheet(false)}
-                  style={{
-                    border: 'none',
-                    background: '#f5ede2',
-                    color: '#5e554d',
-                    borderRadius: 16,
-                    padding: '12px 16px',
-                    fontWeight: 800,
-                    fontSize: 15,
-                  }}
-                >
-                  Close
-                </button>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button
+                    onClick={() => setRouteSheetOpen(false)}
+                    style={{
+                      border: 'none',
+                      background: '#f5ede2',
+                      color: '#5e554d',
+                      borderRadius: 16,
+                      padding: '12px 16px',
+                      fontWeight: 800,
+                      fontSize: 15,
+                    }}
+                  >
+                    Minimize
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setRouteSheetOpen(false);
+                      setSelectedMasterOpen(false);
+                    }}
+                    style={{
+                      border: 'none',
+                      background: '#f5ede2',
+                      color: '#5e554d',
+                      borderRadius: 16,
+                      padding: '12px 16px',
+                      fontWeight: 800,
+                      fontSize: 15,
+                    }}
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -629,6 +644,7 @@ export default function HomePage() {
             display: 'flex',
             justifyContent: 'center',
             pointerEvents: 'auto',
+            zIndex: 35,
           }}
         >
           <div
@@ -689,7 +705,7 @@ export default function HomePage() {
 
       <style jsx global>{`
         .leaflet-top.leaflet-left {
-          top: 210px !important;
+          top: 240px !important;
           left: 10px !important;
         }
 
@@ -709,7 +725,7 @@ export default function HomePage() {
 
         .leaflet-bottom.leaflet-right,
         .leaflet-bottom.leaflet-left {
-          bottom: 198px !important;
+          bottom: 110px !important;
         }
       `}</style>
     </main>
@@ -739,4 +755,24 @@ const bottomTabStyle: React.CSSProperties = {
   gap: 6,
   color: '#221b15',
   boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+};
+
+const miniCardPrimaryButton: React.CSSProperties = {
+  border: 'none',
+  background: '#0f8cab',
+  color: '#fff',
+  borderRadius: 14,
+  padding: '10px 14px',
+  fontWeight: 800,
+  fontSize: 14,
+};
+
+const miniCardSecondaryButton: React.CSSProperties = {
+  border: '1px solid #dfd4c7',
+  background: '#fff',
+  color: '#2a231d',
+  borderRadius: 14,
+  padding: '10px 14px',
+  fontWeight: 800,
+  fontSize: 14,
 };
