@@ -36,17 +36,23 @@ export default function HomePage() {
   const router = useRouter();
   const masters = getAllMasters();
 
-  const featuredCategories = appCategories.filter((item) => item.id !== 'activities' && item.id !== 'creative').slice(0, 6);
+  const featuredCategories = appCategories
+    .filter((item) => item.id !== 'activities' && item.id !== 'creative')
+    .slice(0, 6);
+
   const extraCategories = appCategories.filter(
     (item) => !featuredCategories.some((featured) => featured.id === item.id)
   );
 
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('beauty');
+  const [activeSubcategory, setActiveSubcategory] = useState<string>('all');
   const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [routeSheetOpen, setRouteSheetOpen] = useState(false);
-  const [routeMode, setRouteMode] = useState<'drive' | 'transit' | 'walk'>('drive');
+  const [routeMode, setRouteMode] = useState<'drive' | 'transit' | 'walk'>(
+    'drive'
+  );
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
 
@@ -68,7 +74,19 @@ export default function HomePage() {
   const nearbyCount = useMemo(() => masters.length || 82, [masters.length]);
 
   const etaText =
-    routeMode === 'drive' ? '12 min' : routeMode === 'transit' ? '24 min' : '38 min';
+    routeMode === 'drive'
+      ? '12 min'
+      : routeMode === 'transit'
+      ? '24 min'
+      : '38 min';
+
+  const activeCategoryConfig =
+    appCategories.find((item) => item.id === activeCategory) || appCategories[0];
+
+  const subcategoryOptions = useMemo(() => {
+    const base = activeCategoryConfig?.subcategories || [];
+    return ['All', ...base];
+  }, [activeCategoryConfig]);
 
   if (!profileMaster) {
     return <main style={{ padding: 24 }}>No providers found</main>;
@@ -247,7 +265,10 @@ export default function HomePage() {
               return (
                 <button
                   key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
+                  onClick={() => {
+                    setActiveCategory(category.id);
+                    setActiveSubcategory('all');
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -301,12 +322,21 @@ export default function HomePage() {
                 All categories
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 320, overflowY: 'auto' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                  maxHeight: 320,
+                  overflowY: 'auto',
+                }}
+              >
                 {extraCategories.map((category) => (
                   <button
                     key={category.id}
                     onClick={() => {
                       setActiveCategory(category.id);
+                      setActiveSubcategory('all');
                       setMenuOpen(false);
                     }}
                     style={{
@@ -314,7 +344,8 @@ export default function HomePage() {
                       alignItems: 'center',
                       gap: 12,
                       border: 'none',
-                      background: activeCategory === category.id ? '#fff' : 'transparent',
+                      background:
+                        activeCategory === category.id ? '#fff' : 'transparent',
                       borderRadius: 18,
                       padding: '13px 12px',
                       textAlign: 'left',
@@ -323,13 +354,62 @@ export default function HomePage() {
                       color: '#231c16',
                     }}
                   >
-                    <span style={{ width: 22, textAlign: 'center' }}>{category.icon}</span>
+                    <span style={{ width: 22, textAlign: 'center' }}>
+                      {category.icon}
+                    </span>
                     <span>{category.label}</span>
                   </button>
                 ))}
               </div>
             </div>
           )}
+
+          <div
+            style={{
+              marginTop: 10,
+              display: 'flex',
+              gap: 8,
+              overflowX: 'auto',
+              paddingBottom: 4,
+              pointerEvents: 'auto',
+              scrollbarWidth: 'none',
+            }}
+          >
+            {subcategoryOptions.map((sub) => {
+              const active =
+                activeSubcategory ===
+                (sub === 'All' ? 'all' : sub.toLowerCase());
+
+              return (
+                <button
+                  key={sub}
+                  onClick={() =>
+                    setActiveSubcategory(sub === 'All' ? 'all' : sub.toLowerCase())
+                  }
+                  style={{
+                    whiteSpace: 'nowrap',
+                    border: active
+                      ? '1px solid rgba(208,196,181,0.95)'
+                      : '1px solid rgba(232,224,214,0.95)',
+                    background: active
+                      ? 'rgba(246,238,228,0.98)'
+                      : 'rgba(255,255,255,0.92)',
+                    color: active ? '#2b241d' : '#6e645a',
+                    borderRadius: 999,
+                    padding: '10px 14px',
+                    fontSize: 14,
+                    fontWeight: 800,
+                    boxShadow: active
+                      ? '0 6px 16px rgba(0,0,0,0.08)'
+                      : '0 4px 12px rgba(0,0,0,0.05)',
+                    flexShrink: 0,
+                  }}
+                >
+                  {sub}
+                </button>
+              );
+            })}
+          </div>
 
           <div
             style={{
@@ -356,7 +436,12 @@ export default function HomePage() {
                 ✓ {nearbyCount} verified providers nearby
               </span>
               <span style={{ fontSize: 15, color: '#2f9c47', fontWeight: 800 }}>
-                Available now
+                {activeCategoryConfig?.label}
+                {activeSubcategory !== 'all'
+                  ? ` · ${subcategoryOptions.find(
+                      (sub) => sub.toLowerCase() === activeSubcategory
+                    )}`
+                  : ' · All services'}
               </span>
             </div>
           </div>
@@ -366,7 +451,7 @@ export default function HomePage() {
           style={{
             position: 'absolute',
             right: 14,
-            top: 220,
+            top: 260,
             display: 'flex',
             flexDirection: 'column',
             gap: 12,
@@ -393,10 +478,7 @@ export default function HomePage() {
             ➤
           </button>
 
-          <button
-            style={floatingButtonStyle}
-            title="My location"
-          >
+          <button style={floatingButtonStyle} title="My location">
             ◎
           </button>
         </div>
@@ -496,7 +578,9 @@ export default function HomePage() {
                       width: 18,
                       height: 18,
                       borderRadius: 999,
-                      background: selectedAvailability?.isAvailable ? '#2fbb52' : '#e84d4d',
+                      background: selectedAvailability?.isAvailable
+                        ? '#2fbb52'
+                        : '#e84d4d',
                       border: '3px solid #fff',
                     }}
                   />
@@ -593,7 +677,9 @@ export default function HomePage() {
                   >
                     <span>Green = available today</span>
                     <span>•</span>
-                    <span style={{ color: '#b95a5a' }}>Red = unavailable today</span>
+                    <span style={{ color: '#b95a5a' }}>
+                      Red = unavailable today
+                    </span>
                   </div>
                 </div>
 
@@ -775,7 +861,9 @@ export default function HomePage() {
                   return (
                     <button
                       key={mode.key}
-                      onClick={() => setRouteMode(mode.key as 'drive' | 'transit' | 'walk')}
+                      onClick={() =>
+                        setRouteMode(mode.key as 'drive' | 'transit' | 'walk')
+                      }
                       style={{
                         border: 'none',
                         background: active ? '#f6efe4' : '#fff',
@@ -859,7 +947,8 @@ export default function HomePage() {
                 marginTop: -36,
                 borderRadius: 999,
                 border: '4px solid #efe6d9',
-                background: 'linear-gradient(180deg, #78c9dc 0%, #4aa9be 100%)',
+                background:
+                  'linear-gradient(180deg, #78c9dc 0%, #4aa9be 100%)',
                 color: '#fff',
                 boxShadow: '0 16px 30px rgba(65,145,163,0.35)',
                 display: 'flex',
@@ -870,7 +959,11 @@ export default function HomePage() {
               }}
             >
               <span style={{ fontSize: 42, lineHeight: 1 }}>+</span>
-              <span style={{ fontSize: 14, fontWeight: 900, marginTop: -2 }}>Add</span>
+              <span
+                style={{ fontSize: 14, fontWeight: 900, marginTop: -2 }}
+              >
+                Add
+              </span>
             </button>
 
             <button
@@ -886,13 +979,13 @@ export default function HomePage() {
 
       <style jsx global>{`
         .leaflet-top.leaflet-left {
-          top: 220px !important;
+          top: 260px !important;
           left: 10px !important;
         }
 
         .leaflet-control-zoom {
           border: none !important;
-          box-shadow: 0 10px 22px rgba(0, 0, 0, 0.10) !important;
+          box-shadow: 0 10px 22px rgba(0, 0, 0, 0.1) !important;
           overflow: hidden;
           border-radius: 18px !important;
         }
