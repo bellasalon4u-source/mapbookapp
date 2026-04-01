@@ -54,6 +54,11 @@ export default function LeaveReviewPage() {
 
   const canSubmit = rating > 0 && reviewText.trim().length >= 12;
 
+  const handleSubmit = () => {
+    if (!canSubmit) return;
+    router.push(`/master/${master.id}/review-success`);
+  };
+
   return (
     <main
       style={{
@@ -416,7 +421,7 @@ export default function LeaveReviewPage() {
         <div style={{ maxWidth: 420, margin: '0 auto' }}>
           <button
             disabled={!canSubmit}
-            onClick={() => router.push(`/master/${master.id}/reviews`)}
+            onClick={handleSubmit}
             style={{
               width: '100%',
               border: 'none',
