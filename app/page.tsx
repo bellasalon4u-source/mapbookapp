@@ -4,51 +4,19 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getAllMasters } from '../services/masters';
+import { categories as appCategories } from '../services/categories';
 
 const RealMap = dynamic(() => import('../components/RealMap'), {
   ssr: false,
 });
 
-const categories = [
-  { id: 'beauty', label: 'Beauty', icon: '✦' },
-  { id: 'wellness', label: 'Wellness', icon: '✦' },
-  { id: 'home', label: 'Home', icon: '⌂' },
-  { id: 'pets', label: 'Pets', icon: '🐾' },
-];
-
 function getCategoryLabel(master: any, activeCategory: string) {
   if (master?.category && typeof master.category === 'string') {
-    return master.category.charAt(0).toUpperCase() + master.category.slice(1);
+    return master.category;
   }
 
-  if (master?.title) {
-    const title = String(master.title).toLowerCase();
-    if (
-      title.includes('hair') ||
-      title.includes('beauty') ||
-      title.includes('brow') ||
-      title.includes('lashes') ||
-      title.includes('nails')
-    ) {
-      return 'Beauty';
-    }
-    if (
-      title.includes('massage') ||
-      title.includes('spa') ||
-      title.includes('wellness')
-    ) {
-      return 'Wellness';
-    }
-    if (title.includes('pet') || title.includes('dog') || title.includes('cat')) {
-      return 'Pets';
-    }
-    if (title.includes('clean') || title.includes('repair') || title.includes('home')) {
-      return 'Home';
-    }
-  }
-
-  const match = categories.find((item) => item.id === activeCategory);
-  return match?.label ?? 'Beauty';
+  const found = appCategories.find((item) => item.id === activeCategory);
+  return found?.shortLabel || found?.label || 'Beauty';
 }
 
 function getAvailability(master: any) {
@@ -67,6 +35,11 @@ function getAvailability(master: any) {
 export default function HomePage() {
   const router = useRouter();
   const masters = getAllMasters();
+
+  const featuredCategories = appCategories.filter((item) => item.id !== 'activities' && item.id !== 'creative').slice(0, 6);
+  const extraCategories = appCategories.filter(
+    (item) => !featuredCategories.some((featured) => featured.id === item.id)
+  );
 
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('beauty');
@@ -268,7 +241,7 @@ export default function HomePage() {
               ⋮
             </button>
 
-            {categories.slice(0, 3).map((category) => {
+            {featuredCategories.map((category) => {
               const active = activeCategory === category.id;
 
               return (
@@ -296,7 +269,7 @@ export default function HomePage() {
                   }}
                 >
                   <span style={{ fontSize: 18 }}>{category.icon}</span>
-                  <span>{category.label}</span>
+                  <span>{category.shortLabel || category.label}</span>
                 </button>
               );
             })}
@@ -306,7 +279,7 @@ export default function HomePage() {
             <div
               style={{
                 marginTop: 10,
-                width: 235,
+                width: 240,
                 background: 'rgba(255,248,239,0.97)',
                 backdropFilter: 'blur(12px)',
                 border: '1px solid #e4d9cc',
@@ -328,8 +301,8 @@ export default function HomePage() {
                 All categories
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {categories.map((category) => (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 320, overflowY: 'auto' }}>
+                {extraCategories.map((category) => (
                   <button
                     key={category.id}
                     onClick={() => {
@@ -402,17 +375,7 @@ export default function HomePage() {
         >
           <button
             onClick={() => setMapMode((prev) => (prev === 'map' ? 'satellite' : 'map'))}
-            style={{
-              width: 58,
-              height: 58,
-              borderRadius: 999,
-              border: '1px solid rgba(230,218,203,0.98)',
-              background: 'rgba(255,255,255,0.95)',
-              fontSize: 24,
-              color: '#4b443c',
-              boxShadow: '0 10px 22px rgba(0,0,0,0.10)',
-              backdropFilter: 'blur(10px)',
-            }}
+            style={floatingButtonStyle}
             title="Map style"
           >
             {mapMode === 'satellite' ? '🛰' : '◩'}
@@ -424,34 +387,14 @@ export default function HomePage() {
                 setRouteSheetOpen((prev) => !prev);
               }
             }}
-            style={{
-              width: 58,
-              height: 58,
-              borderRadius: 999,
-              border: '1px solid rgba(230,218,203,0.98)',
-              background: 'rgba(255,255,255,0.95)',
-              fontSize: 24,
-              color: '#4b443c',
-              boxShadow: '0 10px 22px rgba(0,0,0,0.10)',
-              backdropFilter: 'blur(10px)',
-            }}
+            style={floatingButtonStyle}
             title="Route"
           >
             ➤
           </button>
 
           <button
-            style={{
-              width: 58,
-              height: 58,
-              borderRadius: 999,
-              border: '1px solid rgba(230,218,203,0.98)',
-              background: 'rgba(255,255,255,0.95)',
-              fontSize: 24,
-              color: '#4b443c',
-              boxShadow: '0 10px 22px rgba(0,0,0,0.10)',
-              backdropFilter: 'blur(10px)',
-            }}
+            style={floatingButtonStyle}
             title="My location"
           >
             ◎
@@ -623,32 +566,14 @@ export default function HomePage() {
                         sessionStorage.setItem('mapbook_reset_home', '1');
                         router.push(`/master/${selectedMaster.id}`);
                       }}
-                      style={{
-                        border: '1px solid #ddd2c4',
-                        background: '#fff',
-                        color: '#2a231d',
-                        borderRadius: 16,
-                        padding: '12px 20px',
-                        fontWeight: 900,
-                        fontSize: 15,
-                        boxShadow: '0 3px 8px rgba(0,0,0,0.04)',
-                      }}
+                      style={miniCardSecondaryButton}
                     >
                       View
                     </button>
 
                     <button
                       onClick={() => setRouteSheetOpen(true)}
-                      style={{
-                        border: 'none',
-                        background: '#2ea6c7',
-                        color: '#fff',
-                        borderRadius: 16,
-                        padding: '12px 22px',
-                        fontWeight: 900,
-                        fontSize: 15,
-                        boxShadow: '0 10px 20px rgba(46,166,199,0.18)',
-                      }}
+                      style={miniCardPrimaryButton}
                     >
                       Route
                     </button>
@@ -920,19 +845,7 @@ export default function HomePage() {
           >
             <button
               onClick={() => router.push('/bookings')}
-              style={{
-                border: 'none',
-                background: '#fff',
-                borderRadius: 24,
-                minHeight: 74,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                color: '#221b15',
-                boxShadow: '0 6px 14px rgba(0,0,0,0.04)',
-              }}
+              style={bottomTabStyle}
             >
               <span style={{ fontSize: 22 }}>📅</span>
               <span style={{ fontSize: 16, fontWeight: 900 }}>Bookings</span>
@@ -962,19 +875,7 @@ export default function HomePage() {
 
             <button
               onClick={() => router.push('/favorites')}
-              style={{
-                border: 'none',
-                background: '#fff',
-                borderRadius: 24,
-                minHeight: 74,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                color: '#221b15',
-                boxShadow: '0 6px 14px rgba(0,0,0,0.04)',
-              }}
+              style={bottomTabStyle}
             >
               <span style={{ fontSize: 22 }}>♥</span>
               <span style={{ fontSize: 16, fontWeight: 900 }}>Saved</span>
@@ -1011,3 +912,51 @@ export default function HomePage() {
     </main>
   );
 }
+
+const floatingButtonStyle: React.CSSProperties = {
+  width: 58,
+  height: 58,
+  borderRadius: 999,
+  border: '1px solid rgba(230,218,203,0.98)',
+  background: 'rgba(255,255,255,0.95)',
+  fontSize: 24,
+  color: '#4b443c',
+  boxShadow: '0 10px 22px rgba(0,0,0,0.10)',
+  backdropFilter: 'blur(10px)',
+};
+
+const bottomTabStyle: React.CSSProperties = {
+  border: 'none',
+  background: '#fff',
+  borderRadius: 24,
+  minHeight: 74,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 6,
+  color: '#221b15',
+  boxShadow: '0 6px 14px rgba(0,0,0,0.04)',
+};
+
+const miniCardPrimaryButton: React.CSSProperties = {
+  border: 'none',
+  background: '#2ea6c7',
+  color: '#fff',
+  borderRadius: 16,
+  padding: '12px 22px',
+  fontWeight: 900,
+  fontSize: 15,
+  boxShadow: '0 10px 20px rgba(46,166,199,0.18)',
+};
+
+const miniCardSecondaryButton: React.CSSProperties = {
+  border: '1px solid #ddd2c4',
+  background: '#fff',
+  color: '#2a231d',
+  borderRadius: 16,
+  padding: '12px 20px',
+  fontWeight: 900,
+  fontSize: 15,
+  boxShadow: '0 3px 8px rgba(0,0,0,0.04)',
+};
