@@ -142,7 +142,7 @@ export default function ReviewsPage() {
         background: '#fcf8f2',
         fontFamily: 'Arial, sans-serif',
         color: '#1d1712',
-        padding: 24,
+        padding: 20,
       }}
     >
       <div style={{ maxWidth: 420, margin: '0 auto' }}>
@@ -151,7 +151,7 @@ export default function ReviewsPage() {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: 22,
+            marginBottom: 18,
           }}
         >
           <button
@@ -163,12 +163,13 @@ export default function ReviewsPage() {
               border: '1px solid #e7ddd0',
               background: '#fff',
               fontSize: 24,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
             }}
           >
             ←
           </button>
 
-          <div style={{ fontSize: 30, fontWeight: 800 }}>Reviews</div>
+          <div style={{ fontSize: 30, fontWeight: 900 }}>Reviews</div>
 
           <button
             onClick={() => router.push('/')}
@@ -179,6 +180,7 @@ export default function ReviewsPage() {
               border: '1px solid #e7ddd0',
               background: '#fff',
               fontSize: 22,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
             }}
           >
             ⌂
@@ -188,50 +190,53 @@ export default function ReviewsPage() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #e4d8ca',
-            borderRadius: 28,
+            border: '1px solid #eadfD2',
+            borderRadius: 30,
             padding: 22,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
           }}
         >
           <div style={{ fontSize: 18, color: '#6f655b' }}>{master.name}</div>
 
           <div
             style={{
-              marginTop: 14,
+              marginTop: 16,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 12,
             }}
           >
-            <div style={{ fontSize: 48, fontWeight: 900 }}>
+            <div style={{ fontSize: 64, fontWeight: 900, lineHeight: 1 }}>
               {master.rating.toFixed(1)}
             </div>
 
             <div
               style={{
                 background: '#efe3cf',
-                color: '#5c4a34',
-                borderRadius: 18,
-                padding: '12px 16px',
-                fontWeight: 800,
+                color: '#7a5b22',
+                borderRadius: 20,
+                padding: '14px 18px',
+                fontWeight: 900,
                 fontSize: 20,
+                minWidth: 104,
+                textAlign: 'center',
               }}
             >
               {master.rating.toFixed(1)} ★
             </div>
           </div>
 
-          <div style={{ marginTop: 8, color: '#7a7066', fontSize: 17 }}>
+          <div style={{ marginTop: 14, color: '#7a7066', fontSize: 17 }}>
             Based on {master.reviews} reviews
           </div>
 
           <div
             style={{
-              marginTop: 18,
+              marginTop: 22,
               display: 'flex',
               flexDirection: 'column',
-              gap: 10,
+              gap: 14,
             }}
           >
             {[
@@ -245,17 +250,17 @@ export default function ReviewsPage() {
                 key={row.label}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '36px 1fr 38px',
-                  gap: 10,
+                  gridTemplateColumns: '42px 1fr 34px',
+                  gap: 12,
                   alignItems: 'center',
                 }}
               >
-                <div style={{ fontWeight: 700 }}>{row.label}</div>
+                <div style={{ fontWeight: 800, fontSize: 18 }}>{row.label}</div>
 
                 <div
                   style={{
-                    height: 10,
-                    background: '#f1e8dd',
+                    height: 14,
+                    background: '#eee5db',
                     borderRadius: 999,
                     overflow: 'hidden',
                   }}
@@ -264,13 +269,13 @@ export default function ReviewsPage() {
                     style={{
                       width: row.width,
                       height: '100%',
-                      background: '#2e9746',
+                      background: '#35a24a',
                       borderRadius: 999,
                     }}
                   />
                 </div>
 
-                <div style={{ color: '#6f655b', fontWeight: 700 }}>
+                <div style={{ color: '#6f655b', fontWeight: 800, fontSize: 16 }}>
                   {row.value}
                 </div>
               </div>
@@ -287,59 +292,32 @@ export default function ReviewsPage() {
             paddingBottom: 2,
           }}
         >
-          <button
-            onClick={() => setFilter('newest')}
-            style={{
-              border: 'none',
-              borderRadius: 999,
-              padding: '12px 16px',
-              fontWeight: 800,
-              fontSize: 15,
-              whiteSpace: 'nowrap',
-              background: filter === 'newest' ? '#2e9746' : '#fff',
-              color: filter === 'newest' ? '#fff' : '#2b231d',
-              boxShadow:
-                filter === 'newest' ? 'none' : 'inset 0 0 0 1px #e5d9cb',
-            }}
-          >
-            Newest
-          </button>
-
-          <button
-            onClick={() => setFilter('highest')}
-            style={{
-              border: 'none',
-              borderRadius: 999,
-              padding: '12px 16px',
-              fontWeight: 800,
-              fontSize: 15,
-              whiteSpace: 'nowrap',
-              background: filter === 'highest' ? '#2e9746' : '#fff',
-              color: filter === 'highest' ? '#fff' : '#2b231d',
-              boxShadow:
-                filter === 'highest' ? 'none' : 'inset 0 0 0 1px #e5d9cb',
-            }}
-          >
-            Highest rated
-          </button>
-
-          <button
-            onClick={() => setFilter('photos')}
-            style={{
-              border: 'none',
-              borderRadius: 999,
-              padding: '12px 16px',
-              fontWeight: 800,
-              fontSize: 15,
-              whiteSpace: 'nowrap',
-              background: filter === 'photos' ? '#2e9746' : '#fff',
-              color: filter === 'photos' ? '#fff' : '#2b231d',
-              boxShadow:
-                filter === 'photos' ? 'none' : 'inset 0 0 0 1px #e5d9cb',
-            }}
-          >
-            With photos
-          </button>
+          {[
+            { key: 'newest', label: 'Newest' },
+            { key: 'highest', label: 'Highest rated' },
+            { key: 'photos', label: 'With photos' },
+          ].map((item) => {
+            const active = filter === item.key;
+            return (
+              <button
+                key={item.key}
+                onClick={() => setFilter(item.key as FilterType)}
+                style={{
+                  border: 'none',
+                  borderRadius: 999,
+                  padding: '14px 22px',
+                  fontWeight: 800,
+                  fontSize: 15,
+                  whiteSpace: 'nowrap',
+                  background: active ? '#35a24a' : '#fff',
+                  color: active ? '#fff' : '#2b231d',
+                  boxShadow: active ? 'none' : 'inset 0 0 0 1px #e5d9cb',
+                }}
+              >
+                {item.label}
+              </button>
+            );
+          })}
         </div>
 
         <div
@@ -347,7 +325,7 @@ export default function ReviewsPage() {
             marginTop: 18,
             display: 'flex',
             flexDirection: 'column',
-            gap: 14,
+            gap: 16,
           }}
         >
           {reviews.map((review) => (
@@ -356,10 +334,11 @@ export default function ReviewsPage() {
               onClick={() => setSelectedReview(review)}
               style={{
                 background: '#fff',
-                border: '1px solid #e4d8ca',
-                borderRadius: 24,
-                padding: 18,
+                border: '1px solid #eadfd2',
+                borderRadius: 28,
+                padding: 20,
                 textAlign: 'left',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
               }}
             >
               <div
@@ -367,16 +346,16 @@ export default function ReviewsPage() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   gap: 10,
-                  alignItems: 'center',
+                  alignItems: 'flex-start',
                 }}
               >
                 <div>
-                  <div style={{ fontSize: 20, fontWeight: 800 }}>
+                  <div style={{ fontSize: 22, fontWeight: 900 }}>
                     {review.name}
                   </div>
                   <div
                     style={{
-                      marginTop: 6,
+                      marginTop: 8,
                       color: '#7a7066',
                       fontSize: 14,
                     }}
@@ -389,9 +368,9 @@ export default function ReviewsPage() {
                   style={{
                     background: '#f6efe5',
                     color: '#7b5a20',
-                    borderRadius: 14,
-                    padding: '8px 12px',
-                    fontWeight: 800,
+                    borderRadius: 16,
+                    padding: '10px 14px',
+                    fontWeight: 900,
                     fontSize: 15,
                   }}
                 >
@@ -401,10 +380,10 @@ export default function ReviewsPage() {
 
               <div
                 style={{
-                  marginTop: 12,
-                  color: '#a5781d',
-                  fontSize: 18,
-                  letterSpacing: 1,
+                  marginTop: 14,
+                  color: '#b0831a',
+                  fontSize: 22,
+                  letterSpacing: 2,
                 }}
               >
                 {stars(review.rating)}
@@ -412,12 +391,12 @@ export default function ReviewsPage() {
 
               <p
                 style={{
-                  marginTop: 12,
-                  fontSize: 17,
-                  lineHeight: 1.55,
+                  marginTop: 14,
+                  fontSize: 18,
+                  lineHeight: 1.6,
                   color: '#4f473f',
                   display: '-webkit-box',
-                  WebkitLineClamp: 3,
+                  WebkitLineClamp: 4,
                   WebkitBoxOrient: 'vertical' as const,
                   overflow: 'hidden',
                 }}
@@ -428,10 +407,11 @@ export default function ReviewsPage() {
               {review.photos && review.photos.length > 0 && (
                 <div
                   style={{
-                    marginTop: 14,
-                    display: 'flex',
-                    gap: 10,
-                    overflowX: 'auto',
+                    marginTop: 16,
+                    display: 'grid',
+                    gridTemplateColumns:
+                      review.photos.length === 1 ? '1fr' : '1fr 1fr',
+                    gap: 12,
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -443,16 +423,15 @@ export default function ReviewsPage() {
                         padding: 0,
                         border: 'none',
                         background: 'transparent',
-                        flexShrink: 0,
                       }}
                     >
                       <img
                         src={photo}
                         alt={`${review.name} photo ${index + 1}`}
                         style={{
-                          width: 88,
-                          height: 88,
-                          borderRadius: 16,
+                          width: '100%',
+                          height: 130,
+                          borderRadius: 18,
                           objectFit: 'cover',
                           display: 'block',
                         }}
@@ -484,7 +463,7 @@ export default function ReviewsPage() {
               maxWidth: 420,
               margin: '40px auto',
               background: '#fcf8f2',
-              borderRadius: 28,
+              borderRadius: 30,
               padding: 18,
             }}
           >
@@ -509,7 +488,7 @@ export default function ReviewsPage() {
                 ✕
               </button>
 
-              <div style={{ fontSize: 22, fontWeight: 800 }}>Full review</div>
+              <div style={{ fontSize: 22, fontWeight: 900 }}>Full review</div>
 
               <button
                 onClick={() => router.push('/')}
@@ -532,11 +511,11 @@ export default function ReviewsPage() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   gap: 10,
-                  alignItems: 'center',
+                  alignItems: 'flex-start',
                 }}
               >
                 <div>
-                  <div style={{ fontSize: 22, fontWeight: 800 }}>
+                  <div style={{ fontSize: 22, fontWeight: 900 }}>
                     {selectedReview.name}
                   </div>
                   <div
@@ -556,7 +535,7 @@ export default function ReviewsPage() {
                     color: '#7b5a20',
                     borderRadius: 14,
                     padding: '8px 12px',
-                    fontWeight: 800,
+                    fontWeight: 900,
                     fontSize: 15,
                   }}
                 >
@@ -567,9 +546,9 @@ export default function ReviewsPage() {
               <div
                 style={{
                   marginTop: 12,
-                  color: '#a5781d',
+                  color: '#b0831a',
                   fontSize: 22,
-                  letterSpacing: 1,
+                  letterSpacing: 2,
                 }}
               >
                 {stars(selectedReview.rating)}
@@ -579,7 +558,7 @@ export default function ReviewsPage() {
                 style={{
                   marginTop: 14,
                   fontSize: 18,
-                  lineHeight: 1.6,
+                  lineHeight: 1.65,
                   color: '#4f473f',
                 }}
               >
@@ -598,9 +577,7 @@ export default function ReviewsPage() {
                   {selectedReview.photos.map((photo, index) => (
                     <button
                       key={index}
-                      onClick={() =>
-                        openPhoto(selectedReview.photos!, index)
-                      }
+                      onClick={() => openPhoto(selectedReview.photos!, index)}
                       style={{
                         padding: 0,
                         border: 'none',
