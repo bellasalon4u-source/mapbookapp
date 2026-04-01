@@ -429,21 +429,35 @@ export default function MasterPage() {
                   >
                     {master.rating.toFixed(1)}
                   </span>
+
+                  <span
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 999,
+                      background: '#35a24a',
+                      color: '#fff',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 16,
+                      fontWeight: 900,
+                      flexShrink: 0,
+                    }}
+                  >
+                    ✓
+                  </span>
                 </div>
 
                 <div
                   style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 8,
                     color: '#2d9b47',
                     fontWeight: 800,
                     fontSize: 16,
-                    flexWrap: 'wrap',
+                    lineHeight: 1.2,
                   }}
                 >
-                  <span>{master.reviews}</span>
-                  <span>verified reviews</span>
+                  {master.reviews} verified reviews
                 </div>
               </div>
 
@@ -488,7 +502,7 @@ export default function MasterPage() {
               marginTop: 14,
               display: 'flex',
               flexDirection: 'column',
-              gap: 14,
+              gap: 16,
             }}
           >
             {master.services.map((service) => (
@@ -496,65 +510,112 @@ export default function MasterPage() {
                 key={service.slug}
                 style={{
                   background: '#fff',
-                  border: '1px solid #e4d8ca',
-                  borderRadius: 24,
-                  padding: 12,
-                  display: 'grid',
-                  gridTemplateColumns: '96px 1fr auto',
-                  gap: 14,
-                  alignItems: 'center',
+                  border: '1px solid #e7ddd0',
+                  borderRadius: 26,
+                  padding: 14,
+                  boxShadow: '0 8px 22px rgba(0,0,0,0.04)',
                 }}
               >
-                <img
-                  src={service.image}
-                  alt={service.title}
+                <div
                   style={{
-                    width: 96,
-                    height: 96,
-                    objectFit: 'cover',
-                    borderRadius: 18,
+                    display: 'grid',
+                    gridTemplateColumns: '94px 1fr',
+                    gap: 14,
+                    alignItems: 'center',
                   }}
-                />
+                >
+                  <img
+                    src={service.image}
+                    alt={service.title}
+                    style={{
+                      width: 94,
+                      height: 94,
+                      objectFit: 'cover',
+                      borderRadius: 20,
+                      display: 'block',
+                    }}
+                  />
 
-                <div>
-                  <div style={{ fontSize: 20, fontWeight: 800 }}>
-                    {service.title}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 8,
-                      color: '#746b62',
-                      fontSize: 16,
-                    }}
-                  >
-                    {service.duration}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 8,
-                      color: '#231b15',
-                      fontSize: 17,
-                      fontWeight: 700,
-                    }}
-                  >
-                    from £{service.price}
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 22,
+                        fontWeight: 800,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {service.title}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 8,
+                        color: '#7b7168',
+                        fontSize: 16,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {service.duration}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 10,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        background: '#f7f1e7',
+                        color: '#231b15',
+                        borderRadius: 999,
+                        padding: '8px 12px',
+                        fontSize: 16,
+                        fontWeight: 800,
+                      }}
+                    >
+                      <span style={{ color: '#7a7066', fontWeight: 700 }}>
+                        from
+                      </span>
+                      <span>£{service.price}</span>
+                    </div>
                   </div>
                 </div>
 
-                <button
-                  onClick={() => router.push(`/booking/${master.id}`)}
+                <div
                   style={{
-                    border: 'none',
-                    background: '#2e9746',
-                    color: '#fff',
-                    borderRadius: 18,
-                    padding: '14px 18px',
-                    fontWeight: 800,
-                    fontSize: 16,
+                    marginTop: 14,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 12,
                   }}
                 >
-                  Book
-                </button>
+                  <div
+                    style={{
+                      color: '#7b7168',
+                      fontSize: 15,
+                      lineHeight: 1.35,
+                    }}
+                  >
+                    Premium service with professional result
+                  </div>
+
+                  <button
+                    onClick={() => router.push(`/booking/${master.id}`)}
+                    style={{
+                      border: 'none',
+                      background: '#2e9746',
+                      color: '#fff',
+                      borderRadius: 18,
+                      padding: '14px 20px',
+                      fontWeight: 800,
+                      fontSize: 16,
+                      minWidth: 96,
+                      boxShadow: '0 10px 22px rgba(46,151,70,0.18)',
+                    }}
+                  >
+                    Book
+                  </button>
+                </div>
               </div>
             ))}
           </div>
