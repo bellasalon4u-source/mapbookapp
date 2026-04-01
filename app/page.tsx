@@ -56,13 +56,20 @@ function getMasterAvailability(master: any) {
   };
 }
 
+function getCategoryLabel(categoryId: string) {
+  const found = appCategories.find((c) => c.id === categoryId);
+  return found?.shortLabel || found?.label || 'Beauty';
+}
+
 export default function HomePage() {
   const router = useRouter();
   const masters = getAllMasters();
   const featuredCategories = useMemo(() => getFeaturedCategories(), []);
+
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('beauty');
   const [language, setLanguage] = useState('EN');
+  const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
 
   const featuredMaster = selectedMaster || masters[0];
@@ -294,11 +301,164 @@ export default function HomePage() {
             >
               <RealMap
                 masters={masters}
-                mapMode="map"
+                mapMode={mapMode}
                 selectedMasterId={selectedMaster?.id ?? null}
                 onMasterSelect={(master: any) => setSelectedMaster(master)}
                 onMapBackgroundClick={() => setSelectedMaster(null)}
               />
+
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: 12,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10,
+                  zIndex: 30,
+                }}
+              >
+                <button
+                  onClick={() =>
+                    setMapMode((prev) =>
+                      prev === 'map' ? 'satellite' : 'map'
+                    )
+                  }
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 999,
+                    border: '1px solid #e5ddd1',
+                    background: 'rgba(255,255,255,0.95)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
+                    fontSize: 22,
+                    color: '#3d454f',
+                  }}
+                  title="Map style"
+                >
+                  {mapMode === 'satellite' ? '🛰' : '◩'}
+                </button>
+
+                <button
+                  onClick={() => setSelectedMaster(null)}
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 999,
+                    border: '1px solid #e5ddd1',
+                    background: 'rgba(255,255,255,0.95)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
+                    fontSize: 20,
+                    color: '#3d454f',
+                  }}
+                  title="Clear selection"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {selectedMaster && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 12,
+                    right: 12,
+                    bottom: 12,
+                    zIndex: 35,
+                  }}
+                >
+                  <div
+                    style={{
+                      background: 'rgba(255,255,255,0.97)',
+                      border: '1px solid #ece4d9',
+                      borderRadius: 18,
+                      boxShadow: '0 10px 24px rgba(0,0,0,0.14)',
+                      padding: 12,
+                      display: 'grid',
+                      gridTemplateColumns: '64px 1fr auto',
+                      gap: 12,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 999,
+                        overflow: 'hidden',
+                        border: '3px solid #fff',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+                      }}
+                    >
+                      <img
+                        src={selectedMaster.avatar}
+                        alt={selectedMaster.name}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block',
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 800,
+                          color: '#253140',
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {selectedMaster.name}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: 6,
+                          display: 'flex',
+                          gap: 6,
+                          flexWrap: 'wrap',
+                          alignItems: 'center',
+                          fontSize: 13,
+                          fontWeight: 700,
+                          color: '#445161',
+                        }}
+                      >
+                        <span>{getCategoryLabel(activeCategory)}</span>
+                        <span>•</span>
+                        <span
+                          style={{
+                            color: getMasterAvailability(selectedMaster).color,
+                          }}
+                        >
+                          {getMasterAvailability(selectedMaster).text}
+                        </span>
+                        <span>★ {(selectedMaster.rating ?? 4.7).toFixed(1)}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        router.push(`/master/${selectedMaster.id}`)
+                      }
+                      style={{
+                        border: 'none',
+                        background: '#3a983d',
+                        color: '#fff',
+                        borderRadius: 10,
+                        padding: '12px 16px',
+                        fontSize: 13,
+                        fontWeight: 800,
+                        boxShadow: '0 6px 14px rgba(58,152,61,0.18)',
+                      }}
+                    >
+                      VIEW
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div
                 style={{
@@ -463,7 +623,7 @@ export default function HomePage() {
                   flexWrap: 'wrap',
                 }}
               >
-                <span>{activeCategory === 'beauty' ? 'Beauty' : 'Repairs'}</span>
+                <span>{getCategoryLabel(activeCategory)}</span>
                 <span>•</span>
                 <span style={{ color: featuredAvailability.color }}>
                   {featuredAvailability.text}
@@ -483,6 +643,10 @@ export default function HomePage() {
               >
                 {activeCategory === 'beauty'
                   ? 'Hair • Nails • Makeup'
+                  : activeCategory === 'pets'
+                  ? 'Grooming • Dog Walking • Pet Sitting'
+                  : activeCategory === 'tech'
+                  ? 'Phone Repair • Laptop Repair'
                   : 'Home Repairs • Appliance Repair'}
               </div>
             </div>
