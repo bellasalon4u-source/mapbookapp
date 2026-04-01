@@ -76,7 +76,7 @@ export default function HomePage() {
         background: '#f5f3ef',
         fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
-        paddingBottom: 108,
+        paddingBottom: 126,
       }}
     >
       <div
@@ -328,12 +328,15 @@ export default function HomePage() {
                     border: '1px solid #e5ddd1',
                     background: 'rgba(255,255,255,0.95)',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
-                    fontSize: 22,
+                    fontSize: 20,
                     color: '#3d454f',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   title="Map style"
                 >
-                  {mapMode === 'satellite' ? '🛰' : '◩'}
+                  {mapMode === 'satellite' ? '🛰' : '⌖'}
                 </button>
 
                 <button
@@ -467,8 +470,8 @@ export default function HomePage() {
             maxWidth: 430,
             margin: '0 auto',
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            alignItems: 'center',
+            gridTemplateColumns: '1fr 1fr 92px 1fr 1fr',
+            alignItems: 'end',
             padding: '10px 8px 12px',
           }}
         >
@@ -532,6 +535,36 @@ export default function HomePage() {
 
             <span style={{ fontSize: 12, fontWeight: 700 }}>Messages</span>
           </button>
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              transform: 'translateY(-18px)',
+            }}
+          >
+            <button
+              onClick={() => router.push('/add')}
+              style={{
+                width: 78,
+                height: 78,
+                borderRadius: 999,
+                border: '4px solid #4cab5d',
+                background: '#ffffff',
+                color: '#3f9a4f',
+                boxShadow: '0 10px 24px rgba(0,0,0,0.14)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 2,
+              }}
+              title="Add service"
+            >
+              <span style={{ fontSize: 36, lineHeight: 1, fontWeight: 400 }}>+</span>
+              <span style={{ fontSize: 11, fontWeight: 800 }}>Add</span>
+            </button>
+          </div>
 
           <button
             onClick={() => router.push('/bookings')}
