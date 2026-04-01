@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getAllMasters } from '../services/masters';
@@ -10,16 +10,40 @@ const RealMap = dynamic(() => import('../components/RealMap'), {
   ssr: false,
 });
 
-function getCategoryLabel(master: any, activeCategory: string) {
-  if (master?.category && typeof master.category === 'string') {
-    return master.category;
-  }
+const popularServices = [
+  {
+    id: 'hair-styling',
+    title: 'Hair Styling',
+    image:
+      'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    id: 'phone-repair',
+    title: 'Phone Repair',
+    image:
+      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    id: 'appliance-repair',
+    title: 'Appliance Repair',
+    image:
+      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    id: 'dog-walking',
+    title: 'Dog Walking',
+    image:
+      'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80',
+  },
+];
 
-  const found = appCategories.find((item) => item.id === activeCategory);
-  return found?.shortLabel || found?.label || 'Beauty';
+function getFeaturedCategories() {
+  return ['beauty', 'wellness', 'home', 'repairs', 'tech', 'pets']
+    .map((id) => appCategories.find((c) => c.id === id))
+    .filter(Boolean);
 }
 
-function getAvailability(master: any) {
+function getMasterAvailability(master: any) {
   const isAvailable =
     master?.availableNow === true ||
     master?.availableToday === true ||
@@ -35,191 +59,100 @@ function getAvailability(master: any) {
 export default function HomePage() {
   const router = useRouter();
   const masters = getAllMasters();
-
-  const featuredCategories = appCategories
-    .filter((item) => item.id !== 'activities' && item.id !== 'creative')
-    .slice(0, 6);
-
-  const extraCategories = appCategories.filter(
-    (item) => !featuredCategories.some((featured) => featured.id === item.id)
-  );
-
+  const featuredCategories = useMemo(() => getFeaturedCategories(), []);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('beauty');
-  const [activeSubcategory, setActiveSubcategory] = useState<string>('all');
-  const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const [routeSheetOpen, setRouteSheetOpen] = useState(false);
-  const [routeMode, setRouteMode] = useState<'drive' | 'transit' | 'walk'>(
-    'drive'
-  );
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [language, setLanguage] = useState('EN');
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
 
-  const profileMaster = masters[0];
-
-  useEffect(() => {
-    const shouldReset =
-      typeof window !== 'undefined'
-        ? sessionStorage.getItem('mapbook_reset_home')
-        : null;
-
-    if (shouldReset === '1') {
-      setSelectedMaster(null);
-      setRouteSheetOpen(false);
-      sessionStorage.removeItem('mapbook_reset_home');
-    }
-  }, []);
-
-  const nearbyCount = useMemo(() => masters.length || 82, [masters.length]);
-
-  const etaText =
-    routeMode === 'drive'
-      ? '12 min'
-      : routeMode === 'transit'
-      ? '24 min'
-      : '38 min';
-
-  const activeCategoryConfig =
-    appCategories.find((item) => item.id === activeCategory) || appCategories[0];
-
-  const subcategoryOptions = useMemo(() => {
-    const base = activeCategoryConfig?.subcategories || [];
-    return ['All', ...base];
-  }, [activeCategoryConfig]);
-
-  if (!profileMaster) {
-    return <main style={{ padding: 24 }}>No providers found</main>;
-  }
-
-  const selectedCategory = selectedMaster
-    ? getCategoryLabel(selectedMaster, activeCategory)
-    : null;
-
-  const selectedAvailability = selectedMaster
-    ? getAvailability(selectedMaster)
-    : null;
+  const featuredMaster = selectedMaster || masters[0];
+  const featuredAvailability = getMasterAvailability(featuredMaster);
 
   return (
     <main
       style={{
-        position: 'relative',
-        width: '100%',
-        height: '100vh',
         minHeight: '100vh',
-        overflow: 'hidden',
-        background: '#f7f3ec',
+        background: '#f5f3ef',
         fontFamily: 'Arial, sans-serif',
+        color: '#1f2430',
+        paddingBottom: 110,
       }}
     >
       <div
         style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 1,
+          maxWidth: 430,
+          margin: '0 auto',
+          background: '#f5f3ef',
         }}
       >
-        <RealMap
-          masters={masters}
-          fullScreen
-          mapMode={mapMode}
-          selectedMasterId={selectedMaster?.id ?? null}
-          onMasterSelect={(master: any) => {
-            setSelectedMaster(master);
-            setRouteSheetOpen(false);
-          }}
-          onMapBackgroundClick={() => {
-            setSelectedMaster(null);
-            setRouteSheetOpen(false);
-            setMenuOpen(false);
-          }}
-        />
-      </div>
-
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 20,
-          pointerEvents: 'none',
-          background:
-            mapMode === 'satellite'
-              ? 'linear-gradient(180deg, rgba(16,15,13,0.10) 0%, rgba(16,15,13,0.00) 26%, rgba(16,15,13,0.05) 100%)'
-              : 'linear-gradient(180deg, rgba(252,248,242,0.04) 0%, rgba(252,248,242,0.00) 30%, rgba(252,248,242,0.04) 100%)',
-        }}
-      >
-        <div style={{ padding: '16px 14px 0' }}>
+        <section style={{ padding: '18px 16px 0' }}>
           <div
             style={{
-              pointerEvents: 'auto',
               display: 'grid',
               gridTemplateColumns: '1fr auto auto',
-              alignItems: 'center',
               gap: 10,
-              background: 'rgba(255,255,255,0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(231,221,208,0.95)',
-              borderRadius: 30,
-              padding: '10px 10px 10px 14px',
-              boxShadow: '0 10px 28px rgba(0,0,0,0.10)',
+              alignItems: 'center',
+              background: '#ffffff',
+              borderRadius: 20,
+              padding: '12px 12px 12px 16px',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.08)',
+              border: '1px solid #ece7df',
             }}
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                minWidth: 0,
-              }}
-            >
-              <span style={{ fontSize: 22, color: '#6f655b' }}>🔎</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 20, color: '#9aa0a8' }}>🔎</span>
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search here"
+                placeholder="Search services..."
                 style={{
                   flex: 1,
+                  minWidth: 0,
                   border: 'none',
                   outline: 'none',
                   background: 'transparent',
-                  fontSize: 18,
-                  color: '#2b241d',
-                  minWidth: 0,
+                  fontSize: 17,
+                  color: '#2b2f36',
                 }}
               />
             </div>
 
             <button
-              onClick={() => setVerifiedOnly((prev) => !prev)}
+              onClick={() =>
+                setLanguage((prev) =>
+                  prev === 'EN' ? 'RU' : prev === 'RU' ? 'UA' : 'EN'
+                )
+              }
               style={{
-                width: 48,
-                height: 48,
-                borderRadius: 999,
                 border: 'none',
-                background: verifiedOnly ? '#ece4d7' : '#f4ede3',
-                color: verifiedOnly ? '#5a524a' : '#7d7368',
-                fontSize: 21,
+                background: '#f4efe7',
+                color: '#3f3a33',
+                borderRadius: 999,
+                width: 52,
+                height: 52,
+                fontSize: 16,
                 fontWeight: 800,
               }}
+              title="Change language"
             >
-              ✓
+              {language}
             </button>
 
             <button
               onClick={() => router.push('/profile')}
               style={{
-                width: 48,
-                height: 48,
+                border: '2px solid #fff',
+                background: '#f4efe7',
                 borderRadius: 999,
-                border: '2px solid rgba(255,255,255,0.95)',
-                background: '#f4ede3',
-                overflow: 'hidden',
+                width: 52,
+                height: 52,
                 padding: 0,
-                boxShadow: '0 8px 18px rgba(0,0,0,0.10)',
+                overflow: 'hidden',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
               }}
             >
               <img
-                src={profileMaster.avatar}
+                src={masters[0]?.avatar}
                 alt="Profile"
                 style={{
                   width: '100%',
@@ -230,826 +163,414 @@ export default function HomePage() {
               />
             </button>
           </div>
+        </section>
 
+        <section style={{ padding: '14px 12px 0' }}>
           <div
             style={{
-              marginTop: 12,
-              display: 'flex',
-              gap: 10,
-              overflowX: 'auto',
-              paddingBottom: 4,
-              pointerEvents: 'auto',
-              scrollbarWidth: 'none',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
+              gap: 6,
+              alignItems: 'start',
             }}
           >
-            <button
-              onClick={() => setMenuOpen((prev) => !prev)}
-              style={{
-                minWidth: 54,
-                height: 54,
-                borderRadius: 999,
-                border: '1px solid rgba(223,212,199,0.95)',
-                background: 'rgba(255,255,255,0.95)',
-                boxShadow: '0 8px 20px rgba(0,0,0,0.09)',
-                fontSize: 24,
-                color: '#2a231d',
-                flexShrink: 0,
-              }}
-            >
-              ⋮
-            </button>
-
-            {featuredCategories.map((category) => {
+            {featuredCategories.map((category: any) => {
               const active = activeCategory === category.id;
 
               return (
                 <button
                   key={category.id}
-                  onClick={() => {
-                    setActiveCategory(category.id);
-                    setActiveSubcategory('all');
-                  }}
+                  onClick={() => setActiveCategory(category.id)}
                   style={{
+                    border: 'none',
+                    background: 'transparent',
+                    padding: '0 2px',
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 10,
-                    padding: '14px 20px',
-                    borderRadius: 999,
-                    border: active
-                      ? '1px solid rgba(224,212,196,0.98)'
-                      : '1px solid rgba(255,255,255,0.70)',
-                    background: active
-                      ? 'rgba(255,248,239,0.98)'
-                      : 'rgba(255,255,255,0.94)',
-                    color: '#2a231d',
-                    whiteSpace: 'nowrap',
-                    boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
-                    flexShrink: 0,
-                    fontWeight: 800,
-                    fontSize: 17,
+                    gap: 6,
                   }}
                 >
-                  <span style={{ fontSize: 18 }}>{category.icon}</span>
-                  <span>{category.shortLabel || category.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {menuOpen && (
-            <div
-              style={{
-                marginTop: 10,
-                width: 240,
-                background: 'rgba(255,248,239,0.97)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid #e4d9cc',
-                borderRadius: 26,
-                boxShadow: '0 18px 38px rgba(0,0,0,0.14)',
-                padding: 14,
-                pointerEvents: 'auto',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 14,
-                  fontWeight: 800,
-                  color: '#8b7f73',
-                  marginBottom: 6,
-                  paddingLeft: 6,
-                }}
-              >
-                All categories
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 8,
-                  maxHeight: 320,
-                  overflowY: 'auto',
-                }}
-              >
-                {extraCategories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => {
-                      setActiveCategory(category.id);
-                      setActiveSubcategory('all');
-                      setMenuOpen(false);
-                    }}
+                  <div
                     style={{
+                      width: 52,
+                      height: 52,
+                      borderRadius: 16,
+                      background: active ? '#f6efe1' : 'transparent',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 12,
-                      border: 'none',
-                      background:
-                        activeCategory === category.id ? '#fff' : 'transparent',
-                      borderRadius: 18,
-                      padding: '13px 12px',
-                      textAlign: 'left',
-                      fontWeight: 800,
-                      fontSize: 16,
-                      color: '#231c16',
+                      justifyContent: 'center',
+                      fontSize: 32,
                     }}
                   >
-                    <span style={{ width: 22, textAlign: 'center' }}>
-                      {category.icon}
-                    </span>
-                    <span>{category.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+                    <span>{category.icon}</span>
+                  </div>
 
-          <div
-            style={{
-              marginTop: 10,
-              display: 'flex',
-              gap: 8,
-              overflowX: 'auto',
-              paddingBottom: 4,
-              pointerEvents: 'auto',
-              scrollbarWidth: 'none',
-            }}
-          >
-            {subcategoryOptions.map((sub) => {
-              const active =
-                activeSubcategory ===
-                (sub === 'All' ? 'all' : sub.toLowerCase());
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: active ? 800 : 700,
+                      color: '#253140',
+                      textAlign: 'center',
+                      lineHeight: 1.1,
+                      minHeight: 28,
+                    }}
+                  >
+                    {category.shortLabel || category.label}
+                  </div>
 
-              return (
-                <button
-                  key={sub}
-                  onClick={() =>
-                    setActiveSubcategory(sub === 'All' ? 'all' : sub.toLowerCase())
-                  }
-                  style={{
-                    whiteSpace: 'nowrap',
-                    border: active
-                      ? '1px solid rgba(208,196,181,0.95)'
-                      : '1px solid rgba(232,224,214,0.95)',
-                    background: active
-                      ? 'rgba(246,238,228,0.98)'
-                      : 'rgba(255,255,255,0.92)',
-                    color: active ? '#2b241d' : '#6e645a',
-                    borderRadius: 999,
-                    padding: '10px 14px',
-                    fontSize: 14,
-                    fontWeight: 800,
-                    boxShadow: active
-                      ? '0 6px 16px rgba(0,0,0,0.08)'
-                      : '0 4px 12px rgba(0,0,0,0.05)',
-                    flexShrink: 0,
-                  }}
-                >
-                  {sub}
+                  <div
+                    style={{
+                      marginTop: 2,
+                      width: 42,
+                      height: 4,
+                      borderRadius: 999,
+                      background: active ? '#eb7d96' : 'transparent',
+                    }}
+                  />
                 </button>
               );
             })}
-          </div>
 
-          <div
-            style={{
-              marginTop: 12,
-              pointerEvents: 'auto',
-            }}
-          >
-            <div
+            <button
+              onClick={() => router.push('/categories')}
               style={{
-                display: 'inline-flex',
+                border: 'none',
+                background: 'transparent',
+                padding: '0 2px',
+                display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: 4,
-                background: 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(10px)',
-                borderRadius: 24,
-                padding: '14px 18px',
-                boxShadow: '0 10px 24px rgba(0,0,0,0.09)',
-                color: '#1d1712',
-                border: '1px solid rgba(231,221,208,0.92)',
-              }}
-            >
-              <span style={{ fontSize: 16, fontWeight: 900 }}>
-                ✓ {nearbyCount} verified providers nearby
-              </span>
-              <span style={{ fontSize: 15, color: '#2f9c47', fontWeight: 800 }}>
-                {activeCategoryConfig?.label}
-                {activeSubcategory !== 'all'
-                  ? ` · ${subcategoryOptions.find(
-                      (sub) => sub.toLowerCase() === activeSubcategory
-                    )}`
-                  : ' · All services'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            position: 'absolute',
-            right: 14,
-            top: 260,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-            pointerEvents: 'auto',
-          }}
-        >
-          <button
-            onClick={() => setMapMode((prev) => (prev === 'map' ? 'satellite' : 'map'))}
-            style={floatingButtonStyle}
-            title="Map style"
-          >
-            {mapMode === 'satellite' ? '🛰' : '◩'}
-          </button>
-
-          <button
-            onClick={() => {
-              if (selectedMaster) {
-                setRouteSheetOpen((prev) => !prev);
-              }
-            }}
-            style={floatingButtonStyle}
-            title="Route"
-          >
-            ➤
-          </button>
-
-          <button style={floatingButtonStyle} title="My location">
-            ◎
-          </button>
-        </div>
-
-        {selectedMaster && (
-          <>
-            <div
-              style={{
-                position: 'absolute',
-                left: '50%',
-                top: '36%',
-                transform: 'translate(-10%, -50%)',
-                pointerEvents: 'none',
-                zIndex: 26,
+                alignItems: 'center',
+                gap: 6,
               }}
             >
               <div
                 style={{
-                  position: 'relative',
-                  display: 'inline-flex',
+                  width: 52,
+                  height: 52,
+                  borderRadius: 16,
+                  background: 'transparent',
+                  display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  minWidth: 92,
-                  height: 52,
-                  padding: '0 18px',
-                  background: '#f7f0e4',
-                  border: '1px solid #b9a993',
-                  borderRadius: 14,
-                  boxShadow: '0 8px 18px rgba(0,0,0,0.10)',
-                  color: '#2b241d',
-                  fontSize: 17,
-                  fontWeight: 800,
+                  fontSize: 30,
+                  color: '#30343b',
+                  fontWeight: 900,
                 }}
               >
-                {selectedCategory}
-                <span
-                  style={{
-                    position: 'absolute',
-                    left: 24,
-                    bottom: -7,
-                    width: 14,
-                    height: 14,
-                    background: '#f7f0e4',
-                    borderRight: '1px solid #b9a993',
-                    borderBottom: '1px solid #b9a993',
-                    transform: 'rotate(45deg)',
-                  }}
-                />
+                ⋮
               </div>
-            </div>
-
-            <div
-              style={{
-                position: 'absolute',
-                left: '50%',
-                top: '43%',
-                transform: 'translate(-50%, -50%)',
-                pointerEvents: 'auto',
-                zIndex: 25,
-              }}
-            >
               <div
                 style={{
-                  position: 'relative',
-                  background: 'rgba(255,248,239,0.97)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(229,218,204,0.96)',
-                  borderRadius: 28,
-                  padding: '16px 16px 12px',
-                  display: 'grid',
-                  gridTemplateColumns: '82px 1fr auto',
-                  gap: 14,
-                  alignItems: 'start',
-                  minWidth: 320,
-                  boxShadow: '0 18px 38px rgba(0,0,0,0.16)',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: '#253140',
+                  textAlign: 'center',
+                  minHeight: 28,
                 }}
               >
-                <div style={{ position: 'relative', paddingTop: 8 }}>
-                  <img
-                    src={selectedMaster.avatar}
-                    alt={selectedMaster.name}
-                    style={{
-                      width: 78,
-                      height: 78,
-                      objectFit: 'cover',
-                      borderRadius: 999,
-                      border: '4px solid #fff',
-                      display: 'block',
-                      boxShadow: '0 6px 14px rgba(0,0,0,0.10)',
-                    }}
-                  />
-                  <span
-                    style={{
-                      position: 'absolute',
-                      right: 2,
-                      bottom: 2,
-                      width: 18,
-                      height: 18,
-                      borderRadius: 999,
-                      background: selectedAvailability?.isAvailable
-                        ? '#2fbb52'
-                        : '#e84d4d',
-                      border: '3px solid #fff',
-                    }}
-                  />
-                </div>
-
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: 17,
-                      fontWeight: 900,
-                      color: '#1d1712',
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {selectedMaster.name}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 10,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: selectedAvailability?.color,
-                        fontSize: 15,
-                        fontWeight: 800,
-                      }}
-                    >
-                      {selectedAvailability?.text}
-                    </span>
-
-                    <span
-                      style={{
-                        color: '#2b241d',
-                        fontSize: 15,
-                        fontWeight: 900,
-                      }}
-                    >
-                      ★ {(selectedMaster.rating ?? 4.9).toFixed(1)}
-                    </span>
-
-                    <span
-                      style={{
-                        color: '#2f9c47',
-                        fontSize: 17,
-                        fontWeight: 900,
-                      }}
-                    >
-                      ✓
-                    </span>
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 14,
-                      display: 'flex',
-                      gap: 10,
-                    }}
-                  >
-                    <button
-                      onClick={() => {
-                        sessionStorage.setItem('mapbook_reset_home', '1');
-                        router.push(`/master/${selectedMaster.id}`);
-                      }}
-                      style={miniCardSecondaryButton}
-                    >
-                      View
-                    </button>
-
-                    <button
-                      onClick={() => setRouteSheetOpen(true)}
-                      style={miniCardPrimaryButton}
-                    >
-                      Route
-                    </button>
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 14,
-                      paddingTop: 12,
-                      borderTop: '1px solid #ece2d7',
-                      fontSize: 13,
-                      color: '#81766c',
-                      display: 'flex',
-                      gap: 8,
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <span>Green = available today</span>
-                    <span>•</span>
-                    <span style={{ color: '#b95a5a' }}>
-                      Red = unavailable today
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setSelectedMaster(null);
-                    setRouteSheetOpen(false);
-                  }}
-                  style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 999,
-                    border: '1px solid #e3d9cc',
-                    background: '#fff',
-                    fontSize: 22,
-                    color: '#6a5f56',
-                    boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
-                  }}
-                >
-                  ✕
-                </button>
+                More
               </div>
-            </div>
-          </>
-        )}
+              <div style={{ width: 42, height: 4 }} />
+            </button>
+          </div>
+        </section>
 
-        {routeSheetOpen && selectedMaster && (
+        <section style={{ padding: '10px 0 0' }}>
           <div
             style={{
-              position: 'absolute',
-              left: 14,
-              right: 14,
-              bottom: 104,
-              pointerEvents: 'auto',
-              zIndex: 30,
+              margin: '0 0 0',
+              background: '#ffffff',
+              borderTop: '1px solid #e7e1d8',
+              borderBottom: '1px solid #e7e1d8',
             }}
           >
             <div
               style={{
+                height: 350,
                 position: 'relative',
-                background: 'rgba(255,248,239,0.98)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(231,221,208,0.98)',
-                borderRadius: 30,
-                padding: 14,
-                boxShadow: '0 18px 38px rgba(0,0,0,0.16)',
+                overflow: 'hidden',
               }}
             >
-              <button
-                onClick={() => setRouteSheetOpen(false)}
-                style={{
-                  position: 'absolute',
-                  top: 12,
-                  right: 12,
-                  width: 40,
-                  height: 40,
-                  borderRadius: 999,
-                  border: '1px solid #e3d9cc',
-                  background: '#fff',
-                  fontSize: 20,
-                  color: '#5f564d',
-                }}
-              >
-                ✕
-              </button>
-
-              <div
-                style={{
-                  width: 54,
-                  height: 6,
-                  borderRadius: 999,
-                  background: '#d8cec1',
-                  margin: '0 auto 12px',
-                }}
+              <RealMap
+                masters={masters}
+                mapMode="map"
+                selectedMasterId={selectedMaster?.id ?? null}
+                onMasterSelect={(master: any) => setSelectedMaster(master)}
+                onMapBackgroundClick={() => setSelectedMaster(null)}
               />
 
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr auto auto',
-                  gap: 12,
-                  alignItems: 'center',
-                  paddingRight: 50,
+                  position: 'absolute',
+                  inset: 0,
+                  pointerEvents: 'none',
+                  background:
+                    'linear-gradient(180deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.00) 70%, rgba(255,255,255,0.08) 100%)',
                 }}
-              >
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '56px 1fr',
-                    gap: 12,
-                    alignItems: 'center',
-                    minWidth: 0,
-                  }}
-                >
-                  <img
-                    src={selectedMaster.avatar}
-                    alt={selectedMaster.name}
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 999,
-                      objectFit: 'cover',
-                    }}
-                  />
-
-                  <div style={{ minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 18,
-                        fontWeight: 900,
-                        color: '#1d1712',
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {selectedMaster.name}
-                    </div>
-                    <div
-                      style={{
-                        marginTop: 4,
-                        color: '#6d645c',
-                        fontSize: 15,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      21 Soho Square, London
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    background: '#f3eadf',
-                    borderRadius: 999,
-                    padding: '10px 14px',
-                    fontWeight: 900,
-                    fontSize: 17,
-                    color: '#231b15',
-                  }}
-                >
-                  {etaText}
-                </div>
-
-                <button
-                  style={{
-                    border: 'none',
-                    background: '#0f8cab',
-                    color: '#fff',
-                    borderRadius: 20,
-                    padding: '14px 22px',
-                    fontWeight: 900,
-                    fontSize: 18,
-                    boxShadow: '0 12px 24px rgba(15,140,171,0.24)',
-                  }}
-                >
-                  Start
-                </button>
-              </div>
-
-              <div
-                style={{
-                  marginTop: 14,
-                  background: '#fff',
-                  borderRadius: 24,
-                  border: '1px solid #ebe1d6',
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 1fr',
-                  overflow: 'hidden',
-                }}
-              >
-                {[
-                  { key: 'drive', label: 'Drive', eta: '12 min', icon: '🚗' },
-                  { key: 'transit', label: 'Transit', eta: '24 min', icon: '🚌' },
-                  { key: 'walk', label: 'Walk', eta: '38 min', icon: '🚶' },
-                ].map((mode, index) => {
-                  const active = routeMode === mode.key;
-
-                  return (
-                    <button
-                      key={mode.key}
-                      onClick={() =>
-                        setRouteMode(mode.key as 'drive' | 'transit' | 'walk')
-                      }
-                      style={{
-                        border: 'none',
-                        background: active ? '#f6efe4' : '#fff',
-                        padding: '14px 10px',
-                        borderLeft: index === 0 ? 'none' : '1px solid #eee3d7',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 4,
-                      }}
-                    >
-                      <span style={{ fontSize: 20 }}>{mode.icon}</span>
-                      <span
-                        style={{
-                          fontSize: 15,
-                          fontWeight: 900,
-                          color: '#1d1712',
-                        }}
-                      >
-                        {mode.label}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: 14,
-                          color: active ? '#0f8cab' : '#7b7168',
-                          fontWeight: 800,
-                        }}
-                      >
-                        {mode.eta}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+              />
             </div>
           </div>
-        )}
+        </section>
 
-        <div
+        <section
           style={{
-            position: 'absolute',
-            left: 14,
-            right: 14,
-            bottom: 14,
-            display: 'flex',
-            justifyContent: 'center',
-            pointerEvents: 'auto',
-            zIndex: 35,
+            padding: '14px 16px 0',
           }}
         >
           <div
             style={{
-              width: '100%',
-              maxWidth: 430,
-              background: 'rgba(255,248,239,0.96)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(228,217,204,0.98)',
-              borderRadius: 32,
-              padding: '14px 16px',
-              boxShadow: '0 16px 34px rgba(0,0,0,0.14)',
-              display: 'grid',
-              gridTemplateColumns: '1fr auto 1fr',
-              alignItems: 'end',
-              gap: 10,
-              minHeight: 98,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 12,
             }}
           >
-            <button
-              onClick={() => router.push('/bookings')}
-              style={bottomTabStyle}
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 18,
+                fontWeight: 800,
+                color: '#223145',
+              }}
             >
-              <span style={{ fontSize: 22 }}>📅</span>
-              <span style={{ fontSize: 16, fontWeight: 900 }}>Bookings</span>
-            </button>
+              Popular Services
+            </h2>
 
             <button
-              onClick={() => router.push('/add')}
+              onClick={() => router.push('/services')}
               style={{
-                width: 96,
-                height: 96,
-                marginTop: -36,
-                borderRadius: 999,
-                border: '4px solid #efe6d9',
-                background:
-                  'linear-gradient(180deg, #78c9dc 0%, #4aa9be 100%)',
+                border: 'none',
+                background: 'transparent',
+                fontSize: 26,
+                color: '#9aa0a8',
+                lineHeight: 1,
+              }}
+            >
+              ›
+            </button>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+              gap: 10,
+            }}
+          >
+            {popularServices.map((service) => (
+              <button
+                key={service.id}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  padding: 0,
+                  textAlign: 'left',
+                }}
+              >
+                <div
+                  style={{
+                    width: '100%',
+                    aspectRatio: '0.9 / 1',
+                    borderRadius: 10,
+                    overflow: 'hidden',
+                    background: '#ddd',
+                    boxShadow: '0 3px 10px rgba(0,0,0,0.05)',
+                  }}
+                >
+                  <img
+                    src={service.image}
+                    alt={service.title}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
+                  />
+                </div>
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 12,
+                    lineHeight: 1.2,
+                    fontWeight: 700,
+                    color: '#253140',
+                  }}
+                >
+                  {service.title}
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section style={{ padding: '16px 16px 0' }}>
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 18,
+              padding: 14,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.07)',
+              border: '1px solid #ece7df',
+              display: 'grid',
+              gridTemplateColumns: '98px 1fr auto',
+              gap: 14,
+              alignItems: 'center',
+            }}
+          >
+            <div
+              style={{
+                width: 98,
+                height: 98,
+                borderRadius: 12,
+                overflow: 'hidden',
+                background: '#ddd',
+              }}
+            >
+              <img
+                src={featuredMaster?.avatar || masters[0]?.avatar}
+                alt={featuredMaster?.name || 'Provider'}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                }}
+              />
+            </div>
+
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 800,
+                  color: '#253140',
+                  lineHeight: 1.2,
+                }}
+              >
+                {featuredMaster?.name || "Mike's Repairs"}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 13,
+                  color: '#43505e',
+                  fontWeight: 700,
+                  display: 'flex',
+                  gap: 6,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <span>{activeCategory === 'beauty' ? 'Beauty' : 'Repairs'}</span>
+                <span>•</span>
+                <span style={{ color: featuredAvailability.color }}>
+                  {featuredAvailability.text}
+                </span>
+                <span>★ {(featuredMaster?.rating ?? 4.7).toFixed(1)}</span>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 12,
+                  paddingTop: 10,
+                  borderTop: '1px solid #ebe6df',
+                  fontSize: 13,
+                  color: '#43505e',
+                  fontWeight: 700,
+                }}
+              >
+                {activeCategory === 'beauty'
+                  ? 'Hair • Nails • Makeup'
+                  : 'Home Repairs • Appliance Repair'}
+              </div>
+            </div>
+
+            <button
+              onClick={() =>
+                router.push(`/master/${featuredMaster?.id || masters[0]?.id}`)
+              }
+              style={{
+                alignSelf: 'end',
+                border: 'none',
+                background: '#3a983d',
                 color: '#fff',
-                boxShadow: '0 16px 30px rgba(65,145,163,0.35)',
+                borderRadius: 10,
+                padding: '12px 18px',
+                fontSize: 14,
+                fontWeight: 800,
+                boxShadow: '0 6px 16px rgba(58,152,61,0.20)',
+              }}
+            >
+              VIEW ›
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <nav
+        style={{
+          position: 'fixed',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(245,243,239,0.98)',
+          borderTop: '1px solid #e3ddd5',
+          backdropFilter: 'blur(10px)',
+          zIndex: 50,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 430,
+            margin: '0 auto',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            alignItems: 'center',
+            padding: '10px 8px 12px',
+          }}
+        >
+          {[
+            { label: 'Home', icon: '⌂', active: true, path: '/' },
+            { label: 'Messages', icon: '✉', active: false, path: '/messages' },
+            { label: 'Bookings', icon: '▤', active: false, path: '/bookings' },
+            { label: 'Profile', icon: '◉', active: false, path: '/profile' },
+          ].map((item) => (
+            <button
+              key={item.label}
+              onClick={() => router.push(item.path)}
+              style={{
+                border: 'none',
+                background: 'transparent',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                gap: 2,
+                gap: 5,
+                color: item.active ? '#1f5d99' : '#6e7b8a',
               }}
             >
-              <span style={{ fontSize: 42, lineHeight: 1 }}>+</span>
               <span
-                style={{ fontSize: 14, fontWeight: 900, marginTop: -2 }}
+                style={{
+                  fontSize: 31,
+                  lineHeight: 1,
+                  fontWeight: 700,
+                }}
               >
-                Add
+                {item.icon}
+              </span>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: item.active ? 800 : 700,
+                }}
+              >
+                {item.label}
               </span>
             </button>
-
-            <button
-              onClick={() => router.push('/favorites')}
-              style={bottomTabStyle}
-            >
-              <span style={{ fontSize: 22 }}>♥</span>
-              <span style={{ fontSize: 16, fontWeight: 900 }}>Saved</span>
-            </button>
-          </div>
+          ))}
         </div>
-      </div>
-
-      <style jsx global>{`
-        .leaflet-top.leaflet-left {
-          top: 260px !important;
-          left: 10px !important;
-        }
-
-        .leaflet-control-zoom {
-          border: none !important;
-          box-shadow: 0 10px 22px rgba(0, 0, 0, 0.1) !important;
-          overflow: hidden;
-          border-radius: 18px !important;
-        }
-
-        .leaflet-control-zoom a {
-          width: 48px !important;
-          height: 48px !important;
-          line-height: 48px !important;
-          font-size: 24px !important;
-        }
-
-        .leaflet-bottom.leaflet-right,
-        .leaflet-bottom.leaflet-left {
-          bottom: 112px !important;
-        }
-      `}</style>
+      </nav>
     </main>
   );
 }
-
-const floatingButtonStyle: React.CSSProperties = {
-  width: 58,
-  height: 58,
-  borderRadius: 999,
-  border: '1px solid rgba(230,218,203,0.98)',
-  background: 'rgba(255,255,255,0.95)',
-  fontSize: 24,
-  color: '#4b443c',
-  boxShadow: '0 10px 22px rgba(0,0,0,0.10)',
-  backdropFilter: 'blur(10px)',
-};
-
-const bottomTabStyle: React.CSSProperties = {
-  border: 'none',
-  background: '#fff',
-  borderRadius: 24,
-  minHeight: 74,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 6,
-  color: '#221b15',
-  boxShadow: '0 6px 14px rgba(0,0,0,0.04)',
-};
-
-const miniCardPrimaryButton: React.CSSProperties = {
-  border: 'none',
-  background: '#2ea6c7',
-  color: '#fff',
-  borderRadius: 16,
-  padding: '12px 22px',
-  fontWeight: 900,
-  fontSize: 15,
-  boxShadow: '0 10px 20px rgba(46,166,199,0.18)',
-};
-
-const miniCardSecondaryButton: React.CSSProperties = {
-  border: '1px solid #ddd2c4',
-  background: '#fff',
-  color: '#2a231d',
-  borderRadius: 16,
-  padding: '12px 20px',
-  fontWeight: 900,
-  fontSize: 15,
-  boxShadow: '0 3px 8px rgba(0,0,0,0.04)',
-};
