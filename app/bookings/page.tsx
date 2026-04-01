@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getAllMasters } from '../../services/masters';
 
 type TabType = 'upcoming' | 'completed' | 'cancelled';
 
@@ -24,100 +25,6 @@ type BookingItem = {
   reviewStatus: 'locked' | 'available' | 'submitted';
 };
 
-const initialBookings: BookingItem[] = [
-  {
-    id: 1,
-    masterId: 'bella-keratin-studio',
-    service: 'Keratin Bonds',
-    master: 'Bella Keratin Studio',
-    date: '24 Apr 2026',
-    time: '12:00',
-    image:
-      'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=600&q=80',
-    phone: '+447700123456',
-    bookingStatus: 'pending',
-    reviewStatus: 'locked',
-  },
-  {
-    id: 2,
-    masterId: 'camden-brows-bar',
-    service: 'Brow Lamination',
-    master: 'Camden Brows Bar',
-    date: '27 Apr 2026',
-    time: '15:30',
-    image:
-      'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=600&q=80',
-    phone: '+447700222333',
-    bookingStatus: 'confirmed',
-    reviewStatus: 'locked',
-  },
-  {
-    id: 3,
-    masterId: 'olga-beauty-studio',
-    service: 'Hair Coloring',
-    master: 'Olga Beauty Studio',
-    date: '20 Apr 2026',
-    time: '16:00',
-    image:
-      'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
-    phone: '+447700444555',
-    bookingStatus: 'completed',
-    reviewStatus: 'available',
-  },
-  {
-    id: 4,
-    masterId: 'bella-keratin-studio',
-    service: 'Tape-In Extensions',
-    master: 'Bella Keratin Studio',
-    date: '18 Apr 2026',
-    time: '11:00',
-    image:
-      'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80',
-    phone: '+447700123456',
-    bookingStatus: 'completed',
-    reviewStatus: 'submitted',
-  },
-  {
-    id: 5,
-    masterId: 'luxury-hair-london',
-    service: 'Nano Ring Extensions',
-    master: 'Luxury Hair London',
-    date: '15 Apr 2026',
-    time: '13:00',
-    image:
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80',
-    phone: '+447700777888',
-    bookingStatus: 'cancelled_by_client',
-    reviewStatus: 'locked',
-  },
-  {
-    id: 6,
-    masterId: 'silk-hair-salon',
-    service: 'Hair Botox',
-    master: 'Silk Hair Salon',
-    date: '12 Apr 2026',
-    time: '10:00',
-    image:
-      'https://images.unsplash.com/photo-1522336284037-91f7da073525?auto=format&fit=crop&w=600&q=80',
-    phone: '+447700999111',
-    bookingStatus: 'cancelled_by_seller',
-    reviewStatus: 'locked',
-  },
-  {
-    id: 7,
-    masterId: 'glow-studio',
-    service: 'Facial Massage',
-    master: 'Glow Studio',
-    date: '10 Apr 2026',
-    time: '15:00',
-    image:
-      'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80',
-    phone: '+447700555666',
-    bookingStatus: 'no_show',
-    reviewStatus: 'locked',
-  },
-];
-
 const menuButtonStyle: React.CSSProperties = {
   border: 'none',
   background: '#f8f8f8',
@@ -132,8 +39,137 @@ const menuButtonStyle: React.CSSProperties = {
 export default function BookingsPage() {
   const router = useRouter();
   const [tab, setTab] = useState<TabType>('upcoming');
-  const [bookings, setBookings] = useState<BookingItem[]>(initialBookings);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+  const masters = getAllMasters();
+
+  const m1 = masters[0];
+  const m2 = masters[1] ?? masters[0];
+  const m3 = masters[2] ?? masters[0];
+  const m4 = masters[3] ?? masters[1] ?? masters[0];
+
+  const initialBookings: BookingItem[] = useMemo(
+    () => [
+      {
+        id: 1,
+        masterId: m1?.id || '',
+        service: m1?.services?.[0]?.title || 'Keratin Bonds',
+        master: m1?.name || 'Bella Keratin Studio',
+        date: '24 Apr 2026',
+        time: '12:00',
+        image:
+          m1?.services?.[0]?.image ||
+          m1?.cover ||
+          m1?.avatar ||
+          'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=600&q=80',
+        phone: '+447700123456',
+        bookingStatus: 'pending',
+        reviewStatus: 'locked',
+      },
+      {
+        id: 2,
+        masterId: m2?.id || m1?.id || '',
+        service: m2?.services?.[0]?.title || 'Brow Lamination',
+        master: m2?.name || 'Camden Brows Bar',
+        date: '27 Apr 2026',
+        time: '15:30',
+        image:
+          m2?.services?.[0]?.image ||
+          m2?.cover ||
+          m2?.avatar ||
+          'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=600&q=80',
+        phone: '+447700222333',
+        bookingStatus: 'confirmed',
+        reviewStatus: 'locked',
+      },
+      {
+        id: 3,
+        masterId: m3?.id || m1?.id || '',
+        service: m3?.services?.[0]?.title || 'Hair Coloring',
+        master: m3?.name || 'Olga Beauty Studio',
+        date: '20 Apr 2026',
+        time: '16:00',
+        image:
+          m3?.services?.[0]?.image ||
+          m3?.cover ||
+          m3?.avatar ||
+          'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
+        phone: '+447700444555',
+        bookingStatus: 'completed',
+        reviewStatus: 'available',
+      },
+      {
+        id: 4,
+        masterId: m1?.id || '',
+        service: m1?.services?.[1]?.title || m1?.services?.[0]?.title || 'Tape-In Extensions',
+        master: m1?.name || 'Bella Keratin Studio',
+        date: '18 Apr 2026',
+        time: '11:00',
+        image:
+          m1?.services?.[1]?.image ||
+          m1?.services?.[0]?.image ||
+          m1?.cover ||
+          m1?.avatar ||
+          'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80',
+        phone: '+447700123456',
+        bookingStatus: 'completed',
+        reviewStatus: 'submitted',
+      },
+      {
+        id: 5,
+        masterId: m4?.id || m1?.id || '',
+        service: m4?.services?.[0]?.title || 'Nano Ring Extensions',
+        master: m4?.name || 'Luxury Hair London',
+        date: '15 Apr 2026',
+        time: '13:00',
+        image:
+          m4?.services?.[0]?.image ||
+          m4?.cover ||
+          m4?.avatar ||
+          'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80',
+        phone: '+447700777888',
+        bookingStatus: 'cancelled_by_client',
+        reviewStatus: 'locked',
+      },
+      {
+        id: 6,
+        masterId: m2?.id || m1?.id || '',
+        service: m2?.services?.[1]?.title || m2?.services?.[0]?.title || 'Hair Botox',
+        master: m2?.name || 'Silk Hair Salon',
+        date: '12 Apr 2026',
+        time: '10:00',
+        image:
+          m2?.services?.[1]?.image ||
+          m2?.services?.[0]?.image ||
+          m2?.cover ||
+          m2?.avatar ||
+          'https://images.unsplash.com/photo-1522336284037-91f7da073525?auto=format&fit=crop&w=600&q=80',
+        phone: '+447700999111',
+        bookingStatus: 'cancelled_by_seller',
+        reviewStatus: 'locked',
+      },
+      {
+        id: 7,
+        masterId: m3?.id || m1?.id || '',
+        service: m3?.services?.[1]?.title || m3?.services?.[0]?.title || 'Facial Massage',
+        master: m3?.name || 'Glow Studio',
+        date: '10 Apr 2026',
+        time: '15:00',
+        image:
+          m3?.services?.[1]?.image ||
+          m3?.services?.[0]?.image ||
+          m3?.cover ||
+          m3?.avatar ||
+          'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80',
+        phone: '+447700555666',
+        bookingStatus: 'no_show',
+        reviewStatus: 'locked',
+      },
+    ],
+    [m1, m2, m3, m4]
+  );
+
+  const [bookings, setBookings] = useState<BookingItem[]>(initialBookings);
 
   const upcomingItems = useMemo(
     () =>
@@ -199,6 +235,7 @@ export default function BookingsPage() {
   };
 
   const openBooking = (item: BookingItem) => {
+    if (!item.masterId) return;
     router.push(`/master/${item.masterId}`);
   };
 
@@ -230,10 +267,12 @@ export default function BookingsPage() {
   };
 
   const leaveReview = (item: BookingItem) => {
+    if (!item.masterId) return;
     router.push(`/master/${item.masterId}/leave-review`);
   };
 
   const viewReview = (item: BookingItem) => {
+    if (!item.masterId) return;
     router.push(`/master/${item.masterId}/reviews`);
   };
 
