@@ -80,6 +80,7 @@ export default function HomePage() {
           onMapBackgroundClick={() => {
             setSelectedMaster(null);
             setRouteSheetOpen(false);
+            setMenuOpen(false);
           }}
         />
       </div>
@@ -90,6 +91,10 @@ export default function HomePage() {
           inset: 0,
           zIndex: 20,
           pointerEvents: 'none',
+          background:
+            mapMode === 'satellite'
+              ? 'linear-gradient(180deg, rgba(17,16,13,0.10) 0%, rgba(17,16,13,0.00) 25%, rgba(17,16,13,0.06) 100%)'
+              : 'linear-gradient(180deg, rgba(252,248,242,0.05) 0%, rgba(252,248,242,0.00) 25%, rgba(252,248,242,0.04) 100%)',
         }}
       >
         <div style={{ padding: '16px 14px 0' }}>
@@ -100,11 +105,12 @@ export default function HomePage() {
               gridTemplateColumns: '1fr auto auto',
               alignItems: 'center',
               gap: 10,
-              background: 'rgba(255,255,255,0.96)',
-              border: '1px solid #e7ddd0',
-              borderRadius: 28,
+              background: 'rgba(255,255,255,0.94)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(231,221,208,0.95)',
+              borderRadius: 30,
               padding: '10px 10px 10px 14px',
-              boxShadow: '0 12px 30px rgba(0,0,0,0.10)',
+              boxShadow: '0 12px 34px rgba(0,0,0,0.10)',
             }}
           >
             <div
@@ -135,14 +141,15 @@ export default function HomePage() {
             <button
               onClick={() => setVerifiedOnly((prev) => !prev)}
               style={{
-                width: 46,
-                height: 46,
+                width: 48,
+                height: 48,
                 borderRadius: 999,
                 border: 'none',
                 background: verifiedOnly ? '#2f9c47' : '#f4ede3',
                 color: verifiedOnly ? '#fff' : '#5f564d',
-                fontSize: 20,
+                fontSize: 21,
                 fontWeight: 800,
+                boxShadow: verifiedOnly ? '0 8px 18px rgba(47,156,71,0.28)' : 'none',
               }}
             >
               ✓
@@ -151,13 +158,14 @@ export default function HomePage() {
             <button
               onClick={() => router.push('/profile')}
               style={{
-                width: 46,
-                height: 46,
+                width: 48,
+                height: 48,
                 borderRadius: 999,
-                border: 'none',
+                border: '2px solid rgba(255,255,255,0.92)',
                 background: '#f4ede3',
                 overflow: 'hidden',
                 padding: 0,
+                boxShadow: '0 8px 18px rgba(0,0,0,0.10)',
               }}
             >
               <img
@@ -187,12 +195,12 @@ export default function HomePage() {
             <button
               onClick={() => setMenuOpen((prev) => !prev)}
               style={{
-                minWidth: 52,
-                height: 52,
+                minWidth: 54,
+                height: 54,
                 borderRadius: 999,
-                border: '1px solid #ded4c8',
-                background: 'rgba(255,255,255,0.98)',
-                boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+                border: '1px solid rgba(223,212,199,0.95)',
+                background: 'rgba(255,255,255,0.95)',
+                boxShadow: '0 8px 22px rgba(0,0,0,0.10)',
                 fontSize: 24,
                 color: '#2a231d',
                 flexShrink: 0,
@@ -201,7 +209,7 @@ export default function HomePage() {
               ⋮
             </button>
 
-            {categories.map((category) => {
+            {categories.slice(0, 3).map((category) => {
               const active = activeCategory === category.id;
 
               return (
@@ -212,13 +220,19 @@ export default function HomePage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 10,
-                    padding: '12px 18px',
+                    padding: '14px 20px',
                     borderRadius: 999,
-                    border: active ? '1px solid #e0d4c4' : '1px solid rgba(255,255,255,0.5)',
-                    background: active ? 'rgba(255,248,239,0.98)' : 'rgba(255,255,255,0.94)',
+                    border: active
+                      ? '1px solid rgba(224,212,196,0.98)'
+                      : '1px solid rgba(255,255,255,0.70)',
+                    background: active
+                      ? 'rgba(255,248,239,0.98)'
+                      : 'rgba(255,255,255,0.94)',
                     color: '#2a231d',
                     whiteSpace: 'nowrap',
-                    boxShadow: '0 8px 22px rgba(0,0,0,0.09)',
+                    boxShadow: active
+                      ? '0 10px 24px rgba(0,0,0,0.10)'
+                      : '0 8px 20px rgba(0,0,0,0.08)',
                     flexShrink: 0,
                     fontWeight: 800,
                     fontSize: 17,
@@ -235,15 +249,28 @@ export default function HomePage() {
             <div
               style={{
                 marginTop: 10,
-                width: 220,
-                background: 'rgba(255,248,239,0.98)',
+                width: 235,
+                background: 'rgba(255,248,239,0.97)',
+                backdropFilter: 'blur(12px)',
                 border: '1px solid #e4d9cc',
-                borderRadius: 24,
-                boxShadow: '0 16px 38px rgba(0,0,0,0.12)',
-                padding: 12,
+                borderRadius: 28,
+                boxShadow: '0 20px 42px rgba(0,0,0,0.14)',
+                padding: 14,
                 pointerEvents: 'auto',
               }}
             >
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 800,
+                  color: '#8b7f73',
+                  marginBottom: 6,
+                  paddingLeft: 6,
+                }}
+              >
+                All categories
+              </div>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {categories.map((category) => (
                   <button
@@ -258,15 +285,19 @@ export default function HomePage() {
                       gap: 12,
                       border: 'none',
                       background: activeCategory === category.id ? '#fff' : 'transparent',
-                      borderRadius: 16,
-                      padding: '12px 12px',
+                      borderRadius: 18,
+                      padding: '13px 12px',
                       textAlign: 'left',
                       fontWeight: 800,
                       fontSize: 16,
                       color: '#231c16',
+                      boxShadow:
+                        activeCategory === category.id
+                          ? '0 4px 12px rgba(0,0,0,0.05)'
+                          : 'none',
                     }}
                   >
-                    <span>{category.icon}</span>
+                    <span style={{ width: 22, textAlign: 'center' }}>{category.icon}</span>
                     <span>{category.label}</span>
                   </button>
                 ))}
@@ -280,27 +311,28 @@ export default function HomePage() {
               pointerEvents: 'auto',
             }}
           >
-            <button
+            <div
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 flexDirection: 'column',
                 alignItems: 'flex-start',
-                gap: 2,
-                border: 'none',
-                background: 'rgba(255,255,255,0.96)',
-                borderRadius: 22,
+                gap: 4,
+                background: 'rgba(255,255,255,0.94)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: 24,
                 padding: '14px 18px',
-                boxShadow: '0 10px 24px rgba(0,0,0,0.10)',
+                boxShadow: '0 10px 26px rgba(0,0,0,0.10)',
                 color: '#1d1712',
+                border: '1px solid rgba(231,221,208,0.92)',
               }}
             >
-              <span style={{ fontSize: 16, fontWeight: 800 }}>
+              <span style={{ fontSize: 16, fontWeight: 900 }}>
                 ✓ {nearbyCount} verified providers nearby
               </span>
-              <span style={{ fontSize: 15, color: '#2f9c47', fontWeight: 700 }}>
+              <span style={{ fontSize: 15, color: '#2f9c47', fontWeight: 800 }}>
                 Available now
               </span>
-            </button>
+            </div>
           </div>
         </div>
 
@@ -308,7 +340,7 @@ export default function HomePage() {
           style={{
             position: 'absolute',
             right: 14,
-            top: 190,
+            top: 220,
             display: 'flex',
             flexDirection: 'column',
             gap: 12,
@@ -345,7 +377,7 @@ export default function HomePage() {
             style={{
               position: 'absolute',
               left: '50%',
-              top: '38%',
+              top: '39%',
               transform: 'translate(-50%, -50%)',
               pointerEvents: 'auto',
               zIndex: 25,
@@ -354,36 +386,52 @@ export default function HomePage() {
             <div
               style={{
                 position: 'relative',
-                background: 'rgba(255,248,239,0.98)',
-                border: '1px solid #e5dacc',
-                borderRadius: 24,
+                background: 'rgba(255,248,239,0.97)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(229,218,204,0.96)',
+                borderRadius: 28,
                 padding: 12,
                 display: 'grid',
-                gridTemplateColumns: '64px 1fr auto',
+                gridTemplateColumns: '66px 1fr auto',
                 gap: 12,
                 alignItems: 'center',
-                minWidth: 290,
-                boxShadow: '0 16px 34px rgba(0,0,0,0.14)',
+                minWidth: 300,
+                boxShadow: '0 20px 42px rgba(0,0,0,0.16)',
               }}
             >
-              <img
-                src={selectedMaster.avatar}
-                alt={selectedMaster.name}
-                style={{
-                  width: 64,
-                  height: 64,
-                  objectFit: 'cover',
-                  borderRadius: 999,
-                  border: '4px solid #fff',
-                  display: 'block',
-                }}
-              />
+              <div style={{ position: 'relative' }}>
+                <img
+                  src={selectedMaster.avatar}
+                  alt={selectedMaster.name}
+                  style={{
+                    width: 66,
+                    height: 66,
+                    objectFit: 'cover',
+                    borderRadius: 999,
+                    border: '4px solid #fff',
+                    display: 'block',
+                    boxShadow: '0 6px 14px rgba(0,0,0,0.10)',
+                  }}
+                />
+                <span
+                  style={{
+                    position: 'absolute',
+                    right: 1,
+                    bottom: 1,
+                    width: 16,
+                    height: 16,
+                    borderRadius: 999,
+                    background: '#2fbb52',
+                    border: '2px solid #fff',
+                  }}
+                />
+              </div>
 
               <div>
                 <div
                   style={{
                     fontSize: 16,
-                    fontWeight: 800,
+                    fontWeight: 900,
                     color: '#1d1712',
                     lineHeight: 1.2,
                   }}
@@ -393,7 +441,7 @@ export default function HomePage() {
 
                 <div
                   style={{
-                    marginTop: 6,
+                    marginTop: 7,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
@@ -405,7 +453,7 @@ export default function HomePage() {
                       background: '#f0e3ce',
                       color: '#7c5d26',
                       borderRadius: 999,
-                      padding: '4px 10px',
+                      padding: '5px 10px',
                       fontSize: 13,
                       fontWeight: 800,
                     }}
@@ -413,7 +461,7 @@ export default function HomePage() {
                     Top rated
                   </span>
 
-                  <span style={{ fontSize: 14, fontWeight: 800 }}>
+                  <span style={{ fontSize: 14, fontWeight: 900 }}>
                     ★ {(selectedMaster.rating ?? 4.9).toFixed(1)}
                   </span>
 
@@ -422,7 +470,7 @@ export default function HomePage() {
 
                 <div
                   style={{
-                    marginTop: 8,
+                    marginTop: 10,
                     display: 'flex',
                     gap: 8,
                   }}
@@ -452,13 +500,14 @@ export default function HomePage() {
                 }}
                 style={{
                   alignSelf: 'start',
-                  width: 36,
-                  height: 36,
+                  width: 38,
+                  height: 38,
                   borderRadius: 999,
                   border: '1px solid #e3d9cc',
                   background: '#fff',
                   fontSize: 20,
                   color: '#5f564d',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
                 }}
               >
                 ✕
@@ -482,10 +531,11 @@ export default function HomePage() {
               style={{
                 position: 'relative',
                 background: 'rgba(255,248,239,0.98)',
-                border: '1px solid #e7ddd0',
-                borderRadius: 30,
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(231,221,208,0.98)',
+                borderRadius: 32,
                 padding: 14,
-                boxShadow: '0 18px 38px rgba(0,0,0,0.16)',
+                boxShadow: '0 18px 40px rgba(0,0,0,0.16)',
               }}
             >
               <button
@@ -508,7 +558,7 @@ export default function HomePage() {
 
               <div
                 style={{
-                  width: 52,
+                  width: 54,
                   height: 6,
                   borderRadius: 999,
                   background: '#d8cec1',
@@ -528,7 +578,7 @@ export default function HomePage() {
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '54px 1fr',
+                    gridTemplateColumns: '56px 1fr',
                     gap: 12,
                     alignItems: 'center',
                     minWidth: 0,
@@ -538,8 +588,8 @@ export default function HomePage() {
                     src={selectedMaster.avatar}
                     alt={selectedMaster.name}
                     style={{
-                      width: 54,
-                      height: 54,
+                      width: 56,
+                      height: 56,
                       borderRadius: 999,
                       objectFit: 'cover',
                     }}
@@ -549,7 +599,7 @@ export default function HomePage() {
                     <div
                       style={{
                         fontSize: 18,
-                        fontWeight: 800,
+                        fontWeight: 900,
                         color: '#1d1712',
                         lineHeight: 1.2,
                       }}
@@ -576,7 +626,7 @@ export default function HomePage() {
                     background: '#f3eadf',
                     borderRadius: 999,
                     padding: '10px 14px',
-                    fontWeight: 800,
+                    fontWeight: 900,
                     fontSize: 17,
                     color: '#231b15',
                   }}
@@ -591,7 +641,7 @@ export default function HomePage() {
                     color: '#fff',
                     borderRadius: 20,
                     padding: '14px 22px',
-                    fontWeight: 800,
+                    fontWeight: 900,
                     fontSize: 18,
                     boxShadow: '0 12px 24px rgba(15,140,171,0.24)',
                   }}
@@ -604,7 +654,7 @@ export default function HomePage() {
                 style={{
                   marginTop: 14,
                   background: '#fff',
-                  borderRadius: 22,
+                  borderRadius: 24,
                   border: '1px solid #ebe1d6',
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr 1fr',
@@ -637,7 +687,7 @@ export default function HomePage() {
                       <span
                         style={{
                           fontSize: 15,
-                          fontWeight: 800,
+                          fontWeight: 900,
                           color: '#1d1712',
                         }}
                       >
@@ -647,7 +697,7 @@ export default function HomePage() {
                         style={{
                           fontSize: 14,
                           color: active ? '#0f8cab' : '#7b7168',
-                          fontWeight: 700,
+                          fontWeight: 800,
                         }}
                       >
                         {mode.eta}
@@ -655,78 +705,6 @@ export default function HomePage() {
                     </button>
                   );
                 })}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 12,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 10,
-                  flexWrap: 'wrap',
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      fontSize: 15,
-                      color: '#7a7066',
-                      fontWeight: 700,
-                    }}
-                  >
-                    Route mode
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 4,
-                      fontSize: 18,
-                      fontWeight: 800,
-                      color: '#1d1712',
-                    }}
-                  >
-                    {routeMode === 'drive'
-                      ? 'Drive'
-                      : routeMode === 'transit'
-                      ? 'Transit'
-                      : 'Walk'}
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <button
-                    onClick={() => setRouteSheetOpen(false)}
-                    style={{
-                      border: 'none',
-                      background: '#f5ede2',
-                      color: '#5e554d',
-                      borderRadius: 16,
-                      padding: '12px 16px',
-                      fontWeight: 800,
-                      fontSize: 15,
-                    }}
-                  >
-                    Minimize
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setRouteSheetOpen(false);
-                      setSelectedMaster(null);
-                    }}
-                    style={{
-                      border: 'none',
-                      background: '#f5ede2',
-                      color: '#5e554d',
-                      borderRadius: 16,
-                      padding: '12px 16px',
-                      fontWeight: 800,
-                      fontSize: 15,
-                    }}
-                  >
-                    Close
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -748,16 +726,17 @@ export default function HomePage() {
             style={{
               width: '100%',
               maxWidth: 430,
-              background: 'rgba(255,248,239,0.98)',
-              border: '1px solid #e4d9cc',
-              borderRadius: 30,
+              background: 'rgba(255,248,239,0.96)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(228,217,204,0.98)',
+              borderRadius: 32,
               padding: '14px 16px',
-              boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
+              boxShadow: '0 16px 36px rgba(0,0,0,0.14)',
               display: 'grid',
               gridTemplateColumns: '1fr auto 1fr',
               alignItems: 'end',
               gap: 10,
-              minHeight: 96,
+              minHeight: 98,
             }}
           >
             <button
@@ -765,20 +744,20 @@ export default function HomePage() {
               style={bottomTabStyle}
             >
               <span style={{ fontSize: 22 }}>📅</span>
-              <span style={{ fontSize: 16, fontWeight: 800 }}>Bookings</span>
+              <span style={{ fontSize: 16, fontWeight: 900 }}>Bookings</span>
             </button>
 
             <button
               onClick={() => router.push('/add')}
               style={{
-                width: 94,
-                height: 94,
-                marginTop: -34,
+                width: 96,
+                height: 96,
+                marginTop: -36,
                 borderRadius: 999,
                 border: '4px solid #efe6d9',
-                background: 'linear-gradient(180deg, #6bbfd0 0%, #4aa9be 100%)',
+                background: 'linear-gradient(180deg, #78c9dc 0%, #4aa9be 100%)',
                 color: '#fff',
-                boxShadow: '0 14px 28px rgba(65,145,163,0.35)',
+                boxShadow: '0 16px 30px rgba(65,145,163,0.35)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -787,7 +766,7 @@ export default function HomePage() {
               }}
             >
               <span style={{ fontSize: 42, lineHeight: 1 }}>+</span>
-              <span style={{ fontSize: 14, fontWeight: 800, marginTop: -2 }}>Add</span>
+              <span style={{ fontSize: 14, fontWeight: 900, marginTop: -2 }}>Add</span>
             </button>
 
             <button
@@ -795,7 +774,7 @@ export default function HomePage() {
               style={bottomTabStyle}
             >
               <span style={{ fontSize: 22 }}>♥</span>
-              <span style={{ fontSize: 16, fontWeight: 800 }}>Saved</span>
+              <span style={{ fontSize: 16, fontWeight: 900 }}>Saved</span>
             </button>
           </div>
         </div>
@@ -803,27 +782,27 @@ export default function HomePage() {
 
       <style jsx global>{`
         .leaflet-top.leaflet-left {
-          top: 240px !important;
+          top: 220px !important;
           left: 10px !important;
         }
 
         .leaflet-control-zoom {
           border: none !important;
-          box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08) !important;
+          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.10) !important;
           overflow: hidden;
           border-radius: 18px !important;
         }
 
         .leaflet-control-zoom a {
-          width: 46px !important;
-          height: 46px !important;
-          line-height: 46px !important;
+          width: 48px !important;
+          height: 48px !important;
+          line-height: 48px !important;
           font-size: 24px !important;
         }
 
         .leaflet-bottom.leaflet-right,
         .leaflet-bottom.leaflet-left {
-          bottom: 110px !important;
+          bottom: 112px !important;
         }
       `}</style>
     </main>
@@ -831,20 +810,21 @@ export default function HomePage() {
 }
 
 const floatingButtonStyle: React.CSSProperties = {
-  width: 56,
-  height: 56,
+  width: 58,
+  height: 58,
   borderRadius: 999,
-  border: '1px solid #e6dacb',
-  background: 'rgba(255,255,255,0.96)',
+  border: '1px solid rgba(230,218,203,0.98)',
+  background: 'rgba(255,255,255,0.95)',
   fontSize: 24,
   color: '#4b443c',
-  boxShadow: '0 10px 22px rgba(0,0,0,0.10)',
+  boxShadow: '0 10px 24px rgba(0,0,0,0.11)',
+  backdropFilter: 'blur(10px)',
 };
 
 const bottomTabStyle: React.CSSProperties = {
   border: 'none',
   background: '#fff',
-  borderRadius: 22,
+  borderRadius: 24,
   minHeight: 74,
   display: 'flex',
   flexDirection: 'column',
@@ -852,25 +832,26 @@ const bottomTabStyle: React.CSSProperties = {
   justifyContent: 'center',
   gap: 6,
   color: '#221b15',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+  boxShadow: '0 6px 14px rgba(0,0,0,0.04)',
 };
 
 const miniCardPrimaryButton: React.CSSProperties = {
   border: 'none',
   background: '#0f8cab',
   color: '#fff',
-  borderRadius: 14,
-  padding: '10px 14px',
-  fontWeight: 800,
+  borderRadius: 15,
+  padding: '10px 15px',
+  fontWeight: 900,
   fontSize: 14,
+  boxShadow: '0 8px 18px rgba(15,140,171,0.18)',
 };
 
 const miniCardSecondaryButton: React.CSSProperties = {
   border: '1px solid #dfd4c7',
   background: '#fff',
   color: '#2a231d',
-  borderRadius: 14,
-  padding: '10px 14px',
-  fontWeight: 800,
+  borderRadius: 15,
+  padding: '10px 15px',
+  fontWeight: 900,
   fontSize: 14,
 };
