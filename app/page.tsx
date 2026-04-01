@@ -1,10 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getAllMasters } from '../services/masters';
 import { categories as appCategories } from '../services/categories';
+import {
+  getUnreadMessagesCount,
+  subscribeToChatStore,
+} from '../services/chatStore';
 
 const RealMap = dynamic(() => import('../components/RealMap'), {
   ssr: false,
@@ -71,8 +75,17 @@ export default function HomePage() {
   const [language, setLanguage] = useState('EN');
   const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
-  const unreadMessages = 2;
+  useEffect(() => {
+    const loadUnread = () => {
+      setUnreadMessages(getUnreadMessagesCount());
+    };
+
+    loadUnread();
+    const unsubscribe = subscribeToChatStore(loadUnread);
+    return unsubscribe;
+  }, []);
 
   const featuredMaster = selectedMaster || masters[0];
   const featuredAvailability = getMasterAvailability(featuredMaster);
