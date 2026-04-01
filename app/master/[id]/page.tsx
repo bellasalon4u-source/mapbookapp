@@ -352,45 +352,98 @@ export default function MasterPage() {
             {master.description}
           </p>
 
-          <div
+          <button
+            onClick={() => router.push(`/master/${master.id}/reviews`)}
             style={{
+              width: '100%',
+              marginTop: 22,
+              border: '1px solid #e6dacb',
+              background: '#fffdf9',
+              borderRadius: 22,
+              padding: '18px 20px',
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 16,
-              marginTop: 20,
+              gridTemplateColumns: '1.2fr auto 1fr',
+              alignItems: 'center',
+              gap: 14,
+              boxShadow: '0 8px 22px rgba(0,0,0,0.04)',
+              textAlign: 'left',
             }}
           >
-            <button
-              onClick={() => router.push(`/master/${master.id}/reviews`)}
+            <div
               style={{
-                background: '#2f241c',
-                color: '#fff',
-                borderRadius: 26,
-                padding: 22,
-                border: 'none',
-                textAlign: 'left',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                minWidth: 0,
               }}
             >
-              <div style={{ opacity: 0.9, fontSize: 16 }}>Reviews</div>
-              <div style={{ fontSize: 34, fontWeight: 800, marginTop: 12 }}>
-                {master.reviews}
+              <span
+                style={{
+                  fontSize: 28,
+                  color: '#b0831a',
+                  lineHeight: 1,
+                  flexShrink: 0,
+                }}
+              >
+                ★
+              </span>
+
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 900,
+                    color: '#231b15',
+                    lineHeight: 1,
+                  }}
+                >
+                  {master.rating.toFixed(1)}
+                </div>
+                <div
+                  style={{
+                    marginTop: 4,
+                    fontSize: 17,
+                    color: '#6f655b',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {master.reviews} reviews
+                </div>
               </div>
-            </button>
+            </div>
 
             <div
               style={{
-                background: '#efe7dc',
-                color: '#231b15',
-                borderRadius: 26,
-                padding: 22,
+                width: 1,
+                height: 44,
+                background: '#e8dfd4',
+                justifySelf: 'center',
               }}
-            >
-              <div style={{ opacity: 0.7, fontSize: 16 }}>Starting price</div>
-              <div style={{ fontSize: 34, fontWeight: 800, marginTop: 12 }}>
+            />
+
+            <div style={{ textAlign: 'right' }}>
+              <div
+                style={{
+                  fontSize: 15,
+                  color: '#7a7066',
+                  fontWeight: 700,
+                }}
+              >
+                Starting price
+              </div>
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 34,
+                  fontWeight: 900,
+                  color: '#231b15',
+                  lineHeight: 1,
+                }}
+              >
                 £{master.priceFrom}
               </div>
             </div>
-          </div>
+          </button>
 
           <h2 style={{ marginTop: 28, fontSize: 30 }}>Price list</h2>
 
