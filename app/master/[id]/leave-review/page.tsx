@@ -20,12 +20,15 @@ export default function LeaveReviewPage() {
   }
 
   const tags = [
-    'Clean studio',
+    'Professional',
+    'On time',
     'Good communication',
-    'Natural result',
+    'Good quality',
+    'Matched the description',
     'Fast service',
     'Worth the price',
-    'Would come back',
+    'Would recommend',
+    'Would book again',
   ];
 
   const toggleTag = (tag: string) => {
@@ -242,7 +245,9 @@ export default function LeaveReviewPage() {
             boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 900 }}>What stood out?</div>
+          <div style={{ fontSize: 22, fontWeight: 900 }}>
+            What was good about this service?
+          </div>
 
           <div
             style={{
