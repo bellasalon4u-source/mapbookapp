@@ -9,10 +9,12 @@ type FilterType = 'newest' | 'highest' | 'photos';
 type ReviewItem = {
   id: number;
   name: string;
+  avatar: string;
   rating: number;
   date: string;
   timestamp: number;
   text: string;
+  verified: boolean;
   photos?: string[];
 };
 
@@ -20,9 +22,12 @@ const demoReviews: ReviewItem[] = [
   {
     id: 1,
     name: 'Sophie',
+    avatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
     rating: 5,
     date: '12 Mar 2026',
     timestamp: 20260312,
+    verified: true,
     text: 'Absolutely amazing result. The keratin bonds look very natural and feel super comfortable. One of the best experiences I have had in London. The consultation was clear, the placement was very neat, and the final blend looked premium.',
     photos: [
       'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80',
@@ -32,9 +37,12 @@ const demoReviews: ReviewItem[] = [
   {
     id: 2,
     name: 'Amelia',
+    avatar:
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
     rating: 5,
     date: '04 Mar 2026',
     timestamp: 20260304,
+    verified: true,
     text: 'Very professional, clean and attentive to details. The color match was perfect and the hair feels luxurious. I also liked the atmosphere in the studio and the aftercare advice.',
     photos: [
       'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=900&q=80',
@@ -43,17 +51,23 @@ const demoReviews: ReviewItem[] = [
   {
     id: 3,
     name: 'Mia',
+    avatar:
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80',
     rating: 4,
     date: '26 Feb 2026',
     timestamp: 20260226,
+    verified: true,
     text: 'Really beautiful work and friendly atmosphere. I would definitely come back again for tape-ins. The result was soft and natural, and the whole process felt very calm and professional.',
   },
   {
     id: 4,
     name: 'Olivia',
+    avatar:
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
     rating: 5,
     date: '19 Feb 2026',
     timestamp: 20260219,
+    verified: true,
     text: 'My favorite master so far. The result looks expensive and natural, exactly what I wanted. The placement was comfortable and the finish was super clean.',
     photos: [
       'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=900&q=80',
@@ -63,9 +77,12 @@ const demoReviews: ReviewItem[] = [
   {
     id: 5,
     name: 'Emily',
+    avatar:
+      'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=300&q=80',
     rating: 5,
     date: '11 Feb 2026',
     timestamp: 20260211,
+    verified: true,
     text: 'Great communication, beautiful studio and very high quality service. I highly recommend. The hair matched perfectly and the final look was exactly as discussed.',
   },
 ];
@@ -190,7 +207,7 @@ export default function ReviewsPage() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #eadfD2',
+            border: '1px solid #eadfd2',
             borderRadius: 30,
             padding: 22,
             boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
@@ -345,22 +362,56 @@ export default function ReviewsPage() {
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  gap: 10,
+                  gap: 12,
                   alignItems: 'flex-start',
                 }}
               >
-                <div>
-                  <div style={{ fontSize: 22, fontWeight: 900 }}>
-                    {review.name}
-                  </div>
-                  <div
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <img
+                    src={review.avatar}
+                    alt={review.name}
                     style={{
-                      marginTop: 8,
-                      color: '#7a7066',
-                      fontSize: 14,
+                      width: 52,
+                      height: 52,
+                      borderRadius: 999,
+                      objectFit: 'cover',
+                      flexShrink: 0,
                     }}
-                  >
-                    {review.date}
+                  />
+
+                  <div>
+                    <div style={{ fontSize: 22, fontWeight: 900 }}>
+                      {review.name}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 6,
+                        color: '#7a7066',
+                        fontSize: 14,
+                      }}
+                    >
+                      {review.date}
+                    </div>
+
+                    {review.verified && (
+                      <div
+                        style={{
+                          marginTop: 6,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          background: '#eef8f0',
+                          color: '#1f7d39',
+                          borderRadius: 999,
+                          padding: '6px 10px',
+                          fontSize: 12,
+                          fontWeight: 800,
+                        }}
+                      >
+                        <span>✔</span>
+                        <span>Verified visit</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -372,6 +423,7 @@ export default function ReviewsPage() {
                     padding: '10px 14px',
                     fontWeight: 900,
                     fontSize: 15,
+                    flexShrink: 0,
                   }}
                 >
                   {review.rating}.0 ★
@@ -510,22 +562,56 @@ export default function ReviewsPage() {
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  gap: 10,
+                  gap: 12,
                   alignItems: 'flex-start',
                 }}
               >
-                <div>
-                  <div style={{ fontSize: 22, fontWeight: 900 }}>
-                    {selectedReview.name}
-                  </div>
-                  <div
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <img
+                    src={selectedReview.avatar}
+                    alt={selectedReview.name}
                     style={{
-                      marginTop: 6,
-                      color: '#7a7066',
-                      fontSize: 14,
+                      width: 56,
+                      height: 56,
+                      borderRadius: 999,
+                      objectFit: 'cover',
+                      flexShrink: 0,
                     }}
-                  >
-                    {selectedReview.date}
+                  />
+
+                  <div>
+                    <div style={{ fontSize: 22, fontWeight: 900 }}>
+                      {selectedReview.name}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 6,
+                        color: '#7a7066',
+                        fontSize: 14,
+                      }}
+                    >
+                      {selectedReview.date}
+                    </div>
+
+                    {selectedReview.verified && (
+                      <div
+                        style={{
+                          marginTop: 6,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          background: '#eef8f0',
+                          color: '#1f7d39',
+                          borderRadius: 999,
+                          padding: '6px 10px',
+                          fontSize: 12,
+                          fontWeight: 800,
+                        }}
+                      >
+                        <span>✔</span>
+                        <span>Verified visit</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -537,6 +623,7 @@ export default function ReviewsPage() {
                     padding: '8px 12px',
                     fontWeight: 900,
                     fontSize: 15,
+                    flexShrink: 0,
                   }}
                 >
                   {selectedReview.rating}.0 ★
