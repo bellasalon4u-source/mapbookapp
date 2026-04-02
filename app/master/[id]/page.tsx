@@ -2,109 +2,12 @@
 
 import { useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getMasterById, getAllMasters } from '../../../services/masters';
-import { getListings } from '../../../services/listingsStore';
-
-type ListingLike = {
-  id: string | number;
-  title?: string;
-  category?: string;
-  subcategory?: string;
-  location?: string;
-  description?: string;
-  price?: string;
-  hours?: string;
-  availableToday?: boolean;
-  photos?: string[];
-  paymentMethods?: string[];
-  serviceModes?: string[];
-};
-
-function listingToMasterShape(listing: ListingLike, index: number) {
-  const fallbackImages = [
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=80',
-  ];
-
-  const gallery =
-    listing.photos && listing.photos.length > 0
-      ? listing.photos
-      : [
-          fallbackImages[index % fallbackImages.length],
-          fallbackImages[(index + 1) % fallbackImages.length],
-          fallbackImages[(index + 2) % fallbackImages.length],
-          fallbackImages[(index + 3) % fallbackImages.length],
-        ];
-
-  const numericPrice = Number(String(listing.price || '').replace(/[^\d.]/g, ''));
-  const priceFrom = Number.isFinite(numericPrice) && numericPrice > 0 ? numericPrice : 45;
-
-  return {
-    id: listing.id,
-    name: listing.title || 'Provider',
-    title: listing.subcategory || 'Service provider',
-    city: listing.location || 'London',
-    cover: gallery[0],
-    avatar: gallery[0],
-    gallery,
-    rating: 4.9,
-    reviews: 82,
-    availableNow: !!listing.availableToday,
-    description:
-      listing.description ||
-      'Professional provider available through MapBook.',
-    priceFrom,
-    services: [
-      {
-        slug: 'main-service',
-        title: listing.subcategory || listing.title || 'Main service',
-        duration: listing.hours || 'By appointment',
-        price: priceFrom,
-        image: gallery[0],
-      },
-      {
-        slug: 'premium-service',
-        title: 'Premium option',
-        duration: 'Custom duration',
-        price: priceFrom + 20,
-        image: gallery[1] || gallery[0],
-      },
-    ],
-    paymentMethods:
-      listing.paymentMethods && listing.paymentMethods.length > 0
-        ? listing.paymentMethods
-        : ['cash', 'card'],
-    serviceModes:
-      listing.serviceModes && listing.serviceModes.length > 0
-        ? listing.serviceModes
-        : ['at_client'],
-  };
-}
+import { getMasterById } from '../../../services/masters';
 
 export default function MasterPage() {
   const params = useParams();
   const router = useRouter();
-  const id = String(params.id);
-
-  const allMasters = getAllMasters() as any[];
-  const listings = getListings() as ListingLike[];
-
-  const master = useMemo(() => {
-    const builtInMaster = getMasterById(id);
-    if (builtInMaster) return builtInMaster;
-
-    const listingIndex = listings.findIndex((item) => String(item.id) === id);
-    if (listingIndex !== -1) {
-      return listingToMasterShape(listings[listingIndex], listingIndex);
-    }
-
-    const fallbackMaster = allMasters.find((item: any) => String(item.id) === id);
-    if (fallbackMaster) return fallbackMaster;
-
-    return null;
-  }, [id, listings, allMasters]);
+  const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
 
   const [liked, setLiked] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -116,8 +19,8 @@ export default function MasterPage() {
     return <main style={{ padding: 24 }}>Master not found</main>;
   }
 
-  const previewImages = (master.gallery || []).slice(0, 3);
-  const extraCount = Math.max((master.gallery || []).length - 3, 0);
+  const previewImages = master.gallery.slice(0, 3);
+  const extraCount = Math.max(master.gallery.length - 3, 0);
 
   const openViewer = (index: number) => {
     setSelectedImageIndex(index);
@@ -131,13 +34,13 @@ export default function MasterPage() {
   };
 
   const prevImage = () => {
-    setSelectedImageIndex((prev: number) =>
+    setSelectedImageIndex((prev) =>
       prev === 0 ? master.gallery.length - 1 : prev - 1
     );
   };
 
   const nextImage = () => {
-    setSelectedImageIndex((prev: number) =>
+    setSelectedImageIndex((prev) =>
       prev === master.gallery.length - 1 ? 0 : prev + 1
     );
   };
@@ -221,7 +124,7 @@ export default function MasterPage() {
               zIndex: 4,
             }}
           >
-            {previewImages.map((image: string, index: number) => {
+            {previewImages.map((image, index) => {
               const isLast = index === 2 && extraCount > 0;
 
               return (
@@ -602,7 +505,7 @@ export default function MasterPage() {
               gap: 16,
             }}
           >
-            {master.services.map((service: any) => (
+            {master.services.map((service) => (
               <div
                 key={service.slug}
                 style={{
@@ -697,7 +600,9 @@ export default function MasterPage() {
                   </div>
 
                   <button
-                    onClick={() => router.push(`/booking/${master.id}`)}
+                    onClick={() =>
+                      router.push(`/booking/${master.id}?service=${service.slug}`)
+                    }
                     style={{
                       border: 'none',
                       background: '#2e9746',
@@ -790,7 +695,7 @@ export default function MasterPage() {
                 gap: 10,
               }}
             >
-              {master.gallery.map((image: string, index: number) => (
+              {master.gallery.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => openViewer(index)}
