@@ -123,6 +123,30 @@ function isAvailableToday(master: Master) {
   );
 }
 
+function getStartingPrice(master: Master) {
+  if (
+    master.startingPrice !== undefined &&
+    master.startingPrice !== null &&
+    master.startingPrice !== ''
+  ) {
+    return typeof master.startingPrice === 'number'
+      ? `From £${master.startingPrice}`
+      : String(master.startingPrice).startsWith('From')
+      ? String(master.startingPrice)
+      : `From ${master.startingPrice}`;
+  }
+
+  if (master.price) {
+    const raw = String(master.price).trim();
+    if (!raw) return 'From £45';
+    if (raw.toLowerCase().includes('from')) return raw;
+    if (raw.includes('£')) return `From ${raw}`;
+    return `From £${raw}`;
+  }
+
+  return 'From £45';
+}
+
 function createCirclePin({
   available,
   selected,
@@ -150,89 +174,20 @@ function createCirclePin({
   });
 }
 
-function MapClickHandler({
-  onMapBackgroundClick,
-}: {
-  onMapBackgroundClick?: () => void;
-}) {
-  useMapEvents({
-    click() {
-      onMapBackgroundClick?.();
-    },
-  });
-
-  return null;
-}
-
-function MapBridge({
-  selectedPosition,
-  onPointChange,
-}: {
-  selectedPosition: [number, number] | null;
-  onPointChange: (point: { x: number; y: number } | null) => void;
-}) {
-  const map = useMap();
-
-  useEffect(() => {
-    const updatePoint = () => {
-      if (!selectedPosition) {
-        onPointChange(null);
-        return;
-      }
-
-      const p = map.latLngToContainerPoint(selectedPosition);
-      onPointChange({ x: p.x, y: p.y });
-    };
-
-    updatePoint();
-    map.on('move zoom resize', updatePoint);
-
-    return () => {
-      map.off('move zoom resize', updatePoint);
-    };
-  }, [map, selectedPosition, onPointChange]);
-
-  return null;
-}
-
-function getStartingPrice(master: Master) {
-  if (
-    master.startingPrice !== undefined &&
-    master.startingPrice !== null &&
-    master.startingPrice !== ''
-  ) {
-    return typeof master.startingPrice === 'number'
-      ? `From £${master.startingPrice}`
-      : String(master.startingPrice).startsWith('From')
-      ? String(master.startingPrice)
-      : `From ${master.startingPrice}`;
-  }
-
-  if (master.price) {
-    const raw = String(master.price).trim();
-    if (!raw) return 'From £45';
-    if (raw.toLowerCase().includes('from')) return raw;
-    if (raw.includes('£')) return `From ${raw}`;
-    return `From £${raw}`;
-  }
-
-  return 'From £45';
-}
-
 function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
   const list = methods && methods.length > 0 ? methods : ['cash', 'card'];
 
   const items = list.map((method) => {
-    if (method === 'cash') return { key: 'cash', icon: '💵' };
-    if (method === 'card') return { key: 'card', icon: '💳' };
-    return { key: 'wallet', icon: '👛' };
+    if (method === 'cash') return { key: 'cash', icon: '💵', label: 'Cash' };
+    if (method === 'card') return { key: 'card', icon: '💳', label: 'Card' };
+    return { key: 'wallet', icon: '👛', label: 'Wallet' };
   });
 
   return (
     <div
       style={{
         display: 'flex',
-        gap: 6,
+        gap: 8,
         flexWrap: 'wrap',
       }}
     >
@@ -243,17 +198,17 @@ function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
             border: '1px solid #e6dfd5',
             background: '#fff',
             borderRadius: 999,
-            padding: '4px 8px',
+            padding: '6px 12px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            gap: 8,
             fontSize: 14,
-            lineHeight: 1,
-            minWidth: 32,
-            height: 30,
+            fontWeight: 700,
+            color: '#2a2f36',
           }}
         >
-          {item.icon}
+          <span>{item.icon}</span>
+          <span>{item.label}</span>
         </div>
       ))}
     </div>
@@ -326,12 +281,59 @@ function FavoriteButton({
   );
 }
 
-function FloatingSelectedCard({
+function MapClickHandler({
+  onMapBackgroundClick,
+}: {
+  onMapBackgroundClick?: () => void;
+}) {
+  useMapEvents({
+    click() {
+      onMapBackgroundClick?.();
+    },
+  });
+
+  return null;
+}
+
+function MapBridge({
+  selectedPosition,
+  onPointChange,
+}: {
+  selectedPosition: [number, number] | null;
+  onPointChange: (point: { x: number; y: number } | null) => void;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    const updatePoint = () => {
+      if (!selectedPosition) {
+        onPointChange(null);
+        return;
+      }
+
+      const p = map.latLngToContainerPoint(selectedPosition);
+      onPointChange({ x: p.x, y: p.y });
+    };
+
+    updatePoint();
+    map.on('move zoom resize', updatePoint);
+
+    return () => {
+      map.off('move zoom resize', updatePoint);
+    };
+  }, [map, selectedPosition, onPointChange]);
+
+  return null;
+}
+
+function CompactMapCard({
   master,
   point,
+  onOpenBigCard,
 }: {
   master: Master;
   point: { x: number; y: number };
+  onOpenBigCard: () => void;
 }) {
   const category = inferCategory(master);
   const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.beauty;
@@ -344,10 +346,6 @@ function FloatingSelectedCard({
 
   const left = Math.max(10, Math.min(point.x - 115, viewportWidth - cardWidth - 10));
   const top = Math.max(12, point.y - 108);
-
-  const openMasterPage = () => {
-    window.location.href = `/master/${master.id}`;
-  };
 
   const openRoute = (e?: React.MouseEvent | React.TouchEvent) => {
     e?.stopPropagation();
@@ -563,7 +561,7 @@ function FloatingSelectedCard({
       >
         <button
           type="button"
-          onClick={openMasterPage}
+          onClick={onOpenBigCard}
           style={{
             border: `2px solid ${style.border}`,
             background: '#ffffff',
@@ -620,6 +618,378 @@ function FloatingSelectedCard({
   );
 }
 
+function BigMasterCard({
+  master,
+  onClose,
+}: {
+  master: Master;
+  onClose: () => void;
+}) {
+  const category = inferCategory(master);
+  const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.beauty;
+  const available = isAvailableToday(master);
+  const startingPrice = getStartingPrice(master);
+
+  const openBooking = () => {
+    window.location.href = `/booking/${master.id}`;
+  };
+
+  const openRoute = () => {
+    const lat = master.lat ?? master.latitude;
+    const lng = master.lng ?? master.longitude;
+    if (typeof lat !== 'number' || typeof lng !== 'number') return;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    window.open(url, '_blank');
+  };
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(16,18,24,0.46)',
+        zIndex: 3000,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 460,
+          maxHeight: '92vh',
+          overflowY: 'auto',
+          background: '#fff',
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
+          boxShadow: '0 -12px 30px rgba(0,0,0,0.18)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          style={{
+            position: 'relative',
+            height: 240,
+            overflow: 'hidden',
+            background: '#eee',
+          }}
+        >
+          <img
+            src={
+              master.avatar ||
+              'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80'
+            }
+            alt={master.name || 'Master'}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              position: 'absolute',
+              top: 14,
+              right: 14,
+              width: 42,
+              height: 42,
+              borderRadius: 999,
+              border: 'none',
+              background: 'rgba(255,255,255,0.95)',
+              fontSize: 20,
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            ×
+          </button>
+
+          <div
+            style={{
+              position: 'absolute',
+              right: 14,
+              bottom: 14,
+              background: '#f5ead6',
+              color: '#4a3627',
+              borderRadius: 999,
+              padding: '10px 16px',
+              fontSize: 22,
+              fontWeight: 900,
+            }}
+          >
+            {(master.rating ?? 4.9).toFixed(1)} ★
+          </div>
+
+          <div
+            style={{
+              position: 'absolute',
+              left: 14,
+              bottom: 14,
+              background: '#35a548',
+              color: '#fff',
+              borderRadius: 18,
+              padding: '14px 18px',
+              fontSize: 18,
+              fontWeight: 800,
+            }}
+          >
+            Book now
+          </div>
+        </div>
+
+        <div style={{ padding: 22 }}>
+          <div
+            style={{
+              fontSize: 30,
+              fontWeight: 900,
+              color: '#161a24',
+              lineHeight: 1.1,
+            }}
+          >
+            {master.name || master.title || 'Provider'}
+          </div>
+
+          <div
+            style={{
+              marginTop: 14,
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 10,
+              alignItems: 'center',
+            }}
+          >
+            <span
+              style={{
+                background: '#f6f0e4',
+                color: '#6a5132',
+                borderRadius: 999,
+                padding: '8px 12px',
+                fontSize: 14,
+                fontWeight: 800,
+              }}
+            >
+              🏅 Verified Pro
+            </span>
+
+            <span
+              style={{
+                background: style.tagBg,
+                color: style.tagText,
+                borderRadius: 999,
+                padding: '8px 12px',
+                fontSize: 14,
+                fontWeight: 800,
+              }}
+            >
+              {getCategoryLabel(category)}
+            </span>
+
+            <span
+              style={{
+                color: available ? '#2f9c47' : '#d65a5a',
+                fontSize: 16,
+                fontWeight: 800,
+              }}
+            >
+              {available ? 'Available today' : 'Unavailable today'}
+            </span>
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              fontSize: 18,
+              lineHeight: 1.6,
+              color: '#5f6572',
+            }}
+          >
+            {master.description ||
+              'Luxury hair extensions, keratin bonds, tape-ins and nano ring services in London.'}
+          </div>
+
+          <div
+            style={{
+              marginTop: 24,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 14,
+            }}
+          >
+            <div
+              style={{
+                border: '1px solid #e8e1d8',
+                borderRadius: 24,
+                padding: 20,
+                background: '#fcfbf8',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 14,
+                  color: '#8a8f99',
+                  marginBottom: 8,
+                }}
+              >
+                Price
+              </div>
+              <div
+                style={{
+                  fontSize: 20,
+                  fontWeight: 900,
+                  color: '#161a24',
+                }}
+              >
+                {startingPrice}
+              </div>
+            </div>
+
+            <div
+              style={{
+                border: '1px solid #e8e1d8',
+                borderRadius: 24,
+                padding: 20,
+                background: '#fcfbf8',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 14,
+                  color: '#8a8f99',
+                  marginBottom: 8,
+                }}
+              >
+                Location
+              </div>
+              <div
+                style={{
+                  fontSize: 20,
+                  fontWeight: 900,
+                  color: '#161a24',
+                }}
+              >
+                {master.city || 'London'}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 26 }}>
+            <div
+              style={{
+                fontSize: 17,
+                fontWeight: 900,
+                color: '#161a24',
+                marginBottom: 12,
+              }}
+            >
+              Payment methods
+            </div>
+            <PaymentBadges methods={master.paymentMethods} />
+          </div>
+
+          <div style={{ marginTop: 26 }}>
+            <div
+              style={{
+                fontSize: 17,
+                fontWeight: 900,
+                color: '#161a24',
+                marginBottom: 12,
+              }}
+            >
+              Service format
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                background: '#eaf6eb',
+                color: '#2f9150',
+                borderRadius: 999,
+                padding: '10px 16px',
+                fontSize: 15,
+                fontWeight: 800,
+              }}
+            >
+              At client
+            </div>
+          </div>
+
+          <div style={{ marginTop: 26 }}>
+            <div
+              style={{
+                fontSize: 17,
+                fontWeight: 900,
+                color: '#161a24',
+                marginBottom: 10,
+              }}
+            >
+              Working hours
+            </div>
+            <div
+              style={{
+                fontSize: 18,
+                color: '#5f6572',
+                lineHeight: 1.6,
+              }}
+            >
+              {master.hours || 'By appointment'}
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: 30,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 12,
+              paddingBottom: 26,
+            }}
+          >
+            <button
+              type="button"
+              onClick={openRoute}
+              style={{
+                border: '2px solid #dac7cf',
+                background: '#fff',
+                color: '#1f2430',
+                borderRadius: 18,
+                padding: '16px 18px',
+                fontSize: 18,
+                fontWeight: 800,
+                cursor: 'pointer',
+              }}
+            >
+              Route
+            </button>
+
+            <button
+              type="button"
+              onClick={openBooking}
+              style={{
+                border: 'none',
+                background: 'linear-gradient(180deg, #279ca2 0%, #1f8b91 100%)',
+                color: '#fff',
+                borderRadius: 18,
+                padding: '16px 18px',
+                fontSize: 18,
+                fontWeight: 800,
+                boxShadow: '0 10px 24px rgba(31,139,145,0.24)',
+                cursor: 'pointer',
+              }}
+            >
+              Book now
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function RealMap({
   masters,
   mapMode = 'map',
@@ -629,6 +999,7 @@ export default function RealMap({
   fullScreen,
 }: RealMapProps) {
   const [screenPoint, setScreenPoint] = useState<{ x: number; y: number } | null>(null);
+  const [showBigCard, setShowBigCard] = useState(false);
 
   const safeMasters = Array.isArray(masters) ? masters : [];
 
@@ -658,6 +1029,10 @@ export default function RealMap({
         safeMasters.findIndex((m) => String(m.id) === String(selectedMaster.id))
       )
     : null;
+
+  useEffect(() => {
+    setShowBigCard(false);
+  }, [selectedMasterId]);
 
   return (
     <div
@@ -709,8 +1084,19 @@ export default function RealMap({
         })}
       </MapContainer>
 
-      {selectedMaster && screenPoint && (
-        <FloatingSelectedCard master={selectedMaster} point={screenPoint} />
+      {selectedMaster && screenPoint && !showBigCard && (
+        <CompactMapCard
+          master={selectedMaster}
+          point={screenPoint}
+          onOpenBigCard={() => setShowBigCard(true)}
+        />
+      )}
+
+      {selectedMaster && showBigCard && (
+        <BigMasterCard
+          master={selectedMaster}
+          onClose={() => setShowBigCard(false)}
+        />
       )}
     </div>
   );
