@@ -269,6 +269,8 @@ function FloatingSelectedCard({
         pointerEvents: 'auto',
       }}
       onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
     >
       <div
         style={{
@@ -404,6 +406,7 @@ function FloatingSelectedCard({
         }}
       >
         <button
+          type="button"
           onClick={handleView}
           style={{
             border: `2px solid ${style.border}`,
@@ -415,12 +418,14 @@ function FloatingSelectedCard({
             fontWeight: 800,
             flex: 1,
             cursor: 'pointer',
+            WebkitTapHighlightColor: 'transparent',
           }}
         >
           View
         </button>
 
         <button
+          type="button"
           onClick={handleRoute}
           style={{
             border: 'none',
@@ -433,6 +438,7 @@ function FloatingSelectedCard({
             flex: 1,
             boxShadow: '0 8px 18px rgba(86,183,222,0.24)',
             cursor: 'pointer',
+            WebkitTapHighlightColor: 'transparent',
           }}
         >
           Route
@@ -505,9 +511,23 @@ export default function RealMap({
               key={String(master.id)}
               position={coords}
               icon={createCirclePin({ available, selected })}
+              bubblingMouseEvents={false}
               eventHandlers={{
-                click: () => {
+                click: (e) => {
+                  if ((e as any)?.originalEvent?.stopPropagation) {
+                    (e as any).originalEvent.stopPropagation();
+                  }
                   onMasterSelect?.(master);
+                },
+                mousedown: (e) => {
+                  if ((e as any)?.originalEvent?.stopPropagation) {
+                    (e as any).originalEvent.stopPropagation();
+                  }
+                },
+                touchstart: (e) => {
+                  if ((e as any)?.originalEvent?.stopPropagation) {
+                    (e as any).originalEvent.stopPropagation();
+                  }
                 },
               }}
             />
