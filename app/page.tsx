@@ -53,16 +53,16 @@ function getFeaturedCategories() {
 }
 
 function mapCategoryToId(category: string) {
-  const normalized = category.toLowerCase();
+  const normalized = (category || '').toLowerCase();
 
   const found = appCategories.find(
     (c) =>
-      c.id.toLowerCase() === normalized ||
+      (c.id || '').toLowerCase() === normalized ||
       (c.label || '').toLowerCase() === normalized ||
       (c.shortLabel || '').toLowerCase() === normalized
   );
 
-  return found?.id || normalized;
+  return found?.id || normalized || 'beauty';
 }
 
 function listingToMaster(listing: ListingItem, index: number) {
@@ -73,7 +73,7 @@ function listingToMaster(listing: ListingItem, index: number) {
     [51.5202, -0.1028],
     [51.4955, -0.1722],
     [51.5308, -0.1238],
-    [51.5098, -0.1180],
+    [51.5098, -0.118],
     [51.5159, -0.1426],
   ];
 
@@ -144,7 +144,7 @@ export default function HomePage() {
     return [...listingMasters, ...baseMasters];
   }, [listingMasters, baseMasters]);
 
-  const visibleMasters = useMemo(() => {
+  const filteredMasters = useMemo(() => {
     const q = search.trim().toLowerCase();
 
     return allMasters.filter((master: any) => {
@@ -152,14 +152,36 @@ export default function HomePage() {
 
       const searchMatch =
         !q ||
-        (master.name || '').toLowerCase().includes(q) ||
-        (master.title || '').toLowerCase().includes(q) ||
-        (master.city || '').toLowerCase().includes(q) ||
-        (master.subcategory || '').toLowerCase().includes(q);
+        String(master.name || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(master.title || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(master.city || '')
+          .toLowerCase()
+          .includes(q) ||
+        String(master.subcategory || '')
+          .toLowerCase()
+          .includes(q);
 
       return categoryMatch && searchMatch;
     });
   }, [allMasters, activeCategory, search]);
+
+  const mapMasters = filteredMasters.length > 0 ? filteredMasters : allMasters;
+
+  useEffect(() => {
+    if (!selectedMaster) return;
+
+    const exists = mapMasters.some(
+      (item: any) => String(item.id) === String(selectedMaster.id)
+    );
+
+    if (!exists) {
+      setSelectedMaster(null);
+    }
+  }, [mapMasters, selectedMaster]);
 
   return (
     <main
@@ -388,7 +410,7 @@ export default function HomePage() {
               }}
             >
               <RealMap
-                masters={visibleMasters}
+                masters={mapMasters}
                 mapMode={mapMode}
                 activeCategory={activeCategory}
                 selectedMasterId={selectedMaster?.id ?? null}
