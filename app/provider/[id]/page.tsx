@@ -56,13 +56,13 @@ export default function ProviderPage() {
   const params = useParams();
   const providerId = String(params?.id || '');
 
-  const baseMasters = getAllMasters();
+  const baseMasters = getAllMasters() as any[];
   const listings = getListings();
 
   const listingProviders = listings.map((item, index) => listingToProvider(item, index));
-  const allProviders = [...listingProviders, ...baseMasters];
+  const allProviders: any[] = [...listingProviders, ...baseMasters];
 
-  const provider = useMemo(() => {
+  const provider = useMemo<any | undefined>(() => {
     return allProviders.find((item: any) => String(item.id) === providerId);
   }, [allProviders, providerId]);
 
