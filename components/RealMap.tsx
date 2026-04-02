@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   MapContainer,
   Marker,
@@ -211,7 +210,6 @@ function FloatingSelectedCard({
   master: Master;
   position: [number, number];
 }) {
-  const router = useRouter();
   const map = useMap();
   const [point, setPoint] = useState<{ x: number; y: number } | null>(null);
 
@@ -241,13 +239,11 @@ function FloatingSelectedCard({
   const left = Math.max(12, Math.min(desiredLeft, mapSize.x - cardWidth - 12));
   const top = Math.max(14, point.y - 156);
 
-  const handleView = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    router.push(`/provider/${master.id}`);
+  const openProviderPage = () => {
+    window.location.href = `/provider/${master.id}`;
   };
 
-  const handleRoute = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
+  const openRoute = () => {
     const [lat, lng] = position;
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
     window.open(url, '_blank');
@@ -407,7 +403,14 @@ function FloatingSelectedCard({
       >
         <button
           type="button"
-          onClick={handleView}
+          onClick={(e) => {
+            e.stopPropagation();
+            openProviderPage();
+          }}
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+            openProviderPage();
+          }}
           style={{
             border: `2px solid ${style.border}`,
             background: '#ffffff',
@@ -426,7 +429,14 @@ function FloatingSelectedCard({
 
         <button
           type="button"
-          onClick={handleRoute}
+          onClick={(e) => {
+            e.stopPropagation();
+            openRoute();
+          }}
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+            openRoute();
+          }}
           style={{
             border: 'none',
             background: '#56b7de',
