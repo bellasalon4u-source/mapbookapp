@@ -92,7 +92,7 @@ function getCoords(master: Master, index: number) {
 
 function inferCategory(master: Master): string {
   if (master.category && typeof master.category === 'string') {
-    return master.category.toLowerCase();
+    return master.category.toLowerCase().trim();
   }
   return 'beauty';
 }
@@ -615,6 +615,7 @@ function FloatingSelectedCard({
 export default function RealMap({
   masters,
   mapMode = 'map',
+  activeCategory,
   selectedMasterId,
   onMasterSelect,
   onMapBackgroundClick,
@@ -624,12 +625,24 @@ export default function RealMap({
 
   const safeMasters = Array.isArray(masters) ? masters : [];
 
+  const visibleMasters = useMemo(() => {
+    if (!activeCategory) return safeMasters;
+
+    return safeMasters.filter((master) => {
+      const category = inferCategory(master);
+      return category === activeCategory;
+    });
+  }, [safeMasters, activeCategory]);
+
   const center = useMemo<[number, number]>(() => {
+    if (visibleMasters.length > 0) {
+      return getCoords(visibleMasters[0], 0);
+    }
     if (safeMasters.length > 0) {
       return getCoords(safeMasters[0], 0);
     }
     return [51.5074, -0.1278];
-  }, [safeMasters]);
+  }, [visibleMasters, safeMasters]);
 
   const tileUrl =
     mapMode === 'satellite'
@@ -642,12 +655,12 @@ export default function RealMap({
       : '&copy; OpenStreetMap contributors';
 
   const selectedMaster =
-    safeMasters.find((m) => String(m.id) === String(selectedMasterId)) || null;
+    visibleMasters.find((m) => String(m.id) === String(selectedMasterId)) || null;
 
   const selectedPosition = selectedMaster
     ? getCoords(
         selectedMaster,
-        safeMasters.findIndex((m) => String(m.id) === String(selectedMaster.id))
+        visibleMasters.findIndex((m) => String(m.id) === String(selectedMaster.id))
       )
     : null;
 
@@ -672,7 +685,7 @@ export default function RealMap({
           onPointChange={setScreenPoint}
         />
 
-        {safeMasters.map((master, index) => {
+        {visibleMasters.map((master, index) => {
           const coords = getCoords(master, index);
           const available = isAvailableToday(master);
           const selected = String(selectedMasterId) === String(master.id);
