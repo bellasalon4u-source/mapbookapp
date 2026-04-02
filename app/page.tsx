@@ -168,6 +168,11 @@ export default function HomePage() {
     }
   }, [mapMasters, selectedMaster]);
 
+  const mapKey = useMemo(() => {
+    const ids = mapMasters.map((item: any) => String(item.id)).join('|');
+    return `${activeCategory}-${search}-${mapMode}-${ids}`;
+  }, [activeCategory, search, mapMode, mapMasters]);
+
   return (
     <main
       style={{
@@ -296,6 +301,7 @@ export default function HomePage() {
               }}
             >
               <RealMap
+                key={mapKey}
                 masters={mapMasters}
                 mapMode={mapMode}
                 activeCategory={activeCategory}
