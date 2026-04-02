@@ -1,15 +1,109 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { getMasterById } from '../../../services/masters';
+import { useEffect, useMemo, useState } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { getMasterById, getAllMasters } from '../../../services/masters';
+import { getListings } from '../../../services/listingsStore';
+
+type ListingLike = {
+  id: string | number;
+  title?: string;
+  category?: string;
+  subcategory?: string;
+  location?: string;
+  description?: string;
+  price?: string;
+  hours?: string;
+  availableToday?: boolean;
+  photos?: string[];
+  paymentMethods?: string[];
+  serviceModes?: string[];
+};
+
+function listingToMasterShape(listing: ListingLike, index: number) {
+  const fallbackImages = [
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=80',
+  ];
+
+  const gallery =
+    listing.photos && listing.photos.length > 0
+      ? listing.photos
+      : [
+          fallbackImages[index % fallbackImages.length],
+          fallbackImages[(index + 1) % fallbackImages.length],
+          fallbackImages[(index + 2) % fallbackImages.length],
+        ];
+
+  const numericPrice = Number(String(listing.price || '').replace(/[^\d.]/g, ''));
+  const priceFrom = Number.isFinite(numericPrice) && numericPrice > 0 ? numericPrice : 45;
+
+  return {
+    id: listing.id,
+    name: listing.title || 'Provider',
+    title: listing.subcategory || 'Service provider',
+    city: listing.location || 'London',
+    avatar: gallery[0],
+    services: [
+      {
+        slug: 'main-service',
+        title: listing.subcategory || listing.title || 'Main service',
+        duration: listing.hours || '1h',
+        price: priceFrom,
+        image: gallery[0],
+      },
+      {
+        slug: 'premium-service',
+        title: 'Premium option',
+        duration: '2h',
+        price: priceFrom + 20,
+        image: gallery[1] || gallery[0],
+      },
+    ],
+  };
+}
 
 export default function BookingServicePage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = String(params.id);
 
-  const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
+  const allMasters = getAllMasters() as any[];
+  const listings = getListings() as ListingLike[];
+
+  const master = useMemo(() => {
+    const builtInMaster = getMasterById(id);
+    if (builtInMaster) return builtInMaster;
+
+    const listingIndex = listings.findIndex((item) => String(item.id) === id);
+    if (listingIndex !== -1) {
+      return listingToMasterShape(listings[listingIndex], listingIndex);
+    }
+
+    const fallbackMaster = allMasters.find((item: any) => String(item.id) === id);
+    if (fallbackMaster) return fallbackMaster;
+
+    return null;
+  }, [id, listings, allMasters]);
+
+  const preselectedService = searchParams.get('service') || '';
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!master) return;
+    if (!preselectedService) return;
+
+    const exists = master.services.some(
+      (service: any) => service.slug === preselectedService
+    );
+
+    if (exists) {
+      setSelectedServices([preselectedService]);
+    }
+  }, [master, preselectedService]);
 
   if (!master) {
     return <main style={{ padding: 24 }}>Master not found</main>;
@@ -21,15 +115,18 @@ export default function BookingServicePage() {
     );
   };
 
-  const selectedItems = master.services.filter((service) =>
+  const selectedItems = master.services.filter((service: any) =>
     selectedServices.includes(service.slug)
   );
 
-  const totalPrice = selectedItems.reduce((sum, item) => sum + item.price, 0);
+  const totalPrice = selectedItems.reduce(
+    (sum: number, item: any) => sum + item.price,
+    0
+  );
 
   const parseDurationToMinutes = (value: string) => {
-    const hourMatch = value.match(/(\d+)\s*h/);
-    const minuteMatch = value.match(/(\d+)\s*m/);
+    const hourMatch = value.match(/(\d+)\s*h/i);
+    const minuteMatch = value.match(/(\d+)\s*m/i);
 
     const hours = hourMatch ? Number(hourMatch[1]) : 0;
     const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
@@ -38,7 +135,7 @@ export default function BookingServicePage() {
   };
 
   const totalMinutes = selectedItems.reduce(
-    (sum, item) => sum + parseDurationToMinutes(item.duration),
+    (sum: number, item: any) => sum + parseDurationToMinutes(item.duration),
     0
   );
 
@@ -135,7 +232,7 @@ export default function BookingServicePage() {
         <h2 style={{ marginTop: 28, fontSize: 30 }}>Services</h2>
 
         <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {master.services.map((service) => {
+          {master.services.map((service: any) => {
             const active = selectedServices.includes(service.slug);
 
             return (
