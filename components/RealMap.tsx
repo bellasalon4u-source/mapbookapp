@@ -130,7 +130,7 @@ function createCirclePin({
   available: boolean;
   selected: boolean;
 }) {
-  const size = selected ? 40 : 34;
+  const size = selected ? 36 : 30;
   const fill = available ? '#32c255' : '#f05d62';
 
   return L.divIcon({
@@ -141,8 +141,8 @@ function createCirclePin({
         height:${size}px;
         border-radius:999px;
         background:${fill};
-        border:5px solid #1e232a;
-        box-shadow:0 8px 18px rgba(0,0,0,0.20);
+        border:4px solid #1e232a;
+        box-shadow:0 6px 14px rgba(0,0,0,0.18);
       "></div>
     `,
     iconSize: [size, size],
@@ -196,7 +196,11 @@ function MapBridge({
 }
 
 function getStartingPrice(master: Master) {
-  if (master.startingPrice !== undefined && master.startingPrice !== null && master.startingPrice !== '') {
+  if (
+    master.startingPrice !== undefined &&
+    master.startingPrice !== null &&
+    master.startingPrice !== ''
+  ) {
     return typeof master.startingPrice === 'number'
       ? `From £${master.startingPrice}`
       : String(master.startingPrice).startsWith('From')
@@ -228,7 +232,7 @@ function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
     <div
       style={{
         display: 'flex',
-        gap: 8,
+        gap: 6,
         flexWrap: 'wrap',
       }}
     >
@@ -239,14 +243,14 @@ function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
             border: '1px solid #e6dfd5',
             background: '#fff',
             borderRadius: 999,
-            padding: '5px 10px',
+            padding: '4px 8px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 15,
+            fontSize: 14,
             lineHeight: 1,
-            minWidth: 36,
-            height: 34,
+            minWidth: 32,
+            height: 30,
           }}
         >
           {item.icon}
@@ -258,7 +262,7 @@ function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
 
 function FavoriteButton({
   masterId,
-  size = 24,
+  size = 22,
 }: {
   masterId: string | number;
   size?: number;
@@ -334,12 +338,15 @@ function FloatingSelectedCard({
   const available = isAvailableToday(master);
   const startingPrice = getStartingPrice(master);
 
-  const cardWidth = 330;
-  const left = Math.max(12, Math.min(point.x - 130, window.innerWidth - cardWidth - 18));
-  const top = Math.max(18, point.y - 126);
+  const cardWidth = 290;
+  const viewportWidth =
+    typeof window !== 'undefined' ? window.innerWidth : 390;
 
-  const openProviderPage = () => {
-    window.location.href = `/provider/${master.id}`;
+  const left = Math.max(10, Math.min(point.x - 115, viewportWidth - cardWidth - 10));
+  const top = Math.max(12, point.y - 108);
+
+  const openMasterPage = () => {
+    window.location.href = `/master/${master.id}`;
   };
 
   const openRoute = (e?: React.MouseEvent | React.TouchEvent) => {
@@ -365,9 +372,9 @@ function FloatingSelectedCard({
         width: cardWidth,
         background: '#ffffff',
         border: `1.5px solid ${style.border}`,
-        borderRadius: 24,
-        boxShadow: '0 14px 28px rgba(0,0,0,0.14)',
-        padding: 14,
+        borderRadius: 20,
+        boxShadow: '0 12px 24px rgba(0,0,0,0.12)',
+        padding: 12,
         zIndex: 1000,
         pointerEvents: 'auto',
       }}
@@ -379,10 +386,10 @@ function FloatingSelectedCard({
       <div
         style={{
           position: 'absolute',
-          left: Math.max(42, Math.min(point.x - left - 10, cardWidth - 54)),
-          bottom: -10,
-          width: 20,
-          height: 20,
+          left: Math.max(42, Math.min(point.x - left - 8, cardWidth - 48)),
+          bottom: -9,
+          width: 18,
+          height: 18,
           background: '#ffffff',
           borderRight: `1.5px solid ${style.border}`,
           borderBottom: `1.5px solid ${style.border}`,
@@ -393,21 +400,21 @@ function FloatingSelectedCard({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '96px 1fr auto',
-          gap: 12,
+          gridTemplateColumns: '80px 1fr auto',
+          gap: 10,
           alignItems: 'start',
         }}
       >
         <div
           style={{
-            width: 96,
-            height: 96,
-            borderRadius: 24,
+            width: 80,
+            height: 80,
+            borderRadius: 20,
             overflow: 'hidden',
             border: '3px solid #fff',
-            boxShadow: '0 6px 16px rgba(0,0,0,0.10)',
+            boxShadow: '0 5px 14px rgba(0,0,0,0.10)',
             background: '#eee',
-            gridRow: '1 / span 3',
+            gridRow: '1 / span 4',
           }}
         >
           <img
@@ -427,7 +434,7 @@ function FloatingSelectedCard({
 
         <div
           style={{
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: 800,
             color: '#1f2430',
             lineHeight: 1.15,
@@ -437,15 +444,15 @@ function FloatingSelectedCard({
           {master.name || master.title || 'Provider'}
         </div>
 
-        <div style={{ paddingTop: 2 }}>
-          <FavoriteButton masterId={master.id} size={26} />
+        <div style={{ paddingTop: 1 }}>
+          <FavoriteButton masterId={master.id} size={24} />
         </div>
 
         <div
           style={{
             display: 'flex',
             flexWrap: 'wrap',
-            gap: 8,
+            gap: 6,
             alignItems: 'center',
           }}
         >
@@ -454,8 +461,8 @@ function FloatingSelectedCard({
               background: '#f6f0e4',
               color: '#6a5132',
               borderRadius: 999,
-              padding: '6px 12px',
-              fontSize: 12,
+              padding: '5px 10px',
+              fontSize: 11,
               fontWeight: 800,
               lineHeight: 1,
             }}
@@ -470,7 +477,7 @@ function FloatingSelectedCard({
           style={{
             display: 'flex',
             flexWrap: 'wrap',
-            gap: 8,
+            gap: 6,
             alignItems: 'center',
           }}
         >
@@ -479,8 +486,8 @@ function FloatingSelectedCard({
               background: style.tagBg,
               color: style.tagText,
               borderRadius: 999,
-              padding: '6px 11px',
-              fontSize: 12,
+              padding: '5px 10px',
+              fontSize: 11,
               fontWeight: 800,
               lineHeight: 1,
             }}
@@ -491,7 +498,7 @@ function FloatingSelectedCard({
           <span
             style={{
               color: available ? '#2f9c47' : '#d65a5a',
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: 800,
             }}
           >
@@ -503,17 +510,17 @@ function FloatingSelectedCard({
 
         <div
           style={{
-            marginTop: 4,
+            marginTop: 2,
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
+            gap: 8,
             flexWrap: 'wrap',
           }}
         >
           <span
             style={{
               color: '#1f2430',
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: 800,
             }}
           >
@@ -523,7 +530,7 @@ function FloatingSelectedCard({
           <span
             style={{
               color: '#3c3128',
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: 800,
             }}
           >
@@ -535,10 +542,10 @@ function FloatingSelectedCard({
 
         <div
           style={{
-            marginTop: 8,
+            marginTop: 6,
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
+            gap: 6,
             flexWrap: 'wrap',
           }}
         >
@@ -548,22 +555,22 @@ function FloatingSelectedCard({
 
       <div
         style={{
-          marginTop: 14,
+          marginTop: 12,
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1.15fr',
-          gap: 10,
+          gridTemplateColumns: '1fr 1fr 1.1fr',
+          gap: 8,
         }}
       >
         <button
           type="button"
-          onClick={openProviderPage}
+          onClick={openMasterPage}
           style={{
             border: `2px solid ${style.border}`,
             background: '#ffffff',
             color: '#2a2f36',
-            borderRadius: 18,
-            padding: '12px 14px',
-            fontSize: 14,
+            borderRadius: 16,
+            padding: '10px 12px',
+            fontSize: 13,
             fontWeight: 800,
             cursor: 'pointer',
           }}
@@ -579,11 +586,11 @@ function FloatingSelectedCard({
             border: 'none',
             background: '#56b7de',
             color: '#fff',
-            borderRadius: 18,
-            padding: '12px 14px',
-            fontSize: 14,
+            borderRadius: 16,
+            padding: '10px 12px',
+            fontSize: 13,
             fontWeight: 800,
-            boxShadow: '0 8px 18px rgba(86,183,222,0.20)',
+            boxShadow: '0 8px 18px rgba(86,183,222,0.18)',
             cursor: 'pointer',
           }}
         >
@@ -598,11 +605,11 @@ function FloatingSelectedCard({
             border: 'none',
             background: '#3aa44b',
             color: '#fff',
-            borderRadius: 18,
-            padding: '12px 14px',
-            fontSize: 14,
+            borderRadius: 16,
+            padding: '10px 12px',
+            fontSize: 13,
             fontWeight: 800,
-            boxShadow: '0 8px 18px rgba(58,164,75,0.20)',
+            boxShadow: '0 8px 18px rgba(58,164,75,0.18)',
             cursor: 'pointer',
           }}
         >
