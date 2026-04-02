@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   MapContainer,
   Marker,
@@ -164,18 +164,12 @@ function MapClickHandler({
 
 function MapBridge({
   selectedPosition,
-  onMapReady,
   onPointChange,
 }: {
   selectedPosition: [number, number] | null;
-  onMapReady: (map: L.Map) => void;
   onPointChange: (point: { x: number; y: number } | null) => void;
 }) {
   const map = useMap();
-
-  useEffect(() => {
-    onMapReady(map);
-  }, [map, onMapReady]);
 
   useEffect(() => {
     const updatePoint = () => {
@@ -259,7 +253,8 @@ function FloatingSelectedCard({
     window.location.href = `/provider/${master.id}`;
   };
 
-  const openRoute = () => {
+  const openRoute = (e?: React.MouseEvent | React.TouchEvent) => {
+    e?.stopPropagation();
     const lat = master.lat ?? master.latitude;
     const lng = master.lng ?? master.longitude;
     if (typeof lat !== 'number' || typeof lng !== 'number') return;
@@ -269,6 +264,12 @@ function FloatingSelectedCard({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      onClick={openProviderPage}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') openProviderPage();
+      }}
       style={{
         position: 'absolute',
         left,
@@ -281,8 +282,8 @@ function FloatingSelectedCard({
         padding: 12,
         zIndex: 1000,
         pointerEvents: 'auto',
+        cursor: 'pointer',
       }}
-      onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
       onTouchStart={(e) => e.stopPropagation()}
       onTouchEnd={(e) => e.stopPropagation()}
@@ -422,7 +423,6 @@ function FloatingSelectedCard({
       >
         <button
           type="button"
-          onClick={openProviderPage}
           style={{
             border: `2px solid ${style.border}`,
             background: '#ffffff',
@@ -441,6 +441,7 @@ function FloatingSelectedCard({
         <button
           type="button"
           onClick={openRoute}
+          onTouchEnd={openRoute}
           style={{
             border: 'none',
             background: '#56b7de',
@@ -469,9 +470,7 @@ export default function RealMap({
   onMapBackgroundClick,
   fullScreen,
 }: RealMapProps) {
-  const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
   const [screenPoint, setScreenPoint] = useState<{ x: number; y: number } | null>(null);
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   const safeMasters = Array.isArray(masters) ? masters : [];
 
@@ -504,7 +503,6 @@ export default function RealMap({
 
   return (
     <div
-      ref={wrapperRef}
       style={{
         width: '100%',
         height: fullScreen ? '100vh' : '100%',
@@ -521,7 +519,6 @@ export default function RealMap({
         <MapClickHandler onMapBackgroundClick={onMapBackgroundClick} />
         <MapBridge
           selectedPosition={selectedPosition}
-          onMapReady={setMapInstance}
           onPointChange={setScreenPoint}
         />
 
