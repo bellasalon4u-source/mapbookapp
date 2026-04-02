@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   MapContainer,
   Marker,
@@ -212,6 +212,7 @@ function FloatingSelectedCard({
 }) {
   const map = useMap();
   const [point, setPoint] = useState<{ x: number; y: number } | null>(null);
+  const cardRef = useRef<HTMLDivElement | null>(null);
 
   const category = inferCategory(master);
   const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.beauty;
@@ -230,6 +231,36 @@ function FloatingSelectedCard({
       map.off('move zoom resize', update);
     };
   }, [map, position]);
+
+  useEffect(() => {
+    if (!cardRef.current) return;
+
+    L.DomEvent.disableClickPropagation(cardRef.current);
+    L.DomEvent.disableScrollPropagation(cardRef.current);
+
+    const stop = (e: Event) => {
+      e.stopPropagation();
+    };
+
+    cardRef.current.addEventListener('touchstart', stop, { passive: true });
+    cardRef.current.addEventListener('touchend', stop, { passive: true });
+    cardRef.current.addEventListener('pointerdown', stop);
+    cardRef.current.addEventListener('pointerup', stop);
+    cardRef.current.addEventListener('mousedown', stop);
+    cardRef.current.addEventListener('mouseup', stop);
+    cardRef.current.addEventListener('click', stop);
+
+    return () => {
+      if (!cardRef.current) return;
+      cardRef.current.removeEventListener('touchstart', stop);
+      cardRef.current.removeEventListener('touchend', stop);
+      cardRef.current.removeEventListener('pointerdown', stop);
+      cardRef.current.removeEventListener('pointerup', stop);
+      cardRef.current.removeEventListener('mousedown', stop);
+      cardRef.current.removeEventListener('mouseup', stop);
+      cardRef.current.removeEventListener('click', stop);
+    };
+  }, [cardRef.current]);
 
   if (!point) return null;
 
@@ -251,6 +282,7 @@ function FloatingSelectedCard({
 
   return (
     <div
+      ref={cardRef}
       style={{
         position: 'absolute',
         left,
@@ -264,9 +296,6 @@ function FloatingSelectedCard({
         zIndex: 900,
         pointerEvents: 'auto',
       }}
-      onClick={(e) => e.stopPropagation()}
-      onPointerDown={(e) => e.stopPropagation()}
-      onTouchStart={(e) => e.stopPropagation()}
     >
       <div
         style={{
@@ -403,14 +432,7 @@ function FloatingSelectedCard({
       >
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            openProviderPage();
-          }}
-          onTouchEnd={(e) => {
-            e.stopPropagation();
-            openProviderPage();
-          }}
+          onClick={openProviderPage}
           style={{
             border: `2px solid ${style.border}`,
             background: '#ffffff',
@@ -429,14 +451,7 @@ function FloatingSelectedCard({
 
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            openRoute();
-          }}
-          onTouchEnd={(e) => {
-            e.stopPropagation();
-            openRoute();
-          }}
+          onClick={openRoute}
           style={{
             border: 'none',
             background: '#56b7de',
