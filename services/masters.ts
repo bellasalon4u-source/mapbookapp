@@ -12,6 +12,8 @@ export type MasterItem = {
   name: string;
   title: string;
   city: string;
+  category: string;
+  subcategory?: string;
   avatar: string;
   cover: string;
   rating: number;
@@ -27,6 +29,9 @@ export type MasterItem = {
   lng: number;
   gallery: string[];
   services: ServiceItem[];
+  paymentMethods?: string[];
+  serviceModes?: string[];
+  hours?: string;
 };
 
 const masters: MasterItem[] = [
@@ -35,6 +40,8 @@ const masters: MasterItem[] = [
     name: 'Bella Keratin Studio',
     title: 'Hair Extensions Specialist',
     city: 'London',
+    category: 'beauty',
+    subcategory: 'Hair',
     avatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800&auto=format&fit=crop',
     cover:
@@ -51,6 +58,9 @@ const masters: MasterItem[] = [
     social: '@bellakeratinstudio',
     lat: 51.5074,
     lng: -0.1278,
+    paymentMethods: ['cash', 'card'],
+    serviceModes: ['at_client'],
+    hours: 'By appointment',
     gallery: [
       'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?q=80&w=1200&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=1200&auto=format&fit=crop',
@@ -92,6 +102,8 @@ const masters: MasterItem[] = [
     name: 'Nadia Wellness',
     title: 'Massage Therapist',
     city: 'London',
+    category: 'wellness',
+    subcategory: 'Massage',
     avatar:
       'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=800&auto=format&fit=crop',
     cover:
@@ -107,6 +119,9 @@ const masters: MasterItem[] = [
     social: '@nadiawellness',
     lat: 51.5033,
     lng: -0.1195,
+    paymentMethods: ['cash', 'card'],
+    serviceModes: ['at_client'],
+    hours: 'By appointment',
     gallery: [
       'https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1200&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1200&auto=format&fit=crop',
@@ -144,6 +159,8 @@ const masters: MasterItem[] = [
     name: 'Camden Brows Bar',
     title: 'Brow Specialist',
     city: 'London',
+    category: 'beauty',
+    subcategory: 'Brows & Lashes',
     avatar:
       'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=800&auto=format&fit=crop',
     cover:
@@ -159,6 +176,9 @@ const masters: MasterItem[] = [
     social: '@camdenbrowsbar',
     lat: 51.5231,
     lng: -0.1586,
+    paymentMethods: ['cash', 'card'],
+    serviceModes: ['at_client'],
+    hours: 'By appointment',
     gallery: [
       'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?q=80&w=1200&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop',
