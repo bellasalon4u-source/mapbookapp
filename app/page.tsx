@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getAllMasters } from '../services/masters';
-import { categories as appCategories } from '../services/categories';
 import {
   getListings,
   subscribeToListingsStore,
@@ -45,16 +44,26 @@ const popularServices = [
 ];
 
 function mapCategoryToId(category: string) {
-  const normalized = (category || '').toLowerCase();
+  const normalized = (category || '').toLowerCase().trim();
 
-  const found = appCategories.find(
-    (c) =>
-      (c.id || '').toLowerCase() === normalized ||
-      (c.label || '').toLowerCase() === normalized ||
-      (c.shortLabel || '').toLowerCase() === normalized
-  );
+  const map: Record<string, string> = {
+    beauty: 'beauty',
+    wellness: 'wellness',
+    home: 'home',
+    repairs: 'repairs',
+    tech: 'tech',
+    pets: 'pets',
+    auto: 'auto',
+    moving: 'moving',
+    activities: 'activities',
+    events: 'events',
+    creative: 'creative',
+    fashion: 'fashion',
+    fitness: 'fitness',
+    education: 'education',
+  };
 
-  return found?.id || normalized || 'beauty';
+  return map[normalized] || normalized || 'beauty';
 }
 
 function listingToMaster(listing: ListingItem, index: number) {
@@ -127,7 +136,12 @@ export default function HomePage() {
     const q = search.trim().toLowerCase();
 
     return allMasters.filter((master: any) => {
-      const categoryMatch = !activeCategory || master.category === activeCategory;
+      const masterCategory = String(master.category || '')
+        .toLowerCase()
+        .trim();
+
+      const categoryMatch =
+        !activeCategory || masterCategory === activeCategory;
 
       const searchMatch =
         !q ||
@@ -140,7 +154,7 @@ export default function HomePage() {
     });
   }, [allMasters, activeCategory, search]);
 
-  const mapMasters = filteredMasters.length > 0 ? filteredMasters : allMasters;
+  const mapMasters = filteredMasters;
 
   useEffect(() => {
     if (!selectedMaster) return;
