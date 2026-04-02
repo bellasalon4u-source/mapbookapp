@@ -11,6 +11,7 @@ import {
   type ListingItem,
 } from '../services/listingsStore';
 import BottomNav from '../components/BottomNav';
+import TopCategoriesBar from '../components/TopCategoriesBar';
 
 const RealMap = dynamic(() => import('../components/RealMap'), {
   ssr: false,
@@ -42,12 +43,6 @@ const popularServices = [
       'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80',
   },
 ];
-
-function getFeaturedCategories() {
-  return ['beauty', 'wellness', 'home', 'repairs', 'tech', 'pets']
-    .map((id) => appCategories.find((c) => c.id === id))
-    .filter(Boolean);
-}
 
 function mapCategoryToId(category: string) {
   const normalized = (category || '').toLowerCase();
@@ -102,7 +97,6 @@ function listingToMaster(listing: ListingItem, index: number) {
 export default function HomePage() {
   const router = useRouter();
   const baseMasters = getAllMasters();
-  const featuredCategories = useMemo(() => getFeaturedCategories(), []);
 
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('beauty');
@@ -257,118 +251,19 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '14px 12px 0' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-              gap: 6,
-              alignItems: 'start',
+        <section style={{ padding: '14px 0 0' }}>
+          <TopCategoriesBar
+            activeCategory={activeCategory}
+            onSelectCategory={(category) => {
+              if (category === 'more') {
+                router.push('/categories');
+                return;
+              }
+
+              setActiveCategory(category);
+              setSelectedMaster(null);
             }}
-          >
-            {featuredCategories.map((category: any) => {
-              const active = activeCategory === category.id;
-
-              return (
-                <button
-                  key={category.id}
-                  onClick={() => {
-                    setActiveCategory(category.id);
-                    setSelectedMaster(null);
-                  }}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    padding: '0 2px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 6,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 52,
-                      height: 52,
-                      borderRadius: 16,
-                      background: active ? '#f6efe1' : 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 32,
-                    }}
-                  >
-                    <span>{category.icon}</span>
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: active ? 800 : 700,
-                      color: '#253140',
-                      textAlign: 'center',
-                      lineHeight: 1.1,
-                      minHeight: 28,
-                    }}
-                  >
-                    {category.shortLabel || category.label}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 2,
-                      width: 42,
-                      height: 4,
-                      borderRadius: 999,
-                      background: active ? '#eb7d96' : 'transparent',
-                    }}
-                  />
-                </button>
-              );
-            })}
-
-            <button
-              onClick={() => router.push('/categories')}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                padding: '0 2px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 6,
-              }}
-            >
-              <div
-                style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 16,
-                  background: 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 30,
-                  color: '#30343b',
-                  fontWeight: 900,
-                }}
-              >
-                ⋮
-              </div>
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: '#253140',
-                  textAlign: 'center',
-                  minHeight: 28,
-                }}
-              >
-                More
-              </div>
-              <div style={{ width: 42, height: 4 }} />
-            </button>
-          </div>
+          />
         </section>
 
         <section style={{ padding: '10px 0 0' }}>
