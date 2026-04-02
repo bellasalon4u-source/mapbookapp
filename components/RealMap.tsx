@@ -162,6 +162,43 @@ function MapClickHandler({
   return null;
 }
 
+function MapBridge({
+  selectedPosition,
+  onMapReady,
+  onPointChange,
+}: {
+  selectedPosition: [number, number] | null;
+  onMapReady: (map: L.Map) => void;
+  onPointChange: (point: { x: number; y: number } | null) => void;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    onMapReady(map);
+  }, [map, onMapReady]);
+
+  useEffect(() => {
+    const updatePoint = () => {
+      if (!selectedPosition) {
+        onPointChange(null);
+        return;
+      }
+
+      const p = map.latLngToContainerPoint(selectedPosition);
+      onPointChange({ x: p.x, y: p.y });
+    };
+
+    updatePoint();
+    map.on('move zoom resize', updatePoint);
+
+    return () => {
+      map.off('move zoom resize', updatePoint);
+    };
+  }, [map, selectedPosition, onPointChange]);
+
+  return null;
+}
+
 function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
   const list = methods && methods.length > 0 ? methods : ['cash', 'card'];
 
@@ -205,84 +242,33 @@ function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
 
 function FloatingSelectedCard({
   master,
-  position,
+  point,
 }: {
   master: Master;
-  position: [number, number];
+  point: { x: number; y: number };
 }) {
-  const map = useMap();
-  const [point, setPoint] = useState<{ x: number; y: number } | null>(null);
-  const cardRef = useRef<HTMLDivElement | null>(null);
-
   const category = inferCategory(master);
   const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.beauty;
   const available = isAvailableToday(master);
 
-  useEffect(() => {
-    const update = () => {
-      const p = map.latLngToContainerPoint(position);
-      setPoint({ x: p.x, y: p.y });
-    };
-
-    update();
-    map.on('move zoom resize', update);
-
-    return () => {
-      map.off('move zoom resize', update);
-    };
-  }, [map, position]);
-
-  useEffect(() => {
-    if (!cardRef.current) return;
-
-    L.DomEvent.disableClickPropagation(cardRef.current);
-    L.DomEvent.disableScrollPropagation(cardRef.current);
-
-    const stop = (e: Event) => {
-      e.stopPropagation();
-    };
-
-    cardRef.current.addEventListener('touchstart', stop, { passive: true });
-    cardRef.current.addEventListener('touchend', stop, { passive: true });
-    cardRef.current.addEventListener('pointerdown', stop);
-    cardRef.current.addEventListener('pointerup', stop);
-    cardRef.current.addEventListener('mousedown', stop);
-    cardRef.current.addEventListener('mouseup', stop);
-    cardRef.current.addEventListener('click', stop);
-
-    return () => {
-      if (!cardRef.current) return;
-      cardRef.current.removeEventListener('touchstart', stop);
-      cardRef.current.removeEventListener('touchend', stop);
-      cardRef.current.removeEventListener('pointerdown', stop);
-      cardRef.current.removeEventListener('pointerup', stop);
-      cardRef.current.removeEventListener('mousedown', stop);
-      cardRef.current.removeEventListener('mouseup', stop);
-      cardRef.current.removeEventListener('click', stop);
-    };
-  }, [cardRef.current]);
-
-  if (!point) return null;
-
-  const mapSize = map.getSize();
   const cardWidth = 288;
-  const desiredLeft = point.x - 120;
-  const left = Math.max(12, Math.min(desiredLeft, mapSize.x - cardWidth - 12));
-  const top = Math.max(14, point.y - 156);
+  const left = Math.max(12, Math.min(point.x - 120, 430 - cardWidth - 12));
+  const top = Math.max(18, point.y - 156);
 
   const openProviderPage = () => {
     window.location.href = `/provider/${master.id}`;
   };
 
   const openRoute = () => {
-    const [lat, lng] = position;
+    const lat = master.lat ?? master.latitude;
+    const lng = master.lng ?? master.longitude;
+    if (typeof lat !== 'number' || typeof lng !== 'number') return;
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
     window.open(url, '_blank');
   };
 
   return (
     <div
-      ref={cardRef}
       style={{
         position: 'absolute',
         left,
@@ -293,9 +279,13 @@ function FloatingSelectedCard({
         borderRadius: 26,
         boxShadow: '0 16px 30px rgba(0,0,0,0.18)',
         padding: 12,
-        zIndex: 900,
+        zIndex: 1000,
         pointerEvents: 'auto',
       }}
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
     >
       <div
         style={{
@@ -443,7 +433,6 @@ function FloatingSelectedCard({
             fontWeight: 800,
             flex: 1,
             cursor: 'pointer',
-            WebkitTapHighlightColor: 'transparent',
           }}
         >
           View
@@ -463,7 +452,6 @@ function FloatingSelectedCard({
             flex: 1,
             boxShadow: '0 8px 18px rgba(86,183,222,0.24)',
             cursor: 'pointer',
-            WebkitTapHighlightColor: 'transparent',
           }}
         >
           Route
@@ -481,6 +469,10 @@ export default function RealMap({
   onMapBackgroundClick,
   fullScreen,
 }: RealMapProps) {
+  const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
+  const [screenPoint, setScreenPoint] = useState<{ x: number; y: number } | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
   const safeMasters = Array.isArray(masters) ? masters : [];
 
   const center = useMemo<[number, number]>(() => {
@@ -512,9 +504,11 @@ export default function RealMap({
 
   return (
     <div
+      ref={wrapperRef}
       style={{
         width: '100%',
         height: fullScreen ? '100vh' : '100%',
+        position: 'relative',
       }}
     >
       <MapContainer
@@ -525,6 +519,11 @@ export default function RealMap({
       >
         <TileLayer url={tileUrl} attribution={attribution} />
         <MapClickHandler onMapBackgroundClick={onMapBackgroundClick} />
+        <MapBridge
+          selectedPosition={selectedPosition}
+          onMapReady={setMapInstance}
+          onPointChange={setScreenPoint}
+        />
 
         {safeMasters.map((master, index) => {
           const coords = getCoords(master, index);
@@ -553,14 +552,11 @@ export default function RealMap({
             />
           );
         })}
-
-        {selectedMaster && selectedPosition && (
-          <FloatingSelectedCard
-            master={selectedMaster}
-            position={selectedPosition}
-          />
-        )}
       </MapContainer>
+
+      {selectedMaster && screenPoint && (
+        <FloatingSelectedCard master={selectedMaster} point={screenPoint} />
+      )}
     </div>
   );
 }
