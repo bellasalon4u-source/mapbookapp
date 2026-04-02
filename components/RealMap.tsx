@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   MapContainer,
   Marker,
@@ -29,6 +30,10 @@ type Master = {
   longitude?: number;
   avatar?: string;
   paymentMethods?: PaymentMethod[];
+  description?: string;
+  price?: string;
+  subcategory?: string;
+  hours?: string;
 };
 
 type RealMapProps = {
@@ -45,77 +50,21 @@ const CATEGORY_STYLES: Record<
   string,
   {
     border: string;
-    soft: string;
     tagBg: string;
     tagText: string;
   }
 > = {
-  beauty: {
-    border: '#efb3c4',
-    soft: '#fff7fa',
-    tagBg: '#fde8ef',
-    tagText: '#b84f73',
-  },
-  wellness: {
-    border: '#abdcb3',
-    soft: '#f5fcf6',
-    tagBg: '#e9f8ec',
-    tagText: '#348d4e',
-  },
-  home: {
-    border: '#e5cfaa',
-    soft: '#fffaf3',
-    tagBg: '#f9efdd',
-    tagText: '#9e7343',
-  },
-  repairs: {
-    border: '#a9c4ef',
-    soft: '#f6f9ff',
-    tagBg: '#e8f0ff',
-    tagText: '#315ea6',
-  },
-  tech: {
-    border: '#bcc6d2',
-    soft: '#f8fafc',
-    tagBg: '#eef2f7',
-    tagText: '#445365',
-  },
-  pets: {
-    border: '#b7dcae',
-    soft: '#f7fcf5',
-    tagBg: '#ebf7e8',
-    tagText: '#3b8240',
-  },
-  auto: {
-    border: '#f0c28f',
-    soft: '#fff9f3',
-    tagBg: '#fdeedc',
-    tagText: '#ae651d',
-  },
-  moving: {
-    border: '#c3bdf0',
-    soft: '#faf9ff',
-    tagBg: '#efedff',
-    tagText: '#6658bf',
-  },
-  activities: {
-    border: '#e7b2c8',
-    soft: '#fff8fb',
-    tagBg: '#fcecf3',
-    tagText: '#ab5176',
-  },
-  events: {
-    border: '#efb3b3',
-    soft: '#fff9f9',
-    tagBg: '#fdecec',
-    tagText: '#b04a4a',
-  },
-  creative: {
-    border: '#cbbcf0',
-    soft: '#fbf9ff',
-    tagBg: '#f1ecff',
-    tagText: '#7459b6',
-  },
+  beauty: { border: '#efb3c4', tagBg: '#fde8ef', tagText: '#b84f73' },
+  wellness: { border: '#abdcb3', tagBg: '#e9f8ec', tagText: '#348d4e' },
+  home: { border: '#e5cfaa', tagBg: '#f9efdd', tagText: '#9e7343' },
+  repairs: { border: '#a9c4ef', tagBg: '#e8f0ff', tagText: '#315ea6' },
+  tech: { border: '#bcc6d2', tagBg: '#eef2f7', tagText: '#445365' },
+  pets: { border: '#b7dcae', tagBg: '#ebf7e8', tagText: '#3b8240' },
+  auto: { border: '#f0c28f', tagBg: '#fdeedc', tagText: '#ae651d' },
+  moving: { border: '#c3bdf0', tagBg: '#efedff', tagText: '#6658bf' },
+  activities: { border: '#e7b2c8', tagBg: '#fcecf3', tagText: '#ab5176' },
+  events: { border: '#efb3b3', tagBg: '#fdecec', tagText: '#b04a4a' },
+  creative: { border: '#cbbcf0', tagBg: '#f1ecff', tagText: '#7459b6' },
 };
 
 function getCoords(master: Master, index: number) {
@@ -133,7 +82,7 @@ function getCoords(master: Master, index: number) {
     [51.5202, -0.1028],
     [51.4955, -0.1722],
     [51.5308, -0.1238],
-    [51.5098, -0.1180],
+    [51.5098, -0.118],
     [51.5159, -0.1426],
   ];
 
@@ -144,68 +93,6 @@ function inferCategory(master: Master): string {
   if (master.category && typeof master.category === 'string') {
     return master.category.toLowerCase();
   }
-
-  const text = `${master.title || ''} ${master.name || ''}`.toLowerCase();
-
-  if (
-    text.includes('hair') ||
-    text.includes('beauty') ||
-    text.includes('brow') ||
-    text.includes('lash') ||
-    text.includes('nail') ||
-    text.includes('makeup') ||
-    text.includes('keratin')
-  ) {
-    return 'beauty';
-  }
-
-  if (
-    text.includes('massage') ||
-    text.includes('spa') ||
-    text.includes('wellness') ||
-    text.includes('recovery')
-  ) {
-    return 'wellness';
-  }
-
-  if (
-    text.includes('clean') ||
-    text.includes('handyman') ||
-    text.includes('home')
-  ) {
-    return 'home';
-  }
-
-  if (
-    text.includes('repair') ||
-    text.includes('appliance') ||
-    text.includes('shoe repair') ||
-    text.includes('watch repair')
-  ) {
-    return 'repairs';
-  }
-
-  if (
-    text.includes('phone') ||
-    text.includes('laptop') ||
-    text.includes('computer') ||
-    text.includes('tablet') ||
-    text.includes('tech') ||
-    text.includes('tv')
-  ) {
-    return 'tech';
-  }
-
-  if (
-    text.includes('pet') ||
-    text.includes('dog') ||
-    text.includes('cat') ||
-    text.includes('grooming') ||
-    text.includes('walker')
-  ) {
-    return 'pets';
-  }
-
   return 'beauty';
 }
 
@@ -280,9 +167,9 @@ function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
   const list = methods && methods.length > 0 ? methods : ['cash', 'card'];
 
   const items = list.map((method) => {
-    if (method === 'cash') return { key: 'cash', icon: '💵', label: 'Cash' };
-    if (method === 'card') return { key: 'card', icon: '💳', label: 'Card' };
-    return { key: 'wallet', icon: '👛', label: 'E-money' };
+    if (method === 'cash') return { key: 'cash', icon: '💵' };
+    if (method === 'card') return { key: 'card', icon: '💳' };
+    return { key: 'wallet', icon: '👛' };
   });
 
   return (
@@ -304,14 +191,13 @@ function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
             padding: '6px 10px',
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            fontSize: 12,
-            fontWeight: 700,
-            color: '#354150',
+            justifyContent: 'center',
+            fontSize: 15,
+            lineHeight: 1,
+            minWidth: 36,
           }}
         >
-          <span style={{ fontSize: 15, lineHeight: 1 }}>{item.icon}</span>
-          <span>{item.label}</span>
+          {item.icon}
         </div>
       ))}
     </div>
@@ -325,6 +211,7 @@ function FloatingSelectedCard({
   master: Master;
   position: [number, number];
 }) {
+  const router = useRouter();
   const map = useMap();
   const [point, setPoint] = useState<{ x: number; y: number } | null>(null);
 
@@ -353,6 +240,18 @@ function FloatingSelectedCard({
   const desiredLeft = point.x - 120;
   const left = Math.max(12, Math.min(desiredLeft, mapSize.x - cardWidth - 12));
   const top = Math.max(14, point.y - 156);
+
+  const handleView = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    router.push(`/provider/${master.id}`);
+  };
+
+  const handleRoute = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    const [lat, lng] = position;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    window.open(url, '_blank');
+  };
 
   return (
     <div
@@ -406,7 +305,7 @@ function FloatingSelectedCard({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '72px 1fr auto',
+          gridTemplateColumns: '72px 1fr',
           gap: 12,
           alignItems: 'center',
         }}
@@ -420,7 +319,6 @@ function FloatingSelectedCard({
             border: '3px solid #fff',
             boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
             background: '#eee',
-            position: 'relative',
           }}
         >
           <img
@@ -506,6 +404,7 @@ function FloatingSelectedCard({
         }}
       >
         <button
+          onClick={handleView}
           style={{
             border: `2px solid ${style.border}`,
             background: '#ffffff',
@@ -515,13 +414,14 @@ function FloatingSelectedCard({
             fontSize: 15,
             fontWeight: 800,
             flex: 1,
+            cursor: 'pointer',
           }}
-          onClick={(e) => e.stopPropagation()}
         >
           View
         </button>
 
         <button
+          onClick={handleRoute}
           style={{
             border: 'none',
             background: '#56b7de',
@@ -532,8 +432,8 @@ function FloatingSelectedCard({
             fontWeight: 800,
             flex: 1,
             boxShadow: '0 8px 18px rgba(86,183,222,0.24)',
+            cursor: 'pointer',
           }}
-          onClick={(e) => e.stopPropagation()}
         >
           Route
         </button>
