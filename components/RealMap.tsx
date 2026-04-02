@@ -11,6 +11,8 @@ import {
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
+type PaymentMethod = 'cash' | 'card' | 'wallet';
+
 type Master = {
   id: string | number;
   name?: string;
@@ -26,6 +28,7 @@ type Master = {
   latitude?: number;
   longitude?: number;
   avatar?: string;
+  paymentMethods?: PaymentMethod[];
 };
 
 type RealMapProps = {
@@ -271,6 +274,48 @@ function MapClickHandler({
   return null;
 }
 
+function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
+  const list = methods && methods.length > 0 ? methods : ['cash', 'card'];
+
+  const items = list.map((method) => {
+    if (method === 'cash') return { key: 'cash', icon: '💵', label: 'Cash' };
+    if (method === 'card') return { key: 'card', icon: '💳', label: 'Card' };
+    return { key: 'wallet', icon: '👛', label: 'E-money' };
+  });
+
+  return (
+    <div
+      style={{
+        marginTop: 10,
+        display: 'flex',
+        gap: 8,
+        flexWrap: 'wrap',
+      }}
+    >
+      {items.map((item) => (
+        <div
+          key={item.key}
+          style={{
+            border: '1px solid #e6dfd5',
+            background: '#fff',
+            borderRadius: 999,
+            padding: '6px 10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 12,
+            fontWeight: 700,
+            color: '#354150',
+          }}
+        >
+          <span style={{ fontSize: 15, lineHeight: 1 }}>{item.icon}</span>
+          <span>{item.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function FloatingSelectedCard({
   master,
   position,
@@ -305,7 +350,7 @@ function FloatingSelectedCard({
   const cardWidth = 288;
   const desiredLeft = point.x - 120;
   const left = Math.max(12, Math.min(desiredLeft, mapSize.x - cardWidth - 12));
-  const top = Math.max(14, point.y - 142);
+  const top = Math.max(14, point.y - 156);
 
   return (
     <div
@@ -446,6 +491,8 @@ function FloatingSelectedCard({
               ★ {(master.rating ?? 4.9).toFixed(1)}
             </span>
           </div>
+
+          <PaymentBadges methods={master.paymentMethods} />
         </div>
       </div>
 
