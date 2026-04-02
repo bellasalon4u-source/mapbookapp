@@ -524,11 +524,6 @@ export default function RealMap({
                     (e as any).originalEvent.stopPropagation();
                   }
                 },
-                touchstart: (e) => {
-                  if ((e as any)?.originalEvent?.stopPropagation) {
-                    (e as any).originalEvent.stopPropagation();
-                  }
-                },
               }}
             />
           );
