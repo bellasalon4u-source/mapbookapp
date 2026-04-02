@@ -33,6 +33,8 @@ type Master = {
   price?: string;
   subcategory?: string;
   hours?: string;
+  isVerifiedPro?: boolean;
+  startingPrice?: string | number;
 };
 
 type RealMapProps = {
@@ -193,6 +195,26 @@ function MapBridge({
   return null;
 }
 
+function getStartingPrice(master: Master) {
+  if (master.startingPrice !== undefined && master.startingPrice !== null && master.startingPrice !== '') {
+    return typeof master.startingPrice === 'number'
+      ? `From £${master.startingPrice}`
+      : String(master.startingPrice).startsWith('From')
+      ? String(master.startingPrice)
+      : `From ${master.startingPrice}`;
+  }
+
+  if (master.price) {
+    const raw = String(master.price).trim();
+    if (!raw) return 'From £45';
+    if (raw.toLowerCase().includes('from')) return raw;
+    if (raw.includes('£')) return `From ${raw}`;
+    return `From £${raw}`;
+  }
+
+  return 'From £45';
+}
+
 function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
   const list = methods && methods.length > 0 ? methods : ['cash', 'card'];
 
@@ -205,7 +227,6 @@ function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
   return (
     <div
       style={{
-        marginTop: 10,
         display: 'flex',
         gap: 8,
         flexWrap: 'wrap',
@@ -218,19 +239,86 @@ function PaymentBadges({ methods }: { methods?: PaymentMethod[] }) {
             border: '1px solid #e6dfd5',
             background: '#fff',
             borderRadius: 999,
-            padding: '6px 10px',
+            padding: '5px 10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: 15,
             lineHeight: 1,
             minWidth: 36,
+            height: 34,
           }}
         >
           {item.icon}
         </div>
       ))}
     </div>
+  );
+}
+
+function FavoriteButton({
+  masterId,
+  size = 24,
+}: {
+  masterId: string | number;
+  size?: number;
+}) {
+  const storageKey = 'mapbook-favorites';
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      const ids = raw ? JSON.parse(raw) : [];
+      setIsFavorite(Array.isArray(ids) && ids.includes(String(masterId)));
+    } catch {
+      setIsFavorite(false);
+    }
+  }, [masterId]);
+
+  const toggleFavorite = (e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+
+    try {
+      const raw = localStorage.getItem(storageKey);
+      const ids: string[] = raw ? JSON.parse(raw) : [];
+      const normalized = String(masterId);
+
+      let next: string[];
+      if (ids.includes(normalized)) {
+        next = ids.filter((id) => id !== normalized);
+        setIsFavorite(false);
+      } else {
+        next = [...ids, normalized];
+        setIsFavorite(true);
+      }
+
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      window.dispatchEvent(new Event('favorites-updated'));
+    } catch {
+      // ignore
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={toggleFavorite}
+      onTouchEnd={toggleFavorite}
+      style={{
+        border: 'none',
+        background: 'transparent',
+        padding: 0,
+        margin: 0,
+        cursor: 'pointer',
+        fontSize: size,
+        lineHeight: 1,
+        color: isFavorite ? '#e15386' : '#6f6f73',
+      }}
+      aria-label="Favorite"
+    >
+      {isFavorite ? '♥' : '♡'}
+    </button>
   );
 }
 
@@ -244,10 +332,11 @@ function FloatingSelectedCard({
   const category = inferCategory(master);
   const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.beauty;
   const available = isAvailableToday(master);
+  const startingPrice = getStartingPrice(master);
 
-  const cardWidth = 288;
-  const left = Math.max(12, Math.min(point.x - 120, 430 - cardWidth - 12));
-  const top = Math.max(18, point.y - 156);
+  const cardWidth = 330;
+  const left = Math.max(12, Math.min(point.x - 130, window.innerWidth - cardWidth - 18));
+  const top = Math.max(18, point.y - 126);
 
   const openProviderPage = () => {
     window.location.href = `/provider/${master.id}`;
@@ -262,28 +351,27 @@ function FloatingSelectedCard({
     window.open(url, '_blank');
   };
 
+  const openBooking = (e?: React.MouseEvent | React.TouchEvent) => {
+    e?.stopPropagation();
+    window.location.href = `/booking/${master.id}`;
+  };
+
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={openProviderPage}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') openProviderPage();
-      }}
       style={{
         position: 'absolute',
         left,
         top,
         width: cardWidth,
         background: '#ffffff',
-        border: `2px solid ${style.border}`,
-        borderRadius: 26,
-        boxShadow: '0 16px 30px rgba(0,0,0,0.18)',
-        padding: 12,
+        border: `1.5px solid ${style.border}`,
+        borderRadius: 24,
+        boxShadow: '0 14px 28px rgba(0,0,0,0.14)',
+        padding: 14,
         zIndex: 1000,
         pointerEvents: 'auto',
-        cursor: 'pointer',
       }}
+      onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
       onTouchStart={(e) => e.stopPropagation()}
       onTouchEnd={(e) => e.stopPropagation()}
@@ -291,52 +379,35 @@ function FloatingSelectedCard({
       <div
         style={{
           position: 'absolute',
-          left: Math.max(34, Math.min(point.x - left - 10, cardWidth - 50)),
-          bottom: -12,
-          width: 24,
-          height: 24,
+          left: Math.max(42, Math.min(point.x - left - 10, cardWidth - 54)),
+          bottom: -10,
+          width: 20,
+          height: 20,
           background: '#ffffff',
-          borderRight: `2px solid ${style.border}`,
-          borderBottom: `2px solid ${style.border}`,
+          borderRight: `1.5px solid ${style.border}`,
+          borderBottom: `1.5px solid ${style.border}`,
           transform: 'rotate(45deg)',
         }}
       />
 
       <div
         style={{
-          position: 'absolute',
-          left: 22,
-          top: -44,
-          background: '#ffffff',
-          border: `2px solid ${style.border}`,
-          borderRadius: 16,
-          padding: '8px 12px',
-          fontSize: 15,
-          fontWeight: 800,
-          color: '#27313d',
-          boxShadow: '0 10px 18px rgba(0,0,0,0.12)',
-        }}
-      >
-        {getCategoryLabel(category)}
-      </div>
-
-      <div
-        style={{
           display: 'grid',
-          gridTemplateColumns: '72px 1fr',
+          gridTemplateColumns: '96px 1fr auto',
           gap: 12,
-          alignItems: 'center',
+          alignItems: 'start',
         }}
       >
         <div
           style={{
-            width: 72,
-            height: 72,
-            borderRadius: 20,
+            width: 96,
+            height: 96,
+            borderRadius: 24,
             overflow: 'hidden',
             border: '3px solid #fff',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
+            boxShadow: '0 6px 16px rgba(0,0,0,0.10)',
             background: '#eee',
+            gridRow: '1 / span 3',
           }}
         >
           <img
@@ -354,62 +425,123 @@ function FloatingSelectedCard({
           />
         </div>
 
-        <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 18,
+            fontWeight: 800,
+            color: '#1f2430',
+            lineHeight: 1.15,
+            alignSelf: 'center',
+          }}
+        >
+          {master.name || master.title || 'Provider'}
+        </div>
+
+        <div style={{ paddingTop: 2 }}>
+          <FavoriteButton masterId={master.id} size={26} />
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 8,
+            alignItems: 'center',
+          }}
+        >
           <div
             style={{
-              fontSize: 17,
+              background: '#f6f0e4',
+              color: '#6a5132',
+              borderRadius: 999,
+              padding: '6px 12px',
+              fontSize: 12,
               fontWeight: 800,
-              color: '#1f2430',
-              lineHeight: 1.15,
+              lineHeight: 1,
             }}
           >
-            {master.name || master.title || 'Provider'}
+            🏅 Verified Pro
           </div>
+        </div>
 
-          <div
+        <div />
+
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 8,
+            alignItems: 'center',
+          }}
+        >
+          <span
             style={{
-              marginTop: 8,
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 8,
-              alignItems: 'center',
+              background: style.tagBg,
+              color: style.tagText,
+              borderRadius: 999,
+              padding: '6px 11px',
+              fontSize: 12,
+              fontWeight: 800,
+              lineHeight: 1,
             }}
           >
-            <span
-              style={{
-                background: style.tagBg,
-                color: style.tagText,
-                borderRadius: 999,
-                padding: '6px 10px',
-                fontSize: 12,
-                fontWeight: 800,
-                lineHeight: 1,
-              }}
-            >
-              {getCategoryLabel(category)}
-            </span>
+            {getCategoryLabel(category)}
+          </span>
 
-            <span
-              style={{
-                color: available ? '#2f9c47' : '#d65a5a',
-                fontSize: 13,
-                fontWeight: 800,
-              }}
-            >
-              {available ? 'Available today' : 'Unavailable today'}
-            </span>
+          <span
+            style={{
+              color: available ? '#2f9c47' : '#d65a5a',
+              fontSize: 13,
+              fontWeight: 800,
+            }}
+          >
+            {available ? 'Available today' : 'Unavailable today'}
+          </span>
+        </div>
 
-            <span
-              style={{
-                color: '#1f2430',
-                fontSize: 13,
-                fontWeight: 800,
-              }}
-            >
-              ★ {(master.rating ?? 4.9).toFixed(1)}
-            </span>
-          </div>
+        <div />
 
+        <div
+          style={{
+            marginTop: 4,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            flexWrap: 'wrap',
+          }}
+        >
+          <span
+            style={{
+              color: '#1f2430',
+              fontSize: 15,
+              fontWeight: 800,
+            }}
+          >
+            ★ {(master.rating ?? 4.9).toFixed(1)}
+          </span>
+
+          <span
+            style={{
+              color: '#3c3128',
+              fontSize: 15,
+              fontWeight: 800,
+            }}
+          >
+            {startingPrice}
+          </span>
+        </div>
+
+        <div />
+
+        <div
+          style={{
+            marginTop: 8,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            flexWrap: 'wrap',
+          }}
+        >
           <PaymentBadges methods={master.paymentMethods} />
         </div>
       </div>
@@ -417,21 +549,22 @@ function FloatingSelectedCard({
       <div
         style={{
           marginTop: 14,
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1.15fr',
           gap: 10,
         }}
       >
         <button
           type="button"
+          onClick={openProviderPage}
           style={{
             border: `2px solid ${style.border}`,
             background: '#ffffff',
             color: '#2a2f36',
-            borderRadius: 16,
-            padding: '12px 18px',
-            fontSize: 15,
+            borderRadius: 18,
+            padding: '12px 14px',
+            fontSize: 14,
             fontWeight: 800,
-            flex: 1,
             cursor: 'pointer',
           }}
         >
@@ -446,16 +579,34 @@ function FloatingSelectedCard({
             border: 'none',
             background: '#56b7de',
             color: '#fff',
-            borderRadius: 16,
-            padding: '12px 18px',
-            fontSize: 15,
+            borderRadius: 18,
+            padding: '12px 14px',
+            fontSize: 14,
             fontWeight: 800,
-            flex: 1,
-            boxShadow: '0 8px 18px rgba(86,183,222,0.24)',
+            boxShadow: '0 8px 18px rgba(86,183,222,0.20)',
             cursor: 'pointer',
           }}
         >
           Route
+        </button>
+
+        <button
+          type="button"
+          onClick={openBooking}
+          onTouchEnd={openBooking}
+          style={{
+            border: 'none',
+            background: '#3aa44b',
+            color: '#fff',
+            borderRadius: 18,
+            padding: '12px 14px',
+            fontSize: 14,
+            fontWeight: 800,
+            boxShadow: '0 8px 18px rgba(58,164,75,0.20)',
+            cursor: 'pointer',
+          }}
+        >
+          Book now
         </button>
       </div>
     </div>
