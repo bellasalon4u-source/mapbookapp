@@ -133,6 +133,8 @@ function getCoords(master: Master, index: number) {
     [51.5202, -0.1028],
     [51.4955, -0.1722],
     [51.5308, -0.1238],
+    [51.5098, -0.1180],
+    [51.5159, -0.1426],
   ];
 
   return fallback[index % fallback.length];
@@ -543,23 +545,19 @@ function FloatingSelectedCard({
 export default function RealMap({
   masters,
   mapMode = 'map',
-  activeCategory,
   selectedMasterId,
   onMasterSelect,
   onMapBackgroundClick,
   fullScreen,
 }: RealMapProps) {
-  const filteredMasters = useMemo(() => {
-    if (!activeCategory) return masters;
-    return masters.filter((master) => inferCategory(master) === activeCategory);
-  }, [masters, activeCategory]);
+  const safeMasters = Array.isArray(masters) ? masters : [];
 
   const center = useMemo<[number, number]>(() => {
-    if (filteredMasters.length > 0) {
-      return getCoords(filteredMasters[0], 0);
+    if (safeMasters.length > 0) {
+      return getCoords(safeMasters[0], 0);
     }
     return [51.5074, -0.1278];
-  }, [filteredMasters]);
+  }, [safeMasters]);
 
   const tileUrl =
     mapMode === 'satellite'
@@ -572,12 +570,12 @@ export default function RealMap({
       : '&copy; OpenStreetMap contributors';
 
   const selectedMaster =
-    filteredMasters.find((m) => String(m.id) === String(selectedMasterId)) || null;
+    safeMasters.find((m) => String(m.id) === String(selectedMasterId)) || null;
 
   const selectedPosition = selectedMaster
     ? getCoords(
         selectedMaster,
-        filteredMasters.findIndex((m) => String(m.id) === String(selectedMaster.id))
+        safeMasters.findIndex((m) => String(m.id) === String(selectedMaster.id))
       )
     : null;
 
@@ -597,7 +595,7 @@ export default function RealMap({
         <TileLayer url={tileUrl} attribution={attribution} />
         <MapClickHandler onMapBackgroundClick={onMapBackgroundClick} />
 
-        {filteredMasters.map((master, index) => {
+        {safeMasters.map((master, index) => {
           const coords = getCoords(master, index);
           const available = isAvailableToday(master);
           const selected = String(selectedMasterId) === String(master.id);
