@@ -360,7 +360,7 @@ export default function RealMap({
         zoomControl={true}
       >
         <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
+          attribution="&copy; OpenStreetMap contributors"
           url={getTileUrl(mapMode)}
         />
 
@@ -383,9 +383,6 @@ export default function RealMap({
               icon={buildMarkerIcon(master, isSelected)}
               eventHandlers={{
                 mousedown: () => {
-                  ignoreNextMapClickRef.current = true;
-                },
-                touchstart: () => {
                   ignoreNextMapClickRef.current = true;
                 },
                 click: (event) => {
@@ -583,7 +580,9 @@ export default function RealMap({
                   fontWeight: 900,
                 }}
               >
-                <div style={{ fontSize: 16 }}>★ {Number(selectedMaster.rating || 4.7).toFixed(1)}</div>
+                <div style={{ fontSize: 16 }}>
+                  ★ {Number(selectedMaster.rating || 4.7).toFixed(1)}
+                </div>
                 <div style={{ fontSize: 16 }}>
                   From £{String(selectedMaster.price).replace(/[^\d.]/g, '') || '45'}
                 </div>
