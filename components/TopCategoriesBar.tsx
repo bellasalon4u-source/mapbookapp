@@ -314,14 +314,16 @@ export default function TopCategoriesBar({
         <div
           style={{
             position: 'fixed',
-            top: 154,
-            left: 8,
-            right: 8,
+            top: 150,
+            left: 0,
+            right: 0,
+            padding: '0 8px',
             display: 'grid',
-            gridTemplateColumns: '155px minmax(0, 1fr)',
+            gridTemplateColumns: '42% 58%',
             gap: 8,
             pointerEvents: 'auto',
             zIndex: 9999,
+            boxSizing: 'border-box',
           }}
         >
           <div
@@ -332,6 +334,7 @@ export default function TopCategoriesBar({
               padding: 10,
               boxShadow: '0 14px 30px rgba(0,0,0,0.15)',
               border: '1px solid rgba(226,218,205,0.95)',
+              minWidth: 0,
             }}
           >
             <div
@@ -363,6 +366,7 @@ export default function TopCategoriesBar({
                   background: '#fff',
                   fontSize: 15,
                   cursor: 'pointer',
+                  flexShrink: 0,
                 }}
               >
                 ✕
@@ -405,6 +409,7 @@ export default function TopCategoriesBar({
                       gap: 8,
                       fontWeight: 800,
                       fontSize: 12,
+                      minWidth: 0,
                     }}
                   >
                     <div
@@ -428,7 +433,15 @@ export default function TopCategoriesBar({
                         }}
                       />
                     </div>
-                    <span>{item.shortLabel || item.label}</span>
+                    <span
+                      style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {item.shortLabel || item.label}
+                    </span>
                   </button>
                 );
               })}
@@ -444,6 +457,7 @@ export default function TopCategoriesBar({
               boxShadow: '0 14px 30px rgba(0,0,0,0.15)',
               border: '1px solid rgba(226,218,205,0.95)',
               minHeight: 250,
+              minWidth: 0,
             }}
           >
             <div
