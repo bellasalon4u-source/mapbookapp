@@ -1,5 +1,6 @@
 export type CategoryKey =
   | 'beauty'
+  | 'barber'
   | 'wellness'
   | 'home'
   | 'repairs'
@@ -26,7 +27,7 @@ export const categories: AppCategory[] = [
   {
     id: 'beauty',
     label: 'Beauty',
-    icon: '✦',
+    icon: '🪞',
     subcategories: [
       'Hair',
       'Brows & Lashes',
@@ -38,9 +39,23 @@ export const categories: AppCategory[] = [
     ],
   },
   {
+    id: 'barber',
+    label: 'Barber',
+    icon: '🧔',
+    subcategories: [
+      'Haircut',
+      'Beard Trim',
+      'Shave',
+      'Fade',
+      'Kids Haircut',
+      'Styling',
+      'Other',
+    ],
+  },
+  {
     id: 'wellness',
     label: 'Wellness',
-    icon: '✦',
+    icon: '🪷',
     subcategories: [
       'Massage',
       'Spa',
@@ -54,10 +69,11 @@ export const categories: AppCategory[] = [
   {
     id: 'home',
     label: 'Home',
-    icon: '⌂',
+    icon: '🏡',
     subcategories: [
       'Cleaning',
       'Deep Cleaning',
+      'Garden Help',
       'Handyman',
       'Furniture Assembly',
       'Home Help',
@@ -67,7 +83,7 @@ export const categories: AppCategory[] = [
   {
     id: 'repairs',
     label: 'Repairs',
-    icon: '🔧',
+    icon: '🛠️',
     subcategories: [
       'Home Repairs',
       'Appliance Repair',
@@ -81,7 +97,7 @@ export const categories: AppCategory[] = [
   {
     id: 'tech',
     label: 'Tech',
-    icon: '📱',
+    icon: '🖥️',
     subcategories: [
       'Phone Repair',
       'Computer Repair',
