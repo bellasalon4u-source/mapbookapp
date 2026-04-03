@@ -21,55 +21,58 @@ const topOrder = [
   'pets',
 ];
 
-const displayConfig: Record<
+const iconSrcMap: Record<string, string> = {
+  more: '/ui/categories/more.png',
+  beauty: '/ui/categories/beauty.png',
+  barber: '/ui/categories/barber.png',
+  wellness: '/ui/categories/wellness.png',
+  home: '/ui/categories/home.png',
+  repairs: '/ui/categories/repairs.png',
+  tech: '/ui/categories/tech.png',
+  pets: '/ui/categories/pets.png',
+};
+
+const tileStyleMap: Record<
   string,
-  { label: string; icon: string; bg: string; shadow: string }
+  { label: string; bg: string; shadow: string }
 > = {
   beauty: {
     label: 'Beauty',
-    icon: '🪞',
     bg: 'linear-gradient(180deg, #ff86b9 0%, #ff5f9f 100%)',
     shadow: '0 5px 12px rgba(255,95,159,0.20)',
   },
   barber: {
     label: 'Barber',
-    icon: '🧔',
     bg: 'linear-gradient(180deg, #63bbff 0%, #3498f5 100%)',
     shadow: '0 5px 12px rgba(52,152,245,0.18)',
   },
   wellness: {
     label: 'Wellness',
-    icon: '🪷',
     bg: 'linear-gradient(180deg, #73ea6f 0%, #44cf56 100%)',
     shadow: '0 5px 12px rgba(68,207,86,0.18)',
   },
   home: {
     label: 'Home',
-    icon: '🏡',
     bg: 'linear-gradient(180deg, #ffd84a 0%, #ffbf26 100%)',
     shadow: '0 5px 12px rgba(255,191,38,0.18)',
   },
   repairs: {
     label: 'Repairs',
-    icon: '🛠️',
     bg: 'linear-gradient(180deg, #50c2ff 0%, #2797f4 100%)',
     shadow: '0 5px 12px rgba(39,151,244,0.18)',
   },
   tech: {
     label: 'Tech',
-    icon: '🖥️',
     bg: 'linear-gradient(180deg, #b56eff 0%, #8d50ff 100%)',
     shadow: '0 5px 12px rgba(141,80,255,0.18)',
   },
   pets: {
     label: 'Pets',
-    icon: '🐾',
     bg: 'linear-gradient(180deg, #ffc338 0%, #ffa11f 100%)',
     shadow: '0 5px 12px rgba(255,161,31,0.18)',
   },
   more: {
     label: 'More',
-    icon: '⋮',
     bg: 'linear-gradient(180deg, #173552 0%, #0f2238 100%)',
     shadow: '0 5px 12px rgba(15,34,56,0.20)',
   },
@@ -164,17 +167,25 @@ export default function TopCategoriesBar({
                 width: 46,
                 height: 64,
                 borderRadius: 16,
-                background: displayConfig.more.bg,
-                color: '#fff',
+                background: tileStyleMap.more.bg,
+                boxShadow: tileStyleMap.more.shadow,
+                border: '2px solid rgba(255,255,255,0.82)',
+                overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 24,
-                boxShadow: displayConfig.more.shadow,
-                border: '2px solid rgba(255,255,255,0.82)',
               }}
             >
-              ⋮
+              <img
+                src={iconSrcMap.more}
+                alt="More"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                }}
+              />
             </div>
 
             <div
@@ -209,8 +220,9 @@ export default function TopCategoriesBar({
             }}
           >
             {visibleTopItems.map((item) => {
-              const cfg = displayConfig[item.id];
+              const cfg = tileStyleMap[item.id];
               const isActive = activeCategory === item.id;
+              const src = iconSrcMap[item.id];
 
               return (
                 <button
@@ -237,18 +249,26 @@ export default function TopCategoriesBar({
                       height: 66,
                       borderRadius: 18,
                       background: cfg.bg,
-                      color: '#fff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 28,
                       boxShadow: cfg.shadow,
                       border: isActive
                         ? '3px solid rgba(255,255,255,0.95)'
                         : '2px solid rgba(255,255,255,0.82)',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
-                    {cfg.icon}
+                    <img
+                      src={src}
+                      alt={cfg.label}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                    />
                   </div>
 
                   <div
@@ -359,7 +379,8 @@ export default function TopCategoriesBar({
             >
               {categories.map((item) => {
                 const active = expandedCategory === item.id;
-                const cfg = displayConfig[item.id] || displayConfig.beauty;
+                const src = iconSrcMap[item.id] || iconSrcMap.beauty;
+                const cfg = tileStyleMap[item.id] || tileStyleMap.beauty;
 
                 return (
                   <button
@@ -375,9 +396,9 @@ export default function TopCategoriesBar({
                       textAlign: 'left',
                       borderRadius: 14,
                       padding: '9px 9px',
-                      background: active ? cfg.bg : '#f8f5ef',
-                      color: active ? '#fff' : '#243242',
-                      boxShadow: active ? cfg.shadow : 'none',
+                      background: active ? '#eef7ff' : '#f8f5ef',
+                      color: '#243242',
+                      boxShadow: active ? '0 6px 14px rgba(0,0,0,0.08)' : 'none',
                       display: 'flex',
                       alignItems: 'center',
                       gap: 8,
@@ -385,9 +406,27 @@ export default function TopCategoriesBar({
                       fontSize: 12,
                     }}
                   >
-                    <span style={{ fontSize: 18, lineHeight: 1 }}>
-                      {cfg.icon}
-                    </span>
+                    <div
+                      style={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: 10,
+                        overflow: 'hidden',
+                        flexShrink: 0,
+                        background: cfg.bg,
+                      }}
+                    >
+                      <img
+                        src={src}
+                        alt={item.label}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block',
+                        }}
+                      />
+                    </div>
                     <span>{item.shortLabel || item.label}</span>
                   </button>
                 );
