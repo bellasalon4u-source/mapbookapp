@@ -11,8 +11,6 @@ import {
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-type PaymentMethod = 'cash' | 'card' | 'wallet';
-
 type Master = {
   id: string | number;
   name?: string;
@@ -28,7 +26,7 @@ type Master = {
   latitude?: number;
   longitude?: number;
   avatar?: string;
-  paymentMethods?: PaymentMethod[];
+  paymentMethods?: string[];
   description?: string;
   price?: string;
   subcategory?: string;
@@ -174,7 +172,7 @@ function createCirclePin({
   });
 }
 
-function PaymentIcons({ methods }: { methods?: PaymentMethod[] }) {
+function PaymentIcons({ methods }: { methods?: string[] }) {
   const list = methods && methods.length > 0 ? methods : ['cash', 'card'];
 
   return (
