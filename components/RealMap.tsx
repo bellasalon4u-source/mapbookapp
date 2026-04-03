@@ -11,6 +11,8 @@ import {
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
+type PaymentMethod = 'cash' | 'card' | 'wallet';
+
 type Master = {
   id: string | number;
   name?: string;
@@ -26,7 +28,7 @@ type Master = {
   latitude?: number;
   longitude?: number;
   avatar?: string;
-  paymentMethods?: string[];
+  paymentMethods?: PaymentMethod[];
   description?: string;
   price?: string;
   subcategory?: string;
@@ -45,25 +47,22 @@ type RealMapProps = {
   fullScreen?: boolean;
 };
 
-const CATEGORY_STYLES: Record<
-  string,
-  {
-    border: string;
-    tagBg: string;
-    tagText: string;
-  }
-> = {
-  beauty: { border: '#efb3c4', tagBg: '#fde8ef', tagText: '#b84f73' },
-  wellness: { border: '#abdcb3', tagBg: '#e9f8ec', tagText: '#348d4e' },
-  home: { border: '#e5cfaa', tagBg: '#f9efdd', tagText: '#9e7343' },
-  repairs: { border: '#a9c4ef', tagBg: '#e8f0ff', tagText: '#315ea6' },
-  tech: { border: '#bcc6d2', tagBg: '#eef2f7', tagText: '#445365' },
-  pets: { border: '#b7dcae', tagBg: '#ebf7e8', tagText: '#3b8240' },
-  auto: { border: '#f0c28f', tagBg: '#fdeedc', tagText: '#ae651d' },
-  moving: { border: '#c3bdf0', tagBg: '#efedff', tagText: '#6658bf' },
-  activities: { border: '#e7b2c8', tagBg: '#fcecf3', tagText: '#ab5176' },
-  events: { border: '#efb3b3', tagBg: '#fdecec', tagText: '#b04a4a' },
-  creative: { border: '#cbbcf0', tagBg: '#f1ecff', tagText: '#7459b6' },
+const CATEGORY_COLORS: Record<string, string> = {
+  beauty: '#ff73a6',
+  barber: '#45a7ff',
+  wellness: '#52d95c',
+  home: '#ffd53a',
+  repairs: '#3fb8ff',
+  tech: '#9b63ff',
+  pets: '#ffb32d',
+  auto: '#8b5cf6',
+  moving: '#ff9a3d',
+  activities: '#ff6ea8',
+  events: '#ff7070',
+  creative: '#a56bff',
+  fashion: '#ff7fb8',
+  fitness: '#4fd18c',
+  education: '#4d8cff',
 };
 
 function getCoords(master: Master, index: number) {
@@ -98,6 +97,7 @@ function inferCategory(master: Master): string {
 function getCategoryLabel(category: string) {
   const map: Record<string, string> = {
     beauty: 'Beauty',
+    barber: 'Barber',
     wellness: 'Wellness',
     home: 'Home',
     repairs: 'Repairs',
@@ -108,6 +108,9 @@ function getCategoryLabel(category: string) {
     activities: 'Activities',
     events: 'Events',
     creative: 'Creative',
+    fashion: 'Fashion',
+    fitness: 'Fitness',
+    education: 'Education',
   };
 
   return map[category] || 'Beauty';
@@ -145,34 +148,91 @@ function getStartingPrice(master: Master) {
   return 'From £45';
 }
 
-function createCirclePin({
-  available,
-  selected,
-}: {
-  available: boolean;
-  selected: boolean;
-}) {
-  const size = selected ? 34 : 28;
-  const fill = available ? '#32c255' : '#f05d62';
+function getCategoryAccent(category: string) {
+  return CATEGORY_COLORS[category] || CATEGORY_COLORS.beauty;
+}
+
+function createAvatarPin(master: Master, selected: boolean) {
+  const category = inferCategory(master);
+  const accent = getCategoryAccent(category);
+  const available = isAvailableToday(master);
+
+  const size = selected ? 72 : 64;
+  const borderColor = available ? '#31c64a' : '#ff5c70';
+  const image =
+    master.avatar ||
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80';
 
   return L.divIcon({
     className: '',
     html: `
       <div style="
-        width:${size}px;
-        height:${size}px;
-        border-radius:999px;
-        background:${fill};
-        border:4px solid #1e232a;
-        box-shadow:0 6px 14px rgba(0,0,0,0.18);
-      "></div>
+        position: relative;
+        width: ${size}px;
+        height: ${size + 12}px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        filter: drop-shadow(0 10px 18px rgba(0,0,0,0.18));
+      ">
+        <div style="
+          position: absolute;
+          left: 50%;
+          bottom: 0;
+          width: 18px;
+          height: 18px;
+          background: white;
+          border-right: 4px solid ${borderColor};
+          border-bottom: 4px solid ${borderColor};
+          transform: translateX(-50%) rotate(45deg);
+          border-bottom-right-radius: 4px;
+        "></div>
+
+        <div style="
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: ${size}px;
+          height: ${size}px;
+          border-radius: 999px;
+          background: white;
+          border: 4px solid ${borderColor};
+          box-sizing: border-box;
+          overflow: hidden;
+        ">
+          <img
+            src="${image}"
+            alt=""
+            style="
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              display: block;
+            "
+          />
+        </div>
+
+        <div style="
+          position: absolute;
+          right: ${selected ? 0 : 1}px;
+          top: ${selected ? 38 : 35}px;
+          width: ${selected ? 26 : 24}px;
+          height: ${selected ? 26 : 24}px;
+          border-radius: 999px;
+          background: ${accent};
+          border: 3px solid white;
+          box-sizing: border-box;
+        "></div>
+      </div>
     `,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
+    iconSize: [size, size + 12],
+    iconAnchor: [size / 2, size + 8],
+    popupAnchor: [0, -(size / 2)],
   });
 }
 
-function PaymentIcons({ methods }: { methods?: string[] }) {
+function PaymentIcons({ methods }: { methods?: PaymentMethod[] }) {
   const list = methods && methods.length > 0 ? methods : ['cash', 'card'];
 
   return (
@@ -318,11 +378,11 @@ function FloatingSelectedCard({
   point: { x: number; y: number };
 }) {
   const category = inferCategory(master);
-  const style = CATEGORY_STYLES[category] || CATEGORY_STYLES.beauty;
   const available = isAvailableToday(master);
   const startingPrice = getStartingPrice(master);
+  const accent = getCategoryAccent(category);
 
-  const cardWidth = 285;
+  const cardWidth = 290;
   const viewportWidth =
     typeof window !== 'undefined' ? window.innerWidth : 390;
 
@@ -330,20 +390,11 @@ function FloatingSelectedCard({
     8,
     Math.min(point.x - 110, viewportWidth - cardWidth - 8)
   );
-  const top = Math.max(12, point.y - 104);
+  const top = Math.max(12, point.y - 118);
 
   const openMasterPage = (e?: React.MouseEvent | React.TouchEvent) => {
     e?.stopPropagation();
     window.location.href = `/master/${master.id}`;
-  };
-
-  const openRoute = (e?: React.MouseEvent | React.TouchEvent) => {
-    e?.stopPropagation();
-    const lat = master.lat ?? master.latitude;
-    const lng = master.lng ?? master.longitude;
-    if (typeof lat !== 'number' || typeof lng !== 'number') return;
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-    window.open(url, '_blank');
   };
 
   const openBooking = (e?: React.MouseEvent | React.TouchEvent) => {
@@ -358,10 +409,10 @@ function FloatingSelectedCard({
         left,
         top,
         width: cardWidth,
-        background: '#ffffff',
-        border: `1.5px solid ${style.border}`,
-        borderRadius: 20,
-        boxShadow: '0 12px 24px rgba(0,0,0,0.12)',
+        background: 'rgba(255,255,255,0.98)',
+        border: '1px solid #eadfce',
+        borderRadius: 22,
+        boxShadow: '0 16px 34px rgba(0,0,0,0.16)',
         padding: 12,
         zIndex: 1000,
         pointerEvents: 'auto',
@@ -379,8 +430,8 @@ function FloatingSelectedCard({
           width: 18,
           height: 18,
           background: '#ffffff',
-          borderRight: `1.5px solid ${style.border}`,
-          borderBottom: `1.5px solid ${style.border}`,
+          borderRight: '1px solid #eadfce',
+          borderBottom: '1px solid #eadfce',
           transform: 'rotate(45deg)',
         }}
       />
@@ -388,19 +439,19 @@ function FloatingSelectedCard({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '76px 1fr auto',
+          gridTemplateColumns: '80px 1fr auto',
           gap: 10,
           alignItems: 'start',
         }}
       >
         <div
           style={{
-            width: 76,
-            height: 76,
-            borderRadius: 18,
+            width: 80,
+            height: 80,
+            borderRadius: 20,
             overflow: 'hidden',
-            border: '3px solid #fff',
-            boxShadow: '0 5px 14px rgba(0,0,0,0.10)',
+            border: available ? '4px solid #31c64a' : '4px solid #ff5c70',
+            boxShadow: '0 6px 14px rgba(0,0,0,0.10)',
             background: '#eee',
             gridRow: '1 / span 4',
           }}
@@ -422,8 +473,8 @@ function FloatingSelectedCard({
 
         <div
           style={{
-            fontSize: 15,
-            fontWeight: 800,
+            fontSize: 16,
+            fontWeight: 900,
             color: '#1f2430',
             lineHeight: 1.15,
             alignSelf: 'center',
@@ -432,7 +483,7 @@ function FloatingSelectedCard({
           {master.name || master.title || 'Provider'}
         </div>
 
-        <div style={{ paddingTop: 1 }}>
+        <div style={{ paddingTop: 2 }}>
           <FavoriteButton masterId={master.id} size={23} />
         </div>
 
@@ -457,22 +508,11 @@ function FloatingSelectedCard({
           >
             🏅 Verified Pro
           </div>
-        </div>
 
-        <div />
-
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 6,
-            alignItems: 'center',
-          }}
-        >
           <span
             style={{
-              background: style.tagBg,
-              color: style.tagText,
+              background: accent,
+              color: '#fff',
               borderRadius: 999,
               padding: '5px 10px',
               fontSize: 11,
@@ -482,16 +522,18 @@ function FloatingSelectedCard({
           >
             {getCategoryLabel(category)}
           </span>
+        </div>
 
-          <span
-            style={{
-              color: available ? '#2f9c47' : '#d65a5a',
-              fontSize: 12,
-              fontWeight: 800,
-            }}
-          >
-            {available ? 'Available today' : 'Unavailable today'}
-          </span>
+        <div />
+
+        <div
+          style={{
+            color: available ? '#2f9c47' : '#d65a5a',
+            fontSize: 13,
+            fontWeight: 900,
+          }}
+        >
+          {available ? 'Available today' : 'Unavailable today'}
         </div>
 
         <div />
@@ -509,7 +551,7 @@ function FloatingSelectedCard({
             style={{
               color: '#1f2430',
               fontSize: 14,
-              fontWeight: 800,
+              fontWeight: 900,
             }}
           >
             ★ {(master.rating ?? 4.9).toFixed(1)}
@@ -519,7 +561,7 @@ function FloatingSelectedCard({
             style={{
               color: '#3c3128',
               fontSize: 14,
-              fontWeight: 800,
+              fontWeight: 900,
             }}
           >
             {startingPrice}
@@ -546,7 +588,7 @@ function FloatingSelectedCard({
         style={{
           marginTop: 12,
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1.1fr',
+          gridTemplateColumns: '1fr 1.1fr',
           gap: 8,
         }}
       >
@@ -555,13 +597,13 @@ function FloatingSelectedCard({
           onClick={openMasterPage}
           onTouchEnd={openMasterPage}
           style={{
-            border: `2px solid ${style.border}`,
+            border: '2px solid #eadfce',
             background: '#ffffff',
             color: '#2a2f36',
             borderRadius: 16,
-            padding: '10px 12px',
-            fontSize: 13,
-            fontWeight: 800,
+            padding: '11px 12px',
+            fontSize: 14,
+            fontWeight: 900,
             cursor: 'pointer',
           }}
         >
@@ -570,36 +612,17 @@ function FloatingSelectedCard({
 
         <button
           type="button"
-          onClick={openRoute}
-          onTouchEnd={openRoute}
-          style={{
-            border: 'none',
-            background: '#56b7de',
-            color: '#fff',
-            borderRadius: 16,
-            padding: '10px 12px',
-            fontSize: 13,
-            fontWeight: 800,
-            boxShadow: '0 8px 18px rgba(86,183,222,0.18)',
-            cursor: 'pointer',
-          }}
-        >
-          Route
-        </button>
-
-        <button
-          type="button"
           onClick={openBooking}
           onTouchEnd={openBooking}
           style={{
             border: 'none',
-            background: '#3aa44b',
+            background: '#1fd13f',
             color: '#fff',
             borderRadius: 16,
-            padding: '10px 12px',
-            fontSize: 13,
-            fontWeight: 800,
-            boxShadow: '0 8px 18px rgba(58,164,75,0.18)',
+            padding: '11px 12px',
+            fontSize: 14,
+            fontWeight: 900,
+            boxShadow: '0 8px 18px rgba(31,209,63,0.20)',
             cursor: 'pointer',
           }}
         >
@@ -610,10 +633,28 @@ function FloatingSelectedCard({
   );
 }
 
+function FitMapToMarkers({ masters }: { masters: Master[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!masters.length) return;
+
+    if (masters.length === 1) {
+      const point = getCoords(masters[0], 0);
+      map.setView(point, 12);
+      return;
+    }
+
+    const bounds = masters.map((master, index) => getCoords(master, index));
+    map.fitBounds(bounds, { padding: [40, 40] });
+  }, [map, masters]);
+
+  return null;
+}
+
 export default function RealMap({
   masters,
   mapMode = 'map',
-  activeCategory,
   selectedMasterId,
   onMasterSelect,
   onMapBackgroundClick,
@@ -623,24 +664,12 @@ export default function RealMap({
 
   const safeMasters = Array.isArray(masters) ? masters : [];
 
-  const visibleMasters = useMemo(() => {
-    if (!activeCategory) return safeMasters;
-
-    return safeMasters.filter((master) => {
-      const category = inferCategory(master);
-      return category === activeCategory;
-    });
-  }, [safeMasters, activeCategory]);
-
   const center = useMemo<[number, number]>(() => {
-    if (visibleMasters.length > 0) {
-      return getCoords(visibleMasters[0], 0);
-    }
     if (safeMasters.length > 0) {
       return getCoords(safeMasters[0], 0);
     }
     return [51.5074, -0.1278];
-  }, [visibleMasters, safeMasters]);
+  }, [safeMasters]);
 
   const tileUrl =
     mapMode === 'satellite'
@@ -653,12 +682,12 @@ export default function RealMap({
       : '&copy; OpenStreetMap contributors';
 
   const selectedMaster =
-    visibleMasters.find((m) => String(m.id) === String(selectedMasterId)) || null;
+    safeMasters.find((m) => String(m.id) === String(selectedMasterId)) || null;
 
   const selectedPosition = selectedMaster
     ? getCoords(
         selectedMaster,
-        visibleMasters.findIndex((m) => String(m.id) === String(selectedMaster.id))
+        safeMasters.findIndex((m) => String(m.id) === String(selectedMaster.id))
       )
     : null;
 
@@ -677,22 +706,22 @@ export default function RealMap({
         zoomControl={true}
       >
         <TileLayer url={tileUrl} attribution={attribution} />
+        <FitMapToMarkers masters={safeMasters} />
         <MapClickHandler onMapBackgroundClick={onMapBackgroundClick} />
         <MapBridge
           selectedPosition={selectedPosition}
           onPointChange={setScreenPoint}
         />
 
-        {visibleMasters.map((master, index) => {
+        {safeMasters.map((master, index) => {
           const coords = getCoords(master, index);
-          const available = isAvailableToday(master);
           const selected = String(selectedMasterId) === String(master.id);
 
           return (
             <Marker
               key={String(master.id)}
               position={coords}
-              icon={createCirclePin({ available, selected })}
+              icon={createAvatarPin(master, selected)}
               bubblingMouseEvents={false}
               eventHandlers={{
                 click: (e) => {
