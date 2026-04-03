@@ -267,10 +267,25 @@ export default function HomePage() {
                 router.push('/categories');
                 return;
               }
-
               setActiveCategory(category);
             }}
           />
+        </section>
+
+        <section style={{ padding: '8px 16px 0' }}>
+          <div
+            style={{
+              background: '#fff',
+              border: '1px solid #e7ddd0',
+              borderRadius: 14,
+              padding: '10px 12px',
+              fontSize: 14,
+              fontWeight: 700,
+              color: '#2a2f36',
+            }}
+          >
+            Category: {activeCategory} • Pins: {filteredMasters.length}
+          </div>
         </section>
 
         <section style={{ padding: '10px 0 0' }}>
@@ -354,11 +369,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section
-          style={{
-            padding: '14px 16px 0',
-          }}
-        >
+        <section style={{ padding: '14px 16px 0' }}>
           <div
             style={{
               display: 'flex',
