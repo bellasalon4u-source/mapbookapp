@@ -140,8 +140,7 @@ export default function HomePage() {
         .toLowerCase()
         .trim();
 
-      const categoryMatch =
-        !activeCategory || masterCategory === activeCategory;
+      const categoryMatch = masterCategory === activeCategory;
 
       const searchMatch =
         !q ||
@@ -154,24 +153,14 @@ export default function HomePage() {
     });
   }, [allMasters, activeCategory, search]);
 
-  const mapMasters = filteredMasters;
-
   useEffect(() => {
-    if (!selectedMaster) return;
-
-    const exists = mapMasters.some(
-      (item: any) => String(item.id) === String(selectedMaster.id)
-    );
-
-    if (!exists) {
-      setSelectedMaster(null);
-    }
-  }, [mapMasters, selectedMaster]);
+    setSelectedMaster(null);
+  }, [activeCategory, search]);
 
   const mapKey = useMemo(() => {
-    const ids = mapMasters.map((item: any) => String(item.id)).join('|');
+    const ids = filteredMasters.map((item: any) => String(item.id)).join('|');
     return `${activeCategory}-${search}-${mapMode}-${ids}`;
-  }, [activeCategory, search, mapMode, mapMasters]);
+  }, [activeCategory, search, mapMode, filteredMasters]);
 
   return (
     <main
@@ -280,7 +269,6 @@ export default function HomePage() {
               }
 
               setActiveCategory(category);
-              setSelectedMaster(null);
             }}
           />
         </section>
@@ -302,7 +290,7 @@ export default function HomePage() {
             >
               <RealMap
                 key={mapKey}
-                masters={mapMasters}
+                masters={filteredMasters}
                 mapMode={mapMode}
                 activeCategory={activeCategory}
                 selectedMasterId={selectedMaster?.id ?? null}
