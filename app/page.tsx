@@ -140,13 +140,8 @@ export default function HomePage() {
     const q = search.trim().toLowerCase();
 
     return allMasters.filter((master: any) => {
-      const masterCategory = String(master.category || '')
-        .toLowerCase()
-        .trim();
-
-      const masterSubcategory = String(master.subcategory || '')
-        .toLowerCase()
-        .trim();
+      const masterCategory = String(master.category || '').toLowerCase().trim();
+      const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
 
       const categoryMatch = masterCategory === activeCategory;
 
@@ -184,7 +179,7 @@ export default function HomePage() {
         background: '#f7f3eb',
         fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
-        paddingBottom: 126,
+        paddingBottom: 118,
       }}
     >
       <div
@@ -192,27 +187,27 @@ export default function HomePage() {
           maxWidth: 430,
           margin: '0 auto',
           background: '#f7f3eb',
-          borderTop: '6px solid transparent',
+          borderTop: '5px solid transparent',
           borderImage: `${borderGradient} 1`,
           boxShadow: '0 0 0 1px rgba(226,218,205,0.35)',
         }}
       >
-        <section style={{ padding: '18px 16px 0' }}>
+        <section style={{ padding: '12px 14px 0' }}>
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: '1fr auto auto',
-              gap: 10,
+              gap: 8,
               alignItems: 'center',
               background: '#ffffff',
-              borderRadius: 22,
-              padding: '12px 12px 12px 16px',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+              borderRadius: 20,
+              padding: '10px 10px 10px 14px',
+              boxShadow: '0 6px 18px rgba(0,0,0,0.07)',
               border: '1px solid #ece7df',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 22, color: '#2f8df5' }}>🔎</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 20, color: '#2f8df5' }}>🔎</span>
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -223,7 +218,7 @@ export default function HomePage() {
                   border: 'none',
                   outline: 'none',
                   background: 'transparent',
-                  fontSize: 16,
+                  fontSize: 15,
                   color: '#2b2f36',
                 }}
               />
@@ -240,21 +235,21 @@ export default function HomePage() {
                 background: '#fff',
                 color: '#1f2430',
                 borderRadius: 999,
-                minWidth: 82,
-                height: 52,
-                padding: '0 14px',
-                fontSize: 16,
+                minWidth: 74,
+                height: 46,
+                padding: '0 12px',
+                fontSize: 15,
                 fontWeight: 800,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 8,
+                gap: 6,
                 cursor: 'pointer',
               }}
               title="Change language"
             >
-              <span style={{ fontSize: 24 }}>
+              <span style={{ fontSize: 20 }}>
                 {language === 'EN' ? '🇬🇧' : language === 'UA' ? '🇺🇦' : '🇷🇺'}
               </span>
               <span>{language}</span>
@@ -266,11 +261,11 @@ export default function HomePage() {
                 border: '2px solid #fff',
                 background: '#f4efe7',
                 borderRadius: 999,
-                width: 52,
-                height: 52,
+                width: 46,
+                height: 46,
                 padding: 0,
                 overflow: 'hidden',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
                 cursor: 'pointer',
               }}
             >
@@ -288,7 +283,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '14px 0 0' }}>
+        <section style={{ padding: '10px 0 0' }}>
           <TopCategoriesBar
             activeCategory={activeCategory}
             activeSubcategory={activeSubcategory}
@@ -304,12 +299,12 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '10px 16px 0' }}>
+        <section style={{ padding: '8px 14px 0' }}>
           <div
             style={{
               display: 'flex',
               flexWrap: 'wrap',
-              gap: 10,
+              gap: 8,
               alignItems: 'center',
             }}
           >
@@ -319,10 +314,10 @@ export default function HomePage() {
                 background: '#fff',
                 color: '#2a3442',
                 borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 14,
+                padding: '9px 13px',
+                fontSize: 13,
                 fontWeight: 900,
-                boxShadow: '0 4px 10px rgba(0,0,0,0.04)',
+                boxShadow: '0 3px 8px rgba(0,0,0,0.04)',
               }}
             >
               {categories.find((item) => item.id === activeCategory)?.label || activeCategory}
@@ -336,18 +331,18 @@ export default function HomePage() {
                   background: '#ffe55c',
                   color: '#2a2f36',
                   borderRadius: 999,
-                  padding: '10px 14px',
-                  fontSize: 14,
+                  padding: '9px 13px',
+                  fontSize: 13,
                   fontWeight: 900,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 10,
-                  boxShadow: '0 6px 14px rgba(255,214,64,0.25)',
+                  gap: 8,
+                  boxShadow: '0 5px 12px rgba(255,214,64,0.20)',
                 }}
               >
                 <span>{activeSubcategory}</span>
-                <span style={{ fontSize: 18, lineHeight: 1 }}>✕</span>
+                <span style={{ fontSize: 16, lineHeight: 1 }}>✕</span>
               </button>
             ) : null}
 
@@ -362,8 +357,8 @@ export default function HomePage() {
                 background: '#fff',
                 color: '#5d6672',
                 borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 14,
+                padding: '9px 13px',
+                fontSize: 13,
                 fontWeight: 800,
                 cursor: 'pointer',
               }}
@@ -378,10 +373,10 @@ export default function HomePage() {
                 background: '#eefbe9',
                 color: '#2f9c47',
                 borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 14,
+                padding: '9px 13px',
+                fontSize: 13,
                 fontWeight: 900,
-                boxShadow: '0 4px 12px rgba(47,156,71,0.10)',
+                boxShadow: '0 3px 10px rgba(47,156,71,0.08)',
               }}
             >
               {filteredMasters.filter((item: any) => item.availableNow).length} pros available now
@@ -389,7 +384,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '10px 0 0' }}>
+        <section style={{ padding: '8px 0 0' }}>
           <div
             style={{
               background: '#ffffff',
@@ -399,7 +394,7 @@ export default function HomePage() {
           >
             <div
               style={{
-                height: 470,
+                height: 400,
                 position: 'relative',
                 overflow: 'hidden',
               }}
@@ -417,11 +412,11 @@ export default function HomePage() {
               <div
                 style={{
                   position: 'absolute',
-                  right: 12,
-                  top: 12,
+                  right: 10,
+                  top: 10,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 10,
+                  gap: 8,
                   zIndex: 30,
                 }}
               >
@@ -432,13 +427,13 @@ export default function HomePage() {
                     )
                   }
                   style={{
-                    width: 48,
-                    height: 48,
+                    width: 44,
+                    height: 44,
                     borderRadius: 999,
                     border: '1px solid #e5ddd1',
                     background: 'rgba(255,255,255,0.95)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
-                    fontSize: 20,
+                    boxShadow: '0 3px 10px rgba(0,0,0,0.09)',
+                    fontSize: 18,
                     color: '#3d454f',
                     display: 'flex',
                     alignItems: 'center',
@@ -453,13 +448,13 @@ export default function HomePage() {
                 <button
                   onClick={() => setSelectedMaster(null)}
                   style={{
-                    width: 48,
-                    height: 48,
+                    width: 44,
+                    height: 44,
                     borderRadius: 999,
                     border: '1px solid #e5ddd1',
                     background: 'rgba(255,255,255,0.95)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
-                    fontSize: 20,
+                    boxShadow: '0 3px 10px rgba(0,0,0,0.09)',
+                    fontSize: 18,
                     color: '#3d454f',
                     cursor: 'pointer',
                   }}
@@ -472,30 +467,30 @@ export default function HomePage() {
               <div
                 style={{
                   position: 'absolute',
-                  right: 12,
-                  bottom: 14,
+                  right: 10,
+                  bottom: 10,
                   background: 'rgba(255,255,255,0.96)',
-                  borderRadius: 18,
-                  padding: '14px 16px',
-                  boxShadow: '0 8px 22px rgba(0,0,0,0.12)',
+                  borderRadius: 16,
+                  padding: '12px 14px',
+                  boxShadow: '0 6px 18px rgba(0,0,0,0.10)',
                   zIndex: 20,
-                  minWidth: 138,
+                  minWidth: 128,
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
-                    fontSize: 14,
+                    gap: 8,
+                    fontSize: 13,
                     fontWeight: 800,
                     color: '#2c3542',
                   }}
                 >
                   <span
                     style={{
-                      width: 14,
-                      height: 14,
+                      width: 12,
+                      height: 12,
                       borderRadius: 999,
                       background: '#fff',
                       border: '4px solid #31c64a',
@@ -507,19 +502,19 @@ export default function HomePage() {
 
                 <div
                   style={{
-                    marginTop: 10,
+                    marginTop: 8,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
-                    fontSize: 14,
+                    gap: 8,
+                    fontSize: 13,
                     fontWeight: 800,
                     color: '#2c3542',
                   }}
                 >
                   <span
                     style={{
-                      width: 14,
-                      height: 14,
+                      width: 12,
+                      height: 12,
                       borderRadius: 999,
                       background: '#fff',
                       border: '4px solid #ff5c70',
@@ -533,19 +528,19 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '14px 16px 0' }}>
+        <section style={{ padding: '12px 14px 0' }}>
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: 12,
+              marginBottom: 10,
             }}
           >
             <h2
               style={{
                 margin: 0,
-                fontSize: 18,
+                fontSize: 17,
                 fontWeight: 900,
                 color: '#223145',
               }}
@@ -558,7 +553,7 @@ export default function HomePage() {
               style={{
                 border: 'none',
                 background: 'transparent',
-                fontSize: 26,
+                fontSize: 24,
                 color: '#9aa0a8',
                 lineHeight: 1,
                 cursor: 'pointer',
@@ -593,7 +588,7 @@ export default function HomePage() {
                     borderRadius: 14,
                     overflow: 'hidden',
                     background: '#ddd',
-                    boxShadow: '0 5px 14px rgba(0,0,0,0.08)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.07)',
                   }}
                 >
                   <img
@@ -609,8 +604,8 @@ export default function HomePage() {
                 </div>
                 <div
                   style={{
-                    marginTop: 8,
-                    fontSize: 12,
+                    marginTop: 7,
+                    fontSize: 11,
                     lineHeight: 1.2,
                     fontWeight: 800,
                     color: '#253140',
