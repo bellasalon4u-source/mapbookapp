@@ -19,68 +19,59 @@ const topOrder = [
   'repairs',
   'tech',
   'pets',
-  'more',
 ];
 
 const displayConfig: Record<
   string,
-  { label: string; icon: string; bg: string; color: string; shadow: string }
+  { label: string; icon: string; bg: string; shadow: string }
 > = {
   beauty: {
     label: 'Beauty',
     icon: '🪞',
-    bg: 'linear-gradient(180deg, #ff80b5 0%, #ff5fa0 100%)',
-    color: '#ffffff',
-    shadow: '0 6px 14px rgba(255,95,160,0.22)',
+    bg: 'linear-gradient(180deg, #ff86b9 0%, #ff5f9f 100%)',
+    shadow: '0 5px 12px rgba(255,95,159,0.20)',
   },
   barber: {
     label: 'Barber',
     icon: '🧔',
-    bg: 'linear-gradient(180deg, #5cb7ff 0%, #3297f4 100%)',
-    color: '#ffffff',
-    shadow: '0 6px 14px rgba(50,151,244,0.20)',
+    bg: 'linear-gradient(180deg, #63bbff 0%, #3498f5 100%)',
+    shadow: '0 5px 12px rgba(52,152,245,0.18)',
   },
   wellness: {
     label: 'Wellness',
     icon: '🪷',
-    bg: 'linear-gradient(180deg, #6be86a 0%, #3ccf56 100%)',
-    color: '#ffffff',
-    shadow: '0 6px 14px rgba(60,207,86,0.20)',
+    bg: 'linear-gradient(180deg, #73ea6f 0%, #44cf56 100%)',
+    shadow: '0 5px 12px rgba(68,207,86,0.18)',
   },
   home: {
     label: 'Home',
     icon: '🏡',
-    bg: 'linear-gradient(180deg, #ffd84c 0%, #ffbf26 100%)',
-    color: '#ffffff',
-    shadow: '0 6px 14px rgba(255,191,38,0.22)',
+    bg: 'linear-gradient(180deg, #ffd84a 0%, #ffbf26 100%)',
+    shadow: '0 5px 12px rgba(255,191,38,0.18)',
   },
   repairs: {
     label: 'Repairs',
     icon: '🛠️',
-    bg: 'linear-gradient(180deg, #4abfff 0%, #2196f3 100%)',
-    color: '#ffffff',
-    shadow: '0 6px 14px rgba(33,150,243,0.20)',
+    bg: 'linear-gradient(180deg, #50c2ff 0%, #2797f4 100%)',
+    shadow: '0 5px 12px rgba(39,151,244,0.18)',
   },
   tech: {
     label: 'Tech',
     icon: '🖥️',
-    bg: 'linear-gradient(180deg, #b46cff 0%, #8a4dff 100%)',
-    color: '#ffffff',
-    shadow: '0 6px 14px rgba(138,77,255,0.20)',
+    bg: 'linear-gradient(180deg, #b56eff 0%, #8d50ff 100%)',
+    shadow: '0 5px 12px rgba(141,80,255,0.18)',
   },
   pets: {
     label: 'Pets',
     icon: '🐾',
-    bg: 'linear-gradient(180deg, #ffbd2f 0%, #ff9f1f 100%)',
-    color: '#ffffff',
-    shadow: '0 6px 14px rgba(255,159,31,0.22)',
+    bg: 'linear-gradient(180deg, #ffc338 0%, #ffa11f 100%)',
+    shadow: '0 5px 12px rgba(255,161,31,0.18)',
   },
   more: {
     label: 'More',
     icon: '⋮',
     bg: 'linear-gradient(180deg, #173552 0%, #0f2238 100%)',
-    color: '#ffffff',
-    shadow: '0 6px 14px rgba(15,34,56,0.22)',
+    shadow: '0 5px 12px rgba(15,34,56,0.20)',
   },
 };
 
@@ -117,18 +108,9 @@ export default function TopCategoriesBar({
   }, [menuOpen]);
 
   const visibleTopItems = useMemo(() => {
-    return topOrder.map((id) => {
-      if (id === 'more') {
-        return {
-          id: 'more',
-          label: 'More',
-          icon: '⋮',
-          subcategories: [],
-        };
-      }
-
-      return categories.find((item) => item.id === id)!;
-    });
+    return topOrder
+      .map((id) => categories.find((item) => item.id === id))
+      .filter(Boolean) as typeof categories;
   }, []);
 
   const allOtherCategories = useMemo(() => {
@@ -148,9 +130,9 @@ export default function TopCategoriesBar({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '64px 1fr',
+          gridTemplateColumns: '54px 1fr',
           gap: 8,
-          padding: '0 10px',
+          padding: '0 8px',
           alignItems: 'start',
         }}
       >
@@ -160,7 +142,7 @@ export default function TopCategoriesBar({
             left: 0,
             background: '#f7f3eb',
             zIndex: 3,
-            paddingTop: 2,
+            paddingTop: 1,
           }}
         >
           <button
@@ -169,27 +151,27 @@ export default function TopCategoriesBar({
               border: 'none',
               background: 'transparent',
               padding: 0,
-              width: 58,
+              width: 50,
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 6,
+              gap: 4,
             }}
           >
             <div
               style={{
-                width: 54,
-                height: 74,
-                borderRadius: 18,
+                width: 46,
+                height: 64,
+                borderRadius: 16,
                 background: displayConfig.more.bg,
-                color: displayConfig.more.color,
+                color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 28,
+                fontSize: 24,
                 boxShadow: displayConfig.more.shadow,
-                border: '2px solid rgba(255,255,255,0.75)',
+                border: '2px solid rgba(255,255,255,0.82)',
               }}
             >
               ⋮
@@ -197,7 +179,7 @@ export default function TopCategoriesBar({
 
             <div
               style={{
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 800,
                 color: '#203040',
                 lineHeight: 1,
@@ -215,99 +197,95 @@ export default function TopCategoriesBar({
             WebkitOverflowScrolling: 'touch',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
-            paddingBottom: 4,
+            paddingBottom: 3,
           }}
         >
           <div
             style={{
               display: 'flex',
-              gap: 10,
+              gap: 8,
               minWidth: 'max-content',
-              paddingRight: 10,
+              paddingRight: 8,
             }}
           >
-            {visibleTopItems
-              .filter((item) => item.id !== 'more')
-              .map((item) => {
-                const cfg = displayConfig[item.id];
-                const isActive = activeCategory === item.id;
+            {visibleTopItems.map((item) => {
+              const cfg = displayConfig[item.id];
+              const isActive = activeCategory === item.id;
 
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      onSelectCategory(item.id);
-                      onClearSubcategory();
-                    }}
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    onSelectCategory(item.id);
+                    onClearSubcategory();
+                  }}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    padding: 0,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 4,
+                    minWidth: 66,
+                  }}
+                >
+                  <div
                     style={{
-                      border: 'none',
-                      background: 'transparent',
-                      padding: 0,
-                      cursor: 'pointer',
+                      width: 66,
+                      height: 66,
+                      borderRadius: 18,
+                      background: cfg.bg,
+                      color: '#fff',
                       display: 'flex',
-                      flexDirection: 'column',
                       alignItems: 'center',
-                      gap: 6,
-                      minWidth: 76,
+                      justifyContent: 'center',
+                      fontSize: 28,
+                      boxShadow: cfg.shadow,
+                      border: isActive
+                        ? '3px solid rgba(255,255,255,0.95)'
+                        : '2px solid rgba(255,255,255,0.82)',
                     }}
                   >
-                    <div
-                      style={{
-                        width: 76,
-                        height: 76,
-                        borderRadius: 22,
-                        background: cfg.bg,
-                        color: cfg.color,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 32,
-                        boxShadow: cfg.shadow,
-                        border: isActive
-                          ? '3px solid rgba(255,255,255,0.92)'
-                          : '2px solid rgba(255,255,255,0.75)',
-                        transform: isActive ? 'translateY(-1px)' : 'none',
-                        transition: 'all 0.18s ease',
-                      }}
-                    >
-                      {cfg.icon}
-                    </div>
+                    {cfg.icon}
+                  </div>
 
-                    <div
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 900,
-                        color: '#ffffff',
-                        background: 'rgba(0,0,0,0.28)',
-                        padding: '5px 10px',
-                        borderRadius: 999,
-                        marginTop: -16,
-                        lineHeight: 1,
-                        textShadow: '0 1px 2px rgba(0,0,0,0.35)',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
-                        maxWidth: 78,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {cfg.label}
-                    </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 900,
+                      color: '#fff',
+                      background: 'rgba(0,0,0,0.26)',
+                      padding: '4px 9px',
+                      borderRadius: 999,
+                      marginTop: -14,
+                      lineHeight: 1,
+                      textShadow: '0 1px 2px rgba(0,0,0,0.30)',
+                      boxShadow: '0 3px 8px rgba(0,0,0,0.08)',
+                      maxWidth: 70,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {cfg.label}
+                  </div>
 
-                    <div
-                      style={{
-                        width: 46,
-                        height: 6,
-                        borderRadius: 999,
-                        background: isActive ? '#43d94d' : 'transparent',
-                        boxShadow: isActive
-                          ? '0 4px 10px rgba(67,217,77,0.30)'
-                          : 'none',
-                      }}
-                    />
-                  </button>
-                );
-              })}
+                  <div
+                    style={{
+                      width: 40,
+                      height: 5,
+                      borderRadius: 999,
+                      background: isActive ? '#43d94d' : 'transparent',
+                      boxShadow: isActive
+                        ? '0 4px 10px rgba(67,217,77,0.28)'
+                        : 'none',
+                    }}
+                  />
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -316,22 +294,22 @@ export default function TopCategoriesBar({
         <div
           style={{
             position: 'absolute',
-            top: 8,
-            left: 10,
-            right: 10,
+            top: 6,
+            left: 8,
+            right: 8,
             display: 'grid',
-            gridTemplateColumns: '155px 1fr',
-            gap: 10,
+            gridTemplateColumns: '145px 1fr',
+            gap: 8,
             pointerEvents: 'auto',
           }}
         >
           <div
             style={{
-              background: 'rgba(255,255,255,0.97)',
+              background: 'rgba(255,255,255,0.98)',
               backdropFilter: 'blur(10px)',
-              borderRadius: 20,
-              padding: 12,
-              boxShadow: '0 14px 30px rgba(0,0,0,0.16)',
+              borderRadius: 18,
+              padding: 10,
+              boxShadow: '0 14px 30px rgba(0,0,0,0.15)',
               border: '1px solid rgba(226,218,205,0.95)',
             }}
           >
@@ -341,12 +319,12 @@ export default function TopCategoriesBar({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 gap: 8,
-                marginBottom: 10,
+                marginBottom: 8,
               }}
             >
               <div
                 style={{
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: 900,
                   color: '#233244',
                 }}
@@ -357,12 +335,12 @@ export default function TopCategoriesBar({
               <button
                 onClick={() => setMenuOpen(false)}
                 style={{
-                  width: 30,
-                  height: 30,
+                  width: 28,
+                  height: 28,
                   borderRadius: 999,
                   border: '1px solid #e5ddd2',
                   background: '#fff',
-                  fontSize: 16,
+                  fontSize: 15,
                   cursor: 'pointer',
                 }}
               >
@@ -374,8 +352,8 @@ export default function TopCategoriesBar({
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 8,
-                maxHeight: 340,
+                gap: 7,
+                maxHeight: 320,
                 overflowY: 'auto',
               }}
             >
@@ -395,19 +373,19 @@ export default function TopCategoriesBar({
                       border: 'none',
                       cursor: 'pointer',
                       textAlign: 'left',
-                      borderRadius: 16,
-                      padding: '10px 10px',
+                      borderRadius: 14,
+                      padding: '9px 9px',
                       background: active ? cfg.bg : '#f8f5ef',
                       color: active ? '#fff' : '#243242',
                       boxShadow: active ? cfg.shadow : 'none',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 9,
+                      gap: 8,
                       fontWeight: 800,
-                      fontSize: 13,
+                      fontSize: 12,
                     }}
                   >
-                    <span style={{ fontSize: 20, lineHeight: 1 }}>
+                    <span style={{ fontSize: 18, lineHeight: 1 }}>
                       {cfg.icon}
                     </span>
                     <span>{item.shortLabel || item.label}</span>
@@ -419,21 +397,21 @@ export default function TopCategoriesBar({
 
           <div
             style={{
-              background: 'rgba(255,255,255,0.98)',
+              background: 'rgba(255,255,255,0.99)',
               backdropFilter: 'blur(10px)',
-              borderRadius: 20,
-              padding: 14,
-              boxShadow: '0 14px 30px rgba(0,0,0,0.16)',
+              borderRadius: 18,
+              padding: 12,
+              boxShadow: '0 14px 30px rgba(0,0,0,0.15)',
               border: '1px solid rgba(226,218,205,0.95)',
-              minHeight: 170,
+              minHeight: 160,
             }}
           >
             <div
               style={{
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: 900,
                 color: '#233244',
-                marginBottom: 12,
+                marginBottom: 10,
               }}
             >
               {expanded?.label || 'Subcategories'}
@@ -465,12 +443,12 @@ export default function TopCategoriesBar({
                         background: active ? '#fffbea' : '#fff',
                         color: '#2a3442',
                         borderRadius: 999,
-                        padding: '9px 12px',
-                        fontSize: 13,
+                        padding: '8px 11px',
+                        fontSize: 12,
                         fontWeight: 800,
                         cursor: 'pointer',
                         boxShadow: active
-                          ? '0 6px 14px rgba(67,217,77,0.14)'
+                          ? '0 6px 14px rgba(67,217,77,0.12)'
                           : '0 4px 10px rgba(0,0,0,0.04)',
                       }}
                     >
@@ -485,8 +463,8 @@ export default function TopCategoriesBar({
               <>
                 <div
                   style={{
-                    marginTop: 18,
-                    fontSize: 12,
+                    marginTop: 16,
+                    fontSize: 11,
                     fontWeight: 800,
                     color: '#6a7480',
                   }}
@@ -496,10 +474,10 @@ export default function TopCategoriesBar({
 
                 <div
                   style={{
-                    marginTop: 10,
+                    marginTop: 8,
                     display: 'flex',
                     flexWrap: 'wrap',
-                    gap: 8,
+                    gap: 7,
                   }}
                 >
                   {allOtherCategories.map((item) => (
@@ -515,8 +493,8 @@ export default function TopCategoriesBar({
                         background: '#fff',
                         color: '#243242',
                         borderRadius: 999,
-                        padding: '8px 12px',
-                        fontSize: 12,
+                        padding: '7px 10px',
+                        fontSize: 11,
                         fontWeight: 800,
                         cursor: 'pointer',
                       }}
