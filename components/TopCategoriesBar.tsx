@@ -31,56 +31,56 @@ const displayConfig: Record<
     icon: '🪞',
     bg: 'linear-gradient(180deg, #ff80b5 0%, #ff5fa0 100%)',
     color: '#ffffff',
-    shadow: '0 8px 18px rgba(255,95,160,0.32)',
+    shadow: '0 6px 14px rgba(255,95,160,0.22)',
   },
   barber: {
     label: 'Barber',
     icon: '🧔',
     bg: 'linear-gradient(180deg, #5cb7ff 0%, #3297f4 100%)',
     color: '#ffffff',
-    shadow: '0 8px 18px rgba(50,151,244,0.28)',
+    shadow: '0 6px 14px rgba(50,151,244,0.20)',
   },
   wellness: {
     label: 'Wellness',
     icon: '🪷',
     bg: 'linear-gradient(180deg, #6be86a 0%, #3ccf56 100%)',
     color: '#ffffff',
-    shadow: '0 8px 18px rgba(60,207,86,0.28)',
+    shadow: '0 6px 14px rgba(60,207,86,0.20)',
   },
   home: {
     label: 'Home',
     icon: '🏡',
     bg: 'linear-gradient(180deg, #ffd84c 0%, #ffbf26 100%)',
     color: '#ffffff',
-    shadow: '0 8px 18px rgba(255,191,38,0.30)',
+    shadow: '0 6px 14px rgba(255,191,38,0.22)',
   },
   repairs: {
     label: 'Repairs',
     icon: '🛠️',
     bg: 'linear-gradient(180deg, #4abfff 0%, #2196f3 100%)',
     color: '#ffffff',
-    shadow: '0 8px 18px rgba(33,150,243,0.28)',
+    shadow: '0 6px 14px rgba(33,150,243,0.20)',
   },
   tech: {
     label: 'Tech',
     icon: '🖥️',
     bg: 'linear-gradient(180deg, #b46cff 0%, #8a4dff 100%)',
     color: '#ffffff',
-    shadow: '0 8px 18px rgba(138,77,255,0.28)',
+    shadow: '0 6px 14px rgba(138,77,255,0.20)',
   },
   pets: {
     label: 'Pets',
     icon: '🐾',
     bg: 'linear-gradient(180deg, #ffbd2f 0%, #ff9f1f 100%)',
     color: '#ffffff',
-    shadow: '0 8px 18px rgba(255,159,31,0.30)',
+    shadow: '0 6px 14px rgba(255,159,31,0.22)',
   },
   more: {
     label: 'More',
     icon: '⋮',
     bg: 'linear-gradient(180deg, #173552 0%, #0f2238 100%)',
     color: '#ffffff',
-    shadow: '0 8px 18px rgba(15,34,56,0.30)',
+    shadow: '0 6px 14px rgba(15,34,56,0.22)',
   },
 };
 
@@ -148,9 +148,9 @@ export default function TopCategoriesBar({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '78px 1fr',
-          gap: 10,
-          padding: '0 12px',
+          gridTemplateColumns: '64px 1fr',
+          gap: 8,
+          padding: '0 10px',
           alignItems: 'start',
         }}
       >
@@ -158,7 +158,7 @@ export default function TopCategoriesBar({
           style={{
             position: 'sticky',
             left: 0,
-            background: '#f5f3ef',
+            background: '#f7f3eb',
             zIndex: 3,
             paddingTop: 2,
           }}
@@ -169,27 +169,27 @@ export default function TopCategoriesBar({
               border: 'none',
               background: 'transparent',
               padding: 0,
-              width: 70,
+              width: 58,
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 8,
+              gap: 6,
             }}
           >
             <div
               style={{
-                width: 64,
-                height: 92,
-                borderRadius: 20,
+                width: 54,
+                height: 74,
+                borderRadius: 18,
                 background: displayConfig.more.bg,
                 color: displayConfig.more.color,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 34,
+                fontSize: 28,
                 boxShadow: displayConfig.more.shadow,
-                border: '2px solid rgba(255,255,255,0.7)',
+                border: '2px solid rgba(255,255,255,0.75)',
               }}
             >
               ⋮
@@ -197,7 +197,7 @@ export default function TopCategoriesBar({
 
             <div
               style={{
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: 800,
                 color: '#203040',
                 lineHeight: 1,
@@ -215,15 +215,15 @@ export default function TopCategoriesBar({
             WebkitOverflowScrolling: 'touch',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
-            paddingBottom: 6,
+            paddingBottom: 4,
           }}
         >
           <div
             style={{
               display: 'flex',
-              gap: 12,
+              gap: 10,
               minWidth: 'max-content',
-              paddingRight: 12,
+              paddingRight: 10,
             }}
           >
             {visibleTopItems
@@ -247,26 +247,26 @@ export default function TopCategoriesBar({
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      gap: 8,
-                      minWidth: 92,
+                      gap: 6,
+                      minWidth: 76,
                     }}
                   >
                     <div
                       style={{
-                        width: 92,
-                        height: 92,
-                        borderRadius: 24,
+                        width: 76,
+                        height: 76,
+                        borderRadius: 22,
                         background: cfg.bg,
                         color: cfg.color,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 42,
+                        fontSize: 32,
                         boxShadow: cfg.shadow,
                         border: isActive
                           ? '3px solid rgba(255,255,255,0.92)'
-                          : '2px solid rgba(255,255,255,0.72)',
-                        transform: isActive ? 'translateY(-2px)' : 'none',
+                          : '2px solid rgba(255,255,255,0.75)',
+                        transform: isActive ? 'translateY(-1px)' : 'none',
                         transition: 'all 0.18s ease',
                       }}
                     >
@@ -275,16 +275,20 @@ export default function TopCategoriesBar({
 
                     <div
                       style={{
-                        fontSize: 15,
+                        fontSize: 12,
                         fontWeight: 900,
                         color: '#ffffff',
-                        background: 'rgba(0,0,0,0.30)',
-                        padding: '6px 12px',
+                        background: 'rgba(0,0,0,0.28)',
+                        padding: '5px 10px',
                         borderRadius: 999,
-                        marginTop: -20,
+                        marginTop: -16,
                         lineHeight: 1,
                         textShadow: '0 1px 2px rgba(0,0,0,0.35)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+                        maxWidth: 78,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
                       }}
                     >
                       {cfg.label}
@@ -292,12 +296,12 @@ export default function TopCategoriesBar({
 
                     <div
                       style={{
-                        width: 54,
-                        height: 7,
+                        width: 46,
+                        height: 6,
                         borderRadius: 999,
                         background: isActive ? '#43d94d' : 'transparent',
                         boxShadow: isActive
-                          ? '0 4px 10px rgba(67,217,77,0.35)'
+                          ? '0 4px 10px rgba(67,217,77,0.30)'
                           : 'none',
                       }}
                     />
@@ -316,8 +320,8 @@ export default function TopCategoriesBar({
             left: 10,
             right: 10,
             display: 'grid',
-            gridTemplateColumns: '170px 1fr',
-            gap: 12,
+            gridTemplateColumns: '155px 1fr',
+            gap: 10,
             pointerEvents: 'auto',
           }}
         >
@@ -325,7 +329,7 @@ export default function TopCategoriesBar({
             style={{
               background: 'rgba(255,255,255,0.97)',
               backdropFilter: 'blur(10px)',
-              borderRadius: 22,
+              borderRadius: 20,
               padding: 12,
               boxShadow: '0 14px 30px rgba(0,0,0,0.16)',
               border: '1px solid rgba(226,218,205,0.95)',
@@ -342,7 +346,7 @@ export default function TopCategoriesBar({
             >
               <div
                 style={{
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: 900,
                   color: '#233244',
                 }}
@@ -353,12 +357,12 @@ export default function TopCategoriesBar({
               <button
                 onClick={() => setMenuOpen(false)}
                 style={{
-                  width: 32,
-                  height: 32,
+                  width: 30,
+                  height: 30,
                   borderRadius: 999,
                   border: '1px solid #e5ddd2',
                   background: '#fff',
-                  fontSize: 18,
+                  fontSize: 16,
                   cursor: 'pointer',
                 }}
               >
@@ -371,14 +375,13 @@ export default function TopCategoriesBar({
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 8,
-                maxHeight: 360,
+                maxHeight: 340,
                 overflowY: 'auto',
               }}
             >
               {categories.map((item) => {
                 const active = expandedCategory === item.id;
-                const cfg =
-                  displayConfig[item.id] || displayConfig.beauty;
+                const cfg = displayConfig[item.id] || displayConfig.beauty;
 
                 return (
                   <button
@@ -392,19 +395,19 @@ export default function TopCategoriesBar({
                       border: 'none',
                       cursor: 'pointer',
                       textAlign: 'left',
-                      borderRadius: 18,
-                      padding: '12px 12px',
+                      borderRadius: 16,
+                      padding: '10px 10px',
                       background: active ? cfg.bg : '#f8f5ef',
                       color: active ? '#fff' : '#243242',
                       boxShadow: active ? cfg.shadow : 'none',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 10,
+                      gap: 9,
                       fontWeight: 800,
-                      fontSize: 14,
+                      fontSize: 13,
                     }}
                   >
-                    <span style={{ fontSize: 22, lineHeight: 1 }}>
+                    <span style={{ fontSize: 20, lineHeight: 1 }}>
                       {cfg.icon}
                     </span>
                     <span>{item.shortLabel || item.label}</span>
@@ -418,16 +421,16 @@ export default function TopCategoriesBar({
             style={{
               background: 'rgba(255,255,255,0.98)',
               backdropFilter: 'blur(10px)',
-              borderRadius: 22,
+              borderRadius: 20,
               padding: 14,
               boxShadow: '0 14px 30px rgba(0,0,0,0.16)',
               border: '1px solid rgba(226,218,205,0.95)',
-              minHeight: 180,
+              minHeight: 170,
             }}
           >
             <div
               style={{
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: 900,
                 color: '#233244',
                 marginBottom: 12,
@@ -441,7 +444,7 @@ export default function TopCategoriesBar({
                 style={{
                   display: 'flex',
                   flexWrap: 'wrap',
-                  gap: 10,
+                  gap: 8,
                 }}
               >
                 {expanded.subcategories.map((sub) => {
@@ -462,12 +465,12 @@ export default function TopCategoriesBar({
                         background: active ? '#fffbea' : '#fff',
                         color: '#2a3442',
                         borderRadius: 999,
-                        padding: '10px 14px',
-                        fontSize: 14,
+                        padding: '9px 12px',
+                        fontSize: 13,
                         fontWeight: 800,
                         cursor: 'pointer',
                         boxShadow: active
-                          ? '0 6px 14px rgba(67,217,77,0.16)'
+                          ? '0 6px 14px rgba(67,217,77,0.14)'
                           : '0 4px 10px rgba(0,0,0,0.04)',
                       }}
                     >
@@ -483,7 +486,7 @@ export default function TopCategoriesBar({
                 <div
                   style={{
                     marginTop: 18,
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: 800,
                     color: '#6a7480',
                   }}
@@ -513,7 +516,7 @@ export default function TopCategoriesBar({
                         color: '#243242',
                         borderRadius: 999,
                         padding: '8px 12px',
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: 800,
                         cursor: 'pointer',
                       }}
