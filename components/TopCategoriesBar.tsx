@@ -314,16 +314,14 @@ export default function TopCategoriesBar({
         <div
           style={{
             position: 'fixed',
-            top: 148,
-            left: 12,
-            right: 12,
-            maxWidth: 430,
-            margin: '0 auto',
+            top: 154,
+            left: 8,
+            right: 8,
             display: 'grid',
-            gridTemplateColumns: 'minmax(135px, 0.95fr) minmax(0, 1.45fr)',
-            gap: 10,
+            gridTemplateColumns: '155px minmax(0, 1fr)',
+            gap: 8,
             pointerEvents: 'auto',
-            zIndex: 999,
+            zIndex: 9999,
           }}
         >
           <div
@@ -376,7 +374,7 @@ export default function TopCategoriesBar({
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 7,
-                maxHeight: 420,
+                maxHeight: 460,
                 overflowY: 'auto',
               }}
             >
@@ -442,10 +440,10 @@ export default function TopCategoriesBar({
               background: 'rgba(255,255,255,0.99)',
               backdropFilter: 'blur(10px)',
               borderRadius: 18,
-              padding: 12,
+              padding: 14,
               boxShadow: '0 14px 30px rgba(0,0,0,0.15)',
               border: '1px solid rgba(226,218,205,0.95)',
-              minHeight: 220,
+              minHeight: 250,
             }}
           >
             <div
