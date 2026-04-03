@@ -313,6 +313,21 @@ export default function HomePage() {
               alignItems: 'center',
             }}
           >
+            <div
+              style={{
+                border: '1px solid #eadfce',
+                background: '#fff',
+                color: '#2a3442',
+                borderRadius: 999,
+                padding: '10px 14px',
+                fontSize: 14,
+                fontWeight: 900,
+                boxShadow: '0 4px 10px rgba(0,0,0,0.04)',
+              }}
+            >
+              {categories.find((item) => item.id === activeCategory)?.label || activeCategory}
+            </div>
+
             {activeSubcategory ? (
               <button
                 onClick={() => setActiveSubcategory('')}
@@ -337,7 +352,11 @@ export default function HomePage() {
             ) : null}
 
             <button
-              onClick={() => router.push('/categories')}
+              onClick={() => {
+                setSearch('');
+                setActiveSubcategory('');
+                setSelectedMaster(null);
+              }}
               style={{
                 border: '1px dashed #d8cfbf',
                 background: '#fff',
@@ -349,7 +368,7 @@ export default function HomePage() {
                 cursor: 'pointer',
               }}
             >
-              + Add filter
+              Clear filters
             </button>
 
             <div
