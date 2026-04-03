@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import L, { type DivIcon } from 'leaflet';
 import {
   MapContainer,
@@ -56,27 +56,13 @@ function clamp(value: number, min: number, max: number) {
 function getCategoryAccent(category?: string) {
   const normalized = String(category || '').toLowerCase();
 
-  if (normalized === 'beauty') {
-    return '#ff6d9f';
-  }
-  if (normalized === 'barber') {
-    return '#53aef7';
-  }
-  if (normalized === 'wellness') {
-    return '#49c968';
-  }
-  if (normalized === 'home') {
-    return '#ffc938';
-  }
-  if (normalized === 'repairs') {
-    return '#3db0f7';
-  }
-  if (normalized === 'tech') {
-    return '#9b67ff';
-  }
-  if (normalized === 'pets') {
-    return '#ffa726';
-  }
+  if (normalized === 'beauty') return '#ff6d9f';
+  if (normalized === 'barber') return '#53aef7';
+  if (normalized === 'wellness') return '#49c968';
+  if (normalized === 'home') return '#ffc938';
+  if (normalized === 'repairs') return '#3db0f7';
+  if (normalized === 'tech') return '#9b67ff';
+  if (normalized === 'pets') return '#ffa726';
 
   return '#ff6d9f';
 }
@@ -91,7 +77,6 @@ function getTileUrl(mode: 'map' | 'satellite' = 'map') {
   if (mode === 'satellite') {
     return 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
   }
-
   return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 }
 
@@ -104,15 +89,9 @@ function normalizePaymentMethods(value: MasterItem['paymentMethods']): PaymentMe
 function paymentBadge(method: PaymentMethod) {
   const normalized = String(method).toLowerCase();
 
-  if (normalized === 'cash') {
-    return { icon: '💵', label: 'Cash' };
-  }
-  if (normalized === 'card') {
-    return { icon: '💳', label: 'Card' };
-  }
-  if (normalized === 'wallet') {
-    return { icon: '📱', label: 'Wallet' };
-  }
+  if (normalized === 'cash') return { icon: '💵', label: 'Cash' };
+  if (normalized === 'card') return { icon: '💳', label: 'Card' };
+  if (normalized === 'wallet') return { icon: '📱', label: 'Wallet' };
 
   return { icon: '•', label: String(method) };
 }
@@ -132,7 +111,7 @@ function buildMarkerIcon(master: MasterItem, isSelected: boolean): DivIcon {
   return L.divIcon({
     className: 'custom-master-pin',
     html: `
-      <div style="position:relative;width:${size}px;height:${size + 14}px;">
+      <div style="position:relative;width:${size}px;height:${size + 14}px;pointer-events:auto;">
         <div style="
           position:absolute;
           left:50%;
@@ -158,6 +137,7 @@ function buildMarkerIcon(master: MasterItem, isSelected: boolean): DivIcon {
           border:${outerRing}px solid ${borderColor};
           box-shadow:0 6px 18px rgba(0,0,0,0.16);
           overflow:hidden;
+          pointer-events:auto;
         ">
           <img
             src="${avatar}"
@@ -172,6 +152,7 @@ function buildMarkerIcon(master: MasterItem, isSelected: boolean): DivIcon {
               top:50%;
               transform:translate(-50%,-50%);
               display:block;
+              pointer-events:none;
             "
           />
         </div>
@@ -186,6 +167,7 @@ function buildMarkerIcon(master: MasterItem, isSelected: boolean): DivIcon {
           border:4px solid ${accent};
           border-radius:999px;
           box-shadow:0 4px 10px rgba(0,0,0,0.14);
+          pointer-events:none;
         "></div>
       </div>
     `,
@@ -198,13 +180,19 @@ function MapEventsLayer({
   onBackgroundClick,
   selectedLatLng,
   onPointChange,
+  ignoreNextMapClickRef,
 }: {
   onBackgroundClick?: () => void;
   selectedLatLng?: [number, number] | null;
   onPointChange: (state: SelectedPointState | null) => void;
+  ignoreNextMapClickRef: React.MutableRefObject<boolean>;
 }) {
   const map = useMapEvents({
     click() {
+      if (ignoreNextMapClickRef.current) {
+        ignoreNextMapClickRef.current = false;
+        return;
+      }
       onBackgroundClick?.();
     },
     move() {
@@ -289,7 +277,10 @@ function FitBoundsLayer({ masters }: { masters: MasterItem[] }) {
     }
 
     const bounds = L.latLngBounds(
-      masters.map((item) => [item.lat || londonCenter[0], item.lng || londonCenter[1]] as [number, number])
+      masters.map(
+        (item) =>
+          [item.lat || londonCenter[0], item.lng || londonCenter[1]] as [number, number]
+      )
     );
 
     map.fitBounds(bounds.pad(0.22), {
@@ -308,6 +299,7 @@ export default function RealMap({
   onMapBackgroundClick,
 }: RealMapProps) {
   const [selectedPoint, setSelectedPoint] = useState<SelectedPointState | null>(null);
+  const ignoreNextMapClickRef = useRef(false);
 
   const safeMasters = useMemo(() => {
     return (masters || []).map((item, index) => ({
@@ -361,6 +353,7 @@ export default function RealMap({
       <MapContainer
         center={londonCenter}
         zoom={11}
+        tap={false}
         style={{
           width: '100%',
           height: '100%',
@@ -378,6 +371,7 @@ export default function RealMap({
           onBackgroundClick={onMapBackgroundClick}
           selectedLatLng={selectedLatLng}
           onPointChange={setSelectedPoint}
+          ignoreNextMapClickRef={ignoreNextMapClickRef}
         />
 
         {safeMasters.map((master) => {
@@ -389,8 +383,22 @@ export default function RealMap({
               position={[master.lat as number, master.lng as number]}
               icon={buildMarkerIcon(master, isSelected)}
               eventHandlers={{
-                click: () => {
+                mousedown: () => {
+                  ignoreNextMapClickRef.current = true;
+                },
+                touchstart: () => {
+                  ignoreNextMapClickRef.current = true;
+                },
+                click: (event) => {
+                  ignoreNextMapClickRef.current = true;
+                  if ('originalEvent' in event && event.originalEvent) {
+                    L.DomEvent.stopPropagation(event.originalEvent as Event);
+                  }
                   onMasterSelect?.(master);
+
+                  window.setTimeout(() => {
+                    ignoreNextMapClickRef.current = false;
+                  }, 250);
                 },
               }}
             />
@@ -411,6 +419,7 @@ export default function RealMap({
             border: '1px solid rgba(230,223,213,0.95)',
             padding: 14,
             zIndex: 60,
+            pointerEvents: 'auto',
           }}
         >
           <div
