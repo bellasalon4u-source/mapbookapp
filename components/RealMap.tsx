@@ -353,7 +353,6 @@ export default function RealMap({
       <MapContainer
         center={londonCenter}
         zoom={11}
-        tap={false}
         style={{
           width: '100%',
           height: '100%',
