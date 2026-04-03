@@ -1,3 +1,5 @@
+export type PaymentMethod = 'cash' | 'card' | 'wallet';
+
 export type ServiceItem = {
   slug: string;
   title: string;
@@ -11,8 +13,9 @@ export type MasterItem = {
   id: string;
   name: string;
   title: string;
-  category: string;
   city: string;
+  category: string;
+  subcategory?: string;
   avatar: string;
   cover: string;
   rating: number;
@@ -28,9 +31,7 @@ export type MasterItem = {
   lng: number;
   gallery: string[];
   services: ServiceItem[];
-  paymentMethods?: string[];
-  serviceModes?: string[];
-  hours?: string;
+  paymentMethods?: PaymentMethod[];
 };
 
 const masters: MasterItem[] = [
@@ -38,8 +39,9 @@ const masters: MasterItem[] = [
     id: 'bella-keratin-studio',
     name: 'Bella Keratin Studio',
     title: 'Hair Extensions Specialist',
-    category: 'beauty',
     city: 'London',
+    category: 'beauty',
+    subcategory: 'Hair',
     avatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800&auto=format&fit=crop',
     cover:
@@ -57,8 +59,6 @@ const masters: MasterItem[] = [
     lat: 51.5074,
     lng: -0.1278,
     paymentMethods: ['cash', 'card'],
-    serviceModes: ['at_client'],
-    hours: 'By appointment',
     gallery: [
       'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?q=80&w=1200&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=1200&auto=format&fit=crop',
@@ -96,11 +96,123 @@ const masters: MasterItem[] = [
     ],
   },
   {
+    id: 'camden-brows-bar',
+    name: 'Camden Brows Bar',
+    title: 'Brow Specialist',
+    city: 'London',
+    category: 'beauty',
+    subcategory: 'Brows & Lashes',
+    avatar:
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=800&auto=format&fit=crop',
+    cover:
+      'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?q=80&w=1200&auto=format&fit=crop',
+    rating: 4.6,
+    priceFrom: 28,
+    availableNow: false,
+    reviews: 58,
+    description: 'Natural brow shaping, lamination and tinting in Camden.',
+    address: '8 Camden High Street, London',
+    phone: '+44 7700 888222',
+    email: 'camdenbrows@mapbook.app',
+    social: '@camdenbrowsbar',
+    lat: 51.5231,
+    lng: -0.1586,
+    paymentMethods: ['cash', 'card'],
+    gallery: [
+      'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=1200&auto=format&fit=crop',
+    ],
+    services: [
+      {
+        slug: 'brow-shape',
+        title: 'Brow Shape',
+        duration: '30m',
+        price: 28,
+        image:
+          'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'brow-lamination',
+        title: 'Brow Lamination',
+        duration: '45m',
+        price: 48,
+        image:
+          'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'brow-tint',
+        title: 'Brow Tint',
+        duration: '20m',
+        price: 20,
+        image:
+          'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200&auto=format&fit=crop',
+      },
+    ],
+  },
+  {
+    id: 'soho-barber-club',
+    name: 'Soho Barber Club',
+    title: 'Barber',
+    city: 'London',
+    category: 'barber',
+    subcategory: 'Haircut',
+    avatar:
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800&auto=format&fit=crop',
+    cover:
+      'https://images.unsplash.com/photo-1517832606299-7ae9b720a186?q=80&w=1200&auto=format&fit=crop',
+    rating: 4.9,
+    priceFrom: 22,
+    availableNow: true,
+    reviews: 96,
+    description: 'Modern barber cuts, beard trims and premium grooming in Soho.',
+    address: '11 Greek Street, London',
+    phone: '+44 7700 222333',
+    email: 'soho@mapbook.app',
+    social: '@sohobarberclub',
+    lat: 51.5148,
+    lng: -0.1322,
+    paymentMethods: ['cash', 'card'],
+    gallery: [
+      'https://images.unsplash.com/photo-1517832606299-7ae9b720a186?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=1200&auto=format&fit=crop',
+    ],
+    services: [
+      {
+        slug: 'mens-haircut',
+        title: 'Men’s Haircut',
+        duration: '45m',
+        price: 22,
+        image:
+          'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'fade-cut',
+        title: 'Fade Cut',
+        duration: '50m',
+        price: 28,
+        image:
+          'https://images.unsplash.com/photo-1517832606299-7ae9b720a186?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'beard-trim',
+        title: 'Beard Trim',
+        duration: '25m',
+        price: 16,
+        image:
+          'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=1200&auto=format&fit=crop',
+      },
+    ],
+  },
+  {
     id: 'nadia-wellness',
     name: 'Nadia Wellness',
     title: 'Massage Therapist',
-    category: 'wellness',
     city: 'London',
+    category: 'wellness',
+    subcategory: 'Massage',
     avatar:
       'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=800&auto=format&fit=crop',
     cover:
@@ -117,8 +229,6 @@ const masters: MasterItem[] = [
     lat: 51.5033,
     lng: -0.1195,
     paymentMethods: ['cash', 'card'],
-    serviceModes: ['at_client', 'at_my_place'],
-    hours: '10:00 - 20:00',
     gallery: [
       'https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1200&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1200&auto=format&fit=crop',
@@ -152,103 +262,37 @@ const masters: MasterItem[] = [
     ],
   },
   {
-    id: 'camden-brows-bar',
-    name: 'Camden Brows Bar',
-    title: 'Brow Specialist',
-    category: 'beauty',
+    id: 'green-home-care',
+    name: 'Green Home Care',
+    title: 'Home Cleaning',
     city: 'London',
-    avatar:
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=800&auto=format&fit=crop',
-    cover:
-      'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?q=80&w=1200&auto=format&fit=crop',
-    rating: 4.6,
-    priceFrom: 28,
-    availableNow: false,
-    reviews: 58,
-    description: 'Natural brow shaping, lamination and tinting in Camden.',
-    address: '8 Camden High Street, London',
-    phone: '+44 7700 888222',
-    email: 'camdenbrows@mapbook.app',
-    social: '@camdenbrowsbar',
-    lat: 51.5231,
-    lng: -0.1586,
-    paymentMethods: ['cash', 'card'],
-    serviceModes: ['at_my_place'],
-    hours: '11:00 - 19:00',
-    gallery: [
-      'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=1200&auto=format&fit=crop',
-    ],
-    services: [
-      {
-        slug: 'brow-shape',
-        title: 'Brow Shape',
-        duration: '30m',
-        price: 28,
-        image:
-          'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1200&auto=format&fit=crop',
-      },
-      {
-        slug: 'brow-lamination',
-        title: 'Brow Lamination',
-        duration: '45m',
-        price: 48,
-        image:
-          'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1200&auto=format&fit=crop',
-      },
-      {
-        slug: 'brow-tint',
-        title: 'Brow Tint',
-        duration: '20m',
-        price: 20,
-        image:
-          'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200&auto=format&fit=crop',
-      },
-      {
-        slug: 'lamination-and-tint',
-        title: 'Lamination + Tint',
-        duration: '60m',
-        price: 58,
-        image:
-          'https://images.unsplash.com/photo-1457972729786-0411a3b2b626?q=80&w=1200&auto=format&fit=crop',
-      },
-    ],
-  },
-  {
-    id: 'sparkle-home-care',
-    name: 'Sparkle Home Care',
-    title: 'Home Cleaning Specialist',
     category: 'home',
-    city: 'London',
+    subcategory: 'Cleaning',
     avatar:
       'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop',
     cover:
       'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1200&auto=format&fit=crop',
-    rating: 4.8,
+    rating: 4.9,
     priceFrom: 35,
     availableNow: true,
-    reviews: 47,
-    description: 'Professional home cleaning, deep cleaning and regular weekly visits.',
-    address: '42 Paddington Street, London',
-    phone: '+44 7700 111333',
-    email: 'sparkle@mapbook.app',
-    social: '@sparklehomecare',
-    lat: 51.5159,
-    lng: -0.1426,
+    reviews: 73,
+    description: 'Reliable home cleaning, deep cleaning and home help across London.',
+    address: '27 Baker Street, London',
+    phone: '+44 7700 909101',
+    email: 'greenhome@mapbook.app',
+    social: '@greenhomecare',
+    lat: 51.5206,
+    lng: -0.1550,
     paymentMethods: ['cash', 'card'],
-    serviceModes: ['at_client'],
-    hours: '08:00 - 18:00',
     gallery: [
       'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1600566752355-35792bedcfea?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1563453392212-326f5e854473?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=1200&auto=format&fit=crop',
     ],
     services: [
       {
-        slug: 'home-cleaning',
-        title: 'Home Cleaning',
+        slug: 'standard-cleaning',
+        title: 'Standard Cleaning',
         duration: '2h',
         price: 35,
         image:
@@ -257,154 +301,148 @@ const masters: MasterItem[] = [
       {
         slug: 'deep-cleaning',
         title: 'Deep Cleaning',
-        duration: '4h',
-        price: 90,
+        duration: '3h',
+        price: 60,
         image:
-          'https://images.unsplash.com/photo-1600566752355-35792bedcfea?q=80&w=1200&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1563453392212-326f5e854473?q=80&w=1200&auto=format&fit=crop',
       },
     ],
   },
   {
-    id: 'fixgo-repairs',
-    name: 'FixGo Repairs',
-    title: 'Handyman & Repairs',
-    category: 'repairs',
+    id: 'fixmate-repairs',
+    name: 'FixMate Repairs',
+    title: 'Appliance Repair',
     city: 'London',
+    category: 'repairs',
+    subcategory: 'Appliance Repair',
     avatar:
       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800&auto=format&fit=crop',
     cover:
-      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1200&auto=format&fit=crop',
-    rating: 4.7,
-    priceFrom: 40,
+      'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?q=80&w=1200&auto=format&fit=crop',
+    rating: 4.8,
+    priceFrom: 50,
     availableNow: true,
-    reviews: 39,
-    description: 'Fast home repairs, furniture assembly and small handyman jobs.',
-    address: '17 Baker Street, London',
-    phone: '+44 7700 222444',
-    email: 'fixgo@mapbook.app',
-    social: '@fixgorepairs',
-    lat: 51.5202,
-    lng: -0.1588,
+    reviews: 69,
+    description: 'Fast appliance and home repair services with same-day response.',
+    address: '40 Marylebone Lane, London',
+    phone: '+44 7700 444777',
+    email: 'fixmate@mapbook.app',
+    social: '@fixmaterepairs',
+    lat: 51.5169,
+    lng: -0.1490,
     paymentMethods: ['cash', 'card'],
-    serviceModes: ['at_client'],
-    hours: '09:00 - 19:00',
     gallery: [
-      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?q=80&w=1200&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1585128792020-803d29415281?q=80&w=1200&auto=format&fit=crop',
     ],
     services: [
       {
-        slug: 'handyman-visit',
-        title: 'Handyman Visit',
-        duration: '1h 30m',
-        price: 40,
+        slug: 'appliance-diagnostics',
+        title: 'Appliance Diagnostics',
+        duration: '45m',
+        price: 50,
         image:
-          'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?q=80&w=1200&auto=format&fit=crop',
       },
       {
-        slug: 'furniture-assembly',
-        title: 'Furniture Assembly',
-        duration: '2h',
-        price: 65,
+        slug: 'washer-repair',
+        title: 'Washer Repair',
+        duration: '1h 30m',
+        price: 90,
         image:
-          'https://images.unsplash.com/photo-1585128792020-803d29415281?q=80&w=1200&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200&auto=format&fit=crop',
       },
     ],
   },
   {
-    id: 'quickfix-tech',
-    name: 'QuickFix Tech',
-    title: 'Phone & Laptop Repair',
-    category: 'tech',
+    id: 'smart-tech-london',
+    name: 'Smart Tech London',
+    title: 'Device Repair',
     city: 'London',
+    category: 'tech',
+    subcategory: 'Phone Repair',
     avatar:
       'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&auto=format&fit=crop',
     cover:
-      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1200&auto=format&fit=crop',
-    rating: 4.8,
-    priceFrom: 50,
-    availableNow: true,
-    reviews: 53,
-    description: 'Phone screen repair, battery replacement and laptop diagnostics.',
-    address: '55 Oxford Street, London',
-    phone: '+44 7700 333555',
-    email: 'quickfix@mapbook.app',
-    social: '@quickfixtech',
-    lat: 51.5144,
-    lng: -0.1455,
-    paymentMethods: ['card', 'wallet'],
-    serviceModes: ['at_client', 'at_my_place'],
-    hours: '10:00 - 20:00',
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop',
+    rating: 4.5,
+    priceFrom: 40,
+    availableNow: false,
+    reviews: 54,
+    description: 'Phone, laptop and smart device repair in central London.',
+    address: '95 Oxford Street, London',
+    phone: '+44 7700 333666',
+    email: 'smarttech@mapbook.app',
+    social: '@smarttechlondon',
+    lat: 51.5152,
+    lng: -0.1410,
+    paymentMethods: ['cash', 'card'],
     gallery: [
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1580910051074-3eb694886505?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?q=80&w=1200&auto=format&fit=crop',
     ],
     services: [
       {
         slug: 'phone-screen-repair',
         title: 'Phone Screen Repair',
-        duration: '1h',
-        price: 70,
+        duration: '45m',
+        price: 40,
         image:
           'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1200&auto=format&fit=crop',
       },
       {
-        slug: 'laptop-diagnostics',
-        title: 'Laptop Diagnostics',
-        duration: '45m',
-        price: 50,
+        slug: 'laptop-checkup',
+        title: 'Laptop Checkup',
+        duration: '1h',
+        price: 55,
         image:
-          'https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?q=80&w=1200&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop',
       },
     ],
   },
   {
-    id: 'happy-paws-london',
-    name: 'Happy Paws London',
-    title: 'Dog Walker & Pet Sitter',
-    category: 'pets',
+    id: 'happy-paws-care',
+    name: 'Happy Paws Care',
+    title: 'Dog Walker',
     city: 'London',
+    category: 'pets',
+    subcategory: 'Dog Walking',
     avatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1546961329-78bef0414d7c?q=80&w=800&auto=format&fit=crop',
     cover:
       'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=1200&auto=format&fit=crop',
     rating: 4.9,
-    priceFrom: 22,
+    priceFrom: 18,
     availableNow: true,
-    reviews: 71,
-    description: 'Reliable dog walking, pet sitting and home visits across London.',
-    address: '9 Notting Hill Gate, London',
-    phone: '+44 7700 444666',
+    reviews: 47,
+    description: 'Dog walking, pet sitting and caring home visits in London.',
+    address: '10 Islington Green, London',
+    phone: '+44 7700 111202',
     email: 'happypaws@mapbook.app',
-    social: '@happypawslondon',
-    lat: 51.5098,
-    lng: -0.1969,
+    social: '@happypawscare',
+    lat: 51.5362,
+    lng: -0.1035,
     paymentMethods: ['cash', 'card'],
-    serviceModes: ['at_client'],
-    hours: '07:00 - 21:00',
     gallery: [
       'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=1200&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1517849845537-4d257902454a?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1450778869180-41d0601e046e?q=80&w=1200&auto=format&fit=crop',
     ],
     services: [
       {
         slug: 'dog-walking',
         title: 'Dog Walking',
-        duration: '45m',
-        price: 22,
+        duration: '30m',
+        price: 18,
         image:
           'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=1200&auto=format&fit=crop',
       },
       {
         slug: 'pet-sitting',
         title: 'Pet Sitting',
-        duration: '2h',
-        price: 40,
+        duration: '1h',
+        price: 22,
         image:
-          'https://images.unsplash.com/photo-1450778869180-41d0601e046e?q=80&w=1200&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1517849845537-4d257902454a?q=80&w=1200&auto=format&fit=crop',
       },
     ],
   },
