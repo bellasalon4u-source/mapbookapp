@@ -106,6 +106,42 @@ function getLanguageBorder(language: string) {
   return 'linear-gradient(90deg, #1f57d6 0%, #1f57d6 40%, #ffffff 40%, #ffffff 60%, #e53e4f 60%, #e53e4f 100%)';
 }
 
+function getCategoryAccent(category?: string) {
+  const normalized = String(category || '').toLowerCase();
+
+  if (normalized === 'beauty') return '#ff6d9f';
+  if (normalized === 'barber') return '#53aef7';
+  if (normalized === 'wellness') return '#49c968';
+  if (normalized === 'home') return '#ffc938';
+  if (normalized === 'repairs') return '#3db0f7';
+  if (normalized === 'tech') return '#9b67ff';
+  if (normalized === 'pets') return '#ffa726';
+
+  return '#ff6d9f';
+}
+
+function getCategoryLabel(category?: string) {
+  const normalized = String(category || '').toLowerCase();
+  if (!normalized) return 'Service';
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function normalizePaymentMethods(value: any): string[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string' && value.trim()) return [value];
+  return ['cash', 'card'];
+}
+
+function paymentBadge(method: string) {
+  const normalized = String(method).toLowerCase();
+
+  if (normalized === 'cash') return { icon: '💵', label: 'Cash' };
+  if (normalized === 'card') return { icon: '💳', label: 'Card' };
+  if (normalized === 'wallet') return { icon: '📱', label: 'Wallet' };
+
+  return { icon: '•', label: String(method) };
+}
+
 export default function HomePage() {
   const router = useRouter();
   const baseMasters = getAllMasters();
@@ -396,7 +432,7 @@ export default function HomePage() {
               style={{
                 height: 400,
                 position: 'relative',
-                overflow: 'hidden',
+                overflow: 'visible',
               }}
             >
               <RealMap
@@ -464,66 +500,313 @@ export default function HomePage() {
                 </button>
               </div>
 
-              <div
-                style={{
-                  position: 'absolute',
-                  right: 10,
-                  bottom: 10,
-                  background: 'rgba(255,255,255,0.96)',
-                  borderRadius: 16,
-                  padding: '12px 14px',
-                  boxShadow: '0 6px 18px rgba(0,0,0,0.10)',
-                  zIndex: 20,
-                  minWidth: 128,
-                }}
-              >
+              {!selectedMaster ? (
                 <div
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    fontSize: 13,
-                    fontWeight: 800,
-                    color: '#2c3542',
+                    position: 'absolute',
+                    right: 10,
+                    bottom: 10,
+                    background: 'rgba(255,255,255,0.96)',
+                    borderRadius: 16,
+                    padding: '12px 14px',
+                    boxShadow: '0 6px 18px rgba(0,0,0,0.10)',
+                    zIndex: 20,
+                    minWidth: 128,
                   }}
                 >
-                  <span
+                  <div
                     style={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: 999,
-                      background: '#fff',
-                      border: '4px solid #31c64a',
-                      display: 'inline-block',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: '#2c3542',
                     }}
-                  />
-                  <span>Available</span>
-                </div>
+                  >
+                    <span
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 999,
+                        background: '#fff',
+                        border: '4px solid #31c64a',
+                        display: 'inline-block',
+                      }}
+                    />
+                    <span>Available</span>
+                  </div>
 
+                  <div
+                    style={{
+                      marginTop: 8,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: '#2c3542',
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 999,
+                        background: '#fff',
+                        border: '4px solid #ff5c70',
+                        display: 'inline-block',
+                      }}
+                    />
+                    <span>Unavailable</span>
+                  </div>
+                </div>
+              ) : null}
+
+              {selectedMaster ? (
                 <div
                   style={{
-                    marginTop: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    fontSize: 13,
-                    fontWeight: 800,
-                    color: '#2c3542',
+                    position: 'absolute',
+                    left: 12,
+                    right: 12,
+                    bottom: 12,
+                    background: '#fff',
+                    borderRadius: 22,
+                    boxShadow: '0 16px 40px rgba(0,0,0,0.18)',
+                    border: '1px solid rgba(230,223,213,0.95)',
+                    padding: 14,
+                    zIndex: 80,
                   }}
                 >
-                  <span
+                  <div
                     style={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: 999,
-                      background: '#fff',
-                      border: '4px solid #ff5c70',
-                      display: 'inline-block',
+                      display: 'grid',
+                      gridTemplateColumns: '104px 1fr',
+                      gap: 14,
+                      alignItems: 'start',
                     }}
-                  />
-                  <span>Unavailable</span>
+                  >
+                    <div>
+                      <div
+                        style={{
+                          position: 'relative',
+                          width: 104,
+                          height: 104,
+                          borderRadius: 20,
+                          overflow: 'hidden',
+                          background: '#eef2f5',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                        }}
+                      >
+                        <img
+                          src={selectedMaster.avatar}
+                          alt={selectedMaster.name || selectedMaster.title || 'Master'}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block',
+                          }}
+                        />
+
+                        <button
+                          style={{
+                            position: 'absolute',
+                            right: 8,
+                            top: 8,
+                            width: 30,
+                            height: 30,
+                            borderRadius: 999,
+                            border: 'none',
+                            background: '#fff',
+                            color: '#ff6b8e',
+                            fontSize: 16,
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.14)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          ♥
+                        </button>
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: 10,
+                          display: 'flex',
+                          gap: 6,
+                          flexWrap: 'wrap',
+                        }}
+                      >
+                        {normalizePaymentMethods(selectedMaster.paymentMethods)
+                          .slice(0, 3)
+                          .map((method) => {
+                            const item = paymentBadge(method);
+
+                            return (
+                              <div
+                                key={`${selectedMaster.id}-${String(method)}`}
+                                style={{
+                                  minWidth: 40,
+                                  height: 28,
+                                  padding: '0 8px',
+                                  borderRadius: 10,
+                                  border: '1px solid #ece3d8',
+                                  background: '#fff',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: 4,
+                                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                                  fontSize: 12,
+                                  fontWeight: 800,
+                                  color: '#44505f',
+                                }}
+                              >
+                                <span>{item.icon}</span>
+                                {item.label === 'Cash' || item.label === 'Card' ? null : (
+                                  <span>{item.label}</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+
+                    <div style={{ minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: 18,
+                          lineHeight: 1.1,
+                          fontWeight: 900,
+                          color: '#212836',
+                          marginBottom: 8,
+                        }}
+                      >
+                        {selectedMaster.name || selectedMaster.title || 'Service Pro'}
+                      </div>
+
+                      <div
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          padding: '7px 12px',
+                          borderRadius: 999,
+                          background: '#f3ebdf',
+                          color: '#7d694f',
+                          fontSize: 12,
+                          fontWeight: 900,
+                        }}
+                      >
+                        <span>🏅</span>
+                        <span>Verified Pro</span>
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: 9,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '6px 12px',
+                          borderRadius: 999,
+                          background: '#ffe8f1',
+                          color: getCategoryAccent(selectedMaster.category),
+                          fontSize: 12,
+                          fontWeight: 900,
+                        }}
+                      >
+                        {getCategoryLabel(selectedMaster.category)}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: 8,
+                          fontSize: 13,
+                          fontWeight: 900,
+                          color: selectedMaster.availableNow ? '#31b14c' : '#de6a74',
+                        }}
+                      >
+                        {selectedMaster.availableNow ? 'Available now' : 'Unavailable today'}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: 10,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          flexWrap: 'wrap',
+                          color: '#212836',
+                          fontWeight: 900,
+                        }}
+                      >
+                        <div style={{ fontSize: 16 }}>
+                          ★ {Number(selectedMaster.rating || 4.7).toFixed(1)}
+                        </div>
+                        <div style={{ fontSize: 16 }}>
+                          From £{String(selectedMaster.price).replace(/[^\d.]/g, '') || '45'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 14,
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr 1fr',
+                      gap: 10,
+                    }}
+                  >
+                    <button
+                      style={{
+                        height: 52,
+                        borderRadius: 18,
+                        border: '2px solid #efbdd0',
+                        background: '#fff',
+                        color: '#25303d',
+                        fontSize: 17,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      View
+                    </button>
+
+                    <button
+                      style={{
+                        height: 52,
+                        borderRadius: 18,
+                        border: 'none',
+                        background: '#5dc1ee',
+                        color: '#fff',
+                        fontSize: 17,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                        boxShadow: '0 8px 16px rgba(93,193,238,0.25)',
+                      }}
+                    >
+                      Route
+                    </button>
+
+                    <button
+                      style={{
+                        height: 52,
+                        borderRadius: 18,
+                        border: 'none',
+                        background: '#3bb54a',
+                        color: '#fff',
+                        fontSize: 17,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                        boxShadow: '0 8px 16px rgba(59,181,74,0.24)',
+                      }}
+                    >
+                      Book now
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           </div>
         </section>
