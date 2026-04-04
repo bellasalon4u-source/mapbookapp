@@ -124,7 +124,7 @@ export default function TopCategoriesBar({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 6,
+              gap: 8,
             }}
           >
             <div
@@ -174,7 +174,7 @@ export default function TopCategoriesBar({
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             paddingBottom: 6,
-            paddingRight: 6,
+            paddingRight: 10,
           }}
         >
           <div
@@ -183,6 +183,7 @@ export default function TopCategoriesBar({
               gap: 12,
               minWidth: 'max-content',
               paddingRight: 20,
+              alignItems: 'flex-start',
             }}
           >
             {visibleTopItems.map((item) => {
@@ -205,7 +206,7 @@ export default function TopCategoriesBar({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 8,
                     minWidth: 78,
                     flexShrink: 0,
                     transform: isActive ? 'scale(1.06)' : 'scale(1)',
@@ -456,9 +457,7 @@ export default function TopCategoriesBar({
                         setMenuOpen(false);
                       }}
                       style={{
-                        border: active
-                          ? `2px solid ${color}`
-                          : '1px solid #eadfce',
+                        border: active ? `2px solid ${color}` : '1px solid #eadfce',
                         background: '#fff',
                         color: active ? color : '#2a3442',
                         borderRadius: 999,
