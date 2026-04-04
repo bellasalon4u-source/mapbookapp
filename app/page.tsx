@@ -114,15 +114,15 @@ function getLanguageBorder(language: string) {
 function getCategoryAccent(category?: string) {
   const normalized = String(category || '').toLowerCase();
 
-  if (normalized === 'beauty') return '#ff6d9f';
-  if (normalized === 'barber') return '#53aef7';
-  if (normalized === 'wellness') return '#49c968';
-  if (normalized === 'home') return '#ffc938';
-  if (normalized === 'repairs') return '#3db0f7';
-  if (normalized === 'tech') return '#9b67ff';
-  if (normalized === 'pets') return '#ffa726';
+  if (normalized === 'beauty') return '#ff4f93';
+  if (normalized === 'barber') return '#2d98ff';
+  if (normalized === 'wellness') return '#32c957';
+  if (normalized === 'home') return '#ff9f1a';
+  if (normalized === 'repairs') return '#f4b400';
+  if (normalized === 'tech') return '#9b5cff';
+  if (normalized === 'pets') return '#28c7d9';
 
-  return '#ff6d9f';
+  return '#ff4f93';
 }
 
 function getCategoryLabel(category?: string) {
@@ -160,6 +160,7 @@ export default function HomePage() {
   const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
   const [likedFilterMode, setLikedFilterMode] = useState<'none' | 'category' | 'all'>('none');
   const [listings, setListings] = useState<ListingItem[]>([]);
+  const [recenterToUserTrigger, setRecenterToUserTrigger] = useState(0);
 
   useEffect(() => {
     const loadListings = () => {
@@ -241,11 +242,13 @@ export default function HomePage() {
   const borderGradient = getLanguageBorder(language);
   const currentCategoryLabel =
     categories.find((item) => item.id === activeCategory)?.label || activeCategory;
+
   const likedInCategoryCount = allMasters.filter(
     (master: any) =>
       String(master.category || '').toLowerCase().trim() === activeCategory &&
       likedMasterIds.includes(String(master.id))
   ).length;
+
   const likedAllCount = likedMasterIds.length;
 
   return (
@@ -523,6 +526,7 @@ export default function HomePage() {
                 activeCategory={activeCategory}
                 selectedMasterId={selectedMaster?.id ?? null}
                 likedMasterIds={likedMasterIds}
+                recenterToUserTrigger={recenterToUserTrigger}
                 onMasterSelect={(master: any) => setSelectedMaster(master)}
                 onMapBackgroundClick={() => setSelectedMaster(null)}
                 onToggleLike={(master: any) => {
@@ -549,12 +553,12 @@ export default function HomePage() {
                     )
                   }
                   style={{
-                    width: 44,
-                    height: 44,
+                    width: 48,
+                    height: 48,
                     borderRadius: 999,
                     border: '1px solid #e5ddd1',
-                    background: 'rgba(255,255,255,0.95)',
-                    boxShadow: '0 3px 10px rgba(0,0,0,0.09)',
+                    background: 'rgba(255,255,255,0.96)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
                     fontSize: 18,
                     color: '#3d454f',
                     display: 'flex',
@@ -564,18 +568,39 @@ export default function HomePage() {
                   }}
                   title="Map style"
                 >
-                  {mapMode === 'satellite' ? '🛰' : '⌖'}
+                  {mapMode === 'satellite' ? '🗺️' : '🛰️'}
+                </button>
+
+                <button
+                  onClick={() => setRecenterToUserTrigger((prev) => prev + 1)}
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 999,
+                    border: '1px solid #e5ddd1',
+                    background: 'rgba(255,255,255,0.96)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
+                    fontSize: 20,
+                    color: '#3d454f',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                  }}
+                  title="My location"
+                >
+                  ⌖
                 </button>
 
                 <button
                   onClick={() => setSelectedMaster(null)}
                   style={{
-                    width: 44,
-                    height: 44,
+                    width: 48,
+                    height: 48,
                     borderRadius: 999,
                     border: '1px solid #e5ddd1',
-                    background: 'rgba(255,255,255,0.95)',
-                    boxShadow: '0 3px 10px rgba(0,0,0,0.09)',
+                    background: 'rgba(255,255,255,0.96)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
                     fontSize: 18,
                     color: '#3d454f',
                     cursor: 'pointer',
