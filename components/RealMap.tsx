@@ -36,6 +36,7 @@ type RealMapProps = {
   activeCategory?: string;
   selectedMasterId?: string | number | null;
   likedMasterIds?: string[];
+  recenterToUserTrigger?: number;
   onMasterSelect?: (master: MasterItem) => void;
   onMapBackgroundClick?: () => void;
   onToggleLike?: (master: MasterItem) => void;
@@ -273,11 +274,31 @@ function UserLocationLayer({
   return null;
 }
 
+function RecenterToUserLayer({
+  userLocation,
+  recenterToUserTrigger = 0,
+}: {
+  userLocation: [number, number] | null;
+  recenterToUserTrigger?: number;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!userLocation) return;
+    if (!recenterToUserTrigger) return;
+
+    map.setView(userLocation, 14, { animate: true });
+  }, [map, userLocation, recenterToUserTrigger]);
+
+  return null;
+}
+
 export default function RealMap({
   masters,
   mapMode = 'map',
   selectedMasterId,
   likedMasterIds = [],
+  recenterToUserTrigger = 0,
   onMasterSelect,
   onMapBackgroundClick,
   onToggleLike,
@@ -341,6 +362,10 @@ export default function RealMap({
 
         <UserLocationLayer onLocationFound={setUserLocation} />
         <FitBoundsLayer masters={safeMasters} userLocation={userLocation} />
+        <RecenterToUserLayer
+          userLocation={userLocation}
+          recenterToUserTrigger={recenterToUserTrigger}
+        />
 
         <MapEventsLayer
           onBackgroundClick={onMapBackgroundClick}
@@ -396,17 +421,4 @@ export default function RealMap({
                   }
 
                   if (clickedLike) {
-                    onToggleLike?.(master);
-                    return;
-                  }
-
-                  onMasterSelect?.(master);
-                },
-              }}
-            />
-          );
-        })}
-      </MapContainer>
-    </div>
-  );
-}
+                    onToggleLike?.(
