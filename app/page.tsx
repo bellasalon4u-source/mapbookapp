@@ -569,7 +569,7 @@ export default function HomePage() {
                     position: 'absolute',
                     left: 12,
                     right: 12,
-                    bottom: 12,
+                    bottom: 24,
                     background: '#fff',
                     borderRadius: 22,
                     boxShadow: '0 16px 40px rgba(0,0,0,0.18)',
