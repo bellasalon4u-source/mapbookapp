@@ -152,6 +152,7 @@ export default function HomePage() {
   const [language, setLanguage] = useState('EN');
   const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
+  const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
   const [listings, setListings] = useState<ListingItem[]>([]);
 
   useEffect(() => {
@@ -612,6 +613,14 @@ export default function HomePage() {
                         />
 
                         <button
+                          onClick={() => {
+                            const id = String(selectedMaster.id);
+                            setLikedMasterIds((prev) =>
+                              prev.includes(id)
+                                ? prev.filter((item) => item !== id)
+                                : [...prev, id]
+                            );
+                          }}
                           style={{
                             position: 'absolute',
                             right: 8,
@@ -627,7 +636,7 @@ export default function HomePage() {
                             cursor: 'pointer',
                           }}
                         >
-                          ♥
+                          {likedMasterIds.includes(String(selectedMaster.id)) ? '♥' : '♡'}
                         </button>
                       </div>
 
@@ -761,22 +770,33 @@ export default function HomePage() {
                     }}
                   >
                     <button
-  onClick={() => router.push('/profile')}
-  style={{
-    height: 52,
-    borderRadius: 18,
-    border: '2px solid #efbdd0',
-    background: '#fff',
-    color: '#25303d',
-    fontSize: 17,
-    fontWeight: 900,
-    cursor: 'pointer',
-  }}
->
-  View
-</button>
+                      onClick={() => router.push(`/master/${selectedMaster.id}`)}
+                      style={{
+                        height: 52,
+                        borderRadius: 18,
+                        border: '2px solid #efbdd0',
+                        background: '#fff',
+                        color: '#25303d',
+                        fontSize: 17,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      View
+                    </button>
 
                     <button
+                      onClick={() => {
+                        const lat = selectedMaster?.lat;
+                        const lng = selectedMaster?.lng;
+
+                        if (typeof lat === 'number' && typeof lng === 'number') {
+                          window.open(
+                            `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+                            '_blank'
+                          );
+                        }
+                      }}
                       style={{
                         height: 52,
                         borderRadius: 18,
@@ -793,6 +813,7 @@ export default function HomePage() {
                     </button>
 
                     <button
+                      onClick={() => router.push(`/booking/${selectedMaster.id}`)}
                       style={{
                         height: 52,
                         borderRadius: 18,
