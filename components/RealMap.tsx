@@ -141,7 +141,7 @@ function buildMarkerIcon(
             display:flex;
             align-items:center;
             justify-content:center;
-            color:#ff5f93;
+            color:#ff2020;
             font-size:${isLiked ? 16 : 0}px;
             font-weight:900;
             line-height:1;
