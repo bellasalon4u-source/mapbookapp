@@ -34,8 +34,10 @@ type RealMapProps = {
   mapMode?: 'map' | 'satellite';
   activeCategory?: string;
   selectedMasterId?: string | number | null;
+  likedMasterIds?: string[];
   onMasterSelect?: (master: MasterItem) => void;
   onMapBackgroundClick?: () => void;
+  onToggleLike?: (master: MasterItem) => void;
 };
 
 const londonCenter: [number, number] = [51.5074, -0.1278];
@@ -61,7 +63,11 @@ function getTileUrl(mode: 'map' | 'satellite' = 'map') {
   return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 }
 
-function buildMarkerIcon(master: MasterItem, isSelected: boolean): DivIcon {
+function buildMarkerIcon(
+  master: MasterItem,
+  isSelected: boolean,
+  isLiked: boolean
+): DivIcon {
   const accent = getCategoryAccent(master.category);
   const borderColor = master.availableNow ? '#39c95a' : '#ff6880';
   const avatar =
@@ -71,7 +77,7 @@ function buildMarkerIcon(master: MasterItem, isSelected: boolean): DivIcon {
   const outerRing = isSelected ? 6 : 5;
   const size = isSelected ? 76 : 70;
   const photoSize = isSelected ? 56 : 52;
-  const dotSize = isSelected ? 16 : 14;
+  const badgeSize = isSelected ? 30 : 28;
 
   return L.divIcon({
     className: 'custom-master-pin',
@@ -120,17 +126,30 @@ function buildMarkerIcon(master: MasterItem, isSelected: boolean): DivIcon {
           />
         </div>
 
-        <div style="
-          position:absolute;
-          right:1px;
-          top:${size * 0.48}px;
-          width:${dotSize + 10}px;
-          height:${dotSize + 10}px;
-          background:#fff;
-          border:4px solid ${accent};
-          border-radius:999px;
-          box-shadow:0 4px 10px rgba(0,0,0,0.14);
-        "></div>
+        <div
+          class="pin-like-badge"
+          style="
+            position:absolute;
+            right:1px;
+            top:${size * 0.48}px;
+            width:${badgeSize + 10}px;
+            height:${badgeSize + 10}px;
+            background:#fff;
+            border:4px solid ${accent};
+            border-radius:999px;
+            box-shadow:0 4px 10px rgba(0,0,0,0.14);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#ff5f93;
+            font-size:${isLiked ? 16 : 0}px;
+            font-weight:900;
+            line-height:1;
+            cursor:pointer;
+          "
+        >
+          ${isLiked ? '♥' : ''}
+        </div>
       </div>
     `,
     iconSize: [size, size + 14],
@@ -196,8 +215,10 @@ export default function RealMap({
   masters,
   mapMode = 'map',
   selectedMasterId,
+  likedMasterIds = [],
   onMasterSelect,
   onMapBackgroundClick,
+  onToggleLike,
 }: RealMapProps) {
   const ignoreNextMapClickRef = useRef(false);
 
@@ -264,21 +285,32 @@ export default function RealMap({
 
         {safeMasters.map((master) => {
           const isSelected = String(master.id) === String(selectedMasterId);
+          const isLiked = likedMasterIds.includes(String(master.id));
 
           return (
             <Marker
               key={String(master.id)}
               position={[master.lat as number, master.lng as number]}
-              icon={buildMarkerIcon(master, isSelected)}
+              icon={buildMarkerIcon(master, isSelected, isLiked)}
               eventHandlers={{
                 mousedown: () => {
                   ignoreNextMapClickRef.current = true;
                 },
                 click: (event) => {
                   ignoreNextMapClickRef.current = true;
-                  if ('originalEvent' in event && event.originalEvent) {
+
+                  const target = event.originalEvent?.target as HTMLElement | null;
+                  const clickedLike = target?.closest('.pin-like-badge');
+
+                  if (event.originalEvent) {
                     L.DomEvent.stopPropagation(event.originalEvent as Event);
                   }
+
+                  if (clickedLike) {
+                    onToggleLike?.(master);
+                    return;
+                  }
+
                   onMasterSelect?.(master);
                 },
               }}
