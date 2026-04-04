@@ -153,6 +153,7 @@ export default function HomePage() {
   const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
   const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
+  const [showLikedOnly, setShowLikedOnly] = useState(false);
   const [listings, setListings] = useState<ListingItem[]>([]);
 
   useEffect(() => {
@@ -194,18 +195,28 @@ export default function HomePage() {
         String(master.subcategory || '').toLowerCase().includes(q) ||
         String(master.description || '').toLowerCase().includes(q);
 
-      return categoryMatch && subcategoryMatch && searchMatch;
+      const likedMatch =
+        !showLikedOnly || likedMasterIds.includes(String(master.id));
+
+      return categoryMatch && subcategoryMatch && searchMatch && likedMatch;
     });
-  }, [allMasters, activeCategory, activeSubcategory, search]);
+  }, [
+    allMasters,
+    activeCategory,
+    activeSubcategory,
+    search,
+    showLikedOnly,
+    likedMasterIds,
+  ]);
 
   useEffect(() => {
     setSelectedMaster(null);
-  }, [activeCategory, activeSubcategory, search]);
+  }, [activeCategory, activeSubcategory, search, showLikedOnly]);
 
   const mapKey = useMemo(() => {
     const ids = filteredMasters.map((item: any) => String(item.id)).join('|');
-    return `${activeCategory}-${activeSubcategory}-${search}-${mapMode}-${ids}`;
-  }, [activeCategory, activeSubcategory, search, mapMode, filteredMasters]);
+    return `${activeCategory}-${activeSubcategory}-${search}-${mapMode}-${showLikedOnly}-${ids}`;
+  }, [activeCategory, activeSubcategory, search, mapMode, showLikedOnly, filteredMasters]);
 
   const borderGradient = getLanguageBorder(language);
 
@@ -388,6 +399,7 @@ export default function HomePage() {
                 setSearch('');
                 setActiveSubcategory('');
                 setSelectedMaster(null);
+                setShowLikedOnly(false);
               }}
               style={{
                 border: '1px dashed #d8cfbf',
@@ -401,6 +413,27 @@ export default function HomePage() {
               }}
             >
               Clear filters
+            </button>
+
+            <button
+              onClick={() => setShowLikedOnly((prev) => !prev)}
+              style={{
+                border: showLikedOnly ? '1px solid #f3a7c0' : '1px solid #eadfce',
+                background: showLikedOnly ? '#ffeaf2' : '#fff',
+                color: '#2a2f36',
+                borderRadius: 999,
+                padding: '9px 13px',
+                fontSize: 13,
+                fontWeight: 900,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                boxShadow: showLikedOnly ? '0 5px 12px rgba(255,109,159,0.14)' : 'none',
+              }}
+            >
+              <span style={{ color: '#ff6d9f' }}>♥</span>
+              <span>Liked</span>
             </button>
 
             <div
@@ -442,8 +475,15 @@ export default function HomePage() {
                 mapMode={mapMode}
                 activeCategory={activeCategory}
                 selectedMasterId={selectedMaster?.id ?? null}
+                likedMasterIds={likedMasterIds}
                 onMasterSelect={(master: any) => setSelectedMaster(master)}
                 onMapBackgroundClick={() => setSelectedMaster(null)}
+                onToggleLike={(master: any) => {
+                  const id = String(master.id);
+                  setLikedMasterIds((prev) =>
+                    prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+                  );
+                }}
               />
 
               <div
