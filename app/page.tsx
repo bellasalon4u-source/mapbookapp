@@ -761,19 +761,20 @@ export default function HomePage() {
                     }}
                   >
                     <button
-                      style={{
-                        height: 52,
-                        borderRadius: 18,
-                        border: '2px solid #efbdd0',
-                        background: '#fff',
-                        color: '#25303d',
-                        fontSize: 17,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      View
-                    </button>
+  onClick={() => router.push('/profile')}
+  style={{
+    height: 52,
+    borderRadius: 18,
+    border: '2px solid #efbdd0',
+    background: '#fff',
+    color: '#25303d',
+    fontSize: 17,
+    fontWeight: 900,
+    cursor: 'pointer',
+  }}
+>
+  View
+</button>
 
                     <button
                       style={{
