@@ -10,6 +10,11 @@ import {
   subscribeToListingsStore,
   type ListingItem,
 } from '../services/listingsStore';
+import {
+  getLikedMasterIds,
+  subscribeToLikedMasters,
+  toggleLikedMaster,
+} from '../services/likedMastersStore';
 import BottomNav from '../components/BottomNav';
 import TopCategoriesBar from '../components/TopCategoriesBar';
 
@@ -153,7 +158,7 @@ export default function HomePage() {
   const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
   const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
-  const [showLikedOnly, setShowLikedOnly] = useState(false);
+  const [likedFilterMode, setLikedFilterMode] = useState<'none' | 'category' | 'all'>('none');
   const [listings, setListings] = useState<ListingItem[]>([]);
 
   useEffect(() => {
@@ -163,6 +168,16 @@ export default function HomePage() {
 
     loadListings();
     const unsubscribe = subscribeToListingsStore(loadListings);
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const loadLiked = () => {
+      setLikedMasterIds(getLikedMasterIds());
+    };
+
+    loadLiked();
+    const unsubscribe = subscribeToLikedMasters(loadLiked);
     return unsubscribe;
   }, []);
 
@@ -181,11 +196,14 @@ export default function HomePage() {
       const masterCategory = String(master.category || '').toLowerCase().trim();
       const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
 
-      const categoryMatch = masterCategory === activeCategory;
+      const categoryMatch =
+        likedFilterMode === 'all' ? true : masterCategory === activeCategory;
 
       const subcategoryMatch =
-        !activeSubcategory ||
-        masterSubcategory === activeSubcategory.toLowerCase().trim();
+        likedFilterMode === 'all'
+          ? true
+          : !activeSubcategory ||
+            masterSubcategory === activeSubcategory.toLowerCase().trim();
 
       const searchMatch =
         !q ||
@@ -196,7 +214,9 @@ export default function HomePage() {
         String(master.description || '').toLowerCase().includes(q);
 
       const likedMatch =
-        !showLikedOnly || likedMasterIds.includes(String(master.id));
+        likedFilterMode === 'none'
+          ? true
+          : likedMasterIds.includes(String(master.id));
 
       return categoryMatch && subcategoryMatch && searchMatch && likedMatch;
     });
@@ -205,20 +225,28 @@ export default function HomePage() {
     activeCategory,
     activeSubcategory,
     search,
-    showLikedOnly,
     likedMasterIds,
+    likedFilterMode,
   ]);
 
   useEffect(() => {
     setSelectedMaster(null);
-  }, [activeCategory, activeSubcategory, search, showLikedOnly]);
+  }, [activeCategory, activeSubcategory, search, likedFilterMode]);
 
   const mapKey = useMemo(() => {
     const ids = filteredMasters.map((item: any) => String(item.id)).join('|');
-    return `${activeCategory}-${activeSubcategory}-${search}-${mapMode}-${showLikedOnly}-${ids}`;
-  }, [activeCategory, activeSubcategory, search, mapMode, showLikedOnly, filteredMasters]);
+    return `${activeCategory}-${activeSubcategory}-${search}-${mapMode}-${likedFilterMode}-${ids}`;
+  }, [activeCategory, activeSubcategory, search, mapMode, likedFilterMode, filteredMasters]);
 
   const borderGradient = getLanguageBorder(language);
+  const currentCategoryLabel =
+    categories.find((item) => item.id === activeCategory)?.label || activeCategory;
+  const likedInCategoryCount = allMasters.filter(
+    (master: any) =>
+      String(master.category || '').toLowerCase().trim() === activeCategory &&
+      likedMasterIds.includes(String(master.id))
+  ).length;
+  const likedAllCount = likedMasterIds.length;
 
   return (
     <main
@@ -337,6 +365,7 @@ export default function HomePage() {
             activeSubcategory={activeSubcategory}
             onSelectCategory={(category) => {
               setActiveCategory(category);
+              setLikedFilterMode('none');
             }}
             onSelectSubcategory={(subcategory) => {
               setActiveSubcategory(subcategory);
@@ -352,88 +381,106 @@ export default function HomePage() {
             style={{
               display: 'flex',
               flexWrap: 'wrap',
-              gap: 8,
+              gap: 10,
               alignItems: 'center',
             }}
           >
-            <div
-              style={{
-                border: '1px solid #eadfce',
-                background: '#fff',
-                color: '#2a3442',
-                borderRadius: 999,
-                padding: '9px 13px',
-                fontSize: 13,
-                fontWeight: 900,
-                boxShadow: '0 3px 8px rgba(0,0,0,0.04)',
-              }}
-            >
-              {categories.find((item) => item.id === activeCategory)?.label || activeCategory}
-            </div>
-
-            {activeSubcategory ? (
-              <button
-                onClick={() => setActiveSubcategory('')}
-                style={{
-                  border: '1px solid #efcf68',
-                  background: '#ffe55c',
-                  color: '#2a2f36',
-                  borderRadius: 999,
-                  padding: '9px 13px',
-                  fontSize: 13,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  boxShadow: '0 5px 12px rgba(255,214,64,0.20)',
-                }}
-              >
-                <span>{activeSubcategory}</span>
-                <span style={{ fontSize: 16, lineHeight: 1 }}>✕</span>
-              </button>
-            ) : null}
-
             <button
-              onClick={() => {
-                setSearch('');
-                setActiveSubcategory('');
-                setSelectedMaster(null);
-                setShowLikedOnly(false);
-              }}
+              onClick={() =>
+                setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))
+              }
               style={{
-                border: '1px dashed #d8cfbf',
+                border:
+                  likedFilterMode === 'category'
+                    ? '3px solid #ff2020'
+                    : '1px solid #dadada',
                 background: '#fff',
-                color: '#5d6672',
+                color: '#1f2430',
                 borderRadius: 999,
-                padding: '9px 13px',
-                fontSize: 13,
-                fontWeight: 800,
-                cursor: 'pointer',
-              }}
-            >
-              Clear filters
-            </button>
-
-            <button
-              onClick={() => setShowLikedOnly((prev) => !prev)}
-              style={{
-                border: showLikedOnly ? '1px solid #f3a7c0' : '1px solid #eadfce',
-                background: showLikedOnly ? '#ffeaf2' : '#fff',
-                color: '#2a2f36',
-                borderRadius: 999,
-                padding: '9px 13px',
-                fontSize: 13,
-                fontWeight: 900,
+                padding: likedFilterMode === 'category' ? '12px 16px' : '10px 14px',
+                fontSize: likedFilterMode === 'category' ? 16 : 15,
+                fontWeight: likedFilterMode === 'category' ? 900 : 800,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
-                boxShadow: showLikedOnly ? '0 5px 12px rgba(255,109,159,0.14)' : 'none',
+                gap: 10,
+                boxShadow:
+                  likedFilterMode === 'category'
+                    ? '0 6px 18px rgba(255,32,32,0.18)'
+                    : '0 3px 8px rgba(0,0,0,0.04)',
+                transform: likedFilterMode === 'category' ? 'scale(1.03)' : 'scale(1)',
+                transition: 'all 0.18s ease',
               }}
             >
-              <span style={{ color: '#ff6d9f' }}>♥</span>
-              <span>Liked</span>
+              <span style={{ color: '#ff2020', fontSize: 18 }}>♥</span>
+              <span>{currentCategoryLabel}</span>
+              <span
+                style={{
+                  marginLeft: 2,
+                  minWidth: 28,
+                  height: 28,
+                  borderRadius: 999,
+                  border: '1px solid #e4e4e4',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 14,
+                  fontWeight: 900,
+                  color: '#1f2430',
+                  background: '#fff',
+                }}
+              >
+                {likedInCategoryCount}
+              </span>
+            </button>
+
+            <button
+              onClick={() =>
+                setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))
+              }
+              style={{
+                border:
+                  likedFilterMode === 'all'
+                    ? '3px solid #ff2020'
+                    : '1px solid #dadada',
+                background: '#fff',
+                color: '#1f2430',
+                borderRadius: 999,
+                padding: likedFilterMode === 'all' ? '12px 16px' : '10px 14px',
+                fontSize: likedFilterMode === 'all' ? 16 : 15,
+                fontWeight: likedFilterMode === 'all' ? 900 : 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                boxShadow:
+                  likedFilterMode === 'all'
+                    ? '0 6px 18px rgba(255,32,32,0.18)'
+                    : '0 3px 8px rgba(0,0,0,0.04)',
+                transform: likedFilterMode === 'all' ? 'scale(1.03)' : 'scale(1)',
+                transition: 'all 0.18s ease',
+              }}
+            >
+              <span style={{ color: '#ff2020', fontSize: 18 }}>♥</span>
+              <span>All liked</span>
+              <span
+                style={{
+                  marginLeft: 2,
+                  minWidth: 28,
+                  height: 28,
+                  borderRadius: 999,
+                  border: '1px solid #e4e4e4',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 14,
+                  fontWeight: 900,
+                  color: '#1f2430',
+                  background: '#fff',
+                }}
+              >
+                {likedAllCount}
+              </span>
             </button>
 
             <div
@@ -479,10 +526,7 @@ export default function HomePage() {
                 onMasterSelect={(master: any) => setSelectedMaster(master)}
                 onMapBackgroundClick={() => setSelectedMaster(null)}
                 onToggleLike={(master: any) => {
-                  const id = String(master.id);
-                  setLikedMasterIds((prev) =>
-                    prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-                  );
+                  toggleLikedMaster(master.id);
                 }}
               />
 
@@ -653,14 +697,7 @@ export default function HomePage() {
                         />
 
                         <button
-                          onClick={() => {
-                            const id = String(selectedMaster.id);
-                            setLikedMasterIds((prev) =>
-                              prev.includes(id)
-                                ? prev.filter((item) => item !== id)
-                                : [...prev, id]
-                            );
-                          }}
+                          onClick={() => toggleLikedMaster(selectedMaster.id)}
                           style={{
                             position: 'absolute',
                             right: 8,
@@ -670,7 +707,7 @@ export default function HomePage() {
                             borderRadius: 999,
                             border: 'none',
                             background: '#fff',
-                            color: '#ff6b8e',
+                            color: '#ff2020',
                             fontSize: 16,
                             boxShadow: '0 4px 10px rgba(0,0,0,0.14)',
                             cursor: 'pointer',
