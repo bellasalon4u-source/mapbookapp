@@ -45,15 +45,15 @@ const londonCenter: [number, number] = [51.5074, -0.1278];
 function getCategoryAccent(category?: string) {
   const normalized = String(category || '').toLowerCase();
 
-  if (normalized === 'beauty') return '#ff6d9f';
-  if (normalized === 'barber') return '#53aef7';
-  if (normalized === 'wellness') return '#49c968';
-  if (normalized === 'home') return '#ffc938';
-  if (normalized === 'repairs') return '#3db0f7';
-  if (normalized === 'tech') return '#9b67ff';
-  if (normalized === 'pets') return '#ffa726';
+  if (normalized === 'beauty') return '#ff4f93';
+  if (normalized === 'barber') return '#2d98ff';
+  if (normalized === 'wellness') return '#32c957';
+  if (normalized === 'home') return '#ff9f1a';
+  if (normalized === 'repairs') return '#f4b400';
+  if (normalized === 'tech') return '#9b5cff';
+  if (normalized === 'pets') return '#28c7d9';
 
-  return '#ff6d9f';
+  return '#ff4f93';
 }
 
 function getTileUrl(mode: 'map' | 'satellite' = 'map') {
@@ -69,31 +69,32 @@ function buildMarkerIcon(
   isLiked: boolean
 ): DivIcon {
   const accent = getCategoryAccent(master.category);
-  const borderColor = master.availableNow ? '#39c95a' : '#ff6880';
+  const availabilityColor = master.availableNow ? '#31cf4b' : '#ff2d2d';
   const avatar =
     master.avatar ||
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80';
 
   const outerRing = isSelected ? 6 : 5;
-  const size = isSelected ? 76 : 70;
-  const photoSize = isSelected ? 56 : 52;
-  const badgeSize = isSelected ? 30 : 28;
+  const size = isSelected ? 78 : 72;
+  const photoSize = isSelected ? 58 : 54;
+  const likeBadgeSize = isSelected ? 30 : 28;
+  const statusBadgeSize = isSelected ? 18 : 16;
 
   return L.divIcon({
     className: 'custom-master-pin',
     html: `
-      <div style="position:relative;width:${size}px;height:${size + 14}px;">
+      <div style="position:relative;width:${size}px;height:${size + 18}px;">
         <div style="
           position:absolute;
           left:50%;
-          top:${size - 7}px;
+          top:${size - 4}px;
           transform:translateX(-50%);
           width:0;
           height:0;
-          border-left:13px solid transparent;
-          border-right:13px solid transparent;
-          border-top:18px solid ${borderColor};
-          filter:drop-shadow(0 4px 6px rgba(0,0,0,0.14));
+          border-left:14px solid transparent;
+          border-right:14px solid transparent;
+          border-top:19px solid ${accent};
+          filter:drop-shadow(0 5px 8px rgba(0,0,0,0.16));
         "></div>
 
         <div style="
@@ -105,8 +106,8 @@ function buildMarkerIcon(
           height:${size}px;
           border-radius:999px;
           background:#fff;
-          border:${outerRing}px solid ${borderColor};
-          box-shadow:0 6px 18px rgba(0,0,0,0.16);
+          border:${outerRing}px solid ${accent};
+          box-shadow:0 7px 18px rgba(0,0,0,0.16);
           overflow:hidden;
         ">
           <img
@@ -127,13 +128,12 @@ function buildMarkerIcon(
         </div>
 
         <div
-          class="pin-like-badge"
           style="
             position:absolute;
-            right:1px;
-            top:${size * 0.48}px;
-            width:${badgeSize + 10}px;
-            height:${badgeSize + 10}px;
+            right:2px;
+            top:${size * 0.56}px;
+            width:${likeBadgeSize + 10}px;
+            height:${likeBadgeSize + 10}px;
             background:#fff;
             border:4px solid ${accent};
             border-radius:999px;
@@ -147,13 +147,26 @@ function buildMarkerIcon(
             line-height:1;
             cursor:pointer;
           "
+          class="pin-like-badge"
         >
           ${isLiked ? '♥' : ''}
         </div>
+
+        <div style="
+          position:absolute;
+          right:${isLiked ? likeBadgeSize + 20 : 4}px;
+          top:${size * 0.46}px;
+          width:${statusBadgeSize + 10}px;
+          height:${statusBadgeSize + 10}px;
+          background:#fff;
+          border:4px solid ${availabilityColor};
+          border-radius:999px;
+          box-shadow:0 4px 10px rgba(0,0,0,0.12);
+        "></div>
       </div>
     `,
-    iconSize: [size, size + 14],
-    iconAnchor: [size / 2, size + 10],
+    iconSize: [size, size + 18],
+    iconAnchor: [size / 2, size + 12],
   });
 }
 
@@ -234,90 +247,4 @@ export default function RealMap({
         typeof item.availableNow === 'boolean'
           ? item.availableNow
           : typeof item.availableToday === 'boolean'
-          ? item.availableToday
-          : true,
-      avatar:
-        item.avatar ||
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
-    }));
-  }, [masters]);
-
-  return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        background: '#f3efe7',
-        touchAction: 'none',
-        overscrollBehavior: 'contain',
-        WebkitUserSelect: 'none',
-        userSelect: 'none',
-      }}
-    >
-      <MapContainer
-        center={londonCenter}
-        zoom={11}
-        dragging={true}
-        touchZoom={true}
-        doubleClickZoom={true}
-        scrollWheelZoom={false}
-        boxZoom={false}
-        keyboard={false}
-        style={{
-          width: '100%',
-          height: '100%',
-          touchAction: 'none',
-        }}
-        zoomControl={true}
-      >
-        <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url={getTileUrl(mapMode)}
-        />
-
-        <FitBoundsLayer masters={safeMasters} />
-
-        <MapEventsLayer
-          onBackgroundClick={onMapBackgroundClick}
-          ignoreNextMapClickRef={ignoreNextMapClickRef}
-        />
-
-        {safeMasters.map((master) => {
-          const isSelected = String(master.id) === String(selectedMasterId);
-          const isLiked = likedMasterIds.includes(String(master.id));
-
-          return (
-            <Marker
-              key={String(master.id)}
-              position={[master.lat as number, master.lng as number]}
-              icon={buildMarkerIcon(master, isSelected, isLiked)}
-              eventHandlers={{
-                mousedown: () => {
-                  ignoreNextMapClickRef.current = true;
-                },
-                click: (event) => {
-                  ignoreNextMapClickRef.current = true;
-
-                  const target = event.originalEvent?.target as HTMLElement | null;
-                  const clickedLike = target?.closest('.pin-like-badge');
-
-                  if (event.originalEvent) {
-                    L.DomEvent.stopPropagation(event.originalEvent as Event);
-                  }
-
-                  if (clickedLike) {
-                    onToggleLike?.(master);
-                    return;
-                  }
-
-                  onMasterSelect?.(master);
-                },
-              }}
-            />
-          );
-        })}
-      </MapContainer>
-    </div>
-  );
-}
+          ? item.available
