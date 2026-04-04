@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import L, { type DivIcon } from 'leaflet';
 import {
   MapContainer,
@@ -140,11 +140,17 @@ function buildMarkerIcon(master: MasterItem, isSelected: boolean): DivIcon {
 
 function MapEventsLayer({
   onBackgroundClick,
+  ignoreNextMapClickRef,
 }: {
   onBackgroundClick?: () => void;
+  ignoreNextMapClickRef: React.MutableRefObject<boolean>;
 }) {
   useMapEvents({
     click() {
+      if (ignoreNextMapClickRef.current) {
+        ignoreNextMapClickRef.current = false;
+        return;
+      }
       onBackgroundClick?.();
     },
   });
@@ -187,6 +193,8 @@ export default function RealMap({
   onMasterSelect,
   onMapBackgroundClick,
 }: RealMapProps) {
+  const ignoreNextMapClickRef = useRef(false);
+
   const safeMasters = useMemo(() => {
     return (masters || []).map((item, index) => ({
       ...item,
@@ -231,7 +239,11 @@ export default function RealMap({
         />
 
         <FitBoundsLayer masters={safeMasters} />
-        <MapEventsLayer onBackgroundClick={onMapBackgroundClick} />
+
+        <MapEventsLayer
+          onBackgroundClick={onMapBackgroundClick}
+          ignoreNextMapClickRef={ignoreNextMapClickRef}
+        />
 
         {safeMasters.map((master) => {
           const isSelected = String(master.id) === String(selectedMasterId);
@@ -242,7 +254,11 @@ export default function RealMap({
               position={[master.lat as number, master.lng as number]}
               icon={buildMarkerIcon(master, isSelected)}
               eventHandlers={{
+                mousedown: () => {
+                  ignoreNextMapClickRef.current = true;
+                },
                 click: (event) => {
+                  ignoreNextMapClickRef.current = true;
                   if ('originalEvent' in event && event.originalEvent) {
                     L.DomEvent.stopPropagation(event.originalEvent as Event);
                   }
