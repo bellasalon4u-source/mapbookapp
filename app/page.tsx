@@ -430,9 +430,9 @@ export default function HomePage() {
           >
             <div
               style={{
-                height: 400,
+                height: 520,
                 position: 'relative',
-                overflow: 'visible',
+                overflow: 'hidden',
               }}
             >
               <RealMap
