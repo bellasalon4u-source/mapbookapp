@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import L, { type DivIcon } from 'leaflet';
 import {
   MapContainer,
@@ -8,6 +8,7 @@ import {
   TileLayer,
   useMap,
   useMapEvents,
+  CircleMarker,
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -60,6 +61,7 @@ function getTileUrl(mode: 'map' | 'satellite' = 'map') {
   if (mode === 'satellite') {
     return 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
   }
+
   return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 }
 
@@ -69,7 +71,7 @@ function buildMarkerIcon(
   isLiked: boolean
 ): DivIcon {
   const accent = getCategoryAccent(master.category);
-  const availabilityColor = master.availableNow ? '#31cf4b' : '#ff2d2d';
+  const availabilityColor = master.availableNow ? '#2ed14f' : '#ff2d2d';
   const avatar =
     master.avatar ||
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80';
@@ -78,7 +80,7 @@ function buildMarkerIcon(
   const size = isSelected ? 78 : 72;
   const photoSize = isSelected ? 58 : 54;
   const likeBadgeSize = isSelected ? 30 : 28;
-  const statusBadgeSize = isSelected ? 18 : 16;
+  const statusBadgeSize = isSelected ? 20 : 18;
 
   return L.divIcon({
     className: 'custom-master-pin',
@@ -128,6 +130,7 @@ function buildMarkerIcon(
         </div>
 
         <div
+          class="pin-like-badge"
           style="
             position:absolute;
             right:2px;
@@ -147,7 +150,6 @@ function buildMarkerIcon(
             line-height:1;
             cursor:pointer;
           "
-          class="pin-like-badge"
         >
           ${isLiked ? '♥' : ''}
         </div>
@@ -190,7 +192,13 @@ function MapEventsLayer({
   return null;
 }
 
-function FitBoundsLayer({ masters }: { masters: MasterItem[] }) {
+function FitBoundsLayer({
+  masters,
+  userLocation,
+}: {
+  masters: MasterItem[];
+  userLocation: [number, number] | null;
+}) {
   const map = useMap();
 
   useEffect(() => {
@@ -198,28 +206,69 @@ function FitBoundsLayer({ masters }: { masters: MasterItem[] }) {
       map.invalidateSize();
     }, 80);
 
-    if (!masters.length) {
+    const points: [number, number][] = masters.map((item) => [
+      item.lat || londonCenter[0],
+      item.lng || londonCenter[1],
+    ]);
+
+    if (userLocation) {
+      points.push(userLocation);
+    }
+
+    if (!points.length) {
       map.setView(londonCenter, 11);
       return () => window.clearTimeout(id);
     }
 
-    if (masters.length === 1) {
-      const item = masters[0];
-      map.setView([item.lat || londonCenter[0], item.lng || londonCenter[1]], 11);
+    if (points.length === 1) {
+      map.setView(points[0], 11);
       return () => window.clearTimeout(id);
     }
 
-    const bounds = L.latLngBounds(
-      masters.map(
-        (item) =>
-          [item.lat || londonCenter[0], item.lng || londonCenter[1]] as [number, number]
-      )
-    );
-
+    const bounds = L.latLngBounds(points);
     map.fitBounds(bounds.pad(0.22), { animate: true });
 
     return () => window.clearTimeout(id);
-  }, [map, masters]);
+  }, [map, masters, userLocation]);
+
+  return null;
+}
+
+function UserLocationLayer({
+  onLocationFound,
+}: {
+  onLocationFound: (coords: [number, number] | null) => void;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    map.locate({
+      setView: false,
+      maxZoom: 14,
+      enableHighAccuracy: true,
+    });
+
+    const handleFound = (event: L.LocationEvent) => {
+      if (cancelled) return;
+      onLocationFound([event.latlng.lat, event.latlng.lng]);
+    };
+
+    const handleError = () => {
+      if (cancelled) return;
+      onLocationFound(null);
+    };
+
+    map.on('locationfound', handleFound);
+    map.on('locationerror', handleError);
+
+    return () => {
+      cancelled = true;
+      map.off('locationfound', handleFound);
+      map.off('locationerror', handleError);
+    };
+  }, [map, onLocationFound]);
 
   return null;
 }
@@ -234,6 +283,7 @@ export default function RealMap({
   onToggleLike,
 }: RealMapProps) {
   const ignoreNextMapClickRef = useRef(false);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
   const safeMasters = useMemo(() => {
     return (masters || []).map((item, index) => ({
@@ -247,4 +297,116 @@ export default function RealMap({
         typeof item.availableNow === 'boolean'
           ? item.availableNow
           : typeof item.availableToday === 'boolean'
-          ? item.available
+          ? item.availableToday
+          : true,
+      avatar:
+        item.avatar ||
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    }));
+  }, [masters]);
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        background: '#f3efe7',
+        touchAction: 'none',
+        overscrollBehavior: 'contain',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
+      }}
+    >
+      <MapContainer
+        center={londonCenter}
+        zoom={11}
+        dragging={true}
+        touchZoom={true}
+        doubleClickZoom={true}
+        scrollWheelZoom={false}
+        boxZoom={false}
+        keyboard={false}
+        style={{
+          width: '100%',
+          height: '100%',
+          touchAction: 'none',
+        }}
+        zoomControl={true}
+      >
+        <TileLayer
+          attribution="&copy; OpenStreetMap contributors"
+          url={getTileUrl(mapMode)}
+        />
+
+        <UserLocationLayer onLocationFound={setUserLocation} />
+        <FitBoundsLayer masters={safeMasters} userLocation={userLocation} />
+
+        <MapEventsLayer
+          onBackgroundClick={onMapBackgroundClick}
+          ignoreNextMapClickRef={ignoreNextMapClickRef}
+        />
+
+        {userLocation ? (
+          <>
+            <CircleMarker
+              center={userLocation}
+              radius={16}
+              pathOptions={{
+                color: 'rgba(46,128,255,0.18)',
+                fillColor: 'rgba(46,128,255,0.18)',
+                fillOpacity: 1,
+                weight: 0,
+              }}
+            />
+            <CircleMarker
+              center={userLocation}
+              radius={8}
+              pathOptions={{
+                color: '#ffffff',
+                fillColor: '#2f8df5',
+                fillOpacity: 1,
+                weight: 3,
+              }}
+            />
+          </>
+        ) : null}
+
+        {safeMasters.map((master) => {
+          const isSelected = String(master.id) === String(selectedMasterId);
+          const isLiked = likedMasterIds.includes(String(master.id));
+
+          return (
+            <Marker
+              key={String(master.id)}
+              position={[master.lat as number, master.lng as number]}
+              icon={buildMarkerIcon(master, isSelected, isLiked)}
+              eventHandlers={{
+                mousedown: () => {
+                  ignoreNextMapClickRef.current = true;
+                },
+                click: (event) => {
+                  ignoreNextMapClickRef.current = true;
+
+                  const target = event.originalEvent?.target as HTMLElement | null;
+                  const clickedLike = target?.closest('.pin-like-badge');
+
+                  if (event.originalEvent) {
+                    L.DomEvent.stopPropagation(event.originalEvent as Event);
+                  }
+
+                  if (clickedLike) {
+                    onToggleLike?.(master);
+                    return;
+                  }
+
+                  onMasterSelect?.(master);
+                },
+              }}
+            />
+          );
+        })}
+      </MapContainer>
+    </div>
+  );
+}
