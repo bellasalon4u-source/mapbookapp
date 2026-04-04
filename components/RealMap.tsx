@@ -162,15 +162,19 @@ function FitBoundsLayer({ masters }: { masters: MasterItem[] }) {
   const map = useMap();
 
   useEffect(() => {
+    const id = window.setTimeout(() => {
+      map.invalidateSize();
+    }, 80);
+
     if (!masters.length) {
       map.setView(londonCenter, 11);
-      return;
+      return () => window.clearTimeout(id);
     }
 
     if (masters.length === 1) {
       const item = masters[0];
       map.setView([item.lat || londonCenter[0], item.lng || londonCenter[1]], 11);
-      return;
+      return () => window.clearTimeout(id);
     }
 
     const bounds = L.latLngBounds(
@@ -181,6 +185,8 @@ function FitBoundsLayer({ masters }: { masters: MasterItem[] }) {
     );
 
     map.fitBounds(bounds.pad(0.22), { animate: true });
+
+    return () => window.clearTimeout(id);
   }, [map, masters]);
 
   return null;
@@ -222,14 +228,25 @@ export default function RealMap({
         width: '100%',
         height: '100%',
         background: '#f3efe7',
+        touchAction: 'none',
+        overscrollBehavior: 'contain',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
       }}
     >
       <MapContainer
         center={londonCenter}
         zoom={11}
+        dragging={true}
+        touchZoom={true}
+        doubleClickZoom={true}
+        scrollWheelZoom={false}
+        boxZoom={false}
+        keyboard={false}
         style={{
           width: '100%',
           height: '100%',
+          touchAction: 'none',
         }}
         zoomControl={true}
       >
