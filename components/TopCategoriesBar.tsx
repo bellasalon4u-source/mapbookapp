@@ -32,50 +32,15 @@ const iconSrcMap: Record<string, string> = {
   pets: '/ui/categories/pets.png',
 };
 
-const tileStyleMap: Record<
-  string,
-  { label: string; bg: string; shadow: string }
-> = {
-  beauty: {
-    label: 'Beauty',
-    bg: 'linear-gradient(180deg, #ff86b9 0%, #ff5f9f 100%)',
-    shadow: '0 5px 12px rgba(255,95,159,0.20)',
-  },
-  barber: {
-    label: 'Barber',
-    bg: 'linear-gradient(180deg, #63bbff 0%, #3498f5 100%)',
-    shadow: '0 5px 12px rgba(52,152,245,0.18)',
-  },
-  wellness: {
-    label: 'Wellness',
-    bg: 'linear-gradient(180deg, #73ea6f 0%, #44cf56 100%)',
-    shadow: '0 5px 12px rgba(68,207,86,0.18)',
-  },
-  home: {
-    label: 'Home',
-    bg: 'linear-gradient(180deg, #ffd84a 0%, #ffbf26 100%)',
-    shadow: '0 5px 12px rgba(255,191,38,0.18)',
-  },
-  repairs: {
-    label: 'Repairs',
-    bg: 'linear-gradient(180deg, #50c2ff 0%, #2797f4 100%)',
-    shadow: '0 5px 12px rgba(39,151,244,0.18)',
-  },
-  tech: {
-    label: 'Tech',
-    bg: 'linear-gradient(180deg, #b56eff 0%, #8d50ff 100%)',
-    shadow: '0 5px 12px rgba(141,80,255,0.18)',
-  },
-  pets: {
-    label: 'Pets',
-    bg: 'linear-gradient(180deg, #ffc338 0%, #ffa11f 100%)',
-    shadow: '0 5px 12px rgba(255,161,31,0.18)',
-  },
-  more: {
-    label: 'More',
-    bg: 'linear-gradient(180deg, #173552 0%, #0f2238 100%)',
-    shadow: '0 5px 12px rgba(15,34,56,0.20)',
-  },
+const colorMap: Record<string, string> = {
+  beauty: '#ff4f93',
+  barber: '#2d98ff',
+  wellness: '#32c957',
+  home: '#ff9f1a',
+  repairs: '#f4b400',
+  tech: '#9b5cff',
+  pets: '#28c7d9',
+  more: '#173552',
 };
 
 export default function TopCategoriesBar({
@@ -133,9 +98,9 @@ export default function TopCategoriesBar({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '54px 1fr',
-          gap: 8,
-          padding: '0 8px',
+          gridTemplateColumns: '64px 1fr',
+          gap: 10,
+          padding: '0 10px',
           alignItems: 'start',
         }}
       >
@@ -145,7 +110,7 @@ export default function TopCategoriesBar({
             left: 0,
             background: '#f7f3eb',
             zIndex: 3,
-            paddingTop: 1,
+            paddingTop: 2,
           }}
         >
           <button
@@ -154,22 +119,22 @@ export default function TopCategoriesBar({
               border: 'none',
               background: 'transparent',
               padding: 0,
-              width: 50,
+              width: 56,
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 4,
+              gap: 6,
             }}
           >
             <div
               style={{
-                width: 46,
-                height: 64,
-                borderRadius: 16,
-                background: tileStyleMap.more.bg,
-                boxShadow: tileStyleMap.more.shadow,
-                border: '2px solid rgba(255,255,255,0.82)',
+                width: 52,
+                height: 72,
+                borderRadius: 18,
+                background: 'linear-gradient(180deg, #173552 0%, #0f2238 100%)',
+                boxShadow: '0 8px 18px rgba(15,34,56,0.20)',
+                border: '2px solid rgba(255,255,255,0.92)',
                 overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',
@@ -191,7 +156,7 @@ export default function TopCategoriesBar({
             <div
               style={{
                 fontSize: 11,
-                fontWeight: 800,
+                fontWeight: 900,
                 color: '#203040',
                 lineHeight: 1,
               }}
@@ -208,21 +173,22 @@ export default function TopCategoriesBar({
             WebkitOverflowScrolling: 'touch',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
-            paddingBottom: 3,
+            paddingBottom: 6,
+            paddingRight: 6,
           }}
         >
           <div
             style={{
               display: 'flex',
-              gap: 8,
+              gap: 12,
               minWidth: 'max-content',
-              paddingRight: 8,
+              paddingRight: 20,
             }}
           >
             {visibleTopItems.map((item) => {
-              const cfg = tileStyleMap[item.id];
               const isActive = activeCategory === item.id;
               const src = iconSrcMap[item.id];
+              const color = colorMap[item.id] || '#43d94d';
 
               return (
                 <button
@@ -239,20 +205,25 @@ export default function TopCategoriesBar({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 4,
-                    minWidth: 66,
+                    gap: 6,
+                    minWidth: 78,
+                    flexShrink: 0,
+                    transform: isActive ? 'scale(1.06)' : 'scale(1)',
+                    transition: 'transform 0.18s ease',
                   }}
                 >
                   <div
                     style={{
-                      width: 66,
-                      height: 66,
-                      borderRadius: 18,
-                      background: cfg.bg,
-                      boxShadow: cfg.shadow,
+                      width: isActive ? 78 : 72,
+                      height: isActive ? 78 : 72,
+                      borderRadius: 20,
+                      background: '#fff',
                       border: isActive
-                        ? '3px solid rgba(255,255,255,0.95)'
-                        : '2px solid rgba(255,255,255,0.82)',
+                        ? `2.5px solid ${color}`
+                        : '1.5px solid rgba(220,220,220,0.95)',
+                      boxShadow: isActive
+                        ? `0 8px 20px ${color}22`
+                        : '0 5px 14px rgba(0,0,0,0.06)',
                       overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
@@ -261,7 +232,7 @@ export default function TopCategoriesBar({
                   >
                     <img
                       src={src}
-                      alt={cfg.label}
+                      alt={item.label}
                       style={{
                         width: '100%',
                         height: '100%',
@@ -273,34 +244,24 @@ export default function TopCategoriesBar({
 
                   <div
                     style={{
-                      fontSize: 11,
+                      fontSize: isActive ? 12 : 11,
                       fontWeight: 900,
-                      color: '#fff',
-                      background: 'rgba(0,0,0,0.26)',
-                      padding: '4px 9px',
-                      borderRadius: 999,
-                      marginTop: -14,
+                      color,
                       lineHeight: 1,
-                      textShadow: '0 1px 2px rgba(0,0,0,0.30)',
-                      boxShadow: '0 3px 8px rgba(0,0,0,0.08)',
-                      maxWidth: 70,
                       whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
                     }}
                   >
-                    {cfg.label}
+                    {item.shortLabel || item.label}
                   </div>
 
                   <div
                     style={{
-                      width: 40,
-                      height: 5,
+                      width: isActive ? 46 : 0,
+                      height: 6,
                       borderRadius: 999,
-                      background: isActive ? '#43d94d' : 'transparent',
-                      boxShadow: isActive
-                        ? '0 4px 10px rgba(67,217,77,0.28)'
-                        : 'none',
+                      background: isActive ? color : 'transparent',
+                      boxShadow: isActive ? `0 5px 12px ${color}55` : 'none',
+                      transition: 'all 0.18s ease',
                     }}
                   />
                 </button>
@@ -385,7 +346,7 @@ export default function TopCategoriesBar({
               {categories.map((item) => {
                 const active = expandedCategory === item.id;
                 const src = iconSrcMap[item.id] || iconSrcMap.beauty;
-                const cfg = tileStyleMap[item.id] || tileStyleMap.beauty;
+                const color = colorMap[item.id] || '#43d94d';
 
                 return (
                   <button
@@ -396,14 +357,14 @@ export default function TopCategoriesBar({
                       onClearSubcategory();
                     }}
                     style={{
-                      border: 'none',
+                      border: active ? `2px solid ${color}` : '1px solid #ebe2d5',
                       cursor: 'pointer',
                       textAlign: 'left',
                       borderRadius: 14,
                       padding: '9px 9px',
-                      background: active ? '#eef7ff' : '#f8f5ef',
+                      background: '#fff',
                       color: '#243242',
-                      boxShadow: active ? '0 6px 14px rgba(0,0,0,0.08)' : 'none',
+                      boxShadow: active ? `0 6px 14px ${color}22` : 'none',
                       display: 'flex',
                       alignItems: 'center',
                       gap: 8,
@@ -419,7 +380,8 @@ export default function TopCategoriesBar({
                         borderRadius: 10,
                         overflow: 'hidden',
                         flexShrink: 0,
-                        background: cfg.bg,
+                        background: '#fff',
+                        border: `1.5px solid ${color}`,
                       }}
                     >
                       <img
@@ -435,9 +397,11 @@ export default function TopCategoriesBar({
                     </div>
                     <span
                       style={{
+                        color,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
+                        fontWeight: 900,
                       }}
                     >
                       {item.shortLabel || item.label}
@@ -481,6 +445,7 @@ export default function TopCategoriesBar({
               >
                 {expanded.subcategories.map((sub) => {
                   const active = activeSubcategory === sub;
+                  const color = colorMap[expanded.id] || '#43d94d';
 
                   return (
                     <button
@@ -492,17 +457,17 @@ export default function TopCategoriesBar({
                       }}
                       style={{
                         border: active
-                          ? '2px solid #43d94d'
+                          ? `2px solid ${color}`
                           : '1px solid #eadfce',
-                        background: active ? '#fffbea' : '#fff',
-                        color: '#2a3442',
+                        background: '#fff',
+                        color: active ? color : '#2a3442',
                         borderRadius: 999,
                         padding: '8px 11px',
                         fontSize: 12,
                         fontWeight: 800,
                         cursor: 'pointer',
                         boxShadow: active
-                          ? '0 6px 14px rgba(67,217,77,0.12)'
+                          ? `0 6px 14px ${color}22`
                           : '0 4px 10px rgba(0,0,0,0.04)',
                       }}
                     >
@@ -534,28 +499,32 @@ export default function TopCategoriesBar({
                     gap: 7,
                   }}
                 >
-                  {allOtherCategories.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        setExpandedCategory(item.id);
-                        onSelectCategory(item.id);
-                        onClearSubcategory();
-                      }}
-                      style={{
-                        border: '1px solid #eadfce',
-                        background: '#fff',
-                        color: '#243242',
-                        borderRadius: 999,
-                        padding: '7px 10px',
-                        fontSize: 11,
-                        fontWeight: 800,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {item.shortLabel || item.label}
-                    </button>
-                  ))}
+                  {allOtherCategories.map((item) => {
+                    const color = colorMap[item.id] || '#43d94d';
+
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setExpandedCategory(item.id);
+                          onSelectCategory(item.id);
+                          onClearSubcategory();
+                        }}
+                        style={{
+                          border: `1px solid ${color}55`,
+                          background: '#fff',
+                          color,
+                          borderRadius: 999,
+                          padding: '7px 10px',
+                          fontSize: 11,
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {item.shortLabel || item.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </>
             )}
