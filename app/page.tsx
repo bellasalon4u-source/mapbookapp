@@ -453,7 +453,8 @@ export default function HomePage() {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 8,
-                  zIndex: 30,
+                  zIndex: 1000,
+                  pointerEvents: 'auto',
                 }}
               >
                 <button
@@ -575,7 +576,8 @@ export default function HomePage() {
                     boxShadow: '0 16px 40px rgba(0,0,0,0.18)',
                     border: '1px solid rgba(230,223,213,0.95)',
                     padding: 14,
-                    zIndex: 80,
+                    zIndex: 1001,
+                    pointerEvents: 'auto',
                   }}
                 >
                   <div
