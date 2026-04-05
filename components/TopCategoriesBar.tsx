@@ -282,34 +282,36 @@ export default function TopCategoriesBar({
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(247,243,235,0.96)',
-            backdropFilter: 'blur(8px)',
             zIndex: 9999,
-            padding: '18px 10px 14px',
-            boxSizing: 'border-box',
+            pointerEvents: 'none',
           }}
         >
           <div
             style={{
               maxWidth: 430,
-              height: 'calc(100vh - 32px)',
               margin: '0 auto',
-              display: 'grid',
-              gridTemplateRows: 'auto 1fr',
-              gap: 12,
+              height: '100vh',
+              position: 'relative',
             }}
           >
             <div
               style={{
+                pointerEvents: 'auto',
+                position: 'absolute',
+                left: 10,
+                right: 10,
+                top: 18,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 gap: 12,
-                background: '#fff',
-                borderRadius: 22,
-                border: '1px solid rgba(226,218,205,0.95)',
-                boxShadow: '0 10px 24px rgba(0,0,0,0.08)',
-                padding: '14px 16px',
+                background: 'rgba(255,255,255,0.72)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                borderRadius: 24,
+                border: '1px solid rgba(255,255,255,0.55)',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.10)',
+                padding: '16px 18px',
               }}
             >
               <div>
@@ -327,7 +329,7 @@ export default function TopCategoriesBar({
                   style={{
                     marginTop: 4,
                     fontSize: 13,
-                    color: '#7a7065',
+                    color: '#6f675f',
                     fontWeight: 700,
                   }}
                 >
@@ -338,11 +340,11 @@ export default function TopCategoriesBar({
               <button
                 onClick={() => setMenuOpen(false)}
                 style={{
-                  width: 44,
-                  height: 44,
+                  width: 46,
+                  height: 46,
                   borderRadius: 999,
-                  border: '1px solid #e5ddd2',
-                  background: '#fff',
+                  border: '1px solid rgba(210,205,195,0.9)',
+                  background: 'rgba(255,255,255,0.78)',
                   fontSize: 24,
                   cursor: 'pointer',
                   flexShrink: 0,
@@ -355,20 +357,28 @@ export default function TopCategoriesBar({
 
             <div
               style={{
-                minHeight: 0,
+                position: 'absolute',
+                left: 10,
+                right: 10,
+                top: 118,
+                bottom: 110,
                 display: 'grid',
-                gridTemplateColumns: '34% 66%',
+                gridTemplateColumns: '36% 64%',
                 gap: 10,
+                pointerEvents: 'none',
               }}
             >
               <div
                 style={{
+                  pointerEvents: 'auto',
                   minHeight: 0,
-                  background: 'rgba(255,255,255,0.99)',
-                  borderRadius: 20,
+                  background: 'rgba(255,255,255,0.22)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  borderRadius: 22,
+                  border: '1px solid rgba(255,255,255,0.45)',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
                   padding: 10,
-                  boxShadow: '0 14px 30px rgba(0,0,0,0.10)',
-                  border: '1px solid rgba(226,218,205,0.95)',
                   overflowY: 'auto',
                 }}
               >
@@ -405,13 +415,12 @@ export default function TopCategoriesBar({
                           onClearSubcategory();
                         }}
                         style={{
-                          border: active ? `2px solid ${color}` : '1px solid #ebe2d5',
+                          border: active ? `2px solid ${color}` : '1px solid rgba(255,255,255,0.55)',
                           cursor: 'pointer',
                           textAlign: 'left',
                           borderRadius: 16,
                           padding: '10px 8px',
-                          background: '#fff',
-                          color: '#243242',
+                          background: active ? 'rgba(255,255,255,0.78)' : 'rgba(255,255,255,0.40)',
                           boxShadow: active ? `0 6px 14px ${color}22` : 'none',
                           display: 'flex',
                           alignItems: 'center',
@@ -463,12 +472,15 @@ export default function TopCategoriesBar({
 
               <div
                 style={{
+                  pointerEvents: 'auto',
                   minHeight: 0,
-                  background: 'rgba(255,255,255,0.99)',
-                  borderRadius: 20,
+                  background: 'rgba(255,255,255,0.22)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  borderRadius: 22,
+                  border: '1px solid rgba(255,255,255,0.45)',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
                   padding: 14,
-                  boxShadow: '0 14px 30px rgba(0,0,0,0.10)',
-                  border: '1px solid rgba(226,218,205,0.95)',
                   overflowY: 'auto',
                 }}
               >
@@ -504,8 +516,8 @@ export default function TopCategoriesBar({
                             setMenuOpen(false);
                           }}
                           style={{
-                            border: active ? `2px solid ${color}` : '1px solid #eadfce',
-                            background: '#fff',
+                            border: active ? `2px solid ${color}` : '1px solid rgba(255,255,255,0.55)',
+                            background: active ? 'rgba(255,255,255,0.84)' : 'rgba(255,255,255,0.46)',
                             color: active ? color : '#2a3442',
                             borderRadius: 999,
                             padding: '10px 14px',
@@ -558,7 +570,7 @@ export default function TopCategoriesBar({
                             }}
                             style={{
                               border: `1px solid ${color}55`,
-                              background: '#fff',
+                              background: 'rgba(255,255,255,0.46)',
                               color,
                               borderRadius: 999,
                               padding: '8px 11px',
