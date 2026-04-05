@@ -96,7 +96,7 @@ export default function TopCategoriesBar({
       ref={wrapperRef}
       style={{
         position: 'relative',
-        zIndex: 40,
+        zIndex: 120,
       }}
     >
       <div
@@ -282,7 +282,7 @@ export default function TopCategoriesBar({
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 9999,
+            zIndex: 10000,
             pointerEvents: 'none',
           }}
         >
@@ -296,8 +296,18 @@ export default function TopCategoriesBar({
           >
             <div
               style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'rgba(247,243,235,0.06)',
+                pointerEvents: 'none',
+              }}
+            />
+
+            <div
+              style={{
                 pointerEvents: 'auto',
                 position: 'absolute',
+                zIndex: 3,
                 left: 10,
                 right: 10,
                 top: 18,
@@ -358,20 +368,23 @@ export default function TopCategoriesBar({
             <div
               style={{
                 position: 'absolute',
+                zIndex: 3,
                 left: 10,
                 right: 10,
                 top: 118,
-                bottom: 110,
+                bottom: 104,
                 display: 'grid',
                 gridTemplateColumns: '36% 64%',
                 gap: 10,
                 pointerEvents: 'none',
+                overflow: 'hidden',
               }}
             >
               <div
                 style={{
                   pointerEvents: 'auto',
                   minHeight: 0,
+                  height: '100%',
                   background: 'rgba(255,255,255,0.22)',
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
@@ -380,6 +393,7 @@ export default function TopCategoriesBar({
                   boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
                   padding: 10,
                   overflowY: 'auto',
+                  overflowX: 'hidden',
                 }}
               >
                 <div
@@ -399,6 +413,7 @@ export default function TopCategoriesBar({
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 8,
+                    paddingBottom: 8,
                   }}
                 >
                   {categories.map((item) => {
@@ -474,6 +489,7 @@ export default function TopCategoriesBar({
                 style={{
                   pointerEvents: 'auto',
                   minHeight: 0,
+                  height: '100%',
                   background: 'rgba(255,255,255,0.22)',
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
@@ -482,6 +498,7 @@ export default function TopCategoriesBar({
                   boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
                   padding: 14,
                   overflowY: 'auto',
+                  overflowX: 'hidden',
                 }}
               >
                 <div
@@ -501,6 +518,7 @@ export default function TopCategoriesBar({
                       display: 'flex',
                       flexWrap: 'wrap',
                       gap: 10,
+                      paddingBottom: 8,
                     }}
                   >
                     {expanded.subcategories.map((sub) => {
@@ -555,6 +573,7 @@ export default function TopCategoriesBar({
                         display: 'flex',
                         flexWrap: 'wrap',
                         gap: 8,
+                        paddingBottom: 8,
                       }}
                     >
                       {allOtherCategories.map((item) => {
