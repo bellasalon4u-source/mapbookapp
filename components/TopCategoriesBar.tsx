@@ -59,7 +59,6 @@ export default function TopCategoriesBar({
   const [expandedCategory, setExpandedCategory] = useState<string>(activeCategory);
   const [mounted, setMounted] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const overlayContentRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -68,27 +67,6 @@ export default function TopCategoriesBar({
   useEffect(() => {
     setExpandedCategory(activeCategory);
   }, [activeCategory]);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-
-    const handleOutside = (event: MouseEvent | TouchEvent) => {
-      const target = event.target as Node;
-      const clickedTopBar = wrapperRef.current?.contains(target);
-      const clickedOverlay = overlayContentRef.current?.contains(target);
-
-      if (clickedTopBar || clickedOverlay) return;
-      setMenuOpen(false);
-    };
-
-    document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('touchstart', handleOutside);
-
-    return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('touchstart', handleOutside);
-    };
-  }, [menuOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -128,18 +106,25 @@ export default function TopCategoriesBar({
               style={{
                 position: 'absolute',
                 inset: 0,
-                background: 'rgba(0,0,0,0.03)',
+                background: 'rgba(0,0,0,0.02)',
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
               }}
             />
 
             <div
-              ref={overlayContentRef}
               style={{
                 position: 'relative',
                 width: '100%',
                 height: '100%',
                 maxWidth: 430,
                 margin: '0 auto',
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
               }}
             >
               <div
@@ -152,11 +137,11 @@ export default function TopCategoriesBar({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   gap: 12,
-                  background: 'rgba(255,255,255,0.78)',
+                  background: 'rgba(255,255,255,0.82)',
                   backdropFilter: 'blur(14px)',
                   WebkitBackdropFilter: 'blur(14px)',
                   borderRadius: 24,
-                  border: '1px solid rgba(255,255,255,0.65)',
+                  border: '1px solid rgba(255,255,255,0.72)',
                   boxShadow: '0 10px 30px rgba(0,0,0,0.10)',
                   padding: '16px 18px',
                 }}
@@ -191,7 +176,7 @@ export default function TopCategoriesBar({
                     height: 46,
                     borderRadius: 999,
                     border: '1px solid rgba(210,205,195,0.9)',
-                    background: 'rgba(255,255,255,0.82)',
+                    background: 'rgba(255,255,255,0.88)',
                     fontSize: 24,
                     cursor: 'pointer',
                     flexShrink: 0,
@@ -208,21 +193,22 @@ export default function TopCategoriesBar({
                   left: 10,
                   right: 10,
                   top: 118,
-                  height: 'min(360px, 42vh)',
+                  height: 'min(300px, 34vh)',
                   display: 'grid',
                   gridTemplateColumns: '34% 66%',
                   gap: 10,
+                  overflow: 'hidden',
                 }}
               >
                 <div
                   style={{
                     minHeight: 0,
                     height: '100%',
-                    background: 'rgba(255,255,255,0.20)',
+                    background: 'rgba(255,255,255,0.26)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)',
                     borderRadius: 22,
-                    border: '1px solid rgba(255,255,255,0.45)',
+                    border: '1px solid rgba(255,255,255,0.50)',
                     boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
                     padding: 10,
                     overflowY: 'auto',
@@ -246,7 +232,7 @@ export default function TopCategoriesBar({
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 8,
-                      paddingBottom: 6,
+                      paddingBottom: 4,
                     }}
                   >
                     {categories.map((item) => {
@@ -265,14 +251,14 @@ export default function TopCategoriesBar({
                           style={{
                             border: active
                               ? `2px solid ${color}`
-                              : '1px solid rgba(255,255,255,0.55)',
+                              : '1px solid rgba(255,255,255,0.58)',
                             cursor: 'pointer',
                             textAlign: 'left',
                             borderRadius: 16,
                             padding: '10px 8px',
                             background: active
-                              ? 'rgba(255,255,255,0.78)'
-                              : 'rgba(255,255,255,0.40)',
+                              ? 'rgba(255,255,255,0.82)'
+                              : 'rgba(255,255,255,0.44)',
                             boxShadow: active ? `0 6px 14px ${color}22` : 'none',
                             display: 'flex',
                             alignItems: 'center',
@@ -326,11 +312,11 @@ export default function TopCategoriesBar({
                   style={{
                     minHeight: 0,
                     height: '100%',
-                    background: 'rgba(255,255,255,0.20)',
+                    background: 'rgba(255,255,255,0.26)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)',
                     borderRadius: 22,
-                    border: '1px solid rgba(255,255,255,0.45)',
+                    border: '1px solid rgba(255,255,255,0.50)',
                     boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
                     padding: 14,
                     overflowY: 'auto',
@@ -354,7 +340,7 @@ export default function TopCategoriesBar({
                         display: 'flex',
                         flexWrap: 'wrap',
                         gap: 10,
-                        paddingBottom: 6,
+                        paddingBottom: 4,
                       }}
                     >
                       {expanded.subcategories.map((sub) => {
@@ -372,10 +358,10 @@ export default function TopCategoriesBar({
                             style={{
                               border: active
                                 ? `2px solid ${color}`
-                                : '1px solid rgba(255,255,255,0.55)',
+                                : '1px solid rgba(255,255,255,0.58)',
                               background: active
-                                ? 'rgba(255,255,255,0.84)'
-                                : 'rgba(255,255,255,0.46)',
+                                ? 'rgba(255,255,255,0.88)'
+                                : 'rgba(255,255,255,0.52)',
                               color: active ? color : '#2a3442',
                               borderRadius: 999,
                               padding: '10px 14px',
@@ -413,7 +399,7 @@ export default function TopCategoriesBar({
                           display: 'flex',
                           flexWrap: 'wrap',
                           gap: 8,
-                          paddingBottom: 6,
+                          paddingBottom: 4,
                         }}
                       >
                         {allOtherCategories.map((item) => {
@@ -429,7 +415,7 @@ export default function TopCategoriesBar({
                               }}
                               style={{
                                 border: `1px solid ${color}55`,
-                                background: 'rgba(255,255,255,0.46)',
+                                background: 'rgba(255,255,255,0.52)',
                                 color,
                                 borderRadius: 999,
                                 padding: '8px 11px',
