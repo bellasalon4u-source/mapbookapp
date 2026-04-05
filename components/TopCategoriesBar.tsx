@@ -128,9 +128,7 @@ export default function TopCategoriesBar({
               style={{
                 position: 'absolute',
                 inset: 0,
-                background: 'rgba(0,0,0,0.04)',
-                backdropFilter: 'blur(2px)',
-                WebkitBackdropFilter: 'blur(2px)',
+                background: 'rgba(0,0,0,0.03)',
               }}
             />
 
@@ -154,11 +152,11 @@ export default function TopCategoriesBar({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   gap: 12,
-                  background: 'rgba(255,255,255,0.72)',
+                  background: 'rgba(255,255,255,0.78)',
                   backdropFilter: 'blur(14px)',
                   WebkitBackdropFilter: 'blur(14px)',
                   borderRadius: 24,
-                  border: '1px solid rgba(255,255,255,0.6)',
+                  border: '1px solid rgba(255,255,255,0.65)',
                   boxShadow: '0 10px 30px rgba(0,0,0,0.10)',
                   padding: '16px 18px',
                 }}
@@ -193,7 +191,7 @@ export default function TopCategoriesBar({
                     height: 46,
                     borderRadius: 999,
                     border: '1px solid rgba(210,205,195,0.9)',
-                    background: 'rgba(255,255,255,0.78)',
+                    background: 'rgba(255,255,255,0.82)',
                     fontSize: 24,
                     cursor: 'pointer',
                     flexShrink: 0,
@@ -210,11 +208,10 @@ export default function TopCategoriesBar({
                   left: 10,
                   right: 10,
                   top: 118,
-                  bottom: 24,
+                  height: 'min(360px, 42vh)',
                   display: 'grid',
-                  gridTemplateColumns: '36% 64%',
+                  gridTemplateColumns: '34% 66%',
                   gap: 10,
-                  overflow: 'hidden',
                 }}
               >
                 <div
@@ -249,7 +246,7 @@ export default function TopCategoriesBar({
                       display: 'flex',
                       flexDirection: 'column',
                       gap: 8,
-                      paddingBottom: 8,
+                      paddingBottom: 6,
                     }}
                   >
                     {categories.map((item) => {
@@ -357,7 +354,7 @@ export default function TopCategoriesBar({
                         display: 'flex',
                         flexWrap: 'wrap',
                         gap: 10,
-                        paddingBottom: 8,
+                        paddingBottom: 6,
                       }}
                     >
                       {expanded.subcategories.map((sub) => {
@@ -416,7 +413,7 @@ export default function TopCategoriesBar({
                           display: 'flex',
                           flexWrap: 'wrap',
                           gap: 8,
-                          paddingBottom: 8,
+                          paddingBottom: 6,
                         }}
                       >
                         {allOtherCategories.map((item) => {
