@@ -30,6 +30,8 @@ const iconSrcMap: Record<string, string> = {
   repairs: '/ui/categories/repairs.png',
   tech: '/ui/categories/tech.png',
   pets: '/ui/categories/pets.png',
+  transport: '/ui/categories/transport.png',
+  education: '/ui/categories/education.png',
 };
 
 const colorMap: Record<string, string> = {
@@ -40,6 +42,8 @@ const colorMap: Record<string, string> = {
   repairs: '#f4b400',
   tech: '#9b5cff',
   pets: '#28c7d9',
+  transport: '#2f7df6',
+  education: '#7d52ff',
   more: '#173552',
 };
 
@@ -132,9 +136,9 @@ export default function TopCategoriesBar({
                 width: 52,
                 height: 72,
                 borderRadius: 18,
-                background: 'linear-gradient(180deg, #173552 0%, #0f2238 100%)',
-                boxShadow: '0 8px 18px rgba(15,34,56,0.20)',
-                border: '2px solid rgba(255,255,255,0.92)',
+                background: '#fff',
+                boxShadow: '0 8px 18px rgba(15,34,56,0.12)',
+                border: '1.5px solid rgba(220,220,220,0.95)',
                 overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',
@@ -157,8 +161,9 @@ export default function TopCategoriesBar({
               style={{
                 fontSize: 11,
                 fontWeight: 900,
-                color: '#203040',
+                color: colorMap.more,
                 lineHeight: 1,
+                whiteSpace: 'nowrap',
               }}
             >
               More
