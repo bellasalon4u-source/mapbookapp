@@ -33,6 +33,13 @@ const iconSrcMap: Record<string, string> = {
   pets: '/ui/categories/pets.png',
   transport: '/ui/categories/transport.png',
   education: '/ui/categories/education.png',
+  fashion: '/ui/categories/fashion.png',
+  auto: '/ui/categories/auto.png',
+  moving: '/ui/categories/moving.png',
+  fitness: '/ui/categories/fitness.png',
+  events: '/ui/categories/events.png',
+  activities: '/ui/categories/activities.png',
+  creative: '/ui/categories/creative.png',
 };
 
 const colorMap: Record<string, string> = {
@@ -45,6 +52,13 @@ const colorMap: Record<string, string> = {
   pets: '#28c7d9',
   transport: '#2f7df6',
   education: '#7d52ff',
+  fashion: '#43d94d',
+  auto: '#43d94d',
+  moving: '#43d94d',
+  fitness: '#43d94d',
+  events: '#43d94d',
+  activities: '#43d94d',
+  creative: '#43d94d',
   more: '#173552',
 };
 
@@ -559,73 +573,4 @@ export default function TopCategoriesBar({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 8,
-                    minWidth: 78,
-                    flexShrink: 0,
-                    transform: isActive ? 'scale(1.06)' : 'scale(1)',
-                    transition: 'transform 0.18s ease',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: isActive ? 78 : 72,
-                      height: isActive ? 78 : 72,
-                      borderRadius: 20,
-                      background: '#fff',
-                      border: isActive
-                        ? `2.5px solid ${color}`
-                        : '1.5px solid rgba(220,220,220,0.95)',
-                      boxShadow: isActive
-                        ? `0 8px 20px ${color}22`
-                        : '0 5px 14px rgba(0,0,0,0.06)',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <img
-                      src={src}
-                      alt={item.label}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        display: 'block',
-                      }}
-                    />
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: isActive ? 12 : 11,
-                      fontWeight: 900,
-                      color,
-                      lineHeight: 1,
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {item.shortLabel || item.label}
-                  </div>
-
-                  <div
-                    style={{
-                      width: isActive ? 46 : 0,
-                      height: 6,
-                      borderRadius: 999,
-                      background: isActive ? color : 'transparent',
-                      boxShadow: isActive ? `0 5px 12px ${color}55` : 'none',
-                      transition: 'all 0.18s ease',
-                    }}
-                  />
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {overlay}
-    </div>
-  );
-}
+                    gap:
