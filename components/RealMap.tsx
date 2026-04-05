@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import L, { type DivIcon } from 'leaflet';
 import {
   MapContainer,
@@ -54,6 +54,8 @@ function getCategoryAccent(category?: string) {
   if (normalized === 'repairs') return '#f4b400';
   if (normalized === 'tech') return '#9b5cff';
   if (normalized === 'pets') return '#28c7d9';
+  if (normalized === 'transport') return '#2f7df6';
+  if (normalized === 'education') return '#7d52ff';
 
   return '#ff4f93';
 }
@@ -178,7 +180,7 @@ function MapEventsLayer({
   ignoreNextMapClickRef,
 }: {
   onBackgroundClick?: () => void;
-  ignoreNextMapClickRef: React.MutableRefObject<boolean>;
+  ignoreNextMapClickRef: MutableRefObject<boolean>;
 }) {
   useMapEvents({
     click() {
@@ -318,8 +320,8 @@ export default function RealMap({
         typeof item.availableNow === 'boolean'
           ? item.availableNow
           : typeof item.availableToday === 'boolean'
-          ? item.availableToday
-          : true,
+            ? item.availableToday
+            : true,
       avatar:
         item.avatar ||
         'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
@@ -421,4 +423,17 @@ export default function RealMap({
                   }
 
                   if (clickedLike) {
-                    onToggleLike?.(
+                    onToggleLike?.(master);
+                    return;
+                  }
+
+                  onMasterSelect?.(master);
+                },
+              }}
+            />
+          );
+        })}
+      </MapContainer>
+    </div>
+  );
+}
