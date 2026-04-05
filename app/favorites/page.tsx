@@ -72,6 +72,8 @@ function getCategoryAccent(category?: string) {
   if (normalized === 'repairs') return '#3db0f7';
   if (normalized === 'tech') return '#9b67ff';
   if (normalized === 'pets') return '#ffa726';
+  if (normalized === 'transport') return '#2f7df6';
+  if (normalized === 'education') return '#7d52ff';
 
   return '#ff6d9f';
 }
@@ -447,7 +449,7 @@ export default function FavoritesPage() {
         )}
       </div>
 
-      <BottomNav active="profile" />
+      <BottomNav />
     </main>
   );
 }
