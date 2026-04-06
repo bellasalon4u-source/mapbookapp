@@ -87,7 +87,6 @@ type SearchResult =
       id: string;
       label: string;
       categoryId: string;
-      categoryLabel: string;
       master: any;
     }
   | {
@@ -95,7 +94,6 @@ type SearchResult =
       id: string;
       label: string;
       categoryId: string;
-      categoryLabel: string;
       listingMaster: any;
     };
 
@@ -495,18 +493,17 @@ function getCategoryAccent(category?: string) {
   return '#ff4f93';
 }
 
-function getCategoryLabel(category?: string) {
+function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
   const normalized = String(category || '').toLowerCase();
   if (!normalized) return 'Service';
 
   const found = categories.find((item) => item.id === normalized);
-  return found?.shortLabel || found?.label || normalized.charAt(0).toUpperCase() + normalized.slice(1);
-}
+  if (!found) {
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  }
 
-function getTranslatedCategoryLabel(categoryId: string, language: AppLanguage) {
   const tr = t(language);
-
-  const map: Record<string, string> = {
+  const translatedMap: Record<string, string> = {
     beauty: tr.beauty,
     barber: tr.barber,
     wellness: tr.wellness,
@@ -524,7 +521,7 @@ function getTranslatedCategoryLabel(categoryId: string, language: AppLanguage) {
     creative: tr.creative,
   };
 
-  return map[categoryId] || getCategoryLabel(categoryId);
+  return translatedMap[found.id] || found.shortLabel || found.label;
 }
 
 function normalizePaymentMethods(value: any): string[] {
@@ -692,7 +689,7 @@ export default function HomePage() {
         id: `smart-${item.categoryId}-${item.subcategory}-${item.label}`,
         label: item.label,
         categoryId: item.categoryId,
-        categoryLabel: getTranslatedCategoryLabel(item.categoryId, language),
+        categoryLabel: getCategoryLabel(item.categoryId, language),
         subcategory: item.subcategory,
         matchText: item.label,
       }));
@@ -718,7 +715,7 @@ export default function HomePage() {
       .map(({ item }) => ({
         type: 'category' as const,
         id: `category-${item.id}`,
-        label: getTranslatedCategoryLabel(item.id, language),
+        label: getCategoryLabel(item.id, language),
         categoryId: item.id,
       }));
   }, [search, language]);
@@ -732,7 +729,7 @@ export default function HomePage() {
         item.subcategories.map((sub) => ({
           sub,
           categoryId: item.id,
-          categoryLabel: getTranslatedCategoryLabel(item.id, language),
+          categoryLabel: getCategoryLabel(item.id, language),
           score: scoreTextMatch(q, sub),
         }))
       )
@@ -777,10 +774,9 @@ export default function HomePage() {
         id: `master-${master.id}`,
         label: master.name || master.title || 'Pro',
         categoryId: String(master.category || 'beauty'),
-        categoryLabel: getTranslatedCategoryLabel(String(master.category || 'beauty'), language),
         master,
       }));
-  }, [search, allMasters, language]);
+  }, [search, allMasters]);
 
   const listingResults = useMemo(() => {
     const q = search.trim();
@@ -811,10 +807,9 @@ export default function HomePage() {
         id: `listing-${master.id}`,
         label: master.title || 'Listing',
         categoryId: String(master.category || 'beauty'),
-        categoryLabel: getTranslatedCategoryLabel(String(master.category || 'beauty'), language),
         listingMaster: master,
       }));
-  }, [search, listingMasters, language]);
+  }, [search, listingMasters]);
 
   const filteredMasters = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -867,7 +862,7 @@ export default function HomePage() {
   }, [activeCategory, activeSubcategory, search, mapMode, likedFilterMode, filteredMasters]);
 
   const borderGradient = getLanguageBorder(language);
-  const currentCategoryLabel = getTranslatedCategoryLabel(activeCategory, language);
+  const currentCategoryLabel = getCategoryLabel(activeCategory, language);
 
   const likedInCategoryCount = allMasters.filter(
     (master: any) =>
@@ -1361,7 +1356,7 @@ export default function HomePage() {
                                 {item.label}
                               </span>
                               <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {item.categoryLabel}
+                                {getCategoryLabel(item.categoryId, language)}
                               </span>
                             </button>
                           ))}
@@ -1404,7 +1399,7 @@ export default function HomePage() {
                                 {item.label}
                               </span>
                               <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {item.categoryLabel}
+                                {getCategoryLabel(item.categoryId, language)}
                               </span>
                             </button>
                           ))}
@@ -1422,7 +1417,6 @@ export default function HomePage() {
           <TopCategoriesBar
             activeCategory={activeCategory}
             activeSubcategory={activeSubcategory}
-            language={language}
             onSelectCategory={(category) => {
               setActiveCategory(category);
               setLikedFilterMode('none');
@@ -1885,7 +1879,7 @@ export default function HomePage() {
                           fontWeight: 900,
                         }}
                       >
-                        {getTranslatedCategoryLabel(String(selectedMaster.category || ''), language)}
+                        {getCategoryLabel(selectedMaster.category, language)}
                       </div>
 
                       <div
