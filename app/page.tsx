@@ -392,7 +392,22 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
 function normalizeText(value: string) {
   return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
 }
+function normalizePaymentMethods(value: any): string[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string' && value.trim()) return [value];
+  return ['cash', 'card'];
+}
 
+function paymentBadge(method: string, language: AppLanguage) {
+  const tr = t(language);
+  const normalized = String(method).toLowerCase();
+
+  if (normalized === 'cash') return { icon: '💵', label: tr.cash };
+  if (normalized === 'card') return { icon: '💳', label: tr.card };
+  if (normalized === 'wallet') return { icon: '📱', label: tr.wallet };
+
+  return { icon: '•', label: String(method) };
+}
 function scoreTextMatch(query: string, target: string) {
   const q = normalizeText(query);
   const tValue = normalizeText(target);
