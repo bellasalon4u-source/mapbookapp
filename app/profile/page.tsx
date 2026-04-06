@@ -1,16 +1,120 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import BottomNav from '../../components/common/BottomNav';
+import { getSavedLanguage, type AppLanguage } from '../../services/i18n';
+
+const profileTexts = {
+  EN: {
+    title: 'Profile',
+    subtitle: 'Manage your account, bookings and preferences',
+    editProfile: 'Edit profile',
+    upcomingBookings: 'Upcoming bookings',
+    savedMasters: 'Saved masters',
+    messages: 'Messages',
+    likedPins: 'Liked pins',
+    latestBooking: 'My latest booking',
+    paymentMethods: 'Payment methods',
+    notifications: 'Notifications',
+    languageRegion: 'Language & region',
+    logout: 'Log out',
+  },
+  ES: {
+    title: 'Perfil',
+    subtitle: 'Administra tu cuenta, reservas y preferencias',
+    editProfile: 'Editar perfil',
+    upcomingBookings: 'Próximas reservas',
+    savedMasters: 'Profesionales guardados',
+    messages: 'Mensajes',
+    likedPins: 'Pins guardados',
+    latestBooking: 'Mi última reserva',
+    paymentMethods: 'Métodos de pago',
+    notifications: 'Notificaciones',
+    languageRegion: 'Idioma y región',
+    logout: 'Cerrar sesión',
+  },
+  RU: {
+    title: 'Профиль',
+    subtitle: 'Управляйте аккаунтом, бронированиями и настройками',
+    editProfile: 'Редактировать профиль',
+    upcomingBookings: 'Предстоящие бронирования',
+    savedMasters: 'Сохранённые мастера',
+    messages: 'Сообщения',
+    likedPins: 'Избранные пины',
+    latestBooking: 'Моё последнее бронирование',
+    paymentMethods: 'Способы оплаты',
+    notifications: 'Уведомления',
+    languageRegion: 'Язык и регион',
+    logout: 'Выйти',
+  },
+  CZ: {
+    title: 'Profil',
+    subtitle: 'Spravujte svůj účet, rezervace a nastavení',
+    editProfile: 'Upravit profil',
+    upcomingBookings: 'Nadcházející rezervace',
+    savedMasters: 'Uložení specialisté',
+    messages: 'Zprávy',
+    likedPins: 'Oblíbené piny',
+    latestBooking: 'Moje poslední rezervace',
+    paymentMethods: 'Platební metody',
+    notifications: 'Oznámení',
+    languageRegion: 'Jazyk a region',
+    logout: 'Odhlásit se',
+  },
+  DE: {
+    title: 'Profil',
+    subtitle: 'Verwalte dein Konto, Buchungen und Einstellungen',
+    editProfile: 'Profil bearbeiten',
+    upcomingBookings: 'Bevorstehende Buchungen',
+    savedMasters: 'Gespeicherte Profis',
+    messages: 'Nachrichten',
+    likedPins: 'Gespeicherte Pins',
+    latestBooking: 'Meine letzte Buchung',
+    paymentMethods: 'Zahlungsmethoden',
+    notifications: 'Benachrichtigungen',
+    languageRegion: 'Sprache & Region',
+    logout: 'Abmelden',
+  },
+  PL: {
+    title: 'Profil',
+    subtitle: 'Zarządzaj kontem, rezerwacjami i ustawieniami',
+    editProfile: 'Edytuj profil',
+    upcomingBookings: 'Nadchodzące rezerwacje',
+    savedMasters: 'Zapisani specjaliści',
+    messages: 'Wiadomości',
+    likedPins: 'Polubione pinezki',
+    latestBooking: 'Moja ostatnia rezerwacja',
+    paymentMethods: 'Metody płatności',
+    notifications: 'Powiadomienia',
+    languageRegion: 'Język i region',
+    logout: 'Wyloguj się',
+  },
+} as const;
 
 export default function ProfilePage() {
+  const [language, setLanguage] = useState<AppLanguage>('EN');
+
+  useEffect(() => {
+    setLanguage(getSavedLanguage());
+
+    const handleFocus = () => {
+      setLanguage(getSavedLanguage());
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
+  const text = profileTexts[language as keyof typeof profileTexts] || profileTexts.EN;
+
   return (
     <main className="min-h-screen bg-[#fcf8f2] px-4 py-6 pb-24">
       <div className="mx-auto max-w-md">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#1d1712]">Profile</h1>
-            <p className="mt-1 text-sm text-[#7a7065]">
-              Manage your account, bookings and preferences
-            </p>
+            <h1 className="text-3xl font-bold text-[#1d1712]">{text.title}</h1>
+            <p className="mt-1 text-sm text-[#7a7065]">{text.subtitle}</p>
           </div>
 
           <Link
@@ -37,18 +141,18 @@ export default function ProfilePage() {
           </div>
 
           <button className="mt-5 w-full rounded-2xl bg-[#2f241c] px-4 py-4 text-sm font-bold text-white">
-            Edit profile
+            {text.editProfile}
           </button>
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3">
           <div className="rounded-3xl bg-[#2f241c] p-4 text-white">
-            <p className="text-xs text-[#d9cdbd]">Upcoming bookings</p>
+            <p className="text-xs text-[#d9cdbd]">{text.upcomingBookings}</p>
             <p className="mt-2 text-3xl font-bold">3</p>
           </div>
 
           <div className="rounded-3xl bg-[#f2e9dc] p-4 text-[#241d17]">
-            <p className="text-xs text-[#6e5f51]">Saved masters</p>
+            <p className="text-xs text-[#6e5f51]">{text.savedMasters}</p>
             <p className="mt-2 text-3xl font-bold">8</p>
           </div>
         </div>
@@ -58,37 +162,37 @@ export default function ProfilePage() {
             href="/messages"
             className="block rounded-3xl border border-[#efe4d7] bg-white px-5 py-4 text-sm font-bold text-[#1d1712]"
           >
-            Messages
+            {text.messages}
           </Link>
 
           <Link
             href="/favorites"
             className="block rounded-3xl border border-[#efe4d7] bg-white px-5 py-4 text-sm font-bold text-[#1d1712]"
           >
-            Liked pins
+            {text.likedPins}
           </Link>
 
           <Link
             href="/booking-success"
             className="block rounded-3xl border border-[#efe4d7] bg-white px-5 py-4 text-sm font-bold text-[#1d1712]"
           >
-            My latest booking
+            {text.latestBooking}
           </Link>
 
           <button className="w-full rounded-3xl border border-[#efe4d7] bg-white px-5 py-4 text-left text-sm font-bold text-[#1d1712]">
-            Payment methods
+            {text.paymentMethods}
           </button>
 
           <button className="w-full rounded-3xl border border-[#efe4d7] bg-white px-5 py-4 text-left text-sm font-bold text-[#1d1712]">
-            Notifications
+            {text.notifications}
           </button>
 
           <button className="w-full rounded-3xl border border-[#efe4d7] bg-white px-5 py-4 text-left text-sm font-bold text-[#1d1712]">
-            Language & region
+            {text.languageRegion}
           </button>
 
           <button className="w-full rounded-3xl border border-[#efe4d7] bg-white px-5 py-4 text-left text-sm font-bold text-red-600">
-            Log out
+            {text.logout}
           </button>
         </div>
       </div>
