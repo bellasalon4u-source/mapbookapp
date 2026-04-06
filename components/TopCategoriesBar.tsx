@@ -19,7 +19,15 @@ const topOrder = [
   'home',
   'repairs',
   'tech',
+  'fashion',
   'pets',
+  'auto',
+  'moving',
+  'fitness',
+  'education',
+  'events',
+  'activities',
+  'creative',
 ];
 
 const iconSrcMap: Record<string, string> = {
@@ -30,16 +38,16 @@ const iconSrcMap: Record<string, string> = {
   home: '/ui/categories/home.png',
   repairs: '/ui/categories/repairs.png',
   tech: '/ui/categories/tech.png',
-  pets: '/ui/categories/pets.png',
-  transport: '/ui/categories/transport.png',
-  education: '/ui/categories/education.png',
   fashion: '/ui/categories/fashion.png',
+  pets: '/ui/categories/pets.png',
   auto: '/ui/categories/auto.png',
   moving: '/ui/categories/moving.png',
   fitness: '/ui/categories/fitness.png',
+  education: '/ui/categories/education.png',
   events: '/ui/categories/events.png',
   activities: '/ui/categories/activities.png',
   creative: '/ui/categories/creative.png',
+  transport: '/ui/categories/transport.png',
 };
 
 const colorMap: Record<string, string> = {
@@ -49,16 +57,16 @@ const colorMap: Record<string, string> = {
   home: '#ff9f1a',
   repairs: '#f4b400',
   tech: '#9b5cff',
-  pets: '#28c7d9',
-  transport: '#2f7df6',
-  education: '#7d52ff',
   fashion: '#43d94d',
+  pets: '#28c7d9',
   auto: '#43d94d',
   moving: '#43d94d',
   fitness: '#43d94d',
+  education: '#7d52ff',
   events: '#43d94d',
   activities: '#43d94d',
   creative: '#43d94d',
+  transport: '#2f7df6',
   more: '#173552',
 };
 
@@ -97,10 +105,6 @@ export default function TopCategoriesBar({
     return topOrder
       .map((id) => categories.find((item) => item.id === id))
       .filter(Boolean) as typeof categories;
-  }, []);
-
-  const allOtherCategories = useMemo(() => {
-    return categories.filter((item) => !topOrder.includes(item.id));
   }, []);
 
   const expanded = categories.find((item) => item.id === expandedCategory);
@@ -151,7 +155,7 @@ export default function TopCategoriesBar({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   gap: 12,
-                  background: 'rgba(255,255,255,0.82)',
+                  background: 'rgba(255,255,255,0.84)',
                   backdropFilter: 'blur(14px)',
                   WebkitBackdropFilter: 'blur(14px)',
                   borderRadius: 24,
@@ -207,7 +211,7 @@ export default function TopCategoriesBar({
                   left: 10,
                   right: 10,
                   top: 118,
-                  height: 'min(300px, 34vh)',
+                  height: 'min(320px, 36vh)',
                   display: 'grid',
                   gridTemplateColumns: '34% 66%',
                   gap: 10,
@@ -218,7 +222,7 @@ export default function TopCategoriesBar({
                   style={{
                     minHeight: 0,
                     height: '100%',
-                    background: 'rgba(255,255,255,0.26)',
+                    background: 'rgba(255,255,255,0.28)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)',
                     borderRadius: 22,
@@ -326,7 +330,7 @@ export default function TopCategoriesBar({
                   style={{
                     minHeight: 0,
                     height: '100%',
-                    background: 'rgba(255,255,255,0.26)',
+                    background: 'rgba(255,255,255,0.28)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)',
                     borderRadius: 22,
@@ -393,58 +397,6 @@ export default function TopCategoriesBar({
                       })}
                     </div>
                   ) : null}
-
-                  {allOtherCategories.length > 0 && (
-                    <>
-                      <div
-                        style={{
-                          marginTop: 18,
-                          fontSize: 12,
-                          fontWeight: 800,
-                          color: '#6a7480',
-                        }}
-                      >
-                        Extra categories
-                      </div>
-
-                      <div
-                        style={{
-                          marginTop: 10,
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: 8,
-                          paddingBottom: 4,
-                        }}
-                      >
-                        {allOtherCategories.map((item) => {
-                          const color = colorMap[item.id] || '#43d94d';
-
-                          return (
-                            <button
-                              key={item.id}
-                              onClick={() => {
-                                setExpandedCategory(item.id);
-                                onSelectCategory(item.id);
-                                onClearSubcategory();
-                              }}
-                              style={{
-                                border: `1px solid ${color}55`,
-                                background: 'rgba(255,255,255,0.52)',
-                                color,
-                                borderRadius: 999,
-                                padding: '8px 11px',
-                                fontSize: 11,
-                                fontWeight: 900,
-                                cursor: 'pointer',
-                              }}
-                            >
-                              {item.shortLabel || item.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </>
-                  )}
                 </div>
               </div>
             </div>
@@ -555,7 +507,7 @@ export default function TopCategoriesBar({
           >
             {visibleTopItems.map((item) => {
               const isActive = activeCategory === item.id;
-              const src = iconSrcMap[item.id];
+              const src = iconSrcMap[item.id] || iconSrcMap.beauty;
               const color = colorMap[item.id] || '#43d94d';
 
               return (
@@ -573,4 +525,73 @@ export default function TopCategoriesBar({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap:
+                    gap: 8,
+                    minWidth: 78,
+                    flexShrink: 0,
+                    transform: isActive ? 'scale(1.06)' : 'scale(1)',
+                    transition: 'transform 0.18s ease',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: isActive ? 78 : 72,
+                      height: isActive ? 78 : 72,
+                      borderRadius: 20,
+                      background: '#fff',
+                      border: isActive
+                        ? `2.5px solid ${color}`
+                        : '1.5px solid rgba(220,220,220,0.95)',
+                      boxShadow: isActive
+                        ? `0 8px 20px ${color}22`
+                        : '0 5px 14px rgba(0,0,0,0.06)',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <img
+                      src={src}
+                      alt={item.label}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                    />
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: isActive ? 12 : 11,
+                      fontWeight: 900,
+                      color,
+                      lineHeight: 1,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {item.shortLabel || item.label}
+                  </div>
+
+                  <div
+                    style={{
+                      width: isActive ? 46 : 0,
+                      height: 6,
+                      borderRadius: 999,
+                      background: isActive ? color : 'transparent',
+                      boxShadow: isActive ? `0 5px 12px ${color}55` : 'none',
+                      transition: 'all 0.18s ease',
+                    }}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {overlay}
+    </div>
+  );
+}
