@@ -53,6 +53,7 @@ export const translations = {
     activities: 'Activities',
     creative: 'Creative',
   },
+
   RU: {
     searchPlaceholder: 'Поиск услуг, категорий или специалистов...',
     recentSearches: 'Недавние поиски',
@@ -103,6 +104,7 @@ export const translations = {
     activities: 'Активности',
     creative: 'Креатив',
   },
+
   UA: {
     searchPlaceholder: 'Пошук послуг, категорій або спеціалістів...',
     recentSearches: 'Останні пошуки',
