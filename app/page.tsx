@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getAllMasters } from '../services/masters';
 import { categories } from '../services/categories';
+import { t, getSavedLanguage, saveLanguage, type AppLanguage } from '../services/i18n';
 import {
   getListings,
   subscribeToListingsStore,
@@ -334,12 +335,7 @@ const searchAliases = [
     label: 'Spa',
     categoryId: 'wellness',
     subcategory: 'Spa',
-    keywords: [
-      'spa',
-      'спа',
-      'spa day',
-      'relax spa',
-    ],
+    keywords: ['spa', 'спа', 'spa day', 'relax spa'],
   },
   {
     label: 'Personal training',
@@ -358,10 +354,7 @@ const searchAliases = [
     label: 'Yoga',
     categoryId: 'fitness',
     subcategory: 'Yoga',
-    keywords: [
-      'yoga',
-      'йога',
-    ],
+    keywords: ['yoga', 'йога'],
   },
   {
     label: 'Moving',
@@ -394,51 +387,25 @@ const searchAliases = [
     label: 'Courier',
     categoryId: 'moving',
     subcategory: 'Courier',
-    keywords: [
-      'courier',
-      'delivery today',
-      'same day delivery',
-      'курьер',
-      'доставка сегодня',
-    ],
+    keywords: ['courier', 'delivery today', 'same day delivery', 'курьер', 'доставка сегодня'],
   },
   {
     label: 'Car wash',
     categoryId: 'auto',
     subcategory: 'Car Wash',
-    keywords: [
-      'car wash',
-      'wash car',
-      'помыть машину',
-      'мойка машины',
-      'автомойка',
-    ],
+    keywords: ['car wash', 'wash car', 'помыть машину', 'мойка машины', 'автомойка'],
   },
   {
     label: 'Detailing',
     categoryId: 'auto',
     subcategory: 'Detailing',
-    keywords: [
-      'detailing',
-      'car detailing',
-      'детейлинг',
-      'полировка авто',
-      'химчистка авто',
-    ],
+    keywords: ['detailing', 'car detailing', 'детейлинг', 'полировка авто', 'химчистка авто'],
   },
   {
     label: 'Tyre help',
     categoryId: 'auto',
     subcategory: 'Tyre Help',
-    keywords: [
-      'tyre',
-      'flat tyre',
-      'wheel help',
-      'шина',
-      'колесо',
-      'прокол колеса',
-      'накачать шины',
-    ],
+    keywords: ['tyre', 'flat tyre', 'wheel help', 'шина', 'колесо', 'прокол колеса', 'накачать шины'],
   },
 ];
 
@@ -492,7 +459,7 @@ function listingToMaster(listing: ListingItem, index: number) {
   };
 }
 
-function getLanguageBorder(language: string) {
+function getLanguageBorder(language: AppLanguage) {
   if (language === 'UA') {
     return 'linear-gradient(90deg, #1f7cff 0%, #1f7cff 50%, #ffd338 50%, #ffd338 100%)';
   }
@@ -540,12 +507,13 @@ function normalizePaymentMethods(value: any): string[] {
   return ['cash', 'card'];
 }
 
-function paymentBadge(method: string) {
+function paymentBadge(method: string, language: AppLanguage) {
+  const tr = t(language);
   const normalized = String(method).toLowerCase();
 
-  if (normalized === 'cash') return { icon: '💵', label: 'Cash' };
-  if (normalized === 'card') return { icon: '💳', label: 'Card' };
-  if (normalized === 'wallet') return { icon: '📱', label: 'Wallet' };
+  if (normalized === 'cash') return { icon: '💵', label: tr.cash };
+  if (normalized === 'card') return { icon: '💳', label: tr.card };
+  if (normalized === 'wallet') return { icon: '📱', label: tr.wallet };
 
   return { icon: '•', label: String(method) };
 }
@@ -559,27 +527,27 @@ function normalizeText(value: string) {
 
 function tokenize(value: string) {
   return normalizeText(value)
-    .split(/[^a-zA-Zа-яА-ЯёЁ0-9]+/)
+    .split(/[^a-zA-Zа-яА-ЯёЁіІїЇєЄ0-9]+/)
     .map((item) => item.trim())
     .filter(Boolean);
 }
 
 function scoreTextMatch(query: string, target: string) {
   const q = normalizeText(query);
-  const t = normalizeText(target);
-  if (!q || !t) return 0;
+  const tValue = normalizeText(target);
+  if (!q || !tValue) return 0;
 
-  if (t === q) return 120;
-  if (t.startsWith(q)) return 90;
-  if (t.includes(q)) return 70;
+  if (tValue === q) return 120;
+  if (tValue.startsWith(q)) return 90;
+  if (tValue.includes(q)) return 70;
 
   const qWords = tokenize(q);
-  const tWords = tokenize(t);
+  const tWords = tokenize(tValue);
 
   let score = 0;
 
   for (const word of qWords) {
-    if (t.includes(word)) score += 14;
+    if (tValue.includes(word)) score += 14;
     if (tWords.some((item) => item.startsWith(word))) score += 10;
   }
 
@@ -612,7 +580,7 @@ export default function HomePage() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState('beauty');
   const [activeSubcategory, setActiveSubcategory] = useState('');
-  const [language, setLanguage] = useState('EN');
+  const [language, setLanguage] = useState<AppLanguage>('EN');
   const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
   const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
@@ -620,9 +588,16 @@ export default function HomePage() {
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [recenterToUserTrigger, setRecenterToUserTrigger] = useState(0);
 
+  const tr = t(language);
+
   useEffect(() => {
+    setLanguage(getSavedLanguage());
     setRecentSearches(readRecentSearches());
   }, []);
+
+  useEffect(() => {
+    saveLanguage(language);
+  }, [language]);
 
   useEffect(() => {
     const handleOutside = (event: MouseEvent | TouchEvent) => {
@@ -1007,7 +982,7 @@ export default function HomePage() {
                       }
                     }
                   }}
-                  placeholder="Search services, categories or professionals..."
+                  placeholder={tr.searchPlaceholder}
                   style={{
                     flex: 1,
                     minWidth: 0,
@@ -1125,7 +1100,7 @@ export default function HomePage() {
                             marginBottom: 8,
                           }}
                         >
-                          Recent searches
+                          {tr.recentSearches}
                         </div>
 
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -1160,7 +1135,7 @@ export default function HomePage() {
                           marginBottom: 8,
                         }}
                       >
-                        Popular searches
+                        {tr.popularSearches}
                       </div>
 
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -1194,7 +1169,7 @@ export default function HomePage() {
                       color: '#74808c',
                     }}
                   >
-                    No results found
+                    {tr.noResultsFound}
                   </div>
                 ) : (
                   <>
@@ -1208,7 +1183,7 @@ export default function HomePage() {
                             marginBottom: 8,
                           }}
                         >
-                          Smart matches
+                          {tr.smartMatches}
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1251,7 +1226,7 @@ export default function HomePage() {
                             marginBottom: 8,
                           }}
                         >
-                          Categories
+                          {tr.categories}
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1291,7 +1266,7 @@ export default function HomePage() {
                             marginBottom: 8,
                           }}
                         >
-                          Services
+                          {tr.services}
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1334,7 +1309,7 @@ export default function HomePage() {
                             marginBottom: 8,
                           }}
                         >
-                          Pros
+                          {tr.pros}
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1377,7 +1352,7 @@ export default function HomePage() {
                             marginBottom: 8,
                           }}
                         >
-                          Listings
+                          {tr.listings}
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1519,7 +1494,7 @@ export default function HomePage() {
               }}
             >
               <span style={{ color: '#ff2020', fontSize: 18 }}>♥</span>
-              <span>All liked</span>
+              <span>{tr.allLiked}</span>
               <span
                 style={{
                   marginLeft: 2,
@@ -1553,7 +1528,7 @@ export default function HomePage() {
                 boxShadow: '0 3px 10px rgba(47,156,71,0.08)',
               }}
             >
-              {filteredMasters.filter((item: any) => item.availableNow).length} pros available now
+              {filteredMasters.filter((item: any) => item.availableNow).length} {tr.prosAvailableNow}
             </div>
           </div>
         </section>
@@ -1620,7 +1595,7 @@ export default function HomePage() {
                     justifyContent: 'center',
                     cursor: 'pointer',
                   }}
-                  title="Map style"
+                  title={tr.mapStyle}
                 >
                   {mapMode === 'satellite' ? '🗺️' : '🛰️'}
                 </button>
@@ -1641,7 +1616,7 @@ export default function HomePage() {
                     justifyContent: 'center',
                     cursor: 'pointer',
                   }}
-                  title="My location"
+                  title={tr.myLocation}
                 >
                   ⌖
                 </button>
@@ -1659,7 +1634,7 @@ export default function HomePage() {
                     color: '#3d454f',
                     cursor: 'pointer',
                   }}
-                  title="Clear selection"
+                  title={tr.clearSelection}
                 >
                   ✕
                 </button>
@@ -1699,7 +1674,7 @@ export default function HomePage() {
                         display: 'inline-block',
                       }}
                     />
-                    <span>Available</span>
+                    <span>{tr.available}</span>
                   </div>
 
                   <div
@@ -1723,7 +1698,7 @@ export default function HomePage() {
                         display: 'inline-block',
                       }}
                     />
-                    <span>Unavailable</span>
+                    <span>{tr.unavailable}</span>
                   </div>
                 </div>
               ) : null}
@@ -1807,7 +1782,7 @@ export default function HomePage() {
                         {normalizePaymentMethods(selectedMaster.paymentMethods)
                           .slice(0, 3)
                           .map((method) => {
-                            const item = paymentBadge(method);
+                            const item = paymentBadge(method, language);
 
                             return (
                               <div
@@ -1830,7 +1805,7 @@ export default function HomePage() {
                                 }}
                               >
                                 <span>{item.icon}</span>
-                                {item.label === 'Cash' || item.label === 'Card' ? null : (
+                                {item.label === tr.cash || item.label === tr.card ? null : (
                                   <span>{item.label}</span>
                                 )}
                               </div>
@@ -1866,7 +1841,7 @@ export default function HomePage() {
                         }}
                       >
                         <span>🏅</span>
-                        <span>Verified Pro</span>
+                        <span>{tr.verifiedPro}</span>
                       </div>
 
                       <div
@@ -1893,7 +1868,7 @@ export default function HomePage() {
                           color: selectedMaster.availableNow ? '#31b14c' : '#de6a74',
                         }}
                       >
-                        {selectedMaster.availableNow ? 'Available now' : 'Unavailable today'}
+                        {selectedMaster.availableNow ? tr.availableNow : tr.unavailableToday}
                       </div>
 
                       <div
@@ -1911,7 +1886,7 @@ export default function HomePage() {
                           ★ {Number(selectedMaster.rating || 4.7).toFixed(1)}
                         </div>
                         <div style={{ fontSize: 16 }}>
-                          From £{String(selectedMaster.price).replace(/[^\d.]/g, '') || '45'}
+                          {tr.from} £{String(selectedMaster.price).replace(/[^\d.]/g, '') || '45'}
                         </div>
                       </div>
                     </div>
@@ -1938,7 +1913,7 @@ export default function HomePage() {
                         cursor: 'pointer',
                       }}
                     >
-                      View
+                      {tr.view}
                     </button>
 
                     <button
@@ -1965,7 +1940,7 @@ export default function HomePage() {
                         boxShadow: '0 8px 16px rgba(93,193,238,0.25)',
                       }}
                     >
-                      Route
+                      {tr.route}
                     </button>
 
                     <button
@@ -1982,7 +1957,7 @@ export default function HomePage() {
                         boxShadow: '0 8px 16px rgba(59,181,74,0.24)',
                       }}
                     >
-                      Book now
+                      {tr.bookNow}
                     </button>
                   </div>
                 </div>
@@ -2008,7 +1983,7 @@ export default function HomePage() {
                 color: '#223145',
               }}
             >
-              Popular Services
+              {tr.popularServices}
             </h2>
 
             <button
