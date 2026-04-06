@@ -791,7 +791,9 @@ export default function TopCategoriesBar({
       {overlay}
     </div>
   );
-} top categories bar and 
+}
+это top categories bar  
+ 
 export type AppLanguage = 'EN' | 'RU' | 'UA';
 
 const STORAGE_KEY = 'mapbook_language';
@@ -830,23 +832,8 @@ export const translations = {
     chooseCategoryAndSubcategory: 'Choose category and subcategory',
     extraCategories: 'Extra categories',
     more: 'More',
-
-    beauty: 'Beauty',
-    barber: 'Barber',
-    wellness: 'Wellness',
-    home: 'Home',
-    repairs: 'Repairs',
-    tech: 'Tech',
-    pets: 'Pets',
-    fashion: 'Fashion',
-    auto: 'Auto',
-    moving: 'Moving',
-    fitness: 'Fitness',
-    education: 'Education',
-    events: 'Events',
-    activities: 'Activities',
-    creative: 'Creative',
   },
+
   RU: {
     searchPlaceholder: 'Поиск услуг, категорий или специалистов...',
     recentSearches: 'Недавние поиски',
@@ -880,23 +867,8 @@ export const translations = {
     chooseCategoryAndSubcategory: 'Выберите категорию и подкатегорию',
     extraCategories: 'Дополнительные категории',
     more: 'Ещё',
-
-    beauty: 'Красота',
-    barber: 'Барбер',
-    wellness: 'Велнес',
-    home: 'Дом',
-    repairs: 'Ремонт',
-    tech: 'Техника',
-    pets: 'Питомцы',
-    fashion: 'Мода',
-    auto: 'Авто',
-    moving: 'Переезд',
-    fitness: 'Фитнес',
-    education: 'Обучение',
-    events: 'События',
-    activities: 'Активности',
-    creative: 'Креатив',
   },
+
   UA: {
     searchPlaceholder: 'Пошук послуг, категорій або спеціалістів...',
     recentSearches: 'Останні пошуки',
@@ -930,22 +902,6 @@ export const translations = {
     chooseCategoryAndSubcategory: 'Оберіть категорію та підкатегорію',
     extraCategories: 'Додаткові категорії',
     more: 'Ще',
-
-    beauty: 'Краса',
-    barber: 'Барбер',
-    wellness: 'Велнес',
-    home: 'Дім',
-    repairs: 'Ремонт',
-    tech: 'Техніка',
-    pets: 'Улюбленці',
-    fashion: 'Мода',
-    auto: 'Авто',
-    moving: 'Переїзд',
-    fitness: 'Фітнес',
-    education: 'Навчання',
-    events: 'Події',
-    activities: 'Активності',
-    creative: 'Креатив',
   },
 } as const;
 
@@ -965,4 +921,5 @@ export function saveLanguage(language: AppLanguage) {
 
 export function t(language: AppLanguage) {
   return translations[language] || translations.EN;
-} i 18  проверь внимательно  вельмі внимательно and think deeply  it's already exhausting me and my conversation tons and lot . correctly or not  go through everything and tell me what to do next and what the mistake is maybe it's not in there maybe in another place too think deeply with all context we just did not just these 2 text but also all previous context including app page reason carefully and thoroughly without rushing think slowly but surely too.
+} i18n
+Give me correct directions this time for real with correct solution seeing all logs and all things. think carefully then answer.
