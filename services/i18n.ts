@@ -6,10 +6,10 @@ export const translations = {
     recentSearches: 'Recent searches',
     popularSearches: 'Popular searches',
     noResultsFound: 'No results found',
-    smartMatches: 'Smart matches',
+    smartMatches: 'Best matches',
     categories: 'Categories',
     services: 'Services',
-    pros: 'Pros',
+    pros: 'Professionals',
     listings: 'Listings',
     allLiked: 'All liked',
     prosAvailableNow: 'pros available now',
@@ -18,17 +18,17 @@ export const translations = {
     clearSelection: 'Clear selection',
     available: 'Available',
     unavailable: 'Unavailable',
-    cash: 'Cash',
-    card: 'Card',
-    wallet: 'Wallet',
-    verifiedPro: 'Verified Pro',
     availableNow: 'Available now',
     unavailableToday: 'Unavailable today',
+    verifiedPro: 'Verified Pro',
     from: 'From',
     view: 'View',
     route: 'Route',
     bookNow: 'Book now',
     popularServices: 'Popular Services',
+    cash: 'Cash',
+    card: 'Card',
+    wallet: 'Wallet',
     allCategories: 'All categories',
     chooseCategoryAndSubcategory: 'Choose category and subcategory',
     extraCategories: 'Extra categories',
@@ -39,8 +39,8 @@ export const translations = {
     home: 'Home',
     repairs: 'Repairs',
     tech: 'Tech',
-    pets: 'Pets',
     fashion: 'Fashion',
+    pets: 'Pets',
     auto: 'Auto',
     moving: 'Moving',
     fitness: 'Fitness',
@@ -51,33 +51,33 @@ export const translations = {
   },
 
   UA: {
-    searchPlaceholder: 'Пошук послуг, категорій або спеціалістів...',
-    recentSearches: 'Останні запити',
+    searchPlaceholder: 'Пошук послуг, категорій або фахівців...',
+    recentSearches: 'Останні пошуки',
     popularSearches: 'Популярні запити',
     noResultsFound: 'Нічого не знайдено',
-    smartMatches: 'Розумні збіги',
+    smartMatches: 'Найкращі збіги',
     categories: 'Категорії',
     services: 'Послуги',
-    pros: 'Спеціалісти',
+    pros: 'Фахівці',
     listings: 'Оголошення',
-    allLiked: 'Усі збережені',
-    prosAvailableNow: 'спеціалістів доступно зараз',
+    allLiked: 'Усі вибрані',
+    prosAvailableNow: 'фахівців доступно зараз',
     mapStyle: 'Стиль мапи',
     myLocation: 'Моє місцезнаходження',
     clearSelection: 'Скинути вибір',
     available: 'Доступно',
     unavailable: 'Недоступно',
+    availableNow: 'Доступно зараз',
+    unavailableToday: 'Сьогодні недоступно',
+    verifiedPro: 'Перевірений фахівець',
+    from: 'Від',
+    view: 'Перегляд',
+    route: 'Маршрут',
+    bookNow: 'Забронювати',
+    popularServices: 'Популярні послуги',
     cash: 'Готівка',
     card: 'Картка',
     wallet: 'Гаманець',
-    verifiedPro: 'Перевірений майстер',
-    availableNow: 'Доступно зараз',
-    unavailableToday: 'Сьогодні недоступно',
-    from: 'Від',
-    view: 'Дивитися',
-    route: 'Маршрут',
-    bookNow: 'Записатися',
-    popularServices: 'Популярні послуги',
     allCategories: 'Усі категорії',
     chooseCategoryAndSubcategory: 'Оберіть категорію та підкатегорію',
     extraCategories: 'Додаткові категорії',
@@ -88,8 +88,8 @@ export const translations = {
     home: 'Дім',
     repairs: 'Ремонт',
     tech: 'Техніка',
-    pets: 'Тварини',
     fashion: 'Мода',
+    pets: 'Тварини',
     auto: 'Авто',
     moving: 'Переїзд',
     fitness: 'Фітнес',
@@ -104,7 +104,7 @@ export const translations = {
     recentSearches: 'Недавние запросы',
     popularSearches: 'Популярные запросы',
     noResultsFound: 'Ничего не найдено',
-    smartMatches: 'Умные совпадения',
+    smartMatches: 'Лучшие совпадения',
     categories: 'Категории',
     services: 'Услуги',
     pros: 'Специалисты',
@@ -116,17 +116,17 @@ export const translations = {
     clearSelection: 'Сбросить выбор',
     available: 'Доступно',
     unavailable: 'Недоступно',
-    cash: 'Наличные',
-    card: 'Карта',
-    wallet: 'Кошелёк',
-    verifiedPro: 'Проверенный мастер',
     availableNow: 'Доступно сейчас',
     unavailableToday: 'Сегодня недоступно',
+    verifiedPro: 'Проверенный специалист',
     from: 'От',
     view: 'Смотреть',
     route: 'Маршрут',
-    bookNow: 'Записаться',
+    bookNow: 'Забронировать',
     popularServices: 'Популярные услуги',
+    cash: 'Наличные',
+    card: 'Карта',
+    wallet: 'Кошелёк',
     allCategories: 'Все категории',
     chooseCategoryAndSubcategory: 'Выберите категорию и подкатегорию',
     extraCategories: 'Дополнительные категории',
@@ -137,8 +137,8 @@ export const translations = {
     home: 'Дом',
     repairs: 'Ремонт',
     tech: 'Техника',
-    pets: 'Питомцы',
     fashion: 'Мода',
+    pets: 'Животные',
     auto: 'Авто',
     moving: 'Переезд',
     fitness: 'Фитнес',
@@ -149,11 +149,17 @@ export const translations = {
   },
 } as const;
 
+export function t(language: AppLanguage) {
+  return translations[language] || translations.EN;
+}
+
 export function getSavedLanguage(): AppLanguage {
   if (typeof window === 'undefined') return 'EN';
 
   const saved = window.localStorage.getItem('mapbook_language');
-  if (saved === 'EN' || saved === 'UA' || saved === 'RU') return saved;
+  if (saved === 'EN' || saved === 'UA' || saved === 'RU') {
+    return saved;
+  }
 
   return 'EN';
 }
@@ -161,8 +167,4 @@ export function getSavedLanguage(): AppLanguage {
 export function saveLanguage(language: AppLanguage) {
   if (typeof window === 'undefined') return;
   window.localStorage.setItem('mapbook_language', language);
-}
-
-export function t(language: AppLanguage) {
-  return translations[language] || translations.EN;
 }
