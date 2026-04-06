@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { categories } from '../services/categories';
-import { t, getSavedLanguage, type AppLanguage } from '../services/i18n';
+import { t, type AppLanguage } from '../services/i18n';
 
 type TopCategoriesBarProps = {
   activeCategory: string;
   activeSubcategory?: string;
+  language: AppLanguage;
   onSelectCategory: (category: string) => void;
   onSelectSubcategory: (subcategory: string) => void;
   onClearSubcategory: () => void;
@@ -115,7 +116,7 @@ function translateSubcategory(value: string, language: AppLanguage) {
     'Therapy Support': { EN: 'Therapy Support', RU: 'Терапевтическая помощь', UA: 'Терапевтична підтримка' },
 
     Cleaning: { EN: 'Cleaning', RU: 'Уборка', UA: 'Прибирання' },
-    'Deep Cleaning': { EN: 'Deep Cleaning', RU: 'Глубокая чистка', UA: 'Глибоке прибирання' },
+    'Deep Cleaning': { EN: 'Deep Cleaning', RU: 'Глубокая уборка', UA: 'Глибоке прибирання' },
     'Garden Help': { EN: 'Garden Help', RU: 'Помощь в саду', UA: 'Допомога в саду' },
     Handyman: { EN: 'Handyman', RU: 'Мастер на час', UA: 'Майстер на годину' },
     'Furniture Assembly': { EN: 'Furniture Assembly', RU: 'Сборка мебели', UA: 'Збирання меблів' },
@@ -208,6 +209,7 @@ function translateSubcategory(value: string, language: AppLanguage) {
 export default function TopCategoriesBar({
   activeCategory,
   activeSubcategory,
+  language,
   onSelectCategory,
   onSelectSubcategory,
   onClearSubcategory,
@@ -215,18 +217,15 @@ export default function TopCategoriesBar({
   const [menuOpen, setMenuOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string>(activeCategory);
   const [mounted, setMounted] = useState(false);
-  const [language, setLanguage] = useState<AppLanguage>('EN');
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
-    setLanguage(getSavedLanguage());
   }, []);
 
   useEffect(() => {
     setExpandedCategory(activeCategory);
-    setLanguage(getSavedLanguage());
-  }, [activeCategory, menuOpen]);
+  }, [activeCategory]);
 
   useEffect(() => {
     if (!menuOpen) return;
