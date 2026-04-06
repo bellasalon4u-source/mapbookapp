@@ -72,21 +72,21 @@ const colorMap: Record<string, string> = {
 
 function translateCategoryLabel(categoryId: string, language: AppLanguage, fallback?: string) {
   const map: Record<string, Record<AppLanguage, string>> = {
-    beauty: { EN: 'Beauty', RU: 'Красота', UA: 'Краса' },
-    barber: { EN: 'Barber', RU: 'Барбер', UA: 'Барбер' },
-    wellness: { EN: 'Wellness', RU: 'Велнес', UA: 'Велнес' },
-    home: { EN: 'Home', RU: 'Дом', UA: 'Дім' },
-    repairs: { EN: 'Repairs', RU: 'Ремонт', UA: 'Ремонт' },
-    tech: { EN: 'Tech', RU: 'Техника', UA: 'Техніка' },
-    pets: { EN: 'Pets', RU: 'Питомцы', UA: 'Улюбленці' },
-    fashion: { EN: 'Fashion', RU: 'Мода', UA: 'Мода' },
-    auto: { EN: 'Auto', RU: 'Авто', UA: 'Авто' },
-    moving: { EN: 'Moving', RU: 'Переезд', UA: 'Переїзд' },
-    fitness: { EN: 'Fitness', RU: 'Фитнес', UA: 'Фітнес' },
-    education: { EN: 'Education', RU: 'Обучение', UA: 'Навчання' },
-    events: { EN: 'Events', RU: 'События', UA: 'Події' },
-    activities: { EN: 'Activities', RU: 'Активности', UA: 'Активності' },
-    creative: { EN: 'Creative', RU: 'Креатив', UA: 'Креатив' },
+    beauty: { EN: 'Beauty', ES: 'Belleza', RU: 'Красота', CZ: 'Krása', DE: 'Beauty', PL: 'Uroda' },
+    barber: { EN: 'Barber', ES: 'Barbero', RU: 'Барбер', CZ: 'Barber', DE: 'Barber', PL: 'Barber' },
+    wellness: { EN: 'Wellness', ES: 'Bienestar', RU: 'Велнес', CZ: 'Wellness', DE: 'Wellness', PL: 'Wellness' },
+    home: { EN: 'Home', ES: 'Hogar', RU: 'Дом', CZ: 'Domov', DE: 'Zuhause', PL: 'Dom' },
+    repairs: { EN: 'Repairs', ES: 'Reparaciones', RU: 'Ремонт', CZ: 'Opravy', DE: 'Reparaturen', PL: 'Naprawy' },
+    tech: { EN: 'Tech', ES: 'Tecnología', RU: 'Техника', CZ: 'Technika', DE: 'Technik', PL: 'Technika' },
+    pets: { EN: 'Pets', ES: 'Mascotas', RU: 'Питомцы', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęta' },
+    fashion: { EN: 'Fashion', ES: 'Moda', RU: 'Мода', CZ: 'Móda', DE: 'Mode', PL: 'Moda' },
+    auto: { EN: 'Auto', ES: 'Auto', RU: 'Авто', CZ: 'Auto', DE: 'Auto', PL: 'Auto' },
+    moving: { EN: 'Moving', ES: 'Mudanza', RU: 'Переезд', CZ: 'Stěhování', DE: 'Umzug', PL: 'Przeprowadzka' },
+    fitness: { EN: 'Fitness', ES: 'Fitness', RU: 'Фитнес', CZ: 'Fitness', DE: 'Fitness', PL: 'Fitness' },
+    education: { EN: 'Education', ES: 'Educación', RU: 'Обучение', CZ: 'Vzdělání', DE: 'Bildung', PL: 'Edukacja' },
+    events: { EN: 'Events', ES: 'Eventos', RU: 'События', CZ: 'Události', DE: 'Events', PL: 'Wydarzenia' },
+    activities: { EN: 'Activities', ES: 'Actividades', RU: 'Активности', CZ: 'Aktivity', DE: 'Aktivitäten', PL: 'Aktywności' },
+    creative: { EN: 'Creative', ES: 'Creativo', RU: 'Креатив', CZ: 'Kreativa', DE: 'Kreativ', PL: 'Kreatywne' },
   };
 
   return map[categoryId]?.[language] || fallback || categoryId;
@@ -94,113 +94,35 @@ function translateCategoryLabel(categoryId: string, language: AppLanguage, fallb
 
 function translateSubcategory(value: string, language: AppLanguage) {
   const dict: Record<string, Record<AppLanguage, string>> = {
-    Hair: { EN: 'Hair', RU: 'Волосы', UA: 'Волосся' },
-    'Brows & Lashes': { EN: 'Brows & Lashes', RU: 'Брови и ресницы', UA: 'Брови та вії' },
-    Nails: { EN: 'Nails', RU: 'Ногти', UA: 'Нігті' },
-    Makeup: { EN: 'Makeup', RU: 'Макияж', UA: 'Макіяж' },
-    Skincare: { EN: 'Skincare', RU: 'Уход за кожей', UA: 'Догляд за шкірою' },
-    Aesthetics: { EN: 'Aesthetics', RU: 'Эстетика', UA: 'Естетика' },
+    Hair: { EN: 'Hair', ES: 'Cabello', RU: 'Волосы', CZ: 'Vlasy', DE: 'Haare', PL: 'Włosy' },
+    'Brows & Lashes': { EN: 'Brows & Lashes', ES: 'Cejas y pestañas', RU: 'Брови и ресницы', CZ: 'Obočí a řasy', DE: 'Augenbrauen & Wimpern', PL: 'Brwi i rzęsy' },
+    Nails: { EN: 'Nails', ES: 'Uñas', RU: 'Ногти', CZ: 'Nehty', DE: 'Nägel', PL: 'Paznokcie' },
+    Makeup: { EN: 'Makeup', ES: 'Maquillaje', RU: 'Макияж', CZ: 'Make-up', DE: 'Make-up', PL: 'Makijaż' },
+    Skincare: { EN: 'Skincare', ES: 'Cuidado de la piel', RU: 'Уход за кожей', CZ: 'Péče o pleť', DE: 'Hautpflege', PL: 'Pielęgnacja skóry' },
+    Aesthetics: { EN: 'Aesthetics', ES: 'Estética', RU: 'Эстетика', CZ: 'Estetika', DE: 'Ästhetik', PL: 'Estetyka' },
 
-    Haircut: { EN: 'Haircut', RU: 'Стрижка', UA: 'Стрижка' },
-    'Beard Trim': { EN: 'Beard Trim', RU: 'Подравнивание бороды', UA: 'Підрівнювання бороди' },
-    Shave: { EN: 'Shave', RU: 'Бритьё', UA: 'Гоління' },
-    Fade: { EN: 'Fade', RU: 'Фейд', UA: 'Фейд' },
-    'Kids Haircut': { EN: 'Kids Haircut', RU: 'Детская стрижка', UA: 'Дитяча стрижка' },
-    Styling: { EN: 'Styling', RU: 'Укладка', UA: 'Укладання' },
+    Haircut: { EN: 'Haircut', ES: 'Corte de pelo', RU: 'Стрижка', CZ: 'Střih', DE: 'Haarschnitt', PL: 'Strzyżenie' },
+    'Beard Trim': { EN: 'Beard Trim', ES: 'Recorte de barba', RU: 'Подравнивание бороды', CZ: 'Úprava vousů', DE: 'Bart trimmen', PL: 'Przycinanie brody' },
+    Shave: { EN: 'Shave', ES: 'Afeitado', RU: 'Бритьё', CZ: 'Holení', DE: 'Rasur', PL: 'Golenie' },
+    Fade: { EN: 'Fade', ES: 'Fade', RU: 'Фейд', CZ: 'Fade', DE: 'Fade', PL: 'Fade' },
+    'Kids Haircut': { EN: 'Kids Haircut', ES: 'Corte infantil', RU: 'Детская стрижка', CZ: 'Dětský střih', DE: 'Kinderhaarschnitt', PL: 'Strzyżenie dziecięce' },
+    Styling: { EN: 'Styling', ES: 'Peinado', RU: 'Укладка', CZ: 'Styling', DE: 'Styling', PL: 'Stylizacja' },
 
-    Massage: { EN: 'Massage', RU: 'Массаж', UA: 'Масаж' },
-    Spa: { EN: 'Spa', RU: 'Спа', UA: 'Спа' },
-    Relaxation: { EN: 'Relaxation', RU: 'Релакс', UA: 'Релакс' },
-    Recovery: { EN: 'Recovery', RU: 'Восстановление', UA: 'Відновлення' },
-    'Holistic Care': { EN: 'Holistic Care', RU: 'Холистический уход', UA: 'Холістичний догляд' },
-    'Therapy Support': { EN: 'Therapy Support', RU: 'Терапевтическая помощь', UA: 'Терапевтична підтримка' },
+    Massage: { EN: 'Massage', ES: 'Masaje', RU: 'Массаж', CZ: 'Masáž', DE: 'Massage', PL: 'Masaż' },
+    Spa: { EN: 'Spa', ES: 'Spa', RU: 'Спа', CZ: 'Spa', DE: 'Spa', PL: 'Spa' },
+    Relaxation: { EN: 'Relaxation', ES: 'Relajación', RU: 'Релакс', CZ: 'Relaxace', DE: 'Entspannung', PL: 'Relaks' },
+    Recovery: { EN: 'Recovery', ES: 'Recuperación', RU: 'Восстановление', CZ: 'Regenerace', DE: 'Erholung', PL: 'Regeneracja' },
+    'Holistic Care': { EN: 'Holistic Care', ES: 'Cuidado holístico', RU: 'Холистический уход', CZ: 'Holistická péče', DE: 'Ganzheitliche Pflege', PL: 'Opieka holistyczna' },
+    'Therapy Support': { EN: 'Therapy Support', ES: 'Apoyo terapéutico', RU: 'Терапевтическая помощь', CZ: 'Terapeutická podpora', DE: 'Therapie-Unterstützung', PL: 'Wsparcie terapeutyczne' },
 
-    Cleaning: { EN: 'Cleaning', RU: 'Уборка', UA: 'Прибирання' },
-    'Deep Cleaning': { EN: 'Deep Cleaning', RU: 'Глубокая уборка', UA: 'Глибоке прибирання' },
-    'Garden Help': { EN: 'Garden Help', RU: 'Помощь в саду', UA: 'Допомога в саду' },
-    Handyman: { EN: 'Handyman', RU: 'Мастер на час', UA: 'Майстер на годину' },
-    'Furniture Assembly': { EN: 'Furniture Assembly', RU: 'Сборка мебели', UA: 'Збирання меблів' },
-    'Home Help': { EN: 'Home Help', RU: 'Помощь по дому', UA: 'Допомога вдома' },
+    Cleaning: { EN: 'Cleaning', ES: 'Limpieza', RU: 'Уборка', CZ: 'Úklid', DE: 'Reinigung', PL: 'Sprzątanie' },
+    'Deep Cleaning': { EN: 'Deep Cleaning', ES: 'Limpieza profunda', RU: 'Глубокая уборка', CZ: 'Hloubkové čištění', DE: 'Tiefenreinigung', PL: 'Dogłębne czyszczenie' },
+    'Garden Help': { EN: 'Garden Help', ES: 'Ayuda en jardín', RU: 'Помощь в саду', CZ: 'Pomoc na zahradě', DE: 'Gartenhilfe', PL: 'Pomoc w ogrodzie' },
+    Handyman: { EN: 'Handyman', ES: 'Manitas', RU: 'Мастер на час', CZ: 'Hodinový manžel', DE: 'Handwerker', PL: 'Złota rączka' },
+    'Furniture Assembly': { EN: 'Furniture Assembly', ES: 'Montaje de muebles', RU: 'Сборка мебели', CZ: 'Montáž nábytku', DE: 'Möbelmontage', PL: 'Montaż mebli' },
+    'Home Help': { EN: 'Home Help', ES: 'Ayuda en casa', RU: 'Помощь по дому', CZ: 'Pomoc v domácnosti', DE: 'Haushaltshilfe', PL: 'Pomoc domowa' },
 
-    'Home Repairs': { EN: 'Home Repairs', RU: 'Ремонт дома', UA: 'Ремонт дому' },
-    'Appliance Repair': { EN: 'Appliance Repair', RU: 'Ремонт техники', UA: 'Ремонт техніки' },
-    'Furniture Repair': { EN: 'Furniture Repair', RU: 'Ремонт мебели', UA: 'Ремонт меблів' },
-    'Shoe Repair': { EN: 'Shoe Repair', RU: 'Ремонт обуви', UA: 'Ремонт взуття' },
-    'Clothing Repair': { EN: 'Clothing Repair', RU: 'Ремонт одежды', UA: 'Ремонт одягу' },
-    'Watch Repair': { EN: 'Watch Repair', RU: 'Ремонт часов', UA: 'Ремонт годинників' },
-
-    'Phone Repair': { EN: 'Phone Repair', RU: 'Ремонт телефона', UA: 'Ремонт телефону' },
-    'Computer Repair': { EN: 'Computer Repair', RU: 'Ремонт компьютера', UA: 'Ремонт комп’ютера' },
-    'Laptop Repair': { EN: 'Laptop Repair', RU: 'Ремонт ноутбука', UA: 'Ремонт ноутбука' },
-    'Tablet Repair': { EN: 'Tablet Repair', RU: 'Ремонт планшета', UA: 'Ремонт планшета' },
-    'TV Setup': { EN: 'TV Setup', RU: 'Настройка ТВ', UA: 'Налаштування ТБ' },
-    'Smart Device Help': { EN: 'Smart Device Help', RU: 'Помощь с умными устройствами', UA: 'Допомога зі смарт-пристроями' },
-
-    Tailoring: { EN: 'Tailoring', RU: 'Пошив', UA: 'Пошиття' },
-    'Clothing Alterations': { EN: 'Clothing Alterations', RU: 'Подгонка одежды', UA: 'Підгонка одягу' },
-    'Custom Sewing': { EN: 'Custom Sewing', RU: 'Индивидуальный пошив', UA: 'Індивідуальне пошиття' },
-    'Shoe Care': { EN: 'Shoe Care', RU: 'Уход за обувью', UA: 'Догляд за взуттям' },
-    'Bag Repair': { EN: 'Bag Repair', RU: 'Ремонт сумок', UA: 'Ремонт сумок' },
-
-    Grooming: { EN: 'Grooming', RU: 'Груминг', UA: 'Грумінг' },
-    'Dog Walking': { EN: 'Dog Walking', RU: 'Выгул собак', UA: 'Вигул собак' },
-    'Pet Sitting': { EN: 'Pet Sitting', RU: 'Передержка питомцев', UA: 'Перетримка тварин' },
-    'Pet Taxi': { EN: 'Pet Taxi', RU: 'Зоотакси', UA: 'Зоотаксі' },
-    'Pet Delivery': { EN: 'Pet Delivery', RU: 'Доставка для питомцев', UA: 'Доставка для тварин' },
-    Training: { EN: 'Training', RU: 'Дрессировка', UA: 'Дресирування' },
-    'Home Visits': { EN: 'Home Visits', RU: 'Выезды на дом', UA: 'Виїзд додому' },
-    'Accessories & Gifts': { EN: 'Accessories & Gifts', RU: 'Аксессуары и подарки', UA: 'Аксесуари та подарунки' },
-
-    'Car Wash': { EN: 'Car Wash', RU: 'Мойка авто', UA: 'Мийка авто' },
-    Detailing: { EN: 'Detailing', RU: 'Детейлинг', UA: 'Детейлінг' },
-    'Tyre Help': { EN: 'Tyre Help', RU: 'Помощь с шинами', UA: 'Допомога з шинами' },
-    'Battery Help': { EN: 'Battery Help', RU: 'Помощь с аккумулятором', UA: 'Допомога з акумулятором' },
-    Diagnostics: { EN: 'Diagnostics', RU: 'Диагностика', UA: 'Діагностика' },
-    'Driver Service': { EN: 'Driver Service', RU: 'Услуги водителя', UA: 'Послуги водія' },
-
-    'Small Moves': { EN: 'Small Moves', RU: 'Небольшой переезд', UA: 'Невеликий переїзд' },
-    'Van Help': { EN: 'Van Help', RU: 'Помощь с фургоном', UA: 'Допомога з фургоном' },
-    'Furniture Delivery': { EN: 'Furniture Delivery', RU: 'Доставка мебели', UA: 'Доставка меблів' },
-    Courier: { EN: 'Courier', RU: 'Курьер', UA: 'Кур’єр' },
-    'Same-Day Delivery': { EN: 'Same-Day Delivery', RU: 'Доставка день в день', UA: 'Доставка в той самий день' },
-    'Heavy Item Transport': { EN: 'Heavy Item Transport', RU: 'Перевозка тяжёлых вещей', UA: 'Перевезення важких речей' },
-
-    'Personal Training': { EN: 'Personal Training', RU: 'Персональные тренировки', UA: 'Персональні тренування' },
-    Yoga: { EN: 'Yoga', RU: 'Йога', UA: 'Йога' },
-    Pilates: { EN: 'Pilates', RU: 'Пилатес', UA: 'Пілатес' },
-    Stretching: { EN: 'Stretching', RU: 'Растяжка', UA: 'Розтяжка' },
-    'Dance Fitness': { EN: 'Dance Fitness', RU: 'Танцевальный фитнес', UA: 'Танцювальний фітнес' },
-    'Outdoor Training': { EN: 'Outdoor Training', RU: 'Тренировки на улице', UA: 'Тренування на вулиці' },
-
-    Languages: { EN: 'Languages', RU: 'Языки', UA: 'Мови' },
-    Tutoring: { EN: 'Tutoring', RU: 'Репетиторство', UA: 'Репетиторство' },
-    'Music Lessons': { EN: 'Music Lessons', RU: 'Уроки музыки', UA: 'Уроки музики' },
-    'Kids Learning': { EN: 'Kids Learning', RU: 'Обучение детей', UA: 'Навчання дітей' },
-    'Exam Prep': { EN: 'Exam Prep', RU: 'Подготовка к экзаменам', UA: 'Підготовка до іспитів' },
-    'Skill Coaching': { EN: 'Skill Coaching', RU: 'Обучение навыкам', UA: 'Навчання навичкам' },
-
-    Photography: { EN: 'Photography', RU: 'Фотосъёмка', UA: 'Фотозйомка' },
-    Videography: { EN: 'Videography', RU: 'Видеосъёмка', UA: 'Відеозйомка' },
-    Decor: { EN: 'Decor', RU: 'Декор', UA: 'Декор' },
-    'DJ & Music': { EN: 'DJ & Music', RU: 'DJ и музыка', UA: 'DJ і музика' },
-    'Makeup for Events': { EN: 'Makeup for Events', RU: 'Макияж для событий', UA: 'Макіяж для подій' },
-    'Catering Help': { EN: 'Catering Help', RU: 'Помощь с кейтерингом', UA: 'Допомога з кейтерингом' },
-
-    Tours: { EN: 'Tours', RU: 'Туры', UA: 'Тури' },
-    Workshops: { EN: 'Workshops', RU: 'Мастер-классы', UA: 'Майстер-класи' },
-    'Kids Activities': { EN: 'Kids Activities', RU: 'Детские активности', UA: 'Дитячі активності' },
-    'Art Classes': { EN: 'Art Classes', RU: 'Уроки искусства', UA: 'Уроки мистецтва' },
-    'Dance Classes': { EN: 'Dance Classes', RU: 'Уроки танцев', UA: 'Уроки танців' },
-    'Outdoor Activities': { EN: 'Outdoor Activities', RU: 'Активности на улице', UA: 'Активності на вулиці' },
-
-    'Graphic Design': { EN: 'Graphic Design', RU: 'Графический дизайн', UA: 'Графічний дизайн' },
-    'Content Creation': { EN: 'Content Creation', RU: 'Создание контента', UA: 'Створення контенту' },
-    'Photo Editing': { EN: 'Photo Editing', RU: 'Обработка фото', UA: 'Обробка фото' },
-    'Video Editing': { EN: 'Video Editing', RU: 'Монтаж видео', UA: 'Монтаж відео' },
-    Branding: { EN: 'Branding', RU: 'Брендинг', UA: 'Брендинг' },
-    'Social Media Help': { EN: 'Social Media Help', RU: 'Помощь с соцсетями', UA: 'Допомога із соцмережами' },
-
-    Other: { EN: 'Other', RU: 'Другое', UA: 'Інше' },
+    Other: { EN: 'Other', ES: 'Otro', RU: 'Другое', CZ: 'Jiné', DE: 'Andere', PL: 'Inne' }
   };
 
   return dict[value]?.[language] || value;
@@ -410,16 +332,12 @@ export default function TopCategoriesBar({
                             onClearSubcategory();
                           }}
                           style={{
-                            border: active
-                              ? `2px solid ${color}`
-                              : '1px solid rgba(255,255,255,0.58)',
+                            border: active ? `2px solid ${color}` : '1px solid rgba(255,255,255,0.58)',
                             cursor: 'pointer',
                             textAlign: 'left',
                             borderRadius: 16,
                             padding: '10px 8px',
-                            background: active
-                              ? 'rgba(255,255,255,0.82)'
-                              : 'rgba(255,255,255,0.44)',
+                            background: active ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.44)',
                             boxShadow: active ? `0 6px 14px ${color}22` : 'none',
                             display: 'flex',
                             alignItems: 'center',
@@ -519,21 +437,15 @@ export default function TopCategoriesBar({
                               setMenuOpen(false);
                             }}
                             style={{
-                              border: active
-                                ? `2px solid ${color}`
-                                : '1px solid rgba(255,255,255,0.58)',
-                              background: active
-                                ? 'rgba(255,255,255,0.88)'
-                                : 'rgba(255,255,255,0.52)',
+                              border: active ? `2px solid ${color}` : '1px solid rgba(255,255,255,0.58)',
+                              background: active ? 'rgba(255,255,255,0.88)' : 'rgba(255,255,255,0.52)',
                               color: active ? color : '#2a3442',
                               borderRadius: 999,
                               padding: '10px 14px',
                               fontSize: 13,
                               fontWeight: 800,
                               cursor: 'pointer',
-                              boxShadow: active
-                                ? `0 6px 14px ${color}22`
-                                : '0 4px 10px rgba(0,0,0,0.04)',
+                              boxShadow: active ? `0 6px 14px ${color}22` : '0 4px 10px rgba(0,0,0,0.04)',
                             }}
                           >
                             {translateSubcategory(sub, language)}
@@ -735,12 +647,8 @@ export default function TopCategoriesBar({
                       height: isActive ? 78 : 72,
                       borderRadius: 20,
                       background: '#fff',
-                      border: isActive
-                        ? `2.5px solid ${color}`
-                        : '1.5px solid rgba(220,220,220,0.95)',
-                      boxShadow: isActive
-                        ? `0 8px 20px ${color}22`
-                        : '0 5px 14px rgba(0,0,0,0.06)',
+                      border: isActive ? `2.5px solid ${color}` : '1.5px solid rgba(220,220,220,0.95)',
+                      boxShadow: isActive ? `0 8px 20px ${color}22` : '0 5px 14px rgba(0,0,0,0.06)',
                       overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
@@ -792,134 +700,3 @@ export default function TopCategoriesBar({
     </div>
   );
 }
-это top categories bar  
- 
-export type AppLanguage = 'EN' | 'RU' | 'UA';
-
-const STORAGE_KEY = 'mapbook_language';
-
-export const translations = {
-  EN: {
-    searchPlaceholder: 'Search services, categories or professionals...',
-    recentSearches: 'Recent searches',
-    popularSearches: 'Popular searches',
-    noResultsFound: 'No results found',
-    smartMatches: 'Smart matches',
-    categories: 'Categories',
-    services: 'Services',
-    pros: 'Pros',
-    listings: 'Listings',
-    allLiked: 'All liked',
-    prosAvailableNow: 'pros available now',
-    mapStyle: 'Map style',
-    myLocation: 'My location',
-    clearSelection: 'Clear selection',
-    available: 'Available',
-    unavailable: 'Unavailable',
-    verifiedPro: 'Verified Pro',
-    availableNow: 'Available now',
-    unavailableToday: 'Unavailable today',
-    from: 'From',
-    view: 'View',
-    route: 'Route',
-    bookNow: 'Book now',
-    popularServices: 'Popular Services',
-    cash: 'Cash',
-    card: 'Card',
-    wallet: 'Wallet',
-
-    allCategories: 'All categories',
-    chooseCategoryAndSubcategory: 'Choose category and subcategory',
-    extraCategories: 'Extra categories',
-    more: 'More',
-  },
-
-  RU: {
-    searchPlaceholder: 'Поиск услуг, категорий или специалистов...',
-    recentSearches: 'Недавние поиски',
-    popularSearches: 'Популярные запросы',
-    noResultsFound: 'Ничего не найдено',
-    smartMatches: 'Умные совпадения',
-    categories: 'Категории',
-    services: 'Услуги',
-    pros: 'Специалисты',
-    listings: 'Объявления',
-    allLiked: 'Все избранные',
-    prosAvailableNow: 'специалистов онлайн',
-    mapStyle: 'Стиль карты',
-    myLocation: 'Моё местоположение',
-    clearSelection: 'Сбросить выбор',
-    available: 'Доступен',
-    unavailable: 'Недоступен',
-    verifiedPro: 'Проверенный специалист',
-    availableNow: 'Доступен сейчас',
-    unavailableToday: 'Сегодня недоступен',
-    from: 'От',
-    view: 'Открыть',
-    route: 'Маршрут',
-    bookNow: 'Забронировать',
-    popularServices: 'Популярные услуги',
-    cash: 'Наличные',
-    card: 'Карта',
-    wallet: 'Кошелёк',
-
-    allCategories: 'Все категории',
-    chooseCategoryAndSubcategory: 'Выберите категорию и подкатегорию',
-    extraCategories: 'Дополнительные категории',
-    more: 'Ещё',
-  },
-
-  UA: {
-    searchPlaceholder: 'Пошук послуг, категорій або спеціалістів...',
-    recentSearches: 'Останні пошуки',
-    popularSearches: 'Популярні запити',
-    noResultsFound: 'Нічого не знайдено',
-    smartMatches: 'Розумні збіги',
-    categories: 'Категорії',
-    services: 'Послуги',
-    pros: 'Спеціалісти',
-    listings: 'Оголошення',
-    allLiked: 'Усі обрані',
-    prosAvailableNow: 'спеціалістів онлайн',
-    mapStyle: 'Стиль мапи',
-    myLocation: 'Моє місцезнаходження',
-    clearSelection: 'Скинути вибір',
-    available: 'Доступний',
-    unavailable: 'Недоступний',
-    verifiedPro: 'Перевірений спеціаліст',
-    availableNow: 'Доступний зараз',
-    unavailableToday: 'Сьогодні недоступний',
-    from: 'Від',
-    view: 'Відкрити',
-    route: 'Маршрут',
-    bookNow: 'Забронювати',
-    popularServices: 'Популярні послуги',
-    cash: 'Готівка',
-    card: 'Картка',
-    wallet: 'Гаманець',
-
-    allCategories: 'Усі категорії',
-    chooseCategoryAndSubcategory: 'Оберіть категорію та підкатегорію',
-    extraCategories: 'Додаткові категорії',
-    more: 'Ще',
-  },
-} as const;
-
-export function getSavedLanguage(): AppLanguage {
-  if (typeof window === 'undefined') return 'EN';
-
-  const saved = window.localStorage.getItem(STORAGE_KEY);
-  if (saved === 'EN' || saved === 'RU' || saved === 'UA') return saved;
-
-  return 'EN';
-}
-
-export function saveLanguage(language: AppLanguage) {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(STORAGE_KEY, language);
-}
-
-export function t(language: AppLanguage) {
-  return translations[language] || translations.EN;
-} i18n
-Give me correct directions this time for real with correct solution seeing all logs and all things. think carefully then answer.
