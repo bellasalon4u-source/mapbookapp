@@ -65,9 +65,7 @@ type SearchResult =
       id: string;
       label: string;
       categoryId: string;
-      categoryLabel: string;
       subcategory: string;
-      matchText: string;
     }
   | {
       type: 'category';
@@ -80,7 +78,6 @@ type SearchResult =
       id: string;
       label: string;
       categoryId: string;
-      categoryLabel: string;
     }
   | {
       type: 'master';
@@ -88,13 +85,6 @@ type SearchResult =
       label: string;
       categoryId: string;
       master: any;
-    }
-  | {
-      type: 'listing';
-      id: string;
-      label: string;
-      categoryId: string;
-      listingMaster: any;
     };
 
 const searchAliases = [
@@ -102,310 +92,37 @@ const searchAliases = [
     label: 'Dog hotel',
     categoryId: 'pets',
     subcategory: 'Pet Sitting',
-    keywords: [
-      'dog hotel',
-      'hotel for dogs',
-      'pet hotel',
-      'dog boarding',
-      'boarding for dogs',
-      'pet boarding',
-      'отель для собак',
-      'гостиница для собак',
-      'передержка собак',
-      'передержка собаки',
-      'где оставить собаку',
-      'where to leave dog',
-    ],
-  },
-  {
-    label: 'Dog walking',
-    categoryId: 'pets',
-    subcategory: 'Dog Walking',
-    keywords: [
-      'dog walking',
-      'dog walker',
-      'walk my dog',
-      'выгул собак',
-      'выгулять собаку',
-      'гулять с собакой',
-    ],
-  },
-  {
-    label: 'Pet taxi',
-    categoryId: 'pets',
-    subcategory: 'Pet Taxi',
-    keywords: [
-      'pet taxi',
-      'taxi for dog',
-      'taxi for cat',
-      'зоотакси',
-      'такси для животных',
-      'перевезти собаку',
-      'перевезти кота',
-    ],
-  },
-  {
-    label: 'Pet grooming',
-    categoryId: 'pets',
-    subcategory: 'Grooming',
-    keywords: [
-      'pet grooming',
-      'dog grooming',
-      'cat grooming',
-      'груминг',
-      'подстричь собаку',
-      'помыть собаку',
-    ],
+    keywords: ['dog hotel', 'hotel for dogs', 'pet hotel', 'dog boarding', 'отель для собак', 'передержка собак'],
   },
   {
     label: 'Carpet cleaning',
     categoryId: 'home',
     subcategory: 'Deep Cleaning',
-    keywords: [
-      'clean carpet',
-      'wash carpet',
-      'carpet cleaning',
-      'rug cleaning',
-      'помыть ковёр',
-      'почистить ковёр',
-      'почистить ковер',
-      'чистка ковра',
-      'химчистка ковра',
-    ],
-  },
-  {
-    label: 'Sofa cleaning',
-    categoryId: 'home',
-    subcategory: 'Deep Cleaning',
-    keywords: [
-      'clean sofa',
-      'wash sofa',
-      'sofa cleaning',
-      'couch cleaning',
-      'почистить диван',
-      'помыть диван',
-      'чистка дивана',
-      'химчистка дивана',
-    ],
-  },
-  {
-    label: 'Home cleaning',
-    categoryId: 'home',
-    subcategory: 'Cleaning',
-    keywords: [
-      'home cleaning',
-      'house cleaning',
-      'apartment cleaning',
-      'clean house',
-      'уборка',
-      'уборка квартиры',
-      'уборка дома',
-      'cleaner',
-    ],
-  },
-  {
-    label: 'Furniture assembly',
-    categoryId: 'home',
-    subcategory: 'Furniture Assembly',
-    keywords: [
-      'assemble furniture',
-      'furniture assembly',
-      'ikea assembly',
-      'собрать мебель',
-      'сборка мебели',
-    ],
-  },
-  {
-    label: 'Handyman',
-    categoryId: 'home',
-    subcategory: 'Handyman',
-    keywords: [
-      'handyman',
-      'fix at home',
-      'small home repair',
-      'муж на час',
-      'мелкий ремонт дома',
-    ],
+    keywords: ['carpet cleaning', 'clean carpet', 'wash carpet', 'почистить ковёр', 'почистить ковер', 'помыть ковёр'],
   },
   {
     label: 'Phone repair',
     categoryId: 'tech',
     subcategory: 'Phone Repair',
-    keywords: [
-      'phone repair',
-      'repair phone',
-      'fix phone',
-      'broken phone',
-      'ремонт телефона',
-      'починить телефон',
-      'замена экрана',
-      'экран телефона',
-    ],
-  },
-  {
-    label: 'Laptop repair',
-    categoryId: 'tech',
-    subcategory: 'Laptop Repair',
-    keywords: [
-      'laptop repair',
-      'repair laptop',
-      'fix laptop',
-      'ремонт ноутбука',
-      'починить ноутбук',
-    ],
-  },
-  {
-    label: 'Computer repair',
-    categoryId: 'tech',
-    subcategory: 'Computer Repair',
-    keywords: [
-      'computer repair',
-      'pc repair',
-      'repair computer',
-      'ремонт компьютера',
-      'починить компьютер',
-    ],
-  },
-  {
-    label: 'TV setup',
-    categoryId: 'tech',
-    subcategory: 'TV Setup',
-    keywords: [
-      'tv setup',
-      'install tv',
-      'set up television',
-      'настроить телевизор',
-      'подключить телевизор',
-    ],
+    keywords: ['phone repair', 'fix phone', 'ремонт телефона', 'починить телефон'],
   },
   {
     label: 'Hair extensions',
     categoryId: 'beauty',
     subcategory: 'Hair',
-    keywords: [
-      'hair extensions',
-      'hairextensions',
-      'extensions',
-      'наращивание волос',
-      'волосы',
-      'hair stylist',
-      'парикмахер',
-    ],
-  },
-  {
-    label: 'Brows & Lashes',
-    categoryId: 'beauty',
-    subcategory: 'Brows & Lashes',
-    keywords: [
-      'lashes',
-      'brows',
-      'eyelashes',
-      'ресницы',
-      'брови',
-      'lash artist',
-      'ламинирование ресниц',
-    ],
-  },
-  {
-    label: 'Nails',
-    categoryId: 'beauty',
-    subcategory: 'Nails',
-    keywords: [
-      'nails',
-      'manicure',
-      'pedicure',
-      'маникюр',
-      'педикюр',
-      'ногти',
-    ],
+    keywords: ['hair extensions', 'hairextensions', 'наращивание волос'],
   },
   {
     label: 'Massage',
     categoryId: 'wellness',
     subcategory: 'Massage',
-    keywords: [
-      'massage',
-      'spa massage',
-      'массаж',
-      'расслабляющий массаж',
-      'лечебный массаж',
-    ],
-  },
-  {
-    label: 'Spa',
-    categoryId: 'wellness',
-    subcategory: 'Spa',
-    keywords: ['spa', 'спа', 'spa day', 'relax spa'],
-  },
-  {
-    label: 'Personal training',
-    categoryId: 'fitness',
-    subcategory: 'Personal Training',
-    keywords: [
-      'personal trainer',
-      'personal training',
-      'fitness coach',
-      'персональный тренер',
-      'фитнес тренер',
-      'тренер',
-    ],
-  },
-  {
-    label: 'Yoga',
-    categoryId: 'fitness',
-    subcategory: 'Yoga',
-    keywords: ['yoga', 'йога'],
+    keywords: ['massage', 'массаж'],
   },
   {
     label: 'Moving',
     categoryId: 'moving',
     subcategory: 'Small Moves',
-    keywords: [
-      'moving',
-      'move house',
-      'small move',
-      'переезд',
-      'перевезти вещи',
-      'перевозка вещей',
-      'перевезти шкаф',
-    ],
-  },
-  {
-    label: 'Van help',
-    categoryId: 'moving',
-    subcategory: 'Van Help',
-    keywords: [
-      'van help',
-      'man with van',
-      'van',
-      'нужен бус',
-      'грузовой фургон',
-      'машина для переезда',
-    ],
-  },
-  {
-    label: 'Courier',
-    categoryId: 'moving',
-    subcategory: 'Courier',
-    keywords: ['courier', 'delivery today', 'same day delivery', 'курьер', 'доставка сегодня'],
-  },
-  {
-    label: 'Car wash',
-    categoryId: 'auto',
-    subcategory: 'Car Wash',
-    keywords: ['car wash', 'wash car', 'помыть машину', 'мойка машины', 'автомойка'],
-  },
-  {
-    label: 'Detailing',
-    categoryId: 'auto',
-    subcategory: 'Detailing',
-    keywords: ['detailing', 'car detailing', 'детейлинг', 'полировка авто', 'химчистка авто'],
-  },
-  {
-    label: 'Tyre help',
-    categoryId: 'auto',
-    subcategory: 'Tyre Help',
-    keywords: ['tyre', 'flat tyre', 'wheel help', 'шина', 'колесо', 'прокол колеса', 'накачать шины'],
+    keywords: ['moving', 'переезд', 'перевезти вещи'],
   },
 ];
 
@@ -481,49 +198,60 @@ function getCategoryAccent(category?: string) {
   if (normalized === 'repairs') return '#f4b400';
   if (normalized === 'tech') return '#9b5cff';
   if (normalized === 'pets') return '#28c7d9';
-  if (normalized === 'fashion') return '#43d94d';
-  if (normalized === 'auto') return '#43d94d';
-  if (normalized === 'moving') return '#43d94d';
-  if (normalized === 'fitness') return '#43d94d';
-  if (normalized === 'events') return '#43d94d';
-  if (normalized === 'activities') return '#43d94d';
-  if (normalized === 'creative') return '#43d94d';
   if (normalized === 'education') return '#7d52ff';
 
-  return '#ff4f93';
+  return '#43d94d';
 }
 
-function getCategoryLabel(category: string | undefined, language: AppLanguage) {
-  const tr = t(language);
-  const normalized = String(category || '').toLowerCase().trim();
+function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
+  const normalized = String(category || '').toLowerCase();
+  const found = categories.find((item) => item.id === normalized);
 
-  const map: Record<string, string> = {
-    beauty: tr.beauty,
-    barber: tr.barber,
-    wellness: tr.wellness,
-    home: tr.home,
-    repairs: tr.repairs,
-    tech: tr.tech,
-    fashion: tr.fashion,
-    pets: tr.pets,
-    auto: tr.auto,
-    moving: tr.moving,
-    fitness: tr.fitness,
-    education: tr.education,
-    events: tr.events,
-    activities: tr.activities,
-    creative: tr.creative,
-  };
+  if (!found) return 'Service';
 
-  return map[normalized] || 'Service';
-}
-
-function getSearchResultCategoryLabel(result: SearchResult, language: AppLanguage) {
-  if ('categoryLabel' in result && result.categoryLabel) {
-    return result.categoryLabel;
+  if (language === 'RU') {
+    const map: Record<string, string> = {
+      beauty: 'Красота',
+      barber: 'Барбер',
+      wellness: 'Велнес',
+      home: 'Дом',
+      repairs: 'Ремонт',
+      tech: 'Техника',
+      fashion: 'Мода',
+      pets: 'Питомцы',
+      auto: 'Авто',
+      moving: 'Переезд',
+      fitness: 'Фитнес',
+      education: 'Обучение',
+      events: 'События',
+      activities: 'Активности',
+      creative: 'Креатив',
+    };
+    return map[normalized] || found.shortLabel || found.label;
   }
 
-  return getCategoryLabel(result.categoryId, language);
+  if (language === 'UA') {
+    const map: Record<string, string> = {
+      beauty: 'Краса',
+      barber: 'Барбер',
+      wellness: 'Велнес',
+      home: 'Дім',
+      repairs: 'Ремонт',
+      tech: 'Техніка',
+      fashion: 'Мода',
+      pets: 'Улюбленці',
+      auto: 'Авто',
+      moving: 'Переїзд',
+      fitness: 'Фітнес',
+      education: 'Освіта',
+      events: 'Події',
+      activities: 'Активності',
+      creative: 'Креатив',
+    };
+    return map[normalized] || found.shortLabel || found.label;
+  }
+
+  return found.shortLabel || found.label;
 }
 
 function normalizePaymentMethods(value: any): string[] {
@@ -544,39 +272,19 @@ function paymentBadge(method: string, language: AppLanguage) {
 }
 
 function normalizeText(value: string) {
-  return String(value || '')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function tokenize(value: string) {
-  return normalizeText(value)
-    .split(/[^a-zA-Zа-яА-ЯёЁіІїЇєЄ0-9]+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
+  return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
 function scoreTextMatch(query: string, target: string) {
   const q = normalizeText(query);
   const tValue = normalizeText(target);
-  if (!q || !tValue) return 0;
 
+  if (!q || !tValue) return 0;
   if (tValue === q) return 120;
   if (tValue.startsWith(q)) return 90;
   if (tValue.includes(q)) return 70;
 
-  const qWords = tokenize(q);
-  const tWords = tokenize(tValue);
-
-  let score = 0;
-
-  for (const word of qWords) {
-    if (tValue.includes(word)) score += 14;
-    if (tWords.some((item) => item.startsWith(word))) score += 10;
-  }
-
-  return score;
+  return 0;
 }
 
 function saveRecentSearch(value: string) {
@@ -641,23 +349,15 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    const loadListings = () => {
-      setListings(getListings());
-    };
-
+    const loadListings = () => setListings(getListings());
     loadListings();
-    const unsubscribe = subscribeToListingsStore(loadListings);
-    return unsubscribe;
+    return subscribeToListingsStore(loadListings);
   }, []);
 
   useEffect(() => {
-    const loadLiked = () => {
-      setLikedMasterIds(getLikedMasterIds());
-    };
-
+    const loadLiked = () => setLikedMasterIds(getLikedMasterIds());
     loadLiked();
-    const unsubscribe = subscribeToLikedMasters(loadLiked);
-    return unsubscribe;
+    return subscribeToLikedMasters(loadLiked);
   }, []);
 
   const listingMasters = useMemo(() => {
@@ -673,16 +373,10 @@ export default function HomePage() {
     if (!q) return [] as SearchResult[];
 
     return searchAliases
-      .map((item) => {
-        const bestKeywordScore = Math.max(
-          ...item.keywords.map((keyword) => scoreTextMatch(q, keyword))
-        );
-
-        return {
-          item,
-          score: bestKeywordScore,
-        };
-      })
+      .map((item) => ({
+        item,
+        score: Math.max(...item.keywords.map((keyword) => scoreTextMatch(q, keyword))),
+      }))
       .filter((item) => item.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, 8)
@@ -691,26 +385,23 @@ export default function HomePage() {
         id: `smart-${item.categoryId}-${item.subcategory}-${item.label}`,
         label: item.label,
         categoryId: item.categoryId,
-        categoryLabel: getCategoryLabel(item.categoryId, language),
         subcategory: item.subcategory,
-        matchText: item.label,
       }));
-  }, [search, language]);
+  }, [search]);
 
   const categoryResults = useMemo(() => {
     const q = search.trim();
     if (!q) return [] as SearchResult[];
 
     return categories
-      .map((item) => {
-        const score = Math.max(
+      .map((item) => ({
+        item,
+        score: Math.max(
           scoreTextMatch(q, item.label),
           scoreTextMatch(q, item.shortLabel || ''),
           scoreTextMatch(q, item.id)
-        );
-
-        return { item, score };
-      })
+        ),
+      }))
       .filter((item) => item.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, 6)
@@ -731,7 +422,6 @@ export default function HomePage() {
         item.subcategories.map((sub) => ({
           sub,
           categoryId: item.id,
-          categoryLabel: getCategoryLabel(item.id, language),
           score: scoreTextMatch(q, sub),
         }))
       )
@@ -743,9 +433,8 @@ export default function HomePage() {
         id: `subcategory-${item.categoryId}-${item.sub}`,
         label: item.sub,
         categoryId: item.categoryId,
-        categoryLabel: item.categoryLabel,
       }));
-  }, [search, language]);
+  }, [search]);
 
   const proResults = useMemo(() => {
     const q = search.trim();
@@ -753,18 +442,12 @@ export default function HomePage() {
 
     return allMasters
       .map((master: any) => {
-        const description = String(master.description || '');
-        const title = String(master.name || master.title || '');
-        const category = String(master.category || '');
-        const subcategory = String(master.subcategory || '');
-        const city = String(master.city || '');
-
         const score =
-          scoreTextMatch(q, title) * 1.5 +
-          scoreTextMatch(q, subcategory) * 1.3 +
-          scoreTextMatch(q, description) * 1.2 +
-          scoreTextMatch(q, city) +
-          scoreTextMatch(q, category);
+          scoreTextMatch(q, String(master.name || master.title || '')) * 1.5 +
+          scoreTextMatch(q, String(master.subcategory || '')) * 1.3 +
+          scoreTextMatch(q, String(master.description || '')) * 1.2 +
+          scoreTextMatch(q, String(master.city || '')) +
+          scoreTextMatch(q, String(master.category || ''));
 
         return { master, score };
       })
@@ -780,39 +463,6 @@ export default function HomePage() {
       }));
   }, [search, allMasters]);
 
-  const listingResults = useMemo(() => {
-    const q = search.trim();
-    if (!q) return [] as SearchResult[];
-
-    return listingMasters
-      .map((master: any) => {
-        const description = String(master.description || '');
-        const title = String(master.title || master.name || '');
-        const category = String(master.category || '');
-        const subcategory = String(master.subcategory || '');
-        const city = String(master.city || '');
-
-        const score =
-          scoreTextMatch(q, title) * 1.5 +
-          scoreTextMatch(q, subcategory) * 1.3 +
-          scoreTextMatch(q, description) * 1.2 +
-          scoreTextMatch(q, city) +
-          scoreTextMatch(q, category);
-
-        return { master, score };
-      })
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 6)
-      .map(({ master }) => ({
-        type: 'listing' as const,
-        id: `listing-${master.id}`,
-        label: master.title || 'Listing',
-        categoryId: String(master.category || 'beauty'),
-        listingMaster: master,
-      }));
-  }, [search, listingMasters]);
-
   const filteredMasters = useMemo(() => {
     const q = search.trim().toLowerCase();
 
@@ -820,14 +470,12 @@ export default function HomePage() {
       const masterCategory = String(master.category || '').toLowerCase().trim();
       const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
 
-      const categoryMatch =
-        likedFilterMode === 'all' ? true : masterCategory === activeCategory;
+      const categoryMatch = likedFilterMode === 'all' ? true : masterCategory === activeCategory;
 
       const subcategoryMatch =
         likedFilterMode === 'all'
           ? true
-          : !activeSubcategory ||
-            masterSubcategory === activeSubcategory.toLowerCase().trim();
+          : !activeSubcategory || masterSubcategory === activeSubcategory.toLowerCase().trim();
 
       const searchMatch =
         !q ||
@@ -839,20 +487,11 @@ export default function HomePage() {
         String(master.category || '').toLowerCase().includes(q);
 
       const likedMatch =
-        likedFilterMode === 'none'
-          ? true
-          : likedMasterIds.includes(String(master.id));
+        likedFilterMode === 'none' ? true : likedMasterIds.includes(String(master.id));
 
       return categoryMatch && subcategoryMatch && searchMatch && likedMatch;
     });
-  }, [
-    allMasters,
-    activeCategory,
-    activeSubcategory,
-    search,
-    likedMasterIds,
-    likedFilterMode,
-  ]);
+  }, [allMasters, activeCategory, activeSubcategory, search, likedMasterIds, likedFilterMode]);
 
   useEffect(() => {
     setSelectedMaster(null);
@@ -878,8 +517,7 @@ export default function HomePage() {
     smartResults.length > 0 ||
     categoryResults.length > 0 ||
     subcategoryResults.length > 0 ||
-    proResults.length > 0 ||
-    listingResults.length > 0;
+    proResults.length > 0;
 
   const selectSearchResult = (result: SearchResult) => {
     if (result.type === 'smart') {
@@ -888,7 +526,7 @@ export default function HomePage() {
       setLikedFilterMode('none');
       setSearch(result.label);
       setSearchOpen(false);
-      saveRecentSearch(result.matchText);
+      saveRecentSearch(result.label);
       setRecentSearches(readRecentSearches());
       return;
     }
@@ -915,22 +553,10 @@ export default function HomePage() {
       return;
     }
 
-    if (result.type === 'master') {
-      setActiveCategory(String(result.master.category || 'beauty'));
-      setActiveSubcategory(result.master.subcategory || '');
-      setLikedFilterMode('none');
-      setSelectedMaster(result.master);
-      setSearch(result.label);
-      setSearchOpen(false);
-      saveRecentSearch(result.label);
-      setRecentSearches(readRecentSearches());
-      return;
-    }
-
-    setActiveCategory(String(result.listingMaster.category || 'beauty'));
-    setActiveSubcategory(result.listingMaster.subcategory || '');
+    setActiveCategory(String(result.master.category || 'beauty'));
+    setActiveSubcategory(result.master.subcategory || '');
     setLikedFilterMode('none');
-    setSelectedMaster(result.listingMaster);
+    setSelectedMaster(result.master);
     setSearch(result.label);
     setSearchOpen(false);
     saveRecentSearch(result.label);
@@ -994,8 +620,7 @@ export default function HomePage() {
                         smartResults[0] ||
                         subcategoryResults[0] ||
                         categoryResults[0] ||
-                        proResults[0] ||
-                        listingResults[0];
+                        proResults[0];
 
                       if (first) {
                         selectSearchResult(first);
@@ -1040,9 +665,7 @@ export default function HomePage() {
 
               <button
                 onClick={() =>
-                  setLanguage((prev) =>
-                    prev === 'EN' ? 'UA' : prev === 'UA' ? 'RU' : 'EN'
-                  )
+                  setLanguage((prev) => (prev === 'EN' ? 'UA' : prev === 'UA' ? 'RU' : 'EN'))
                 }
                 style={{
                   border: 'none',
@@ -1061,7 +684,6 @@ export default function HomePage() {
                   gap: 6,
                   cursor: 'pointer',
                 }}
-                title="Change language"
               >
                 <span style={{ fontSize: 20 }}>
                   {language === 'EN' ? '🇬🇧' : language === 'UA' ? '🇺🇦' : '🇷🇺'}
@@ -1116,17 +738,9 @@ export default function HomePage() {
                   <>
                     {recentSearches.length > 0 ? (
                       <div style={{ marginBottom: 14 }}>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                            color: '#6c7480',
-                            marginBottom: 8,
-                          }}
-                        >
+                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
                           {tr.recentSearches}
                         </div>
-
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                           {recentSearches.map((item) => (
                             <button
@@ -1151,17 +765,9 @@ export default function HomePage() {
                     ) : null}
 
                     <div>
-                      <div
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 900,
-                          color: '#6c7480',
-                          marginBottom: 8,
-                        }}
-                      >
+                      <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
                         {tr.popularSearches}
                       </div>
-
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                         {popularSearches.map((item) => (
                           <button
@@ -1185,31 +791,16 @@ export default function HomePage() {
                     </div>
                   </>
                 ) : !hasAnyResults ? (
-                  <div
-                    style={{
-                      padding: '12px 6px',
-                      fontSize: 14,
-                      fontWeight: 800,
-                      color: '#74808c',
-                    }}
-                  >
+                  <div style={{ padding: '12px 6px', fontSize: 14, fontWeight: 800, color: '#74808c' }}>
                     {tr.noResultsFound}
                   </div>
                 ) : (
                   <>
-                    {smartResults.length > 0 ? (
+                    {smartResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                            color: '#6c7480',
-                            marginBottom: 8,
-                          }}
-                        >
+                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
                           {tr.smartMatches}
                         </div>
-
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {smartResults.map((item) => (
                             <button
@@ -1232,27 +823,19 @@ export default function HomePage() {
                                 {item.label}
                               </span>
                               <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {item.categoryLabel} • {item.subcategory}
+                                {getCategoryLabel(item.categoryId, language)} • {item.subcategory}
                               </span>
                             </button>
                           ))}
                         </div>
                       </div>
-                    ) : null}
+                    )}
 
-                    {categoryResults.length > 0 ? (
+                    {categoryResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                            color: '#6c7480',
-                            marginBottom: 8,
-                          }}
-                        >
+                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
                           {tr.categories}
                         </div>
-
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {categoryResults.map((item) => (
                             <button
@@ -1278,21 +861,13 @@ export default function HomePage() {
                           ))}
                         </div>
                       </div>
-                    ) : null}
+                    )}
 
-                    {subcategoryResults.length > 0 ? (
+                    {subcategoryResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                            color: '#6c7480',
-                            marginBottom: 8,
-                          }}
-                        >
+                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
                           {tr.services}
                         </div>
-
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {subcategoryResults.map((item) => (
                             <button
@@ -1315,27 +890,19 @@ export default function HomePage() {
                                 {item.label}
                               </span>
                               <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {item.categoryLabel}
+                                {getCategoryLabel(item.categoryId, language)}
                               </span>
                             </button>
                           ))}
                         </div>
                       </div>
-                    ) : null}
+                    )}
 
-                    {proResults.length > 0 ? (
-                      <div style={{ marginBottom: 12 }}>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                            color: '#6c7480',
-                            marginBottom: 8,
-                          }}
-                        >
+                    {proResults.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
                           {tr.pros}
                         </div>
-
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {proResults.map((item) => (
                             <button
@@ -1358,56 +925,13 @@ export default function HomePage() {
                                 {item.label}
                               </span>
                               <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {getSearchResultCategoryLabel(item, language)}
+                                {getCategoryLabel(item.categoryId, language)}
                               </span>
                             </button>
                           ))}
                         </div>
                       </div>
-                    ) : null}
-
-                    {listingResults.length > 0 ? (
-                      <div>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                            color: '#6c7480',
-                            marginBottom: 8,
-                          }}
-                        >
-                          {tr.listings}
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          {listingResults.map((item) => (
-                            <button
-                              key={item.id}
-                              onClick={() => selectSearchResult(item)}
-                              style={{
-                                border: 'none',
-                                background: '#fff',
-                                borderRadius: 14,
-                                padding: '10px 12px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'flex-start',
-                                gap: 2,
-                                cursor: 'pointer',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                              }}
-                            >
-                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
-                                {item.label}
-                              </span>
-                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {getSearchResultCategoryLabel(item, language)}
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null}
+                    )}
                   </>
                 )}
               </div>
@@ -1433,23 +957,11 @@ export default function HomePage() {
         </section>
 
         <section style={{ padding: '8px 14px 0' }}>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 10,
-              alignItems: 'center',
-            }}
-          >
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
             <button
-              onClick={() =>
-                setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))
-              }
+              onClick={() => setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))}
               style={{
-                border:
-                  likedFilterMode === 'category'
-                    ? '3px solid #ff2020'
-                    : '1px solid #dadada',
+                border: likedFilterMode === 'category' ? '3px solid #ff2020' : '1px solid #dadada',
                 background: '#fff',
                 color: '#1f2430',
                 borderRadius: 999,
@@ -1460,19 +972,12 @@ export default function HomePage() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
-                boxShadow:
-                  likedFilterMode === 'category'
-                    ? '0 6px 18px rgba(255,32,32,0.18)'
-                    : '0 3px 8px rgba(0,0,0,0.04)',
-                transform: likedFilterMode === 'category' ? 'scale(1.03)' : 'scale(1)',
-                transition: 'all 0.18s ease',
               }}
             >
               <span style={{ color: '#ff2020', fontSize: 18 }}>♥</span>
               <span>{currentCategoryLabel}</span>
               <span
                 style={{
-                  marginLeft: 2,
                   minWidth: 28,
                   height: 28,
                   borderRadius: 999,
@@ -1482,7 +987,6 @@ export default function HomePage() {
                   justifyContent: 'center',
                   fontSize: 14,
                   fontWeight: 900,
-                  color: '#1f2430',
                   background: '#fff',
                 }}
               >
@@ -1491,14 +995,9 @@ export default function HomePage() {
             </button>
 
             <button
-              onClick={() =>
-                setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))
-              }
+              onClick={() => setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
               style={{
-                border:
-                  likedFilterMode === 'all'
-                    ? '3px solid #ff2020'
-                    : '1px solid #dadada',
+                border: likedFilterMode === 'all' ? '3px solid #ff2020' : '1px solid #dadada',
                 background: '#fff',
                 color: '#1f2430',
                 borderRadius: 999,
@@ -1509,19 +1008,12 @@ export default function HomePage() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
-                boxShadow:
-                  likedFilterMode === 'all'
-                    ? '0 6px 18px rgba(255,32,32,0.18)'
-                    : '0 3px 8px rgba(0,0,0,0.04)',
-                transform: likedFilterMode === 'all' ? 'scale(1.03)' : 'scale(1)',
-                transition: 'all 0.18s ease',
               }}
             >
               <span style={{ color: '#ff2020', fontSize: 18 }}>♥</span>
               <span>{tr.allLiked}</span>
               <span
                 style={{
-                  marginLeft: 2,
                   minWidth: 28,
                   height: 28,
                   borderRadius: 999,
@@ -1531,7 +1023,6 @@ export default function HomePage() {
                   justifyContent: 'center',
                   fontSize: 14,
                   fontWeight: 900,
-                  color: '#1f2430',
                   background: '#fff',
                 }}
               >
@@ -1549,7 +1040,6 @@ export default function HomePage() {
                 padding: '9px 13px',
                 fontSize: 13,
                 fontWeight: 900,
-                boxShadow: '0 3px 10px rgba(47,156,71,0.08)',
               }}
             >
               {filteredMasters.filter((item: any) => item.availableNow).length} {tr.prosAvailableNow}
@@ -1557,4 +1047,79 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '8
+        <section style={{ padding: '8px 0 0' }}>
+          <div style={{ background: '#ffffff', borderTop: '1px solid #e7e1d8', borderBottom: '1px solid #e7e1d8' }}>
+            <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
+              <RealMap
+                key={mapKey}
+                masters={filteredMasters}
+                mapMode={mapMode}
+                activeCategory={activeCategory}
+                selectedMasterId={selectedMaster?.id ?? null}
+                likedMasterIds={likedMasterIds}
+                recenterToUserTrigger={recenterToUserTrigger}
+                onMasterSelect={(master: any) => setSelectedMaster(master)}
+                onMapBackgroundClick={() => setSelectedMaster(null)}
+                onToggleLike={(master: any) => toggleLikedMaster(master.id)}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section style={{ padding: '12px 14px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 900, color: '#223145' }}>
+              {tr.popularServices}
+            </h2>
+
+            <button
+              onClick={() => router.push('/services')}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                fontSize: 24,
+                color: '#9aa0a8',
+                lineHeight: 1,
+                cursor: 'pointer',
+              }}
+            >
+              ›
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
+            {popularServices.map((service) => (
+              <button
+                key={service.id}
+                onClick={() => runQuickSearch(service.title)}
+                style={{ border: 'none', background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}
+              >
+                <div
+                  style={{
+                    width: '100%',
+                    aspectRatio: '0.9 / 1',
+                    borderRadius: 14,
+                    overflow: 'hidden',
+                    background: '#ddd',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.07)',
+                  }}
+                >
+                  <img
+                    src={service.image}
+                    alt={service.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                </div>
+                <div style={{ marginTop: 7, fontSize: 11, lineHeight: 1.2, fontWeight: 800, color: '#253140' }}>
+                  {service.title}
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <BottomNav />
+    </main>
+  );
+}
