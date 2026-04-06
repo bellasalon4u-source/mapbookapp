@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { categories } from '../services/categories';
+import { t, getSavedLanguage, type AppLanguage } from '../services/i18n';
 
 type TopCategoriesBarProps = {
   activeCategory: string;
@@ -12,15 +13,15 @@ type TopCategoriesBarProps = {
   onClearSubcategory: () => void;
 };
 
-const topOrder = [
+const horizontalOrder = [
   'beauty',
   'barber',
   'wellness',
   'home',
   'repairs',
   'tech',
-  'fashion',
   'pets',
+  'fashion',
   'auto',
   'moving',
   'fitness',
@@ -38,8 +39,8 @@ const iconSrcMap: Record<string, string> = {
   home: '/ui/categories/home.png',
   repairs: '/ui/categories/repairs.png',
   tech: '/ui/categories/tech.png',
-  fashion: '/ui/categories/fashion.png',
   pets: '/ui/categories/pets.png',
+  fashion: '/ui/categories/fashion.png',
   auto: '/ui/categories/auto.png',
   moving: '/ui/categories/moving.png',
   fitness: '/ui/categories/fitness.png',
@@ -47,7 +48,6 @@ const iconSrcMap: Record<string, string> = {
   events: '/ui/categories/events.png',
   activities: '/ui/categories/activities.png',
   creative: '/ui/categories/creative.png',
-  transport: '/ui/categories/transport.png',
 };
 
 const colorMap: Record<string, string> = {
@@ -57,8 +57,8 @@ const colorMap: Record<string, string> = {
   home: '#ff9f1a',
   repairs: '#f4b400',
   tech: '#9b5cff',
-  fashion: '#43d94d',
   pets: '#28c7d9',
+  fashion: '#43d94d',
   auto: '#43d94d',
   moving: '#43d94d',
   fitness: '#43d94d',
@@ -66,9 +66,144 @@ const colorMap: Record<string, string> = {
   events: '#43d94d',
   activities: '#43d94d',
   creative: '#43d94d',
-  transport: '#2f7df6',
   more: '#173552',
 };
+
+function translateCategoryLabel(categoryId: string, language: AppLanguage, fallback?: string) {
+  const map: Record<string, Record<AppLanguage, string>> = {
+    beauty: { EN: 'Beauty', RU: 'Красота', UA: 'Краса' },
+    barber: { EN: 'Barber', RU: 'Барбер', UA: 'Барбер' },
+    wellness: { EN: 'Wellness', RU: 'Велнес', UA: 'Велнес' },
+    home: { EN: 'Home', RU: 'Дом', UA: 'Дім' },
+    repairs: { EN: 'Repairs', RU: 'Ремонт', UA: 'Ремонт' },
+    tech: { EN: 'Tech', RU: 'Техника', UA: 'Техніка' },
+    pets: { EN: 'Pets', RU: 'Питомцы', UA: 'Улюбленці' },
+    fashion: { EN: 'Fashion', RU: 'Мода', UA: 'Мода' },
+    auto: { EN: 'Auto', RU: 'Авто', UA: 'Авто' },
+    moving: { EN: 'Moving', RU: 'Переезд', UA: 'Переїзд' },
+    fitness: { EN: 'Fitness', RU: 'Фитнес', UA: 'Фітнес' },
+    education: { EN: 'Education', RU: 'Обучение', UA: 'Навчання' },
+    events: { EN: 'Events', RU: 'События', UA: 'Події' },
+    activities: { EN: 'Activities', RU: 'Активности', UA: 'Активності' },
+    creative: { EN: 'Creative', RU: 'Креатив', UA: 'Креатив' },
+  };
+
+  return map[categoryId]?.[language] || fallback || categoryId;
+}
+
+function translateSubcategory(value: string, language: AppLanguage) {
+  const dict: Record<string, Record<AppLanguage, string>> = {
+    Hair: { EN: 'Hair', RU: 'Волосы', UA: 'Волосся' },
+    'Brows & Lashes': { EN: 'Brows & Lashes', RU: 'Брови и ресницы', UA: 'Брови та вії' },
+    Nails: { EN: 'Nails', RU: 'Ногти', UA: 'Нігті' },
+    Makeup: { EN: 'Makeup', RU: 'Макияж', UA: 'Макіяж' },
+    Skincare: { EN: 'Skincare', RU: 'Уход за кожей', UA: 'Догляд за шкірою' },
+    Aesthetics: { EN: 'Aesthetics', RU: 'Эстетика', UA: 'Естетика' },
+
+    Haircut: { EN: 'Haircut', RU: 'Стрижка', UA: 'Стрижка' },
+    'Beard Trim': { EN: 'Beard Trim', RU: 'Подравнивание бороды', UA: 'Підрівнювання бороди' },
+    Shave: { EN: 'Shave', RU: 'Бритьё', UA: 'Гоління' },
+    Fade: { EN: 'Fade', RU: 'Фейд', UA: 'Фейд' },
+    'Kids Haircut': { EN: 'Kids Haircut', RU: 'Детская стрижка', UA: 'Дитяча стрижка' },
+    Styling: { EN: 'Styling', RU: 'Укладка', UA: 'Укладання' },
+
+    Massage: { EN: 'Massage', RU: 'Массаж', UA: 'Масаж' },
+    Spa: { EN: 'Spa', RU: 'Спа', UA: 'Спа' },
+    Relaxation: { EN: 'Relaxation', RU: 'Релакс', UA: 'Релакс' },
+    Recovery: { EN: 'Recovery', RU: 'Восстановление', UA: 'Відновлення' },
+    'Holistic Care': { EN: 'Holistic Care', RU: 'Холистический уход', UA: 'Холістичний догляд' },
+    'Therapy Support': { EN: 'Therapy Support', RU: 'Терапевтическая помощь', UA: 'Терапевтична підтримка' },
+
+    Cleaning: { EN: 'Cleaning', RU: 'Уборка', UA: 'Прибирання' },
+    'Deep Cleaning': { EN: 'Deep Cleaning', RU: 'Глубокая чистка', UA: 'Глибоке прибирання' },
+    'Garden Help': { EN: 'Garden Help', RU: 'Помощь в саду', UA: 'Допомога в саду' },
+    Handyman: { EN: 'Handyman', RU: 'Мастер на час', UA: 'Майстер на годину' },
+    'Furniture Assembly': { EN: 'Furniture Assembly', RU: 'Сборка мебели', UA: 'Збирання меблів' },
+    'Home Help': { EN: 'Home Help', RU: 'Помощь по дому', UA: 'Допомога вдома' },
+
+    'Home Repairs': { EN: 'Home Repairs', RU: 'Ремонт дома', UA: 'Ремонт дому' },
+    'Appliance Repair': { EN: 'Appliance Repair', RU: 'Ремонт техники', UA: 'Ремонт техніки' },
+    'Furniture Repair': { EN: 'Furniture Repair', RU: 'Ремонт мебели', UA: 'Ремонт меблів' },
+    'Shoe Repair': { EN: 'Shoe Repair', RU: 'Ремонт обуви', UA: 'Ремонт взуття' },
+    'Clothing Repair': { EN: 'Clothing Repair', RU: 'Ремонт одежды', UA: 'Ремонт одягу' },
+    'Watch Repair': { EN: 'Watch Repair', RU: 'Ремонт часов', UA: 'Ремонт годинників' },
+
+    'Phone Repair': { EN: 'Phone Repair', RU: 'Ремонт телефона', UA: 'Ремонт телефону' },
+    'Computer Repair': { EN: 'Computer Repair', RU: 'Ремонт компьютера', UA: 'Ремонт комп’ютера' },
+    'Laptop Repair': { EN: 'Laptop Repair', RU: 'Ремонт ноутбука', UA: 'Ремонт ноутбука' },
+    'Tablet Repair': { EN: 'Tablet Repair', RU: 'Ремонт планшета', UA: 'Ремонт планшета' },
+    'TV Setup': { EN: 'TV Setup', RU: 'Настройка ТВ', UA: 'Налаштування ТБ' },
+    'Smart Device Help': { EN: 'Smart Device Help', RU: 'Помощь с умными устройствами', UA: 'Допомога зі смарт-пристроями' },
+
+    Tailoring: { EN: 'Tailoring', RU: 'Пошив', UA: 'Пошиття' },
+    'Clothing Alterations': { EN: 'Clothing Alterations', RU: 'Подгонка одежды', UA: 'Підгонка одягу' },
+    'Custom Sewing': { EN: 'Custom Sewing', RU: 'Индивидуальный пошив', UA: 'Індивідуальне пошиття' },
+    'Shoe Care': { EN: 'Shoe Care', RU: 'Уход за обувью', UA: 'Догляд за взуттям' },
+    'Bag Repair': { EN: 'Bag Repair', RU: 'Ремонт сумок', UA: 'Ремонт сумок' },
+
+    Grooming: { EN: 'Grooming', RU: 'Груминг', UA: 'Грумінг' },
+    'Dog Walking': { EN: 'Dog Walking', RU: 'Выгул собак', UA: 'Вигул собак' },
+    'Pet Sitting': { EN: 'Pet Sitting', RU: 'Передержка питомцев', UA: 'Перетримка тварин' },
+    'Pet Taxi': { EN: 'Pet Taxi', RU: 'Зоотакси', UA: 'Зоотаксі' },
+    'Pet Delivery': { EN: 'Pet Delivery', RU: 'Доставка для питомцев', UA: 'Доставка для тварин' },
+    Training: { EN: 'Training', RU: 'Дрессировка', UA: 'Дресирування' },
+    'Home Visits': { EN: 'Home Visits', RU: 'Выезды на дом', UA: 'Виїзд додому' },
+    'Accessories & Gifts': { EN: 'Accessories & Gifts', RU: 'Аксессуары и подарки', UA: 'Аксесуари та подарунки' },
+
+    'Car Wash': { EN: 'Car Wash', RU: 'Мойка авто', UA: 'Мийка авто' },
+    Detailing: { EN: 'Detailing', RU: 'Детейлинг', UA: 'Детейлінг' },
+    'Tyre Help': { EN: 'Tyre Help', RU: 'Помощь с шинами', UA: 'Допомога з шинами' },
+    'Battery Help': { EN: 'Battery Help', RU: 'Помощь с аккумулятором', UA: 'Допомога з акумулятором' },
+    Diagnostics: { EN: 'Diagnostics', RU: 'Диагностика', UA: 'Діагностика' },
+    'Driver Service': { EN: 'Driver Service', RU: 'Услуги водителя', UA: 'Послуги водія' },
+
+    'Small Moves': { EN: 'Small Moves', RU: 'Небольшой переезд', UA: 'Невеликий переїзд' },
+    'Van Help': { EN: 'Van Help', RU: 'Помощь с фургоном', UA: 'Допомога з фургоном' },
+    'Furniture Delivery': { EN: 'Furniture Delivery', RU: 'Доставка мебели', UA: 'Доставка меблів' },
+    Courier: { EN: 'Courier', RU: 'Курьер', UA: 'Кур’єр' },
+    'Same-Day Delivery': { EN: 'Same-Day Delivery', RU: 'Доставка день в день', UA: 'Доставка в той самий день' },
+    'Heavy Item Transport': { EN: 'Heavy Item Transport', RU: 'Перевозка тяжёлых вещей', UA: 'Перевезення важких речей' },
+
+    'Personal Training': { EN: 'Personal Training', RU: 'Персональные тренировки', UA: 'Персональні тренування' },
+    Yoga: { EN: 'Yoga', RU: 'Йога', UA: 'Йога' },
+    Pilates: { EN: 'Pilates', RU: 'Пилатес', UA: 'Пілатес' },
+    Stretching: { EN: 'Stretching', RU: 'Растяжка', UA: 'Розтяжка' },
+    'Dance Fitness': { EN: 'Dance Fitness', RU: 'Танцевальный фитнес', UA: 'Танцювальний фітнес' },
+    'Outdoor Training': { EN: 'Outdoor Training', RU: 'Тренировки на улице', UA: 'Тренування на вулиці' },
+
+    Languages: { EN: 'Languages', RU: 'Языки', UA: 'Мови' },
+    Tutoring: { EN: 'Tutoring', RU: 'Репетиторство', UA: 'Репетиторство' },
+    'Music Lessons': { EN: 'Music Lessons', RU: 'Уроки музыки', UA: 'Уроки музики' },
+    'Kids Learning': { EN: 'Kids Learning', RU: 'Обучение детей', UA: 'Навчання дітей' },
+    'Exam Prep': { EN: 'Exam Prep', RU: 'Подготовка к экзаменам', UA: 'Підготовка до іспитів' },
+    'Skill Coaching': { EN: 'Skill Coaching', RU: 'Обучение навыкам', UA: 'Навчання навичкам' },
+
+    Photography: { EN: 'Photography', RU: 'Фотосъёмка', UA: 'Фотозйомка' },
+    Videography: { EN: 'Videography', RU: 'Видеосъёмка', UA: 'Відеозйомка' },
+    Decor: { EN: 'Decor', RU: 'Декор', UA: 'Декор' },
+    'DJ & Music': { EN: 'DJ & Music', RU: 'DJ и музыка', UA: 'DJ і музика' },
+    'Makeup for Events': { EN: 'Makeup for Events', RU: 'Макияж для событий', UA: 'Макіяж для подій' },
+    'Catering Help': { EN: 'Catering Help', RU: 'Помощь с кейтерингом', UA: 'Допомога з кейтерингом' },
+
+    Tours: { EN: 'Tours', RU: 'Туры', UA: 'Тури' },
+    Workshops: { EN: 'Workshops', RU: 'Мастер-классы', UA: 'Майстер-класи' },
+    'Kids Activities': { EN: 'Kids Activities', RU: 'Детские активности', UA: 'Дитячі активності' },
+    'Art Classes': { EN: 'Art Classes', RU: 'Уроки искусства', UA: 'Уроки мистецтва' },
+    'Dance Classes': { EN: 'Dance Classes', RU: 'Уроки танцев', UA: 'Уроки танців' },
+    'Outdoor Activities': { EN: 'Outdoor Activities', RU: 'Активности на улице', UA: 'Активності на вулиці' },
+
+    'Graphic Design': { EN: 'Graphic Design', RU: 'Графический дизайн', UA: 'Графічний дизайн' },
+    'Content Creation': { EN: 'Content Creation', RU: 'Создание контента', UA: 'Створення контенту' },
+    'Photo Editing': { EN: 'Photo Editing', RU: 'Обработка фото', UA: 'Обробка фото' },
+    'Video Editing': { EN: 'Video Editing', RU: 'Монтаж видео', UA: 'Монтаж відео' },
+    Branding: { EN: 'Branding', RU: 'Брендинг', UA: 'Брендинг' },
+    'Social Media Help': { EN: 'Social Media Help', RU: 'Помощь с соцсетями', UA: 'Допомога із соцмережами' },
+
+    Other: { EN: 'Other', RU: 'Другое', UA: 'Інше' },
+  };
+
+  return dict[value]?.[language] || value;
+}
 
 export default function TopCategoriesBar({
   activeCategory,
@@ -80,15 +215,18 @@ export default function TopCategoriesBar({
   const [menuOpen, setMenuOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string>(activeCategory);
   const [mounted, setMounted] = useState(false);
+  const [language, setLanguage] = useState<AppLanguage>('EN');
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    setLanguage(getSavedLanguage());
   }, []);
 
   useEffect(() => {
     setExpandedCategory(activeCategory);
-  }, [activeCategory]);
+    setLanguage(getSavedLanguage());
+  }, [activeCategory, menuOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -101,10 +239,16 @@ export default function TopCategoriesBar({
     };
   }, [menuOpen]);
 
+  const tr = t(language);
+
   const visibleTopItems = useMemo(() => {
-    return topOrder
+    return horizontalOrder
       .map((id) => categories.find((item) => item.id === id))
       .filter(Boolean) as typeof categories;
+  }, []);
+
+  const allOtherCategories = useMemo(() => {
+    return categories.filter((item) => !horizontalOrder.includes(item.id));
   }, []);
 
   const expanded = categories.find((item) => item.id === expandedCategory);
@@ -155,7 +299,7 @@ export default function TopCategoriesBar({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   gap: 12,
-                  background: 'rgba(255,255,255,0.84)',
+                  background: 'rgba(255,255,255,0.82)',
                   backdropFilter: 'blur(14px)',
                   WebkitBackdropFilter: 'blur(14px)',
                   borderRadius: 24,
@@ -173,7 +317,7 @@ export default function TopCategoriesBar({
                       lineHeight: 1.1,
                     }}
                   >
-                    All categories
+                    {tr.allCategories}
                   </div>
                   <div
                     style={{
@@ -183,7 +327,7 @@ export default function TopCategoriesBar({
                       fontWeight: 700,
                     }}
                   >
-                    Choose category and subcategory
+                    {tr.chooseCategoryAndSubcategory}
                   </div>
                 </div>
 
@@ -222,7 +366,7 @@ export default function TopCategoriesBar({
                   style={{
                     minHeight: 0,
                     height: '100%',
-                    background: 'rgba(255,255,255,0.28)',
+                    background: 'rgba(255,255,255,0.26)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)',
                     borderRadius: 22,
@@ -242,7 +386,7 @@ export default function TopCategoriesBar({
                       paddingLeft: 4,
                     }}
                   >
-                    Categories
+                    {tr.categories}
                   </div>
 
                   <div
@@ -318,7 +462,7 @@ export default function TopCategoriesBar({
                               fontWeight: 900,
                             }}
                           >
-                            {item.shortLabel || item.label}
+                            {translateCategoryLabel(item.id, language, item.shortLabel || item.label)}
                           </span>
                         </button>
                       );
@@ -330,7 +474,7 @@ export default function TopCategoriesBar({
                   style={{
                     minHeight: 0,
                     height: '100%',
-                    background: 'rgba(255,255,255,0.28)',
+                    background: 'rgba(255,255,255,0.26)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)',
                     borderRadius: 22,
@@ -349,7 +493,9 @@ export default function TopCategoriesBar({
                       marginBottom: 12,
                     }}
                   >
-                    {expanded?.label || 'Subcategories'}
+                    {expanded
+                      ? translateCategoryLabel(expanded.id, language, expanded.label)
+                      : tr.services}
                   </div>
 
                   {expanded ? (
@@ -391,11 +537,63 @@ export default function TopCategoriesBar({
                                 : '0 4px 10px rgba(0,0,0,0.04)',
                             }}
                           >
-                            {sub}
+                            {translateSubcategory(sub, language)}
                           </button>
                         );
                       })}
                     </div>
+                  ) : null}
+
+                  {allOtherCategories.length > 0 ? (
+                    <>
+                      <div
+                        style={{
+                          marginTop: 18,
+                          fontSize: 12,
+                          fontWeight: 800,
+                          color: '#6a7480',
+                        }}
+                      >
+                        {tr.extraCategories}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: 10,
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 8,
+                          paddingBottom: 4,
+                        }}
+                      >
+                        {allOtherCategories.map((item) => {
+                          const color = colorMap[item.id] || '#43d94d';
+
+                          return (
+                            <button
+                              key={item.id}
+                              onClick={() => {
+                                setExpandedCategory(item.id);
+                                onSelectCategory(item.id);
+                                onClearSubcategory();
+                              }}
+                              style={{
+                                border: `1px solid ${color}55`,
+                                background: 'rgba(255,255,255,0.52)',
+                                color,
+                                borderRadius: 999,
+                                padding: '8px 11px',
+                                fontSize: 11,
+                                fontWeight: 900,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {translateCategoryLabel(item.id, language, item.shortLabel || item.label)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
                   ) : null}
                 </div>
               </div>
@@ -507,7 +705,7 @@ export default function TopCategoriesBar({
           >
             {visibleTopItems.map((item) => {
               const isActive = activeCategory === item.id;
-              const src = iconSrcMap[item.id] || iconSrcMap.beauty;
+              const src = iconSrcMap[item.id];
               const color = colorMap[item.id] || '#43d94d';
 
               return (
@@ -571,7 +769,7 @@ export default function TopCategoriesBar({
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {item.shortLabel || item.label}
+                    {translateCategoryLabel(item.id, language, item.shortLabel || item.label)}
                   </div>
 
                   <div
