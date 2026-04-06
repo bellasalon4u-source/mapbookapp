@@ -677,7 +677,7 @@ export default function TopCategoriesBar({
                 whiteSpace: 'nowrap',
               }}
             >
-              More
+              {tr.more}
             </div>
           </button>
         </div>
@@ -791,4 +791,178 @@ export default function TopCategoriesBar({
       {overlay}
     </div>
   );
+} top categories bar and 
+export type AppLanguage = 'EN' | 'RU' | 'UA';
+
+const STORAGE_KEY = 'mapbook_language';
+
+export const translations = {
+  EN: {
+    searchPlaceholder: 'Search services, categories or professionals...',
+    recentSearches: 'Recent searches',
+    popularSearches: 'Popular searches',
+    noResultsFound: 'No results found',
+    smartMatches: 'Smart matches',
+    categories: 'Categories',
+    services: 'Services',
+    pros: 'Pros',
+    listings: 'Listings',
+    allLiked: 'All liked',
+    prosAvailableNow: 'pros available now',
+    mapStyle: 'Map style',
+    myLocation: 'My location',
+    clearSelection: 'Clear selection',
+    available: 'Available',
+    unavailable: 'Unavailable',
+    verifiedPro: 'Verified Pro',
+    availableNow: 'Available now',
+    unavailableToday: 'Unavailable today',
+    from: 'From',
+    view: 'View',
+    route: 'Route',
+    bookNow: 'Book now',
+    popularServices: 'Popular Services',
+    cash: 'Cash',
+    card: 'Card',
+    wallet: 'Wallet',
+
+    allCategories: 'All categories',
+    chooseCategoryAndSubcategory: 'Choose category and subcategory',
+    extraCategories: 'Extra categories',
+    more: 'More',
+
+    beauty: 'Beauty',
+    barber: 'Barber',
+    wellness: 'Wellness',
+    home: 'Home',
+    repairs: 'Repairs',
+    tech: 'Tech',
+    pets: 'Pets',
+    fashion: 'Fashion',
+    auto: 'Auto',
+    moving: 'Moving',
+    fitness: 'Fitness',
+    education: 'Education',
+    events: 'Events',
+    activities: 'Activities',
+    creative: 'Creative',
+  },
+  RU: {
+    searchPlaceholder: 'Поиск услуг, категорий или специалистов...',
+    recentSearches: 'Недавние поиски',
+    popularSearches: 'Популярные запросы',
+    noResultsFound: 'Ничего не найдено',
+    smartMatches: 'Умные совпадения',
+    categories: 'Категории',
+    services: 'Услуги',
+    pros: 'Специалисты',
+    listings: 'Объявления',
+    allLiked: 'Все избранные',
+    prosAvailableNow: 'специалистов онлайн',
+    mapStyle: 'Стиль карты',
+    myLocation: 'Моё местоположение',
+    clearSelection: 'Сбросить выбор',
+    available: 'Доступен',
+    unavailable: 'Недоступен',
+    verifiedPro: 'Проверенный специалист',
+    availableNow: 'Доступен сейчас',
+    unavailableToday: 'Сегодня недоступен',
+    from: 'От',
+    view: 'Открыть',
+    route: 'Маршрут',
+    bookNow: 'Забронировать',
+    popularServices: 'Популярные услуги',
+    cash: 'Наличные',
+    card: 'Карта',
+    wallet: 'Кошелёк',
+
+    allCategories: 'Все категории',
+    chooseCategoryAndSubcategory: 'Выберите категорию и подкатегорию',
+    extraCategories: 'Дополнительные категории',
+    more: 'Ещё',
+
+    beauty: 'Красота',
+    barber: 'Барбер',
+    wellness: 'Велнес',
+    home: 'Дом',
+    repairs: 'Ремонт',
+    tech: 'Техника',
+    pets: 'Питомцы',
+    fashion: 'Мода',
+    auto: 'Авто',
+    moving: 'Переезд',
+    fitness: 'Фитнес',
+    education: 'Обучение',
+    events: 'События',
+    activities: 'Активности',
+    creative: 'Креатив',
+  },
+  UA: {
+    searchPlaceholder: 'Пошук послуг, категорій або спеціалістів...',
+    recentSearches: 'Останні пошуки',
+    popularSearches: 'Популярні запити',
+    noResultsFound: 'Нічого не знайдено',
+    smartMatches: 'Розумні збіги',
+    categories: 'Категорії',
+    services: 'Послуги',
+    pros: 'Спеціалісти',
+    listings: 'Оголошення',
+    allLiked: 'Усі обрані',
+    prosAvailableNow: 'спеціалістів онлайн',
+    mapStyle: 'Стиль мапи',
+    myLocation: 'Моє місцезнаходження',
+    clearSelection: 'Скинути вибір',
+    available: 'Доступний',
+    unavailable: 'Недоступний',
+    verifiedPro: 'Перевірений спеціаліст',
+    availableNow: 'Доступний зараз',
+    unavailableToday: 'Сьогодні недоступний',
+    from: 'Від',
+    view: 'Відкрити',
+    route: 'Маршрут',
+    bookNow: 'Забронювати',
+    popularServices: 'Популярні послуги',
+    cash: 'Готівка',
+    card: 'Картка',
+    wallet: 'Гаманець',
+
+    allCategories: 'Усі категорії',
+    chooseCategoryAndSubcategory: 'Оберіть категорію та підкатегорію',
+    extraCategories: 'Додаткові категорії',
+    more: 'Ще',
+
+    beauty: 'Краса',
+    barber: 'Барбер',
+    wellness: 'Велнес',
+    home: 'Дім',
+    repairs: 'Ремонт',
+    tech: 'Техніка',
+    pets: 'Улюбленці',
+    fashion: 'Мода',
+    auto: 'Авто',
+    moving: 'Переїзд',
+    fitness: 'Фітнес',
+    education: 'Навчання',
+    events: 'Події',
+    activities: 'Активності',
+    creative: 'Креатив',
+  },
+} as const;
+
+export function getSavedLanguage(): AppLanguage {
+  if (typeof window === 'undefined') return 'EN';
+
+  const saved = window.localStorage.getItem(STORAGE_KEY);
+  if (saved === 'EN' || saved === 'RU' || saved === 'UA') return saved;
+
+  return 'EN';
 }
+
+export function saveLanguage(language: AppLanguage) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(STORAGE_KEY, language);
+}
+
+export function t(language: AppLanguage) {
+  return translations[language] || translations.EN;
+} i 18  проверь внимательно  вельмі внимательно and think deeply  it's already exhausting me and my conversation tons and lot . correctly or not  go through everything and tell me what to do next and what the mistake is maybe it's not in there maybe in another place too think deeply with all context we just did not just these 2 text but also all previous context including app page reason carefully and thoroughly without rushing think slowly but surely too.
