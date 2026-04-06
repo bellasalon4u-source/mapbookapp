@@ -102,8 +102,12 @@ const searchAliases = [
       'hotel for dogs',
       'pet hotel',
       'dog boarding',
+      'hotel para perros',
+      'perro hotel',
       'отель для собак',
-      'передержка собак',
+      'psí hotel',
+      'hundehotel',
+      'hotel dla psów',
     ],
   },
   {
@@ -114,34 +118,68 @@ const searchAliases = [
       'carpet cleaning',
       'clean carpet',
       'wash carpet',
+      'limpiar alfombra',
+      'alfombra limpieza',
       'почистить ковёр',
-      'почистить ковер',
-      'помыть ковёр',
+      'čištění koberce',
+      'teppichreinigung',
+      'czyszczenie dywanu',
     ],
   },
   {
     label: 'Phone repair',
     categoryId: 'tech',
     subcategory: 'Phone Repair',
-    keywords: ['phone repair', 'fix phone', 'ремонт телефона', 'починить телефон'],
+    keywords: [
+      'phone repair',
+      'fix phone',
+      'reparar telefono',
+      'ремонт телефона',
+      'oprava telefonu',
+      'handy reparatur',
+      'naprawa telefonu',
+    ],
   },
   {
     label: 'Hair extensions',
     categoryId: 'beauty',
     subcategory: 'Hair',
-    keywords: ['hair extensions', 'hairextensions', 'наращивание волос'],
+    keywords: [
+      'hair extensions',
+      'hairextensions',
+      'extensiones de cabello',
+      'наращивание волос',
+      'prodloužení vlasů',
+      'haarverlängerung',
+      'przedłużanie włosów',
+    ],
   },
   {
     label: 'Massage',
     categoryId: 'wellness',
     subcategory: 'Massage',
-    keywords: ['massage', 'массаж'],
+    keywords: [
+      'massage',
+      'masaje',
+      'массаж',
+      'masáž',
+      'massage de',
+      'masaż',
+    ],
   },
   {
     label: 'Moving',
     categoryId: 'moving',
     subcategory: 'Small Moves',
-    keywords: ['moving', 'переезд', 'перевезти вещи'],
+    keywords: [
+      'moving',
+      'move house',
+      'mudanza',
+      'переезд',
+      'stěhování',
+      'umzug',
+      'przeprowadzka',
+    ],
   },
 ];
 
@@ -196,12 +234,24 @@ function listingToMaster(listing: ListingItem, index: number) {
 }
 
 function getLanguageBorder(language: AppLanguage) {
-  if (language === 'UA') {
-    return 'linear-gradient(90deg, #1f7cff 0%, #1f7cff 50%, #ffd338 50%, #ffd338 100%)';
+  if (language === 'ES') {
+    return 'linear-gradient(90deg, #c60b1e 0%, #c60b1e 25%, #ffc400 25%, #ffc400 75%, #c60b1e 75%, #c60b1e 100%)';
   }
 
   if (language === 'RU') {
     return 'linear-gradient(90deg, #ffffff 0%, #ffffff 33%, #2f6fff 33%, #2f6fff 66%, #ff5252 66%, #ff5252 100%)';
+  }
+
+  if (language === 'CZ') {
+    return 'linear-gradient(90deg, #ffffff 0%, #ffffff 50%, #11457e 50%, #11457e 75%, #d7141a 75%, #d7141a 100%)';
+  }
+
+  if (language === 'DE') {
+    return 'linear-gradient(90deg, #000000 0%, #000000 33%, #dd0000 33%, #dd0000 66%, #ffce00 66%, #ffce00 100%)';
+  }
+
+  if (language === 'PL') {
+    return 'linear-gradient(90deg, #ffffff 0%, #ffffff 50%, #dc143c 50%, #dc143c 100%)';
   }
 
   return 'linear-gradient(90deg, #1f57d6 0%, #1f57d6 40%, #ffffff 40%, #ffffff 60%, #e53e4f 60%, #e53e4f 100%)';
@@ -213,49 +263,130 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
 
   if (!found) return 'Service';
 
-  if (language === 'RU') {
-    const map: Record<string, string> = {
-      beauty: 'Красота',
-      barber: 'Барбер',
-      wellness: 'Велнес',
-      home: 'Дом',
-      repairs: 'Ремонт',
-      tech: 'Техника',
-      fashion: 'Мода',
-      pets: 'Питомцы',
-      auto: 'Авто',
-      moving: 'Переезд',
-      fitness: 'Фитнес',
-      education: 'Обучение',
-      events: 'События',
-      activities: 'Активности',
-      creative: 'Креатив',
-    };
-    return map[normalized] || found.shortLabel || found.label;
-  }
+  const map: Record<string, Record<AppLanguage, string>> = {
+    beauty: {
+      EN: 'Beauty',
+      ES: 'Belleza',
+      RU: 'Красота',
+      CZ: 'Krása',
+      DE: 'Beauty',
+      PL: 'Uroda',
+    },
+    barber: {
+      EN: 'Barber',
+      ES: 'Barbero',
+      RU: 'Барбер',
+      CZ: 'Barber',
+      DE: 'Barber',
+      PL: 'Barber',
+    },
+    wellness: {
+      EN: 'Wellness',
+      ES: 'Bienestar',
+      RU: 'Велнес',
+      CZ: 'Wellness',
+      DE: 'Wellness',
+      PL: 'Wellness',
+    },
+    home: {
+      EN: 'Home',
+      ES: 'Hogar',
+      RU: 'Дом',
+      CZ: 'Domov',
+      DE: 'Zuhause',
+      PL: 'Dom',
+    },
+    repairs: {
+      EN: 'Repairs',
+      ES: 'Reparaciones',
+      RU: 'Ремонт',
+      CZ: 'Opravy',
+      DE: 'Reparaturen',
+      PL: 'Naprawy',
+    },
+    tech: {
+      EN: 'Tech',
+      ES: 'Tecnología',
+      RU: 'Техника',
+      CZ: 'Technika',
+      DE: 'Technik',
+      PL: 'Technika',
+    },
+    pets: {
+      EN: 'Pets',
+      ES: 'Mascotas',
+      RU: 'Питомцы',
+      CZ: 'Mazlíčci',
+      DE: 'Haustiere',
+      PL: 'Zwierzęta',
+    },
+    fashion: {
+      EN: 'Fashion',
+      ES: 'Moda',
+      RU: 'Мода',
+      CZ: 'Móda',
+      DE: 'Mode',
+      PL: 'Moda',
+    },
+    auto: {
+      EN: 'Auto',
+      ES: 'Auto',
+      RU: 'Авто',
+      CZ: 'Auto',
+      DE: 'Auto',
+      PL: 'Auto',
+    },
+    moving: {
+      EN: 'Moving',
+      ES: 'Mudanza',
+      RU: 'Переезд',
+      CZ: 'Stěhování',
+      DE: 'Umzug',
+      PL: 'Przeprowadzka',
+    },
+    fitness: {
+      EN: 'Fitness',
+      ES: 'Fitness',
+      RU: 'Фитнес',
+      CZ: 'Fitness',
+      DE: 'Fitness',
+      PL: 'Fitness',
+    },
+    education: {
+      EN: 'Education',
+      ES: 'Educación',
+      RU: 'Обучение',
+      CZ: 'Vzdělání',
+      DE: 'Bildung',
+      PL: 'Edukacja',
+    },
+    events: {
+      EN: 'Events',
+      ES: 'Eventos',
+      RU: 'События',
+      CZ: 'Události',
+      DE: 'Events',
+      PL: 'Wydarzenia',
+    },
+    activities: {
+      EN: 'Activities',
+      ES: 'Actividades',
+      RU: 'Активности',
+      CZ: 'Aktivity',
+      DE: 'Aktivitäten',
+      PL: 'Aktywności',
+    },
+    creative: {
+      EN: 'Creative',
+      ES: 'Creativo',
+      RU: 'Креатив',
+      CZ: 'Kreativa',
+      DE: 'Kreativ',
+      PL: 'Kreatywne',
+    },
+  };
 
-  if (language === 'UA') {
-    const map: Record<string, string> = {
-      beauty: 'Краса',
-      barber: 'Барбер',
-      wellness: 'Велнес',
-      home: 'Дім',
-      repairs: 'Ремонт',
-      tech: 'Техніка',
-      fashion: 'Мода',
-      pets: 'Улюбленці',
-      auto: 'Авто',
-      moving: 'Переїзд',
-      fitness: 'Фітнес',
-      education: 'Навчання',
-      events: 'Події',
-      activities: 'Активності',
-      creative: 'Креатив',
-    };
-    return map[normalized] || found.shortLabel || found.label;
-  }
-
-  return found.shortLabel || found.label;
+  return map[normalized]?.[language] || found.shortLabel || found.label;
 }
 
 function normalizeText(value: string) {
@@ -288,6 +419,21 @@ function saveRecentSearch(value: string) {
 function readRecentSearches() {
   if (typeof window === 'undefined') return [] as string[];
   return JSON.parse(window.localStorage.getItem('mapbook_recent_searches') || '[]') as string[];
+}
+
+function nextLanguage(current: AppLanguage): AppLanguage {
+  const order: AppLanguage[] = ['EN', 'ES', 'RU', 'CZ', 'DE', 'PL'];
+  const index = order.indexOf(current);
+  return order[(index + 1) % order.length];
+}
+
+function languageFlag(language: AppLanguage) {
+  if (language === 'ES') return '🇪🇸';
+  if (language === 'RU') return '🇷🇺';
+  if (language === 'CZ') return '🇨🇿';
+  if (language === 'DE') return '🇩🇪';
+  if (language === 'PL') return '🇵🇱';
+  return '🇬🇧';
 }
 
 export default function HomePage() {
@@ -651,18 +797,16 @@ export default function HomePage() {
 
               <button
                 onClick={() => {
-                  const nextLanguage: AppLanguage =
-                    language === 'EN' ? 'UA' : language === 'UA' ? 'RU' : 'EN';
-
-                  setLanguage(nextLanguage);
-                  saveLanguage(nextLanguage);
+                  const next = nextLanguage(language);
+                  setLanguage(next);
+                  saveLanguage(next);
                 }}
                 style={{
                   border: 'none',
                   background: '#fff',
                   color: '#1f2430',
                   borderRadius: 999,
-                  minWidth: 74,
+                  minWidth: 82,
                   height: 46,
                   padding: '0 12px',
                   fontSize: 15,
@@ -675,9 +819,7 @@ export default function HomePage() {
                   cursor: 'pointer',
                 }}
               >
-                <span style={{ fontSize: 20 }}>
-                  {language === 'EN' ? '🇬🇧' : language === 'UA' ? '🇺🇦' : '🇷🇺'}
-                </span>
+                <span style={{ fontSize: 20 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
