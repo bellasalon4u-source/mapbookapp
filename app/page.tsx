@@ -87,6 +87,7 @@ type SearchResult =
       id: string;
       label: string;
       categoryId: string;
+      categoryLabel: string;
       master: any;
     }
   | {
@@ -94,6 +95,7 @@ type SearchResult =
       id: string;
       label: string;
       categoryId: string;
+      categoryLabel: string;
       listingMaster: any;
     };
 
@@ -501,6 +503,30 @@ function getCategoryLabel(category?: string) {
   return found?.shortLabel || found?.label || normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
+function getTranslatedCategoryLabel(categoryId: string, language: AppLanguage) {
+  const tr = t(language);
+
+  const map: Record<string, string> = {
+    beauty: tr.beauty,
+    barber: tr.barber,
+    wellness: tr.wellness,
+    home: tr.home,
+    repairs: tr.repairs,
+    tech: tr.tech,
+    pets: tr.pets,
+    fashion: tr.fashion,
+    auto: tr.auto,
+    moving: tr.moving,
+    fitness: tr.fitness,
+    education: tr.education,
+    events: tr.events,
+    activities: tr.activities,
+    creative: tr.creative,
+  };
+
+  return map[categoryId] || getCategoryLabel(categoryId);
+}
+
 function normalizePaymentMethods(value: any): string[] {
   if (Array.isArray(value)) return value;
   if (typeof value === 'string' && value.trim()) return [value];
@@ -666,11 +692,11 @@ export default function HomePage() {
         id: `smart-${item.categoryId}-${item.subcategory}-${item.label}`,
         label: item.label,
         categoryId: item.categoryId,
-        categoryLabel: getCategoryLabel(item.categoryId),
+        categoryLabel: getTranslatedCategoryLabel(item.categoryId, language),
         subcategory: item.subcategory,
         matchText: item.label,
       }));
-  }, [search]);
+  }, [search, language]);
 
   const categoryResults = useMemo(() => {
     const q = search.trim();
@@ -692,10 +718,10 @@ export default function HomePage() {
       .map(({ item }) => ({
         type: 'category' as const,
         id: `category-${item.id}`,
-        label: item.shortLabel || item.label,
+        label: getTranslatedCategoryLabel(item.id, language),
         categoryId: item.id,
       }));
-  }, [search]);
+  }, [search, language]);
 
   const subcategoryResults = useMemo(() => {
     const q = search.trim();
@@ -706,7 +732,7 @@ export default function HomePage() {
         item.subcategories.map((sub) => ({
           sub,
           categoryId: item.id,
-          categoryLabel: item.shortLabel || item.label,
+          categoryLabel: getTranslatedCategoryLabel(item.id, language),
           score: scoreTextMatch(q, sub),
         }))
       )
@@ -720,7 +746,7 @@ export default function HomePage() {
         categoryId: item.categoryId,
         categoryLabel: item.categoryLabel,
       }));
-  }, [search]);
+  }, [search, language]);
 
   const proResults = useMemo(() => {
     const q = search.trim();
@@ -751,9 +777,10 @@ export default function HomePage() {
         id: `master-${master.id}`,
         label: master.name || master.title || 'Pro',
         categoryId: String(master.category || 'beauty'),
+        categoryLabel: getTranslatedCategoryLabel(String(master.category || 'beauty'), language),
         master,
       }));
-  }, [search, allMasters]);
+  }, [search, allMasters, language]);
 
   const listingResults = useMemo(() => {
     const q = search.trim();
@@ -784,9 +811,10 @@ export default function HomePage() {
         id: `listing-${master.id}`,
         label: master.title || 'Listing',
         categoryId: String(master.category || 'beauty'),
+        categoryLabel: getTranslatedCategoryLabel(String(master.category || 'beauty'), language),
         listingMaster: master,
       }));
-  }, [search, listingMasters]);
+  }, [search, listingMasters, language]);
 
   const filteredMasters = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -839,8 +867,7 @@ export default function HomePage() {
   }, [activeCategory, activeSubcategory, search, mapMode, likedFilterMode, filteredMasters]);
 
   const borderGradient = getLanguageBorder(language);
-  const currentCategoryLabel =
-    categories.find((item) => item.id === activeCategory)?.label || activeCategory;
+  const currentCategoryLabel = getTranslatedCategoryLabel(activeCategory, language);
 
   const likedInCategoryCount = allMasters.filter(
     (master: any) =>
@@ -1334,7 +1361,7 @@ export default function HomePage() {
                                 {item.label}
                               </span>
                               <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {getCategoryLabel(item.categoryId)}
+                                {item.categoryLabel}
                               </span>
                             </button>
                           ))}
@@ -1377,7 +1404,7 @@ export default function HomePage() {
                                 {item.label}
                               </span>
                               <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {getCategoryLabel(item.categoryId)}
+                                {item.categoryLabel}
                               </span>
                             </button>
                           ))}
@@ -1395,6 +1422,7 @@ export default function HomePage() {
           <TopCategoriesBar
             activeCategory={activeCategory}
             activeSubcategory={activeSubcategory}
+            language={language}
             onSelectCategory={(category) => {
               setActiveCategory(category);
               setLikedFilterMode('none');
@@ -1857,7 +1885,7 @@ export default function HomePage() {
                           fontWeight: 900,
                         }}
                       >
-                        {getCategoryLabel(selectedMaster.category)}
+                        {getTranslatedCategoryLabel(String(selectedMaster.category || ''), language)}
                       </div>
 
                       <div
