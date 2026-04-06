@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getAllMasters } from '../services/masters';
@@ -48,6 +48,46 @@ const popularServices = [
       'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80',
   },
 ];
+
+const popularSearches = [
+  'Hair',
+  'Nails',
+  'Massage',
+  'Dog Walking',
+  'Phone Repair',
+  'Cleaning',
+];
+
+type SearchResult =
+  | {
+      id: string;
+      type: 'category';
+      title: string;
+      subtitle: string;
+      categoryId: string;
+    }
+  | {
+      id: string;
+      type: 'subcategory';
+      title: string;
+      subtitle: string;
+      categoryId: string;
+      subcategory: string;
+    }
+  | {
+      id: string;
+      type: 'master';
+      title: string;
+      subtitle: string;
+      master: any;
+    }
+  | {
+      id: string;
+      type: 'listing';
+      title: string;
+      subtitle: string;
+      master: any;
+    };
 
 function mapCategoryToId(category: string) {
   const normalized = (category || '').toLowerCase().trim();
@@ -121,6 +161,14 @@ function getCategoryAccent(category?: string) {
   if (normalized === 'repairs') return '#f4b400';
   if (normalized === 'tech') return '#9b5cff';
   if (normalized === 'pets') return '#28c7d9';
+  if (normalized === 'fashion') return '#43d94d';
+  if (normalized === 'auto') return '#43d94d';
+  if (normalized === 'moving') return '#43d94d';
+  if (normalized === 'fitness') return '#43d94d';
+  if (normalized === 'events') return '#43d94d';
+  if (normalized === 'activities') return '#43d94d';
+  if (normalized === 'creative') return '#43d94d';
+  if (normalized === 'education') return '#7d52ff';
 
   return '#ff4f93';
 }
@@ -128,6 +176,10 @@ function getCategoryAccent(category?: string) {
 function getCategoryLabel(category?: string) {
   const normalized = String(category || '').toLowerCase();
   if (!normalized) return 'Service';
+
+  const found = categories.find((item) => item.id === normalized);
+  if (found) return found.shortLabel || found.label;
+
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
@@ -147,11 +199,30 @@ function paymentBadge(method: string) {
   return { icon: '•', label: String(method) };
 }
 
+function saveRecentSearch(value: string) {
+  if (typeof window === 'undefined') return;
+  const trimmed = value.trim();
+  if (!trimmed) return;
+
+  const key = 'mapbook_recent_searches';
+  const current = JSON.parse(window.localStorage.getItem(key) || '[]') as string[];
+  const next = [trimmed, ...current.filter((item) => item.toLowerCase() !== trimmed.toLowerCase())].slice(0, 6);
+  window.localStorage.setItem(key, JSON.stringify(next));
+}
+
+function readRecentSearches() {
+  if (typeof window === 'undefined') return [] as string[];
+  return JSON.parse(window.localStorage.getItem('mapbook_recent_searches') || '[]') as string[];
+}
+
 export default function HomePage() {
   const router = useRouter();
   const baseMasters = getAllMasters();
+  const searchWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const [search, setSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState('beauty');
   const [activeSubcategory, setActiveSubcategory] = useState('');
   const [language, setLanguage] = useState('EN');
@@ -161,6 +232,26 @@ export default function HomePage() {
   const [likedFilterMode, setLikedFilterMode] = useState<'none' | 'category' | 'all'>('none');
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [recenterToUserTrigger, setRecenterToUserTrigger] = useState(0);
+
+  useEffect(() => {
+    setRecentSearches(readRecentSearches());
+  }, []);
+
+  useEffect(() => {
+    const handleOutside = (event: MouseEvent | TouchEvent) => {
+      if (!searchWrapperRef.current) return;
+      if (searchWrapperRef.current.contains(event.target as Node)) return;
+      setSearchOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('touchstart', handleOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('touchstart', handleOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const loadListings = () => {
@@ -189,6 +280,78 @@ export default function HomePage() {
   const allMasters = useMemo(() => {
     return [...listingMasters, ...baseMasters];
   }, [listingMasters, baseMasters]);
+
+  const searchResults = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return [] as SearchResult[];
+
+    const categoryResults: SearchResult[] = categories
+      .filter((item) => {
+        const label = item.label.toLowerCase();
+        const shortLabel = (item.shortLabel || '').toLowerCase();
+        const id = item.id.toLowerCase();
+        return label.includes(q) || shortLabel.includes(q) || id.includes(q);
+      })
+      .slice(0, 5)
+      .map((item) => ({
+        id: `category-${item.id}`,
+        type: 'category',
+        title: item.shortLabel || item.label,
+        subtitle: 'Category',
+        categoryId: item.id,
+      }));
+
+    const subcategoryResults: SearchResult[] = categories
+      .flatMap((item) =>
+        item.subcategories
+          .filter((sub) => sub.toLowerCase().includes(q))
+          .map((sub) => ({
+            id: `subcategory-${item.id}-${sub}`,
+            type: 'subcategory' as const,
+            title: sub,
+            subtitle: item.shortLabel || item.label,
+            categoryId: item.id,
+            subcategory: sub,
+          }))
+      )
+      .slice(0, 8);
+
+    const masterResults: SearchResult[] = allMasters
+      .filter((master: any) => {
+        return (
+          String(master.name || '').toLowerCase().includes(q) ||
+          String(master.title || '').toLowerCase().includes(q) ||
+          String(master.city || '').toLowerCase().includes(q) ||
+          String(master.description || '').toLowerCase().includes(q)
+        );
+      })
+      .slice(0, 6)
+      .map((master: any) => ({
+        id: `master-${master.id}`,
+        type: 'master',
+        title: master.name || master.title || 'Pro',
+        subtitle: `${getCategoryLabel(master.category)}${master.city ? ` • ${master.city}` : ''}`,
+        master,
+      }));
+
+    const listingResults: SearchResult[] = listingMasters
+      .filter((master: any) => {
+        return (
+          String(master.title || '').toLowerCase().includes(q) ||
+          String(master.subcategory || '').toLowerCase().includes(q)
+        );
+      })
+      .slice(0, 6)
+      .map((master: any) => ({
+        id: `listing-${master.id}`,
+        type: 'listing',
+        title: master.title || 'Listing',
+        subtitle: `${getCategoryLabel(master.category)}${master.subcategory ? ` • ${master.subcategory}` : ''}`,
+        master,
+      }));
+
+    return [...categoryResults, ...subcategoryResults, ...masterResults, ...listingResults];
+  }, [search, allMasters, listingMasters]);
 
   const filteredMasters = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -251,6 +414,57 @@ export default function HomePage() {
 
   const likedAllCount = likedMasterIds.length;
 
+  const groupedResults = useMemo(() => {
+    return {
+      categories: searchResults.filter((item) => item.type === 'category'),
+      subcategories: searchResults.filter((item) => item.type === 'subcategory'),
+      pros: searchResults.filter((item) => item.type === 'master'),
+      listings: searchResults.filter((item) => item.type === 'listing'),
+    };
+  }, [searchResults]);
+
+  const selectSearchResult = (result: SearchResult) => {
+    if (result.type === 'category') {
+      setActiveCategory(result.categoryId);
+      setActiveSubcategory('');
+      setLikedFilterMode('none');
+      setSearch('');
+      setSearchOpen(false);
+      saveRecentSearch(result.title);
+      setRecentSearches(readRecentSearches());
+      return;
+    }
+
+    if (result.type === 'subcategory') {
+      setActiveCategory(result.categoryId);
+      setActiveSubcategory(result.subcategory);
+      setLikedFilterMode('none');
+      setSearch('');
+      setSearchOpen(false);
+      saveRecentSearch(result.title);
+      setRecentSearches(readRecentSearches());
+      return;
+    }
+
+    if (result.type === 'master' || result.type === 'listing') {
+      setActiveCategory(String(result.master.category || 'beauty'));
+      setActiveSubcategory(result.master.subcategory || '');
+      setLikedFilterMode('none');
+      setSelectedMaster(result.master);
+      setSearch(result.title);
+      setSearchOpen(false);
+      saveRecentSearch(result.title);
+      setRecentSearches(readRecentSearches());
+    }
+  };
+
+  const runQuickSearch = (value: string) => {
+    setSearch(value);
+    setSearchOpen(true);
+    saveRecentSearch(value);
+    setRecentSearches(readRecentSearches());
+  };
+
   return (
     <main
       style={{
@@ -272,93 +486,407 @@ export default function HomePage() {
         }}
       >
         <section style={{ padding: '12px 14px 0' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto auto',
-              gap: 8,
-              alignItems: 'center',
-              background: '#ffffff',
-              borderRadius: 20,
-              padding: '10px 10px 10px 14px',
-              boxShadow: '0 6px 18px rgba(0,0,0,0.07)',
-              border: '1px solid #ece7df',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 20, color: '#2f8df5' }}>🔎</span>
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search services, categories or professionals..."
+          <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr auto auto',
+                gap: 8,
+                alignItems: 'center',
+                background: '#ffffff',
+                borderRadius: 20,
+                padding: '10px 10px 10px 14px',
+                boxShadow: '0 6px 18px rgba(0,0,0,0.07)',
+                border: '1px solid #ece7df',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 20, color: '#2f8df5' }}>🔎</span>
+                <input
+                  value={search}
+                  onFocus={() => setSearchOpen(true)}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setSearchOpen(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const firstResult = searchResults[0];
+                      if (firstResult) {
+                        selectSearchResult(firstResult);
+                      } else if (search.trim()) {
+                        saveRecentSearch(search);
+                        setRecentSearches(readRecentSearches());
+                        setSearchOpen(false);
+                      }
+                    }
+                  }}
+                  placeholder="Search services, categories or professionals..."
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontSize: 15,
+                    color: '#2b2f36',
+                  }}
+                />
+
+                {search ? (
+                  <button
+                    onClick={() => {
+                      setSearch('');
+                      setSearchOpen(false);
+                    }}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      fontSize: 18,
+                      color: '#85909c',
+                      cursor: 'pointer',
+                      padding: 0,
+                    }}
+                  >
+                    ✕
+                  </button>
+                ) : null}
+              </div>
+
+              <button
+                onClick={() =>
+                  setLanguage((prev) =>
+                    prev === 'EN' ? 'UA' : prev === 'UA' ? 'RU' : 'EN'
+                  )
+                }
                 style={{
-                  flex: 1,
-                  minWidth: 0,
                   border: 'none',
-                  outline: 'none',
-                  background: 'transparent',
+                  background: '#fff',
+                  color: '#1f2430',
+                  borderRadius: 999,
+                  minWidth: 74,
+                  height: 46,
+                  padding: '0 12px',
                   fontSize: 15,
-                  color: '#2b2f36',
+                  fontWeight: 800,
+                  boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  cursor: 'pointer',
                 }}
-              />
+                title="Change language"
+              >
+                <span style={{ fontSize: 20 }}>
+                  {language === 'EN' ? '🇬🇧' : language === 'UA' ? '🇺🇦' : '🇷🇺'}
+                </span>
+                <span>{language}</span>
+              </button>
+
+              <button
+                onClick={() => router.push('/profile')}
+                style={{
+                  border: '2px solid #fff',
+                  background: '#f4efe7',
+                  borderRadius: 999,
+                  width: 46,
+                  height: 46,
+                  padding: 0,
+                  overflow: 'hidden',
+                  boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
+                  cursor: 'pointer',
+                }}
+              >
+                <img
+                  src={baseMasters[0]?.avatar}
+                  alt="Profile"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
+                />
+              </button>
             </div>
 
-            <button
-              onClick={() =>
-                setLanguage((prev) =>
-                  prev === 'EN' ? 'UA' : prev === 'UA' ? 'RU' : 'EN'
-                )
-              }
-              style={{
-                border: 'none',
-                background: '#fff',
-                color: '#1f2430',
-                borderRadius: 999,
-                minWidth: 74,
-                height: 46,
-                padding: '0 12px',
-                fontSize: 15,
-                fontWeight: 800,
-                boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                cursor: 'pointer',
-              }}
-              title="Change language"
-            >
-              <span style={{ fontSize: 20 }}>
-                {language === 'EN' ? '🇬🇧' : language === 'UA' ? '🇺🇦' : '🇷🇺'}
-              </span>
-              <span>{language}</span>
-            </button>
-
-            <button
-              onClick={() => router.push('/profile')}
-              style={{
-                border: '2px solid #fff',
-                background: '#f4efe7',
-                borderRadius: 999,
-                width: 46,
-                height: 46,
-                padding: 0,
-                overflow: 'hidden',
-                boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
-                cursor: 'pointer',
-              }}
-            >
-              <img
-                src={baseMasters[0]?.avatar}
-                alt="Profile"
+            {searchOpen ? (
+              <div
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  display: 'block',
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  top: 'calc(100% + 8px)',
+                  background: 'rgba(255,255,255,0.98)',
+                  border: '1px solid #ece4d8',
+                  borderRadius: 20,
+                  boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
+                  padding: 12,
+                  maxHeight: 360,
+                  overflowY: 'auto',
                 }}
-              />
-            </button>
+              >
+                {!search.trim() ? (
+                  <>
+                    {recentSearches.length > 0 ? (
+                      <div style={{ marginBottom: 14 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
+                          Recent searches
+                        </div>
+
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                          {recentSearches.map((item) => (
+                            <button
+                              key={item}
+                              onClick={() => runQuickSearch(item)}
+                              style={{
+                                border: '1px solid #e7ddd0',
+                                background: '#fff',
+                                borderRadius: 999,
+                                padding: '8px 12px',
+                                fontSize: 13,
+                                fontWeight: 800,
+                                color: '#2a3442',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {item}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 900,
+                          color: '#6c7480',
+                          marginBottom: 8,
+                        }}
+                      >
+                        Popular searches
+                      </div>
+
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {popularSearches.map((item) => (
+                          <button
+                            key={item}
+                            onClick={() => runQuickSearch(item)}
+                            style={{
+                              border: '1px solid #e7ddd0',
+                              background: '#fff8f8',
+                              borderRadius: 999,
+                              padding: '8px 12px',
+                              fontSize: 13,
+                              fontWeight: 900,
+                              color: '#ff4f93',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : searchResults.length === 0 ? (
+                  <div
+                    style={{
+                      padding: '12px 6px',
+                      fontSize: 14,
+                      fontWeight: 800,
+                      color: '#74808c',
+                    }}
+                  >
+                    No results found
+                  </div>
+                ) : (
+                  <>
+                    {groupedResults.categories.length > 0 ? (
+                      <div style={{ marginBottom: 12 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
+                          Categories
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {groupedResults.categories.map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() => selectSearchResult(item)}
+                              style={{
+                                border: 'none',
+                                background: '#fff',
+                                borderRadius: 14,
+                                padding: '10px 12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start',
+                                gap: 2,
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                              }}
+                            >
+                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
+                                {item.title}
+                              </span>
+                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
+                                {item.subtitle}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {groupedResults.subcategories.length > 0 ? (
+                      <div style={{ marginBottom: 12 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
+                          Services
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {groupedResults.subcategories.map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() => selectSearchResult(item)}
+                              style={{
+                                border: 'none',
+                                background: '#fff',
+                                borderRadius: 14,
+                                padding: '10px 12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start',
+                                gap: 2,
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                              }}
+                            >
+                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
+                                {item.title}
+                              </span>
+                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
+                                {item.subtitle}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {groupedResults.pros.length > 0 ? (
+                      <div style={{ marginBottom: 12 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
+                          Pros
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {groupedResults.pros.map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() => selectSearchResult(item)}
+                              style={{
+                                border: 'none',
+                                background: '#fff',
+                                borderRadius: 14,
+                                padding: '10px 12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start',
+                                gap: 2,
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                              }}
+                            >
+                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
+                                {item.title}
+                              </span>
+                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
+                                {item.subtitle}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {groupedResults.listings.length > 0 ? (
+                      <div>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
+                          Listings
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {groupedResults.listings.map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() => selectSearchResult(item)}
+                              style={{
+                                border: 'none',
+                                background: '#fff',
+                                borderRadius: 14,
+                                padding: '10px 12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start',
+                                gap: 2,
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                              }}
+                            >
+                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
+                                {item.title}
+                              </span>
+                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
+                                {item.subtitle}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </>
+                )}
+              </div>
+            ) : null}
           </div>
         </section>
 
@@ -982,6 +1510,7 @@ export default function HomePage() {
             {popularServices.map((service) => (
               <button
                 key={service.id}
+                onClick={() => runQuickSearch(service.title)}
                 style={{
                   border: 'none',
                   background: 'transparent',
