@@ -1,55 +1,6 @@
 export type AppLanguage = 'EN' | 'UA' | 'RU';
 
-type TranslationMap = {
-  searchPlaceholder: string;
-  recentSearches: string;
-  popularSearches: string;
-  noResultsFound: string;
-  smartMatches: string;
-  categories: string;
-  services: string;
-  pros: string;
-  listings: string;
-  allLiked: string;
-  prosAvailableNow: string;
-  available: string;
-  unavailable: string;
-  verifiedPro: string;
-  availableNow: string;
-  unavailableToday: string;
-  from: string;
-  view: string;
-  route: string;
-  bookNow: string;
-  popularServices: string;
-  chooseCategoryAndSubcategory: string;
-  allCategories: string;
-  extraCategories: string;
-  cash: string;
-  card: string;
-  wallet: string;
-  mapStyle: string;
-  myLocation: string;
-  clearSelection: string;
-
-  beauty: string;
-  barber: string;
-  wellness: string;
-  home: string;
-  repairs: string;
-  tech: string;
-  pets: string;
-  fashion: string;
-  auto: string;
-  moving: string;
-  fitness: string;
-  education: string;
-  events: string;
-  activities: string;
-  creative: string;
-};
-
-const translations: Record<AppLanguage, TranslationMap> = {
+export const translations = {
   EN: {
     searchPlaceholder: 'Search services, categories or professionals...',
     recentSearches: 'Recent searches',
@@ -62,8 +13,14 @@ const translations: Record<AppLanguage, TranslationMap> = {
     listings: 'Listings',
     allLiked: 'All liked',
     prosAvailableNow: 'pros available now',
+    mapStyle: 'Map style',
+    myLocation: 'My location',
+    clearSelection: 'Clear selection',
     available: 'Available',
     unavailable: 'Unavailable',
+    cash: 'Cash',
+    card: 'Card',
+    wallet: 'Wallet',
     verifiedPro: 'Verified Pro',
     availableNow: 'Available now',
     unavailableToday: 'Unavailable today',
@@ -72,15 +29,9 @@ const translations: Record<AppLanguage, TranslationMap> = {
     route: 'Route',
     bookNow: 'Book now',
     popularServices: 'Popular Services',
-    chooseCategoryAndSubcategory: 'Choose category and subcategory',
     allCategories: 'All categories',
+    chooseCategoryAndSubcategory: 'Choose category and subcategory',
     extraCategories: 'Extra categories',
-    cash: 'Cash',
-    card: 'Card',
-    wallet: 'Wallet',
-    mapStyle: 'Map style',
-    myLocation: 'My location',
-    clearSelection: 'Clear selection',
 
     beauty: 'Beauty',
     barber: 'Barber',
@@ -101,35 +52,35 @@ const translations: Record<AppLanguage, TranslationMap> = {
 
   UA: {
     searchPlaceholder: 'Пошук послуг, категорій або спеціалістів...',
-    recentSearches: 'Останні пошуки',
-    popularSearches: 'Популярні пошуки',
+    recentSearches: 'Останні запити',
+    popularSearches: 'Популярні запити',
     noResultsFound: 'Нічого не знайдено',
     smartMatches: 'Розумні збіги',
     categories: 'Категорії',
     services: 'Послуги',
     pros: 'Спеціалісти',
     listings: 'Оголошення',
-    allLiked: 'Усі вподобані',
+    allLiked: 'Усі збережені',
     prosAvailableNow: 'спеціалістів доступно зараз',
-    available: 'Доступний',
-    unavailable: 'Недоступний',
-    verifiedPro: 'Перевірений спеціаліст',
-    availableNow: 'Доступний зараз',
-    unavailableToday: 'Сьогодні недоступний',
-    from: 'Від',
-    view: 'Перегляд',
-    route: 'Маршрут',
-    bookNow: 'Забронювати',
-    popularServices: 'Популярні послуги',
-    chooseCategoryAndSubcategory: 'Оберіть категорію та підкатегорію',
-    allCategories: 'Усі категорії',
-    extraCategories: 'Додаткові категорії',
-    cash: 'Готівка',
-    card: 'Картка',
-    wallet: 'Гаманець',
     mapStyle: 'Стиль мапи',
     myLocation: 'Моє місцезнаходження',
     clearSelection: 'Скинути вибір',
+    available: 'Доступно',
+    unavailable: 'Недоступно',
+    cash: 'Готівка',
+    card: 'Картка',
+    wallet: 'Гаманець',
+    verifiedPro: 'Перевірений майстер',
+    availableNow: 'Доступно зараз',
+    unavailableToday: 'Сьогодні недоступно',
+    from: 'Від',
+    view: 'Дивитися',
+    route: 'Маршрут',
+    bookNow: 'Записатися',
+    popularServices: 'Популярні послуги',
+    allCategories: 'Усі категорії',
+    chooseCategoryAndSubcategory: 'Оберіть категорію та підкатегорію',
+    extraCategories: 'Додаткові категорії',
 
     beauty: 'Краса',
     barber: 'Барбер',
@@ -150,8 +101,8 @@ const translations: Record<AppLanguage, TranslationMap> = {
 
   RU: {
     searchPlaceholder: 'Поиск услуг, категорий или специалистов...',
-    recentSearches: 'Недавние поиски',
-    popularSearches: 'Популярные поиски',
+    recentSearches: 'Недавние запросы',
+    popularSearches: 'Популярные запросы',
     noResultsFound: 'Ничего не найдено',
     smartMatches: 'Умные совпадения',
     categories: 'Категории',
@@ -160,25 +111,25 @@ const translations: Record<AppLanguage, TranslationMap> = {
     listings: 'Объявления',
     allLiked: 'Все избранные',
     prosAvailableNow: 'специалистов доступно сейчас',
-    available: 'Доступен',
-    unavailable: 'Недоступен',
-    verifiedPro: 'Проверенный специалист',
-    availableNow: 'Доступен сейчас',
-    unavailableToday: 'Сегодня недоступен',
-    from: 'От',
-    view: 'Смотреть',
-    route: 'Маршрут',
-    bookNow: 'Забронировать',
-    popularServices: 'Популярные услуги',
-    chooseCategoryAndSubcategory: 'Выберите категорию и подкатегорию',
-    allCategories: 'Все категории',
-    extraCategories: 'Дополнительные категории',
-    cash: 'Наличные',
-    card: 'Карта',
-    wallet: 'Кошелёк',
     mapStyle: 'Стиль карты',
     myLocation: 'Моё местоположение',
     clearSelection: 'Сбросить выбор',
+    available: 'Доступно',
+    unavailable: 'Недоступно',
+    cash: 'Наличные',
+    card: 'Карта',
+    wallet: 'Кошелёк',
+    verifiedPro: 'Проверенный мастер',
+    availableNow: 'Доступно сейчас',
+    unavailableToday: 'Сегодня недоступно',
+    from: 'От',
+    view: 'Смотреть',
+    route: 'Маршрут',
+    bookNow: 'Записаться',
+    popularServices: 'Популярные услуги',
+    allCategories: 'Все категории',
+    chooseCategoryAndSubcategory: 'Выберите категорию и подкатегорию',
+    extraCategories: 'Дополнительные категории',
 
     beauty: 'Красота',
     barber: 'Барбер',
@@ -186,7 +137,7 @@ const translations: Record<AppLanguage, TranslationMap> = {
     home: 'Дом',
     repairs: 'Ремонт',
     tech: 'Техника',
-    pets: 'Животные',
+    pets: 'Питомцы',
     fashion: 'Мода',
     auto: 'Авто',
     moving: 'Переезд',
@@ -196,11 +147,7 @@ const translations: Record<AppLanguage, TranslationMap> = {
     activities: 'Активности',
     creative: 'Креатив',
   },
-};
-
-export function t(language: AppLanguage) {
-  return translations[language] || translations.EN;
-}
+} as const;
 
 export function getSavedLanguage(): AppLanguage {
   if (typeof window === 'undefined') return 'EN';
@@ -214,4 +161,8 @@ export function getSavedLanguage(): AppLanguage {
 export function saveLanguage(language: AppLanguage) {
   if (typeof window === 'undefined') return;
   window.localStorage.setItem('mapbook_language', language);
+}
+
+export function t(language: AppLanguage) {
+  return translations[language] || translations.EN;
 }
