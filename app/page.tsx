@@ -87,18 +87,37 @@ type SearchResult =
       master: any;
     };
 
+type SmartSearchResult = Extract<SearchResult, { type: 'smart' }>;
+type CategorySearchResult = Extract<SearchResult, { type: 'category' }>;
+type SubcategorySearchResult = Extract<SearchResult, { type: 'subcategory' }>;
+type MasterSearchResult = Extract<SearchResult, { type: 'master' }>;
+
 const searchAliases = [
   {
     label: 'Dog hotel',
     categoryId: 'pets',
     subcategory: 'Pet Sitting',
-    keywords: ['dog hotel', 'hotel for dogs', 'pet hotel', 'dog boarding', 'отель для собак', 'передержка собак'],
+    keywords: [
+      'dog hotel',
+      'hotel for dogs',
+      'pet hotel',
+      'dog boarding',
+      'отель для собак',
+      'передержка собак',
+    ],
   },
   {
     label: 'Carpet cleaning',
     categoryId: 'home',
     subcategory: 'Deep Cleaning',
-    keywords: ['carpet cleaning', 'clean carpet', 'wash carpet', 'почистить ковёр', 'почистить ковер', 'помыть ковёр'],
+    keywords: [
+      'carpet cleaning',
+      'clean carpet',
+      'wash carpet',
+      'почистить ковёр',
+      'почистить ковер',
+      'помыть ковёр',
+    ],
   },
   {
     label: 'Phone repair',
@@ -188,21 +207,6 @@ function getLanguageBorder(language: AppLanguage) {
   return 'linear-gradient(90deg, #1f57d6 0%, #1f57d6 40%, #ffffff 40%, #ffffff 60%, #e53e4f 60%, #e53e4f 100%)';
 }
 
-function getCategoryAccent(category?: string) {
-  const normalized = String(category || '').toLowerCase();
-
-  if (normalized === 'beauty') return '#ff4f93';
-  if (normalized === 'barber') return '#2d98ff';
-  if (normalized === 'wellness') return '#32c957';
-  if (normalized === 'home') return '#ff9f1a';
-  if (normalized === 'repairs') return '#f4b400';
-  if (normalized === 'tech') return '#9b5cff';
-  if (normalized === 'pets') return '#28c7d9';
-  if (normalized === 'education') return '#7d52ff';
-
-  return '#43d94d';
-}
-
 function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
   const normalized = String(category || '').toLowerCase();
   const found = categories.find((item) => item.id === normalized);
@@ -243,7 +247,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       auto: 'Авто',
       moving: 'Переїзд',
       fitness: 'Фітнес',
-      education: 'Освіта',
+      education: 'Навчання',
       events: 'Події',
       activities: 'Активності',
       creative: 'Креатив',
@@ -252,23 +256,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
   }
 
   return found.shortLabel || found.label;
-}
-
-function normalizePaymentMethods(value: any): string[] {
-  if (Array.isArray(value)) return value;
-  if (typeof value === 'string' && value.trim()) return [value];
-  return ['cash', 'card'];
-}
-
-function paymentBadge(method: string, language: AppLanguage) {
-  const tr = t(language);
-  const normalized = String(method).toLowerCase();
-
-  if (normalized === 'cash') return { icon: '💵', label: tr.cash };
-  if (normalized === 'card') return { icon: '💳', label: tr.card };
-  if (normalized === 'wallet') return { icon: '📱', label: tr.wallet };
-
-  return { icon: '•', label: String(method) };
 }
 
 function normalizeText(value: string) {
@@ -319,13 +306,13 @@ export default function HomePage() {
   const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
   const [likedFilterMode, setLikedFilterMode] = useState<'none' | 'category' | 'all'>('none');
   const [listings, setListings] = useState<ListingItem[]>([]);
-  const [recenterToUserTrigger, setRecenterToUserTrigger] = useState(0);
+  const [recenterToUserTrigger] = useState(0);
 
   const tr = t(language);
 
   useEffect(() => {
-  setRecentSearches(readRecentSearches());
-}, []);
+    setRecentSearches(readRecentSearches());
+  }, []);
 
   useEffect(() => {
     saveLanguage(language);
@@ -369,7 +356,7 @@ export default function HomePage() {
 
   const smartResults = useMemo(() => {
     const q = search.trim();
-    if (!q) return [] as SearchResult[];
+    if (!q) return [] as SmartSearchResult[];
 
     return searchAliases
       .map((item) => ({
@@ -390,7 +377,7 @@ export default function HomePage() {
 
   const categoryResults = useMemo(() => {
     const q = search.trim();
-    if (!q) return [] as SearchResult[];
+    if (!q) return [] as CategorySearchResult[];
 
     return categories
       .map((item) => ({
@@ -414,7 +401,7 @@ export default function HomePage() {
 
   const subcategoryResults = useMemo(() => {
     const q = search.trim();
-    if (!q) return [] as SearchResult[];
+    if (!q) return [] as SubcategorySearchResult[];
 
     return categories
       .flatMap((item) =>
@@ -437,7 +424,7 @@ export default function HomePage() {
 
   const proResults = useMemo(() => {
     const q = search.trim();
-    if (!q) return [] as SearchResult[];
+    if (!q) return [] as MasterSearchResult[];
 
     return allMasters
       .map((master: any) => {
@@ -664,12 +651,12 @@ export default function HomePage() {
 
               <button
                 onClick={() => {
-  const nextLanguage: AppLanguage =
-    language === 'EN' ? 'UA' : language === 'UA' ? 'RU' : 'EN';
+                  const nextLanguage: AppLanguage =
+                    language === 'EN' ? 'UA' : language === 'UA' ? 'RU' : 'EN';
 
-  setLanguage(nextLanguage);
-  saveLanguage(nextLanguage);
-}}
+                  setLanguage(nextLanguage);
+                  saveLanguage(nextLanguage);
+                }}
                 style={{
                   border: 'none',
                   background: '#fff',
@@ -944,20 +931,20 @@ export default function HomePage() {
 
         <section style={{ padding: '10px 0 0' }}>
           <TopCategoriesBar
-  language={language}
-  activeCategory={activeCategory}
-  activeSubcategory={activeSubcategory}
-  onSelectCategory={(category) => {
-    setActiveCategory(category);
-    setLikedFilterMode('none');
-  }}
-  onSelectSubcategory={(subcategory) => {
-    setActiveSubcategory(subcategory);
-  }}
-  onClearSubcategory={() => {
-    setActiveSubcategory('');
-  }}
-/>
+            language={language}
+            activeCategory={activeCategory}
+            activeSubcategory={activeSubcategory}
+            onSelectCategory={(category) => {
+              setActiveCategory(category);
+              setLikedFilterMode('none');
+            }}
+            onSelectSubcategory={(subcategory) => {
+              setActiveSubcategory(subcategory);
+            }}
+            onClearSubcategory={() => {
+              setActiveSubcategory('');
+            }}
+          />
         </section>
 
         <section style={{ padding: '8px 14px 0' }}>
