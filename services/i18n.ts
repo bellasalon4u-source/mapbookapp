@@ -1,30 +1,77 @@
-export type AppLanguage = 'EN' | 'RU' | 'UA';
+export type AppLanguage = 'EN' | 'UA' | 'RU';
 
-export const LANGUAGE_STORAGE_KEY = 'mapbook_language';
+type TranslationMap = {
+  searchPlaceholder: string;
+  recentSearches: string;
+  popularSearches: string;
+  noResultsFound: string;
+  smartMatches: string;
+  categories: string;
+  services: string;
+  pros: string;
+  listings: string;
+  allLiked: string;
+  prosAvailableNow: string;
+  available: string;
+  unavailable: string;
+  verifiedPro: string;
+  availableNow: string;
+  unavailableToday: string;
+  from: string;
+  view: string;
+  route: string;
+  bookNow: string;
+  popularServices: string;
+  chooseCategoryAndSubcategory: string;
+  allCategories: string;
+  extraCategories: string;
+  cash: string;
+  card: string;
+  wallet: string;
+  mapStyle: string;
+  myLocation: string;
+  clearSelection: string;
 
-export const translations = {
+  beauty: string;
+  barber: string;
+  wellness: string;
+  home: string;
+  repairs: string;
+  tech: string;
+  pets: string;
+  fashion: string;
+  auto: string;
+  moving: string;
+  fitness: string;
+  education: string;
+  events: string;
+  activities: string;
+  creative: string;
+};
+
+const translations: Record<AppLanguage, TranslationMap> = {
   EN: {
     searchPlaceholder: 'Search services, categories or professionals...',
-    popularServices: 'Popular Services',
-    allLiked: 'All liked',
-    prosAvailableNow: 'pros available now',
-    available: 'Available',
-    unavailable: 'Unavailable',
-    availableNow: 'Available now',
-    unavailableToday: 'Unavailable today',
-    verifiedPro: 'Verified Pro',
-    from: 'From',
-    view: 'View',
-    route: 'Route',
-    bookNow: 'Book now',
+    recentSearches: 'Recent searches',
+    popularSearches: 'Popular searches',
+    noResultsFound: 'No results found',
+    smartMatches: 'Smart matches',
     categories: 'Categories',
     services: 'Services',
     pros: 'Pros',
     listings: 'Listings',
-    smartMatches: 'Smart matches',
-    recentSearches: 'Recent searches',
-    popularSearches: 'Popular searches',
-    noResultsFound: 'No results found',
+    allLiked: 'All liked',
+    prosAvailableNow: 'pros available now',
+    available: 'Available',
+    unavailable: 'Unavailable',
+    verifiedPro: 'Verified Pro',
+    availableNow: 'Available now',
+    unavailableToday: 'Unavailable today',
+    from: 'From',
+    view: 'View',
+    route: 'Route',
+    bookNow: 'Book now',
+    popularServices: 'Popular Services',
     chooseCategoryAndSubcategory: 'Choose category and subcategory',
     allCategories: 'All categories',
     extraCategories: 'Extra categories',
@@ -34,61 +81,46 @@ export const translations = {
     mapStyle: 'Map style',
     myLocation: 'My location',
     clearSelection: 'Clear selection',
+
+    beauty: 'Beauty',
+    barber: 'Barber',
+    wellness: 'Wellness',
+    home: 'Home',
+    repairs: 'Repairs',
+    tech: 'Tech',
+    pets: 'Pets',
+    fashion: 'Fashion',
+    auto: 'Auto',
+    moving: 'Moving',
+    fitness: 'Fitness',
+    education: 'Education',
+    events: 'Events',
+    activities: 'Activities',
+    creative: 'Creative',
   },
-  RU: {
-    searchPlaceholder: 'Поиск услуг, категорий или специалистов...',
-    popularServices: 'Популярные услуги',
-    allLiked: 'Все избранные',
-    prosAvailableNow: 'специалистов сейчас онлайн',
-    available: 'Доступен',
-    unavailable: 'Недоступен',
-    availableNow: 'Сейчас доступен',
-    unavailableToday: 'Сегодня недоступен',
-    verifiedPro: 'Проверенный специалист',
-    from: 'От',
-    view: 'Открыть',
-    route: 'Маршрут',
-    bookNow: 'Записаться',
-    categories: 'Категории',
-    services: 'Услуги',
-    pros: 'Специалисты',
-    listings: 'Объявления',
-    smartMatches: 'Умные совпадения',
-    recentSearches: 'Недавние поиски',
-    popularSearches: 'Популярные запросы',
-    noResultsFound: 'Ничего не найдено',
-    chooseCategoryAndSubcategory: 'Выберите категорию и подкатегорию',
-    allCategories: 'Все категории',
-    extraCategories: 'Дополнительные категории',
-    cash: 'Наличные',
-    card: 'Карта',
-    wallet: 'Кошелёк',
-    mapStyle: 'Стиль карты',
-    myLocation: 'Моё местоположение',
-    clearSelection: 'Сбросить выбор',
-  },
+
   UA: {
     searchPlaceholder: 'Пошук послуг, категорій або спеціалістів...',
-    popularServices: 'Популярні послуги',
-    allLiked: 'Усе вибране',
-    prosAvailableNow: 'спеціалістів зараз онлайн',
-    available: 'Доступний',
-    unavailable: 'Недоступний',
-    availableNow: 'Зараз доступний',
-    unavailableToday: 'Сьогодні недоступний',
-    verifiedPro: 'Перевірений спеціаліст',
-    from: 'Від',
-    view: 'Відкрити',
-    route: 'Маршрут',
-    bookNow: 'Записатися',
+    recentSearches: 'Останні пошуки',
+    popularSearches: 'Популярні пошуки',
+    noResultsFound: 'Нічого не знайдено',
+    smartMatches: 'Розумні збіги',
     categories: 'Категорії',
     services: 'Послуги',
     pros: 'Спеціалісти',
     listings: 'Оголошення',
-    smartMatches: 'Розумні збіги',
-    recentSearches: 'Нещодавні пошуки',
-    popularSearches: 'Популярні запити',
-    noResultsFound: 'Нічого не знайдено',
+    allLiked: 'Усі вподобані',
+    prosAvailableNow: 'спеціалістів доступно зараз',
+    available: 'Доступний',
+    unavailable: 'Недоступний',
+    verifiedPro: 'Перевірений спеціаліст',
+    availableNow: 'Доступний зараз',
+    unavailableToday: 'Сьогодні недоступний',
+    from: 'Від',
+    view: 'Перегляд',
+    route: 'Маршрут',
+    bookNow: 'Забронювати',
+    popularServices: 'Популярні послуги',
     chooseCategoryAndSubcategory: 'Оберіть категорію та підкатегорію',
     allCategories: 'Усі категорії',
     extraCategories: 'Додаткові категорії',
@@ -98,23 +130,88 @@ export const translations = {
     mapStyle: 'Стиль мапи',
     myLocation: 'Моє місцезнаходження',
     clearSelection: 'Скинути вибір',
+
+    beauty: 'Краса',
+    barber: 'Барбер',
+    wellness: 'Велнес',
+    home: 'Дім',
+    repairs: 'Ремонт',
+    tech: 'Техніка',
+    pets: 'Тварини',
+    fashion: 'Мода',
+    auto: 'Авто',
+    moving: 'Переїзд',
+    fitness: 'Фітнес',
+    education: 'Освіта',
+    events: 'Події',
+    activities: 'Активності',
+    creative: 'Креатив',
   },
-} as const;
+
+  RU: {
+    searchPlaceholder: 'Поиск услуг, категорий или специалистов...',
+    recentSearches: 'Недавние поиски',
+    popularSearches: 'Популярные поиски',
+    noResultsFound: 'Ничего не найдено',
+    smartMatches: 'Умные совпадения',
+    categories: 'Категории',
+    services: 'Услуги',
+    pros: 'Специалисты',
+    listings: 'Объявления',
+    allLiked: 'Все избранные',
+    prosAvailableNow: 'специалистов доступно сейчас',
+    available: 'Доступен',
+    unavailable: 'Недоступен',
+    verifiedPro: 'Проверенный специалист',
+    availableNow: 'Доступен сейчас',
+    unavailableToday: 'Сегодня недоступен',
+    from: 'От',
+    view: 'Смотреть',
+    route: 'Маршрут',
+    bookNow: 'Забронировать',
+    popularServices: 'Популярные услуги',
+    chooseCategoryAndSubcategory: 'Выберите категорию и подкатегорию',
+    allCategories: 'Все категории',
+    extraCategories: 'Дополнительные категории',
+    cash: 'Наличные',
+    card: 'Карта',
+    wallet: 'Кошелёк',
+    mapStyle: 'Стиль карты',
+    myLocation: 'Моё местоположение',
+    clearSelection: 'Сбросить выбор',
+
+    beauty: 'Красота',
+    barber: 'Барбер',
+    wellness: 'Велнес',
+    home: 'Дом',
+    repairs: 'Ремонт',
+    tech: 'Техника',
+    pets: 'Животные',
+    fashion: 'Мода',
+    auto: 'Авто',
+    moving: 'Переезд',
+    fitness: 'Фитнес',
+    education: 'Обучение',
+    events: 'События',
+    activities: 'Активности',
+    creative: 'Креатив',
+  },
+};
+
+export function t(language: AppLanguage) {
+  return translations[language] || translations.EN;
+}
 
 export function getSavedLanguage(): AppLanguage {
   if (typeof window === 'undefined') return 'EN';
 
-  const saved = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-  if (saved === 'EN' || saved === 'RU' || saved === 'UA') return saved;
+  const saved = window.localStorage.getItem('mapbook_language');
+  if (saved === 'EN' || saved === 'UA' || saved === 'RU') return saved;
 
   return 'EN';
 }
 
 export function saveLanguage(language: AppLanguage) {
   if (typeof window === 'undefined') return;
-  window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
-}
-
-export function t(language: AppLanguage) {
-  return translations[language] || translations.EN;
+  window.localStorage.setItem('mapbook_language', language);
 }
