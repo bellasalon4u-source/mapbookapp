@@ -313,7 +313,7 @@ export default function HomePage() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState('beauty');
   const [activeSubcategory, setActiveSubcategory] = useState('');
-  const [language, setLanguage] = useState<AppLanguage>('EN');
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
   const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
@@ -324,9 +324,8 @@ export default function HomePage() {
   const tr = t(language);
 
   useEffect(() => {
-    setLanguage(getSavedLanguage());
-    setRecentSearches(readRecentSearches());
-  }, []);
+  setRecentSearches(readRecentSearches());
+}, []);
 
   useEffect(() => {
     saveLanguage(language);
@@ -664,9 +663,13 @@ export default function HomePage() {
               </div>
 
               <button
-                onClick={() =>
-                  setLanguage((prev) => (prev === 'EN' ? 'UA' : prev === 'UA' ? 'RU' : 'EN'))
-                }
+                onClick={() => {
+  const nextLanguage: AppLanguage =
+    language === 'EN' ? 'UA' : language === 'UA' ? 'RU' : 'EN';
+
+  setLanguage(nextLanguage);
+  saveLanguage(nextLanguage);
+}}
                 style={{
                   border: 'none',
                   background: '#fff',
