@@ -944,19 +944,20 @@ export default function HomePage() {
 
         <section style={{ padding: '10px 0 0' }}>
           <TopCategoriesBar
-            activeCategory={activeCategory}
-            activeSubcategory={activeSubcategory}
-            onSelectCategory={(category) => {
-              setActiveCategory(category);
-              setLikedFilterMode('none');
-            }}
-            onSelectSubcategory={(subcategory) => {
-              setActiveSubcategory(subcategory);
-            }}
-            onClearSubcategory={() => {
-              setActiveSubcategory('');
-            }}
-          />
+  language={language}
+  activeCategory={activeCategory}
+  activeSubcategory={activeSubcategory}
+  onSelectCategory={(category) => {
+    setActiveCategory(category);
+    setLikedFilterMode('none');
+  }}
+  onSelectSubcategory={(subcategory) => {
+    setActiveSubcategory(subcategory);
+  }}
+  onClearSubcategory={() => {
+    setActiveSubcategory('');
+  }}
+/>
         </section>
 
         <section style={{ padding: '8px 14px 0' }}>
