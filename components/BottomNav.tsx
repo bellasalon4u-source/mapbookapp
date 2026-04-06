@@ -6,11 +6,13 @@ import {
   getUnreadMessagesCount,
   subscribeToChatStore,
 } from '../services/chatStore';
+import { getSavedLanguage, t } from '../services/i18n';
 
 export default function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [language, setLanguage] = useState(getSavedLanguage());
 
   useEffect(() => {
     const loadUnread = () => {
@@ -21,6 +23,107 @@ export default function BottomNav() {
     const unsubscribe = subscribeToChatStore(loadUnread);
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    const syncLanguage = () => {
+      setLanguage(getSavedLanguage());
+    };
+
+    syncLanguage();
+
+    window.addEventListener('focus', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
+
+    const interval = window.setInterval(syncLanguage, 500);
+
+    return () => {
+      window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  const tr = t(language);
+
+  const navText = {
+    home:
+      language === 'ES'
+        ? 'Inicio'
+        : language === 'RU'
+        ? 'Главная'
+        : language === 'CZ'
+        ? 'Domů'
+        : language === 'DE'
+        ? 'Start'
+        : language === 'PL'
+        ? 'Start'
+        : 'Home',
+
+    messages:
+      language === 'ES'
+        ? 'Mensajes'
+        : language === 'RU'
+        ? 'Сообщения'
+        : language === 'CZ'
+        ? 'Zprávy'
+        : language === 'DE'
+        ? 'Nachrichten'
+        : language === 'PL'
+        ? 'Wiadomości'
+        : 'Messages',
+
+    add:
+      language === 'ES'
+        ? 'Añadir'
+        : language === 'RU'
+        ? 'Добавить'
+        : language === 'CZ'
+        ? 'Přidat'
+        : language === 'DE'
+        ? 'Hinzufügen'
+        : language === 'PL'
+        ? 'Dodaj'
+        : 'Add',
+
+    bookings:
+      language === 'ES'
+        ? 'Reservas'
+        : language === 'RU'
+        ? 'Брони'
+        : language === 'CZ'
+        ? 'Rezervace'
+        : language === 'DE'
+        ? 'Buchungen'
+        : language === 'PL'
+        ? 'Rezerwacje'
+        : 'Bookings',
+
+    profile:
+      language === 'ES'
+        ? 'Perfil'
+        : language === 'RU'
+        ? 'Профиль'
+        : language === 'CZ'
+        ? 'Profil'
+        : language === 'DE'
+        ? 'Profil'
+        : language === 'PL'
+        ? 'Profil'
+        : 'Profile',
+
+    addService:
+      language === 'ES'
+        ? 'Añadir servicio'
+        : language === 'RU'
+        ? 'Добавить услугу'
+        : language === 'CZ'
+        ? 'Přidat službu'
+        : language === 'DE'
+        ? 'Service hinzufügen'
+        : language === 'PL'
+        ? 'Dodaj usługę'
+        : 'Add service',
+  };
 
   const isHome = pathname === '/';
   const isMessages = pathname.startsWith('/messages');
@@ -64,7 +167,7 @@ export default function BottomNav() {
           }}
         >
           <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>⌂</span>
-          <span style={{ fontSize: 12, fontWeight: 800 }}>Home</span>
+          <span style={{ fontSize: 12, fontWeight: 800 }}>{navText.home}</span>
         </button>
 
         <button
@@ -109,7 +212,7 @@ export default function BottomNav() {
             )}
           </div>
 
-          <span style={{ fontSize: 12, fontWeight: 700 }}>Messages</span>
+          <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.messages}</span>
         </button>
 
         <div
@@ -135,10 +238,10 @@ export default function BottomNav() {
               justifyContent: 'center',
               gap: 2,
             }}
-            title="Add service"
+            title={navText.addService}
           >
             <span style={{ fontSize: 36, lineHeight: 1, fontWeight: 400 }}>+</span>
-            <span style={{ fontSize: 11, fontWeight: 800 }}>Add</span>
+            <span style={{ fontSize: 11, fontWeight: 800 }}>{navText.add}</span>
           </button>
         </div>
 
@@ -155,7 +258,7 @@ export default function BottomNav() {
           }}
         >
           <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>▤</span>
-          <span style={{ fontSize: 12, fontWeight: 700 }}>Bookings</span>
+          <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.bookings}</span>
         </button>
 
         <button
@@ -171,7 +274,7 @@ export default function BottomNav() {
           }}
         >
           <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>◉</span>
-          <span style={{ fontSize: 12, fontWeight: 700 }}>Profile</span>
+          <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.profile}</span>
         </button>
       </div>
     </nav>
