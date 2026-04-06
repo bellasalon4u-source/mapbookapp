@@ -55,39 +55,7 @@ const popularSearches = [
   'Massage',
   'Dog Walking',
   'Phone Repair',
-  'Cleaning',
 ];
-
-type SearchResult =
-  | {
-      id: string;
-      type: 'category';
-      title: string;
-      subtitle: string;
-      categoryId: string;
-    }
-  | {
-      id: string;
-      type: 'subcategory';
-      title: string;
-      subtitle: string;
-      categoryId: string;
-      subcategory: string;
-    }
-  | {
-      id: string;
-      type: 'master';
-      title: string;
-      subtitle: string;
-      master: any;
-    }
-  | {
-      id: string;
-      type: 'listing';
-      title: string;
-      subtitle: string;
-      master: any;
-    };
 
 function mapCategoryToId(category: string) {
   const normalized = (category || '').toLowerCase().trim();
@@ -178,9 +146,7 @@ function getCategoryLabel(category?: string) {
   if (!normalized) return 'Service';
 
   const found = categories.find((item) => item.id === normalized);
-  if (found) return found.shortLabel || found.label;
-
-  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  return found?.shortLabel || found?.label || normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
 function normalizePaymentMethods(value: any): string[] {
@@ -199,30 +165,48 @@ function paymentBadge(method: string) {
   return { icon: '•', label: String(method) };
 }
 
-function saveRecentSearch(value: string) {
-  if (typeof window === 'undefined') return;
-  const trimmed = value.trim();
-  if (!trimmed) return;
+type SearchCategoryResult = {
+  type: 'category';
+  id: string;
+  label: string;
+};
 
-  const key = 'mapbook_recent_searches';
-  const current = JSON.parse(window.localStorage.getItem(key) || '[]') as string[];
-  const next = [trimmed, ...current.filter((item) => item.toLowerCase() !== trimmed.toLowerCase())].slice(0, 6);
-  window.localStorage.setItem(key, JSON.stringify(next));
-}
+type SearchSubcategoryResult = {
+  type: 'subcategory';
+  id: string;
+  label: string;
+  categoryId: string;
+  categoryLabel: string;
+};
 
-function readRecentSearches() {
-  if (typeof window === 'undefined') return [] as string[];
-  return JSON.parse(window.localStorage.getItem('mapbook_recent_searches') || '[]') as string[];
-}
+type SearchMasterResult = {
+  type: 'master';
+  id: string;
+  label: string;
+  categoryId: string;
+  master: any;
+};
+
+type SearchListingResult = {
+  type: 'listing';
+  id: string;
+  label: string;
+  categoryId: string;
+  listingMaster: any;
+};
+
+type SearchResult =
+  | SearchCategoryResult
+  | SearchSubcategoryResult
+  | SearchMasterResult
+  | SearchListingResult;
 
 export default function HomePage() {
   const router = useRouter();
   const baseMasters = getAllMasters();
-  const searchWrapperRef = useRef<HTMLDivElement | null>(null);
+  const searchBoxRef = useRef<HTMLDivElement | null>(null);
 
   const [search, setSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState('beauty');
   const [activeSubcategory, setActiveSubcategory] = useState('');
   const [language, setLanguage] = useState('EN');
@@ -232,26 +216,8 @@ export default function HomePage() {
   const [likedFilterMode, setLikedFilterMode] = useState<'none' | 'category' | 'all'>('none');
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [recenterToUserTrigger, setRecenterToUserTrigger] = useState(0);
-
-  useEffect(() => {
-    setRecentSearches(readRecentSearches());
-  }, []);
-
-  useEffect(() => {
-    const handleOutside = (event: MouseEvent | TouchEvent) => {
-      if (!searchWrapperRef.current) return;
-      if (searchWrapperRef.current.contains(event.target as Node)) return;
-      setSearchOpen(false);
-    };
-
-    document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('touchstart', handleOutside);
-
-    return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('touchstart', handleOutside);
-    };
-  }, []);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
   useEffect(() => {
     const loadListings = () => {
@@ -273,6 +239,33 @@ export default function HomePage() {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem('mapbook_recent_searches');
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        setRecentSearches(parsed.filter(Boolean).slice(0, 6));
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const handleOutside = (event: MouseEvent | TouchEvent) => {
+      if (!searchBoxRef.current) return;
+      if (searchBoxRef.current.contains(event.target as Node)) return;
+      setSearchOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('touchstart', handleOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('touchstart', handleOutside);
+    };
+  }, []);
+
   const listingMasters = useMemo(() => {
     return listings.map((item, index) => listingToMaster(item, index));
   }, [listings]);
@@ -281,77 +274,17 @@ export default function HomePage() {
     return [...listingMasters, ...baseMasters];
   }, [listingMasters, baseMasters]);
 
-  const searchResults = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return [] as SearchResult[];
+  const saveRecentSearch = (value: string) => {
+    const normalized = value.trim();
+    if (!normalized) return;
 
-    const categoryResults: SearchResult[] = categories
-      .filter((item) => {
-        const label = item.label.toLowerCase();
-        const shortLabel = (item.shortLabel || '').toLowerCase();
-        const id = item.id.toLowerCase();
-        return label.includes(q) || shortLabel.includes(q) || id.includes(q);
-      })
-      .slice(0, 5)
-      .map((item) => ({
-        id: `category-${item.id}`,
-        type: 'category',
-        title: item.shortLabel || item.label,
-        subtitle: 'Category',
-        categoryId: item.id,
-      }));
+    const next = [normalized, ...recentSearches.filter((item) => item.toLowerCase() !== normalized.toLowerCase())].slice(0, 6);
+    setRecentSearches(next);
 
-    const subcategoryResults: SearchResult[] = categories
-      .flatMap((item) =>
-        item.subcategories
-          .filter((sub) => sub.toLowerCase().includes(q))
-          .map((sub) => ({
-            id: `subcategory-${item.id}-${sub}`,
-            type: 'subcategory' as const,
-            title: sub,
-            subtitle: item.shortLabel || item.label,
-            categoryId: item.id,
-            subcategory: sub,
-          }))
-      )
-      .slice(0, 8);
-
-    const masterResults: SearchResult[] = allMasters
-      .filter((master: any) => {
-        return (
-          String(master.name || '').toLowerCase().includes(q) ||
-          String(master.title || '').toLowerCase().includes(q) ||
-          String(master.city || '').toLowerCase().includes(q) ||
-          String(master.description || '').toLowerCase().includes(q)
-        );
-      })
-      .slice(0, 6)
-      .map((master: any) => ({
-        id: `master-${master.id}`,
-        type: 'master',
-        title: master.name || master.title || 'Pro',
-        subtitle: `${getCategoryLabel(master.category)}${master.city ? ` • ${master.city}` : ''}`,
-        master,
-      }));
-
-    const listingResults: SearchResult[] = listingMasters
-      .filter((master: any) => {
-        return (
-          String(master.title || '').toLowerCase().includes(q) ||
-          String(master.subcategory || '').toLowerCase().includes(q)
-        );
-      })
-      .slice(0, 6)
-      .map((master: any) => ({
-        id: `listing-${master.id}`,
-        type: 'listing',
-        title: master.title || 'Listing',
-        subtitle: `${getCategoryLabel(master.category)}${master.subcategory ? ` • ${master.subcategory}` : ''}`,
-        master,
-      }));
-
-    return [...categoryResults, ...subcategoryResults, ...masterResults, ...listingResults];
-  }, [search, allMasters, listingMasters]);
+    try {
+      window.localStorage.setItem('mapbook_recent_searches', JSON.stringify(next));
+    } catch {}
+  };
 
   const filteredMasters = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -375,7 +308,8 @@ export default function HomePage() {
         String(master.title || '').toLowerCase().includes(q) ||
         String(master.city || '').toLowerCase().includes(q) ||
         String(master.subcategory || '').toLowerCase().includes(q) ||
-        String(master.description || '').toLowerCase().includes(q);
+        String(master.description || '').toLowerCase().includes(q) ||
+        String(master.category || '').toLowerCase().includes(q);
 
       const likedMatch =
         likedFilterMode === 'none'
@@ -392,6 +326,136 @@ export default function HomePage() {
     likedMasterIds,
     likedFilterMode,
   ]);
+
+  const searchResults = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return { categories: [], subcategories: [], masters: [], listings: [] };
+
+    const categoryResults: SearchCategoryResult[] = categories
+      .filter((item) => {
+        return (
+          item.label.toLowerCase().includes(q) ||
+          item.id.toLowerCase().includes(q) ||
+          (item.shortLabel || '').toLowerCase().includes(q)
+        );
+      })
+      .slice(0, 6)
+      .map((item) => ({
+        type: 'category',
+        id: item.id,
+        label: item.shortLabel || item.label,
+      }));
+
+    const subcategoryResults: SearchSubcategoryResult[] = categories
+      .flatMap((item) =>
+        item.subcategories
+          .filter((sub) => sub.toLowerCase().includes(q))
+          .map((sub) => ({
+            type: 'subcategory' as const,
+            id: `${item.id}-${sub}`,
+            label: sub,
+            categoryId: item.id,
+            categoryLabel: item.shortLabel || item.label,
+          }))
+      )
+      .slice(0, 8);
+
+    const masterResults: SearchMasterResult[] = allMasters
+      .filter((master: any) => {
+        return (
+          String(master.name || '').toLowerCase().includes(q) ||
+          String(master.title || '').toLowerCase().includes(q)
+        );
+      })
+      .slice(0, 6)
+      .map((master: any) => ({
+        type: 'master',
+        id: String(master.id),
+        label: String(master.name || master.title || 'Service Pro'),
+        categoryId: String(master.category || 'beauty'),
+        master,
+      }));
+
+    const listingResults: SearchListingResult[] = listingMasters
+      .filter((item: any) => {
+        return (
+          String(item.title || item.name || '').toLowerCase().includes(q) ||
+          String(item.subcategory || '').toLowerCase().includes(q) ||
+          String(item.description || '').toLowerCase().includes(q)
+        );
+      })
+      .slice(0, 6)
+      .map((item: any) => ({
+        type: 'listing',
+        id: String(item.id),
+        label: String(item.title || item.name || 'Listing'),
+        categoryId: String(item.category || 'beauty'),
+        listingMaster: item,
+      }));
+
+    return {
+      categories: categoryResults,
+      subcategories: subcategoryResults,
+      masters: masterResults,
+      listings: listingResults,
+    };
+  }, [search, allMasters, listingMasters]);
+
+  const hasSearchResults =
+    searchResults.categories.length > 0 ||
+    searchResults.subcategories.length > 0 ||
+    searchResults.masters.length > 0 ||
+    searchResults.listings.length > 0;
+
+  const applySearchResult = (result: SearchResult) => {
+    setLikedFilterMode('none');
+
+    if (result.type === 'category') {
+      setActiveCategory(result.id);
+      setActiveSubcategory('');
+      setSearch(result.label);
+      saveRecentSearch(result.label);
+      setSelectedMaster(null);
+      setSearchOpen(false);
+      return;
+    }
+
+    if (result.type === 'subcategory') {
+      setActiveCategory(result.categoryId);
+      setActiveSubcategory(result.label);
+      setSearch(result.label);
+      saveRecentSearch(result.label);
+      setSelectedMaster(null);
+      setSearchOpen(false);
+      return;
+    }
+
+    if (result.type === 'master') {
+      setActiveCategory(result.categoryId);
+      setActiveSubcategory(result.master.subcategory || '');
+      setSearch(result.label);
+      saveRecentSearch(result.label);
+      setSelectedMaster(result.master);
+      setSearchOpen(false);
+      return;
+    }
+
+    setActiveCategory(result.categoryId);
+    setActiveSubcategory(result.listingMaster.subcategory || '');
+    setSearch(result.label);
+    saveRecentSearch(result.label);
+    setSelectedMaster(result.listingMaster);
+    setSearchOpen(false);
+  };
+
+  const runTextSearch = (value: string) => {
+    const normalized = value.trim();
+    setSearch(normalized);
+    setLikedFilterMode('none');
+    setSelectedMaster(null);
+    setSearchOpen(false);
+    if (normalized) saveRecentSearch(normalized);
+  };
 
   useEffect(() => {
     setSelectedMaster(null);
@@ -414,57 +478,6 @@ export default function HomePage() {
 
   const likedAllCount = likedMasterIds.length;
 
-  const groupedResults = useMemo(() => {
-    return {
-      categories: searchResults.filter((item) => item.type === 'category'),
-      subcategories: searchResults.filter((item) => item.type === 'subcategory'),
-      pros: searchResults.filter((item) => item.type === 'master'),
-      listings: searchResults.filter((item) => item.type === 'listing'),
-    };
-  }, [searchResults]);
-
-  const selectSearchResult = (result: SearchResult) => {
-    if (result.type === 'category') {
-      setActiveCategory(result.categoryId);
-      setActiveSubcategory('');
-      setLikedFilterMode('none');
-      setSearch('');
-      setSearchOpen(false);
-      saveRecentSearch(result.title);
-      setRecentSearches(readRecentSearches());
-      return;
-    }
-
-    if (result.type === 'subcategory') {
-      setActiveCategory(result.categoryId);
-      setActiveSubcategory(result.subcategory);
-      setLikedFilterMode('none');
-      setSearch('');
-      setSearchOpen(false);
-      saveRecentSearch(result.title);
-      setRecentSearches(readRecentSearches());
-      return;
-    }
-
-    if (result.type === 'master' || result.type === 'listing') {
-      setActiveCategory(String(result.master.category || 'beauty'));
-      setActiveSubcategory(result.master.subcategory || '');
-      setLikedFilterMode('none');
-      setSelectedMaster(result.master);
-      setSearch(result.title);
-      setSearchOpen(false);
-      saveRecentSearch(result.title);
-      setRecentSearches(readRecentSearches());
-    }
-  };
-
-  const runQuickSearch = (value: string) => {
-    setSearch(value);
-    setSearchOpen(true);
-    saveRecentSearch(value);
-    setRecentSearches(readRecentSearches());
-  };
-
   return (
     <main
       style={{
@@ -486,7 +499,7 @@ export default function HomePage() {
         }}
       >
         <section style={{ padding: '12px 14px 0' }}>
-          <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
+          <div ref={searchBoxRef} style={{ position: 'relative' }}>
             <div
               style={{
                 display: 'grid',
@@ -511,14 +524,7 @@ export default function HomePage() {
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      const firstResult = searchResults[0];
-                      if (firstResult) {
-                        selectSearchResult(firstResult);
-                      } else if (search.trim()) {
-                        saveRecentSearch(search);
-                        setRecentSearches(readRecentSearches());
-                        setSearchOpen(false);
-                      }
+                      runTextSearch(search);
                     }
                   }}
                   placeholder="Search services, categories or professionals..."
@@ -537,16 +543,18 @@ export default function HomePage() {
                   <button
                     onClick={() => {
                       setSearch('');
-                      setSearchOpen(false);
+                      setSearchOpen(true);
                     }}
                     style={{
                       border: 'none',
                       background: 'transparent',
+                      color: '#8b94a1',
                       fontSize: 18,
-                      color: '#85909c',
                       cursor: 'pointer',
                       padding: 0,
+                      lineHeight: 1,
                     }}
+                    title="Clear"
                   >
                     ✕
                   </button>
@@ -618,13 +626,12 @@ export default function HomePage() {
                   left: 0,
                   right: 0,
                   top: 'calc(100% + 8px)',
+                  zIndex: 3000,
                   background: 'rgba(255,255,255,0.98)',
-                  border: '1px solid #ece4d8',
+                  border: '1px solid #ece7df',
                   borderRadius: 20,
-                  boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
+                  boxShadow: '0 16px 32px rgba(0,0,0,0.12)',
                   padding: 12,
-                  maxHeight: 360,
-                  overflowY: 'auto',
                 }}
               >
                 {!search.trim() ? (
@@ -635,26 +642,32 @@ export default function HomePage() {
                           style={{
                             fontSize: 12,
                             fontWeight: 900,
-                            color: '#6c7480',
+                            color: '#6f7986',
                             marginBottom: 8,
                           }}
                         >
                           Recent searches
                         </div>
 
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: 8,
+                          }}
+                        >
                           {recentSearches.map((item) => (
                             <button
                               key={item}
-                              onClick={() => runQuickSearch(item)}
+                              onClick={() => runTextSearch(item)}
                               style={{
-                                border: '1px solid #e7ddd0',
+                                border: '1px solid #e6dfd6',
                                 background: '#fff',
                                 borderRadius: 999,
                                 padding: '8px 12px',
                                 fontSize: 13,
                                 fontWeight: 800,
-                                color: '#2a3442',
+                                color: '#2b3442',
                                 cursor: 'pointer',
                               }}
                             >
@@ -665,31 +678,37 @@ export default function HomePage() {
                       </div>
                     ) : null}
 
-                    <div>
+                    <div style={{ marginBottom: 6 }}>
                       <div
                         style={{
                           fontSize: 12,
                           fontWeight: 900,
-                          color: '#6c7480',
+                          color: '#6f7986',
                           marginBottom: 8,
                         }}
                       >
                         Popular searches
                       </div>
 
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 8,
+                        }}
+                      >
                         {popularSearches.map((item) => (
                           <button
                             key={item}
-                            onClick={() => runQuickSearch(item)}
+                            onClick={() => runTextSearch(item)}
                             style={{
-                              border: '1px solid #e7ddd0',
-                              background: '#fff8f8',
+                              border: '1px solid #e6dfd6',
+                              background: '#fff',
                               borderRadius: 999,
                               padding: '8px 12px',
                               fontSize: 13,
-                              fontWeight: 900,
-                              color: '#ff4f93',
+                              fontWeight: 800,
+                              color: '#2b3442',
                               cursor: 'pointer',
                             }}
                           >
@@ -699,26 +718,15 @@ export default function HomePage() {
                       </div>
                     </div>
                   </>
-                ) : searchResults.length === 0 ? (
-                  <div
-                    style={{
-                      padding: '12px 6px',
-                      fontSize: 14,
-                      fontWeight: 800,
-                      color: '#74808c',
-                    }}
-                  >
-                    No results found
-                  </div>
                 ) : (
                   <>
-                    {groupedResults.categories.length > 0 ? (
+                    {searchResults.categories.length > 0 ? (
                       <div style={{ marginBottom: 12 }}>
                         <div
                           style={{
                             fontSize: 12,
                             fontWeight: 900,
-                            color: '#6c7480',
+                            color: '#6f7986',
                             marginBottom: 8,
                           }}
                         >
@@ -726,42 +734,36 @@ export default function HomePage() {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          {groupedResults.categories.map((item) => (
+                          {searchResults.categories.map((item) => (
                             <button
                               key={item.id}
-                              onClick={() => selectSearchResult(item)}
+                              onClick={() => applySearchResult(item)}
                               style={{
                                 border: 'none',
-                                background: '#fff',
+                                background: '#f8f4ee',
                                 borderRadius: 14,
-                                padding: '10px 12px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'flex-start',
-                                gap: 2,
+                                padding: '11px 12px',
+                                textAlign: 'left',
+                                fontSize: 14,
+                                fontWeight: 800,
+                                color: '#223145',
                                 cursor: 'pointer',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                               }}
                             >
-                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
-                                {item.title}
-                              </span>
-                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {item.subtitle}
-                              </span>
+                              {item.label}
                             </button>
                           ))}
                         </div>
                       </div>
                     ) : null}
 
-                    {groupedResults.subcategories.length > 0 ? (
+                    {searchResults.subcategories.length > 0 ? (
                       <div style={{ marginBottom: 12 }}>
                         <div
                           style={{
                             fontSize: 12,
                             fontWeight: 900,
-                            color: '#6c7480',
+                            color: '#6f7986',
                             marginBottom: 8,
                           }}
                         >
@@ -769,42 +771,46 @@ export default function HomePage() {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          {groupedResults.subcategories.map((item) => (
+                          {searchResults.subcategories.map((item) => (
                             <button
                               key={item.id}
-                              onClick={() => selectSearchResult(item)}
+                              onClick={() => applySearchResult(item)}
                               style={{
                                 border: 'none',
-                                background: '#fff',
+                                background: '#f8f4ee',
                                 borderRadius: 14,
-                                padding: '10px 12px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'flex-start',
-                                gap: 2,
+                                padding: '11px 12px',
+                                textAlign: 'left',
+                                fontSize: 14,
+                                fontWeight: 800,
+                                color: '#223145',
                                 cursor: 'pointer',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                               }}
                             >
-                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
-                                {item.title}
-                              </span>
-                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {item.subtitle}
-                              </span>
+                              <div>{item.label}</div>
+                              <div
+                                style={{
+                                  marginTop: 2,
+                                  fontSize: 11,
+                                  color: '#7b8490',
+                                  fontWeight: 700,
+                                }}
+                              >
+                                {item.categoryLabel}
+                              </div>
                             </button>
                           ))}
                         </div>
                       </div>
                     ) : null}
 
-                    {groupedResults.pros.length > 0 ? (
+                    {searchResults.masters.length > 0 ? (
                       <div style={{ marginBottom: 12 }}>
                         <div
                           style={{
                             fontSize: 12,
                             fontWeight: 900,
-                            color: '#6c7480',
+                            color: '#6f7986',
                             marginBottom: 8,
                           }}
                         >
@@ -812,42 +818,36 @@ export default function HomePage() {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          {groupedResults.pros.map((item) => (
+                          {searchResults.masters.map((item) => (
                             <button
                               key={item.id}
-                              onClick={() => selectSearchResult(item)}
+                              onClick={() => applySearchResult(item)}
                               style={{
                                 border: 'none',
-                                background: '#fff',
+                                background: '#f8f4ee',
                                 borderRadius: 14,
-                                padding: '10px 12px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'flex-start',
-                                gap: 2,
+                                padding: '11px 12px',
+                                textAlign: 'left',
+                                fontSize: 14,
+                                fontWeight: 800,
+                                color: '#223145',
                                 cursor: 'pointer',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                               }}
                             >
-                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
-                                {item.title}
-                              </span>
-                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {item.subtitle}
-                              </span>
+                              {item.label}
                             </button>
                           ))}
                         </div>
                       </div>
                     ) : null}
 
-                    {groupedResults.listings.length > 0 ? (
-                      <div>
+                    {searchResults.listings.length > 0 ? (
+                      <div style={{ marginBottom: 4 }}>
                         <div
                           style={{
                             fontSize: 12,
                             fontWeight: 900,
-                            color: '#6c7480',
+                            color: '#6f7986',
                             marginBottom: 8,
                           }}
                         >
@@ -855,32 +855,40 @@ export default function HomePage() {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          {groupedResults.listings.map((item) => (
+                          {searchResults.listings.map((item) => (
                             <button
                               key={item.id}
-                              onClick={() => selectSearchResult(item)}
+                              onClick={() => applySearchResult(item)}
                               style={{
                                 border: 'none',
-                                background: '#fff',
+                                background: '#f8f4ee',
                                 borderRadius: 14,
-                                padding: '10px 12px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'flex-start',
-                                gap: 2,
+                                padding: '11px 12px',
+                                textAlign: 'left',
+                                fontSize: 14,
+                                fontWeight: 800,
+                                color: '#223145',
                                 cursor: 'pointer',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                               }}
                             >
-                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
-                                {item.title}
-                              </span>
-                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {item.subtitle}
-                              </span>
+                              {item.label}
                             </button>
                           ))}
                         </div>
+                      </div>
+                    ) : null}
+
+                    {!hasSearchResults ? (
+                      <div
+                        style={{
+                          padding: '14px 8px',
+                          textAlign: 'center',
+                          fontSize: 14,
+                          fontWeight: 800,
+                          color: '#7b8490',
+                        }}
+                      >
+                        No results found
                       </div>
                     ) : null}
                   </>
@@ -1510,7 +1518,6 @@ export default function HomePage() {
             {popularServices.map((service) => (
               <button
                 key={service.id}
-                onClick={() => runQuickSearch(service.title)}
                 style={{
                   border: 'none',
                   background: 'transparent',
