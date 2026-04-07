@@ -678,8 +678,29 @@ export default function RealMap({
                 cursor: 'pointer',
               }}
             >
-              {likedMasterIds.includes(String(selectedMaster.id)) ? '♥ Saved' : '♡ Save'}
-            </button>
+              {language === 'ES'
+  ? likedMasterIds.includes(String(selectedMaster.id))
+    ? '♥ Guardado'
+    : '♡ Guardar'
+  : language === 'RU'
+  ? likedMasterIds.includes(String(selectedMaster.id))
+    ? '♥ Сохранено'
+    : '♡ Сохранить'
+  : language === 'CZ'
+  ? likedMasterIds.includes(String(selectedMaster.id))
+    ? '♥ Uloženo'
+    : '♡ Uložit'
+  : language === 'DE'
+  ? likedMasterIds.includes(String(selectedMaster.id))
+    ? '♥ Gespeichert'
+    : '♡ Speichern'
+  : language === 'PL'
+  ? likedMasterIds.includes(String(selectedMaster.id))
+    ? '♥ Zapisano'
+    : '♡ Zapisz'
+  : likedMasterIds.includes(String(selectedMaster.id))
+  ? '♥ Saved'
+  : '♡ Save'}
 
             <button
               onClick={() => onMasterSelect?.(selectedMaster)}
