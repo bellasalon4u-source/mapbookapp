@@ -1,11 +1,16 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
-import L from 'leaflet';
-import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
+import L, { type DivIcon } from 'leaflet';
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  useMap,
+  useMapEvents,
+  CircleMarker,
+} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-
-type AppLanguage = string;
 
 type MasterItem = {
   id: string | number;
@@ -31,169 +36,297 @@ type RealMapProps = {
   activeCategory?: string;
   selectedMasterId?: string | number | null;
   likedMasterIds?: string[];
-  onToggleLike?: (id: string | number) => void;
-  onSelectMaster?: (id: string | number) => void;
-  language?: AppLanguage;
+  recenterToUserTrigger?: number;
+  onMasterSelect?: (master: MasterItem) => void;
+  onMapBackgroundClick?: () => void;
+  onToggleLike?: (master: MasterItem) => void;
 };
 
-const LONDON_CENTER: [number, number] = [51.5074, -0.1278];
+const londonCenter: [number, number] = [51.5074, -0.1278];
 
-function FitToMarkers({
-  masters,
-  selectedMasterId,
-}: {
-  masters: MasterItem[];
-  selectedMasterId?: string | number | null;
-}) {
-  const map = useMap();
+function getCategoryAccent(category?: string) {
+  const normalized = String(category || '').toLowerCase();
 
-  useEffect(() => {
-    if (!masters.length) {
-      map.setView(LONDON_CENTER, 11);
-      return;
-    }
+  if (normalized === 'beauty') return '#ff4f93';
+  if (normalized === 'barber') return '#2d98ff';
+  if (normalized === 'wellness') return '#32c957';
+  if (normalized === 'home') return '#ff9f1a';
+  if (normalized === 'repairs') return '#f4b400';
+  if (normalized === 'tech') return '#9b5cff';
+  if (normalized === 'pets') return '#28c7d9';
+  if (normalized === 'transport') return '#2f7df6';
+  if (normalized === 'education') return '#7d52ff';
 
-    const selected = masters.find((m) => String(m.id) === String(selectedMasterId));
-
-    if (
-      selected &&
-      typeof selected.lat === 'number' &&
-      typeof selected.lng === 'number'
-    ) {
-      map.setView([selected.lat, selected.lng], 14, { animate: true });
-      return;
-    }
-
-    if (masters.length === 1) {
-      const first = masters[0];
-      if (typeof first.lat === 'number' && typeof first.lng === 'number') {
-        map.setView([first.lat, first.lng], 13, { animate: true });
-      }
-      return;
-    }
-
-    const bounds = L.latLngBounds(
-      masters.map((m) => [m.lat as number, m.lng as number] as [number, number])
-    );
-
-    map.fitBounds(bounds, {
-      padding: [40, 40],
-      animate: true,
-    });
-  }, [map, masters, selectedMasterId]);
-
-  return null;
+  return '#ff4f93';
 }
 
-function createPinIcon(isSelected: boolean, isAvailable: boolean) {
-  const size = isSelected ? 28 : 22;
-  const border = isSelected ? 4 : 3;
-  const background = isAvailable ? '#22c55e' : '#ef4444';
-  const ring = isSelected ? '#111827' : '#ffffff';
-
-  return L.divIcon({
-    className: '',
-    html: `
-      <div style="
-        width:${size}px;
-        height:${size}px;
-        border-radius:9999px;
-        background:${background};
-        border:${border}px solid ${ring};
-        box-sizing:border-box;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-      ">
-        <div style="
-          width:8px;
-          height:8px;
-          border-radius:9999px;
-          background:#ffffff;
-        "></div>
-      </div>
-    `,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
-}
-
-function getTileUrl(mapMode: 'map' | 'satellite') {
-  if (mapMode === 'satellite') {
-    return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+function getTileUrl(mode: 'map' | 'satellite' = 'map') {
+  if (mode === 'satellite') {
+    return 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
   }
 
   return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 }
 
-function getName(master: MasterItem) {
-  return master.name || master.title || 'Specialist';
+function buildMarkerIcon(
+  master: MasterItem,
+  isSelected: boolean,
+  isLiked: boolean
+): DivIcon {
+  const accent = getCategoryAccent(master.category);
+  const availabilityColor = master.availableNow ? '#2ed14f' : '#ff2d2d';
+  const avatar =
+    master.avatar ||
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80';
+
+  const outerRing = isSelected ? 6 : 5;
+  const size = isSelected ? 78 : 72;
+  const photoSize = isSelected ? 58 : 54;
+  const likeBadgeSize = isSelected ? 30 : 28;
+  const statusBadgeSize = isSelected ? 20 : 18;
+
+  return L.divIcon({
+    className: 'custom-master-pin',
+    html: `
+      <div style="position:relative;width:${size}px;height:${size + 18}px;">
+        <div style="
+          position:absolute;
+          left:50%;
+          top:${size - 4}px;
+          transform:translateX(-50%);
+          width:0;
+          height:0;
+          border-left:14px solid transparent;
+          border-right:14px solid transparent;
+          border-top:19px solid ${accent};
+          filter:drop-shadow(0 5px 8px rgba(0,0,0,0.16));
+        "></div>
+
+        <div style="
+          position:absolute;
+          left:50%;
+          top:0;
+          transform:translateX(-50%);
+          width:${size}px;
+          height:${size}px;
+          border-radius:999px;
+          background:#fff;
+          border:${outerRing}px solid ${accent};
+          box-shadow:0 7px 18px rgba(0,0,0,0.16);
+          overflow:hidden;
+        ">
+          <img
+            src="${avatar}"
+            alt="${master.name || master.title || 'Master'}"
+            style="
+              width:${photoSize}px;
+              height:${photoSize}px;
+              object-fit:cover;
+              border-radius:999px;
+              position:absolute;
+              left:50%;
+              top:50%;
+              transform:translate(-50%,-50%);
+              display:block;
+            "
+          />
+        </div>
+
+        <div
+          class="pin-like-badge"
+          style="
+            position:absolute;
+            right:2px;
+            top:${size * 0.56}px;
+            width:${likeBadgeSize + 10}px;
+            height:${likeBadgeSize + 10}px;
+            background:#fff;
+            border:4px solid ${accent};
+            border-radius:999px;
+            box-shadow:0 4px 10px rgba(0,0,0,0.14);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#ff2020;
+            font-size:${isLiked ? 16 : 0}px;
+            font-weight:900;
+            line-height:1;
+            cursor:pointer;
+          "
+        >
+          ${isLiked ? '♥' : ''}
+        </div>
+
+        <div style="
+          position:absolute;
+          right:${isLiked ? likeBadgeSize + 20 : 4}px;
+          top:${size * 0.46}px;
+          width:${statusBadgeSize + 10}px;
+          height:${statusBadgeSize + 10}px;
+          background:#fff;
+          border:4px solid ${availabilityColor};
+          border-radius:999px;
+          box-shadow:0 4px 10px rgba(0,0,0,0.12);
+        "></div>
+      </div>
+    `,
+    iconSize: [size, size + 18],
+    iconAnchor: [size / 2, size + 12],
+  });
 }
 
-function getCategory(master: MasterItem) {
-  return master.subcategory || master.category || 'service';
+function MapEventsLayer({
+  onBackgroundClick,
+  ignoreNextMapClickRef,
+}: {
+  onBackgroundClick?: () => void;
+  ignoreNextMapClickRef: MutableRefObject<boolean>;
+}) {
+  useMapEvents({
+    click() {
+      if (ignoreNextMapClickRef.current) {
+        ignoreNextMapClickRef.current = false;
+        return;
+      }
+      onBackgroundClick?.();
+    },
+  });
+
+  return null;
 }
 
-function getAvailabilityLabel(master: MasterItem, language?: string) {
-  const isAvailable = Boolean(master.availableNow || master.availableToday);
+function FitBoundsLayer({
+  masters,
+  userLocation,
+}: {
+  masters: MasterItem[];
+  userLocation: [number, number] | null;
+}) {
+  const map = useMap();
 
-  if (language === 'ru') {
-    return isAvailable ? 'Доступен сейчас' : 'Сейчас занят';
-  }
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      map.invalidateSize();
+    }, 80);
 
-  return isAvailable ? 'Available now' : 'Busy now';
+    const points: [number, number][] = masters.map((item) => [
+      item.lat || londonCenter[0],
+      item.lng || londonCenter[1],
+    ]);
+
+    if (userLocation) {
+      points.push(userLocation);
+    }
+
+    if (!points.length) {
+      map.setView(londonCenter, 11);
+      return () => window.clearTimeout(id);
+    }
+
+    if (points.length === 1) {
+      map.setView(points[0], 11);
+      return () => window.clearTimeout(id);
+    }
+
+    const bounds = L.latLngBounds(points);
+    map.fitBounds(bounds.pad(0.22), { animate: true });
+
+    return () => window.clearTimeout(id);
+  }, [map, masters, userLocation]);
+
+  return null;
 }
 
-function getPriceLabel(price?: string | number, language?: string) {
-  if (price === undefined || price === null || price === '') return null;
+function UserLocationLayer({
+  onLocationFound,
+}: {
+  onLocationFound: (coords: [number, number] | null) => void;
+}) {
+  const map = useMap();
 
-  if (typeof price === 'number') {
-    return language === 'ru' ? `От £${price}` : `From £${price}`;
-  }
+  useEffect(() => {
+    let cancelled = false;
 
-  return String(price);
+    map.locate({
+      setView: false,
+      maxZoom: 14,
+      enableHighAccuracy: true,
+    });
+
+    const handleFound = (event: L.LocationEvent) => {
+      if (cancelled) return;
+      onLocationFound([event.latlng.lat, event.latlng.lng]);
+    };
+
+    const handleError = () => {
+      if (cancelled) return;
+      onLocationFound(null);
+    };
+
+    map.on('locationfound', handleFound);
+    map.on('locationerror', handleError);
+
+    return () => {
+      cancelled = true;
+      map.off('locationfound', handleFound);
+      map.off('locationerror', handleError);
+    };
+  }, [map, onLocationFound]);
+
+  return null;
+}
+
+function RecenterToUserLayer({
+  userLocation,
+  recenterToUserTrigger = 0,
+}: {
+  userLocation: [number, number] | null;
+  recenterToUserTrigger?: number;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!userLocation) return;
+    if (!recenterToUserTrigger) return;
+
+    map.setView(userLocation, 14, { animate: true });
+  }, [map, userLocation, recenterToUserTrigger]);
+
+  return null;
 }
 
 export default function RealMap({
   masters,
   mapMode = 'map',
-  activeCategory,
   selectedMasterId,
   likedMasterIds = [],
+  recenterToUserTrigger = 0,
+  onMasterSelect,
+  onMapBackgroundClick,
   onToggleLike,
-  onSelectMaster,
-  language = 'ru',
 }: RealMapProps) {
-  const validMasters = useMemo(() => {
-    return masters.filter(
-      (master) =>
-        typeof master.lat === 'number' &&
-        typeof master.lng === 'number'
-    );
+  const ignoreNextMapClickRef = useRef(false);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+
+  const safeMasters = useMemo(() => {
+    return (masters || []).map((item, index) => ({
+      ...item,
+      id: item.id ?? String(index),
+      lat: typeof item.lat === 'number' ? item.lat : londonCenter[0],
+      lng: typeof item.lng === 'number' ? item.lng : londonCenter[1],
+      rating: item.rating ?? 4.7,
+      price: item.price ?? '45',
+      availableNow:
+        typeof item.availableNow === 'boolean'
+          ? item.availableNow
+          : typeof item.availableToday === 'boolean'
+            ? item.availableToday
+            : true,
+      avatar:
+        item.avatar ||
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    }));
   }, [masters]);
-
-  const filteredMasters = useMemo(() => {
-    if (!activeCategory || activeCategory === 'all') {
-      return validMasters;
-    }
-
-    const target = activeCategory.toLowerCase();
-
-    return validMasters.filter((master) => {
-      const category = (master.category || '').toLowerCase();
-      const subcategory = (master.subcategory || '').toLowerCase();
-
-      return category.includes(target) || subcategory.includes(target);
-    });
-  }, [validMasters, activeCategory]);
-
-  const selectedMaster = useMemo(() => {
-    return (
-      filteredMasters.find((m) => String(m.id) === String(selectedMasterId)) ||
-      filteredMasters[0] ||
-      null
-    );
-  }, [filteredMasters, selectedMasterId]);
 
   return (
     <div
@@ -201,210 +334,106 @@ export default function RealMap({
         position: 'relative',
         width: '100%',
         height: '100%',
-        minHeight: '100%',
-        overflow: 'hidden',
-        borderRadius: 24,
+        background: '#f3efe7',
+        touchAction: 'none',
+        overscrollBehavior: 'contain',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
       }}
     >
       <MapContainer
-        center={LONDON_CENTER}
+        center={londonCenter}
         zoom={11}
-        scrollWheelZoom={true}
-        style={{ width: '100%', height: '100%' }}
+        dragging={true}
+        touchZoom={true}
+        doubleClickZoom={true}
+        scrollWheelZoom={false}
+        boxZoom={false}
+        keyboard={false}
+        style={{
+          width: '100%',
+          height: '100%',
+          touchAction: 'none',
+        }}
+        zoomControl={true}
       >
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
           url={getTileUrl(mapMode)}
         />
 
-        <FitToMarkers
-          masters={filteredMasters}
-          selectedMasterId={selectedMasterId}
+        <UserLocationLayer onLocationFound={setUserLocation} />
+        <FitBoundsLayer masters={safeMasters} userLocation={userLocation} />
+        <RecenterToUserLayer
+          userLocation={userLocation}
+          recenterToUserTrigger={recenterToUserTrigger}
         />
 
-        {filteredMasters.map((master) => {
+        <MapEventsLayer
+          onBackgroundClick={onMapBackgroundClick}
+          ignoreNextMapClickRef={ignoreNextMapClickRef}
+        />
+
+        {userLocation ? (
+          <>
+            <CircleMarker
+              center={userLocation}
+              radius={16}
+              pathOptions={{
+                color: 'rgba(46,128,255,0.18)',
+                fillColor: 'rgba(46,128,255,0.18)',
+                fillOpacity: 1,
+                weight: 0,
+              }}
+            />
+            <CircleMarker
+              center={userLocation}
+              radius={8}
+              pathOptions={{
+                color: '#ffffff',
+                fillColor: '#2f8df5',
+                fillOpacity: 1,
+                weight: 3,
+              }}
+            />
+          </>
+        ) : null}
+
+        {safeMasters.map((master) => {
           const isSelected = String(master.id) === String(selectedMasterId);
-          const isAvailable = Boolean(master.availableNow || master.availableToday);
+          const isLiked = likedMasterIds.includes(String(master.id));
 
           return (
             <Marker
               key={String(master.id)}
               position={[master.lat as number, master.lng as number]}
-              icon={createPinIcon(isSelected, isAvailable)}
+              icon={buildMarkerIcon(master, isSelected, isLiked)}
               eventHandlers={{
-                click: () => {
-                  if (onSelectMaster) {
-                    onSelectMaster(master.id);
+                mousedown: () => {
+                  ignoreNextMapClickRef.current = true;
+                },
+                click: (event) => {
+                  ignoreNextMapClickRef.current = true;
+
+                  const target = event.originalEvent?.target as HTMLElement | null;
+                  const clickedLike = target?.closest('.pin-like-badge');
+
+                  if (event.originalEvent) {
+                    L.DomEvent.stopPropagation(event.originalEvent as Event);
                   }
+
+                  if (clickedLike) {
+                    onToggleLike?.(master);
+                    return;
+                  }
+
+                  onMasterSelect?.(master);
                 },
               }}
             />
           );
         })}
       </MapContainer>
-
-      {selectedMaster ? (
-        <div
-          style={{
-            position: 'absolute',
-            left: 12,
-            right: 12,
-            bottom: 12,
-            zIndex: 1000,
-            background: '#ffffff',
-            borderRadius: 28,
-            overflow: 'hidden',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.18)',
-          }}
-        >
-          {selectedMaster.avatar ? (
-            <img
-              src={selectedMaster.avatar}
-              alt={getName(selectedMaster)}
-              style={{
-                width: '100%',
-                height: 220,
-                objectFit: 'cover',
-                display: 'block',
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: '100%',
-                height: 220,
-                background: '#e5e7eb',
-              }}
-            />
-          )}
-
-          <div style={{ padding: 24 }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: 12,
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    fontSize: 28,
-                    fontWeight: 800,
-                    lineHeight: 1.1,
-                    color: '#0f172a',
-                    marginBottom: 10,
-                  }}
-                >
-                  {getName(selectedMaster)}
-                </div>
-
-                <div
-                  style={{
-                    fontSize: 16,
-                    color: '#6b7280',
-                    marginBottom: 16,
-                  }}
-                >
-                  {getCategory(selectedMaster)}
-                  {selectedMaster.city ? ` • ${selectedMaster.city}` : ''}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (onToggleLike) {
-                    onToggleLike(selectedMaster.id);
-                  }
-                }}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  fontSize: 28,
-                  cursor: 'pointer',
-                  lineHeight: 1,
-                }}
-              >
-                {likedMasterIds.some(
-                  (id) => String(id) === String(selectedMaster.id)
-                )
-                  ? '❤️'
-                  : '🤍'}
-              </button>
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 12,
-                marginBottom: 18,
-              }}
-            >
-              {typeof selectedMaster.rating === 'number' ? (
-                <div
-                  style={{
-                    padding: '12px 18px',
-                    borderRadius: 9999,
-                    background: '#fce7f3',
-                    color: '#db2777',
-                    fontSize: 18,
-                    fontWeight: 800,
-                  }}
-                >
-                  ★ {selectedMaster.rating.toFixed(1)}
-                </div>
-              ) : null}
-
-              <div
-                style={{
-                  padding: '12px 18px',
-                  borderRadius: 9999,
-                  background: selectedMaster.availableNow || selectedMaster.availableToday
-                    ? '#dcfce7'
-                    : '#fee2e2',
-                  color: selectedMaster.availableNow || selectedMaster.availableToday
-                    ? '#15803d'
-                    : '#b91c1c',
-                  fontSize: 18,
-                  fontWeight: 800,
-                }}
-              >
-                {getAvailabilityLabel(selectedMaster, language)}
-              </div>
-
-              {getPriceLabel(selectedMaster.price, language) ? (
-                <div
-                  style={{
-                    padding: '12px 18px',
-                    borderRadius: 9999,
-                    background: '#f3f4f6',
-                    color: '#374151',
-                    fontSize: 18,
-                    fontWeight: 800,
-                  }}
-                >
-                  {getPriceLabel(selectedMaster.price, language)}
-                </div>
-              ) : null}
-            </div>
-
-            {selectedMaster.description ? (
-              <div
-                style={{
-                  fontSize: 16,
-                  lineHeight: 1.6,
-                  color: '#374151',
-                }}
-              >
-                {selectedMaster.description}
-              </div>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }
