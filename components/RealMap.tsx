@@ -42,6 +42,8 @@ type RealMapProps = {
   onMasterSelect?: (master: MasterItem) => void;
   onMapBackgroundClick?: () => void;
   onToggleLike?: (master: MasterItem) => void;
+  onViewMaster?: (master: MasterItem) => void;
+  onBookMaster?: (master: MasterItem) => void;
 };
 
 const londonCenter: [number, number] = [51.5074, -0.1278];
@@ -345,6 +347,8 @@ export default function RealMap({
   onMasterSelect,
   onMapBackgroundClick,
   onToggleLike,
+  onViewMaster,
+  onBookMaster,
 }: RealMapProps) {
   const ignoreNextMapClickRef = useRef(false);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
@@ -506,6 +510,7 @@ export default function RealMap({
             border: '1px solid #e9e2d8',
             boxShadow: '0 14px 30px rgba(0,0,0,0.16)',
             padding: 14,
+            pointerEvents: 'auto',
           }}
         >
           <div
@@ -530,7 +535,12 @@ export default function RealMap({
                 }}
               />
               <button
-                onClick={() => onToggleLike?.(selectedMaster)}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onToggleLike?.(selectedMaster);
+                }}
                 style={{
                   position: 'absolute',
                   top: 8,
@@ -641,7 +651,12 @@ export default function RealMap({
             </div>
 
             <button
-              onClick={() => onMapBackgroundClick?.()}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onMapBackgroundClick?.();
+              }}
               style={{
                 border: 'none',
                 background: '#f4efe8',
@@ -718,7 +733,12 @@ export default function RealMap({
             }}
           >
             <button
-              onClick={() => onMasterSelect?.(selectedMaster)}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onViewMaster?.(selectedMaster);
+              }}
               style={{
                 border: '2px solid #efcfe0',
                 background: '#fff',
@@ -728,13 +748,20 @@ export default function RealMap({
                 fontSize: 15,
                 fontWeight: 900,
                 cursor: 'pointer',
+                position: 'relative',
+                zIndex: 2,
               }}
             >
               View
             </button>
 
             <button
-              onClick={() => openRoute(selectedMaster)}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openRoute(selectedMaster);
+              }}
               style={{
                 border: 'none',
                 background: '#63b9e8',
@@ -744,13 +771,20 @@ export default function RealMap({
                 fontSize: 15,
                 fontWeight: 900,
                 cursor: 'pointer',
+                position: 'relative',
+                zIndex: 2,
               }}
             >
               Route
             </button>
 
             <button
-              onClick={() => onMasterSelect?.(selectedMaster)}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onBookMaster?.(selectedMaster);
+              }}
               style={{
                 border: 'none',
                 background: '#41bf4a',
@@ -760,6 +794,8 @@ export default function RealMap({
                 fontSize: 15,
                 fontWeight: 900,
                 cursor: 'pointer',
+                position: 'relative',
+                zIndex: 2,
               }}
             >
               {tr.bookNow}
