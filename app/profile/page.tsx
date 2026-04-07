@@ -239,9 +239,15 @@ export default function ProfilePage() {
   const [language, setLanguage] = useState<AppLanguage>('EN');
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
   const [bookingsCount, setBookingsCount] = useState(0);
-  const [savedMastersCount, setSavedMastersCount] = useState(getUserProfile().savedMastersCount);
-  const [availableBalance, setAvailableBalance] = useState(getWalletState().availableBalance);
-  const [welcomeBonus, setWelcomeBonus] = useState(getWalletState().welcomeBonus);
+  const [savedMastersCount, setSavedMastersCount] = useState(
+    getUserProfile().savedMastersCount
+  );
+  const [availableBalance, setAvailableBalance] = useState(
+    getWalletState().availableBalance
+  );
+  const [welcomeBonus, setWelcomeBonus] = useState(
+    getWalletState().welcomeBonus
+  );
   const [referralFreeBookings, setReferralFreeBookings] = useState(
     getReferralState().freeBookingsAvailable
   );
@@ -260,7 +266,8 @@ export default function ProfilePage() {
     const syncBookings = () => {
       const all = getBookings();
       const nextCount = all.filter(
-        (booking) => booking.status === 'upcoming' || booking.status === 'pending'
+        (booking) =>
+          booking.status === 'upcoming' || booking.status === 'pending'
       ).length;
       setBookingsCount(nextCount);
     };
@@ -431,11 +438,14 @@ export default function ProfilePage() {
           <div className="mt-5 rounded-[28px] border border-[#efe4d7] bg-white p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-base font-extrabold text-[#1d1712]">{text.bonusesTitle}</div>
+                <div className="text-base font-extrabold text-[#1d1712]">
+                  {text.bonusesTitle}
+                </div>
 
                 {welcomeBonus > 0 && (
                   <div className="mt-2 text-sm leading-6 text-[#6f6458]">
-                    {text.welcomeBonus}: <span className="font-bold">£{welcomeBonus.toFixed(2)}</span>
+                    {text.welcomeBonus}:{' '}
+                    <span className="font-bold">£{welcomeBonus.toFixed(2)}</span>
                   </div>
                 )}
 
@@ -467,7 +477,9 @@ export default function ProfilePage() {
             />
 
             <div className="min-w-0">
-              <h2 className="truncate text-xl font-bold text-[#1d1712]">{profile.fullName}</h2>
+              <h2 className="truncate text-xl font-bold text-[#1d1712]">
+                {profile.fullName}
+              </h2>
               <p className="mt-1 truncate text-sm text-[#7a7065]">{profile.email}</p>
               <p className="mt-1 text-sm text-[#7a7065]">{profile.phone}</p>
               <p className="mt-1 text-sm text-[#7a7065]">{profile.city}</p>
@@ -528,7 +540,9 @@ export default function ProfilePage() {
                   </div>
 
                   {item.subtitle && (
-                    <div className="mt-1 text-xs leading-5 text-[#7a7065]">{item.subtitle}</div>
+                    <div className="mt-1 text-xs leading-5 text-[#7a7065]">
+                      {item.subtitle}
+                    </div>
                   )}
                 </div>
 
@@ -562,5 +576,3 @@ export default function ProfilePage() {
     </main>
   );
 }
- это текст page profile
-начала открываться новая версия .но перезагружается на старую .что делать
