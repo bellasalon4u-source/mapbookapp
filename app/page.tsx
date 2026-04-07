@@ -158,14 +158,7 @@ const searchAliases = [
     label: 'Massage',
     categoryId: 'wellness',
     subcategory: 'Massage',
-    keywords: [
-      'massage',
-      'masaje',
-      'массаж',
-      'masáž',
-      'massage de',
-      'masaż',
-    ],
+    keywords: ['massage', 'masaje', 'массаж', 'masáž', 'massage de', 'masaż'],
   },
   {
     label: 'Moving',
@@ -1196,10 +1189,10 @@ export default function HomePage() {
                   toggleLikedMaster(String(master.id));
                 }}
                 onViewMaster={(master) => {
-                  router.push(`/profile?id=${master.id}`);
+                  router.push(`/master/${master.id}`);
                 }}
                 onBookMaster={(master) => {
-                  router.push(`/bookings?master=${master.id}`);
+                  router.push(`/booking/${master.id}`);
                 }}
               />
             </div>
