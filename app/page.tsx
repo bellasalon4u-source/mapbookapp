@@ -1183,19 +1183,7 @@ export default function HomePage() {
         <section style={{ padding: '8px 0 0' }}>
           <div style={{ background: '#ffffff', borderTop: '1px solid #e7e1d8', borderBottom: '1px solid #e7e1d8' }}>
             <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
-              <RealMap
-                key={mapKey}
-                masters={filteredMasters}
-                mapMode={mapMode}
-                activeCategory={activeCategory}
-                selectedMasterId={selectedMaster?.id ?? null}
-                likedMasterIds={likedMasterIds}
-                recenterToUserTrigger={recenterToUserTrigger}
-                language={language}
-                onMasterSelect={(master: any) => setSelectedMaster(master)}
-                onMapBackgroundClick={() => setSelectedMaster(null)}
-                onToggleLike={(master: any) => toggleLikedMaster(master.id)}
-              />
+              <RealMap masters={filteredMasters} />
             </div>
           </div>
         </section>
