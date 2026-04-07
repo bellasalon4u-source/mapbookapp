@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import { getSavedLanguage, type AppLanguage } from '../../services/i18n';
 import { getAllMasters } from '../../services/masters';
 import {
   getLikedMasterIds,
