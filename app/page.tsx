@@ -14,6 +14,7 @@ import {
 import {
   getLikedMasterIds,
   subscribeToLikedMasters,
+  toggleLikedMaster,
 } from '../services/likedMastersStore';
 import BottomNav from '../components/BottomNav';
 import TopCategoriesBar from '../components/TopCategoriesBar';
@@ -446,9 +447,12 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('beauty');
   const [activeSubcategory, setActiveSubcategory] = useState('');
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [mapMode] = useState<'map' | 'satellite'>('map');
+  const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
   const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
   const [likedFilterMode, setLikedFilterMode] = useState<'none' | 'category' | 'all'>('none');
   const [listings, setListings] = useState<ListingItem[]>([]);
+  const [recenterToUserTrigger] = useState(0);
 
   const tr = t(language);
 
@@ -621,6 +625,10 @@ export default function HomePage() {
     });
   }, [allMasters, activeCategory, activeSubcategory, search, likedMasterIds, likedFilterMode]);
 
+  useEffect(() => {
+    setSelectedMaster(null);
+  }, [activeCategory, activeSubcategory, search, likedFilterMode]);
+
   const borderGradient = getLanguageBorder(language);
   const currentCategoryLabel = getCategoryLabel(activeCategory, language);
 
@@ -675,6 +683,7 @@ export default function HomePage() {
     setActiveCategory(String(result.master.category || 'beauty'));
     setActiveSubcategory(result.master.subcategory || '');
     setLikedFilterMode('none');
+    setSelectedMaster(result.master);
     setSearch(result.label);
     setSearchOpen(false);
     saveRecentSearch(result.label);
@@ -1169,7 +1178,24 @@ export default function HomePage() {
         <section style={{ padding: '8px 0 0' }}>
           <div style={{ background: '#ffffff', borderTop: '1px solid #e7e1d8', borderBottom: '1px solid #e7e1d8' }}>
             <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
-              <RealMap masters={filteredMasters} />
+              <RealMap
+                masters={filteredMasters}
+                mapMode={mapMode}
+                activeCategory={activeCategory}
+                selectedMasterId={selectedMaster?.id ?? null}
+                likedMasterIds={likedMasterIds}
+                recenterToUserTrigger={recenterToUserTrigger}
+                language={language}
+                onMasterSelect={(master) => {
+                  setSelectedMaster(master);
+                }}
+                onMapBackgroundClick={() => {
+                  setSelectedMaster(null);
+                }}
+                onToggleLike={(master) => {
+                  toggleLikedMaster(String(master.id));
+                }}
+              />
             </div>
           </div>
         </section>
