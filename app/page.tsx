@@ -1185,7 +1185,6 @@ export default function HomePage() {
                 selectedMasterId={selectedMaster?.id ?? null}
                 likedMasterIds={likedMasterIds}
                 recenterToUserTrigger={recenterToUserTrigger}
-                language={language}
                 onMasterSelect={(master) => {
                   setSelectedMaster(master);
                 }}
