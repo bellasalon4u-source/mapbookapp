@@ -678,31 +678,68 @@ export default function RealMap({
                 cursor: 'pointer',
               }}
             >
-              {language === 'ES'
-  ? likedMasterIds.includes(String(selectedMaster.id))
-    ? '♥ Guardado'
-    : '♡ Guardar'
-  : language === 'RU'
-  ? likedMasterIds.includes(String(selectedMaster.id))
-    ? '♥ Сохранено'
-    : '♡ Сохранить'
-  : language === 'CZ'
-  ? likedMasterIds.includes(String(selectedMaster.id))
-    ? '♥ Uloženo'
-    : '♡ Uložit'
-  : language === 'DE'
-  ? likedMasterIds.includes(String(selectedMaster.id))
-    ? '♥ Gespeichert'
-    : '♡ Speichern'
-  : language === 'PL'
-  ? likedMasterIds.includes(String(selectedMaster.id))
-    ? '♥ Zapisano'
-    : '♡ Zapisz'
-  : likedMasterIds.includes(String(selectedMaster.id))
-  ? '♥ Saved'
-  : '♡ Save'}
+              <div
+  style={{
+    marginTop: 14,
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: 10,
+  }}
+>
+  <button
+    onClick={() => onToggleLike?.(selectedMaster)}
+    style={{
+      border: '1px solid #eadfd2',
+      background: '#fff',
+      color: '#263545',
+      borderRadius: 16,
+      padding: '13px 12px',
+      fontSize: 14,
+      fontWeight: 900,
+      cursor: 'pointer',
+    }}
+  >
+    {language === 'ES'
+      ? likedMasterIds.includes(String(selectedMaster.id))
+        ? '♥ Guardado'
+        : '♡ Guardar'
+      : language === 'RU'
+      ? likedMasterIds.includes(String(selectedMaster.id))
+        ? '♥ Сохранено'
+        : '♡ Сохранить'
+      : language === 'CZ'
+      ? likedMasterIds.includes(String(selectedMaster.id))
+        ? '♥ Uloženo'
+        : '♡ Uložit'
+      : language === 'DE'
+      ? likedMasterIds.includes(String(selectedMaster.id))
+        ? '♥ Gespeichert'
+        : '♡ Speichern'
+      : language === 'PL'
+      ? likedMasterIds.includes(String(selectedMaster.id))
+        ? '♥ Zapisano'
+        : '♡ Zapisz'
+      : likedMasterIds.includes(String(selectedMaster.id))
+      ? '♥ Saved'
+      : '♡ Save'}
+  </button>
 
-            <button
+  <button
+    onClick={() => onMasterSelect?.(selectedMaster)}
+    style={{
+      border: 'none',
+      background: '#2f241c',
+      color: '#fff',
+      borderRadius: 16,
+      padding: '13px 12px',
+      fontSize: 14,
+      fontWeight: 900,
+      cursor: 'pointer',
+    }}
+  >
+    {tr.bookNow}
+  </button>
+</div>
               onClick={() => onMasterSelect?.(selectedMaster)}
               style={{
                 border: 'none',
