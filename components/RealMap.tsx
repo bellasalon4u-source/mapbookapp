@@ -62,6 +62,20 @@ function getCategoryAccent(category?: string) {
   return '#ff4f93';
 }
 
+function getCategoryBadgeLabel(category?: string) {
+  const normalized = String(category || '').toLowerCase();
+
+  if (normalized === 'beauty') return 'Beauty';
+  if (normalized === 'barber') return 'Barber';
+  if (normalized === 'wellness') return 'Wellness';
+  if (normalized === 'home') return 'Home';
+  if (normalized === 'repairs') return 'Repairs';
+  if (normalized === 'tech') return 'Tech';
+  if (normalized === 'pets') return 'Pets';
+
+  return category || 'Service';
+}
+
 function getTileUrl(mode: 'map' | 'satellite' = 'map') {
   if (mode === 'satellite') {
     return 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
@@ -85,6 +99,13 @@ function paymentBadge(method: string, language: AppLanguage) {
   if (normalized === 'wallet') return { icon: '📱', label: tr.wallet };
 
   return { icon: '•', label: String(method) };
+}
+
+function formatPrice(value: string | number | undefined, trObj: ReturnType<typeof t>) {
+  if (value === undefined || value === null || value === '') return `${trObj.from} £45`;
+  const asString = String(value).trim();
+  if (asString.includes('£')) return `${trObj.from} ${asString.replace(/^From\s*/i, '').trim()}`;
+  return `${trObj.from} £${asString}`;
 }
 
 function buildMarkerIcon(
@@ -357,6 +378,14 @@ export default function RealMap({
     );
   }, [safeMasters, selectedMasterId]);
 
+  const openRoute = (master: MasterItem) => {
+    if (typeof window === 'undefined') return;
+    const lat = typeof master.lat === 'number' ? master.lat : londonCenter[0];
+    const lng = typeof master.lng === 'number' ? master.lng : londonCenter[1];
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <div
       style={{
@@ -470,109 +499,130 @@ export default function RealMap({
             position: 'absolute',
             left: 12,
             right: 12,
-            bottom: 18,
+            bottom: 16,
             zIndex: 1200,
             background: 'rgba(255,255,255,0.98)',
-            borderRadius: 24,
+            borderRadius: 28,
             border: '1px solid #e9e2d8',
             boxShadow: '0 14px 30px rgba(0,0,0,0.16)',
             padding: 14,
           }}
         >
-          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-            <img
-              src={selectedMaster.avatar}
-              alt={selectedMaster.name || selectedMaster.title || 'Pro'}
-              style={{
-                width: 84,
-                height: 84,
-                borderRadius: 18,
-                objectFit: 'cover',
-                flexShrink: 0,
-                border: '1px solid #eee7de',
-              }}
-            />
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '96px 1fr auto',
+              gap: 14,
+              alignItems: 'start',
+            }}
+          >
+            <div style={{ position: 'relative' }}>
+              <img
+                src={selectedMaster.avatar}
+                alt={selectedMaster.name || selectedMaster.title || 'Pro'}
                 style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  gap: 8,
+                  width: 96,
+                  height: 96,
+                  borderRadius: 22,
+                  objectFit: 'cover',
+                  display: 'block',
+                  border: '1px solid #eee7de',
+                }}
+              />
+              <button
+                onClick={() => onToggleLike?.(selectedMaster)}
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  width: 34,
+                  height: 34,
+                  borderRadius: 999,
+                  border: 'none',
+                  background: '#fff',
+                  color: '#ff4f93',
+                  fontSize: 18,
+                  fontWeight: 900,
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.12)',
+                  cursor: 'pointer',
                 }}
               >
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: 17,
-                      fontWeight: 900,
-                      color: '#223145',
-                      lineHeight: 1.15,
-                    }}
-                  >
-                    {selectedMaster.name || selectedMaster.title || 'Pro'}
-                  </div>
+                ♥
+              </button>
+            </div>
 
-                  <div
-                    style={{
-                      marginTop: 4,
-                      fontSize: 13,
-                      color: '#6f7a86',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {selectedMaster.subcategory || selectedMaster.category || 'Service'}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 4,
-                      fontSize: 13,
-                      color: '#6f7a86',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {selectedMaster.city || 'London'}
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => onMapBackgroundClick?.()}
-                  style={{
-                    border: 'none',
-                    background: '#f4efe8',
-                    color: '#6b7480',
-                    width: 34,
-                    height: 34,
-                    borderRadius: 999,
-                    fontSize: 18,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                  }}
-                >
-                  ✕
-                </button>
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 900,
+                  color: '#1f2430',
+                  lineHeight: 1.15,
+                  marginBottom: 8,
+                }}
+              >
+                {selectedMaster.name || selectedMaster.title || 'Pro'}
               </div>
 
               <div
                 style={{
-                  marginTop: 8,
                   display: 'flex',
                   flexWrap: 'wrap',
                   gap: 8,
-                  alignItems: 'center',
+                  marginBottom: 8,
                 }}
               >
                 <div
                   style={{
                     borderRadius: 999,
-                    background: '#fff5f8',
-                    color: '#ff4f93',
-                    padding: '6px 10px',
+                    background: '#f3eadf',
+                    color: '#8f765f',
+                    padding: '8px 12px',
                     fontSize: 12,
                     fontWeight: 900,
+                  }}
+                >
+                  🏅 Verified Pro
+                </div>
+
+                <div
+                  style={{
+                    borderRadius: 999,
+                    background: '#ffe7f2',
+                    color: '#ff5aa5',
+                    padding: '8px 12px',
+                    fontSize: 12,
+                    fontWeight: 900,
+                  }}
+                >
+                  {getCategoryBadgeLabel(selectedMaster.category)}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 900,
+                  color: selectedMaster.availableNow ? '#2f9c47' : '#d56d83',
+                  marginBottom: 10,
+                }}
+              >
+                {selectedMaster.availableNow ? 'Available now' : 'Unavailable today'}
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 12,
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 900,
+                    color: '#1f2430',
                   }}
                 >
                   ★ {selectedMaster.rating || 4.8}
@@ -580,33 +630,33 @@ export default function RealMap({
 
                 <div
                   style={{
-                    borderRadius: 999,
-                    background: selectedMaster.availableNow ? '#eefbe9' : '#f4f5f7',
-                    color: selectedMaster.availableNow ? '#2f9c47' : '#7c8691',
-                    padding: '6px 10px',
-                    fontSize: 12,
+                    fontSize: 15,
                     fontWeight: 900,
+                    color: '#1f2430',
                   }}
                 >
-                  {selectedMaster.availableNow ? tr.availableNow : tr.unavailableToday}
+                  {formatPrice(selectedMaster.price, tr)}
                 </div>
-
-                {selectedMaster.price ? (
-                  <div
-                    style={{
-                      borderRadius: 999,
-                      background: '#f5f1ea',
-                      color: '#263545',
-                      padding: '6px 10px',
-                      fontSize: 12,
-                      fontWeight: 900,
-                    }}
-                  >
-                    {tr.from} {selectedMaster.price}
-                  </div>
-                ) : null}
               </div>
             </div>
+
+            <button
+              onClick={() => onMapBackgroundClick?.()}
+              style={{
+                border: 'none',
+                background: '#f4efe8',
+                color: '#6b7480',
+                width: 44,
+                height: 44,
+                borderRadius: 999,
+                fontSize: 26,
+                lineHeight: 1,
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+            >
+              ×
+            </button>
           </div>
 
           {selectedMaster.description ? (
@@ -614,7 +664,7 @@ export default function RealMap({
               style={{
                 marginTop: 12,
                 fontSize: 14,
-                lineHeight: 1.4,
+                lineHeight: 1.45,
                 color: '#4d5865',
                 fontWeight: 600,
               }}
@@ -628,7 +678,7 @@ export default function RealMap({
               marginTop: 12,
               display: 'flex',
               flexWrap: 'wrap',
-              gap: 8,
+              gap: 10,
             }}
           >
             {normalizePaymentMethods(selectedMaster.paymentMethods).map((method) => {
@@ -640,14 +690,16 @@ export default function RealMap({
                   style={{
                     border: '1px solid #ebe3d7',
                     background: '#fff',
-                    borderRadius: 999,
-                    padding: '7px 11px',
+                    borderRadius: 16,
+                    padding: '8px 12px',
                     fontSize: 12,
                     fontWeight: 800,
                     color: '#2b3745',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 6,
+                    minWidth: 64,
+                    justifyContent: 'center',
                   }}
                 >
                   <span>{badge.icon}</span>
@@ -659,37 +711,53 @@ export default function RealMap({
 
           <div
             style={{
-              marginTop: 14,
+              marginTop: 16,
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
+              gridTemplateColumns: '1fr 1fr 1fr',
               gap: 10,
             }}
           >
             <button
-              onClick={() => onToggleLike?.(selectedMaster)}
+              onClick={() => onMasterSelect?.(selectedMaster)}
               style={{
-                border: '1px solid #eadfd2',
+                border: '2px solid #efcfe0',
                 background: '#fff',
-                color: '#263545',
-                borderRadius: 16,
-                padding: '13px 12px',
-                fontSize: 14,
+                color: '#243041',
+                borderRadius: 18,
+                padding: '14px 10px',
+                fontSize: 15,
                 fontWeight: 900,
                 cursor: 'pointer',
               }}
             >
-              {likedMasterIds.includes(String(selectedMaster.id)) ? '♥ Saved' : '♡ Save'}
+              View
+            </button>
+
+            <button
+              onClick={() => openRoute(selectedMaster)}
+              style={{
+                border: 'none',
+                background: '#63b9e8',
+                color: '#fff',
+                borderRadius: 18,
+                padding: '14px 10px',
+                fontSize: 15,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              Route
             </button>
 
             <button
               onClick={() => onMasterSelect?.(selectedMaster)}
               style={{
                 border: 'none',
-                background: '#2f241c',
+                background: '#41bf4a',
                 color: '#fff',
-                borderRadius: 16,
-                padding: '13px 12px',
-                fontSize: 14,
+                borderRadius: 18,
+                padding: '14px 10px',
+                fontSize: 15,
                 fontWeight: 900,
                 cursor: 'pointer',
               }}
