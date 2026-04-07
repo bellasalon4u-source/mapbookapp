@@ -1,20 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import L, { type DivIcon } from 'leaflet';
-import {
-  MapContainer,
-  Marker,
-  TileLayer,
-  useMap,
-  useMapEvents,
-  CircleMarker,
-} from 'react-leaflet';
+import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { t, type AppLanguage } from '../services/i18n';
-import MapProfileCard from '../components/MapProfileCard';
 
-type MasterItem = {
+export type MasterItem = {
   id: string | number;
   name?: string;
   title?: string;
@@ -23,498 +14,471 @@ type MasterItem = {
   city?: string;
   rating?: number;
   price?: string | number;
-  priceFrom?: string | number;
   availableNow?: boolean;
   availableToday?: boolean;
   lat?: number;
   lng?: number;
   avatar?: string;
-  image?: string;
-  images?: string[];
+  gallery?: string[];
   description?: string;
   paymentMethods?: string[] | string;
-  tags?: string[];
 };
 
 type RealMapProps = {
-  masters: MasterItem[];
-  mapMode?: 'map' | 'satellite';
-  activeCategory?: string;
-  selectedMasterId?: string | number | null;
-  likedMasterIds?: string[];
-  recenterToUserTrigger?: number;
-  language?: AppLanguage;
-  onMasterSelect?: (master: MasterItem) => void;
-  onMapBackgroundClick?: () => void;
-  onToggleLike?: (master: MasterItem) => void;
+  masters?: MasterItem[];
 };
 
-const londonCenter: [number, number] = [51.5074, -0.1278];
+const DEFAULT_MASTERS: MasterItem[] = [
+  {
+    id: 1,
+    name: 'Alex Hair Master',
+    category: 'Hair',
+    subcategory: 'Extensions',
+    city: 'London',
+    rating: 5,
+    price: '£80',
+    availableNow: true,
+    lat: 51.5074,
+    lng: -0.1278,
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=1200&auto=format&fit=crop',
+    ],
+    description:
+      'Luxury hair extensions, keratin bonds, tape-ins and nano ring services in London.',
+    paymentMethods: ['Cash', 'Card'],
+  },
+  {
+    id: 2,
+    name: 'Nails by Sofia',
+    category: 'Nails',
+    subcategory: 'Manicure',
+    city: 'London',
+    rating: 4.9,
+    price: '£35',
+    availableNow: false,
+    lat: 51.5155,
+    lng: -0.091,
+    avatar: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1200&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=1200&auto=format&fit=crop',
+    ],
+    description:
+      'Clean luxury manicure, BIAB, gel polish and elegant nail sets.',
+    paymentMethods: ['Card'],
+  },
+  {
+    id: 3,
+    name: 'Glow Skin Studio',
+    category: 'Beauty',
+    subcategory: 'Facial',
+    city: 'London',
+    rating: 4.8,
+    price: '£55',
+    availableNow: true,
+    lat: 51.5033,
+    lng: -0.1195,
+    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1200&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop',
+    ],
+    description:
+      'Facials, skin glow treatments and premium beauty care with a soft luxury touch.',
+    paymentMethods: ['Cash', 'Card'],
+  },
+];
 
-function getCategoryAccent(category?: string) {
-  const normalized = String(category || '').toLowerCase();
-
-  if (normalized === 'beauty') return '#ff4f93';
-  if (normalized === 'barber') return '#2d98ff';
-  if (normalized === 'wellness') return '#32c957';
-  if (normalized === 'home') return '#ff9f1a';
-  if (normalized === 'repairs') return '#f4b400';
-  if (normalized === 'tech') return '#9b5cff';
-  if (normalized === 'pets') return '#28c7d9';
-  if (normalized === 'transport') return '#2f7df6';
-  if (normalized === 'education') return '#7d52ff';
-
-  return '#ff4f93';
-}
-
-function getTileUrl(mode: 'map' | 'satellite' = 'map') {
-  if (mode === 'satellite') {
-    return 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
-  }
-
-  return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-}
-
-function normalizePaymentMethods(value: string[] | string | undefined): string[] {
-  if (Array.isArray(value)) return value;
-  if (typeof value === 'string' && value.trim()) return [value];
-  return ['cash', 'card'];
-}
-
-function paymentBadge(method: string, language: AppLanguage) {
-  const tr = t(language);
-  const normalized = String(method).toLowerCase();
-
-  if (normalized === 'cash') return { icon: '💵', label: tr.cash };
-  if (normalized === 'card') return { icon: '💳', label: tr.card };
-  if (normalized === 'wallet') return { icon: '📱', label: tr.wallet };
-
-  return { icon: '•', label: String(method) };
-}
-
-function buildMarkerIcon(
-  master: MasterItem,
-  isSelected: boolean,
-  isLiked: boolean
-): DivIcon {
-  const accent = getCategoryAccent(master.category);
-  const availabilityColor = master.availableNow ? '#2ed14f' : '#ff2d2d';
-  const avatar =
-    master.avatar ||
-    master.image ||
-    master.images?.[0] ||
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80';
-
-  const outerRing = isSelected ? 6 : 5;
-  const size = isSelected ? 78 : 72;
-  const photoSize = isSelected ? 58 : 54;
-  const likeBadgeSize = isSelected ? 30 : 28;
-  const statusBadgeSize = isSelected ? 20 : 18;
+function createPinIcon(image?: string, isActive?: boolean, availableNow?: boolean): DivIcon {
+  const borderColor = isActive ? '#ff4fa3' : '#ffffff';
+  const glowColor = availableNow ? '#33c65c' : '#d1d5db';
 
   return L.divIcon({
-    className: 'custom-master-pin',
+    className: '',
     html: `
-      <div style="position:relative;width:${size}px;height:${size + 18}px;">
+      <div style="position: relative; width: 58px; height: 58px;">
         <div style="
-          position:absolute;
-          left:50%;
-          top:${size - 4}px;
-          transform:translateX(-50%);
-          width:0;
-          height:0;
-          border-left:14px solid transparent;
-          border-right:14px solid transparent;
-          border-top:19px solid ${accent};
-          filter:drop-shadow(0 5px 8px rgba(0,0,0,0.16));
-        "></div>
-
-        <div style="
-          position:absolute;
-          left:50%;
-          top:0;
-          transform:translateX(-50%);
-          width:${size}px;
-          height:${size}px;
-          border-radius:999px;
-          background:#fff;
-          border:${outerRing}px solid ${accent};
-          box-shadow:0 7px 18px rgba(0,0,0,0.16);
-          overflow:hidden;
+          width: 58px;
+          height: 58px;
+          border-radius: 9999px;
+          overflow: hidden;
+          border: 4px solid ${borderColor};
+          box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+          background: #f3f4f6;
         ">
           <img
-            src="${avatar}"
-            alt="${master.name || master.title || 'Master'}"
-            style="
-              width:${photoSize}px;
-              height:${photoSize}px;
-              object-fit:cover;
-              border-radius:999px;
-              position:absolute;
-              left:50%;
-              top:50%;
-              transform:translate(-50%,-50%);
-              display:block;
-            "
+            src="${image || 'https://via.placeholder.com/200x200.png?text=Pro'}"
+            style="width:100%;height:100%;object-fit:cover;"
           />
         </div>
 
-        <div
-          class="pin-like-badge"
-          style="
-            position:absolute;
-            right:2px;
-            top:${size * 0.56}px;
-            width:${likeBadgeSize + 10}px;
-            height:${likeBadgeSize + 10}px;
-            background:#fff;
-            border:4px solid ${accent};
-            border-radius:999px;
-            box-shadow:0 4px 10px rgba(0,0,0,0.14);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            color:#ff2020;
-            font-size:${isLiked ? 16 : 0}px;
-            font-weight:900;
-            line-height:1;
-            cursor:pointer;
-          "
-        >
-          ${isLiked ? '♥' : ''}
-        </div>
+        <div style="
+          position:absolute;
+          right:-2px;
+          bottom:2px;
+          width:18px;
+          height:18px;
+          border-radius:9999px;
+          background:${glowColor};
+          border:4px solid #ffffff;
+        "></div>
 
         <div style="
           position:absolute;
-          right:${isLiked ? likeBadgeSize + 20 : 4}px;
-          top:${size * 0.46}px;
-          width:${statusBadgeSize + 10}px;
-          height:${statusBadgeSize + 10}px;
-          background:#fff;
-          border:4px solid ${availabilityColor};
-          border-radius:999px;
-          box-shadow:0 4px 10px rgba(0,0,0,0.12);
+          left:50%;
+          bottom:-10px;
+          transform:translateX(-50%);
+          width:0;
+          height:0;
+          border-left:10px solid transparent;
+          border-right:10px solid transparent;
+          border-top:14px solid ${isActive ? '#ff4fa3' : '#e879b6'};
         "></div>
       </div>
     `,
-    iconSize: [size, size + 18],
-    iconAnchor: [size / 2, size + 12],
+    iconSize: [58, 72],
+    iconAnchor: [29, 62],
+    popupAnchor: [0, -58],
   });
 }
 
-function MapEventsLayer({
-  onBackgroundClick,
-  ignoreNextMapClickRef,
-}: {
-  onBackgroundClick?: () => void;
-  ignoreNextMapClickRef: MutableRefObject<boolean>;
-}) {
-  useMapEvents({
-    click() {
-      if (ignoreNextMapClickRef.current) {
-        ignoreNextMapClickRef.current = false;
-        return;
-      }
-      onBackgroundClick?.();
-    },
-  });
-
-  return null;
-}
-
-function FitBoundsLayer({
-  masters,
-  userLocation,
-}: {
-  masters: MasterItem[];
-  userLocation: [number, number] | null;
-}) {
+function FlyToSelected({ selected }: { selected: MasterItem | null }) {
   const map = useMap();
 
   useEffect(() => {
-    const id = window.setTimeout(() => {
-      map.invalidateSize();
-    }, 80);
-
-    const points: [number, number][] = masters.map((item) => [
-      item.lat || londonCenter[0],
-      item.lng || londonCenter[1],
-    ]);
-
-    if (userLocation) {
-      points.push(userLocation);
-    }
-
-    if (!points.length) {
-      map.setView(londonCenter, 11);
-      return () => window.clearTimeout(id);
-    }
-
-    if (points.length === 1) {
-      map.setView(points[0], 11);
-      return () => window.clearTimeout(id);
-    }
-
-    const bounds = L.latLngBounds(points);
-    map.fitBounds(bounds.pad(0.22), { animate: true });
-
-    return () => window.clearTimeout(id);
-  }, [map, masters, userLocation]);
-
-  return null;
-}
-
-function UserLocationLayer({
-  onLocationFound,
-}: {
-  onLocationFound: (coords: [number, number] | null) => void;
-}) {
-  const map = useMap();
-
-  useEffect(() => {
-    let cancelled = false;
-
-    map.locate({
-      setView: false,
-      maxZoom: 14,
-      enableHighAccuracy: true,
-    });
-
-    const handleFound = (event: L.LocationEvent) => {
-      if (cancelled) return;
-      onLocationFound([event.latlng.lat, event.latlng.lng]);
-    };
-
-    const handleError = () => {
-      if (cancelled) return;
-      onLocationFound(null);
-    };
-
-    map.on('locationfound', handleFound);
-    map.on('locationerror', handleError);
-
-    return () => {
-      cancelled = true;
-      map.off('locationfound', handleFound);
-      map.off('locationerror', handleError);
-    };
-  }, [map, onLocationFound]);
-
-  return null;
-}
-
-function RecenterToUserLayer({
-  userLocation,
-  recenterToUserTrigger = 0,
-}: {
-  userLocation: [number, number] | null;
-  recenterToUserTrigger?: number;
-}) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (!userLocation) return;
-    if (!recenterToUserTrigger) return;
-
-    map.setView(userLocation, 14, { animate: true });
-  }, [map, userLocation, recenterToUserTrigger]);
-
-  return null;
-}
-
-export default function RealMap({
-  masters,
-  mapMode = 'map',
-  selectedMasterId,
-  likedMasterIds = [],
-  recenterToUserTrigger = 0,
-  language = 'EN',
-  onMasterSelect,
-  onMapBackgroundClick,
-  onToggleLike,
-}: RealMapProps) {
-  const ignoreNextMapClickRef = useRef(false);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-
-  const safeMasters = useMemo(() => {
-    return (masters || []).map((item, index) => {
-      const paymentTags = normalizePaymentMethods(item.paymentMethods).map((method) => {
-        const badge = paymentBadge(method, language);
-        return `${badge.icon} ${badge.label}`;
+    if (
+      selected &&
+      typeof selected.lat === 'number' &&
+      typeof selected.lng === 'number'
+    ) {
+      map.flyTo([selected.lat, selected.lng], 13, {
+        duration: 0.8,
       });
+    }
+  }, [selected, map]);
 
-      const fallbackImage =
-        item.avatar ||
-        item.image ||
-        item.images?.[0] ||
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80';
+  return null;
+}
 
-      return {
-        ...item,
-        id: item.id ?? String(index),
-        lat: typeof item.lat === 'number' ? item.lat : londonCenter[0],
-        lng: typeof item.lng === 'number' ? item.lng : londonCenter[1],
-        rating: item.rating ?? 4.7,
-        price: item.price ?? '45',
-        priceFrom: item.priceFrom ?? item.price ?? '45',
-        availableNow:
-          typeof item.availableNow === 'boolean'
-            ? item.availableNow
-            : typeof item.availableToday === 'boolean'
-            ? item.availableToday
-            : true,
-        avatar:
-          item.avatar ||
-          item.image ||
-          item.images?.[0] ||
-          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
-        image: item.image || item.avatar || item.images?.[0] || fallbackImage,
-        images:
-          item.images && item.images.length > 0
-            ? item.images
-            : [
-                fallbackImage,
-                'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=80',
-                'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
-              ],
-        tags: item.tags && item.tags.length > 0 ? item.tags : paymentTags,
-      };
+export default function RealMap({ masters = [] }: RealMapProps) {
+  const data = useMemo(() => {
+    const source = masters.length ? masters : DEFAULT_MASTERS;
+
+    return source.filter(
+      (item) =>
+        typeof item.lat === 'number' &&
+        typeof item.lng === 'number'
+    );
+  }, [masters]);
+
+  const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [selectedMaster, setSelectedMaster] = useState<MasterItem | null>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  const categories = useMemo(() => {
+    const unique = Array.from(
+      new Set(data.map((item) => item.category).filter(Boolean))
+    ) as string[];
+
+    return ['All', ...unique];
+  }, [data]);
+
+  const filteredMasters = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    return data.filter((master) => {
+      const matchesCategory =
+        activeCategory === 'All' || master.category === activeCategory;
+
+      const text = [
+        master.name,
+        master.title,
+        master.category,
+        master.subcategory,
+        master.city,
+        master.description,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      const matchesSearch = !q || text.includes(q);
+
+      return matchesCategory && matchesSearch;
     });
-  }, [masters, language]);
+  }, [data, search, activeCategory]);
 
-  const selectedMaster = useMemo(() => {
-    if (selectedMasterId === null || selectedMasterId === undefined) return null;
-    return safeMasters.find((item) => String(item.id) === String(selectedMasterId)) || null;
-  }, [safeMasters, selectedMasterId]);
+  useEffect(() => {
+    if (!selectedMaster && filteredMasters.length > 0) {
+      setSelectedMaster(filteredMasters[0]);
+    }
+  }, [filteredMasters, selectedMaster]);
+
+  useEffect(() => {
+    if (!selectedMaster) return;
+
+    const stillExists = filteredMasters.some(
+      (item) => String(item.id) === String(selectedMaster.id)
+    );
+
+    if (!stillExists) {
+      setSelectedMaster(filteredMasters[0] || null);
+      setActiveSlide(0);
+    }
+  }, [filteredMasters, selectedMaster]);
+
+  const currentGallery = selectedMaster?.gallery?.length
+    ? selectedMaster.gallery
+    : selectedMaster?.avatar
+    ? [selectedMaster.avatar]
+    : [];
+
+  const mapCenter: [number, number] =
+    selectedMaster && typeof selectedMaster.lat === 'number' && typeof selectedMaster.lng === 'number'
+      ? [selectedMaster.lat, selectedMaster.lng]
+      : filteredMasters.length > 0 &&
+        typeof filteredMasters[0].lat === 'number' &&
+        typeof filteredMasters[0].lng === 'number'
+      ? [filteredMasters[0].lat as number, filteredMasters[0].lng as number]
+      : [51.5074, -0.1278];
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        background: '#f3efe7',
-        touchAction: 'none',
-        overscrollBehavior: 'contain',
-        WebkitUserSelect: 'none',
-        userSelect: 'none',
-      }}
-    >
-      <MapContainer
-        center={londonCenter}
-        zoom={11}
-        dragging={true}
-        touchZoom={true}
-        doubleClickZoom={true}
-        scrollWheelZoom={false}
-        boxZoom={false}
-        keyboard={false}
-        style={{
-          width: '100%',
-          height: '100%',
-          touchAction: 'none',
-        }}
-        zoomControl={true}
-      >
-        <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url={getTileUrl(mapMode)}
-        />
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-[#f5f1e8]">
+      <div className="absolute inset-0 z-0">
+        <MapContainer
+          center={mapCenter}
+          zoom={11}
+          scrollWheelZoom
+          className="h-full w-full"
+        >
+          <TileLayer
+            attribution='&copy; OpenStreetMap contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
 
-        <UserLocationLayer onLocationFound={setUserLocation} />
-        <FitBoundsLayer masters={safeMasters} userLocation={userLocation} />
-        <RecenterToUserLayer
-          userLocation={userLocation}
-          recenterToUserTrigger={recenterToUserTrigger}
-        />
+          <FlyToSelected selected={selectedMaster} />
 
-        <MapEventsLayer
-          onBackgroundClick={onMapBackgroundClick}
-          ignoreNextMapClickRef={ignoreNextMapClickRef}
-        />
+          {filteredMasters.map((master) => {
+            if (
+              typeof master.lat !== 'number' ||
+              typeof master.lng !== 'number'
+            ) {
+              return null;
+            }
 
-        {userLocation ? (
-          <>
-            <CircleMarker
-              center={userLocation}
-              radius={16}
-              pathOptions={{
-                color: 'rgba(46,128,255,0.18)',
-                fillColor: 'rgba(46,128,255,0.18)',
-                fillOpacity: 1,
-                weight: 0,
-              }}
-            />
-            <CircleMarker
-              center={userLocation}
-              radius={8}
-              pathOptions={{
-                color: '#ffffff',
-                fillColor: '#2f8df5',
-                fillOpacity: 1,
-                weight: 3,
-              }}
-            />
-          </>
-        ) : null}
+            const isActive =
+              selectedMaster && String(selectedMaster.id) === String(master.id);
 
-        {safeMasters.map((master) => {
-          const isSelected = String(master.id) === String(selectedMasterId);
-          const isLiked = likedMasterIds.includes(String(master.id));
+            return (
+              <Marker
+                key={master.id}
+                position={[master.lat, master.lng]}
+                icon={createPinIcon(master.avatar, isActive, master.availableNow)}
+                eventHandlers={{
+                  click: () => {
+                    setSelectedMaster(master);
+                    setActiveSlide(0);
+                  },
+                }}
+              />
+            );
+          })}
+        </MapContainer>
+      </div>
 
-          return (
-            <Marker
-              key={String(master.id)}
-              position={[master.lat as number, master.lng as number]}
-              icon={buildMarkerIcon(master, isSelected, isLiked)}
-              eventHandlers={{
-                mousedown: () => {
-                  ignoreNextMapClickRef.current = true;
-                },
-                click: (event) => {
-                  ignoreNextMapClickRef.current = true;
+      <div className="absolute inset-x-0 top-0 z-[1000] p-4">
+        <div className="mx-auto max-w-3xl rounded-[28px] bg-[#f5f1e8]/95 p-3 backdrop-blur">
+          <div className="mb-3">
+            <div className="flex items-center gap-3 rounded-[26px] bg-white px-4 py-4 shadow-sm">
+              <span className="text-[24px]">🔎</span>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search masters, services, city"
+                className="w-full border-none bg-transparent text-[18px] outline-none"
+              />
+              {search ? (
+                <button
+                  onClick={() => setSearch('')}
+                  className="text-[28px] leading-none text-gray-400"
+                >
+                  ×
+                </button>
+              ) : null}
+            </div>
+          </div>
 
-                  const target = event.originalEvent?.target as HTMLElement | null;
-                  const clickedLike = target?.closest('.pin-like-badge');
+          <div className="mb-3 flex gap-3 overflow-x-auto pb-1">
+            {categories.map((category) => {
+              const count =
+                category === 'All'
+                  ? data.length
+                  : data.filter((item) => item.category === category).length;
 
-                  if (event.originalEvent) {
-                    L.DomEvent.stopPropagation(event.originalEvent as Event);
-                  }
+              const active = activeCategory === category;
 
-                  if (clickedLike) {
-                    onToggleLike?.(master);
-                    return;
-                  }
+              return (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  className={`flex shrink-0 items-center gap-3 rounded-full border px-5 py-4 text-[18px] font-semibold shadow-sm ${
+                    active
+                      ? 'border-pink-400 bg-white text-black'
+                      : 'border-gray-200 bg-white text-gray-800'
+                  }`}
+                >
+                  <span>❤️</span>
+                  <span>{category}</span>
+                  <span className="flex h-9 min-w-9 items-center justify-center rounded-full border border-gray-200 px-2 text-[18px]">
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-                  onMasterSelect?.(master);
-                },
-              }}
-            />
-          );
-        })}
-      </MapContainer>
+          <div className="rounded-[24px] bg-white/70 p-3">
+            <div className="mb-2 text-[18px] font-bold text-gray-600">
+              Professionals
+            </div>
+
+            {filteredMasters.length === 0 ? (
+              <div className="rounded-[22px] bg-white p-4 text-[17px] text-gray-500">
+                Nothing found
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredMasters.map((master) => {
+                  const active =
+                    selectedMaster &&
+                    String(selectedMaster.id) === String(master.id);
+
+                  return (
+                    <button
+                      key={master.id}
+                      onClick={() => {
+                        setSelectedMaster(master);
+                        setActiveSlide(0);
+                      }}
+                      className={`block w-full rounded-[22px] px-4 py-4 text-left ${
+                        active ? 'bg-pink-50' : 'bg-white'
+                      }`}
+                    >
+                      <div className="text-[20px] font-bold text-gray-900">
+                        {master.name || master.title || 'Professional'}
+                      </div>
+                      <div className="text-[16px] text-gray-500">
+                        {master.category || 'Beauty'}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="mt-3 flex justify-end">
+            <div className="rounded-full bg-[#e7f5df] px-6 py-4 text-[18px] font-semibold text-[#2f9e44]">
+              {filteredMasters.filter((item) => item.availableNow).length} pros available now
+            </div>
+          </div>
+        </div>
+      </div>
 
       {selectedMaster ? (
-        <div
-          style={{
-            position: 'absolute',
-            left: 12,
-            right: 12,
-            bottom: 18,
-            zIndex: 1200,
-            display: 'flex',
-            justifyContent: 'center',
-            pointerEvents: 'none',
-          }}
-        >
-          <div style={{ width: '100%', maxWidth: 420, pointerEvents: 'auto' }}>
-            <MapProfileCard
-              item={{
-                ...selectedMaster,
-                online: selectedMaster.availableNow,
-                priceFrom: selectedMaster.priceFrom ?? selectedMaster.price,
-              }}
-              onClose={() => onMapBackgroundClick?.()}
-            />
+        <div className="absolute inset-x-0 bottom-0 z-[1100] mx-auto w-full max-w-3xl p-4">
+          <div className="overflow-hidden rounded-[34px] bg-white shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
+            <div className="relative">
+              <img
+                src={currentGallery[activeSlide] || selectedMaster.avatar}
+                alt={selectedMaster.name || 'Master'}
+                className="h-[240px] w-full object-cover"
+              />
+
+              <button
+                onClick={() => setSelectedMaster(null)}
+                className="absolute right-5 top-5 flex h-16 w-16 items-center justify-center rounded-full bg-white text-[38px] leading-none text-gray-700 shadow"
+              >
+                ×
+              </button>
+
+              {currentGallery.length > 1 ? (
+                <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-3">
+                  {currentGallery.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveSlide(index)}
+                      className={`h-4 rounded-full ${
+                        activeSlide === index ? 'w-14 bg-white' : 'w-4 bg-white/70'
+                      }`}
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            <div className="p-6">
+              <h2 className="mb-1 text-[28px] font-extrabold text-gray-900">
+                {selectedMaster.name || selectedMaster.title || 'Professional'}
+              </h2>
+
+              <div className="mb-5 text-[18px] text-gray-500">
+                {selectedMaster.category || 'Beauty'} • {selectedMaster.city || 'London'}
+              </div>
+
+              <div className="mb-6 flex flex-wrap gap-3">
+                <div className="rounded-full bg-pink-50 px-5 py-3 text-[18px] font-bold text-pink-600">
+                  ★ {selectedMaster.rating || 5}
+                </div>
+
+                <div className="rounded-full bg-green-50 px-5 py-3 text-[18px] font-bold text-green-700">
+                  {selectedMaster.availableNow ? 'Доступен сейчас' : 'Не сейчас'}
+                </div>
+
+                <div className="rounded-full bg-gray-100 px-5 py-3 text-[18px] font-bold text-gray-700">
+                  From {selectedMaster.price || '£45'}
+                </div>
+              </div>
+
+              <p className="mb-6 text-[18px] leading-8 text-gray-700">
+                {selectedMaster.description || 'Premium beauty services in your area.'}
+              </p>
+
+              <div className="mb-8 flex flex-wrap gap-3">
+                {Array.isArray(selectedMaster.paymentMethods)
+                  ? selectedMaster.paymentMethods.map((method) => (
+                      <div
+                        key={method}
+                        className="rounded-full border border-gray-200 px-5 py-3 text-[18px] font-semibold text-gray-700"
+                      >
+                        {method === 'Cash' ? '💵 Cash' : method === 'Card' ? '💳 Card' : method}
+                      </div>
+                    ))
+                  : selectedMaster.paymentMethods
+                  ? (
+                    <div className="rounded-full border border-gray-200 px-5 py-3 text-[18px] font-semibold text-gray-700">
+                      {selectedMaster.paymentMethods}
+                    </div>
+                    )
+                  : null}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <button className="rounded-[24px] border border-gray-200 px-6 py-5 text-[18px] font-bold text-gray-800">
+                  ♡ Save
+                </button>
+
+                <button className="rounded-[24px] bg-[#4b2e1f] px-6 py-5 text-[18px] font-bold text-white">
+                  Book now
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       ) : null}
