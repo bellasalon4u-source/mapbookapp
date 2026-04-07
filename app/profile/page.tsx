@@ -5,10 +5,23 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../components/common/BottomNav';
 import { getSavedLanguage, type AppLanguage } from '../../services/i18n';
-import { getUserProfile, subscribeToUserProfile, type UserProfile } from '../services/userProfileStore';
-import { getBookings, subscribeToBookingsStore } from '../services/bookingsStore';
-import { getWalletState, subscribeToWalletStore } from '../services/walletStore';
-import { getReferralState, subscribeToReferralStore } from '../services/referralStore';
+import {
+  getUserProfile,
+  subscribeToUserProfile,
+  type UserProfile,
+} from '../services/userProfileStore';
+import {
+  getBookings,
+  subscribeToBookingsStore,
+} from '../services/bookingsStore';
+import {
+  getWalletState,
+  subscribeToWalletStore,
+} from '../services/walletStore';
+import {
+  getReferralState,
+  subscribeToReferralStore,
+} from '../services/referralStore';
 
 const profileTexts = {
   EN: {
@@ -533,11 +546,7 @@ export default function ProfilePage() {
             );
 
             if (!item.href) {
-              return (
-                <div key={item.id}>
-                  {content}
-                </div>
-              );
+              return <div key={item.id}>{content}</div>;
             }
 
             return (
@@ -552,4 +561,6 @@ export default function ProfilePage() {
       <BottomNav active="profile" />
     </main>
   );
-} вот текст .теперь дай готовое след задание чётко и правильно
+}
+ это текст page profile
+начала открываться новая версия .но перезагружается на старую .что делать
