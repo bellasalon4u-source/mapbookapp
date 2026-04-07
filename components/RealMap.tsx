@@ -11,6 +11,7 @@ import {
   CircleMarker,
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { t, type AppLanguage } from '../services/i18n';
 
 type MasterItem = {
   id: string | number;
@@ -37,6 +38,7 @@ type RealMapProps = {
   selectedMasterId?: string | number | null;
   likedMasterIds?: string[];
   recenterToUserTrigger?: number;
+  language?: AppLanguage;
   onMasterSelect?: (master: MasterItem) => void;
   onMapBackgroundClick?: () => void;
   onToggleLike?: (master: MasterItem) => void;
@@ -66,6 +68,23 @@ function getTileUrl(mode: 'map' | 'satellite' = 'map') {
   }
 
   return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+}
+
+function normalizePaymentMethods(value: string[] | string | undefined): string[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string' && value.trim()) return [value];
+  return ['cash', 'card'];
+}
+
+function paymentBadge(method: string, language: AppLanguage) {
+  const tr = t(language);
+  const normalized = String(method).toLowerCase();
+
+  if (normalized === 'cash') return { icon: '💵', label: tr.cash };
+  if (normalized === 'card') return { icon: '💳', label: tr.card };
+  if (normalized === 'wallet') return { icon: '📱', label: tr.wallet };
+
+  return { icon: '•', label: String(method) };
 }
 
 function buildMarkerIcon(
@@ -301,12 +320,15 @@ export default function RealMap({
   selectedMasterId,
   likedMasterIds = [],
   recenterToUserTrigger = 0,
+  language = 'EN',
   onMasterSelect,
   onMapBackgroundClick,
   onToggleLike,
 }: RealMapProps) {
   const ignoreNextMapClickRef = useRef(false);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+
+  const tr = t(language);
 
   const safeMasters = useMemo(() => {
     return (masters || []).map((item, index) => ({
@@ -320,13 +342,20 @@ export default function RealMap({
         typeof item.availableNow === 'boolean'
           ? item.availableNow
           : typeof item.availableToday === 'boolean'
-            ? item.availableToday
-            : true,
+          ? item.availableToday
+          : true,
       avatar:
         item.avatar ||
         'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
     }));
   }, [masters]);
+
+  const selectedMaster = useMemo(() => {
+    if (selectedMasterId === null || selectedMasterId === undefined) return null;
+    return (
+      safeMasters.find((item) => String(item.id) === String(selectedMasterId)) || null
+    );
+  }, [safeMasters, selectedMasterId]);
 
   return (
     <div
@@ -434,6 +463,242 @@ export default function RealMap({
           );
         })}
       </MapContainer>
+
+      {selectedMaster ? (
+        <div
+          style={{
+            position: 'absolute',
+            left: 12,
+            right: 12,
+            bottom: 18,
+            zIndex: 1200,
+            background: 'rgba(255,255,255,0.98)',
+            borderRadius: 24,
+            border: '1px solid #e9e2d8',
+            boxShadow: '0 14px 30px rgba(0,0,0,0.16)',
+            padding: 14,
+          }}
+        >
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <img
+              src={selectedMaster.avatar}
+              alt={selectedMaster.name || selectedMaster.title || 'Pro'}
+              style={{
+                width: 84,
+                height: 84,
+                borderRadius: 18,
+                objectFit: 'cover',
+                flexShrink: 0,
+                border: '1px solid #eee7de',
+              }}
+            />
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  gap: 8,
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: 17,
+                      fontWeight: 900,
+                      color: '#223145',
+                      lineHeight: 1.15,
+                    }}
+                  >
+                    {selectedMaster.name || selectedMaster.title || 'Pro'}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontSize: 13,
+                      color: '#6f7a86',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {selectedMaster.subcategory || selectedMaster.category || 'Service'}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontSize: 13,
+                      color: '#6f7a86',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {selectedMaster.city || 'London'}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => onMapBackgroundClick?.()}
+                  style={{
+                    border: 'none',
+                    background: '#f4efe8',
+                    color: '#6b7480',
+                    width: 34,
+                    height: 34,
+                    borderRadius: 999,
+                    fontSize: 18,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 8,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 8,
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    borderRadius: 999,
+                    background: '#fff5f8',
+                    color: '#ff4f93',
+                    padding: '6px 10px',
+                    fontSize: 12,
+                    fontWeight: 900,
+                  }}
+                >
+                  ★ {selectedMaster.rating || 4.8}
+                </div>
+
+                <div
+                  style={{
+                    borderRadius: 999,
+                    background: selectedMaster.availableNow ? '#eefbe9' : '#f4f5f7',
+                    color: selectedMaster.availableNow ? '#2f9c47' : '#7c8691',
+                    padding: '6px 10px',
+                    fontSize: 12,
+                    fontWeight: 900,
+                  }}
+                >
+                  {selectedMaster.availableNow ? tr.availableNow : tr.unavailableToday}
+                </div>
+
+                {selectedMaster.price ? (
+                  <div
+                    style={{
+                      borderRadius: 999,
+                      background: '#f5f1ea',
+                      color: '#263545',
+                      padding: '6px 10px',
+                      fontSize: 12,
+                      fontWeight: 900,
+                    }}
+                  >
+                    {tr.from} {selectedMaster.price}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          {selectedMaster.description ? (
+            <div
+              style={{
+                marginTop: 12,
+                fontSize: 14,
+                lineHeight: 1.4,
+                color: '#4d5865',
+                fontWeight: 600,
+              }}
+            >
+              {selectedMaster.description}
+            </div>
+          ) : null}
+
+          <div
+            style={{
+              marginTop: 12,
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+            }}
+          >
+            {normalizePaymentMethods(selectedMaster.paymentMethods).map((method) => {
+              const badge = paymentBadge(method, language);
+
+              return (
+                <div
+                  key={method}
+                  style={{
+                    border: '1px solid #ebe3d7',
+                    background: '#fff',
+                    borderRadius: 999,
+                    padding: '7px 11px',
+                    fontSize: 12,
+                    fontWeight: 800,
+                    color: '#2b3745',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <span>{badge.icon}</span>
+                  <span>{badge.label}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div
+            style={{
+              marginTop: 14,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 10,
+            }}
+          >
+            <button
+              onClick={() => onToggleLike?.(selectedMaster)}
+              style={{
+                border: '1px solid #eadfd2',
+                background: '#fff',
+                color: '#263545',
+                borderRadius: 16,
+                padding: '13px 12px',
+                fontSize: 14,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              {likedMasterIds.includes(String(selectedMaster.id)) ? '♥ Saved' : '♡ Save'}
+            </button>
+
+            <button
+              onClick={() => onMasterSelect?.(selectedMaster)}
+              style={{
+                border: 'none',
+                background: '#2f241c',
+                color: '#fff',
+                borderRadius: 16,
+                padding: '13px 12px',
+                fontSize: 14,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              {tr.bookNow}
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
