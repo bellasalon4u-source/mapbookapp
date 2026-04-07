@@ -12,6 +12,7 @@ import {
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { t, type AppLanguage } from '../services/i18n';
+import MapProfileCard from '../components/MapProfileCard';
 
 type MasterItem = {
   id: string | number;
@@ -22,13 +23,17 @@ type MasterItem = {
   city?: string;
   rating?: number;
   price?: string | number;
+  priceFrom?: string | number;
   availableNow?: boolean;
   availableToday?: boolean;
   lat?: number;
   lng?: number;
   avatar?: string;
+  image?: string;
+  images?: string[];
   description?: string;
   paymentMethods?: string[] | string;
+  tags?: string[];
 };
 
 type RealMapProps = {
@@ -87,15 +92,6 @@ function paymentBadge(method: string, language: AppLanguage) {
   return { icon: '•', label: String(method) };
 }
 
-function getSaveLabel(language: AppLanguage, isSaved: boolean) {
-  if (language === 'ES') return isSaved ? '♥ Guardado' : '♡ Guardar';
-  if (language === 'RU') return isSaved ? '♥ Сохранено' : '♡ Сохранить';
-  if (language === 'CZ') return isSaved ? '♥ Uloženo' : '♡ Uložit';
-  if (language === 'DE') return isSaved ? '♥ Gespeichert' : '♡ Speichern';
-  if (language === 'PL') return isSaved ? '♥ Zapisano' : '♡ Zapisz';
-  return isSaved ? '♥ Saved' : '♡ Save';
-}
-
 function buildMarkerIcon(
   master: MasterItem,
   isSelected: boolean,
@@ -105,6 +101,8 @@ function buildMarkerIcon(
   const availabilityColor = master.availableNow ? '#2ed14f' : '#ff2d2d';
   const avatar =
     master.avatar ||
+    master.image ||
+    master.images?.[0] ||
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80';
 
   const outerRing = isSelected ? 6 : 5;
@@ -337,27 +335,51 @@ export default function RealMap({
   const ignoreNextMapClickRef = useRef(false);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
-  const tr = t(language);
-
   const safeMasters = useMemo(() => {
-    return (masters || []).map((item, index) => ({
-      ...item,
-      id: item.id ?? String(index),
-      lat: typeof item.lat === 'number' ? item.lat : londonCenter[0],
-      lng: typeof item.lng === 'number' ? item.lng : londonCenter[1],
-      rating: item.rating ?? 4.7,
-      price: item.price ?? '45',
-      availableNow:
-        typeof item.availableNow === 'boolean'
-          ? item.availableNow
-          : typeof item.availableToday === 'boolean'
-          ? item.availableToday
-          : true,
-      avatar:
+    return (masters || []).map((item, index) => {
+      const paymentTags = normalizePaymentMethods(item.paymentMethods).map((method) => {
+        const badge = paymentBadge(method, language);
+        return `${badge.icon} ${badge.label}`;
+      });
+
+      const fallbackImage =
         item.avatar ||
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
-    }));
-  }, [masters]);
+        item.image ||
+        item.images?.[0] ||
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80';
+
+      return {
+        ...item,
+        id: item.id ?? String(index),
+        lat: typeof item.lat === 'number' ? item.lat : londonCenter[0],
+        lng: typeof item.lng === 'number' ? item.lng : londonCenter[1],
+        rating: item.rating ?? 4.7,
+        price: item.price ?? '45',
+        priceFrom: item.priceFrom ?? item.price ?? '45',
+        availableNow:
+          typeof item.availableNow === 'boolean'
+            ? item.availableNow
+            : typeof item.availableToday === 'boolean'
+            ? item.availableToday
+            : true,
+        avatar:
+          item.avatar ||
+          item.image ||
+          item.images?.[0] ||
+          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+        image: item.image || item.avatar || item.images?.[0] || fallbackImage,
+        images:
+          item.images && item.images.length > 0
+            ? item.images
+            : [
+                fallbackImage,
+                'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=80',
+                'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+              ],
+        tags: item.tags && item.tags.length > 0 ? item.tags : paymentTags,
+      };
+    });
+  }, [masters, language]);
 
   const selectedMaster = useMemo(() => {
     if (selectedMasterId === null || selectedMasterId === undefined) return null;
@@ -479,233 +501,20 @@ export default function RealMap({
             right: 12,
             bottom: 18,
             zIndex: 1200,
-            background: 'rgba(255,255,255,0.98)',
-            borderRadius: 24,
-            border: '1px solid #e9e2d8',
-            boxShadow: '0 14px 30px rgba(0,0,0,0.16)',
-            padding: 14,
+            display: 'flex',
+            justifyContent: 'center',
+            pointerEvents: 'none',
           }}
         >
-          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-            <img
-              src={selectedMaster.avatar}
-              alt={selectedMaster.name || selectedMaster.title || 'Pro'}
-              style={{
-                width: 84,
-                height: 84,
-                borderRadius: 18,
-                objectFit: 'cover',
-                flexShrink: 0,
-                border: '1px solid #eee7de',
+          <div style={{ width: '100%', maxWidth: 420, pointerEvents: 'auto' }}>
+            <MapProfileCard
+              item={{
+                ...selectedMaster,
+                online: selectedMaster.availableNow,
+                priceFrom: selectedMaster.priceFrom ?? selectedMaster.price,
               }}
+              onClose={() => onMapBackgroundClick?.()}
             />
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  gap: 8,
-                }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: 17,
-                      fontWeight: 900,
-                      color: '#223145',
-                      lineHeight: 1.15,
-                    }}
-                  >
-                    {selectedMaster.name || selectedMaster.title || 'Pro'}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 4,
-                      fontSize: 13,
-                      color: '#6f7a86',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {selectedMaster.subcategory || selectedMaster.category || 'Service'}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 4,
-                      fontSize: 13,
-                      color: '#6f7a86',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {selectedMaster.city || 'London'}
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => onMapBackgroundClick?.()}
-                  style={{
-                    border: 'none',
-                    background: '#f4efe8',
-                    color: '#6b7480',
-                    width: 34,
-                    height: 34,
-                    borderRadius: 999,
-                    fontSize: 18,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div
-                style={{
-                  marginTop: 8,
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 8,
-                  alignItems: 'center',
-                }}
-              >
-                <div
-                  style={{
-                    borderRadius: 999,
-                    background: '#fff5f8',
-                    color: '#ff4f93',
-                    padding: '6px 10px',
-                    fontSize: 12,
-                    fontWeight: 900,
-                  }}
-                >
-                  ★ {selectedMaster.rating || 4.8}
-                </div>
-
-                <div
-                  style={{
-                    borderRadius: 999,
-                    background: selectedMaster.availableNow ? '#eefbe9' : '#f4f5f7',
-                    color: selectedMaster.availableNow ? '#2f9c47' : '#7c8691',
-                    padding: '6px 10px',
-                    fontSize: 12,
-                    fontWeight: 900,
-                  }}
-                >
-                  {selectedMaster.availableNow ? tr.availableNow : tr.unavailableToday}
-                </div>
-
-                {selectedMaster.price ? (
-                  <div
-                    style={{
-                      borderRadius: 999,
-                      background: '#f5f1ea',
-                      color: '#263545',
-                      padding: '6px 10px',
-                      fontSize: 12,
-                      fontWeight: 900,
-                    }}
-                  >
-                    {tr.from} {selectedMaster.price}
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          {selectedMaster.description ? (
-            <div
-              style={{
-                marginTop: 12,
-                fontSize: 14,
-                lineHeight: 1.4,
-                color: '#4d5865',
-                fontWeight: 600,
-              }}
-            >
-              {selectedMaster.description}
-            </div>
-          ) : null}
-
-          <div
-            style={{
-              marginTop: 12,
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 8,
-            }}
-          >
-            {normalizePaymentMethods(selectedMaster.paymentMethods).map((method) => {
-              const badge = paymentBadge(method, language);
-
-              return (
-                <div
-                  key={method}
-                  style={{
-                    border: '1px solid #ebe3d7',
-                    background: '#fff',
-                    borderRadius: 999,
-                    padding: '7px 11px',
-                    fontSize: 12,
-                    fontWeight: 800,
-                    color: '#2b3745',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                  }}
-                >
-                  <span>{badge.icon}</span>
-                  <span>{badge.label}</span>
-                </div>
-              );
-            })}
-          </div>
-
-          <div
-            style={{
-              marginTop: 14,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 10,
-            }}
-          >
-            <button
-              onClick={() => onToggleLike?.(selectedMaster)}
-              style={{
-                border: '1px solid #eadfd2',
-                background: '#fff',
-                color: '#263545',
-                borderRadius: 16,
-                padding: '13px 12px',
-                fontSize: 14,
-                fontWeight: 900,
-                cursor: 'pointer',
-              }}
-            >
-              {getSaveLabel(
-                language,
-                likedMasterIds.includes(String(selectedMaster.id))
-              )}
-            </button>
-
-            <button
-              onClick={() => onMasterSelect?.(selectedMaster)}
-              style={{
-                border: 'none',
-                background: '#2f241c',
-                color: '#fff',
-                borderRadius: 16,
-                padding: '13px 12px',
-                fontSize: 14,
-                fontWeight: 900,
-                cursor: 'pointer',
-              }}
-            >
-              {tr.bookNow}
-            </button>
           </div>
         </div>
       ) : null}
