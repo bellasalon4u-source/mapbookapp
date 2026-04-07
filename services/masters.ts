@@ -36,66 +36,6 @@ export type MasterItem = {
 
 const masters: MasterItem[] = [
   {
-    id: 'bella-keratin-studio',
-    name: 'Bella Keratin Studio',
-    title: 'Hair Extensions Specialist',
-    city: 'London',
-    category: 'beauty',
-    subcategory: 'Hair',
-    avatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800&auto=format&fit=crop',
-    cover:
-      'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?q=80&w=1200&auto=format&fit=crop',
-    rating: 4.9,
-    priceFrom: 45,
-    availableNow: true,
-    reviews: 82,
-    description:
-      'Luxury hair extensions, keratin bonds, tape-ins and nano ring services in London.',
-    address: '21 Soho Square, London',
-    phone: '+44 7700 123456',
-    email: 'bella@mapbook.app',
-    social: '@bellakeratinstudio',
-    lat: 51.5074,
-    lng: -0.1278,
-    paymentMethods: ['cash', 'card'],
-    gallery: [
-      'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=1200&auto=format&fit=crop',
-    ],
-    services: [
-      {
-        slug: 'keratin-bonds',
-        title: 'Keratin Bonds',
-        duration: '2h 30m',
-        price: 180,
-        image:
-          'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=1200&auto=format&fit=crop',
-        description: 'Premium keratin bond installation for natural long-lasting result.',
-      },
-      {
-        slug: 'tape-in-extensions',
-        title: 'Tape-In Extensions',
-        duration: '1h 45m',
-        price: 150,
-        image:
-          'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200&auto=format&fit=crop',
-        description: 'Soft seamless tape-in method with natural blend.',
-      },
-      {
-        slug: 'nano-rings',
-        title: 'Nano Ring Extensions',
-        duration: '2h',
-        price: 220,
-        image:
-          'https://images.unsplash.com/photo-1523263685509-57c1d050d19b?q=80&w=1200&auto=format&fit=crop',
-        description: 'Discrete nano ring technique for fine hair.',
-      },
-    ],
-  },
-  {
     id: 'camden-brows-bar',
     name: 'Camden Brows Bar',
     title: 'Brow Specialist',
@@ -282,7 +222,7 @@ const masters: MasterItem[] = [
     email: 'greenhome@mapbook.app',
     social: '@greenhomecare',
     lat: 51.5206,
-    lng: -0.1550,
+    lng: -0.155,
     paymentMethods: ['cash', 'card'],
     gallery: [
       'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1200&auto=format&fit=crop',
@@ -329,7 +269,7 @@ const masters: MasterItem[] = [
     email: 'fixmate@mapbook.app',
     social: '@fixmaterepairs',
     lat: 51.5169,
-    lng: -0.1490,
+    lng: -0.149,
     paymentMethods: ['cash', 'card'],
     gallery: [
       'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?q=80&w=1200&auto=format&fit=crop',
@@ -375,7 +315,7 @@ const masters: MasterItem[] = [
     email: 'smarttech@mapbook.app',
     social: '@smarttechlondon',
     lat: 51.5152,
-    lng: -0.1410,
+    lng: -0.141,
     paymentMethods: ['cash', 'card'],
     gallery: [
       'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop',
