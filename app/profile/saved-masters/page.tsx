@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../services/i18n';
-import { getAllMasters } from '../../services/masters';
+import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import { getAllMasters } from '../../../services/masters';
 import {
   getLikedMasterIds,
   subscribeToLikedMasters,
   toggleLikedMaster,
-} from '../../services/likedMastersStore';
+} from '../../../services/likedMastersStore';
 
 const savedMastersTexts = {
   EN: {
@@ -70,7 +70,7 @@ export default function SavedMastersPage() {
   const router = useRouter();
 
   const [language, setLanguage] = useState<AppLanguage>('EN');
-  const [likedIds, setLikedIds] = useState<(string | number)[]>(getLikedMasterIds());
+  const [likedIds, setLikedIds] = useState<(string | number)[]>([]);
 
   useEffect(() => {
     const syncLanguage = () => {
@@ -93,10 +93,9 @@ export default function SavedMastersPage() {
     };
   }, []);
 
-  const text = useMemo(
-    () => savedMastersTexts[language as keyof typeof savedMastersTexts] || savedMastersTexts.EN,
-    [language]
-  );
+  const text =
+    savedMastersTexts[language as keyof typeof savedMastersTexts] ||
+    savedMastersTexts.EN;
 
   const allMasters = getAllMasters() as SavedMasterItem[];
 
