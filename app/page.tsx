@@ -14,7 +14,6 @@ import {
 import {
   getLikedMasterIds,
   subscribeToLikedMasters,
-  toggleLikedMaster,
 } from '../services/likedMastersStore';
 import BottomNav from '../components/BottomNav';
 import TopCategoriesBar from '../components/TopCategoriesBar';
@@ -447,12 +446,9 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('beauty');
   const [activeSubcategory, setActiveSubcategory] = useState('');
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
-  const [mapMode, setMapMode] = useState<'map' | 'satellite'>('map');
-  const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
   const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
   const [likedFilterMode, setLikedFilterMode] = useState<'none' | 'category' | 'all'>('none');
   const [listings, setListings] = useState<ListingItem[]>([]);
-  const [recenterToUserTrigger] = useState(0);
 
   const tr = t(language);
 
@@ -625,15 +621,6 @@ export default function HomePage() {
     });
   }, [allMasters, activeCategory, activeSubcategory, search, likedMasterIds, likedFilterMode]);
 
-  useEffect(() => {
-    setSelectedMaster(null);
-  }, [activeCategory, activeSubcategory, search, likedFilterMode]);
-
-  const mapKey = useMemo(() => {
-    const ids = filteredMasters.map((item: any) => String(item.id)).join('|');
-    return `${activeCategory}-${activeSubcategory}-${search}-${mapMode}-${likedFilterMode}-${ids}`;
-  }, [activeCategory, activeSubcategory, search, mapMode, likedFilterMode, filteredMasters]);
-
   const borderGradient = getLanguageBorder(language);
   const currentCategoryLabel = getCategoryLabel(activeCategory, language);
 
@@ -688,7 +675,6 @@ export default function HomePage() {
     setActiveCategory(String(result.master.category || 'beauty'));
     setActiveSubcategory(result.master.subcategory || '');
     setLikedFilterMode('none');
-    setSelectedMaster(result.master);
     setSearch(result.label);
     setSearchOpen(false);
     saveRecentSearch(result.label);
