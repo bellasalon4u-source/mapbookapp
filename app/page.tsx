@@ -1185,6 +1185,7 @@ export default function HomePage() {
                 selectedMasterId={selectedMaster?.id ?? null}
                 likedMasterIds={likedMasterIds}
                 recenterToUserTrigger={recenterToUserTrigger}
+                language={language}
                 onMasterSelect={(master) => {
                   setSelectedMaster(master);
                 }}
@@ -1193,6 +1194,12 @@ export default function HomePage() {
                 }}
                 onToggleLike={(master) => {
                   toggleLikedMaster(String(master.id));
+                }}
+                onViewMaster={(master) => {
+                  router.push(`/profile?id=${master.id}`);
+                }}
+                onBookMaster={(master) => {
+                  router.push(`/bookings?master=${master.id}`);
                 }}
               />
             </div>
