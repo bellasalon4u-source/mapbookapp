@@ -2,14 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import BottomNav from '../../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import BottomNav from '../components/common/BottomNav';
+import { getSavedLanguage, type AppLanguage } from '../services/i18n';
 import {
   getBookings,
   subscribeToBookingsStore,
   type BookingItem,
   type BookingStatus,
-} from '../../services/bookingsStore';
+} from '../app/services/bookingsStore';
 
 const bookingsTexts = {
   EN: {
@@ -164,7 +164,7 @@ export default function ProfileBookingsPage() {
             className={`rounded-full px-4 py-2 text-sm font-bold ${
               activeTab === 'upcoming'
                 ? 'bg-[#2f241c] text-white'
-                : 'bg-white text-[#3a2d24] border border-[#efe4d7]'
+                : 'border border-[#efe4d7] bg-white text-[#3a2d24]'
             }`}
           >
             {text.upcoming}
@@ -176,7 +176,7 @@ export default function ProfileBookingsPage() {
             className={`rounded-full px-4 py-2 text-sm font-bold ${
               activeTab === 'completed'
                 ? 'bg-[#2f241c] text-white'
-                : 'bg-white text-[#3a2d24] border border-[#efe4d7]'
+                : 'border border-[#efe4d7] bg-white text-[#3a2d24]'
             }`}
           >
             {text.completed}
@@ -188,7 +188,7 @@ export default function ProfileBookingsPage() {
             className={`rounded-full px-4 py-2 text-sm font-bold ${
               activeTab === 'cancelled'
                 ? 'bg-[#2f241c] text-white'
-                : 'bg-white text-[#3a2d24] border border-[#efe4d7]'
+                : 'border border-[#efe4d7] bg-white text-[#3a2d24]'
             }`}
           >
             {text.cancelled}
