@@ -1,17 +1,11 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import L, { type DivIcon, type LatLngExpression } from 'leaflet';
-import {
-  CircleMarker,
-  MapContainer,
-  Marker,
-  Popup,
-  TileLayer,
-  useMap,
-} from 'react-leaflet';
+import L from 'leaflet';
+import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { t, type AppLanguage } from '../services/i18n';
+
+type AppLanguage = string;
 
 type MasterItem = {
   id: string | number;
@@ -42,37 +36,44 @@ type RealMapProps = {
   language?: AppLanguage;
 };
 
-const LONDON_CENTER: LatLngExpression = [51.5074, -0.1278];
+const LONDON_CENTER: [number, number] = [51.5074, -0.1278];
 
-function MapBounds({ masters, selectedMasterId }: { masters: MasterItem[]; selectedMasterId?: string | number | null }) {
+function FitToMarkers({
+  masters,
+  selectedMasterId,
+}: {
+  masters: MasterItem[];
+  selectedMasterId?: string | number | null;
+}) {
   const map = useMap();
 
   useEffect(() => {
-    const validMasters = masters.filter(
-      (master) => typeof master.lat === 'number' && typeof master.lng === 'number'
-    );
-
-    if (!validMasters.length) {
+    if (!masters.length) {
       map.setView(LONDON_CENTER, 11);
       return;
     }
 
-    const selected = validMasters.find((m) => String(m.id) === String(selectedMasterId));
+    const selected = masters.find((m) => String(m.id) === String(selectedMasterId));
 
-    if (selected && typeof selected.lat === 'number' && typeof selected.lng === 'number') {
+    if (
+      selected &&
+      typeof selected.lat === 'number' &&
+      typeof selected.lng === 'number'
+    ) {
       map.setView([selected.lat, selected.lng], 14, { animate: true });
       return;
     }
 
-    if (validMasters.length === 1) {
-      map.setView([validMasters[0].lat as number, validMasters[0].lng as number], 13, {
-        animate: true,
-      });
+    if (masters.length === 1) {
+      const first = masters[0];
+      if (typeof first.lat === 'number' && typeof first.lng === 'number') {
+        map.setView([first.lat, first.lng], 13, { animate: true });
+      }
       return;
     }
 
     const bounds = L.latLngBounds(
-      validMasters.map((master) => [master.lat as number, master.lng as number] as [number, number])
+      masters.map((m) => [m.lat as number, m.lng as number] as [number, number])
     );
 
     map.fitBounds(bounds, {
@@ -84,12 +85,10 @@ function MapBounds({ masters, selectedMasterId }: { masters: MasterItem[]; selec
   return null;
 }
 
-function createMarkerIcon(isSelected: boolean, isAvailable: boolean): DivIcon {
-  const size = isSelected ? 26 : 22;
+function createPinIcon(isSelected: boolean, isAvailable: boolean) {
+  const size = isSelected ? 28 : 22;
   const border = isSelected ? 4 : 3;
-  const dotSize = isSelected ? 10 : 8;
-
-  const background = isAvailable ? '#21c45d' : '#ef4444';
+  const background = isAvailable ? '#22c55e' : '#ef4444';
   const ring = isSelected ? '#111827' : '#ffffff';
 
   return L.divIcon({
@@ -98,7 +97,7 @@ function createMarkerIcon(isSelected: boolean, isAvailable: boolean): DivIcon {
       <div style="
         width:${size}px;
         height:${size}px;
-        border-radius:999px;
+        border-radius:9999px;
         background:${background};
         border:${border}px solid ${ring};
         box-sizing:border-box;
@@ -107,16 +106,15 @@ function createMarkerIcon(isSelected: boolean, isAvailable: boolean): DivIcon {
         justify-content:center;
       ">
         <div style="
-          width:${dotSize}px;
-          height:${dotSize}px;
-          border-radius:999px;
+          width:8px;
+          height:8px;
+          border-radius:9999px;
           background:#ffffff;
         "></div>
       </div>
     `,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
-    popupAnchor: [0, -size / 2],
   });
 }
 
@@ -126,6 +124,34 @@ function getTileUrl(mapMode: 'map' | 'satellite') {
   }
 
   return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+}
+
+function getName(master: MasterItem) {
+  return master.name || master.title || 'Specialist';
+}
+
+function getCategory(master: MasterItem) {
+  return master.subcategory || master.category || 'service';
+}
+
+function getAvailabilityLabel(master: MasterItem, language?: string) {
+  const isAvailable = Boolean(master.availableNow || master.availableToday);
+
+  if (language === 'ru') {
+    return isAvailable ? 'Доступен сейчас' : 'Сейчас занят';
+  }
+
+  return isAvailable ? 'Available now' : 'Busy now';
+}
+
+function getPriceLabel(price?: string | number, language?: string) {
+  if (price === undefined || price === null || price === '') return null;
+
+  if (typeof price === 'number') {
+    return language === 'ru' ? `От £${price}` : `From £${price}`;
+  }
+
+  return String(price);
 }
 
 export default function RealMap({
@@ -140,210 +166,245 @@ export default function RealMap({
 }: RealMapProps) {
   const validMasters = useMemo(() => {
     return masters.filter(
-      (master) => typeof master.lat === 'number' && typeof master.lng === 'number'
+      (master) =>
+        typeof master.lat === 'number' &&
+        typeof master.lng === 'number'
     );
   }, [masters]);
 
   const filteredMasters = useMemo(() => {
-    if (!activeCategory || activeCategory === 'all') return validMasters;
+    if (!activeCategory || activeCategory === 'all') {
+      return validMasters;
+    }
+
+    const target = activeCategory.toLowerCase();
 
     return validMasters.filter((master) => {
       const category = (master.category || '').toLowerCase();
       const subcategory = (master.subcategory || '').toLowerCase();
-      const target = activeCategory.toLowerCase();
 
       return category.includes(target) || subcategory.includes(target);
     });
   }, [validMasters, activeCategory]);
 
+  const selectedMaster = useMemo(() => {
+    return (
+      filteredMasters.find((m) => String(m.id) === String(selectedMasterId)) ||
+      filteredMasters[0] ||
+      null
+    );
+  }, [filteredMasters, selectedMasterId]);
+
   return (
     <div
       style={{
+        position: 'relative',
         width: '100%',
         height: '100%',
         minHeight: '100%',
-        borderRadius: 24,
         overflow: 'hidden',
+        borderRadius: 24,
       }}
     >
       <MapContainer
         center={LONDON_CENTER}
         zoom={11}
-        scrollWheelZoom
+        scrollWheelZoom={true}
         style={{ width: '100%', height: '100%' }}
       >
         <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
+          attribution="&copy; OpenStreetMap contributors"
           url={getTileUrl(mapMode)}
         />
 
-        <MapBounds masters={filteredMasters} selectedMasterId={selectedMasterId} />
+        <FitToMarkers
+          masters={filteredMasters}
+          selectedMasterId={selectedMasterId}
+        />
 
         {filteredMasters.map((master) => {
           const isSelected = String(master.id) === String(selectedMasterId);
-          const isLiked = likedMasterIds.some((id) => String(id) === String(master.id));
           const isAvailable = Boolean(master.availableNow || master.availableToday);
 
           return (
             <Marker
-              key={master.id}
+              key={String(master.id)}
               position={[master.lat as number, master.lng as number]}
-              icon={createMarkerIcon(isSelected, isAvailable)}
+              icon={createPinIcon(isSelected, isAvailable)}
               eventHandlers={{
                 click: () => {
-                  onSelectMaster?.(master.id);
+                  if (onSelectMaster) {
+                    onSelectMaster(master.id);
+                  }
                 },
               }}
-            >
-              <CircleMarker
-                center={[master.lat as number, master.lng as number]}
-                radius={isSelected ? 16 : 13}
-                pathOptions={{
-                  color: isAvailable ? '#21c45d' : '#ef4444',
-                  weight: 2,
-                  fillOpacity: 0,
-                }}
-              />
-
-              <Popup maxWidth={320}>
-                <div
-                  style={{
-                    minWidth: 240,
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  {master.avatar ? (
-                    <img
-                      src={master.avatar}
-                      alt={master.name || master.title || 'master'}
-                      style={{
-                        width: '100%',
-                        height: 140,
-                        objectFit: 'cover',
-                        borderRadius: 16,
-                        marginBottom: 12,
-                      }}
-                    />
-                  ) : null}
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      gap: 12,
-                      alignItems: 'flex-start',
-                    }}
-                  >
-                    <div>
-                      <div
-                        style={{
-                          fontSize: 20,
-                          fontWeight: 800,
-                          lineHeight: 1.1,
-                          marginBottom: 6,
-                        }}
-                      >
-                        {master.name || master.title || 'Specialist'}
-                      </div>
-
-                      <div
-                        style={{
-                          fontSize: 14,
-                          opacity: 0.75,
-                          marginBottom: 12,
-                        }}
-                      >
-                        {master.subcategory || master.category || 'service'}
-                        {master.city ? ` • ${master.city}` : ''}
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => onToggleLike?.(master.id)}
-                      style={{
-                        border: 'none',
-                        background: 'transparent',
-                        cursor: 'pointer',
-                        fontSize: 22,
-                        lineHeight: 1,
-                      }}
-                    >
-                      {isLiked ? '❤️' : '🤍'}
-                    </button>
-                  </div>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: 8,
-                      marginBottom: 12,
-                    }}
-                  >
-                    {typeof master.rating === 'number' ? (
-                      <span
-                        style={{
-                          padding: '8px 12px',
-                          borderRadius: 999,
-                          background: '#fce7f3',
-                          color: '#be185d',
-                          fontWeight: 700,
-                          fontSize: 14,
-                        }}
-                      >
-                        ★ {master.rating.toFixed(1)}
-                      </span>
-                    ) : null}
-
-                    <span
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: 999,
-                        background: isAvailable ? '#dcfce7' : '#fee2e2',
-                        color: isAvailable ? '#15803d' : '#b91c1c',
-                        fontWeight: 700,
-                        fontSize: 14,
-                      }}
-                    >
-                      {isAvailable
-                        ? t('availableNow', language) || 'Доступен сейчас'
-                        : t('busy', language) || 'Недоступен'}
-                    </span>
-
-                    {master.price ? (
-                      <span
-                        style={{
-                          padding: '8px 12px',
-                          borderRadius: 999,
-                          background: '#f3f4f6',
-                          color: '#111827',
-                          fontWeight: 700,
-                          fontSize: 14,
-                        }}
-                      >
-                        {typeof master.price === 'number' ? `From £${master.price}` : master.price}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  {master.description ? (
-                    <div
-                      style={{
-                        fontSize: 14,
-                        lineHeight: 1.5,
-                        color: '#374151',
-                      }}
-                    >
-                      {master.description}
-                    </div>
-                  ) : null}
-                </div>
-              </Popup>
-            </Marker>
+            />
           );
         })}
       </MapContainer>
+
+      {selectedMaster ? (
+        <div
+          style={{
+            position: 'absolute',
+            left: 12,
+            right: 12,
+            bottom: 12,
+            zIndex: 1000,
+            background: '#ffffff',
+            borderRadius: 28,
+            overflow: 'hidden',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.18)',
+          }}
+        >
+          {selectedMaster.avatar ? (
+            <img
+              src={selectedMaster.avatar}
+              alt={getName(selectedMaster)}
+              style={{
+                width: '100%',
+                height: 220,
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: 220,
+                background: '#e5e7eb',
+              }}
+            />
+          )}
+
+          <div style={{ padding: 24 }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                gap: 12,
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 800,
+                    lineHeight: 1.1,
+                    color: '#0f172a',
+                    marginBottom: 10,
+                  }}
+                >
+                  {getName(selectedMaster)}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 16,
+                    color: '#6b7280',
+                    marginBottom: 16,
+                  }}
+                >
+                  {getCategory(selectedMaster)}
+                  {selectedMaster.city ? ` • ${selectedMaster.city}` : ''}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (onToggleLike) {
+                    onToggleLike(selectedMaster.id);
+                  }
+                }}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  fontSize: 28,
+                  cursor: 'pointer',
+                  lineHeight: 1,
+                }}
+              >
+                {likedMasterIds.some(
+                  (id) => String(id) === String(selectedMaster.id)
+                )
+                  ? '❤️'
+                  : '🤍'}
+              </button>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 12,
+                marginBottom: 18,
+              }}
+            >
+              {typeof selectedMaster.rating === 'number' ? (
+                <div
+                  style={{
+                    padding: '12px 18px',
+                    borderRadius: 9999,
+                    background: '#fce7f3',
+                    color: '#db2777',
+                    fontSize: 18,
+                    fontWeight: 800,
+                  }}
+                >
+                  ★ {selectedMaster.rating.toFixed(1)}
+                </div>
+              ) : null}
+
+              <div
+                style={{
+                  padding: '12px 18px',
+                  borderRadius: 9999,
+                  background: selectedMaster.availableNow || selectedMaster.availableToday
+                    ? '#dcfce7'
+                    : '#fee2e2',
+                  color: selectedMaster.availableNow || selectedMaster.availableToday
+                    ? '#15803d'
+                    : '#b91c1c',
+                  fontSize: 18,
+                  fontWeight: 800,
+                }}
+              >
+                {getAvailabilityLabel(selectedMaster, language)}
+              </div>
+
+              {getPriceLabel(selectedMaster.price, language) ? (
+                <div
+                  style={{
+                    padding: '12px 18px',
+                    borderRadius: 9999,
+                    background: '#f3f4f6',
+                    color: '#374151',
+                    fontSize: 18,
+                    fontWeight: 800,
+                  }}
+                >
+                  {getPriceLabel(selectedMaster.price, language)}
+                </div>
+              ) : null}
+            </div>
+
+            {selectedMaster.description ? (
+              <div
+                style={{
+                  fontSize: 16,
+                  lineHeight: 1.6,
+                  color: '#374151',
+                }}
+              >
+                {selectedMaster.description}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
