@@ -28,33 +28,6 @@ const RealMap = dynamic(() => import('../components/RealMap'), {
   ssr: false,
 });
 
-const popularServices = [
-  {
-    id: 'hair-styling',
-    title: 'Hair Styling',
-    image:
-      'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'phone-repair',
-    title: 'Phone Repair',
-    image:
-      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'home-cleaning',
-    title: 'Home Cleaning',
-    image:
-      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'dog-walking',
-    title: 'Dog Walking',
-    image:
-      'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80',
-  },
-];
-
 const popularSearches = [
   'Dog hotel',
   'Carpet cleaning',
@@ -505,7 +478,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    const loadLiked = () => setLikedMasterIds(getLikedMasterIds());
+    const loadLiked = () => setLikedMasterIds(getLikedMasterIds().map(String));
     loadLiked();
     return subscribeToLikedMasters(loadLiked);
   }, []);
@@ -514,7 +487,18 @@ export default function HomePage() {
     const loadPromotions = () => {
       const userLat = 51.4066;
       const userLng = -0.6759;
-      setPromotions(getVisiblePromotionsForLocation(userLat, userLng, activeCategory));
+
+      const categoryPromotions = getVisiblePromotionsForLocation(
+        userLat,
+        userLng,
+        activeCategory
+      );
+
+      const fallbackPromotions = getVisiblePromotionsForLocation(userLat, userLng);
+
+      setPromotions(
+        categoryPromotions.length > 0 ? categoryPromotions : fallbackPromotions
+      );
     };
 
     loadPromotions();
@@ -1321,8 +1305,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '12px 14px 0' }}>
-          {promotions.length > 0 && (
+        {promotions.length > 0 && (
+          <section style={{ padding: '12px 14px 0' }}>
             <div style={{ marginBottom: 18 }}>
               <div
                 style={{
@@ -1362,7 +1346,11 @@ export default function HomePage() {
                   display: 'flex',
                   gap: 12,
                   overflowX: 'auto',
+                  overflowY: 'hidden',
                   paddingBottom: 6,
+                  WebkitOverflowScrolling: 'touch',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
                 }}
               >
                 {promotions.map((promo) => (
@@ -1440,58 +1428,8 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
-          )}
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 900, color: '#223145' }}>
-              {tr.popularServices}
-            </h2>
-
-            <button
-              onClick={() => router.push('/services')}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                fontSize: 24,
-                color: '#9aa0a8',
-                lineHeight: 1,
-                cursor: 'pointer',
-              }}
-            >
-              ›
-            </button>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
-            {popularServices.map((service) => (
-              <button
-                key={service.id}
-                onClick={() => runQuickSearch(service.title)}
-                style={{ border: 'none', background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}
-              >
-                <div
-                  style={{
-                    width: '100%',
-                    aspectRatio: '0.9 / 1',
-                    borderRadius: 14,
-                    overflow: 'hidden',
-                    background: '#ddd',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.07)',
-                  }}
-                >
-                  <img
-                    src={service.image}
-                    alt={service.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  />
-                </div>
-                <div style={{ marginTop: 7, fontSize: 11, lineHeight: 1.2, fontWeight: 800, color: '#253140' }}>
-                  {service.title}
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
+          </section>
+        )}
       </div>
 
       <BottomNav />
