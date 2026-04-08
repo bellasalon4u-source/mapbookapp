@@ -23,30 +23,46 @@ const RealMap = dynamic(() => import('../components/RealMap'), {
   ssr: false,
 });
 
-const popularServices = [
+const promotedOffers = [
   {
-    id: 'hair-styling',
-    title: 'Hair Styling',
+    id: 'promo-1',
+    title: 'Keratin Hair Extensions',
+    subtitle: '20% off this week',
     image:
       'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80',
+    badge: 'Sponsored',
+    search: 'Hair extensions',
+    accent: '#ff4f93',
   },
   {
-    id: 'phone-repair',
-    title: 'Phone Repair',
+    id: 'promo-2',
+    title: 'Barber Fade + Beard',
+    subtitle: 'From £25 today',
     image:
-      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=900&q=80',
+    badge: 'Sponsored',
+    search: 'Barber',
+    accent: '#2d98ff',
   },
   {
-    id: 'home-cleaning',
-    title: 'Home Cleaning',
+    id: 'promo-3',
+    title: 'Relax Massage Offer',
+    subtitle: 'Available nearby now',
+    image:
+      'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=900&q=80',
+    badge: 'Sponsored',
+    search: 'Massage',
+    accent: '#32c957',
+  },
+  {
+    id: 'promo-4',
+    title: 'Deep Cleaning Promo',
+    subtitle: 'Book in your area',
     image:
       'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'dog-walking',
-    title: 'Dog Walking',
-    image:
-      'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80',
+    badge: 'Sponsored',
+    search: 'Home Cleaning',
+    accent: '#ff9f1a',
   },
 ];
 
@@ -434,6 +450,15 @@ function formatAdTime(totalSeconds: number) {
   const hours = Math.floor(safe / 3600);
   const minutes = Math.floor((safe % 3600) / 60);
   return `${hours}h ${String(minutes).padStart(2, '0')}m`;
+}
+
+function getAdsTitle(language: AppLanguage) {
+  if (language === 'ES') return 'Ofertas calientes cerca de ti';
+  if (language === 'RU') return 'Горячие предложения рядом с вами';
+  if (language === 'CZ') return 'Horké nabídky poblíž vás';
+  if (language === 'DE') return 'Heiße Angebote in deiner Nähe';
+  if (language === 'PL') return 'Gorące oferty w pobliżu';
+  return 'Hot offers near you';
 }
 
 export default function HomePage() {
@@ -1290,7 +1315,7 @@ export default function HomePage() {
                   toggleLikedMaster(String(master.id));
                 }}
                 onViewMaster={(master) => {
-                  router.push(`/master/${master.id}`);
+                  router.push(`/booking/${master.id}`);
                 }}
                 onBookMaster={(master) => {
                   router.push(`/booking/${master.id}`);
@@ -1301,13 +1326,13 @@ export default function HomePage() {
         </section>
 
         <section style={{ padding: '12px 14px 0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 900, color: '#223145' }}>
-              {tr.popularServices}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 900, color: '#1f2430' }}>
+              {getAdsTitle(language)}
             </h2>
 
             <button
-              onClick={() => router.push('/services')}
+              onClick={() => router.push('/profile')}
               style={{
                 border: 'none',
                 background: 'transparent',
@@ -1321,31 +1346,93 @@ export default function HomePage() {
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
-            {popularServices.map((service) => (
+          <div
+            style={{
+              display: 'flex',
+              gap: 12,
+              overflowX: 'auto',
+              paddingBottom: 8,
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
+          >
+            {promotedOffers.map((offer) => (
               <button
-                key={service.id}
-                onClick={() => runQuickSearch(service.title)}
-                style={{ border: 'none', background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer' }}
+                key={offer.id}
+                onClick={() => runQuickSearch(offer.search)}
+                style={{
+                  border: '1px solid #e9e1d5',
+                  background: '#fff',
+                  borderRadius: 20,
+                  padding: 0,
+                  minWidth: 220,
+                  maxWidth: 220,
+                  overflow: 'hidden',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  boxShadow: '0 6px 18px rgba(0,0,0,0.06)',
+                  flexShrink: 0,
+                }}
               >
                 <div
                   style={{
-                    width: '100%',
-                    aspectRatio: '0.9 / 1',
-                    borderRadius: 14,
+                    position: 'relative',
+                    height: 128,
                     overflow: 'hidden',
                     background: '#ddd',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.07)',
                   }}
                 >
                   <img
-                    src={service.image}
-                    alt={service.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    src={offer.image}
+                    alt={offer.title}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
                   />
+
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 10,
+                      left: 10,
+                      borderRadius: 999,
+                      background: 'rgba(255,255,255,0.92)',
+                      color: offer.accent,
+                      fontSize: 11,
+                      fontWeight: 900,
+                      padding: '6px 10px',
+                    }}
+                  >
+                    {offer.badge}
+                  </div>
                 </div>
-                <div style={{ marginTop: 7, fontSize: 11, lineHeight: 1.2, fontWeight: 800, color: '#253140' }}>
-                  {service.title}
+
+                <div style={{ padding: 12 }}>
+                  <div
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 900,
+                      color: '#1f2430',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {offer.title}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: '#6a7480',
+                    }}
+                  >
+                    {offer.subtitle}
+                  </div>
                 </div>
               </button>
             ))}
