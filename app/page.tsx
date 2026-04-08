@@ -461,7 +461,6 @@ export default function HomePage() {
   const router = useRouter();
   const baseMasters = getAllMasters();
   const searchWrapperRef = useRef<HTMLDivElement | null>(null);
-  const promotionsSectionRef = useRef<HTMLDivElement | null>(null);
 
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -748,6 +747,13 @@ export default function HomePage() {
   };
 
   const openPromotionView = (promo: PromotionItem) => {
+    const matchedMaster = findPromotionMaster(promo, allMasters);
+
+    if (matchedMaster) {
+      router.push(`/master/${matchedMaster.id}`);
+      return;
+    }
+
     setActiveCategory(String(promo.categoryId || 'beauty'));
     setActiveSubcategory('');
     setLikedFilterMode('none');
@@ -755,19 +761,6 @@ export default function HomePage() {
     setSearchOpen(false);
     saveRecentSearch(promo.title);
     setRecentSearches(readRecentSearches());
-
-    const matchedMaster = findPromotionMaster(promo, allMasters);
-
-    if (matchedMaster) {
-      setSelectedMaster(matchedMaster);
-    }
-
-    window.setTimeout(() => {
-      promotionsSectionRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }, 50);
   };
 
   const openPromotionBooking = (promo: PromotionItem) => {
@@ -785,13 +778,6 @@ export default function HomePage() {
     setSearchOpen(false);
     saveRecentSearch(promo.title);
     setRecentSearches(readRecentSearches());
-
-    window.setTimeout(() => {
-      promotionsSectionRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }, 50);
   };
 
   return (
@@ -1386,7 +1372,7 @@ export default function HomePage() {
         </section>
 
         {promotions.length > 0 && (
-          <section ref={promotionsSectionRef} style={{ padding: '12px 14px 0' }}>
+          <section style={{ padding: '12px 14px 0' }}>
             <div style={{ marginBottom: 18 }}>
               <div
                 style={{
