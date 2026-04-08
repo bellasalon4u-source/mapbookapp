@@ -414,10 +414,54 @@ function formatAdTime(totalSeconds: number) {
   return `${hours}h ${String(minutes).padStart(2, '0')}m`;
 }
 
+function findPromotionMaster(promo: PromotionItem, masters: any[]) {
+  const normalizedCategory = String(promo.categoryId || '').toLowerCase().trim();
+  const normalizedTitle = normalizeText(promo.title);
+  const titleWords = normalizedTitle.split(' ').filter((word) => word.length > 2);
+
+  const exactByMasterId = masters.find(
+    (master: any) => String(master.id) === String(promo.masterId)
+  );
+
+  if (exactByMasterId) return exactByMasterId;
+
+  const sameCategory = masters.filter(
+    (master: any) => String(master.category || '').toLowerCase().trim() === normalizedCategory
+  );
+
+  const best = sameCategory
+    .map((master: any) => {
+      const haystack = normalizeText(
+        [
+          master.name || '',
+          master.title || '',
+          master.subcategory || '',
+          master.description || '',
+        ].join(' ')
+      );
+
+      let score = 0;
+
+      if (haystack.includes(normalizedTitle)) score += 100;
+
+      titleWords.forEach((word) => {
+        if (haystack.includes(word)) score += 20;
+      });
+
+      return { master, score };
+    })
+    .sort((a, b) => b.score - a.score)[0];
+
+  if (best && best.score > 0) return best.master;
+
+  return sameCategory[0] || null;
+}
+
 export default function HomePage() {
   const router = useRouter();
   const baseMasters = getAllMasters();
   const searchWrapperRef = useRef<HTMLDivElement | null>(null);
+  const promotionsSectionRef = useRef<HTMLDivElement | null>(null);
 
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -701,6 +745,53 @@ export default function HomePage() {
     setSearchOpen(true);
     saveRecentSearch(value);
     setRecentSearches(readRecentSearches());
+  };
+
+  const openPromotionView = (promo: PromotionItem) => {
+    setActiveCategory(String(promo.categoryId || 'beauty'));
+    setActiveSubcategory('');
+    setLikedFilterMode('none');
+    setSearch(promo.title);
+    setSearchOpen(false);
+    saveRecentSearch(promo.title);
+    setRecentSearches(readRecentSearches());
+
+    const matchedMaster = findPromotionMaster(promo, allMasters);
+
+    if (matchedMaster) {
+      setSelectedMaster(matchedMaster);
+    }
+
+    window.setTimeout(() => {
+      promotionsSectionRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 50);
+  };
+
+  const openPromotionBooking = (promo: PromotionItem) => {
+    const matchedMaster = findPromotionMaster(promo, allMasters);
+
+    if (matchedMaster) {
+      router.push(`/booking/${matchedMaster.id}`);
+      return;
+    }
+
+    setActiveCategory(String(promo.categoryId || 'beauty'));
+    setActiveSubcategory('');
+    setLikedFilterMode('none');
+    setSearch(promo.title);
+    setSearchOpen(false);
+    saveRecentSearch(promo.title);
+    setRecentSearches(readRecentSearches());
+
+    window.setTimeout(() => {
+      promotionsSectionRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 50);
   };
 
   return (
@@ -1295,7 +1386,7 @@ export default function HomePage() {
         </section>
 
         {promotions.length > 0 && (
-          <section style={{ padding: '12px 14px 0' }}>
+          <section ref={promotionsSectionRef} style={{ padding: '12px 14px 0' }}>
             <div style={{ marginBottom: 18 }}>
               <div
                 style={{
@@ -1343,77 +1434,127 @@ export default function HomePage() {
                 }}
               >
                 {promotions.map((promo) => (
-                  <button
+                  <div
                     key={promo.id}
-                    onClick={() => router.push('/profile')}
                     style={{
-                      border: 'none',
                       background: '#fff',
                       borderRadius: 26,
                       overflow: 'hidden',
                       minWidth: 250,
                       maxWidth: 250,
                       boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-                      padding: 0,
-                      textAlign: 'left',
-                      cursor: 'pointer',
                       flexShrink: 0,
                     }}
                   >
-                    <div style={{ position: 'relative' }}>
-                      <img
-                        src={promo.image}
-                        alt={promo.title}
-                        style={{
-                          width: '100%',
-                          height: 170,
-                          objectFit: 'cover',
-                          display: 'block',
-                        }}
-                      />
+                    <button
+                      onClick={() => openPromotionView(promo)}
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        padding: 0,
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        display: 'block',
+                        width: '100%',
+                      }}
+                    >
+                      <div style={{ position: 'relative' }}>
+                        <img
+                          src={promo.image}
+                          alt={promo.title}
+                          style={{
+                            width: '100%',
+                            height: 170,
+                            objectFit: 'cover',
+                            display: 'block',
+                          }}
+                        />
 
-                      <div
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 12,
+                            left: 12,
+                            background: '#ffffff',
+                            color: '#ff4f93',
+                            borderRadius: 999,
+                            padding: '8px 14px',
+                            fontSize: 12,
+                            fontWeight: 900,
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+                          }}
+                        >
+                          Sponsored
+                        </div>
+                      </div>
+
+                      <div style={{ padding: '14px 16px 12px' }}>
+                        <div
+                          style={{
+                            fontSize: 16,
+                            fontWeight: 900,
+                            color: '#1f2430',
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {promo.title}
+                        </div>
+
+                        <div
+                          style={{
+                            marginTop: 8,
+                            fontSize: 13,
+                            fontWeight: 700,
+                            color: '#6b7280',
+                          }}
+                        >
+                          {promo.subtitle || 'Special offer near you'}
+                        </div>
+                      </div>
+                    </button>
+
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: 10,
+                        padding: '0 16px 16px',
+                      }}
+                    >
+                      <button
+                        onClick={() => openPromotionView(promo)}
                         style={{
-                          position: 'absolute',
-                          top: 12,
-                          left: 12,
-                          background: '#ffffff',
-                          color: '#ff4f93',
-                          borderRadius: 999,
-                          padding: '8px 14px',
-                          fontSize: 12,
+                          height: 42,
+                          borderRadius: 14,
+                          border: '1px solid #e6ded2',
+                          background: '#fff',
+                          color: '#223145',
+                          fontSize: 14,
                           fontWeight: 900,
-                          boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+                          cursor: 'pointer',
                         }}
                       >
-                        Sponsored
-                      </div>
-                    </div>
+                        View
+                      </button>
 
-                    <div style={{ padding: '14px 16px 18px' }}>
-                      <div
+                      <button
+                        onClick={() => openPromotionBooking(promo)}
                         style={{
-                          fontSize: 16,
+                          height: 42,
+                          border: 'none',
+                          borderRadius: 14,
+                          background: '#ff4f93',
+                          color: '#fff',
+                          fontSize: 14,
                           fontWeight: 900,
-                          color: '#1f2430',
-                          lineHeight: 1.2,
+                          cursor: 'pointer',
+                          boxShadow: '0 6px 14px rgba(255,79,147,0.25)',
                         }}
                       >
-                        {promo.title}
-                      </div>
-
-                      <div
-                        style={{
-                          marginTop: 8,
-                          fontSize: 13,
-                          fontWeight: 700,
-                          color: '#6b7280',
-                        }}
-                      >
-                        {promo.subtitle || 'Special offer near you'}
-                      </div>
+                        Book
+                      </button>
                     </div>
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>
