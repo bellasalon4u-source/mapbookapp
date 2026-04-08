@@ -429,6 +429,13 @@ function languageFlag(language: AppLanguage) {
   return '🇬🇧';
 }
 
+function formatAdTime(totalSeconds: number) {
+  const safe = Math.max(0, totalSeconds);
+  const hours = Math.floor(safe / 3600);
+  const minutes = Math.floor((safe % 3600) / 60);
+  return `${hours}h ${String(minutes).padStart(2, '0')}m`;
+}
+
 export default function HomePage() {
   const router = useRouter();
   const baseMasters = getAllMasters();
@@ -448,6 +455,9 @@ export default function HomePage() {
   const [recenterToUserTrigger] = useState(0);
 
   const tr = t(language);
+
+  const [adSecondsLeft, setAdSecondsLeft] = useState(12 * 3600 + 24 * 60);
+  const [adViews] = useState(184);
   const hasUnreadProfileUpdates = true;
 
   useEffect(() => {
@@ -457,6 +467,14 @@ export default function HomePage() {
   useEffect(() => {
     saveLanguage(language);
   }, [language]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setAdSecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const handleOutside = (event: MouseEvent | TouchEvent) => {
@@ -716,7 +734,7 @@ export default function HomePage() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr auto auto',
+                gridTemplateColumns: '1fr auto auto auto',
                 gap: 8,
                 alignItems: 'center',
                 background: '#ffffff',
@@ -726,7 +744,7 @@ export default function HomePage() {
                 border: '1px solid #ece7df',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
                 <span style={{ fontSize: 20, color: '#2f8df5' }}>🔎</span>
                 <input
                   value={search}
@@ -810,6 +828,51 @@ export default function HomePage() {
               >
                 <span style={{ fontSize: 20 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
+              </button>
+
+              <button
+                onClick={() => router.push('/profile/promotions')}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  cursor: 'pointer',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    color: '#ff3b30',
+                    fontWeight: 900,
+                    fontSize: 16,
+                    lineHeight: 1,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <span style={{ fontSize: 14 }}>⏱</span>
+                  <span>{formatAdTime(adSecondsLeft)}</span>
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    color: '#ff3b30',
+                    fontWeight: 900,
+                    fontSize: 16,
+                    lineHeight: 1,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <span style={{ fontSize: 14 }}>👁</span>
+                  <span>{adViews}</span>
+                </div>
               </button>
 
               <div style={{ position: 'relative' }}>
