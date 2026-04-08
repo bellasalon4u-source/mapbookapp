@@ -733,191 +733,209 @@ export default function HomePage() {
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr auto auto auto',
-                gap: 8,
-                alignItems: 'center',
                 background: '#ffffff',
-                borderRadius: 20,
-                padding: '10px 10px 10px 14px',
+                borderRadius: 24,
+                padding: 10,
                 boxShadow: '0 6px 18px rgba(0,0,0,0.07)',
                 border: '1px solid #ece7df',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                <span style={{ fontSize: 20, color: '#2f8df5' }}>🔎</span>
-                <input
-                  value={search}
-                  onFocus={() => setSearchOpen(true)}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setSearchOpen(true);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      const first =
-                        smartResults[0] ||
-                        subcategoryResults[0] ||
-                        categoryResults[0] ||
-                        proResults[0];
-
-                      if (first) {
-                        selectSearchResult(first);
-                      } else if (search.trim()) {
-                        saveRecentSearch(search);
-                        setRecentSearches(readRecentSearches());
-                        setSearchOpen(false);
-                      }
-                    }
-                  }}
-                  placeholder={tr.searchPlaceholder}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto auto',
+                  gap: 8,
+                  alignItems: 'center',
+                }}
+              >
+                <div
                   style={{
-                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
                     minWidth: 0,
-                    border: 'none',
-                    outline: 'none',
-                    background: 'transparent',
-                    fontSize: 15,
-                    color: '#2b2f36',
+                    height: 46,
+                    padding: '0 4px 0 2px',
                   }}
-                />
-
-                {search ? (
-                  <button
-                    onClick={() => {
-                      setSearch('');
-                      setSearchOpen(false);
+                >
+                  <span style={{ fontSize: 20, color: '#111111' }}>🔎</span>
+                  <input
+                    value={search}
+                    onFocus={() => setSearchOpen(true)}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setSearchOpen(true);
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const first =
+                          smartResults[0] ||
+                          subcategoryResults[0] ||
+                          categoryResults[0] ||
+                          proResults[0];
+
+                        if (first) {
+                          selectSearchResult(first);
+                        } else if (search.trim()) {
+                          saveRecentSearch(search);
+                          setRecentSearches(readRecentSearches());
+                          setSearchOpen(false);
+                        }
+                      }
+                    }}
+                    placeholder={tr.searchPlaceholder}
                     style={{
+                      flex: 1,
+                      minWidth: 0,
                       border: 'none',
+                      outline: 'none',
                       background: 'transparent',
-                      fontSize: 18,
-                      color: '#85909c',
-                      cursor: 'pointer',
+                      fontSize: 15,
+                      color: '#2b2f36',
+                    }}
+                  />
+
+                  {search ? (
+                    <button
+                      onClick={() => {
+                        setSearch('');
+                        setSearchOpen(false);
+                      }}
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        fontSize: 18,
+                        color: '#85909c',
+                        cursor: 'pointer',
+                        padding: 0,
+                      }}
+                    >
+                      ✕
+                    </button>
+                  ) : null}
+                </div>
+
+                <button
+                  onClick={() => {
+                    const next = nextLanguage(language);
+                    setLanguage(next);
+                    saveLanguage(next);
+                  }}
+                  style={{
+                    border: 'none',
+                    background: '#fff',
+                    color: '#1f2430',
+                    borderRadius: 999,
+                    minWidth: 82,
+                    height: 46,
+                    padding: '0 12px',
+                    fontSize: 15,
+                    fontWeight: 800,
+                    boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span style={{ fontSize: 20 }}>{languageFlag(language)}</span>
+                  <span>{language}</span>
+                </button>
+
+                <div style={{ position: 'relative' }}>
+                  <button
+                    onClick={() => router.push('/profile')}
+                    style={{
+                      border: '2px solid #fff',
+                      background: '#f4efe7',
+                      borderRadius: 999,
+                      width: 46,
+                      height: 46,
                       padding: 0,
+                      overflow: 'hidden',
+                      boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
+                      cursor: 'pointer',
+                      display: 'block',
                     }}
                   >
-                    ✕
+                    <img
+                      src={baseMasters[0]?.avatar}
+                      alt="Profile"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                    />
                   </button>
-                ) : null}
+
+                  {hasUnreadProfileUpdates ? (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: 2,
+                        right: 2,
+                        width: 11,
+                        height: 11,
+                        borderRadius: '50%',
+                        background: '#ff3b30',
+                        border: '2px solid #ffffff',
+                        boxShadow: '0 2px 6px rgba(255,59,48,0.35)',
+                      }}
+                    />
+                  ) : null}
+                </div>
               </div>
 
-              <button
-                onClick={() => {
-                  const next = nextLanguage(language);
-                  setLanguage(next);
-                  saveLanguage(next);
-                }}
+              <div
                 style={{
-                  border: 'none',
-                  background: '#fff',
-                  color: '#1f2430',
-                  borderRadius: 999,
-                  minWidth: 82,
-                  height: 46,
-                  padding: '0 12px',
-                  fontSize: 15,
-                  fontWeight: 800,
-                  boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
+                  marginTop: 8,
+                  padding: '4px 2px 0',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 6,
-                  cursor: 'pointer',
+                  justifyContent: 'flex-end',
+                  gap: 16,
                 }}
               >
-                <span style={{ fontSize: 20 }}>{languageFlag(language)}</span>
-                <span>{language}</span>
-              </button>
-
-              <button
-                onClick={() => router.push('/profile/promotions')}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  padding: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  cursor: 'pointer',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    color: '#ff3b30',
-                    fontWeight: 900,
-                    fontSize: 16,
-                    lineHeight: 1,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <span style={{ fontSize: 14 }}>⏱</span>
-                  <span>{formatAdTime(adSecondsLeft)}</span>
-                </div>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    color: '#ff3b30',
-                    fontWeight: 900,
-                    fontSize: 16,
-                    lineHeight: 1,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <span style={{ fontSize: 14 }}>👁</span>
-                  <span>{adViews}</span>
-                </div>
-              </button>
-
-              <div style={{ position: 'relative' }}>
                 <button
                   onClick={() => router.push('/profile')}
                   style={{
-                    border: '2px solid #fff',
-                    background: '#f4efe7',
-                    borderRadius: 999,
-                    width: 46,
-                    height: 46,
+                    border: 'none',
+                    background: 'transparent',
                     padding: 0,
-                    overflow: 'hidden',
-                    boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
                     cursor: 'pointer',
-                    display: 'block',
+                    fontWeight: 900,
+                    fontSize: 16,
+                    lineHeight: 1,
                   }}
                 >
-                  <img
-                    src={baseMasters[0]?.avatar}
-                    alt="Profile"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
-                    }}
-                  />
+                  <span style={{ color: '#ff3b30', fontSize: 14 }}>⏱</span>
+                  <span style={{ color: '#ff3b30' }}>{formatAdTime(adSecondsLeft)}</span>
                 </button>
 
-                {hasUnreadProfileUpdates ? (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: 2,
-                      right: 2,
-                      width: 11,
-                      height: 11,
-                      borderRadius: '50%',
-                      background: '#ff3b30',
-                      border: '2px solid #ffffff',
-                      boxShadow: '0 2px 6px rgba(255,59,48,0.35)',
-                    }}
-                  />
-                ) : null}
+                <button
+                  onClick={() => router.push('/profile')}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    cursor: 'pointer',
+                    fontWeight: 900,
+                    fontSize: 16,
+                    lineHeight: 1,
+                  }}
+                >
+                  <span style={{ color: '#19b44a', fontSize: 16 }}>👁</span>
+                  <span style={{ color: '#ff3b30' }}>{adViews}</span>
+                </button>
               </div>
             </div>
 
