@@ -487,18 +487,7 @@ export default function HomePage() {
     const loadPromotions = () => {
       const userLat = 51.4066;
       const userLng = -0.6759;
-
-      const categoryPromotions = getVisiblePromotionsForLocation(
-        userLat,
-        userLng,
-        activeCategory
-      );
-
-      const fallbackPromotions = getVisiblePromotionsForLocation(userLat, userLng);
-
-      setPromotions(
-        categoryPromotions.length > 0 ? categoryPromotions : fallbackPromotions
-      );
+      setPromotions(getVisiblePromotionsForLocation(userLat, userLng));
     };
 
     loadPromotions();
@@ -507,7 +496,7 @@ export default function HomePage() {
     return () => {
       unsubscribe();
     };
-  }, [activeCategory]);
+  }, []);
 
   const listingMasters = useMemo(() => {
     return listings.map((item, index) => listingToMaster(item, index));
