@@ -372,7 +372,7 @@ export default function TopCategoriesBar({
 
                           <span
                             style={{
-                              color,
+                              color: '#111111',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap',
@@ -491,7 +491,7 @@ export default function TopCategoriesBar({
                               style={{
                                 border: `1px solid ${color}55`,
                                 background: 'rgba(255,255,255,0.52)',
-                                color,
+                                color: '#111111',
                                 borderRadius: 999,
                                 padding: '8px 11px',
                                 fontSize: 11,
@@ -584,7 +584,7 @@ export default function TopCategoriesBar({
               style={{
                 fontSize: 11,
                 fontWeight: 900,
-                color: colorMap.more,
+                color: '#111111',
                 lineHeight: 1,
                 whiteSpace: 'nowrap',
               }}
@@ -671,7 +671,7 @@ export default function TopCategoriesBar({
                     style={{
                       fontSize: isActive ? 12 : 11,
                       fontWeight: 900,
-                      color,
+                      color: '#111111',
                       lineHeight: 1,
                       whiteSpace: 'nowrap',
                     }}
