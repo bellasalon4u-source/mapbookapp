@@ -448,6 +448,7 @@ export default function HomePage() {
   const [recenterToUserTrigger] = useState(0);
 
   const tr = t(language);
+  const hasUnreadProfileUpdates = true;
 
   useEffect(() => {
     setRecentSearches(readRecentSearches());
@@ -811,31 +812,50 @@ export default function HomePage() {
                 <span>{language}</span>
               </button>
 
-              <button
-                onClick={() => router.push('/profile')}
-                style={{
-                  border: '2px solid #fff',
-                  background: '#f4efe7',
-                  borderRadius: 999,
-                  width: 46,
-                  height: 46,
-                  padding: 0,
-                  overflow: 'hidden',
-                  boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
-                  cursor: 'pointer',
-                }}
-              >
-                <img
-                  src={baseMasters[0]?.avatar}
-                  alt="Profile"
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => router.push('/profile')}
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
+                    border: '2px solid #fff',
+                    background: '#f4efe7',
+                    borderRadius: 999,
+                    width: 46,
+                    height: 46,
+                    padding: 0,
+                    overflow: 'hidden',
+                    boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
+                    cursor: 'pointer',
                     display: 'block',
                   }}
-                />
-              </button>
+                >
+                  <img
+                    src={baseMasters[0]?.avatar}
+                    alt="Profile"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
+                  />
+                </button>
+
+                {hasUnreadProfileUpdates ? (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: 2,
+                      right: 2,
+                      width: 11,
+                      height: 11,
+                      borderRadius: '50%',
+                      background: '#ff3b30',
+                      border: '2px solid #ffffff',
+                      boxShadow: '0 2px 6px rgba(255,59,48,0.35)',
+                    }}
+                  />
+                ) : null}
+              </div>
             </div>
 
             {searchOpen ? (
