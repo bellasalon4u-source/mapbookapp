@@ -35,8 +35,8 @@ const defaultPromotions: PromotionItem[] = [
     centerLat: 51.5074,
     centerLng: -0.1278,
     radiusKm: 15,
-    startAt: '2026-04-08T08:00:00.000Z',
-    endAt: '2026-04-12T20:00:00.000Z',
+    startAt: '2026-04-01T08:00:00.000Z',
+    endAt: '2027-12-31T20:00:00.000Z',
     createdAt: '2026-04-08T07:30:00.000Z',
     status: 'active',
     views: 184,
@@ -52,8 +52,8 @@ const defaultPromotions: PromotionItem[] = [
     centerLat: 51.5154,
     centerLng: -0.141,
     radiusKm: 10,
-    startAt: '2026-04-08T09:00:00.000Z',
-    endAt: '2026-04-10T21:00:00.000Z',
+    startAt: '2026-04-01T09:00:00.000Z',
+    endAt: '2027-12-31T21:00:00.000Z',
     createdAt: '2026-04-08T08:10:00.000Z',
     status: 'active',
     views: 96,
@@ -69,8 +69,8 @@ const defaultPromotions: PromotionItem[] = [
     centerLat: 51.5099,
     centerLng: -0.1181,
     radiusKm: 8,
-    startAt: '2026-04-08T10:00:00.000Z',
-    endAt: '2026-04-11T18:00:00.000Z',
+    startAt: '2026-04-01T10:00:00.000Z',
+    endAt: '2027-12-31T18:00:00.000Z',
     createdAt: '2026-04-08T08:40:00.000Z',
     status: 'active',
     views: 71,
@@ -176,7 +176,7 @@ function isInsidePromotionRadius(
 }
 
 export function getPromotions() {
-  return readStore();
+  return readStore().sort((a, b) => toTime(a.createdAt) - toTime(b.createdAt));
 }
 
 export function getPromotionById(id: string) {
@@ -196,24 +196,31 @@ export function getVisiblePromotionsForLocation(
   userLng: number,
   categoryId?: string
 ) {
-  const normalizedCategory = String(categoryId || '')
-    .toLowerCase()
-    .trim();
+  const normalizedCategory = String(categoryId || '').toLowerCase().trim();
+  const active = getActivePromotions();
 
-  return getActivePromotions()
-    .filter((item) => {
-      if (normalizedCategory && item.categoryId.toLowerCase() !== normalizedCategory) {
-        return false;
-      }
+  const categoryItems = normalizedCategory
+    ? active.filter((item) => item.categoryId.toLowerCase() === normalizedCategory)
+    : active;
 
-      return isInsidePromotionRadius(item, userLat, userLng);
-    })
-    .sort((a, b) => toTime(a.createdAt) - toTime(b.createdAt));
+  const inRadius = categoryItems.filter((item) =>
+    isInsidePromotionRadius(item, userLat, userLng)
+  );
+
+  if (inRadius.length > 0) {
+    return inRadius.sort((a, b) => toTime(a.createdAt) - toTime(b.createdAt));
+  }
+
+  if (categoryItems.length > 0) {
+    return categoryItems.sort((a, b) => toTime(a.createdAt) - toTime(b.createdAt));
+  }
+
+  return active.sort((a, b) => toTime(a.createdAt) - toTime(b.createdAt));
 }
 
 export function addPromotion(item: PromotionItem) {
   const current = readStore();
-  writeStore([item, ...current]);
+  writeStore([...current, item]);
 }
 
 export function updatePromotion(id: string, updates: Partial<PromotionItem>) {
