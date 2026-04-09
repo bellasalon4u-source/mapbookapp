@@ -290,7 +290,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       RU: 'Питомцы',
       CZ: 'Mazlíčci',
       DE: 'Haustiere',
-      PL: 'Zwierzęta',
+      PL: 'Zwierzęта',
     },
     fashion: {
       EN: 'Fashion',
@@ -560,7 +560,7 @@ export default function HomePage() {
           if (seenPromotionIdsRef.current.has(promoId)) return;
 
           seenPromotionIdsRef.current.add(promoId);
-          incrementPromotionViews(promoId, 1);
+          incrementPromotionViews(promoId);
         });
       },
       {
@@ -784,26 +784,12 @@ export default function HomePage() {
   };
 
   const openPromotionView = (promo: PromotionItem) => {
-    incrementPromotionViews(promo.id, 1);
-
-    const matchedMaster = findPromotionMaster(promo, allMasters);
-
-    if (matchedMaster) {
-      router.push(`/master/${matchedMaster.id}`);
-      return;
-    }
-
-    setActiveCategory(String(promo.categoryId || 'beauty'));
-    setActiveSubcategory('');
-    setLikedFilterMode('none');
-    setSearch(promo.title);
-    setSearchOpen(false);
-    saveRecentSearch(promo.title);
-    setRecentSearches(readRecentSearches());
+    incrementPromotionViews(promo.id);
+    router.push(`/promotion/${promo.id}`);
   };
 
   const openPromotionBooking = (promo: PromotionItem) => {
-    incrementPromotionViews(promo.id, 1);
+    incrementPromotionViews(promo.id);
 
     const matchedMaster = findPromotionMaster(promo, allMasters);
 
