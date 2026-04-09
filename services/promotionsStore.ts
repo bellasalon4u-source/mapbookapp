@@ -15,6 +15,14 @@ export type PromotionItem = {
   createdAt: string;
   status: PromotionStatus;
   views: number;
+  description?: string;
+  included?: string[];
+  oldPrice?: string;
+  newPrice?: string;
+  validUntil?: string;
+  area?: string;
+  address?: string;
+  distance?: string;
 };
 
 type PromotionsListener = () => void;
@@ -40,6 +48,21 @@ const defaultPromotions: PromotionItem[] = [
     createdAt: '2026-04-08T07:30:00.000Z',
     status: 'active',
     views: 184,
+    description:
+      'Get a professional keratin hair extensions service with a personalised consultation, colour match and a natural blend finish. Perfect for clients who want extra length, extra volume and a seamless result.',
+    included: [
+      'Personal consultation',
+      'Colour matching',
+      'Keratin extension application',
+      'Blend cut and styling',
+      'Aftercare advice',
+    ],
+    oldPrice: '£150',
+    newPrice: '£120',
+    validUntil: '20 April',
+    area: 'Camden, London',
+    address: '24 Camden High Street, London',
+    distance: '1.2 miles away',
   },
   {
     id: 'promo-2',
@@ -57,6 +80,20 @@ const defaultPromotions: PromotionItem[] = [
     createdAt: '2026-04-08T08:10:00.000Z',
     status: 'active',
     views: 96,
+    description:
+      'Fresh barber fade with beard shaping for a clean modern look. Ideal for a quick refresh before work, events or weekends.',
+    included: [
+      'Skin fade or taper fade',
+      'Beard shaping',
+      'Neck clean-up',
+      'Styling finish',
+    ],
+    oldPrice: '£35',
+    newPrice: '£25',
+    validUntil: 'Today',
+    area: 'Soho, London',
+    address: '18 Wardour Street, London',
+    distance: '0.8 miles away',
   },
   {
     id: 'promo-3',
@@ -74,6 +111,20 @@ const defaultPromotions: PromotionItem[] = [
     createdAt: '2026-04-08T08:40:00.000Z',
     status: 'active',
     views: 71,
+    description:
+      'A calming massage session designed to help you relax, release tension and reset. Includes a complimentary aromatherapy upgrade.',
+    included: [
+      '60-minute massage',
+      'Aromatherapy upgrade',
+      'Relaxing treatment room',
+      'Aftercare tips',
+    ],
+    oldPrice: '£70',
+    newPrice: '£60',
+    validUntil: 'This week',
+    area: 'Covent Garden, London',
+    address: '12 Floral Street, London',
+    distance: '1.5 miles away',
   },
 ];
 
@@ -85,16 +136,30 @@ function canUseStorage() {
   return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
 }
 
+function normalizePromotion(item: PromotionItem): PromotionItem {
+  return {
+    ...item,
+    description: item.description || '',
+    included: Array.isArray(item.included) ? item.included : [],
+    oldPrice: item.oldPrice || '',
+    newPrice: item.newPrice || '',
+    validUntil: item.validUntil || '',
+    area: item.area || '',
+    address: item.address || '',
+    distance: item.distance || '',
+  };
+}
+
 function readStore(): PromotionItem[] {
   if (!canUseStorage()) {
-    return defaultPromotions;
+    return defaultPromotions.map(normalizePromotion);
   }
 
   const raw = window.localStorage.getItem(STORAGE_KEY);
 
   if (!raw) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPromotions));
-    return defaultPromotions;
+    return defaultPromotions.map(normalizePromotion);
   }
 
   try {
@@ -102,13 +167,13 @@ function readStore(): PromotionItem[] {
 
     if (!Array.isArray(parsed) || parsed.length === 0) {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPromotions));
-      return defaultPromotions;
+      return defaultPromotions.map(normalizePromotion);
     }
 
-    return parsed;
+    return parsed.map(normalizePromotion);
   } catch {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPromotions));
-    return defaultPromotions;
+    return defaultPromotions.map(normalizePromotion);
   }
 }
 
@@ -220,13 +285,13 @@ export function getVisiblePromotionsForLocation(
 
 export function addPromotion(item: PromotionItem) {
   const current = readStore();
-  writeStore([...current, item]);
+  writeStore([...current, normalizePromotion(item)]);
 }
 
 export function updatePromotion(id: string, updates: Partial<PromotionItem>) {
   const current = readStore();
   const next = current.map((item) =>
-    item.id === id ? { ...item, ...updates } : item
+    item.id === id ? normalizePromotion({ ...item, ...updates }) : item
   );
   writeStore(next);
 }
@@ -250,5 +315,5 @@ export function subscribeToPromotionsStore(listener: PromotionsListener) {
 }
 
 export function resetPromotionsStore() {
-  writeStore(defaultPromotions);
+  writeStore(defaultPromotions.map(normalizePromotion));
 }
