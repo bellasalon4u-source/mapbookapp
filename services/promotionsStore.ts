@@ -231,10 +231,12 @@ export function updatePromotion(id: string, updates: Partial<PromotionItem>) {
   writeStore(next);
 }
 
-export function incrementPromotionViews(id: string) {
+export function incrementPromotionViews(id: string, amount = 1) {
+  if (amount <= 0) return;
+
   const current = readStore();
   const next = current.map((item) =>
-    item.id === id ? { ...item, views: item.views + 1 } : item
+    item.id === id ? { ...item, views: item.views + amount } : item
   );
   writeStore(next);
 }
