@@ -83,7 +83,6 @@ function getLabels(language: AppLang) {
       subtitlePreviewDefault: 'Специальное предложение',
       categoryBeauty: 'Beauty',
       removePhoto: 'Удалить фото',
-      paymentDraftSaved: 'Черновик рекламы сохранён',
     };
   }
 
@@ -129,7 +128,6 @@ function getLabels(language: AppLang) {
       subtitlePreviewDefault: 'Oferta especial',
       categoryBeauty: 'Beauty',
       removePhoto: 'Eliminar foto',
-      paymentDraftSaved: 'Borrador del anuncio guardado',
     };
   }
 
@@ -174,7 +172,6 @@ function getLabels(language: AppLang) {
     subtitlePreviewDefault: 'Special offer',
     categoryBeauty: 'Beauty',
     removePhoto: 'Remove photo',
-    paymentDraftSaved: 'Promotion draft saved',
   };
 }
 
@@ -199,7 +196,7 @@ export default function NewPromotionPage() {
 
   const [title, setTitle] = useState('Keratin Hair Extensions');
   const [description, setDescription] = useState(
-    language === 'RU'
+    normalizeLanguage(getSavedLanguage()) === 'RU'
       ? 'Профессиональное наращивание волос с кератином. Блеск, длина и объём на месяцы вперёд.'
       : 'Professional keratin hair extensions. Shine, length and volume for months ahead.'
   );
@@ -236,10 +233,7 @@ export default function NewPromotionPage() {
   }, [radiusKm, durationDays]);
 
   const categoryLabel = useMemo(() => {
-    return (
-      categories.find((item) => item.id === categoryId)?.label ||
-      labels.categoryBeauty
-    );
+    return categories.find((item) => item.id === categoryId)?.label || labels.categoryBeauty;
   }, [categoryId, labels.categoryBeauty]);
 
   const previewTitle = title.trim() || 'Keratin Hair Extensions';
@@ -301,15 +295,6 @@ export default function NewPromotionPage() {
     setPhotos((prev) =>
       prev.map((item) => (item.id === photoId ? { ...item, ...patch } : item))
     );
-  };
-
-  const movePhoto = (fromIndex: number, toIndex: number) => {
-    setPhotos((prev) => {
-      const next = [...prev];
-      const [moved] = next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, moved);
-      return next;
-    });
   };
 
   const goToPayment = () => {
@@ -1043,96 +1028,114 @@ export default function NewPromotionPage() {
                   boxShadow: '0 10px 24px rgba(0,0,0,0.05)',
                 }}
               >
-                <div style={{ display: 'flex', gap: 0, height: 120, background: '#f3f4f6' }}>
-                  {photos.length > 0 ? (
-                    <>
-                      <div style={{ flex: photos.length === 1 ? 1 : 1.3, overflow: 'hidden' }}>
-                        <img
-                          src={photos[0].src}
-                          alt="Preview main"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            display: 'block',
-                            transform: getPhotoTransform(photos[0]),
-                          }}
-                        />
-                      </div>
-
-                      {photos.length > 1 ? (
-                        <div
-                          style={{
-                            flex: 1,
-                            display: 'grid',
-                            gridTemplateRows: photos.length >= 4 ? '1fr 1fr' : '1fr',
-                            gap: 0,
-                          }}
-                        >
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
-                            {photos[1] ? (
-                              <img
-                                src={photos[1].src}
-                                alt="Preview extra"
-                                style={{
-                                  width: '100%',
-                                  height: '100%',
-                                  objectFit: 'cover',
-                                  display: 'block',
-                                  transform: getPhotoTransform(photos[1]),
-                                }}
-                              />
-                            ) : (
-                              <div />
-                            )}
-
-                            {photos[2] ? (
-                              <img
-                                src={photos[2].src}
-                                alt="Preview extra"
-                                style={{
-                                  width: '100%',
-                                  height: '100%',
-                                  objectFit: 'cover',
-                                  display: 'block',
-                                  transform: getPhotoTransform(photos[2]),
-                                }}
-                              />
-                            ) : (
-                              <div />
-                            )}
-                          </div>
-
-                          {photos[3] ? (
-                            <img
-                              src={photos[3].src}
-                              alt="Preview extra"
-                              style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                                display: 'block',
-                                transform: getPhotoTransform(photos[3]),
-                              }}
-                            />
-                          ) : null}
+                <div style={{ position: 'relative' }}>
+                  <div style={{ display: 'flex', gap: 0, height: 120, background: '#f3f4f6' }}>
+                    {photos.length > 0 ? (
+                      <>
+                        <div style={{ flex: photos.length === 1 ? 1 : 1.3, overflow: 'hidden' }}>
+                          <img
+                            src={photos[0].src}
+                            alt="Preview main"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              display: 'block',
+                              transform: getPhotoTransform(photos[0]),
+                            }}
+                          />
                         </div>
-                      ) : null}
-                    </>
-                  ) : (
-                    <div
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#a0a8b5',
-                        fontWeight: 800,
-                      }}
-                    >
-                      {labels.photosHint}
-                    </div>
-                  )}
+
+                        {photos.length > 1 ? (
+                          <div
+                            style={{
+                              flex: 1,
+                              display: 'grid',
+                              gridTemplateRows: photos.length >= 4 ? '1fr 1fr' : '1fr',
+                              gap: 0,
+                            }}
+                          >
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
+                              {photos[1] ? (
+                                <img
+                                  src={photos[1].src}
+                                  alt="Preview extra"
+                                  style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    display: 'block',
+                                    transform: getPhotoTransform(photos[1]),
+                                  }}
+                                />
+                              ) : (
+                                <div />
+                              )}
+
+                              {photos[2] ? (
+                                <img
+                                  src={photos[2].src}
+                                  alt="Preview extra"
+                                  style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    display: 'block',
+                                    transform: getPhotoTransform(photos[2]),
+                                  }}
+                                />
+                              ) : (
+                                <div />
+                              )}
+                            </div>
+
+                            {photos[3] ? (
+                              <img
+                                src={photos[3].src}
+                                alt="Preview extra"
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover',
+                                  display: 'block',
+                                  transform: getPhotoTransform(photos[3]),
+                                }}
+                              />
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </>
+                    ) : (
+                      <div
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#a0a8b5',
+                          fontWeight: 800,
+                        }}
+                      >
+                        {labels.photosHint}
+                      </div>
+                    )}
+                  </div>
+
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 12,
+                      left: 12,
+                      background: '#fff',
+                      color: '#ff4f93',
+                      borderRadius: 999,
+                      padding: '8px 14px',
+                      fontWeight: 900,
+                      fontSize: 12,
+                    }}
+                  >
+                    {labels.sponsored}
+                  </div>
                 </div>
 
                 <div style={{ padding: 14 }}>
@@ -1581,72 +1584,6 @@ export default function NewPromotionPage() {
                   ↻
                 </button>
               </div>
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                gap: 10,
-                marginBottom: 12,
-              }}
-            >
-              <button
-                onClick={() =>
-                  updatePhoto(activePhoto.id, {
-                    zoom: Math.max(0.8, Number((activePhoto.zoom - 0.05).toFixed(2))),
-                  })
-                }
-                style={{
-                  height: 46,
-                  borderRadius: 14,
-                  border: '1px solid #dce8de',
-                  background: '#eef8f0',
-                  color: '#2f8b48',
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {labels.zoom}
-              </button>
-
-              <button
-                onClick={() =>
-                  updatePhoto(activePhoto.id, {
-                    offsetX: activePhoto.offsetX + 10,
-                  })
-                }
-                style={{
-                  height: 46,
-                  borderRadius: 14,
-                  border: '1px solid #e5ded2',
-                  background: '#fff',
-                  color: '#1b2033',
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {labels.position}
-              </button>
-
-              <button
-                onClick={() =>
-                  updatePhoto(activePhoto.id, {
-                    rotate: activePhoto.rotate + 90,
-                  })
-                }
-                style={{
-                  height: 46,
-                  borderRadius: 14,
-                  border: '1px solid #e5ded2',
-                  background: '#fff',
-                  color: '#1b2033',
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {labels.rotate}
-              </button>
             </div>
 
             <div
