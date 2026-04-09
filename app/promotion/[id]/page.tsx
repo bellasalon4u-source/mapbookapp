@@ -1,47 +1,91 @@
 'use client';
 
-import { type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import {
+  getPromotionById,
+  incrementPromotionViews,
+  type PromotionItem,
+} from '../../../services/promotionsStore';
+import { getAllMasters } from '../../../services/masters';
+import { categories } from '../../../services/categories';
+
+function SectionCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        background: '#ffffff',
+        borderRadius: 28,
+        padding: 22,
+        border: '1px solid #efe7db',
+        boxShadow: '0 2px 10px rgba(44, 26, 12, 0.04)',
+      }}
+    >
+      <h2
+        style={{
+          fontSize: 28,
+          fontWeight: 800,
+          color: '#1f1f1f',
+          margin: 0,
+          marginBottom: 14,
+        }}
+      >
+        {title}
+      </h2>
+      {children}
+    </div>
+  );
+}
 
 export default function PromotionDetailsPage() {
   const router = useRouter();
+  const params = useParams();
+  const promotionId = String(params?.id || '');
 
-  const promotion = {
-    id: 'keratin-hair-extensions',
-    title: 'Keratin Hair Extensions',
-    subtitle: '20% off this week',
-    image:
-      'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80',
-    views: 199,
-    category: 'beauty',
-    description:
-      'Get a professional keratin hair extensions service with a personalised consultation, colour match and a natural blend finish. Perfect for clients who want extra length, extra volume and a seamless result.',
-    included: [
-      'Personal consultation',
-      'Colour matching',
-      'Keratin extension application',
-      'Blend cut and styling',
-      'Aftercare advice',
-    ],
-    oldPrice: '£150',
-    newPrice: '£120',
-    validUntil: '20 April',
-    area: 'Camden, London',
-    address: '24 Camden High Street, London',
-    distance: '1.2 miles away',
-    providerName: 'Camden Brows Bar',
-    providerRole: 'Brows & Lashes',
-    providerImage:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
-    rating: 4.9,
-  };
+  const [promotion, setPromotion] = useState<PromotionItem | null>(null);
+
+  useEffect(() => {
+    if (!promotionId) return;
+
+    const item = getPromotionById(promotionId);
+    setPromotion(item);
+
+    if (item) {
+      incrementPromotionViews(item.id, 1);
+      const refreshed = getPromotionById(item.id);
+      setPromotion(refreshed);
+    }
+  }, [promotionId]);
+
+  const master = useMemo(() => {
+    if (!promotion) return null;
+    const masters = getAllMasters();
+    return masters.find((item) => String(item.id) === String(promotion.masterId)) || null;
+  }, [promotion]);
+
+  const categoryLabel = useMemo(() => {
+    if (!promotion) return 'Beauty';
+    return (
+      categories.find((item) => item.id === promotion.categoryId)?.label ||
+      promotion.categoryId ||
+      'Beauty'
+    );
+  }, [promotion]);
 
   const handleShare = async () => {
     try {
+      if (!promotion) return;
+
       if (navigator.share) {
         await navigator.share({
           title: promotion.title,
-          text: `${promotion.title} — ${promotion.subtitle}`,
+          text: `${promotion.title} — ${promotion.subtitle || ''}`,
           url: window.location.href,
         });
       } else {
@@ -53,36 +97,75 @@ export default function PromotionDetailsPage() {
     }
   };
 
-  function SectionCard({
-    title,
-    children,
-  }: {
-    title: string;
-    children: ReactNode;
-  }) {
+  const handleOpenProfile = () => {
+    if (!promotion) return;
+    router.push(`/master/${promotion.masterId}`);
+  };
+
+  const handleBookNow = () => {
+    if (!promotion) return;
+    router.push(`/booking/${promotion.masterId}`);
+  };
+
+  if (!promotion) {
     return (
-      <div
+      <main
         style={{
-          background: '#ffffff',
-          borderRadius: 28,
-          padding: 22,
-          border: '1px solid #efe7db',
-          boxShadow: '0 2px 10px rgba(44, 26, 12, 0.04)',
+          minHeight: '100vh',
+          background: '#f7f3eb',
+          padding: '24px 16px 120px',
+          fontFamily: 'Inter, Arial, sans-serif',
         }}
       >
-        <h2
-          style={{
-            fontSize: 28,
-            fontWeight: 800,
-            color: '#1f1f1f',
-            margin: 0,
-            marginBottom: 14,
-          }}
-        >
-          {title}
-        </h2>
-        {children}
-      </div>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <button
+            onClick={() => router.back()}
+            style={{
+              border: 'none',
+              background: '#ffffff',
+              color: '#222222',
+              borderRadius: 999,
+              padding: '18px 24px',
+              fontSize: 18,
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 2px 10px rgba(44, 26, 12, 0.05)',
+            }}
+          >
+            ← Back
+          </button>
+
+          <div
+            style={{
+              marginTop: 18,
+              background: '#ffffff',
+              borderRadius: 28,
+              padding: 24,
+              border: '1px solid #efe7db',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 900,
+                color: '#20202a',
+                marginBottom: 10,
+              }}
+            >
+              Promotion not found
+            </div>
+            <div
+              style={{
+                fontSize: 18,
+                color: '#6b7280',
+                lineHeight: 1.6,
+              }}
+            >
+              This promotion is unavailable or no longer exists.
+            </div>
+          </div>
+        </div>
+      </main>
     );
   }
 
@@ -202,7 +285,7 @@ export default function PromotionDetailsPage() {
                 fontWeight: 700,
               }}
             >
-              {promotion.subtitle}
+              {promotion.subtitle || 'Special offer'}
             </p>
 
             <div
@@ -238,22 +321,29 @@ export default function PromotionDetailsPage() {
                   fontWeight: 800,
                 }}
               >
-                Category: {promotion.category}
+                Category: {categoryLabel}
               </div>
 
-              <div
-                style={{
-                  background: '#f1fbf4',
-                  color: '#228b50',
-                  border: '1px solid #d9efdf',
-                  borderRadius: 999,
-                  padding: '12px 18px',
-                  fontSize: 16,
-                  fontWeight: 800,
-                }}
-              >
-                Save £30
-              </div>
+              {promotion.oldPrice && promotion.newPrice ? (
+                <div
+                  style={{
+                    background: '#f1fbf4',
+                    color: '#228b50',
+                    border: '1px solid #d9efdf',
+                    borderRadius: 999,
+                    padding: '12px 18px',
+                    fontSize: 16,
+                    fontWeight: 800,
+                  }}
+                >
+                  Save £
+                  {Math.max(
+                    0,
+                    Number(String(promotion.oldPrice).replace(/[^\d.]/g, '')) -
+                      Number(String(promotion.newPrice).replace(/[^\d.]/g, ''))
+                  )}
+                </div>
+              ) : null}
             </div>
 
             <div
@@ -269,8 +359,11 @@ export default function PromotionDetailsPage() {
               }}
             >
               <img
-                src={promotion.providerImage}
-                alt={promotion.providerName}
+                src={
+                  String(master?.avatar || master?.image || '').trim() ||
+                  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80'
+                }
+                alt={String(master?.name || promotion.title)}
                 style={{
                   width: 76,
                   height: 76,
@@ -289,7 +382,7 @@ export default function PromotionDetailsPage() {
                     marginBottom: 4,
                   }}
                 >
-                  {promotion.providerName}
+                  {String(master?.name || 'Professional')}
                 </div>
 
                 <div
@@ -300,7 +393,7 @@ export default function PromotionDetailsPage() {
                     marginBottom: 6,
                   }}
                 >
-                  {promotion.providerRole}
+                  {String(master?.subcategory || master?.category || categoryLabel)}
                 </div>
 
                 <div
@@ -310,7 +403,7 @@ export default function PromotionDetailsPage() {
                     fontWeight: 700,
                   }}
                 >
-                  ★ {promotion.rating}
+                  ★ {typeof master?.rating === 'number' ? master.rating : 4.9}
                 </div>
               </div>
             </div>
@@ -323,6 +416,7 @@ export default function PromotionDetailsPage() {
               }}
             >
               <button
+                onClick={handleOpenProfile}
                 style={{
                   minHeight: 64,
                   borderRadius: 22,
@@ -354,6 +448,7 @@ export default function PromotionDetailsPage() {
               </button>
 
               <button
+                onClick={handleBookNow}
                 style={{
                   minHeight: 64,
                   borderRadius: 22,
@@ -372,203 +467,232 @@ export default function PromotionDetailsPage() {
           </div>
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gap: 16,
-            marginTop: 18,
-          }}
-        >
-          <SectionCard title="About this offer">
-            <p
-              style={{
-                margin: 0,
-                fontSize: 18,
-                lineHeight: 1.6,
-                color: '#4b5563',
-                fontWeight: 500,
-              }}
-            >
-              {promotion.description}
-            </p>
-          </SectionCard>
-
-          <SectionCard title="What’s included">
-            <div style={{ display: 'grid', gap: 12 }}>
-              {promotion.included.map((item) => (
-                <div
-                  key={item}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    fontSize: 18,
-                    color: '#374151',
-                    fontWeight: 600,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: '50%',
-                      background: '#f1fbf4',
-                      color: '#228b50',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 900,
-                      flexShrink: 0,
-                    }}
-                  >
-                    ✓
-                  </div>
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Pricing">
-            <div style={{ display: 'grid', gap: 14 }}>
-              <div
+        {!!promotion.description && (
+          <div
+            style={{
+              display: 'grid',
+              gap: 16,
+              marginTop: 18,
+            }}
+          >
+            <SectionCard title="About this offer">
+              <p
                 style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 16,
+                  margin: 0,
                   fontSize: 18,
+                  lineHeight: 1.6,
+                  color: '#4b5563',
+                  fontWeight: 500,
                 }}
               >
-                <span style={{ color: '#6b7280', fontWeight: 600 }}>Old price</span>
-                <span
-                  style={{
-                    color: '#9ca3af',
-                    fontWeight: 700,
-                    textDecoration: 'line-through',
-                  }}
-                >
-                  {promotion.oldPrice}
-                </span>
-              </div>
+                {promotion.description}
+              </p>
+            </SectionCard>
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 16,
-                  fontSize: 22,
-                }}
-              >
-                <span style={{ color: '#20202a', fontWeight: 800 }}>Now</span>
-                <span style={{ color: '#ff4fa0', fontWeight: 900 }}>
-                  {promotion.newPrice}
-                </span>
-              </div>
+            {!!promotion.included?.length && (
+              <SectionCard title="What’s included">
+                <div style={{ display: 'grid', gap: 12 }}>
+                  {promotion.included.map((item) => (
+                    <div
+                      key={item}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        fontSize: 18,
+                        color: '#374151',
+                        fontWeight: 600,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: '50%',
+                          background: '#f1fbf4',
+                          color: '#228b50',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 900,
+                          flexShrink: 0,
+                        }}
+                      >
+                        ✓
+                      </div>
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </SectionCard>
+            )}
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 16,
-                  fontSize: 18,
-                }}
-              >
-                <span style={{ color: '#6b7280', fontWeight: 600 }}>You save</span>
-                <span style={{ color: '#228b50', fontWeight: 800 }}>£30</span>
-              </div>
+            {(promotion.oldPrice || promotion.newPrice || promotion.validUntil) && (
+              <SectionCard title="Pricing">
+                <div style={{ display: 'grid', gap: 14 }}>
+                  {!!promotion.oldPrice && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 16,
+                        fontSize: 18,
+                      }}
+                    >
+                      <span style={{ color: '#6b7280', fontWeight: 600 }}>Old price</span>
+                      <span
+                        style={{
+                          color: '#9ca3af',
+                          fontWeight: 700,
+                          textDecoration: 'line-through',
+                        }}
+                      >
+                        {promotion.oldPrice}
+                      </span>
+                    </div>
+                  )}
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 16,
-                  fontSize: 18,
-                }}
-              >
-                <span style={{ color: '#6b7280', fontWeight: 600 }}>Valid until</span>
-                <span style={{ color: '#20202a', fontWeight: 800 }}>
-                  {promotion.validUntil}
-                </span>
-              </div>
-            </div>
-          </SectionCard>
+                  {!!promotion.newPrice && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 16,
+                        fontSize: 22,
+                      }}
+                    >
+                      <span style={{ color: '#20202a', fontWeight: 800 }}>Now</span>
+                      <span style={{ color: '#ff4fa0', fontWeight: 900 }}>
+                        {promotion.newPrice}
+                      </span>
+                    </div>
+                  )}
 
-          <SectionCard title="Location">
-            <div style={{ display: 'grid', gap: 12 }}>
-              <div>
-                <div
-                  style={{
-                    fontSize: 14,
-                    color: '#9ca3af',
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    textTransform: 'uppercase',
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  Area
-                </div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    color: '#20202a',
-                    fontWeight: 800,
-                  }}
-                >
-                  {promotion.area}
-                </div>
-              </div>
+                  {!!promotion.oldPrice && !!promotion.newPrice && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 16,
+                        fontSize: 18,
+                      }}
+                    >
+                      <span style={{ color: '#6b7280', fontWeight: 600 }}>You save</span>
+                      <span style={{ color: '#228b50', fontWeight: 800 }}>
+                        £
+                        {Math.max(
+                          0,
+                          Number(String(promotion.oldPrice).replace(/[^\d.]/g, '')) -
+                            Number(String(promotion.newPrice).replace(/[^\d.]/g, ''))
+                        )}
+                      </span>
+                    </div>
+                  )}
 
-              <div>
-                <div
-                  style={{
-                    fontSize: 14,
-                    color: '#9ca3af',
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    textTransform: 'uppercase',
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  Address
+                  {!!promotion.validUntil && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 16,
+                        fontSize: 18,
+                      }}
+                    >
+                      <span style={{ color: '#6b7280', fontWeight: 600 }}>Valid until</span>
+                      <span style={{ color: '#20202a', fontWeight: 800 }}>
+                        {promotion.validUntil}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    color: '#20202a',
-                    fontWeight: 700,
-                  }}
-                >
-                  {promotion.address}
-                </div>
-              </div>
+              </SectionCard>
+            )}
 
-              <div>
-                <div
-                  style={{
-                    fontSize: 14,
-                    color: '#9ca3af',
-                    fontWeight: 700,
-                    marginBottom: 4,
-                    textTransform: 'uppercase',
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  Distance
+            {(promotion.area || promotion.address || promotion.distance) && (
+              <SectionCard title="Location">
+                <div style={{ display: 'grid', gap: 12 }}>
+                  {!!promotion.area && (
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 14,
+                          color: '#9ca3af',
+                          fontWeight: 700,
+                          marginBottom: 4,
+                          textTransform: 'uppercase',
+                          letterSpacing: 0.5,
+                        }}
+                      >
+                        Area
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 18,
+                          color: '#20202a',
+                          fontWeight: 800,
+                        }}
+                      >
+                        {promotion.area}
+                      </div>
+                    </div>
+                  )}
+
+                  {!!promotion.address && (
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 14,
+                          color: '#9ca3af',
+                          fontWeight: 700,
+                          marginBottom: 4,
+                          textTransform: 'uppercase',
+                          letterSpacing: 0.5,
+                        }}
+                      >
+                        Address
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 18,
+                          color: '#20202a',
+                          fontWeight: 700,
+                        }}
+                      >
+                        {promotion.address}
+                      </div>
+                    </div>
+                  )}
+
+                  {!!promotion.distance && (
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 14,
+                          color: '#9ca3af',
+                          fontWeight: 700,
+                          marginBottom: 4,
+                          textTransform: 'uppercase',
+                          letterSpacing: 0.5,
+                        }}
+                      >
+                        Distance
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 18,
+                          color: '#20202a',
+                          fontWeight: 700,
+                        }}
+                      >
+                        {promotion.distance}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    color: '#20202a',
-                    fontWeight: 700,
-                  }}
-                >
-                  {promotion.distance}
-                </div>
-              </div>
-            </div>
-          </SectionCard>
-        </div>
+              </SectionCard>
+            )}
+          </div>
+        )}
       </div>
     </main>
   );
