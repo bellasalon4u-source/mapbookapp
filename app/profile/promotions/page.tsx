@@ -15,6 +15,7 @@ import { getSavedLanguage } from '../../../services/i18n';
 
 const radiusOptions = [1, 3, 5, 10, 15, 25];
 const durationOptions = [1, 3, 7, 14];
+const MAX_PROMO_PHOTOS = 4;
 
 function formatMoney(value: number) {
   return `£${value.toFixed(0)}`;
@@ -77,23 +78,25 @@ function getLabels(language: string) {
     relaunch: isRu ? 'Перезапустить' : 'Relaunch',
     edit: isRu ? 'Редактировать' : 'Edit',
     views: isRu ? 'Просмотры' : 'Views',
-    photoSectionTitle: isRu ? 'Фото рекламы' : 'Promotion photo',
+    photoSectionTitle: isRu ? 'Фото рекламы' : 'Promotion photos',
     uploadMethods: isRu ? 'Способы загрузки' : 'Upload methods',
     takePhoto: isRu ? 'Сделать фото' : 'Take photo',
     chooseGallery: isRu ? 'Выбрать из галереи' : 'Choose from gallery',
     browseFiles: isRu ? 'Выбрать файл' : 'Browse files',
     useLink: isRu ? 'Вставить ссылку' : 'Use image link',
+    addPhoto: isRu ? 'Добавить фото' : 'Add photo',
     replacePhoto: isRu ? 'Заменить фото' : 'Replace photo',
-    removePhoto: isRu ? 'Удалить фото' : 'Remove photo',
     title: isRu ? 'Заголовок' : 'Title',
     titlePlaceholder: isRu ? 'Введите заголовок рекламы' : 'Enter promotion title',
-    subtitle: isRu ? 'Подзаголовок' : 'Subtitle',
-    subtitlePlaceholder: isRu
+    description: isRu ? 'Описание' : 'Description',
+    descriptionPlaceholder: isRu
       ? 'Например: скидка 20% только на этой неделе'
       : 'Example: 20% off this week',
     category: isRu ? 'Категория' : 'Category',
     radius: isRu ? 'Радиус показа' : 'Radius',
     days: isRu ? 'Длительность' : 'Days',
+    discount: isRu ? 'Скидка' : 'Discount',
+    discountPlaceholder: isRu ? 'Введите процент' : 'Enter percent',
     estimatedPrice: isRu ? 'Примерная цена' : 'Estimated price',
     launchPromotion: isRu ? 'Запустить рекламу' : 'Launch promotion',
     launching: isRu ? 'Запускаем...' : 'Launching...',
@@ -103,9 +106,123 @@ function getLabels(language: string) {
     close: isRu ? 'Закрыть' : 'Close',
     imageLinkPrompt: isRu ? 'Вставьте ссылку на изображение' : 'Paste image URL',
     defaultPreviewText: isRu
-      ? 'Так ваша реклама будет выглядеть в приложении'
-      : 'This is how your promotion will look in the app',
+      ? 'Добавьте до 4 фото для рекламы'
+      : 'Add up to 4 photos for your promotion',
+    maxPhotosHint: isRu ? 'Можно добавить до 4 фото' : 'You can add up to 4 photos',
+    deletePhoto: isRu ? 'Удалить фото' : 'Delete photo',
+    mainPhoto: isRu ? 'Главное фото' : 'Main photo',
+    percent: isRu ? 'Скидка' : 'Discount',
   };
+}
+
+function getCollageLayout(photosCount: number) {
+  if (photosCount <= 1) {
+    return {
+      display: 'grid',
+      gridTemplateColumns: '1fr',
+      gridTemplateRows: '220px',
+      gap: 0,
+    } as const;
+  }
+
+  if (photosCount === 2) {
+    return {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gridTemplateRows: '220px',
+      gap: 6,
+    } as const;
+  }
+
+  if (photosCount === 3) {
+    return {
+      display: 'grid',
+      gridTemplateColumns: '1.2fr 0.8fr',
+      gridTemplateRows: '107px 107px',
+      gap: 6,
+    } as const;
+  }
+
+  return {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gridTemplateRows: '107px 107px',
+    gap: 6,
+  } as const;
+}
+
+function renderPromoCollage(
+  photos: string[],
+  alt: string,
+  height = 220,
+  rounded = 0
+) {
+  const safePhotos = photos.filter(Boolean).slice(0, MAX_PROMO_PHOTOS);
+
+  if (safePhotos.length === 0) {
+    return (
+      <div
+        style={{
+          height,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#9aa2af',
+          fontSize: 15,
+          fontWeight: 700,
+          textAlign: 'center',
+          padding: 20,
+          background: '#f3f4f6',
+        }}
+      >
+        No photo
+      </div>
+    );
+  }
+
+  const layout = getCollageLayout(safePhotos.length);
+
+  return (
+    <div
+      style={{
+        ...layout,
+        height,
+        borderRadius: rounded,
+        overflow: 'hidden',
+        background: '#f3f4f6',
+      }}
+    >
+      {safePhotos.map((photo, index) => {
+        const extraStyle: React.CSSProperties =
+          safePhotos.length === 3 && index === 0
+            ? { gridRow: '1 / span 2' }
+            : {};
+
+        return (
+          <div
+            key={`${photo}-${index}`}
+            style={{
+              position: 'relative',
+              overflow: 'hidden',
+              background: '#eef1f4',
+              ...extraStyle,
+            }}
+          >
+            <img
+              src={photo}
+              alt={alt}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function PromotionsPage() {
@@ -119,13 +236,15 @@ export default function PromotionsPage() {
   const [language, setLanguage] = useState(getSavedLanguage());
   const [promotions, setPromotions] = useState<PromotionItem[]>([]);
   const [title, setTitle] = useState('Keratin Hair Extensions');
-  const [subtitle, setSubtitle] = useState('20% off this week');
-  const [image, setImage] = useState(
-    'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=80'
-  );
+  const [description, setDescription] = useState('20% off this week');
+  const [photos, setPhotos] = useState<string[]>([
+    'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=80',
+  ]);
   const [categoryId, setCategoryId] = useState('beauty');
   const [radiusKm, setRadiusKm] = useState(5);
   const [durationDays, setDurationDays] = useState(3);
+  const [discountEnabled, setDiscountEnabled] = useState(true);
+  const [discountPercent, setDiscountPercent] = useState('20');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const labels = getLabels(language);
@@ -142,7 +261,6 @@ export default function PromotionsPage() {
     };
 
     syncLanguage();
-
     window.addEventListener('focus', syncLanguage);
     window.addEventListener('storage', syncLanguage);
 
@@ -188,45 +306,67 @@ export default function PromotionsPage() {
   const featuredMaster = masters[0];
 
   const categoryLabel =
-    categories.find((item) => item.id === categoryId)?.label || categoryId;
+    categories.find((item: any) => item.id === categoryId)?.label ||
+    categories.find((item: any) => item.id === categoryId)?.name ||
+    categoryId;
 
   const previewTitle = title.trim() || 'Keratin Hair Extensions';
-  const previewSubtitle = subtitle.trim() || labels.specialOffer;
 
-  const readFile = (file: File) => {
-    const reader = new FileReader();
+  const previewDescription = description.trim()
+    ? description.trim()
+    : discountEnabled && discountPercent.trim()
+    ? `${discountPercent.trim()}% off`
+    : labels.specialOffer;
 
-    reader.onload = () => {
-      const result = typeof reader.result === 'string' ? reader.result : '';
-      if (result) setImage(result);
-    };
+  const activeDiscountText =
+    discountEnabled && discountPercent.trim()
+      ? `${labels.percent}: ${discountPercent.trim()}%`
+      : '';
 
-    reader.readAsDataURL(file);
+  const readFiles = (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+
+    const incomingFiles = Array.from(fileList).slice(0, MAX_PROMO_PHOTOS - photos.length);
+    if (incomingFiles.length === 0) return;
+
+    incomingFiles.forEach((file) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const result = typeof reader.result === 'string' ? reader.result : '';
+        if (!result) return;
+
+        setPhotos((prev) => {
+          if (prev.length >= MAX_PROMO_PHOTOS) return prev;
+          return [...prev, result].slice(0, MAX_PROMO_PHOTOS);
+        });
+      };
+
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      readFile(file);
-    }
-
+    readFiles(event.target.files);
     event.target.value = '';
   };
 
   const handleUseLink = () => {
-    const value = window.prompt(labels.imageLinkPrompt, image);
+    if (photos.length >= MAX_PROMO_PHOTOS) return;
+
+    const value = window.prompt(labels.imageLinkPrompt, '');
     if (value && value.trim()) {
-      setImage(value.trim());
+      setPhotos((prev) => [...prev, value.trim()].slice(0, MAX_PROMO_PHOTOS));
     }
   };
 
-  const handleRemovePhoto = () => {
-    setImage('');
+  const handleRemovePhotoAt = (index: number) => {
+    setPhotos((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
   };
 
   const handleLaunchPromotion = () => {
     if (!previewTitle.trim()) return;
-    if (!image.trim()) return;
+    if (photos.length === 0) return;
 
     setIsSubmitting(true);
 
@@ -237,8 +377,8 @@ export default function PromotionsPage() {
       id: makeId(),
       masterId: String(featuredMaster?.id || 'master-1'),
       title: previewTitle.trim(),
-      subtitle: previewSubtitle.trim(),
-      image: image.trim(),
+      subtitle: previewDescription.trim(),
+      image: photos[0],
       categoryId,
       centerLat: Number(featuredMaster?.lat || 51.5074),
       centerLng: Number(featuredMaster?.lng || -0.1278),
@@ -253,9 +393,12 @@ export default function PromotionsPage() {
     setTimeout(() => {
       setIsSubmitting(false);
       setTitle('');
-      setSubtitle('');
+      setDescription('');
+      setPhotos([]);
       setRadiusKm(5);
       setDurationDays(3);
+      setDiscountEnabled(true);
+      setDiscountPercent('20');
     }, 300);
   };
 
@@ -282,6 +425,7 @@ export default function PromotionsPage() {
         type="file"
         accept="image/*"
         capture="environment"
+        multiple
         onChange={handleImageChange}
         style={{ display: 'none' }}
       />
@@ -290,6 +434,7 @@ export default function PromotionsPage() {
         ref={galleryInputRef}
         type="file"
         accept="image/*"
+        multiple
         onChange={handleImageChange}
         style={{ display: 'none' }}
       />
@@ -298,6 +443,7 @@ export default function PromotionsPage() {
         ref={filesInputRef}
         type="file"
         accept="image/*"
+        multiple
         onChange={handleImageChange}
         style={{ display: 'none' }}
       />
@@ -589,7 +735,8 @@ export default function PromotionsPage() {
                             Math.max(
                               1,
                               Math.ceil(
-                                (new Date(promo.endAt).getTime() - new Date(promo.startAt).getTime()) /
+                                (new Date(promo.endAt).getTime() -
+                                  new Date(promo.startAt).getTime()) /
                                   (1000 * 60 * 60 * 24)
                               )
                             )
@@ -712,23 +859,93 @@ export default function PromotionsPage() {
                   overflow: 'hidden',
                   background: '#f3f4f6',
                   border: '1px solid #ece7df',
+                  padding: 8,
                 }}
               >
-                {image ? (
-                  <img
-                    src={image}
-                    alt="Preview"
+                {photos.length > 0 ? (
+                  <div
                     style={{
-                      width: '100%',
-                      height: 210,
-                      objectFit: 'cover',
-                      display: 'block',
+                      ...getCollageLayout(photos.length),
+                      height: 220,
                     }}
-                  />
+                  >
+                    {photos.map((photo, index) => {
+                      const extraStyle: React.CSSProperties =
+                        photos.length === 3 && index === 0
+                          ? { gridRow: '1 / span 2' }
+                          : {};
+
+                      return (
+                        <div
+                          key={`${photo}-${index}`}
+                          style={{
+                            position: 'relative',
+                            overflow: 'hidden',
+                            borderRadius: 18,
+                            background: '#eef1f4',
+                            ...extraStyle,
+                          }}
+                        >
+                          <img
+                            src={photo}
+                            alt={`Promotion ${index + 1}`}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              display: 'block',
+                            }}
+                          />
+
+                          <button
+                            onClick={() => handleRemovePhotoAt(index)}
+                            title={labels.deletePhoto}
+                            style={{
+                              position: 'absolute',
+                              top: 8,
+                              right: 8,
+                              width: 28,
+                              height: 28,
+                              borderRadius: 999,
+                              border: 'none',
+                              background: 'rgba(0,0,0,0.72)',
+                              color: '#fff',
+                              fontSize: 16,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            ×
+                          </button>
+
+                          {index === 0 ? (
+                            <div
+                              style={{
+                                position: 'absolute',
+                                left: 8,
+                                bottom: 8,
+                                padding: '6px 10px',
+                                borderRadius: 999,
+                                background: 'rgba(255,255,255,0.92)',
+                                color: '#202335',
+                                fontSize: 11,
+                                fontWeight: 900,
+                              }}
+                            >
+                              {labels.mainPhoto}
+                            </div>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
                 ) : (
                   <div
                     style={{
-                      height: 210,
+                      height: 220,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -742,6 +959,17 @@ export default function PromotionsPage() {
                     {labels.defaultPreviewText}
                   </div>
                 )}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: '#8a93a0',
+                }}
+              >
+                {labels.maxPhotosHint}
               </div>
             </div>
 
@@ -814,6 +1042,7 @@ export default function PromotionsPage() {
 
                 <button
                   onClick={handleUseLink}
+                  disabled={photos.length >= MAX_PROMO_PHOTOS}
                   style={{
                     minHeight: 52,
                     borderRadius: 18,
@@ -822,24 +1051,20 @@ export default function PromotionsPage() {
                     color: '#ff3b30',
                     fontSize: 15,
                     fontWeight: 900,
-                    cursor: 'pointer',
+                    cursor: photos.length >= MAX_PROMO_PHOTOS ? 'not-allowed' : 'pointer',
+                    opacity: photos.length >= MAX_PROMO_PHOTOS ? 0.55 : 1,
                   }}
                 >
                   {labels.useLink}
                 </button>
               </div>
 
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: 10,
-                  marginTop: 10,
-                }}
-              >
+              <div style={{ marginTop: 10 }}>
                 <button
                   onClick={() => galleryInputRef.current?.click()}
+                  disabled={photos.length >= MAX_PROMO_PHOTOS}
                   style={{
+                    width: '100%',
                     minHeight: 48,
                     borderRadius: 16,
                     border: '1px solid #e7dfd2',
@@ -847,26 +1072,11 @@ export default function PromotionsPage() {
                     color: '#1f2430',
                     fontSize: 14,
                     fontWeight: 800,
-                    cursor: 'pointer',
+                    cursor: photos.length >= MAX_PROMO_PHOTOS ? 'not-allowed' : 'pointer',
+                    opacity: photos.length >= MAX_PROMO_PHOTOS ? 0.55 : 1,
                   }}
                 >
-                  {labels.replacePhoto}
-                </button>
-
-                <button
-                  onClick={handleRemovePhoto}
-                  style={{
-                    minHeight: 48,
-                    borderRadius: 16,
-                    border: '1px solid #f1d9d9',
-                    background: '#fffafa',
-                    color: '#c53d35',
-                    fontSize: 14,
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {labels.removePhoto}
+                  {labels.addPhoto}
                 </button>
               </div>
             </div>
@@ -909,24 +1119,114 @@ export default function PromotionsPage() {
                   marginBottom: 8,
                 }}
               >
-                {labels.subtitle}
+                {labels.description}
               </div>
 
-              <input
-                value={subtitle}
-                onChange={(e) => setSubtitle(e.target.value)}
-                placeholder={labels.subtitlePlaceholder}
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={labels.descriptionPlaceholder}
                 style={{
                   width: '100%',
-                  height: 50,
+                  minHeight: 110,
                   borderRadius: 16,
                   border: '1px solid #e7dfd2',
-                  padding: '0 14px',
+                  padding: '14px',
                   fontSize: 15,
                   outline: 'none',
                   color: '#1f2430',
+                  resize: 'vertical',
+                  fontFamily: 'Arial, sans-serif',
                 }}
               />
+            </div>
+
+            <div>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 800,
+                  color: '#6f7782',
+                  marginBottom: 8,
+                }}
+              >
+                {labels.discount}
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '120px 1fr',
+                  gap: 10,
+                }}
+              >
+                <button
+                  onClick={() => setDiscountEnabled((prev) => !prev)}
+                  style={{
+                    height: 50,
+                    borderRadius: 16,
+                    border: discountEnabled ? '2px solid #2ea44f' : '1px solid #e7dfd2',
+                    background: discountEnabled ? '#f1fbf4' : '#ffffff',
+                    color: discountEnabled ? '#238a4f' : '#1f2430',
+                    fontSize: 14,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {discountEnabled ? 'ON' : 'OFF'}
+                </button>
+
+                <div
+                  style={{
+                    height: 50,
+                    borderRadius: 16,
+                    border: '1px solid #e7dfd2',
+                    background: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0 14px',
+                    gap: 10,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 900,
+                      color: '#6f7782',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {labels.percent}
+                  </span>
+
+                  <input
+                    value={discountPercent}
+                    onChange={(e) =>
+                      setDiscountPercent(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))
+                    }
+                    placeholder={labels.discountPlaceholder}
+                    disabled={!discountEnabled}
+                    style={{
+                      width: '100%',
+                      border: 'none',
+                      outline: 'none',
+                      fontSize: 15,
+                      color: '#1f2430',
+                      background: 'transparent',
+                    }}
+                  />
+
+                  <span
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 900,
+                      color: '#202335',
+                    }}
+                  >
+                    %
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div>
@@ -956,9 +1256,9 @@ export default function PromotionsPage() {
                   color: '#1f2430',
                 }}
               >
-                {categories.map((item) => (
+                {categories.map((item: any) => (
                   <option key={item.id} value={item.id}>
-                    {item.label || item.id}
+                    {item.label || item.name || item.id}
                   </option>
                 ))}
               </select>
@@ -1098,20 +1398,15 @@ export default function PromotionsPage() {
                   }}
                 >
                   <div style={{ position: 'relative' }}>
-                    <img
-                      src={
-                        image.trim()
-                          ? image
-                          : 'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=80'
-                      }
-                      alt={previewTitle}
-                      style={{
-                        width: '100%',
-                        height: 180,
-                        objectFit: 'cover',
-                        display: 'block',
-                      }}
-                    />
+                    {renderPromoCollage(
+                      photos.length > 0
+                        ? photos
+                        : [
+                            'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=80',
+                          ],
+                      previewTitle,
+                      180
+                    )}
 
                     <div
                       style={{
@@ -1150,7 +1445,7 @@ export default function PromotionsPage() {
                         fontWeight: 700,
                       }}
                     >
-                      {previewSubtitle}
+                      {previewDescription}
                     </div>
 
                     <div
@@ -1202,6 +1497,22 @@ export default function PromotionsPage() {
                       >
                         {formatMoney(price)}
                       </div>
+
+                      {activeDiscountText ? (
+                        <div
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: 999,
+                            background: '#fff5f5',
+                            border: '1px solid #f3d7d4',
+                            color: '#ff3b30',
+                            fontWeight: 900,
+                            fontSize: 14,
+                          }}
+                        >
+                          {activeDiscountText}
+                        </div>
+                      ) : null}
                     </div>
 
                     <div
