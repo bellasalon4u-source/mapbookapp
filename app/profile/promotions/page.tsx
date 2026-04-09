@@ -61,7 +61,9 @@ function getLabels(language: string) {
 
   return {
     pageTitle: isRu ? 'Мои рекламы' : 'My Promotions',
-    pageSubtitle: isRu ? 'Создавайте, запускайте и управляйте рекламой' : 'Create, launch and manage your ads',
+    pageSubtitle: isRu
+      ? 'Создавайте, запускайте и управляйте рекламой'
+      : 'Create, launch and manage your ads',
     activeAds: isRu ? 'Активные рекламы' : 'Active ads',
     totalViews: isRu ? 'Всего просмотров' : 'Total views',
     spent: isRu ? 'Потрачено' : 'Spent',
@@ -86,7 +88,9 @@ function getLabels(language: string) {
     title: isRu ? 'Заголовок' : 'Title',
     titlePlaceholder: isRu ? 'Введите заголовок рекламы' : 'Enter promotion title',
     subtitle: isRu ? 'Подзаголовок' : 'Subtitle',
-    subtitlePlaceholder: isRu ? 'Например: скидка 20% только на этой неделе' : 'Example: 20% off this week',
+    subtitlePlaceholder: isRu
+      ? 'Например: скидка 20% только на этой неделе'
+      : 'Example: 20% off this week',
     category: isRu ? 'Категория' : 'Category',
     radius: isRu ? 'Радиус показа' : 'Radius',
     days: isRu ? 'Длительность' : 'Days',
@@ -96,10 +100,11 @@ function getLabels(language: string) {
     promoPreview: isRu ? 'Предпросмотр рекламы' : 'Promotion preview',
     specialOffer: isRu ? 'Специальное предложение' : 'Special offer',
     validPeriod: isRu ? 'Срок' : 'Period',
-    until: isRu ? 'До' : 'Until',
     close: isRu ? 'Закрыть' : 'Close',
     imageLinkPrompt: isRu ? 'Вставьте ссылку на изображение' : 'Paste image URL',
-    defaultPreviewText: isRu ? 'Так ваша реклама будет выглядеть в приложении' : 'This is how your promotion will look in the app',
+    defaultPreviewText: isRu
+      ? 'Так ваша реклама будет выглядеть в приложении'
+      : 'This is how your promotion will look in the app',
   };
 }
 
@@ -183,9 +188,7 @@ export default function PromotionsPage() {
   const featuredMaster = masters[0];
 
   const categoryLabel =
-    categories.find((item) => item.id === categoryId)?.label ||
-    categories.find((item) => item.id === categoryId)?.name ||
-    categoryId;
+    categories.find((item) => item.id === categoryId)?.label || categoryId;
 
   const previewTitle = title.trim() || 'Keratin Hair Extensions';
   const previewSubtitle = subtitle.trim() || labels.specialOffer;
@@ -953,9 +956,9 @@ export default function PromotionsPage() {
                   color: '#1f2430',
                 }}
               >
-                {categories.map((item: any) => (
+                {categories.map((item) => (
                   <option key={item.id} value={item.id}>
-                    {item.label || item.name || item.id}
+                    {item.label || item.id}
                   </option>
                 ))}
               </select>
@@ -1060,7 +1063,8 @@ export default function PromotionsPage() {
                   fontWeight: 700,
                 }}
               >
-                {radiusKm} km • {durationDays} {language === 'RU' ? 'дн.' : durationDays > 1 ? 'days' : 'day'}
+                {radiusKm} km • {durationDays}{' '}
+                {language === 'RU' ? 'дн.' : durationDays > 1 ? 'days' : 'day'}
               </div>
             </div>
 
@@ -1208,7 +1212,8 @@ export default function PromotionsPage() {
                         fontWeight: 700,
                       }}
                     >
-                      {labels.validPeriod}: {durationDays} {language === 'RU' ? 'дн.' : durationDays > 1 ? 'days' : 'day'}
+                      {labels.validPeriod}: {durationDays}{' '}
+                      {language === 'RU' ? 'дн.' : durationDays > 1 ? 'days' : 'day'}
                     </div>
                   </div>
                 </div>
