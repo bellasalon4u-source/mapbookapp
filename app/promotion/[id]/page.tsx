@@ -1,181 +1,123 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { getAllMasters } from '../../../services/masters';
-import {
-  getPromotionById,
-  incrementPromotionViews,
-} from '../../../services/promotionsStore';
+import { useRouter } from 'next/navigation';
 
-function normalizeText(value: string) {
-  return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
-}
-
-function findPromotionMaster(promo: any, masters: any[]) {
-  const normalizedCategory = String(promo.categoryId || '').toLowerCase().trim();
-  const normalizedTitle = normalizeText(promo.title);
-  const titleWords = normalizedTitle.split(' ').filter((word) => word.length > 2);
-
-  const exactByMasterId = masters.find(
-    (master: any) => String(master.id) === String(promo.masterId)
-  );
-
-  if (exactByMasterId) return exactByMasterId;
-
-  const sameCategory = masters.filter(
-    (master: any) => String(master.category || '').toLowerCase().trim() === normalizedCategory
-  );
-
-  const best = sameCategory
-    .map((master: any) => {
-      const haystack = normalizeText(
-        [
-          master.name || '',
-          master.title || '',
-          master.subcategory || '',
-          master.description || '',
-        ].join(' ')
-      );
-
-      let score = 0;
-
-      if (haystack.includes(normalizedTitle)) score += 100;
-
-      titleWords.forEach((word) => {
-        if (haystack.includes(word)) score += 20;
-      });
-
-      return { master, score };
-    })
-    .sort((a, b) => b.score - a.score)[0];
-
-  if (best && best.score > 0) return best.master;
-
-  return sameCategory[0] || null;
-}
-
-export default function PromotionDetailsPage() {
+export default function SponsoredOfferPage() {
   const router = useRouter();
-  const params = useParams();
-  const promotionId = String(params?.id || '');
 
-  const promotion = useMemo(() => getPromotionById(promotionId), [promotionId]);
-  const masters = useMemo(() => getAllMasters(), []);
-  const matchedMaster = useMemo(() => {
-    if (!promotion) return null;
-    return findPromotionMaster(promotion, masters);
-  }, [promotion, masters]);
+  const sponsoredOffer = {
+    id: 'keratin-hair-extensions',
+    title: 'Keratin Hair Extensions',
+    subtitle: '20% off this week',
+    image:
+      'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80',
+    views: 192,
+    category: 'Beauty',
+    description:
+      'Get a professional keratin hair extensions service with a personalised consultation, colour match and natural blend finish. Perfect for clients who want extra length, volume and a seamless result.',
+    included: [
+      'Personal consultation',
+      'Colour matching',
+      'Keratin extension application',
+      'Blend cut and styling',
+      'Aftercare advice',
+    ],
+    oldPrice: '£150',
+    newPrice: '£120',
+    validUntil: '20 April',
+    area: 'Camden, London',
+    address: '24 Camden High Street, London',
+    distance: '1.2 miles away',
+    providerName: 'Camden Brows Bar',
+    providerRole: 'Brows & Lashes',
+    providerImage:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    rating: 4.9,
+  };
 
-  useEffect(() => {
-    if (!promotionId) return;
-    incrementPromotionViews(promotionId, 1);
-  }, [promotionId]);
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: sponsoredOffer.title,
+          text: `${sponsoredOffer.title} — ${sponsoredOffer.subtitle}`,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied');
+      }
+    } catch (error) {
+      console.error('Share failed', error);
+    }
+  };
 
-  if (!promotion) {
-    return (
-      <main
+  const SectionCard = ({
+    title,
+    children,
+  }: {
+    title: string;
+    children: React.ReactNode;
+  }) => (
+    <div
+      style={{
+        background: '#ffffff',
+        borderRadius: 28,
+        padding: 22,
+        border: '1px solid #efe7db',
+        boxShadow: '0 2px 10px rgba(44, 26, 12, 0.04)',
+      }}
+    >
+      <h2
         style={{
-          minHeight: '100vh',
-          background: '#f7f3eb',
-          fontFamily: 'Arial, sans-serif',
-          padding: '24px 16px 120px',
+          fontSize: 28,
+          fontWeight: 800,
+          color: '#1f1f1f',
+          margin: 0,
+          marginBottom: 14,
         }}
       >
-        <div
-          style={{
-            maxWidth: 430,
-            margin: '0 auto',
-          }}
-        >
-          <button
-            onClick={() => router.back()}
-            style={{
-              border: 'none',
-              background: '#fff',
-              borderRadius: 999,
-              padding: '12px 16px',
-              fontSize: 14,
-              fontWeight: 900,
-              cursor: 'pointer',
-              boxShadow: '0 6px 16px rgba(0,0,0,0.08)',
-            }}
-          >
-            ← Back
-          </button>
-
-          <div
-            style={{
-              marginTop: 18,
-              background: '#fff',
-              borderRadius: 28,
-              padding: 24,
-              boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 900,
-                color: '#1f2430',
-                lineHeight: 1.2,
-              }}
-            >
-              Promotion not found
-            </div>
-
-            <div
-              style={{
-                marginTop: 10,
-                fontSize: 15,
-                color: '#6b7280',
-                fontWeight: 700,
-              }}
-            >
-              This advertisement does not exist or has already been removed.
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
+        {title}
+      </h2>
+      {children}
+    </div>
+  );
 
   return (
     <main
       style={{
         minHeight: '100vh',
         background: '#f7f3eb',
-        fontFamily: 'Arial, sans-serif',
-        color: '#1f2430',
-        paddingBottom: 120,
+        padding: '24px 16px 120px',
+        fontFamily: 'Inter, Arial, sans-serif',
       }}
     >
       <div
         style={{
-          maxWidth: 430,
+          maxWidth: 720,
           margin: '0 auto',
-          padding: '16px 14px 0',
         }}
       >
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: 14,
+            alignItems: 'center',
+            marginBottom: 18,
           }}
         >
           <button
             onClick={() => router.back()}
             style={{
               border: 'none',
-              background: '#fff',
+              background: '#ffffff',
+              color: '#222222',
               borderRadius: 999,
-              padding: '12px 16px',
-              fontSize: 14,
-              fontWeight: 900,
+              padding: '18px 24px',
+              fontSize: 18,
+              fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: '0 6px 16px rgba(0,0,0,0.08)',
+              boxShadow: '0 2px 10px rgba(44, 26, 12, 0.05)',
             }}
           >
             ← Back
@@ -183,13 +125,13 @@ export default function PromotionDetailsPage() {
 
           <div
             style={{
-              fontSize: 13,
-              fontWeight: 900,
-              color: '#ff4f93',
-              background: '#fff',
+              background: '#ffffff',
+              color: '#ff4fa0',
               borderRadius: 999,
-              padding: '10px 14px',
-              boxShadow: '0 6px 16px rgba(0,0,0,0.08)',
+              padding: '16px 22px',
+              fontSize: 18,
+              fontWeight: 800,
+              boxShadow: '0 2px 10px rgba(44, 26, 12, 0.05)',
             }}
           >
             Sponsored
@@ -198,19 +140,20 @@ export default function PromotionDetailsPage() {
 
         <div
           style={{
-            background: '#fff',
-            borderRadius: 30,
+            background: '#ffffff',
+            borderRadius: 34,
             overflow: 'hidden',
-            boxShadow: '0 12px 30px rgba(0,0,0,0.10)',
+            border: '1px solid #efe7db',
+            boxShadow: '0 6px 18px rgba(44, 26, 12, 0.06)',
           }}
         >
           <div style={{ position: 'relative' }}>
             <img
-              src={promotion.image}
-              alt={promotion.title}
+              src={sponsoredOffer.image}
+              alt={sponsoredOffer.title}
               style={{
                 width: '100%',
-                height: 320,
+                height: 360,
                 objectFit: 'cover',
                 display: 'block',
               }}
@@ -219,159 +162,172 @@ export default function PromotionDetailsPage() {
             <div
               style={{
                 position: 'absolute',
-                top: 16,
-                left: 16,
+                top: 18,
+                left: 18,
                 background: '#ffffff',
-                color: '#ff4f93',
+                color: '#ff4fa0',
                 borderRadius: 999,
-                padding: '9px 14px',
-                fontSize: 12,
-                fontWeight: 900,
-                boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+                padding: '12px 20px',
+                fontSize: 16,
+                fontWeight: 800,
               }}
             >
               Sponsored
             </div>
           </div>
 
-          <div style={{ padding: '20px 18px 22px' }}>
-            <div
+          <div style={{ padding: 26 }}>
+            <h1
               style={{
-                fontSize: 28,
+                margin: 0,
+                fontSize: 36,
+                lineHeight: 1.05,
                 fontWeight: 900,
-                lineHeight: 1.1,
-                color: '#1f2430',
+                color: '#20202a',
               }}
             >
-              {promotion.title}
-            </div>
+              {sponsoredOffer.title}
+            </h1>
 
-            <div
+            <p
               style={{
-                marginTop: 10,
-                fontSize: 17,
-                fontWeight: 800,
+                marginTop: 12,
+                marginBottom: 18,
+                fontSize: 22,
+                lineHeight: 1.3,
                 color: '#6b7280',
-                lineHeight: 1.35,
+                fontWeight: 700,
               }}
             >
-              {promotion.subtitle || 'Special offer near you'}
+              {sponsoredOffer.subtitle}
+            </p>
+
+            <div
+              style={{
+                display: 'flex',
+                gap: 12,
+                flexWrap: 'wrap',
+                marginBottom: 22,
+              }}
+            >
+              <div
+                style={{
+                  background: '#fff5fa',
+                  color: '#ff4fa0',
+                  border: '1px solid #f8d7e8',
+                  borderRadius: 999,
+                  padding: '12px 18px',
+                  fontSize: 16,
+                  fontWeight: 800,
+                }}
+              >
+                Views: {sponsoredOffer.views}
+              </div>
+
+              <div
+                style={{
+                  background: '#f8f7f4',
+                  color: '#48505e',
+                  border: '1px solid #e9e4db',
+                  borderRadius: 999,
+                  padding: '12px 18px',
+                  fontSize: 16,
+                  fontWeight: 800,
+                }}
+              >
+                Category: {sponsoredOffer.category}
+              </div>
+
+              <div
+                style={{
+                  background: '#f1fbf4',
+                  color: '#228b50',
+                  border: '1px solid #d9efdf',
+                  borderRadius: 999,
+                  padding: '12px 18px',
+                  fontSize: 16,
+                  fontWeight: 800,
+                }}
+              >
+                Save £30
+              </div>
             </div>
 
             <div
               style={{
-                marginTop: 18,
+                background: '#ffffff',
+                border: '1px solid #efe7db',
+                borderRadius: 28,
+                padding: 18,
                 display: 'flex',
-                flexWrap: 'wrap',
-                gap: 10,
+                alignItems: 'center',
+                gap: 16,
+                marginBottom: 20,
               }}
             >
-              <div
+              <img
+                src={sponsoredOffer.providerImage}
+                alt={sponsoredOffer.providerName}
                 style={{
-                  background: '#fff7fb',
-                  border: '1px solid #ffd2e8',
-                  color: '#ff4f93',
-                  borderRadius: 999,
-                  padding: '10px 14px',
-                  fontSize: 13,
-                  fontWeight: 900,
+                  width: 76,
+                  height: 76,
+                  objectFit: 'cover',
+                  borderRadius: '50%',
+                  flexShrink: 0,
                 }}
-              >
-                Views: {promotion.views}
-              </div>
+              />
 
-              <div
-                style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e6eaf0',
-                  color: '#334155',
-                  borderRadius: 999,
-                  padding: '10px 14px',
-                  fontSize: 13,
-                  fontWeight: 900,
-                }}
-              >
-                Category: {promotion.categoryId}
-              </div>
-            </div>
-
-            {matchedMaster ? (
-              <div
-                style={{
-                  marginTop: 20,
-                  background: '#f9fafb',
-                  border: '1px solid #ece7df',
-                  borderRadius: 20,
-                  padding: 14,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                }}
-              >
-                <img
-                  src={matchedMaster.avatar}
-                  alt={matchedMaster.name || matchedMaster.title || 'Master'}
+              <div style={{ flex: 1 }}>
+                <div
                   style={{
-                    width: 58,
-                    height: 58,
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    display: 'block',
+                    fontSize: 20,
+                    fontWeight: 800,
+                    color: '#20202a',
+                    marginBottom: 4,
                   }}
-                />
+                >
+                  {sponsoredOffer.providerName}
+                </div>
 
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 900,
-                      color: '#1f2430',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {matchedMaster.name || matchedMaster.title || 'Master'}
-                  </div>
+                <div
+                  style={{
+                    fontSize: 18,
+                    color: '#6b7280',
+                    fontWeight: 600,
+                    marginBottom: 6,
+                  }}
+                >
+                  {sponsoredOffer.providerRole}
+                </div>
 
-                  <div
-                    style={{
-                      marginTop: 4,
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: '#6b7280',
-                    }}
-                  >
-                    {matchedMaster.subcategory || matchedMaster.category || 'Service'}
-                  </div>
+                <div
+                  style={{
+                    fontSize: 16,
+                    color: '#8b7355',
+                    fontWeight: 700,
+                  }}
+                >
+                  ★ {sponsoredOffer.rating}
                 </div>
               </div>
-            ) : null}
+            </div>
 
             <div
               style={{
-                marginTop: 22,
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 12,
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: 14,
               }}
             >
               <button
-                onClick={() => {
-                  if (matchedMaster) {
-                    router.push(`/master/${matchedMaster.id}`);
-                    return;
-                  }
-                  router.back();
-                }}
                 style={{
-                  height: 50,
-                  borderRadius: 16,
-                  border: '1px solid #e6ded2',
-                  background: '#fff',
-                  color: '#223145',
-                  fontSize: 16,
-                  fontWeight: 900,
+                  minHeight: 64,
+                  borderRadius: 22,
+                  border: '1px solid #e7dfd3',
+                  background: '#ffffff',
+                  color: '#243041',
+                  fontSize: 18,
+                  fontWeight: 800,
                   cursor: 'pointer',
                 }}
               >
@@ -379,29 +335,236 @@ export default function PromotionDetailsPage() {
               </button>
 
               <button
-                onClick={() => {
-                  if (matchedMaster) {
-                    router.push(`/booking/${matchedMaster.id}`);
-                    return;
-                  }
-                  router.back();
-                }}
+                onClick={handleShare}
                 style={{
-                  height: 50,
+                  minHeight: 64,
+                  borderRadius: 22,
+                  border: '1px solid #e7dfd3',
+                  background: '#ffffff',
+                  color: '#243041',
+                  fontSize: 18,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >
+                Share
+              </button>
+
+              <button
+                style={{
+                  minHeight: 64,
+                  borderRadius: 22,
                   border: 'none',
-                  borderRadius: 16,
-                  background: '#ff4f93',
-                  color: '#fff',
-                  fontSize: 16,
+                  background: '#ff4fa0',
+                  color: '#ffffff',
+                  fontSize: 18,
                   fontWeight: 900,
                   cursor: 'pointer',
-                  boxShadow: '0 8px 18px rgba(255,79,147,0.28)',
+                  boxShadow: '0 10px 24px rgba(255, 79, 160, 0.25)',
                 }}
               >
                 Book now
               </button>
             </div>
           </div>
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gap: 16,
+            marginTop: 18,
+          }}
+        >
+          <SectionCard title="About this offer">
+            <p
+              style={{
+                margin: 0,
+                fontSize: 18,
+                lineHeight: 1.6,
+                color: '#4b5563',
+                fontWeight: 500,
+              }}
+            >
+              {sponsoredOffer.description}
+            </p>
+          </SectionCard>
+
+          <SectionCard title="What’s included">
+            <div style={{ display: 'grid', gap: 12 }}>
+              {sponsoredOffer.included.map((item) => (
+                <div
+                  key={item}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    fontSize: 18,
+                    color: '#374151',
+                    fontWeight: 600,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      background: '#f1fbf4',
+                      color: '#228b50',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 900,
+                      flexShrink: 0,
+                    }}
+                  >
+                    ✓
+                  </div>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Pricing">
+            <div style={{ display: 'grid', gap: 14 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 16,
+                  fontSize: 18,
+                }}
+              >
+                <span style={{ color: '#6b7280', fontWeight: 600 }}>Old price</span>
+                <span
+                  style={{
+                    color: '#9ca3af',
+                    fontWeight: 700,
+                    textDecoration: 'line-through',
+                  }}
+                >
+                  {sponsoredOffer.oldPrice}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 16,
+                  fontSize: 22,
+                }}
+              >
+                <span style={{ color: '#20202a', fontWeight: 800 }}>Now</span>
+                <span style={{ color: '#ff4fa0', fontWeight: 900 }}>
+                  {sponsoredOffer.newPrice}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 16,
+                  fontSize: 18,
+                }}
+              >
+                <span style={{ color: '#6b7280', fontWeight: 600 }}>You save</span>
+                <span style={{ color: '#228b50', fontWeight: 800 }}>£30</span>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 16,
+                  fontSize: 18,
+                }}
+              >
+                <span style={{ color: '#6b7280', fontWeight: 600 }}>Valid until</span>
+                <span style={{ color: '#20202a', fontWeight: 800 }}>
+                  {sponsoredOffer.validUntil}
+                </span>
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Location">
+            <div style={{ display: 'grid', gap: 12 }}>
+              <div>
+                <div
+                  style={{
+                    fontSize: 14,
+                    color: '#9ca3af',
+                    fontWeight: 700,
+                    marginBottom: 4,
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Area
+                </div>
+                <div
+                  style={{
+                    fontSize: 18,
+                    color: '#20202a',
+                    fontWeight: 800,
+                  }}
+                >
+                  {sponsoredOffer.area}
+                </div>
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 14,
+                    color: '#9ca3af',
+                    fontWeight: 700,
+                    marginBottom: 4,
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Address
+                </div>
+                <div
+                  style={{
+                    fontSize: 18,
+                    color: '#20202a',
+                    fontWeight: 700,
+                  }}
+                >
+                  {sponsoredOffer.address}
+                </div>
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 14,
+                    color: '#9ca3af',
+                    fontWeight: 700,
+                    marginBottom: 4,
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Distance
+                </div>
+                <div
+                  style={{
+                    fontSize: 18,
+                    color: '#20202a',
+                    fontWeight: 700,
+                  }}
+                >
+                  {sponsoredOffer.distance}
+                </div>
+              </div>
+            </div>
+          </SectionCard>
         </div>
       </div>
     </main>
