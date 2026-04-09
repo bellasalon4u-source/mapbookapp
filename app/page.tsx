@@ -18,6 +18,7 @@ import {
 } from '../services/likedMastersStore';
 import {
   getVisiblePromotionsForLocation,
+  incrementPromotionViews,
   subscribeToPromotionsStore,
   type PromotionItem,
 } from '../services/promotionsStore';
@@ -461,6 +462,8 @@ export default function HomePage() {
   const router = useRouter();
   const baseMasters = getAllMasters();
   const searchWrapperRef = useRef<HTMLDivElement | null>(null);
+  const promotionCardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const seenPromotionIdsRef = useRef<Set<string>>(new Set());
 
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -540,6 +543,40 @@ export default function HomePage() {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (promotions.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          const element = entry.target as HTMLElement;
+          const promoId = element.dataset.promoId;
+
+          if (!promoId) return;
+          if (seenPromotionIdsRef.current.has(promoId)) return;
+
+          seenPromotionIdsRef.current.add(promoId);
+          incrementPromotionViews(promoId, 1);
+        });
+      },
+      {
+        threshold: 0.7,
+      }
+    );
+
+    promotions.forEach((promo) => {
+      const node = promotionCardRefs.current[promo.id];
+      if (node) observer.observe(node);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [promotions]);
 
   const listingMasters = useMemo(() => {
     return listings.map((item, index) => listingToMaster(item, index));
@@ -747,6 +784,8 @@ export default function HomePage() {
   };
 
   const openPromotionView = (promo: PromotionItem) => {
+    incrementPromotionViews(promo.id, 1);
+
     const matchedMaster = findPromotionMaster(promo, allMasters);
 
     if (matchedMaster) {
@@ -764,6 +803,8 @@ export default function HomePage() {
   };
 
   const openPromotionBooking = (promo: PromotionItem) => {
+    incrementPromotionViews(promo.id, 1);
+
     const matchedMaster = findPromotionMaster(promo, allMasters);
 
     if (matchedMaster) {
@@ -1422,6 +1463,10 @@ export default function HomePage() {
                 {promotions.map((promo) => (
                   <div
                     key={promo.id}
+                    ref={(node) => {
+                      promotionCardRefs.current[promo.id] = node;
+                    }}
+                    data-promo-id={promo.id}
                     style={{
                       background: '#fff',
                       borderRadius: 26,
@@ -1474,7 +1519,7 @@ export default function HomePage() {
                         </div>
                       </div>
 
-                      <div style={{ padding: '14px 16px 12px' }}>
+                      <div style={{ padding: '14px 16px 8px' }}>
                         <div
                           style={{
                             fontSize: 16,
@@ -1495,6 +1540,17 @@ export default function HomePage() {
                           }}
                         >
                           {promo.subtitle || 'Special offer near you'}
+                        </div>
+
+                        <div
+                          style={{
+                            marginTop: 10,
+                            fontSize: 12,
+                            fontWeight: 800,
+                            color: '#ff4f93',
+                          }}
+                        >
+                          Views: {promo.views}
                         </div>
                       </div>
                     </button>
