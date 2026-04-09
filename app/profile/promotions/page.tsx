@@ -156,9 +156,9 @@ export default function PromotionsPage() {
       style={{
         minHeight: '100vh',
         background: '#f7f3eb',
-        fontFamily: 'Arial, sans-serif',
+        fontFamily: 'Inter, Arial, sans-serif',
         color: '#1f2430',
-        padding: '16px 14px 34px',
+        padding: '18px 14px 34px',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -166,296 +166,386 @@ export default function PromotionsPage() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
-            marginBottom: 16,
+            justifyContent: 'space-between',
+            gap: 12,
+            marginBottom: 18,
           }}
         >
           <button
             onClick={() => router.back()}
             style={{
-              width: 42,
-              height: 42,
+              width: 56,
+              height: 56,
               borderRadius: 999,
-              border: '1px solid #e7dfd2',
-              background: '#fff',
-              fontSize: 20,
+              border: '1px solid #e8e0d5',
+              background: '#ffffff',
+              fontSize: 28,
+              lineHeight: 1,
+              color: '#1f2430',
               cursor: 'pointer',
+              boxShadow: '0 4px 14px rgba(31, 36, 48, 0.05)',
             }}
           >
             ←
           </button>
 
-          <div>
-            <div style={{ fontSize: 24, fontWeight: 900 }}>My Promotions</div>
-            <div style={{ fontSize: 13, color: '#737b86', fontWeight: 700 }}>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 900,
+                color: '#1f2430',
+                lineHeight: 1.1,
+              }}
+            >
+              My Promotions
+            </div>
+            <div
+              style={{
+                marginTop: 4,
+                fontSize: 14,
+                color: '#7a818c',
+                fontWeight: 600,
+              }}
+            >
               Create, launch and manage your ads
             </div>
           </div>
+
+          <button
+            onClick={() => router.push('/')}
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 999,
+              border: '1px solid #e8e0d5',
+              background: '#ffffff',
+              fontSize: 26,
+              lineHeight: 1,
+              color: '#1f2430',
+              cursor: 'pointer',
+              boxShadow: '0 4px 14px rgba(31, 36, 48, 0.05)',
+            }}
+          >
+            ✕
+          </button>
         </div>
 
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-            gap: 10,
-            marginBottom: 16,
+            gap: 12,
+            marginBottom: 18,
           }}
         >
           <div
             style={{
-              background: '#fff',
-              borderRadius: 22,
-              padding: 14,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
+              background: '#ffffff',
+              borderRadius: 28,
+              padding: 16,
+              border: '1px solid #efe7db',
+              boxShadow: '0 8px 24px rgba(31, 36, 48, 0.05)',
             }}
           >
-            <div style={{ fontSize: 12, color: '#7b848f', fontWeight: 800 }}>Active ads</div>
-            <div style={{ marginTop: 6, fontSize: 28, fontWeight: 900, color: '#ff3b30' }}>
+            <div style={{ fontSize: 13, color: '#7b848f', fontWeight: 700 }}>Active ads</div>
+            <div style={{ marginTop: 10, fontSize: 32, fontWeight: 900, color: '#ff3b30' }}>
               {activePromotions.length}
             </div>
           </div>
 
           <div
             style={{
-              background: '#fff',
-              borderRadius: 22,
-              padding: 14,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
+              background: '#ffffff',
+              borderRadius: 28,
+              padding: 16,
+              border: '1px solid #efe7db',
+              boxShadow: '0 8px 24px rgba(31, 36, 48, 0.05)',
             }}
           >
-            <div style={{ fontSize: 12, color: '#7b848f', fontWeight: 800 }}>Total views</div>
-            <div style={{ marginTop: 6, fontSize: 28, fontWeight: 900, color: '#ff3b30' }}>
+            <div style={{ fontSize: 13, color: '#7b848f', fontWeight: 700 }}>Total views</div>
+            <div style={{ marginTop: 10, fontSize: 32, fontWeight: 900, color: '#ff3b30' }}>
               {totalViews}
             </div>
           </div>
 
           <div
             style={{
-              background: '#fff',
-              borderRadius: 22,
-              padding: 14,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
+              background: '#ffffff',
+              borderRadius: 28,
+              padding: 16,
+              border: '1px solid #efe7db',
+              boxShadow: '0 8px 24px rgba(31, 36, 48, 0.05)',
             }}
           >
-            <div style={{ fontSize: 12, color: '#7b848f', fontWeight: 800 }}>Spent</div>
-            <div style={{ marginTop: 6, fontSize: 28, fontWeight: 900, color: '#ff3b30' }}>
+            <div style={{ fontSize: 13, color: '#7b848f', fontWeight: 700 }}>Spent</div>
+            <div style={{ marginTop: 10, fontSize: 32, fontWeight: 900, color: '#ff3b30' }}>
               {formatMoney(totalSpent)}
             </div>
           </div>
 
           <div
             style={{
-              background: '#fff',
-              borderRadius: 22,
-              padding: 14,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
+              background: '#ffffff',
+              borderRadius: 28,
+              padding: 16,
+              border: '1px solid #efe7db',
+              boxShadow: '0 8px 24px rgba(31, 36, 48, 0.05)',
             }}
           >
-            <div style={{ fontSize: 12, color: '#7b848f', fontWeight: 800 }}>Bookings from ads</div>
-            <div style={{ marginTop: 6, fontSize: 28, fontWeight: 900, color: '#2ea44f' }}>
+            <div style={{ fontSize: 13, color: '#7b848f', fontWeight: 700 }}>Bookings from ads</div>
+            <div style={{ marginTop: 10, fontSize: 32, fontWeight: 900, color: '#2ea44f' }}>
               0
             </div>
           </div>
         </div>
 
         {activePromotions.length > 0 ? (
-          <div style={{ marginBottom: 18 }}>
-            <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 10 }}>Active promotion</div>
+          <div style={{ marginBottom: 20 }}>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 900,
+                color: '#1f2430',
+                marginBottom: 12,
+              }}
+            >
+              Active promotions
+            </div>
 
-            {activePromotions.map((promo) => (
-              <div
-                key={promo.id}
-                style={{
-                  background: '#fff',
-                  borderRadius: 28,
-                  overflow: 'hidden',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-                  marginBottom: 14,
-                }}
-              >
-                <div style={{ position: 'relative' }}>
-                  <img
-                    src={promo.image}
-                    alt={promo.title}
-                    style={{
-                      width: '100%',
-                      height: 220,
-                      objectFit: 'cover',
-                      display: 'block',
-                    }}
-                  />
+            <div style={{ display: 'grid', gap: 14 }}>
+              {activePromotions.map((promo) => {
+                const promoDays = Math.max(
+                  1,
+                  Math.ceil(
+                    (new Date(promo.endAt).getTime() - new Date(promo.startAt).getTime()) /
+                      (1000 * 60 * 60 * 24)
+                  )
+                );
 
+                return (
                   <div
+                    key={promo.id}
                     style={{
-                      position: 'absolute',
-                      top: 14,
-                      left: 14,
-                      background: '#fff',
-                      color: '#ff4f93',
-                      borderRadius: 999,
-                      padding: '9px 16px',
-                      fontSize: 12,
-                      fontWeight: 900,
+                      background: '#ffffff',
+                      borderRadius: 30,
+                      overflow: 'hidden',
+                      border: '1px solid #efe7db',
+                      boxShadow: '0 10px 28px rgba(31, 36, 48, 0.06)',
                     }}
                   >
-                    Sponsored
-                  </div>
-                </div>
+                    <div style={{ position: 'relative' }}>
+                      <img
+                        src={promo.image}
+                        alt={promo.title}
+                        style={{
+                          width: '100%',
+                          height: 210,
+                          objectFit: 'cover',
+                          display: 'block',
+                        }}
+                      />
 
-                <div style={{ padding: 16 }}>
-                  <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1.1 }}>{promo.title}</div>
-
-                  <div style={{ marginTop: 8, fontSize: 15, color: '#6f7782', fontWeight: 700 }}>
-                    {promo.subtitle || 'Special offer'}
-                  </div>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: 10,
-                      marginTop: 14,
-                    }}
-                  >
-                    <div
-                      style={{
-                        padding: '10px 14px',
-                        borderRadius: 999,
-                        background: '#fff5f5',
-                        border: '1px solid #f4d4d2',
-                        color: '#ff3b30',
-                        fontWeight: 900,
-                        fontSize: 14,
-                      }}
-                    >
-                      Active
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 14,
+                          left: 14,
+                          background: '#ffffff',
+                          color: '#ff4f93',
+                          borderRadius: 999,
+                          padding: '10px 16px',
+                          fontSize: 13,
+                          fontWeight: 900,
+                          boxShadow: '0 6px 18px rgba(31, 36, 48, 0.06)',
+                        }}
+                      >
+                        Sponsored
+                      </div>
                     </div>
 
-                    <div
-                      style={{
-                        padding: '10px 14px',
-                        borderRadius: 999,
-                        background: '#fff5f5',
-                        border: '1px solid #f4d4d2',
-                        color: '#ff3b30',
-                        fontWeight: 900,
-                        fontSize: 14,
-                      }}
-                    >
-                      {formatMoney(
-                        calcPromotionPrice(
-                          promo.radiusKm,
-                          Math.max(
-                            1,
-                            Math.ceil(
-                              (new Date(promo.endAt).getTime() - new Date(promo.startAt).getTime()) /
-                                (1000 * 60 * 60 * 24)
-                            )
-                          )
-                        )
-                      )}
-                    </div>
+                    <div style={{ padding: 18 }}>
+                      <div
+                        style={{
+                          fontSize: 28,
+                          fontWeight: 900,
+                          lineHeight: 1.08,
+                          color: '#1f2430',
+                        }}
+                      >
+                        {promo.title}
+                      </div>
 
-                    <div
-                      style={{
-                        padding: '10px 14px',
-                        borderRadius: 999,
-                        background: '#fff5f5',
-                        border: '1px solid #f4d4d2',
-                        color: '#ff3b30',
-                        fontWeight: 900,
-                        fontSize: 14,
-                      }}
-                    >
-                      {formatTimeLeft(promo.endAt)}
-                    </div>
+                      <div
+                        style={{
+                          marginTop: 8,
+                          fontSize: 16,
+                          color: '#6f7782',
+                          fontWeight: 700,
+                        }}
+                      >
+                        {promo.subtitle || 'Special offer'}
+                      </div>
 
-                    <div
-                      style={{
-                        padding: '10px 14px',
-                        borderRadius: 999,
-                        background: '#f8f9fb',
-                        border: '1px solid #e5e7eb',
-                        color: '#1f2430',
-                        fontWeight: 900,
-                        fontSize: 14,
-                      }}
-                    >
-                      Views: {promo.views}
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 10,
+                          marginTop: 14,
+                        }}
+                      >
+                        <div
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: 999,
+                            background: '#fff5f5',
+                            border: '1px solid #f4d8d3',
+                            color: '#ff3b30',
+                            fontWeight: 900,
+                            fontSize: 14,
+                          }}
+                        >
+                          Active
+                        </div>
+
+                        <div
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: 999,
+                            background: '#fff5f5',
+                            border: '1px solid #f4d8d3',
+                            color: '#ff3b30',
+                            fontWeight: 900,
+                            fontSize: 14,
+                          }}
+                        >
+                          {formatMoney(calcPromotionPrice(promo.radiusKm, promoDays))}
+                        </div>
+
+                        <div
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: 999,
+                            background: '#fff5f5',
+                            border: '1px solid #f4d8d3',
+                            color: '#ff3b30',
+                            fontWeight: 900,
+                            fontSize: 14,
+                          }}
+                        >
+                          {formatTimeLeft(promo.endAt)}
+                        </div>
+
+                        <div
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: 999,
+                            background: '#f8f9fb',
+                            border: '1px solid #e5e7eb',
+                            color: '#1f2430',
+                            fontWeight: 800,
+                            fontSize: 14,
+                          }}
+                        >
+                          Views: {promo.views}
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: 16,
+                          display: 'grid',
+                          gridTemplateColumns: '1fr 1fr',
+                          gap: 10,
+                        }}
+                      >
+                        <button
+                          onClick={() => router.push(`/promotion/${promo.id}`)}
+                          style={{
+                            height: 52,
+                            borderRadius: 18,
+                            border: '1px solid #e7dfd2',
+                            background: '#ffffff',
+                            color: '#1f2430',
+                            fontSize: 17,
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() => handlePausePromotion(promo.id)}
+                          style={{
+                            height: 52,
+                            border: 'none',
+                            borderRadius: 18,
+                            background: '#ffd84d',
+                            color: '#533f00',
+                            fontSize: 17,
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Pause
+                        </button>
+                      </div>
                     </div>
                   </div>
-
-                  <div
-                    style={{
-                      marginTop: 14,
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr',
-                      gap: 10,
-                    }}
-                  >
-                    <button
-                      onClick={() => router.push(`/promotion/${promo.id}`)}
-                      style={{
-                        height: 48,
-                        borderRadius: 16,
-                        border: '1px solid #e7dfd2',
-                        background: '#fff',
-                        color: '#1f2430',
-                        fontSize: 16,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => handlePausePromotion(promo.id)}
-                      style={{
-                        height: 48,
-                        border: 'none',
-                        borderRadius: 16,
-                        background: '#ffd84d',
-                        color: '#533f00',
-                        fontSize: 16,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Pause
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+                );
+              })}
+            </div>
           </div>
         ) : null}
 
         <div
           style={{
-            background: '#fff',
-            borderRadius: 28,
-            padding: 16,
-            boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-            marginBottom: 18,
+            background: '#ffffff',
+            borderRadius: 30,
+            padding: 18,
+            border: '1px solid #efe7db',
+            boxShadow: '0 10px 30px rgba(31, 36, 48, 0.06)',
+            marginBottom: 20,
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 12 }}>New promotion</div>
+          <div
+            style={{
+              fontSize: 24,
+              fontWeight: 900,
+              color: '#1f2430',
+              marginBottom: 14,
+            }}
+          >
+            New promotion
+          </div>
 
           <div style={{ display: 'grid', gap: 14 }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#6f7782', marginBottom: 8 }}>Photo URL</div>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: '#6f7782',
+                  marginBottom: 8,
+                }}
+              >
+                Photo URL
+              </div>
               <input
                 value={image}
                 onChange={(e) => setImage(e.target.value)}
                 style={{
                   width: '100%',
-                  height: 46,
-                  borderRadius: 14,
+                  height: 50,
+                  borderRadius: 16,
                   border: '1px solid #e7dfd2',
                   padding: '0 14px',
                   fontSize: 14,
                   outline: 'none',
+                  background: '#ffffff',
+                  color: '#1f2430',
                 }}
               />
             </div>
@@ -463,7 +553,7 @@ export default function PromotionsPage() {
             <div
               style={{
                 width: '100%',
-                borderRadius: 20,
+                borderRadius: 22,
                 overflow: 'hidden',
                 background: '#f3f4f6',
                 border: '1px solid #ece7df',
@@ -482,53 +572,85 @@ export default function PromotionsPage() {
             </div>
 
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#6f7782', marginBottom: 8 }}>Title</div>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: '#6f7782',
+                  marginBottom: 8,
+                }}
+              >
+                Title
+              </div>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 style={{
                   width: '100%',
-                  height: 46,
-                  borderRadius: 14,
+                  height: 50,
+                  borderRadius: 16,
                   border: '1px solid #e7dfd2',
                   padding: '0 14px',
                   fontSize: 14,
                   outline: 'none',
+                  background: '#ffffff',
+                  color: '#1f2430',
                 }}
               />
             </div>
 
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#6f7782', marginBottom: 8 }}>Subtitle</div>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: '#6f7782',
+                  marginBottom: 8,
+                }}
+              >
+                Subtitle
+              </div>
               <input
                 value={subtitle}
                 onChange={(e) => setSubtitle(e.target.value)}
                 style={{
                   width: '100%',
-                  height: 46,
-                  borderRadius: 14,
+                  height: 50,
+                  borderRadius: 16,
                   border: '1px solid #e7dfd2',
                   padding: '0 14px',
                   fontSize: 14,
                   outline: 'none',
+                  background: '#ffffff',
+                  color: '#1f2430',
                 }}
               />
             </div>
 
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#6f7782', marginBottom: 8 }}>Category</div>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: '#6f7782',
+                  marginBottom: 8,
+                }}
+              >
+                Category
+              </div>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 style={{
                   width: '100%',
-                  height: 46,
-                  borderRadius: 14,
+                  height: 50,
+                  borderRadius: 16,
                   border: '1px solid #e7dfd2',
                   padding: '0 14px',
                   fontSize: 14,
                   outline: 'none',
-                  background: '#fff',
+                  background: '#ffffff',
+                  color: '#1f2430',
                 }}
               >
                 {categories.map((item) => (
@@ -540,15 +662,25 @@ export default function PromotionsPage() {
             </div>
 
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#6f7782', marginBottom: 8 }}>Radius</div>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: '#6f7782',
+                  marginBottom: 8,
+                }}
+              >
+                Radius
+              </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {radiusOptions.map((item) => (
                   <button
                     key={item}
+                    type="button"
                     onClick={() => setRadiusKm(item)}
                     style={{
                       border: radiusKm === item ? '2px solid #ff3b30' : '1px solid #e7dfd2',
-                      background: '#fff',
+                      background: radiusKm === item ? '#fff5f5' : '#ffffff',
                       color: radiusKm === item ? '#ff3b30' : '#1f2430',
                       borderRadius: 999,
                       padding: '10px 14px',
@@ -564,15 +696,25 @@ export default function PromotionsPage() {
             </div>
 
             <div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#6f7782', marginBottom: 8 }}>Days</div>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: '#6f7782',
+                  marginBottom: 8,
+                }}
+              >
+                Days
+              </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {durationOptions.map((item) => (
                   <button
                     key={item}
+                    type="button"
                     onClick={() => setDurationDays(item)}
                     style={{
                       border: durationDays === item ? '2px solid #ff3b30' : '1px solid #e7dfd2',
-                      background: '#fff',
+                      background: durationDays === item ? '#fff5f5' : '#ffffff',
                       color: durationDays === item ? '#ff3b30' : '#1f2430',
                       borderRadius: 999,
                       padding: '10px 14px',
@@ -591,15 +733,15 @@ export default function PromotionsPage() {
               style={{
                 background: '#fff5f5',
                 border: '1px solid #f3d7d4',
-                borderRadius: 20,
-                padding: 14,
+                borderRadius: 24,
+                padding: 16,
               }}
             >
-              <div style={{ fontSize: 12, color: '#7b848f', fontWeight: 800 }}>Estimated price</div>
-              <div style={{ marginTop: 6, fontSize: 30, fontWeight: 900, color: '#ff3b30' }}>
+              <div style={{ fontSize: 13, color: '#7b848f', fontWeight: 700 }}>Estimated price</div>
+              <div style={{ marginTop: 8, fontSize: 34, fontWeight: 900, color: '#ff3b30' }}>
                 {formatMoney(price)}
               </div>
-              <div style={{ marginTop: 6, fontSize: 13, color: '#6f7782', fontWeight: 700 }}>
+              <div style={{ marginTop: 6, fontSize: 14, color: '#6f7782', fontWeight: 700 }}>
                 Radius {radiusKm} km • {durationDays} day{durationDays > 1 ? 's' : ''}
               </div>
             </div>
@@ -608,16 +750,16 @@ export default function PromotionsPage() {
               onClick={handleLaunchPromotion}
               disabled={isSubmitting}
               style={{
-                height: 54,
+                height: 56,
                 border: 'none',
-                borderRadius: 18,
-                background: '#2ea44f',
-                color: '#fff',
+                borderRadius: 20,
+                background: '#22a447',
+                color: '#ffffff',
                 fontSize: 18,
                 fontWeight: 900,
                 cursor: 'pointer',
-                boxShadow: '0 8px 20px rgba(46,164,79,0.24)',
-                opacity: isSubmitting ? 0.8 : 1,
+                boxShadow: '0 10px 22px rgba(34, 164, 71, 0.22)',
+                opacity: isSubmitting ? 0.82 : 1,
               }}
             >
               {isSubmitting ? 'Launching...' : 'Launch promotion'}
@@ -627,17 +769,27 @@ export default function PromotionsPage() {
 
         {archivedPromotions.length > 0 ? (
           <div>
-            <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 10 }}>Previous promotions</div>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 900,
+                color: '#1f2430',
+                marginBottom: 12,
+              }}
+            >
+              Previous promotions
+            </div>
 
             <div style={{ display: 'grid', gap: 12 }}>
               {archivedPromotions.map((promo) => (
                 <div
                   key={promo.id}
                   style={{
-                    background: '#fff',
-                    borderRadius: 22,
+                    background: '#ffffff',
+                    borderRadius: 24,
                     padding: 14,
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
+                    border: '1px solid #efe7db',
+                    boxShadow: '0 8px 24px rgba(31, 36, 48, 0.05)',
                     display: 'grid',
                     gridTemplateColumns: '88px 1fr',
                     gap: 12,
@@ -657,19 +809,42 @@ export default function PromotionsPage() {
                   />
 
                   <div>
-                    <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.15 }}>{promo.title}</div>
-
-                    <div style={{ marginTop: 6, fontSize: 13, color: '#6f7782', fontWeight: 700 }}>
-                      {promo.subtitle || 'Special offer'}
+                    <div
+                      style={{
+                        fontSize: 18,
+                        fontWeight: 900,
+                        lineHeight: 1.15,
+                        color: '#1f2430',
+                      }}
+                    >
+                      {promo.title}
                     </div>
 
-                    <div style={{ marginTop: 8, fontSize: 13, color: '#6f7782', fontWeight: 700 }}>
-                      {formatDateLabel(promo.startAt)} → {formatDateLabel(promo.endAt)}
+                    <div
+                      style={{
+                        marginTop: 6,
+                        fontSize: 13,
+                        color: '#6f7782',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {promo.subtitle || 'Special offer'}
                     </div>
 
                     <div
                       style={{
                         marginTop: 8,
+                        fontSize: 13,
+                        color: '#6f7782',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {formatDateLabel(promo.startAt)} → {formatDateLabel(promo.endAt)}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 10,
                         display: 'flex',
                         flexWrap: 'wrap',
                         gap: 8,
@@ -692,11 +867,11 @@ export default function PromotionsPage() {
                       <button
                         onClick={() => handleResumePromotion(promo.id)}
                         style={{
-                          padding: '7px 12px',
+                          padding: '8px 12px',
                           borderRadius: 999,
                           border: 'none',
-                          background: '#2ea44f',
-                          color: '#fff',
+                          background: '#22a447',
+                          color: '#ffffff',
                           fontSize: 12,
                           fontWeight: 900,
                           cursor: 'pointer',
