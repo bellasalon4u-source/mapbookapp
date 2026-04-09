@@ -1,20 +1,21 @@
 'use client';
 
+import { type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function SponsoredOfferPage() {
+export default function PromotionDetailsPage() {
   const router = useRouter();
 
-  const sponsoredOffer = {
+  const promotion = {
     id: 'keratin-hair-extensions',
     title: 'Keratin Hair Extensions',
     subtitle: '20% off this week',
     image:
       'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80',
-    views: 192,
-    category: 'Beauty',
+    views: 199,
+    category: 'beauty',
     description:
-      'Get a professional keratin hair extensions service with a personalised consultation, colour match and natural blend finish. Perfect for clients who want extra length, volume and a seamless result.',
+      'Get a professional keratin hair extensions service with a personalised consultation, colour match and a natural blend finish. Perfect for clients who want extra length, extra volume and a seamless result.',
     included: [
       'Personal consultation',
       'Colour matching',
@@ -39,8 +40,8 @@ export default function SponsoredOfferPage() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: sponsoredOffer.title,
-          text: `${sponsoredOffer.title} — ${sponsoredOffer.subtitle}`,
+          title: promotion.title,
+          text: `${promotion.title} — ${promotion.subtitle}`,
           url: window.location.href,
         });
       } else {
@@ -52,36 +53,38 @@ export default function SponsoredOfferPage() {
     }
   };
 
-  const SectionCard = ({
+  function SectionCard({
     title,
     children,
   }: {
     title: string;
-    children: React.ReactNode;
-  }) => (
-    <div
-      style={{
-        background: '#ffffff',
-        borderRadius: 28,
-        padding: 22,
-        border: '1px solid #efe7db',
-        boxShadow: '0 2px 10px rgba(44, 26, 12, 0.04)',
-      }}
-    >
-      <h2
+    children: ReactNode;
+  }) {
+    return (
+      <div
         style={{
-          fontSize: 28,
-          fontWeight: 800,
-          color: '#1f1f1f',
-          margin: 0,
-          marginBottom: 14,
+          background: '#ffffff',
+          borderRadius: 28,
+          padding: 22,
+          border: '1px solid #efe7db',
+          boxShadow: '0 2px 10px rgba(44, 26, 12, 0.04)',
         }}
       >
-        {title}
-      </h2>
-      {children}
-    </div>
-  );
+        <h2
+          style={{
+            fontSize: 28,
+            fontWeight: 800,
+            color: '#1f1f1f',
+            margin: 0,
+            marginBottom: 14,
+          }}
+        >
+          {title}
+        </h2>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <main
@@ -149,8 +152,8 @@ export default function SponsoredOfferPage() {
         >
           <div style={{ position: 'relative' }}>
             <img
-              src={sponsoredOffer.image}
-              alt={sponsoredOffer.title}
+              src={promotion.image}
+              alt={promotion.title}
               style={{
                 width: '100%',
                 height: 360,
@@ -186,7 +189,7 @@ export default function SponsoredOfferPage() {
                 color: '#20202a',
               }}
             >
-              {sponsoredOffer.title}
+              {promotion.title}
             </h1>
 
             <p
@@ -199,7 +202,7 @@ export default function SponsoredOfferPage() {
                 fontWeight: 700,
               }}
             >
-              {sponsoredOffer.subtitle}
+              {promotion.subtitle}
             </p>
 
             <div
@@ -221,7 +224,7 @@ export default function SponsoredOfferPage() {
                   fontWeight: 800,
                 }}
               >
-                Views: {sponsoredOffer.views}
+                Views: {promotion.views}
               </div>
 
               <div
@@ -235,7 +238,7 @@ export default function SponsoredOfferPage() {
                   fontWeight: 800,
                 }}
               >
-                Category: {sponsoredOffer.category}
+                Category: {promotion.category}
               </div>
 
               <div
@@ -266,8 +269,8 @@ export default function SponsoredOfferPage() {
               }}
             >
               <img
-                src={sponsoredOffer.providerImage}
-                alt={sponsoredOffer.providerName}
+                src={promotion.providerImage}
+                alt={promotion.providerName}
                 style={{
                   width: 76,
                   height: 76,
@@ -286,7 +289,7 @@ export default function SponsoredOfferPage() {
                     marginBottom: 4,
                   }}
                 >
-                  {sponsoredOffer.providerName}
+                  {promotion.providerName}
                 </div>
 
                 <div
@@ -297,7 +300,7 @@ export default function SponsoredOfferPage() {
                     marginBottom: 6,
                   }}
                 >
-                  {sponsoredOffer.providerRole}
+                  {promotion.providerRole}
                 </div>
 
                 <div
@@ -307,7 +310,7 @@ export default function SponsoredOfferPage() {
                     fontWeight: 700,
                   }}
                 >
-                  ★ {sponsoredOffer.rating}
+                  ★ {promotion.rating}
                 </div>
               </div>
             </div>
@@ -386,13 +389,13 @@ export default function SponsoredOfferPage() {
                 fontWeight: 500,
               }}
             >
-              {sponsoredOffer.description}
+              {promotion.description}
             </p>
           </SectionCard>
 
           <SectionCard title="What’s included">
             <div style={{ display: 'grid', gap: 12 }}>
-              {sponsoredOffer.included.map((item) => (
+              {promotion.included.map((item) => (
                 <div
                   key={item}
                   style={{
@@ -444,7 +447,7 @@ export default function SponsoredOfferPage() {
                     textDecoration: 'line-through',
                   }}
                 >
-                  {sponsoredOffer.oldPrice}
+                  {promotion.oldPrice}
                 </span>
               </div>
 
@@ -458,7 +461,7 @@ export default function SponsoredOfferPage() {
               >
                 <span style={{ color: '#20202a', fontWeight: 800 }}>Now</span>
                 <span style={{ color: '#ff4fa0', fontWeight: 900 }}>
-                  {sponsoredOffer.newPrice}
+                  {promotion.newPrice}
                 </span>
               </div>
 
@@ -484,7 +487,7 @@ export default function SponsoredOfferPage() {
               >
                 <span style={{ color: '#6b7280', fontWeight: 600 }}>Valid until</span>
                 <span style={{ color: '#20202a', fontWeight: 800 }}>
-                  {sponsoredOffer.validUntil}
+                  {promotion.validUntil}
                 </span>
               </div>
             </div>
@@ -512,7 +515,7 @@ export default function SponsoredOfferPage() {
                     fontWeight: 800,
                   }}
                 >
-                  {sponsoredOffer.area}
+                  {promotion.area}
                 </div>
               </div>
 
@@ -536,7 +539,7 @@ export default function SponsoredOfferPage() {
                     fontWeight: 700,
                   }}
                 >
-                  {sponsoredOffer.address}
+                  {promotion.address}
                 </div>
               </div>
 
@@ -560,7 +563,7 @@ export default function SponsoredOfferPage() {
                     fontWeight: 700,
                   }}
                 >
-                  {sponsoredOffer.distance}
+                  {promotion.distance}
                 </div>
               </div>
             </div>
