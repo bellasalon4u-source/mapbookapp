@@ -10,6 +10,7 @@ import {
   type PromotionItem,
 } from '../../../services/promotionsStore';
 import { getAllMasters } from '../../../services/masters';
+import { categories } from '../../../services/categories';
 
 const radiusOptions = [1, 3, 5, 10, 15, 25];
 const durationOptions = [1, 3, 7, 14];
@@ -341,7 +342,18 @@ export default function PromotionsPage() {
                         fontSize: 14,
                       }}
                     >
-                      {formatMoney(calcPromotionPrice(promo.radiusKm, Math.max(1, Math.ceil((new Date(promo.endAt).getTime() - new Date(promo.startAt).getTime()) / (1000 * 60 * 60 * 24)))))}
+                      {formatMoney(
+                        calcPromotionPrice(
+                          promo.radiusKm,
+                          Math.max(
+                            1,
+                            Math.ceil(
+                              (new Date(promo.endAt).getTime() - new Date(promo.startAt).getTime()) /
+                                (1000 * 60 * 60 * 24)
+                            )
+                          )
+                        )
+                      )}
                     </div>
 
                     <div
