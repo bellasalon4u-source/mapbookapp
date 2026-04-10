@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import BottomNav from '../../../components/common/BottomNav';
 import {
   getSavedLanguage,
@@ -26,6 +27,34 @@ import {
   type SearchLocationMode,
 } from '../../../services/appRegionStore';
 
+const LocationPickerMap = dynamic(
+  () =>
+    import('./LocationPickerMap').catch(() => ({
+      default: function FallbackMap() {
+        return (
+          <div
+            style={{
+              height: 320,
+              borderRadius: 22,
+              background: '#f6f1e9',
+              border: '1px solid #efe4d7',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 800,
+              color: '#6f6458',
+              textAlign: 'center',
+              padding: 16,
+            }}
+          >
+            Map preview is unavailable right now
+          </div>
+        );
+      },
+    })),
+  { ssr: false }
+);
+
 const pageTexts = {
   EN: {
     title: 'Language, currency & location',
@@ -43,6 +72,8 @@ const pageTexts = {
     saved: 'Settings saved',
     saveButton: 'Save',
     locationNotReady: 'Current location not detected yet',
+    mapPickerTitle: 'Pick point on map',
+    mapPickerHint: 'Tap anywhere on the map to change the search point',
   },
   ES: {
     title: 'Idioma, moneda y ubicación',
@@ -60,6 +91,8 @@ const pageTexts = {
     saved: 'Ajustes guardados',
     saveButton: 'Guardar',
     locationNotReady: 'La ubicación actual aún no está detectada',
+    mapPickerTitle: 'Elegir punto en el mapa',
+    mapPickerHint: 'Toca cualquier lugar del mapa para cambiar el punto de búsqueda',
   },
   RU: {
     title: 'Язык, валюта и локация',
@@ -77,6 +110,8 @@ const pageTexts = {
     saved: 'Настройки сохранены',
     saveButton: 'Сохранить',
     locationNotReady: 'Текущая локация ещё не определена',
+    mapPickerTitle: 'Выбор точки на карте',
+    mapPickerHint: 'Тапни по карте, чтобы изменить точку поиска',
   },
   CZ: {
     title: 'Jazyk, měna a poloha',
@@ -94,6 +129,8 @@ const pageTexts = {
     saved: 'Nastavení uloženo',
     saveButton: 'Uložit',
     locationNotReady: 'Aktuální poloha ještě není zjištěna',
+    mapPickerTitle: 'Vyberte bod na mapě',
+    mapPickerHint: 'Klepněte kamkoli na mapu a změňte bod hledání',
   },
   DE: {
     title: 'Sprache, Währung und Standort',
@@ -111,6 +148,8 @@ const pageTexts = {
     saved: 'Einstellungen gespeichert',
     saveButton: 'Speichern',
     locationNotReady: 'Aktueller Standort wurde noch nicht erkannt',
+    mapPickerTitle: 'Punkt auf der Karte wählen',
+    mapPickerHint: 'Tippen Sie auf die Karte, um den Suchpunkt zu ändern',
   },
   PL: {
     title: 'Język, waluta i lokalizacja',
@@ -128,6 +167,8 @@ const pageTexts = {
     saved: 'Ustawienia zapisane',
     saveButton: 'Zapisz',
     locationNotReady: 'Bieżąca lokalizacja nie została jeszcze wykryta',
+    mapPickerTitle: 'Wybierz punkt na mapie',
+    mapPickerHint: 'Dotknij mapy, aby zmienić punkt wyszukiwania',
   },
 } as const;
 
@@ -196,6 +237,16 @@ export default function LanguageRegionPage() {
   );
 
   const effectiveLocation = useMemo(() => getEffectiveSearchLocation(), [language]);
+
+  const mapLat = useMemo(() => {
+    const parsed = Number(customLat);
+    return Number.isFinite(parsed) ? parsed : 51.5074;
+  }, [customLat]);
+
+  const mapLng = useMemo(() => {
+    const parsed = Number(customLng);
+    return Number.isFinite(parsed) ? parsed : -0.1278;
+  }, [customLng]);
 
   const handleSave = () => {
     saveLanguage(selectedLanguage);
@@ -379,7 +430,27 @@ export default function LanguageRegionPage() {
           </div>
 
           {locationMode === 'custom' && (
-            <div className="mt-4 grid gap-3">
+            <div className="mt-4 grid gap-4">
+              <div>
+                <div className="mb-2 text-sm font-bold text-[#1d1712]">
+                  {text.mapPickerTitle}
+                </div>
+                <div className="mb-3 text-xs leading-5 text-[#6f6458]">
+                  {text.mapPickerHint}
+                </div>
+
+                <div className="overflow-hidden rounded-[22px] border border-[#efe4d7]">
+                  <LocationPickerMap
+                    lat={mapLat}
+                    lng={mapLng}
+                    onPick={(lat: number, lng: number) => {
+                      setCustomLat(String(Number(lat.toFixed(6))));
+                      setCustomLng(String(Number(lng.toFixed(6))));
+                    }}
+                  />
+                </div>
+              </div>
+
               <div>
                 <div className="mb-2 text-sm font-bold text-[#1d1712]">{text.customLat}</div>
                 <input
@@ -426,11 +497,14 @@ export default function LanguageRegionPage() {
           </div>
 
           <div className="mt-2 text-sm leading-6 text-[#6f6458]">
-            {effectiveLocation.label}
+            {locationMode === 'custom'
+              ? customLabel || 'Custom point'
+              : effectiveLocation.label}
           </div>
 
           <div className="mt-1 text-xs leading-5 text-[#8b7f73]">
-            {effectiveLocation.lat}, {effectiveLocation.lng}
+            {locationMode === 'custom' ? customLat : effectiveLocation.lat},{' '}
+            {locationMode === 'custom' ? customLng : effectiveLocation.lng}
           </div>
         </div>
       </div>
