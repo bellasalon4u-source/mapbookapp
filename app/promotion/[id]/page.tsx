@@ -9,6 +9,8 @@ import {
 } from '../../../services/promotionsStore';
 import { getAllMasters } from '../../../services/masters';
 import { categories } from '../../../services/categories';
+import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import { formatDisplayPrice } from '../../../services/currencyDisplay';
 
 function SectionCard({
   title,
@@ -43,25 +45,230 @@ function SectionCard({
   );
 }
 
+function getTexts(language: AppLanguage) {
+  if (language === 'RU') {
+    return {
+      back: 'Назад',
+      notFound: 'Реклама не найдена',
+      notFoundSub: 'Это предложение недоступно или больше не существует.',
+      sponsored: 'Sponsored',
+      specialOffer: 'Специальное предложение',
+      views: 'Просмотры',
+      category: 'Категория',
+      save: 'Экономия',
+      professional: 'Специалист',
+      openProfile: 'Профиль',
+      share: 'Поделиться',
+      bookNow: 'Забронировать',
+      aboutOffer: 'Об этом предложении',
+      included: 'Что входит',
+      pricing: 'Стоимость',
+      oldPrice: 'Старая цена',
+      now: 'Сейчас',
+      youSave: 'Вы экономите',
+      validUntil: 'Действует до',
+      location: 'Локация',
+      area: 'Район',
+      address: 'Адрес',
+      distance: 'Расстояние',
+      copied: 'Ссылка скопирована',
+      beauty: 'Красота',
+    };
+  }
+
+  if (language === 'ES') {
+    return {
+      back: 'Atrás',
+      notFound: 'Anuncio no encontrado',
+      notFoundSub: 'Esta promoción no está disponible o ya no existe.',
+      sponsored: 'Sponsored',
+      specialOffer: 'Oferta especial',
+      views: 'Vistas',
+      category: 'Categoría',
+      save: 'Ahorro',
+      professional: 'Profesional',
+      openProfile: 'Abrir perfil',
+      share: 'Compartir',
+      bookNow: 'Reservar',
+      aboutOffer: 'Sobre esta oferta',
+      included: 'Qué incluye',
+      pricing: 'Precio',
+      oldPrice: 'Precio anterior',
+      now: 'Ahora',
+      youSave: 'Ahorras',
+      validUntil: 'Válido hasta',
+      location: 'Ubicación',
+      area: 'Zona',
+      address: 'Dirección',
+      distance: 'Distancia',
+      copied: 'Enlace copiado',
+      beauty: 'Belleza',
+    };
+  }
+
+  if (language === 'CZ') {
+    return {
+      back: 'Zpět',
+      notFound: 'Reklama nenalezena',
+      notFoundSub: 'Tato nabídka není dostupná nebo již neexistuje.',
+      sponsored: 'Sponsored',
+      specialOffer: 'Speciální nabídka',
+      views: 'Zobrazení',
+      category: 'Kategorie',
+      save: 'Úspora',
+      professional: 'Profesionál',
+      openProfile: 'Otevřít profil',
+      share: 'Sdílet',
+      bookNow: 'Rezervovat',
+      aboutOffer: 'O této nabídce',
+      included: 'Co je zahrnuto',
+      pricing: 'Cena',
+      oldPrice: 'Původní cena',
+      now: 'Nyní',
+      youSave: 'Ušetříte',
+      validUntil: 'Platí do',
+      location: 'Lokalita',
+      area: 'Oblast',
+      address: 'Adresa',
+      distance: 'Vzdálenost',
+      copied: 'Odkaz zkopírován',
+      beauty: 'Krása',
+    };
+  }
+
+  if (language === 'DE') {
+    return {
+      back: 'Zurück',
+      notFound: 'Anzeige nicht gefunden',
+      notFoundSub: 'Dieses Angebot ist nicht verfügbar oder existiert nicht mehr.',
+      sponsored: 'Sponsored',
+      specialOffer: 'Sonderangebot',
+      views: 'Aufrufe',
+      category: 'Kategorie',
+      save: 'Ersparnis',
+      professional: 'Profi',
+      openProfile: 'Profil öffnen',
+      share: 'Teilen',
+      bookNow: 'Jetzt buchen',
+      aboutOffer: 'Über dieses Angebot',
+      included: 'Inklusive',
+      pricing: 'Preis',
+      oldPrice: 'Alter Preis',
+      now: 'Jetzt',
+      youSave: 'Sie sparen',
+      validUntil: 'Gültig bis',
+      location: 'Standort',
+      area: 'Bereich',
+      address: 'Adresse',
+      distance: 'Entfernung',
+      copied: 'Link kopiert',
+      beauty: 'Beauty',
+    };
+  }
+
+  if (language === 'PL') {
+    return {
+      back: 'Wstecz',
+      notFound: 'Reklama nie znaleziona',
+      notFoundSub: 'Ta oferta jest niedostępna lub już nie istnieje.',
+      sponsored: 'Sponsored',
+      specialOffer: 'Oferta specjalna',
+      views: 'Wyświetlenia',
+      category: 'Kategoria',
+      save: 'Oszczędzasz',
+      professional: 'Specjalista',
+      openProfile: 'Otwórz profil',
+      share: 'Udostępnij',
+      bookNow: 'Zarezerwuj',
+      aboutOffer: 'O tej ofercie',
+      included: 'Co zawiera',
+      pricing: 'Cena',
+      oldPrice: 'Stara cena',
+      now: 'Teraz',
+      youSave: 'Oszczędzasz',
+      validUntil: 'Ważne do',
+      location: 'Lokalizacja',
+      area: 'Obszar',
+      address: 'Adres',
+      distance: 'Odległość',
+      copied: 'Link skopiowany',
+      beauty: 'Uroda',
+    };
+  }
+
+  return {
+    back: 'Back',
+    notFound: 'Promotion not found',
+    notFoundSub: 'This promotion is unavailable or no longer exists.',
+    sponsored: 'Sponsored',
+    specialOffer: 'Special offer',
+    views: 'Views',
+    category: 'Category',
+    save: 'Save',
+    professional: 'Professional',
+    openProfile: 'Open profile',
+    share: 'Share',
+    bookNow: 'Book now',
+    aboutOffer: 'About this offer',
+    included: 'What’s included',
+    pricing: 'Pricing',
+    oldPrice: 'Old price',
+    now: 'Now',
+    youSave: 'You save',
+    validUntil: 'Valid until',
+    location: 'Location',
+    area: 'Area',
+    address: 'Address',
+    distance: 'Distance',
+    copied: 'Link copied',
+    beauty: 'Beauty',
+  };
+}
+
+function parsePriceNumber(value: string | undefined) {
+  if (!value) return null;
+  const parsed = Number(String(value).replace(/[^\d.]/g, ''));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export default function PromotionDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const promotionId = String(params?.id || '');
 
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [promotion, setPromotion] = useState<PromotionItem | null>(null);
+
+  const text = getTexts(language);
+
+  useEffect(() => {
+    const syncLanguage = () => {
+      setLanguage(getSavedLanguage());
+    };
+
+    syncLanguage();
+
+    window.addEventListener('focus', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
+
+    return () => {
+      window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
+    };
+  }, []);
 
   useEffect(() => {
     if (!promotionId) return;
 
-    const item = getPromotionById(promotionId);
+    const item = getPromotionById(promotionId, language);
     setPromotion(item);
 
     if (item) {
       incrementPromotionViews(item.id, 1);
-      const refreshed = getPromotionById(item.id);
+      const refreshed = getPromotionById(item.id, language);
       setPromotion(refreshed);
     }
-  }, [promotionId]);
+  }, [promotionId, language]);
 
   const master = useMemo(() => {
     if (!promotion) return null;
@@ -70,13 +277,21 @@ export default function PromotionDetailsPage() {
   }, [promotion]);
 
   const categoryLabel = useMemo(() => {
-    if (!promotion) return 'Beauty';
+    if (!promotion) return text.beauty;
     return (
       categories.find((item) => item.id === promotion.categoryId)?.label ||
       promotion.categoryId ||
-      'Beauty'
+      text.beauty
     );
-  }, [promotion]);
+  }, [promotion, text.beauty]);
+
+  const oldPriceValue = useMemo(() => parsePriceNumber(promotion?.oldPrice), [promotion?.oldPrice]);
+  const newPriceValue = useMemo(() => parsePriceNumber(promotion?.newPrice), [promotion?.newPrice]);
+
+  const saveAmount = useMemo(() => {
+    if (oldPriceValue === null || newPriceValue === null) return 0;
+    return Math.max(0, oldPriceValue - newPriceValue);
+  }, [oldPriceValue, newPriceValue]);
 
   const handleShare = async () => {
     try {
@@ -90,7 +305,7 @@ export default function PromotionDetailsPage() {
         });
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied');
+        alert(text.copied);
       }
     } catch (error) {
       console.error('Share failed', error);
@@ -132,7 +347,7 @@ export default function PromotionDetailsPage() {
               boxShadow: '0 2px 10px rgba(44, 26, 12, 0.05)',
             }}
           >
-            ← Back
+            ← {text.back}
           </button>
 
           <div
@@ -152,7 +367,7 @@ export default function PromotionDetailsPage() {
                 marginBottom: 10,
               }}
             >
-              Promotion not found
+              {text.notFound}
             </div>
             <div
               style={{
@@ -161,7 +376,7 @@ export default function PromotionDetailsPage() {
                 lineHeight: 1.6,
               }}
             >
-              This promotion is unavailable or no longer exists.
+              {text.notFoundSub}
             </div>
           </div>
         </div>
@@ -206,7 +421,7 @@ export default function PromotionDetailsPage() {
               boxShadow: '0 2px 10px rgba(44, 26, 12, 0.05)',
             }}
           >
-            ← Back
+            ← {text.back}
           </button>
 
           <div
@@ -220,7 +435,7 @@ export default function PromotionDetailsPage() {
               boxShadow: '0 2px 10px rgba(44, 26, 12, 0.05)',
             }}
           >
-            Sponsored
+            {text.sponsored}
           </div>
         </div>
 
@@ -258,7 +473,7 @@ export default function PromotionDetailsPage() {
                 fontWeight: 800,
               }}
             >
-              Sponsored
+              {text.sponsored}
             </div>
           </div>
 
@@ -285,7 +500,7 @@ export default function PromotionDetailsPage() {
                 fontWeight: 700,
               }}
             >
-              {promotion.subtitle || 'Special offer'}
+              {promotion.subtitle || text.specialOffer}
             </p>
 
             <div
@@ -307,7 +522,7 @@ export default function PromotionDetailsPage() {
                   fontWeight: 800,
                 }}
               >
-                Views: {promotion.views}
+                {text.views}: {promotion.views}
               </div>
 
               <div
@@ -321,10 +536,10 @@ export default function PromotionDetailsPage() {
                   fontWeight: 800,
                 }}
               >
-                Category: {categoryLabel}
+                {text.category}: {categoryLabel}
               </div>
 
-              {promotion.oldPrice && promotion.newPrice ? (
+              {saveAmount > 0 ? (
                 <div
                   style={{
                     background: '#f1fbf4',
@@ -336,12 +551,7 @@ export default function PromotionDetailsPage() {
                     fontWeight: 800,
                   }}
                 >
-                  Save £
-                  {Math.max(
-                    0,
-                    Number(String(promotion.oldPrice).replace(/[^\d.]/g, '')) -
-                      Number(String(promotion.newPrice).replace(/[^\d.]/g, ''))
-                  )}
+                  {text.save} {formatDisplayPrice(saveAmount)}
                 </div>
               ) : null}
             </div>
@@ -382,7 +592,7 @@ export default function PromotionDetailsPage() {
                     marginBottom: 4,
                   }}
                 >
-                  {String(master?.name || 'Professional')}
+                  {String(master?.name || text.professional)}
                 </div>
 
                 <div
@@ -428,7 +638,7 @@ export default function PromotionDetailsPage() {
                   cursor: 'pointer',
                 }}
               >
-                Open profile
+                {text.openProfile}
               </button>
 
               <button
@@ -444,7 +654,7 @@ export default function PromotionDetailsPage() {
                   cursor: 'pointer',
                 }}
               >
-                Share
+                {text.share}
               </button>
 
               <button
@@ -461,7 +671,7 @@ export default function PromotionDetailsPage() {
                   boxShadow: '0 10px 24px rgba(255, 79, 160, 0.25)',
                 }}
               >
-                Book now
+                {text.bookNow}
               </button>
             </div>
           </div>
@@ -475,7 +685,7 @@ export default function PromotionDetailsPage() {
           }}
         >
           {!!promotion.description && (
-            <SectionCard title="About this offer">
+            <SectionCard title={text.aboutOffer}>
               <p
                 style={{
                   margin: 0,
@@ -491,7 +701,7 @@ export default function PromotionDetailsPage() {
           )}
 
           {!!promotion.included?.length && (
-            <SectionCard title="What’s included">
+            <SectionCard title={text.included}>
               <div style={{ display: 'grid', gap: 12 }}>
                 {promotion.included.map((item) => (
                   <div
@@ -529,9 +739,9 @@ export default function PromotionDetailsPage() {
           )}
 
           {(promotion.oldPrice || promotion.newPrice || promotion.validUntil) && (
-            <SectionCard title="Pricing">
+            <SectionCard title={text.pricing}>
               <div style={{ display: 'grid', gap: 14 }}>
-                {!!promotion.oldPrice && (
+                {!!promotion.oldPrice && oldPriceValue !== null && (
                   <div
                     style={{
                       display: 'flex',
@@ -540,7 +750,7 @@ export default function PromotionDetailsPage() {
                       fontSize: 18,
                     }}
                   >
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>Old price</span>
+                    <span style={{ color: '#6b7280', fontWeight: 600 }}>{text.oldPrice}</span>
                     <span
                       style={{
                         color: '#9ca3af',
@@ -548,12 +758,12 @@ export default function PromotionDetailsPage() {
                         textDecoration: 'line-through',
                       }}
                     >
-                      {promotion.oldPrice}
+                      {formatDisplayPrice(oldPriceValue)}
                     </span>
                   </div>
                 )}
 
-                {!!promotion.newPrice && (
+                {!!promotion.newPrice && newPriceValue !== null && (
                   <div
                     style={{
                       display: 'flex',
@@ -562,14 +772,14 @@ export default function PromotionDetailsPage() {
                       fontSize: 22,
                     }}
                   >
-                    <span style={{ color: '#20202a', fontWeight: 800 }}>Now</span>
+                    <span style={{ color: '#20202a', fontWeight: 800 }}>{text.now}</span>
                     <span style={{ color: '#ff4fa0', fontWeight: 900 }}>
-                      {promotion.newPrice}
+                      {formatDisplayPrice(newPriceValue)}
                     </span>
                   </div>
                 )}
 
-                {!!promotion.oldPrice && !!promotion.newPrice && (
+                {saveAmount > 0 && (
                   <div
                     style={{
                       display: 'flex',
@@ -578,14 +788,9 @@ export default function PromotionDetailsPage() {
                       fontSize: 18,
                     }}
                   >
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>You save</span>
+                    <span style={{ color: '#6b7280', fontWeight: 600 }}>{text.youSave}</span>
                     <span style={{ color: '#228b50', fontWeight: 800 }}>
-                      £
-                      {Math.max(
-                        0,
-                        Number(String(promotion.oldPrice).replace(/[^\d.]/g, '')) -
-                          Number(String(promotion.newPrice).replace(/[^\d.]/g, ''))
-                      )}
+                      {formatDisplayPrice(saveAmount)}
                     </span>
                   </div>
                 )}
@@ -599,7 +804,7 @@ export default function PromotionDetailsPage() {
                       fontSize: 18,
                     }}
                   >
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>Valid until</span>
+                    <span style={{ color: '#6b7280', fontWeight: 600 }}>{text.validUntil}</span>
                     <span style={{ color: '#20202a', fontWeight: 800 }}>
                       {promotion.validUntil}
                     </span>
@@ -610,7 +815,7 @@ export default function PromotionDetailsPage() {
           )}
 
           {(promotion.area || promotion.address || promotion.distance) && (
-            <SectionCard title="Location">
+            <SectionCard title={text.location}>
               <div style={{ display: 'grid', gap: 12 }}>
                 {!!promotion.area && (
                   <div>
@@ -624,7 +829,7 @@ export default function PromotionDetailsPage() {
                         letterSpacing: 0.5,
                       }}
                     >
-                      Area
+                      {text.area}
                     </div>
                     <div
                       style={{
@@ -650,7 +855,7 @@ export default function PromotionDetailsPage() {
                         letterSpacing: 0.5,
                       }}
                     >
-                      Address
+                      {text.address}
                     </div>
                     <div
                       style={{
@@ -676,7 +881,7 @@ export default function PromotionDetailsPage() {
                         letterSpacing: 0.5,
                       }}
                     >
-                      Distance
+                      {text.distance}
                     </div>
                     <div
                       style={{
