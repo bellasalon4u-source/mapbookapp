@@ -16,6 +16,7 @@ import {
   getEffectiveSearchLocation,
   setCurrentLocation,
 } from '../services/appRegionStore';
+import { formatDisplayPrice } from '../services/currencyDisplay';
 
 type MasterItem = {
   id: string | number;
@@ -159,10 +160,7 @@ function paymentBadge(method: string, language: AppLanguage) {
 }
 
 function formatPrice(value: string | number | undefined, trObj: ReturnType<typeof t>) {
-  if (value === undefined || value === null || value === '') return `${trObj.from} £45`;
-  const asString = String(value).trim();
-  if (asString.includes('£')) return `${trObj.from} ${asString.replace(/^From\s*/i, '').trim()}`;
-  return `${trObj.from} £${asString}`;
+  return formatDisplayPrice(value, 45, true, trObj.from);
 }
 
 function buildMarkerIcon(
