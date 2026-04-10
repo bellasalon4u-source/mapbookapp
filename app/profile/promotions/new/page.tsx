@@ -15,6 +15,7 @@ import {
   type AppLanguage,
 } from '../../../../services/i18n';
 import { formatDisplayPrice } from '../../../../services/currencyDisplay';
+import { useLiveCurrencyRates } from '../../../../services/useLiveCurrencyRates';
 
 const radiusOptions = [1, 3, 5, 10, 15, 25];
 const durationOptions = [1, 3, 7, 14];
@@ -346,7 +347,7 @@ function getLabels(language: AppLanguage): NewPromotionLabels {
       nextField: 'Dalej',
       titleFieldName: 'tytuł',
       descriptionFieldName: 'opis',
-      discountFieldName: 'zniżka',
+      discountFieldName: 'zniżка',
       languageBadge: 'Język',
     };
   }
@@ -440,6 +441,8 @@ function getLanguageHint(language: AppLanguage) {
 }
 
 export default function NewPromotionPage() {
+  useLiveCurrencyRates();
+
   const router = useRouter();
 
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
