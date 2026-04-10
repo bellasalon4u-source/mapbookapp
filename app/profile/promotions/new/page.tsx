@@ -74,9 +74,6 @@ function getLabels(language: AppLang) {
       selectPhotoFirst: 'Сначала добавьте хотя бы одно фото',
       editPhoto: 'Редактирование фото',
       editorHint: 'Сдвигайте, масштабируйте и вращайте фото',
-      zoom: 'Масштаб',
-      position: 'Позиция',
-      rotate: 'Поворот',
       done: 'Готово',
       close: 'Закрыть',
       back: 'Назад',
@@ -119,9 +116,6 @@ function getLabels(language: AppLang) {
       selectPhotoFirst: 'Primero añade al menos una foto',
       editPhoto: 'Editar foto',
       editorHint: 'Mueve, amplía y gira la foto',
-      zoom: 'Zoom',
-      position: 'Posición',
-      rotate: 'Giro',
       done: 'Listo',
       close: 'Cerrar',
       back: 'Atrás',
@@ -163,9 +157,6 @@ function getLabels(language: AppLang) {
     selectPhotoFirst: 'Add at least one photo first',
     editPhoto: 'Edit photo',
     editorHint: 'Move, zoom and rotate the photo',
-    zoom: 'Zoom',
-    position: 'Position',
-    rotate: 'Rotate',
     done: 'Done',
     close: 'Close',
     back: 'Back',
@@ -317,7 +308,7 @@ export default function NewPromotionPage() {
     };
 
     localStorage.setItem('promotionDraft', JSON.stringify(payload));
-    router.push('/profile/promotions/payment');
+    window.location.href = '/profile/promotions/payment';
   };
 
   return (
@@ -465,6 +456,7 @@ export default function NewPromotionPage() {
                   />
 
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       removePhoto(photos[0].id);
@@ -540,6 +532,7 @@ export default function NewPromotionPage() {
                         />
 
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             removePhoto(photo.id);
@@ -591,6 +584,7 @@ export default function NewPromotionPage() {
                       />
 
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           removePhoto(photos[3].id);
@@ -615,6 +609,7 @@ export default function NewPromotionPage() {
                     </div>
                   ) : (
                     <button
+                      type="button"
                       onClick={() => galleryInputRef.current?.click()}
                       disabled={photos.length >= MAX_PHOTOS}
                       style={{
@@ -636,6 +631,7 @@ export default function NewPromotionPage() {
               </>
             ) : (
               <button
+                type="button"
                 onClick={() => galleryInputRef.current?.click()}
                 style={{
                   minHeight: 240,
@@ -663,6 +659,7 @@ export default function NewPromotionPage() {
             }}
           >
             <button
+              type="button"
               onClick={() => cameraInputRef.current?.click()}
               style={{
                 minHeight: 50,
@@ -679,6 +676,7 @@ export default function NewPromotionPage() {
             </button>
 
             <button
+              type="button"
               onClick={() => galleryInputRef.current?.click()}
               style={{
                 minHeight: 50,
@@ -695,6 +693,7 @@ export default function NewPromotionPage() {
             </button>
 
             <button
+              type="button"
               onClick={() => filesInputRef.current?.click()}
               style={{
                 minHeight: 50,
@@ -804,10 +803,12 @@ export default function NewPromotionPage() {
                 }}
               >
                 <div style={{ fontSize: 14, fontWeight: 900 }}>
-                  {labels.discount} <span style={{ color: '#727b88' }}>{labels.discountOptional}</span>
+                  {labels.discount}{' '}
+                  <span style={{ color: '#727b88' }}>{labels.discountOptional}</span>
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => setDiscountEnabled((prev) => !prev)}
                   style={{
                     width: 58,
@@ -864,7 +865,9 @@ export default function NewPromotionPage() {
 
                   <input
                     value={discountPercent}
-                    onChange={(e) => setDiscountPercent(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                    onChange={(e) =>
+                      setDiscountPercent(e.target.value.replace(/\D/g, '').slice(0, 2))
+                    }
                     style={{
                       width: '100%',
                       height: 46,
@@ -889,14 +892,16 @@ export default function NewPromotionPage() {
                       fontWeight: 900,
                     }}
                   >
-                    {labels.percent}
+                    %
                   </div>
                 </div>
               ) : null}
             </div>
 
             <div>
-              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>{labels.category}</div>
+              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>
+                {labels.category}
+              </div>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
@@ -926,6 +931,7 @@ export default function NewPromotionPage() {
                 {radiusOptions.map((item) => (
                   <button
                     key={item}
+                    type="button"
                     onClick={() => setRadiusKm(item)}
                     style={{
                       minWidth: 74,
@@ -946,11 +952,14 @@ export default function NewPromotionPage() {
             </div>
 
             <div>
-              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>{labels.duration}</div>
+              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>
+                {labels.duration}
+              </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {durationOptions.map((item) => (
                   <button
                     key={item}
+                    type="button"
                     onClick={() => setDurationDays(item)}
                     style={{
                       minWidth: 86,
@@ -964,13 +973,7 @@ export default function NewPromotionPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    {language === 'RU'
-                      ? item === 1
-                        ? labels.day1
-                        : `${item} ${labels.days}`
-                      : item === 1
-                        ? labels.day1
-                        : `${item} ${labels.days}`}
+                    {item === 1 ? labels.day1 : `${item} ${labels.days}`}
                   </button>
                 ))}
               </div>
@@ -1017,7 +1020,9 @@ export default function NewPromotionPage() {
             </div>
 
             <div>
-              <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 10 }}>{labels.preview}</div>
+              <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 10 }}>
+                {labels.preview}
+              </div>
 
               <div
                 style={{
@@ -1303,6 +1308,7 @@ export default function NewPromotionPage() {
             </div>
 
             <button
+              type="button"
               onClick={goToPayment}
               style={{
                 height: 58,
@@ -1356,6 +1362,7 @@ export default function NewPromotionPage() {
               }}
             >
               <button
+                type="button"
                 onClick={() => setEditingPhotoId(null)}
                 style={{
                   width: 54,
@@ -1383,6 +1390,7 @@ export default function NewPromotionPage() {
               </div>
 
               <button
+                type="button"
                 onClick={() => setEditingPhotoId(null)}
                 style={{
                   width: 54,
@@ -1501,6 +1509,7 @@ export default function NewPromotionPage() {
                   }}
                 >
                   <button
+                    type="button"
                     onClick={() =>
                       updatePhoto(activePhoto.id, {
                         zoom: Math.max(0.8, Number((activePhoto.zoom - 0.1).toFixed(2))),
@@ -1530,6 +1539,7 @@ export default function NewPromotionPage() {
                   </div>
 
                   <button
+                    type="button"
                     onClick={() =>
                       updatePhoto(activePhoto.id, {
                         zoom: Math.min(2.5, Number((activePhoto.zoom + 0.1).toFixed(2))),
@@ -1549,6 +1559,7 @@ export default function NewPromotionPage() {
                 </div>
 
                 <button
+                  type="button"
                   onClick={() =>
                     updatePhoto(activePhoto.id, {
                       rotate: activePhoto.rotate - 90,
@@ -1567,6 +1578,7 @@ export default function NewPromotionPage() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={() =>
                     updatePhoto(activePhoto.id, {
                       rotate: activePhoto.rotate + 90,
@@ -1598,6 +1610,7 @@ export default function NewPromotionPage() {
               {photos.map((photo, index) => (
                 <button
                   key={photo.id}
+                  type="button"
                   onClick={() => setEditingPhotoId(photo.id)}
                   style={{
                     position: 'relative',
@@ -1626,6 +1639,7 @@ export default function NewPromotionPage() {
                   />
 
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       removePhoto(photo.id);
@@ -1651,6 +1665,7 @@ export default function NewPromotionPage() {
 
               {photos.length < MAX_PHOTOS ? (
                 <button
+                  type="button"
                   onClick={() => galleryInputRef.current?.click()}
                   style={{
                     flex: '0 0 auto',
@@ -1670,6 +1685,7 @@ export default function NewPromotionPage() {
             </div>
 
             <button
+              type="button"
               onClick={() => setEditingPhotoId(null)}
               style={{
                 width: '100%',
