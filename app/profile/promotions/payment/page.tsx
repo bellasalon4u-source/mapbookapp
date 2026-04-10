@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getSavedLanguage, type AppLanguage } from '../../../../services/i18n';
 import { addPromotion } from '../../../../services/promotionsStore';
 import { getAllMasters } from '../../../../services/masters';
+import { formatDisplayPrice } from '../../../../services/currencyDisplay';
 
 type AppLang = 'RU' | 'EN' | 'ES';
 
@@ -36,10 +37,6 @@ const PROMO_LANGUAGES: AppLanguage[] = ['EN', 'ES', 'RU', 'CZ', 'DE', 'PL'];
 function normalizeLanguage(value: string): AppLang {
   if (value === 'RU' || value === 'EN' || value === 'ES') return value;
   return 'EN';
-}
-
-function formatMoney(value: number) {
-  return `£${value.toFixed(0)}`;
 }
 
 function makeId(prefix = 'promo') {
@@ -95,6 +92,7 @@ function getLabels(language: AppLang) {
       publishSuccess: 'Реклама оплачена и запущена',
       duration: 'Длительность',
       daysShort: 'дн.',
+      specialOffer: 'Специальное предложение',
     };
   }
 
@@ -129,6 +127,7 @@ function getLabels(language: AppLang) {
       publishSuccess: 'El anuncio fue pagado y publicado',
       duration: 'Duración',
       daysShort: 'días',
+      specialOffer: 'Oferta especial',
     };
   }
 
@@ -162,6 +161,7 @@ function getLabels(language: AppLang) {
     publishSuccess: 'Promotion was paid and published',
     duration: 'Duration',
     daysShort: 'days',
+    specialOffer: 'Special offer',
   };
 }
 
@@ -512,7 +512,7 @@ export default function PromotionPaymentPage() {
                       fontWeight: 700,
                     }}
                   >
-                    {draft.description}
+                    {draft.description || labels.specialOffer}
                   </div>
                 </div>
 
@@ -747,7 +747,7 @@ export default function PromotionPaymentPage() {
           >
             <div style={{ fontSize: 18, fontWeight: 900 }}>{labels.total}</div>
             <div style={{ fontSize: 30, fontWeight: 900, color: '#ff4a43' }}>
-              {formatMoney(draft.price)}
+              {formatDisplayPrice(draft.price)}
             </div>
           </div>
 
@@ -779,7 +779,7 @@ export default function PromotionPaymentPage() {
               opacity: isPaying ? 0.8 : 1,
             }}
           >
-            {isPaying ? labels.processing : labels.publish}
+            {isPaying ? labels.processing : `${labels.publish} · ${formatDisplayPrice(draft.price)}`}
           </button>
         </div>
       </div>
