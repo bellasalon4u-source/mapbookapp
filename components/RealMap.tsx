@@ -12,6 +12,10 @@ import {
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { t, type AppLanguage } from '../services/i18n';
+import {
+  getEffectiveSearchLocation,
+  setCurrentLocation,
+} from '../services/appRegionStore';
 
 type MasterItem = {
   id: string | number;
@@ -64,18 +68,69 @@ function getCategoryAccent(category?: string) {
   return '#ff4f93';
 }
 
-function getCategoryBadgeLabel(category?: string) {
+function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') {
   const normalized = String(category || '').toLowerCase();
 
-  if (normalized === 'beauty') return 'Beauty';
-  if (normalized === 'barber') return 'Barber';
-  if (normalized === 'wellness') return 'Wellness';
-  if (normalized === 'home') return 'Home';
-  if (normalized === 'repairs') return 'Repairs';
-  if (normalized === 'tech') return 'Tech';
-  if (normalized === 'pets') return 'Pets';
+  const labels: Record<string, Record<AppLanguage, string>> = {
+    beauty: {
+      EN: 'Beauty',
+      ES: 'Belleza',
+      RU: 'Красота',
+      CZ: 'Krása',
+      DE: 'Beauty',
+      PL: 'Uroda',
+    },
+    barber: {
+      EN: 'Barber',
+      ES: 'Barbero',
+      RU: 'Барбер',
+      CZ: 'Barber',
+      DE: 'Barber',
+      PL: 'Barber',
+    },
+    wellness: {
+      EN: 'Wellness',
+      ES: 'Bienestar',
+      RU: 'Велнес',
+      CZ: 'Wellness',
+      DE: 'Wellness',
+      PL: 'Wellness',
+    },
+    home: {
+      EN: 'Home',
+      ES: 'Hogar',
+      RU: 'Дом',
+      CZ: 'Domov',
+      DE: 'Zuhause',
+      PL: 'Dom',
+    },
+    repairs: {
+      EN: 'Repairs',
+      ES: 'Reparaciones',
+      RU: 'Ремонт',
+      CZ: 'Opravy',
+      DE: 'Reparaturen',
+      PL: 'Naprawy',
+    },
+    tech: {
+      EN: 'Tech',
+      ES: 'Tecnología',
+      RU: 'Техника',
+      CZ: 'Technika',
+      DE: 'Technik',
+      PL: 'Technika',
+    },
+    pets: {
+      EN: 'Pets',
+      ES: 'Mascotas',
+      RU: 'Питомцы',
+      CZ: 'Mazlíčci',
+      DE: 'Haustiere',
+      PL: 'Zwierzęta',
+    },
+  };
 
-  return category || 'Service';
+  return labels[normalized]?.[language] || category || 'Service';
 }
 
 function getTileUrl(mode: 'map' | 'satellite' = 'map') {
@@ -239,10 +294,10 @@ function MapEventsLayer({
 
 function FitBoundsLayer({
   masters,
-  userLocation,
+  focusLocation,
 }: {
   masters: MasterItem[];
-  userLocation: [number, number] | null;
+  focusLocation: [number, number];
 }) {
   const map = useMap();
 
@@ -252,16 +307,14 @@ function FitBoundsLayer({
     }, 80);
 
     const points: [number, number][] = masters.map((item) => [
-      item.lat || londonCenter[0],
-      item.lng || londonCenter[1],
+      item.lat || focusLocation[0],
+      item.lng || focusLocation[1],
     ]);
 
-    if (userLocation) {
-      points.push(userLocation);
-    }
+    points.push(focusLocation);
 
     if (!points.length) {
-      map.setView(londonCenter, 11);
+      map.setView(focusLocation, 11);
       return () => window.clearTimeout(id);
     }
 
@@ -274,7 +327,7 @@ function FitBoundsLayer({
     map.fitBounds(bounds.pad(0.22), { animate: true });
 
     return () => window.clearTimeout(id);
-  }, [map, masters, userLocation]);
+  }, [map, masters, focusLocation]);
 
   return null;
 }
@@ -297,7 +350,10 @@ function UserLocationLayer({
 
     const handleFound = (event: L.LocationEvent) => {
       if (cancelled) return;
-      onLocationFound([event.latlng.lat, event.latlng.lng]);
+
+      const coords: [number, number] = [event.latlng.lat, event.latlng.lng];
+      setCurrentLocation(coords[0], coords[1], 'Current location');
+      onLocationFound(coords);
     };
 
     const handleError = () => {
@@ -319,20 +375,18 @@ function UserLocationLayer({
 }
 
 function RecenterToUserLayer({
-  userLocation,
+  targetLocation,
   recenterToUserTrigger = 0,
 }: {
-  userLocation: [number, number] | null;
+  targetLocation: [number, number];
   recenterToUserTrigger?: number;
 }) {
   const map = useMap();
 
   useEffect(() => {
-    if (!userLocation) return;
     if (!recenterToUserTrigger) return;
-
-    map.setView(userLocation, 14, { animate: true });
-  }, [map, userLocation, recenterToUserTrigger]);
+    map.setView(targetLocation, 14, { animate: true });
+  }, [map, targetLocation, recenterToUserTrigger]);
 
   return null;
 }
@@ -351,16 +405,28 @@ export default function RealMap({
   onBookMaster,
 }: RealMapProps) {
   const ignoreNextMapClickRef = useRef(false);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const effectiveLocation = getEffectiveSearchLocation();
+  const initialFocusLocation: [number, number] = [
+    effectiveLocation.lat || londonCenter[0],
+    effectiveLocation.lng || londonCenter[1],
+  ];
+
+  const [currentDetectedLocation, setCurrentDetectedLocation] = useState<[number, number] | null>(null);
+  const [focusLocation, setFocusLocation] = useState<[number, number]>(initialFocusLocation);
 
   const tr = t(language);
+
+  useEffect(() => {
+    const next = getEffectiveSearchLocation();
+    setFocusLocation([next.lat || londonCenter[0], next.lng || londonCenter[1]]);
+  }, [language, recenterToUserTrigger]);
 
   const safeMasters = useMemo(() => {
     return (masters || []).map((item, index) => ({
       ...item,
       id: item.id ?? String(index),
-      lat: typeof item.lat === 'number' ? item.lat : londonCenter[0],
-      lng: typeof item.lng === 'number' ? item.lng : londonCenter[1],
+      lat: typeof item.lat === 'number' ? item.lat : focusLocation[0],
+      lng: typeof item.lng === 'number' ? item.lng : focusLocation[1],
       rating: item.rating ?? 4.7,
       price: item.price ?? '45',
       availableNow:
@@ -373,7 +439,7 @@ export default function RealMap({
         item.avatar ||
         'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
     }));
-  }, [masters]);
+  }, [masters, focusLocation]);
 
   const selectedMaster = useMemo(() => {
     if (selectedMasterId === null || selectedMasterId === undefined) return null;
@@ -384,11 +450,17 @@ export default function RealMap({
 
   const openRoute = (master: MasterItem) => {
     if (typeof window === 'undefined') return;
-    const lat = typeof master.lat === 'number' ? master.lat : londonCenter[0];
-    const lng = typeof master.lng === 'number' ? master.lng : londonCenter[1];
+    const lat = typeof master.lat === 'number' ? master.lat : focusLocation[0];
+    const lng = typeof master.lng === 'number' ? master.lng : focusLocation[1];
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
     window.open(url, '_blank');
   };
+
+  const locationDot = useMemo<[number, number]>(() => {
+    if (focusLocation) return focusLocation;
+    if (currentDetectedLocation) return currentDetectedLocation;
+    return londonCenter;
+  }, [focusLocation, currentDetectedLocation]);
 
   return (
     <div
@@ -404,7 +476,7 @@ export default function RealMap({
       }}
     >
       <MapContainer
-        center={londonCenter}
+        center={focusLocation}
         zoom={11}
         dragging={true}
         touchZoom={true}
@@ -424,10 +496,10 @@ export default function RealMap({
           url={getTileUrl(mapMode)}
         />
 
-        <UserLocationLayer onLocationFound={setUserLocation} />
-        <FitBoundsLayer masters={safeMasters} userLocation={userLocation} />
+        <UserLocationLayer onLocationFound={setCurrentDetectedLocation} />
+        <FitBoundsLayer masters={safeMasters} focusLocation={focusLocation} />
         <RecenterToUserLayer
-          userLocation={userLocation}
+          targetLocation={focusLocation}
           recenterToUserTrigger={recenterToUserTrigger}
         />
 
@@ -436,30 +508,28 @@ export default function RealMap({
           ignoreNextMapClickRef={ignoreNextMapClickRef}
         />
 
-        {userLocation ? (
-          <>
-            <CircleMarker
-              center={userLocation}
-              radius={16}
-              pathOptions={{
-                color: 'rgba(46,128,255,0.18)',
-                fillColor: 'rgba(46,128,255,0.18)',
-                fillOpacity: 1,
-                weight: 0,
-              }}
-            />
-            <CircleMarker
-              center={userLocation}
-              radius={8}
-              pathOptions={{
-                color: '#ffffff',
-                fillColor: '#2f8df5',
-                fillOpacity: 1,
-                weight: 3,
-              }}
-            />
-          </>
-        ) : null}
+        <>
+          <CircleMarker
+            center={locationDot}
+            radius={16}
+            pathOptions={{
+              color: 'rgba(46,128,255,0.18)',
+              fillColor: 'rgba(46,128,255,0.18)',
+              fillOpacity: 1,
+              weight: 0,
+            }}
+          />
+          <CircleMarker
+            center={locationDot}
+            radius={8}
+            pathOptions={{
+              color: '#ffffff',
+              fillColor: '#2f8df5',
+              fillOpacity: 1,
+              weight: 3,
+            }}
+          />
+        </>
 
         {safeMasters.map((master) => {
           const isSelected = String(master.id) === String(selectedMasterId);
@@ -592,7 +662,7 @@ export default function RealMap({
                     fontWeight: 900,
                   }}
                 >
-                  🏅 Verified Pro
+                  🏅 {tr.verifiedPro}
                 </div>
 
                 <div
@@ -605,7 +675,7 @@ export default function RealMap({
                     fontWeight: 900,
                   }}
                 >
-                  {getCategoryBadgeLabel(selectedMaster.category)}
+                  {getCategoryBadgeLabel(selectedMaster.category, language)}
                 </div>
               </div>
 
@@ -617,7 +687,7 @@ export default function RealMap({
                   marginBottom: 10,
                 }}
               >
-                {selectedMaster.availableNow ? 'Available now' : 'Unavailable today'}
+                {selectedMaster.availableNow ? tr.availableNow : tr.unavailableToday}
               </div>
 
               <div
@@ -752,7 +822,7 @@ export default function RealMap({
                 zIndex: 2,
               }}
             >
-              View
+              {tr.view}
             </button>
 
             <button
@@ -775,7 +845,7 @@ export default function RealMap({
                 zIndex: 2,
               }}
             >
-              Route
+              {tr.route}
             </button>
 
             <button
