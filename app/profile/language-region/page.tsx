@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
 import BottomNav from '../../../components/common/BottomNav';
 import {
   getSavedLanguage,
@@ -15,174 +14,301 @@ import {
   updateUserProfile,
   type UserProfile,
 } from '../../services/userProfileStore';
-import {
-  currencyMeta,
-  currencyOptions,
-  getAppRegionSettings,
-  getEffectiveSearchLocation,
-  regionOptions,
-  setLocationMode,
-  updateAppRegionSettings,
-  type AppCurrency,
-  type SearchLocationMode,
-} from '../../../services/appRegionStore';
 
-const LocationPickerMap = dynamic(
-  () =>
-    import('./LocationPickerMap').catch(() => ({
-      default: function FallbackMap() {
-        return (
-          <div
-            style={{
-              height: 320,
-              borderRadius: 22,
-              background: '#f6f1e9',
-              border: '1px solid #efe4d7',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              color: '#6f6458',
-              textAlign: 'center',
-              padding: 16,
-            }}
-          >
-            Map preview is unavailable right now
-          </div>
-        );
-      },
-    })),
-  { ssr: false }
-);
+const CURRENCY_STORAGE_KEY = 'mapbook_currency';
+const LOCATION_STORAGE_KEY = 'mapbook_location_pref';
+
+type CurrencyCode = 'GBP' | 'EUR' | 'USD' | 'PLN' | 'CZK' | 'UAH' | 'AED';
+
+type StoredLocation = {
+  source: 'current' | 'region';
+  label: string;
+  lat: number | null;
+  lng: number | null;
+};
 
 const pageTexts = {
   EN: {
-    title: 'Language, currency & location',
-    language: 'Language',
-    region: 'Region',
-    currency: 'Currency',
-    searchLocation: 'Search location',
+    title: 'Language & region',
+    save: 'Save',
+    languageSection: 'Languages available in app',
+    regionSection: 'Countries/regions',
+    currencySection: 'Currency',
+    locationSection: 'Location',
     useCurrentLocation: 'Use current location',
-    useCustomLocation: 'Use custom point',
-    customLat: 'Latitude',
-    customLng: 'Longitude',
-    customLabel: 'Location label',
-    customLabelPlaceholder: 'For example: Madrid, Spain',
-    preview: 'Current search point',
+    currentLocationHint: 'Use your device GPS for search and map results',
+    useRegionLocation: 'Use selected region',
+    regionLocationHint: 'Search near the selected country/region center',
+    locationLoading: 'Getting current location...',
+    locationSuccess: 'Current location selected',
+    locationError: 'Unable to get current location',
     saved: 'Settings saved',
-    saveButton: 'Save',
-    locationNotReady: 'Current location not detected yet',
-    mapPickerTitle: 'Pick point on map',
-    mapPickerHint: 'Tap anywhere on the map to change the search point',
+    selected: 'Selected',
   },
   ES: {
-    title: 'Idioma, moneda y ubicación',
-    language: 'Idioma',
-    region: 'Región',
-    currency: 'Moneda',
-    searchLocation: 'Ubicación de búsqueda',
+    title: 'Idioma y región',
+    save: 'Guardar',
+    languageSection: 'Idiomas disponibles en la app',
+    regionSection: 'Países/regiones',
+    currencySection: 'Moneda',
+    locationSection: 'Ubicación',
     useCurrentLocation: 'Usar ubicación actual',
-    useCustomLocation: 'Usar punto personalizado',
-    customLat: 'Latitud',
-    customLng: 'Longitud',
-    customLabel: 'Nombre de ubicación',
-    customLabelPlaceholder: 'Por ejemplo: Madrid, España',
-    preview: 'Punto de búsqueda actual',
+    currentLocationHint: 'Usa el GPS del dispositivo para búsqueda y mapa',
+    useRegionLocation: 'Usar región seleccionada',
+    regionLocationHint: 'Buscar cerca del centro del país/región seleccionado',
+    locationLoading: 'Obteniendo ubicación actual...',
+    locationSuccess: 'Ubicación actual seleccionada',
+    locationError: 'No se pudo obtener la ubicación',
     saved: 'Ajustes guardados',
-    saveButton: 'Guardar',
-    locationNotReady: 'La ubicación actual aún no está detectada',
-    mapPickerTitle: 'Elegir punto en el mapa',
-    mapPickerHint: 'Toca cualquier lugar del mapa para cambiar el punto de búsqueda',
+    selected: 'Seleccionado',
   },
   RU: {
-    title: 'Язык, валюта и локация',
-    language: 'Язык',
-    region: 'Регион',
-    currency: 'Валюта',
-    searchLocation: 'Локация для поиска',
+    title: 'Язык и регион',
+    save: 'Сохранить',
+    languageSection: 'Языки приложения',
+    regionSection: 'Страны/регионы',
+    currencySection: 'Валюта',
+    locationSection: 'Локация',
     useCurrentLocation: 'Использовать текущую локацию',
-    useCustomLocation: 'Использовать свою точку',
-    customLat: 'Широта',
-    customLng: 'Долгота',
-    customLabel: 'Название точки',
-    customLabelPlaceholder: 'Например: Madrid, Spain',
-    preview: 'Текущая точка поиска',
+    currentLocationHint: 'Использовать GPS телефона для поиска и карты',
+    useRegionLocation: 'Использовать выбранный регион',
+    regionLocationHint: 'Искать рядом с центром выбранной страны/региона',
+    locationLoading: 'Определяем текущую локацию...',
+    locationSuccess: 'Текущая локация выбрана',
+    locationError: 'Не удалось определить локацию',
     saved: 'Настройки сохранены',
-    saveButton: 'Сохранить',
-    locationNotReady: 'Текущая локация ещё не определена',
-    mapPickerTitle: 'Выбор точки на карте',
-    mapPickerHint: 'Тапни по карте, чтобы изменить точку поиска',
+    selected: 'Выбрано',
   },
   CZ: {
-    title: 'Jazyk, měna a poloha',
-    language: 'Jazyk',
-    region: 'Region',
-    currency: 'Měna',
-    searchLocation: 'Poloha pro hledání',
+    title: 'Jazyk a region',
+    save: 'Uložit',
+    languageSection: 'Jazyky aplikace',
+    regionSection: 'Země/regiony',
+    currencySection: 'Měna',
+    locationSection: 'Poloha',
     useCurrentLocation: 'Použít aktuální polohu',
-    useCustomLocation: 'Použít vlastní bod',
-    customLat: 'Zeměpisná šířka',
-    customLng: 'Zeměpisná délka',
-    customLabel: 'Název místa',
-    customLabelPlaceholder: 'Například: Madrid, Spain',
-    preview: 'Aktuální bod hledání',
+    currentLocationHint: 'Použít GPS zařízení pro hledání a mapu',
+    useRegionLocation: 'Použít vybraný region',
+    regionLocationHint: 'Hledat poblíž středu vybrané země/regionu',
+    locationLoading: 'Zjišťuji aktuální polohu...',
+    locationSuccess: 'Aktuální poloha vybrána',
+    locationError: 'Nepodařilo se zjistit polohu',
     saved: 'Nastavení uloženo',
-    saveButton: 'Uložit',
-    locationNotReady: 'Aktuální poloha ještě není zjištěna',
-    mapPickerTitle: 'Vyberte bod na mapě',
-    mapPickerHint: 'Klepněte kamkoli na mapu a změňte bod hledání',
+    selected: 'Vybráno',
   },
   DE: {
-    title: 'Sprache, Währung und Standort',
-    language: 'Sprache',
-    region: 'Region',
-    currency: 'Währung',
-    searchLocation: 'Suchstandort',
+    title: 'Sprache & Region',
+    save: 'Speichern',
+    languageSection: 'Verfügbare App-Sprachen',
+    regionSection: 'Länder/Regionen',
+    currencySection: 'Währung',
+    locationSection: 'Standort',
     useCurrentLocation: 'Aktuellen Standort verwenden',
-    useCustomLocation: 'Eigenen Punkt verwenden',
-    customLat: 'Breitengrad',
-    customLng: 'Längengrad',
-    customLabel: 'Standortname',
-    customLabelPlaceholder: 'Zum Beispiel: Madrid, Spain',
-    preview: 'Aktueller Suchpunkt',
+    currentLocationHint: 'GPS des Geräts für Suche und Karte verwenden',
+    useRegionLocation: 'Ausgewählte Region verwenden',
+    regionLocationHint: 'In der Nähe des Zentrums der gewählten Region suchen',
+    locationLoading: 'Aktueller Standort wird ermittelt...',
+    locationSuccess: 'Aktueller Standort ausgewählt',
+    locationError: 'Standort konnte nicht ermittelt werden',
     saved: 'Einstellungen gespeichert',
-    saveButton: 'Speichern',
-    locationNotReady: 'Aktueller Standort wurde noch nicht erkannt',
-    mapPickerTitle: 'Punkt auf der Karte wählen',
-    mapPickerHint: 'Tippen Sie auf die Karte, um den Suchpunkt zu ändern',
+    selected: 'Ausgewählt',
   },
   PL: {
-    title: 'Język, waluta i lokalizacja',
-    language: 'Język',
-    region: 'Region',
-    currency: 'Waluta',
-    searchLocation: 'Lokalizacja wyszukiwania',
+    title: 'Język i region',
+    save: 'Zapisz',
+    languageSection: 'Języki aplikacji',
+    regionSection: 'Kraje/regiony',
+    currencySection: 'Waluta',
+    locationSection: 'Lokalizacja',
     useCurrentLocation: 'Użyj bieżącej lokalizacji',
-    useCustomLocation: 'Użyj własnego punktu',
-    customLat: 'Szerokość geograficzna',
-    customLng: 'Długość geograficzna',
-    customLabel: 'Nazwa lokalizacji',
-    customLabelPlaceholder: 'Na przykład: Madrid, Spain',
-    preview: 'Aktualny punkt wyszukiwania',
+    currentLocationHint: 'Użyj GPS telefonu do wyszukiwania i mapy',
+    useRegionLocation: 'Użyj wybranego regionu',
+    regionLocationHint: 'Szukaj w pobliżu centrum wybranego kraju/regionu',
+    locationLoading: 'Pobieranie bieżącej lokalizacji...',
+    locationSuccess: 'Wybrano bieżącą lokalizację',
+    locationError: 'Nie udało się pobrać lokalizacji',
     saved: 'Ustawienia zapisane',
-    saveButton: 'Zapisz',
-    locationNotReady: 'Bieżąca lokalizacja nie została jeszcze wykryta',
-    mapPickerTitle: 'Wybierz punkt na mapie',
-    mapPickerHint: 'Dotknij mapy, aby zmienić punkt wyszukiwania',
+    selected: 'Wybrano',
   },
 } as const;
 
-const languageOptions: { value: AppLanguage; label: string }[] = [
-  { value: 'EN', label: 'English' },
-  { value: 'ES', label: 'Español' },
-  { value: 'RU', label: 'Русский' },
-  { value: 'CZ', label: 'Čeština' },
-  { value: 'DE', label: 'Deutsch' },
-  { value: 'PL', label: 'Polski' },
+const languageOptions: { value: AppLanguage; label: string; subtitle: string; flag: string }[] = [
+  { value: 'EN', label: 'English', subtitle: 'App language', flag: '🇬🇧' },
+  { value: 'ES', label: 'Español', subtitle: 'Idioma de la app', flag: '🇪🇸' },
+  { value: 'RU', label: 'Русский', subtitle: 'Язык приложения', flag: '🇷🇺' },
+  { value: 'CZ', label: 'Čeština', subtitle: 'Jazyk aplikace', flag: '🇨🇿' },
+  { value: 'DE', label: 'Deutsch', subtitle: 'App-Sprache', flag: '🇩🇪' },
+  { value: 'PL', label: 'Polski', subtitle: 'Język aplikacji', flag: '🇵🇱' },
 ];
 
-function toInputNumber(value: number | null) {
-  return value === null || Number.isNaN(value) ? '' : String(value);
+const regionOptions = [
+  {
+    value: 'United Kingdom',
+    label: 'United Kingdom',
+    subtitle: 'London · Europe',
+    flag: '🇬🇧',
+    lat: 51.5074,
+    lng: -0.1278,
+  },
+  {
+    value: 'Spain',
+    label: 'Spain',
+    subtitle: 'Madrid · Europe',
+    flag: '🇪🇸',
+    lat: 40.4168,
+    lng: -3.7038,
+  },
+  {
+    value: 'Czech Republic',
+    label: 'Czech Republic',
+    subtitle: 'Prague · Europe',
+    flag: '🇨🇿',
+    lat: 50.0755,
+    lng: 14.4378,
+  },
+  {
+    value: 'Germany',
+    label: 'Germany',
+    subtitle: 'Berlin · Europe',
+    flag: '🇩🇪',
+    lat: 52.52,
+    lng: 13.405,
+  },
+  {
+    value: 'Poland',
+    label: 'Poland',
+    subtitle: 'Warsaw · Europe',
+    flag: '🇵🇱',
+    lat: 52.2297,
+    lng: 21.0122,
+  },
+  {
+    value: 'Ukraine',
+    label: 'Ukraine',
+    subtitle: 'Kyiv · Europe',
+    flag: '🇺🇦',
+    lat: 50.4501,
+    lng: 30.5234,
+  },
+  {
+    value: 'United Arab Emirates',
+    label: 'United Arab Emirates',
+    subtitle: 'Dubai · Middle East',
+    flag: '🇦🇪',
+    lat: 25.2048,
+    lng: 55.2708,
+  },
+] as const;
+
+const currencyOptions: {
+  value: CurrencyCode;
+  symbol: string;
+  title: string;
+  subtitle: string;
+}[] = [
+  { value: 'GBP', symbol: '£', title: 'GBP', subtitle: 'British Pound' },
+  { value: 'EUR', symbol: '€', title: 'EUR', subtitle: 'Euro' },
+  { value: 'USD', symbol: '$', title: 'USD', subtitle: 'US Dollar' },
+  { value: 'PLN', symbol: 'zł', title: 'PLN', subtitle: 'Polish Zloty' },
+  { value: 'CZK', symbol: 'Kč', title: 'CZK', subtitle: 'Czech Koruna' },
+  { value: 'UAH', symbol: '₴', title: 'UAH', subtitle: 'Ukrainian Hryvnia' },
+  { value: 'AED', symbol: 'AED', title: 'AED', subtitle: 'UAE Dirham' },
+];
+
+function readStoredCurrency(): CurrencyCode {
+  if (typeof window === 'undefined') return 'GBP';
+  const value = window.localStorage.getItem(CURRENCY_STORAGE_KEY);
+  if (
+    value === 'GBP' ||
+    value === 'EUR' ||
+    value === 'USD' ||
+    value === 'PLN' ||
+    value === 'CZK' ||
+    value === 'UAH' ||
+    value === 'AED'
+  ) {
+    return value;
+  }
+  return 'GBP';
+}
+
+function saveStoredCurrency(currency: CurrencyCode) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(CURRENCY_STORAGE_KEY, currency);
+}
+
+function readStoredLocation(): StoredLocation | null {
+  if (typeof window === 'undefined') return null;
+
+  const raw = window.localStorage.getItem(LOCATION_STORAGE_KEY);
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as StoredLocation;
+    if (!parsed || typeof parsed !== 'object') return null;
+    return {
+      source: parsed.source === 'current' ? 'current' : 'region',
+      label: String(parsed.label || ''),
+      lat: typeof parsed.lat === 'number' ? parsed.lat : null,
+      lng: typeof parsed.lng === 'number' ? parsed.lng : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function saveStoredLocation(value: StoredLocation) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(value));
+}
+
+function formatCoords(lat: number | null, lng: number | null) {
+  if (lat === null || lng === null) return '';
+  return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+}
+
+function Radio({ checked }: { checked: boolean }) {
+  return (
+    <div
+      style={{
+        width: 24,
+        height: 24,
+        borderRadius: 999,
+        border: checked ? '2px solid #111111' : '2px solid #d8d3c8',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+        background: '#fff',
+      }}
+    >
+      {checked ? (
+        <div
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: 999,
+            background: '#111111',
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        fontSize: 18,
+        fontWeight: 900,
+        color: '#17130f',
+        marginBottom: 12,
+      }}
+    >
+      {children}
+    </div>
+  );
 }
 
 export default function LanguageRegionPage() {
@@ -190,21 +316,12 @@ export default function LanguageRegionPage() {
 
   const [language, setLanguage] = useState<AppLanguage>('EN');
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
-
   const [selectedLanguage, setSelectedLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [selectedRegion, setSelectedRegion] = useState(getUserProfile().region);
-
-  const initialRegionSettings = getAppRegionSettings();
-
-  const [selectedCurrency, setSelectedCurrency] = useState<AppCurrency>(
-    initialRegionSettings.currency
-  );
-  const [locationMode, setSelectedLocationMode] = useState<SearchLocationMode>(
-    initialRegionSettings.locationMode
-  );
-  const [customLat, setCustomLat] = useState(toInputNumber(initialRegionSettings.customLocation.lat));
-  const [customLng, setCustomLng] = useState(toInputNumber(initialRegionSettings.customLocation.lng));
-  const [customLabel, setCustomLabel] = useState(initialRegionSettings.customLocation.label);
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>(readStoredCurrency());
+  const [selectedLocationMode, setSelectedLocationMode] = useState<'current' | 'region'>('region');
+  const [selectedLocation, setSelectedLocation] = useState<StoredLocation | null>(readStoredLocation());
+  const [isLocating, setIsLocating] = useState(false);
 
   useEffect(() => {
     const syncLanguage = () => {
@@ -222,6 +339,14 @@ export default function LanguageRegionPage() {
     syncLanguage();
     syncProfile();
 
+    const storedLocation = readStoredLocation();
+    if (storedLocation) {
+      setSelectedLocation(storedLocation);
+      setSelectedLocationMode(storedLocation.source);
+    }
+
+    setSelectedCurrency(readStoredCurrency());
+
     window.addEventListener('focus', syncLanguage);
     const unsubProfile = subscribeToUserProfile(syncProfile);
 
@@ -236,276 +361,440 @@ export default function LanguageRegionPage() {
     [language]
   );
 
-  const effectiveLocation = useMemo(() => getEffectiveSearchLocation(), [language]);
+  const selectedRegionMeta =
+    regionOptions.find((item) => item.value === selectedRegion) || regionOptions[0];
 
-  const mapLat = useMemo(() => {
-    const parsed = Number(customLat);
-    return Number.isFinite(parsed) ? parsed : 51.5074;
-  }, [customLat]);
+  const locationSummary = useMemo(() => {
+    if (selectedLocation?.label) {
+      const coords = formatCoords(selectedLocation.lat, selectedLocation.lng);
+      return coords ? `${selectedLocation.label} · ${coords}` : selectedLocation.label;
+    }
 
-  const mapLng = useMemo(() => {
-    const parsed = Number(customLng);
-    return Number.isFinite(parsed) ? parsed : -0.1278;
-  }, [customLng]);
+    return `${selectedRegionMeta.label} · ${selectedRegionMeta.subtitle}`;
+  }, [selectedLocation, selectedRegionMeta]);
+
+  const handleUseRegionLocation = () => {
+    const nextLocation: StoredLocation = {
+      source: 'region',
+      label: selectedRegionMeta.label,
+      lat: selectedRegionMeta.lat,
+      lng: selectedRegionMeta.lng,
+    };
+
+    setSelectedLocationMode('region');
+    setSelectedLocation(nextLocation);
+  };
+
+  const handleUseCurrentLocation = () => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      alert(text.locationError);
+      return;
+    }
+
+    setIsLocating(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const nextLocation: StoredLocation = {
+          source: 'current',
+          label: text.locationSuccess,
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+
+        setSelectedLocationMode('current');
+        setSelectedLocation(nextLocation);
+        setIsLocating(false);
+      },
+      () => {
+        setIsLocating(false);
+        alert(text.locationError);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 0,
+      }
+    );
+  };
 
   const handleSave = () => {
     saveLanguage(selectedLanguage);
+    saveStoredCurrency(selectedCurrency);
+
+    const finalLocation =
+      selectedLocationMode === 'region'
+        ? {
+            source: 'region' as const,
+            label: selectedRegionMeta.label,
+            lat: selectedRegionMeta.lat,
+            lng: selectedRegionMeta.lng,
+          }
+        : selectedLocation;
+
+    if (finalLocation) {
+      saveStoredLocation(finalLocation);
+    }
 
     updateUserProfile({
       language: selectedLanguage,
       region: selectedRegion,
     });
 
-    const parsedLat = customLat.trim() === '' ? null : Number(customLat);
-    const parsedLng = customLng.trim() === '' ? null : Number(customLng);
-
-    updateAppRegionSettings({
-      language: selectedLanguage,
-      region: selectedRegion,
-      currency: selectedCurrency,
-      locationMode,
-      customLocation: {
-        lat: Number.isFinite(parsedLat as number) ? parsedLat : null,
-        lng: Number.isFinite(parsedLng as number) ? parsedLng : null,
-        label: customLabel.trim() || 'Custom point',
-      },
-    });
-
-    setLocationMode(locationMode);
-
     alert(text.saved);
     router.push('/profile');
   };
 
   return (
-    <main className="min-h-screen bg-[#fcf8f2] px-4 py-6 pb-24">
+    <main
+      className="min-h-screen px-4 py-5 pb-24"
+      style={{ background: '#f7f3eb' }}
+    >
       <div className="mx-auto max-w-md">
-        <div className="flex items-center justify-between gap-3">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '48px 1fr auto',
+            alignItems: 'center',
+            gap: 12,
+            marginBottom: 18,
+          }}
+        >
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-xl text-[#241c16] shadow-sm"
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 999,
+              border: '1px solid #e8dfd2',
+              background: '#fff',
+              fontSize: 24,
+              fontWeight: 900,
+              color: '#17130f',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            }}
           >
             ←
           </button>
 
-          <h1 className="text-center text-xl font-bold text-[#1d1712]">
+          <h1
+            style={{
+              fontSize: 24,
+              fontWeight: 900,
+              color: '#17130f',
+              margin: 0,
+            }}
+          >
             {text.title}
           </h1>
 
           <button
             type="button"
             onClick={handleSave}
-            className="rounded-full bg-[#2f241c] px-4 py-2 text-sm font-bold text-white"
+            style={{
+              border: 'none',
+              background: '#17130f',
+              color: '#fff',
+              borderRadius: 999,
+              padding: '11px 16px',
+              fontSize: 14,
+              fontWeight: 900,
+            }}
           >
-            {text.saveButton}
+            {text.save}
           </button>
         </div>
 
-        <div className="mt-6 rounded-[28px] border border-[#efe4d7] bg-white p-4 shadow-sm">
-          <div className="text-base font-extrabold text-[#1d1712]">{text.language}</div>
+        <div
+          style={{
+            background: '#ffffff',
+            borderRadius: 30,
+            padding: 18,
+            border: '1px solid #eee5d9',
+            boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
+            marginBottom: 14,
+          }}
+        >
+          <SectionTitle>{text.languageSection}</SectionTitle>
 
-          <div className="mt-4 space-y-3">
-            {languageOptions.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setSelectedLanguage(option.value)}
-                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left ${
-                  selectedLanguage === option.value
-                    ? 'border-[#2f241c] bg-[#f8f1e7]'
-                    : 'border-[#efe4d7] bg-[#fffdf9]'
-                }`}
-              >
-                <span className="text-sm font-bold text-[#1d1712]">{option.label}</span>
-                {selectedLanguage === option.value && (
-                  <span className="text-sm font-bold text-[#2f241c]">✓</span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-5 rounded-[28px] border border-[#efe4d7] bg-white p-4 shadow-sm">
-          <div className="text-base font-extrabold text-[#1d1712]">{text.region}</div>
-
-          <div className="mt-4 space-y-3">
-            {regionOptions.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setSelectedRegion(option)}
-                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left ${
-                  selectedRegion === option
-                    ? 'border-[#2f241c] bg-[#f8f1e7]'
-                    : 'border-[#efe4d7] bg-[#fffdf9]'
-                }`}
-              >
-                <span className="text-sm font-bold text-[#1d1712]">{option}</span>
-                {selectedRegion === option && (
-                  <span className="text-sm font-bold text-[#2f241c]">✓</span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-5 rounded-[28px] border border-[#efe4d7] bg-white p-4 shadow-sm">
-          <div className="text-base font-extrabold text-[#1d1712]">{text.currency}</div>
-
-          <div className="mt-4 space-y-3">
-            {currencyOptions.map((code) => {
-              const meta = currencyMeta[code];
+          <div>
+            {languageOptions.map((option, index) => {
+              const checked = selectedLanguage === option.value;
 
               return (
                 <button
-                  key={code}
+                  key={option.value}
                   type="button"
-                  onClick={() => setSelectedCurrency(code)}
-                  className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left ${
-                    selectedCurrency === code
-                      ? 'border-[#2f241c] bg-[#f8f1e7]'
-                      : 'border-[#efe4d7] bg-[#fffdf9]'
-                  }`}
+                  onClick={() => setSelectedLanguage(option.value)}
+                  style={{
+                    width: '100%',
+                    display: 'grid',
+                    gridTemplateColumns: '34px 1fr auto',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '14px 4px',
+                    background: checked ? '#faf6ef' : 'transparent',
+                    border: 'none',
+                    borderBottom:
+                      index !== languageOptions.length - 1 ? '1px solid #eee7dc' : 'none',
+                    textAlign: 'left',
+                    borderRadius: 18,
+                  }}
                 >
-                  <span className="text-sm font-bold text-[#1d1712]">
-                    {meta.symbol} · {meta.code} · {meta.label}
-                  </span>
-                  {selectedCurrency === code && (
-                    <span className="text-sm font-bold text-[#2f241c]">✓</span>
-                  )}
+                  <div style={{ fontSize: 24 }}>{option.flag}</div>
+
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                      {option.label}
+                    </div>
+                    <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
+                      {option.subtitle}
+                    </div>
+                  </div>
+
+                  <Radio checked={checked} />
                 </button>
               );
             })}
           </div>
         </div>
 
-        <div className="mt-5 rounded-[28px] border border-[#efe4d7] bg-white p-4 shadow-sm">
-          <div className="text-base font-extrabold text-[#1d1712]">
-            {text.searchLocation}
+        <div
+          style={{
+            background: '#ffffff',
+            borderRadius: 30,
+            padding: 18,
+            border: '1px solid #eee5d9',
+            boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
+            marginBottom: 14,
+          }}
+        >
+          <SectionTitle>{text.regionSection}</SectionTitle>
+
+          <div>
+            {regionOptions.map((option, index) => {
+              const checked = selectedRegion === option.value;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    setSelectedRegion(option.value);
+                    if (selectedLocationMode === 'region') {
+                      setSelectedLocation({
+                        source: 'region',
+                        label: option.label,
+                        lat: option.lat,
+                        lng: option.lng,
+                      });
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    display: 'grid',
+                    gridTemplateColumns: '34px 1fr auto',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '14px 4px',
+                    background: checked ? '#faf6ef' : 'transparent',
+                    border: 'none',
+                    borderBottom:
+                      index !== regionOptions.length - 1 ? '1px solid #eee7dc' : 'none',
+                    textAlign: 'left',
+                    borderRadius: 18,
+                  }}
+                >
+                  <div style={{ fontSize: 24 }}>{option.flag}</div>
+
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                      {option.label}
+                    </div>
+                    <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
+                      {option.subtitle}
+                    </div>
+                  </div>
+
+                  <Radio checked={checked} />
+                </button>
+              );
+            })}
           </div>
-
-          <div className="mt-4 space-y-3">
-            <button
-              type="button"
-              onClick={() => setSelectedLocationMode('current')}
-              className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left ${
-                locationMode === 'current'
-                  ? 'border-[#2f241c] bg-[#f8f1e7]'
-                  : 'border-[#efe4d7] bg-[#fffdf9]'
-              }`}
-            >
-              <div>
-                <div className="text-sm font-bold text-[#1d1712]">
-                  {text.useCurrentLocation}
-                </div>
-                <div className="mt-1 text-xs text-[#6f6458]">
-                  {initialRegionSettings.currentLocation.lat === null ||
-                  initialRegionSettings.currentLocation.lng === null
-                    ? text.locationNotReady
-                    : initialRegionSettings.currentLocation.label}
-                </div>
-              </div>
-              {locationMode === 'current' && (
-                <span className="text-sm font-bold text-[#2f241c]">✓</span>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSelectedLocationMode('custom')}
-              className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left ${
-                locationMode === 'custom'
-                  ? 'border-[#2f241c] bg-[#f8f1e7]'
-                  : 'border-[#efe4d7] bg-[#fffdf9]'
-              }`}
-            >
-              <span className="text-sm font-bold text-[#1d1712]">
-                {text.useCustomLocation}
-              </span>
-              {locationMode === 'custom' && (
-                <span className="text-sm font-bold text-[#2f241c]">✓</span>
-              )}
-            </button>
-          </div>
-
-          {locationMode === 'custom' && (
-            <div className="mt-4 grid gap-4">
-              <div>
-                <div className="mb-2 text-sm font-bold text-[#1d1712]">
-                  {text.mapPickerTitle}
-                </div>
-                <div className="mb-3 text-xs leading-5 text-[#6f6458]">
-                  {text.mapPickerHint}
-                </div>
-
-                <div className="overflow-hidden rounded-[22px] border border-[#efe4d7]">
-                  <LocationPickerMap
-                    lat={mapLat}
-                    lng={mapLng}
-                    onPick={(lat: number, lng: number) => {
-                      setCustomLat(String(Number(lat.toFixed(6))));
-                      setCustomLng(String(Number(lng.toFixed(6))));
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="mb-2 text-sm font-bold text-[#1d1712]">{text.customLat}</div>
-                <input
-                  value={customLat}
-                  onChange={(e) => setCustomLat(e.target.value)}
-                  placeholder="51.5074"
-                  className="w-full rounded-2xl border border-[#efe4d7] bg-[#fffdf9] px-4 py-3 text-sm font-bold text-[#1d1712] outline-none"
-                />
-              </div>
-
-              <div>
-                <div className="mb-2 text-sm font-bold text-[#1d1712]">{text.customLng}</div>
-                <input
-                  value={customLng}
-                  onChange={(e) => setCustomLng(e.target.value)}
-                  placeholder="-0.1278"
-                  className="w-full rounded-2xl border border-[#efe4d7] bg-[#fffdf9] px-4 py-3 text-sm font-bold text-[#1d1712] outline-none"
-                />
-              </div>
-
-              <div>
-                <div className="mb-2 text-sm font-bold text-[#1d1712]">{text.customLabel}</div>
-                <input
-                  value={customLabel}
-                  onChange={(e) => setCustomLabel(e.target.value)}
-                  placeholder={text.customLabelPlaceholder}
-                  className="w-full rounded-2xl border border-[#efe4d7] bg-[#fffdf9] px-4 py-3 text-sm font-bold text-[#1d1712] outline-none"
-                />
-              </div>
-            </div>
-          )}
         </div>
 
-        <div className="mt-5 rounded-[28px] border border-[#efe4d7] bg-white p-4 shadow-sm">
-          <div className="text-base font-extrabold text-[#1d1712]">{text.preview}</div>
+        <div
+          style={{
+            background: '#ffffff',
+            borderRadius: 30,
+            padding: 18,
+            border: '1px solid #eee5d9',
+            boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
+            marginBottom: 14,
+          }}
+        >
+          <SectionTitle>{text.currencySection}</SectionTitle>
 
-          <div className="mt-3 text-sm leading-6 text-[#6f6458]">
-            {profile.fullName} · {selectedLanguage} · {selectedRegion}
+          <div>
+            {currencyOptions.map((option, index) => {
+              const checked = selectedCurrency === option.value;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setSelectedCurrency(option.value)}
+                  style={{
+                    width: '100%',
+                    display: 'grid',
+                    gridTemplateColumns: '62px 1fr auto',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '14px 4px',
+                    background: checked ? '#faf6ef' : 'transparent',
+                    border: 'none',
+                    borderBottom:
+                      index !== currencyOptions.length - 1 ? '1px solid #eee7dc' : 'none',
+                    textAlign: 'left',
+                    borderRadius: 18,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 22,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
+                    {option.symbol}
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                      {option.title}
+                    </div>
+                    <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
+                      {option.subtitle}
+                    </div>
+                  </div>
+
+                  <Radio checked={checked} />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div
+          style={{
+            background: '#ffffff',
+            borderRadius: 30,
+            padding: 18,
+            border: '1px solid #eee5d9',
+            boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
+            marginBottom: 14,
+          }}
+        >
+          <SectionTitle>{text.locationSection}</SectionTitle>
+
+          <div
+            style={{
+              borderBottom: '1px solid #eee7dc',
+              paddingBottom: 8,
+              marginBottom: 8,
+            }}
+          >
+            <button
+              type="button"
+              onClick={handleUseCurrentLocation}
+              style={{
+                width: '100%',
+                display: 'grid',
+                gridTemplateColumns: '34px 1fr auto',
+                alignItems: 'center',
+                gap: 12,
+                padding: '14px 4px',
+                background: selectedLocationMode === 'current' ? '#faf6ef' : 'transparent',
+                border: 'none',
+                textAlign: 'left',
+                borderRadius: 18,
+              }}
+            >
+              <div style={{ fontSize: 24 }}>📍</div>
+
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                  {isLocating ? text.locationLoading : text.useCurrentLocation}
+                </div>
+                <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
+                  {text.currentLocationHint}
+                </div>
+              </div>
+
+              <Radio checked={selectedLocationMode === 'current'} />
+            </button>
           </div>
 
-          <div className="mt-2 text-sm leading-6 text-[#6f6458]">
-            {currencyMeta[selectedCurrency].symbol} · {currencyMeta[selectedCurrency].code} ·{' '}
-            {currencyMeta[selectedCurrency].label}
-          </div>
+          <button
+            type="button"
+            onClick={handleUseRegionLocation}
+            style={{
+              width: '100%',
+              display: 'grid',
+              gridTemplateColumns: '34px 1fr auto',
+              alignItems: 'center',
+              gap: 12,
+              padding: '14px 4px',
+              background: selectedLocationMode === 'region' ? '#faf6ef' : 'transparent',
+              border: 'none',
+              textAlign: 'left',
+              borderRadius: 18,
+            }}
+          >
+            <div style={{ fontSize: 24 }}>🗺️</div>
 
-          <div className="mt-2 text-sm leading-6 text-[#6f6458]">
-            {locationMode === 'custom'
-              ? customLabel || 'Custom point'
-              : effectiveLocation.label}
-          </div>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                {text.useRegionLocation}
+              </div>
+              <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
+                {text.regionLocationHint}
+              </div>
+            </div>
 
-          <div className="mt-1 text-xs leading-5 text-[#8b7f73]">
-            {locationMode === 'custom' ? customLat : effectiveLocation.lat},{' '}
-            {locationMode === 'custom' ? customLng : effectiveLocation.lng}
+            <Radio checked={selectedLocationMode === 'region'} />
+          </button>
+
+          <div
+            style={{
+              marginTop: 12,
+              borderRadius: 18,
+              background: '#f8f4ec',
+              padding: '12px 14px',
+            }}
+          >
+            <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800, marginBottom: 4 }}>
+              {text.selected}
+            </div>
+            <div style={{ fontSize: 14, color: '#17130f', fontWeight: 900 }}>
+              {locationSummary}
+            </div>
           </div>
+        </div>
+
+        <div
+          style={{
+            background: '#fff',
+            borderRadius: 24,
+            padding: '14px 16px',
+            border: '1px solid #eee5d9',
+            color: '#6d6459',
+            fontSize: 14,
+            fontWeight: 700,
+          }}
+        >
+          {profile.fullName} · {selectedLanguage} · {selectedRegion} · {selectedCurrency}
         </div>
       </div>
 
