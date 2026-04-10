@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSavedLanguage } from '../../../../services/i18n';
+import { getSavedLanguage, type AppLanguage } from '../../../../services/i18n';
 import { addPromotion } from '../../../../services/promotionsStore';
 import { getAllMasters } from '../../../../services/masters';
 
@@ -28,7 +28,10 @@ type PromotionDraft = {
   price: number;
   photos: PromoPhoto[];
   createdAt: string;
+  language?: AppLanguage;
 };
+
+const PROMO_LANGUAGES: AppLanguage[] = ['EN', 'ES', 'RU', 'CZ', 'DE', 'PL'];
 
 function normalizeLanguage(value: string): AppLang {
   if (value === 'RU' || value === 'EN' || value === 'ES') return value;
@@ -45,6 +48,19 @@ function makeId(prefix = 'promo') {
 
 function getPhotoTransform(photo: PromoPhoto) {
   return `translate(${photo.offsetX}px, ${photo.offsetY}px) scale(${photo.zoom}) rotate(${photo.rotate}deg)`;
+}
+
+function localizeTextForStorage(text: string, sourceLanguage: AppLanguage) {
+  const clean = text.trim();
+  const localized: Partial<Record<AppLanguage, string>> = {};
+
+  for (const lang of PROMO_LANGUAGES) {
+    localized[lang] = clean;
+  }
+
+  localized[sourceLanguage] = clean;
+
+  return localized;
 }
 
 function getLabels(language: AppLang) {
@@ -210,13 +226,17 @@ export default function PromotionPaymentPage() {
     const featuredMaster = masters[0];
     const now = new Date();
     const end = new Date(now.getTime() + draft.durationDays * 24 * 60 * 60 * 1000);
+    const sourceLanguage: AppLanguage = draft.language || getSavedLanguage();
 
     setTimeout(() => {
       addPromotion({
         id: makeId(),
         masterId: String(featuredMaster?.id || 'master-1'),
-        title: draft.title.trim(),
-        subtitle: draft.description.trim(),
+        title: localizeTextForStorage(draft.title, sourceLanguage),
+        subtitle: localizeTextForStorage(
+          draft.description.trim() || draft.title.trim(),
+          sourceLanguage
+        ),
         image: mainPhoto.src,
         categoryId: draft.categoryId,
         centerLat: Number(featuredMaster?.lat || 51.5074),
@@ -227,6 +247,16 @@ export default function PromotionPaymentPage() {
         createdAt: now.toISOString(),
         status: 'active',
         views: 0,
+        description: localizeTextForStorage(draft.description, sourceLanguage),
+        oldPrice: '',
+        newPrice: '',
+        validUntil: localizeTextForStorage(end.toLocaleDateString(), sourceLanguage),
+        area: localizeTextForStorage(String(featuredMaster?.city || 'London'), sourceLanguage),
+        address: localizeTextForStorage(
+          String(featuredMaster?.city || 'London'),
+          sourceLanguage
+        ),
+        distance: localizeTextForStorage(`${draft.radiusKm} km`, sourceLanguage),
       });
 
       localStorage.removeItem('promotionDraft');
@@ -257,7 +287,9 @@ export default function PromotionPaymentPage() {
               textAlign: 'center',
             }}
           >
-            <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 12 }}>{labels.noDraft}</div>
+            <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 12 }}>
+              {labels.noDraft}
+            </div>
 
             <button
               onClick={() => router.push('/profile/promotions/new')}
