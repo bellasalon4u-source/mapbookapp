@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getAllMasters } from '../services/masters';
 import { categories } from '../services/categories';
-import { t, getSavedLanguage, saveLanguage, type AppLanguage } from '../services/i18n';
+import { t, getSavedLanguage, type AppLanguage } from '../services/i18n';
 import {
   getListings,
   subscribeToListingsStore,
@@ -22,6 +22,11 @@ import {
   subscribeToPromotionsStore,
   type PromotionItem,
 } from '../services/promotionsStore';
+import {
+  getAppRegionSettings,
+  getEffectiveSearchLocation,
+  subscribeToAppRegionSettings,
+} from '../services/appRegionStore';
 import BottomNav from '../components/BottomNav';
 import TopCategoriesBar from '../components/TopCategoriesBar';
 
@@ -290,7 +295,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       RU: 'Питомцы',
       CZ: 'Mazlíčci',
       DE: 'Haustiere',
-      PL: 'Zwierzęта',
+      PL: 'Zwierzęta',
     },
     fashion: {
       EN: 'Fashion',
@@ -393,12 +398,6 @@ function readRecentSearches() {
   return JSON.parse(window.localStorage.getItem('mapbook_recent_searches') || '[]') as string[];
 }
 
-function nextLanguage(current: AppLanguage): AppLanguage {
-  const order: AppLanguage[] = ['EN', 'ES', 'RU', 'CZ', 'DE', 'PL'];
-  const index = order.indexOf(current);
-  return order[(index + 1) % order.length];
-}
-
 function languageFlag(language: AppLanguage) {
   if (language === 'ES') return '🇪🇸';
   if (language === 'RU') return '🇷🇺';
@@ -478,6 +477,9 @@ export default function HomePage() {
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [promotions, setPromotions] = useState<PromotionItem[]>([]);
   const [recenterToUserTrigger] = useState(0);
+  const [searchLocation, setSearchLocation] = useState(getEffectiveSearchLocation());
+  const [locationLabel, setLocationLabel] = useState(getEffectiveSearchLocation().label);
+  const [regionVersion, setRegionVersion] = useState(0);
 
   const tr = t(language);
 
@@ -490,8 +492,28 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    saveLanguage(language);
-  }, [language]);
+    const syncRegion = () => {
+      const regionSettings = getAppRegionSettings();
+      setLanguage(regionSettings.language || getSavedLanguage());
+      const effective = getEffectiveSearchLocation();
+      setSearchLocation(effective);
+      setLocationLabel(effective.label);
+      setRegionVersion((prev) => prev + 1);
+    };
+
+    syncRegion();
+
+    window.addEventListener('focus', syncRegion);
+    window.addEventListener('storage', syncRegion);
+
+    const unsubscribe = subscribeToAppRegionSettings(syncRegion);
+
+    return () => {
+      window.removeEventListener('focus', syncRegion);
+      window.removeEventListener('storage', syncRegion);
+      unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -531,9 +553,14 @@ export default function HomePage() {
 
   useEffect(() => {
     const loadPromotions = () => {
-      const userLat = 51.4066;
-      const userLng = -0.6759;
-      setPromotions(getVisiblePromotionsForLocation(userLat, userLng));
+      setPromotions(
+        getVisiblePromotionsForLocation(
+          searchLocation.lat,
+          searchLocation.lng,
+          undefined,
+          language
+        )
+      );
     };
 
     loadPromotions();
@@ -542,7 +569,7 @@ export default function HomePage() {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [searchLocation.lat, searchLocation.lng, language, regionVersion]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -914,11 +941,7 @@ export default function HomePage() {
                 </div>
 
                 <button
-                  onClick={() => {
-                    const next = nextLanguage(language);
-                    setLanguage(next);
-                    saveLanguage(next);
-                  }}
+                  onClick={() => router.push('/profile/language-region')}
                   style={{
                     border: 'none',
                     background: '#fff',
@@ -993,47 +1016,64 @@ export default function HomePage() {
                   padding: '4px 2px 0',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  gap: 16,
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  flexWrap: 'wrap',
                 }}
               >
-                <button
-                  onClick={() => router.push('/profile')}
+                <div
                   style={{
-                    border: 'none',
-                    background: 'transparent',
-                    padding: 0,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 6,
-                    cursor: 'pointer',
+                    fontSize: 13,
                     fontWeight: 900,
-                    fontSize: 16,
-                    lineHeight: 1,
+                    color: '#4f5b68',
                   }}
                 >
-                  <span style={{ color: '#ff3b30', fontSize: 14 }}>⏱</span>
-                  <span style={{ color: '#ff3b30' }}>{formatAdTime(adSecondsLeft)}</span>
-                </button>
+                  <span style={{ color: '#2f63d8' }}>📍</span>
+                  <span>{locationLabel}</span>
+                </div>
 
-                <button
-                  onClick={() => router.push('/profile')}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    padding: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    cursor: 'pointer',
-                    fontWeight: 900,
-                    fontSize: 16,
-                    lineHeight: 1,
-                  }}
-                >
-                  <span style={{ color: '#19b44a', fontSize: 16 }}>👁</span>
-                  <span style={{ color: '#ff3b30' }}>{adViews}</span>
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <button
+                    onClick={() => router.push('/profile')}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      padding: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      cursor: 'pointer',
+                      fontWeight: 900,
+                      fontSize: 16,
+                      lineHeight: 1,
+                    }}
+                  >
+                    <span style={{ color: '#ff3b30', fontSize: 14 }}>⏱</span>
+                    <span style={{ color: '#ff3b30' }}>{formatAdTime(adSecondsLeft)}</span>
+                  </button>
+
+                  <button
+                    onClick={() => router.push('/profile')}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      padding: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      cursor: 'pointer',
+                      fontWeight: 900,
+                      fontSize: 16,
+                      lineHeight: 1,
+                    }}
+                  >
+                    <span style={{ color: '#19b44a', fontSize: 16 }}>👁</span>
+                    <span style={{ color: '#ff3b30' }}>{adViews}</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1417,7 +1457,11 @@ export default function HomePage() {
                     color: '#223145',
                   }}
                 >
-                  Горячие предложения рядом с вами
+                  {language === 'RU'
+                    ? `Горячие предложения рядом с ${locationLabel}`
+                    : language === 'ES'
+                    ? `Ofertas cerca de ${locationLabel}`
+                    : `Hot offers near ${locationLabel}`}
                 </h2>
 
                 <button
@@ -1525,7 +1569,12 @@ export default function HomePage() {
                             color: '#6b7280',
                           }}
                         >
-                          {promo.subtitle || 'Special offer near you'}
+                          {promo.subtitle ||
+                            (language === 'RU'
+                              ? 'Специальное предложение рядом с вами'
+                              : language === 'ES'
+                              ? 'Oferta especial cerca de ti'
+                              : 'Special offer near you')}
                         </div>
 
                         <div
@@ -1536,7 +1585,11 @@ export default function HomePage() {
                             color: '#ff4f93',
                           }}
                         >
-                          Views: {promo.views}
+                          {language === 'RU'
+                            ? `Просмотры: ${promo.views}`
+                            : language === 'ES'
+                            ? `Vistas: ${promo.views}`
+                            : `Views: ${promo.views}`}
                         </div>
                       </div>
                     </button>
@@ -1562,7 +1615,7 @@ export default function HomePage() {
                           cursor: 'pointer',
                         }}
                       >
-                        View
+                        {language === 'RU' ? 'Открыть' : language === 'ES' ? 'Ver' : 'View'}
                       </button>
 
                       <button
@@ -1579,7 +1632,7 @@ export default function HomePage() {
                           boxShadow: '0 6px 14px rgba(255,79,147,0.25)',
                         }}
                       >
-                        Book
+                        {language === 'RU' ? 'Бронь' : language === 'ES' ? 'Reservar' : 'Book'}
                       </button>
                     </div>
                   </div>
