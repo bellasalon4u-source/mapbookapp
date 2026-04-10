@@ -1,4 +1,6 @@
-export type AppLanguage = 'EN' | 'ES' | 'RU' | 'CZ' | 'DE' | 'PL';
+export const APP_LANGUAGES = ['EN', 'ES', 'RU', 'CZ', 'DE', 'PL'] as const;
+
+export type AppLanguage = (typeof APP_LANGUAGES)[number];
 
 const STORAGE_KEY = 'mapbook_language';
 
@@ -34,7 +36,11 @@ export const translations = {
     allCategories: 'All categories',
     chooseCategoryAndSubcategory: 'Choose category and subcategory',
     extraCategories: 'Extra categories',
-    more: 'More'
+    more: 'More',
+    selectedLanguage: 'Selected language',
+    textMustMatchLanguage: 'The text must match the selected language.',
+    clearField: 'Clear field',
+    next: 'Next',
   },
 
   ES: {
@@ -68,7 +74,11 @@ export const translations = {
     allCategories: 'Todas las categorías',
     chooseCategoryAndSubcategory: 'Elige categoría y subcategoría',
     extraCategories: 'Categorías extra',
-    more: 'Más'
+    more: 'Más',
+    selectedLanguage: 'Idioma seleccionado',
+    textMustMatchLanguage: 'El texto debe coincidir con el idioma seleccionado.',
+    clearField: 'Borrar campo',
+    next: 'Siguiente',
   },
 
   RU: {
@@ -102,7 +112,11 @@ export const translations = {
     allCategories: 'Все категории',
     chooseCategoryAndSubcategory: 'Выберите категорию и подкатегорию',
     extraCategories: 'Дополнительные категории',
-    more: 'Ещё'
+    more: 'Ещё',
+    selectedLanguage: 'Выбранный язык',
+    textMustMatchLanguage: 'Текст должен соответствовать выбранному языку.',
+    clearField: 'Очистить поле',
+    next: 'Далее',
   },
 
   CZ: {
@@ -136,7 +150,11 @@ export const translations = {
     allCategories: 'Všechny kategorie',
     chooseCategoryAndSubcategory: 'Vyberte kategorii a podkategorii',
     extraCategories: 'Další kategorie',
-    more: 'Více'
+    more: 'Více',
+    selectedLanguage: 'Vybraný jazyk',
+    textMustMatchLanguage: 'Text musí odpovídat zvolenému jazyku.',
+    clearField: 'Vymazat pole',
+    next: 'Další',
   },
 
   DE: {
@@ -170,7 +188,11 @@ export const translations = {
     allCategories: 'Alle Kategorien',
     chooseCategoryAndSubcategory: 'Kategorie und Unterkategorie wählen',
     extraCategories: 'Weitere Kategorien',
-    more: 'Mehr'
+    more: 'Mehr',
+    selectedLanguage: 'Ausgewählte Sprache',
+    textMustMatchLanguage: 'Der Text muss zur ausgewählten Sprache passen.',
+    clearField: 'Feld leeren',
+    next: 'Weiter',
   },
 
   PL: {
@@ -204,22 +226,24 @@ export const translations = {
     allCategories: 'Wszystkie kategorie',
     chooseCategoryAndSubcategory: 'Wybierz kategorię i podkategorię',
     extraCategories: 'Dodatkowe kategorie',
-    more: 'Więcej'
-  }
+    more: 'Więcej',
+    selectedLanguage: 'Wybrany język',
+    textMustMatchLanguage: 'Tekst musi odpowiadać wybranemu językowi.',
+    clearField: 'Wyczyść pole',
+    next: 'Dalej',
+  },
 } as const;
+
+export function isAppLanguage(value: string | null | undefined): value is AppLanguage {
+  return APP_LANGUAGES.includes((value || '') as AppLanguage);
+}
 
 export function getSavedLanguage(): AppLanguage {
   if (typeof window === 'undefined') return 'EN';
 
   const saved = window.localStorage.getItem(STORAGE_KEY);
-  if (
-    saved === 'EN' ||
-    saved === 'ES' ||
-    saved === 'RU' ||
-    saved === 'CZ' ||
-    saved === 'DE' ||
-    saved === 'PL'
-  ) {
+
+  if (isAppLanguage(saved)) {
     return saved;
   }
 
