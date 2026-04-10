@@ -7,6 +7,7 @@ import {
   subscribeToPromotionsStore,
   updatePromotion,
   type PromotionItem,
+  type PromotionStatus,
 } from '../../../services/promotionsStore';
 import { getSavedLanguage } from '../../../services/i18n';
 
@@ -160,8 +161,13 @@ export default function PromotionsPage() {
   const labels = getLabels(language);
 
   useEffect(() => {
-    const load = () => setPromotions(getPromotions());
+    const load = () => {
+      const currentLanguage = normalizeLanguage(getSavedLanguage());
+      setPromotions(getPromotions(currentLanguage));
+    };
+
     load();
+
     return subscribeToPromotionsStore(load);
   }, []);
 
@@ -180,6 +186,10 @@ export default function PromotionsPage() {
       window.removeEventListener('storage', syncLanguage);
     };
   }, []);
+
+  useEffect(() => {
+    setPromotions(getPromotions(language));
+  }, [language]);
 
   const activePromotions = useMemo(() => {
     return promotions.filter((item) => isPromotionActiveNow(item));
@@ -217,7 +227,10 @@ export default function PromotionsPage() {
   const handleDeactivate = (promotionId: string) => {
     const confirmed = window.confirm(labels.noRefund);
     if (!confirmed) return;
-    updatePromotion(promotionId, { status: 'inactive' as PromotionItem['status'] });
+
+    updatePromotion(promotionId, {
+      status: 'paused' as PromotionStatus,
+    });
   };
 
   const handleReactivate = (item: PromotionItem) => {
