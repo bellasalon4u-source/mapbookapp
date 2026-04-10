@@ -1,15 +1,23 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { categories } from '../../../../services/categories';
-import { getSavedLanguage } from '../../../../services/i18n';
+import {
+  getSavedLanguage,
+  type AppLanguage,
+} from '../../../../services/i18n';
 
 const radiusOptions = [1, 3, 5, 10, 15, 25];
 const durationOptions = [1, 3, 7, 14];
 const MAX_PHOTOS = 4;
-
-type AppLang = 'RU' | 'EN' | 'ES';
 
 type PromoPhoto = {
   id: string;
@@ -18,6 +26,56 @@ type PromoPhoto = {
   rotate: number;
   offsetX: number;
   offsetY: number;
+};
+
+type NewPromotionLabels = {
+  pageTitle: string;
+  photosTitle: string;
+  photosHint: string;
+  camera: string;
+  gallery: string;
+  files: string;
+  addPhoto: string;
+  dragHint: string;
+  title: string;
+  titlePlaceholder: string;
+  description: string;
+  descriptionPlaceholder: string;
+  discount: string;
+  discountOptional: string;
+  percent: string;
+  category: string;
+  radius: string;
+  duration: string;
+  day1: string;
+  days: string;
+  estimatedPrice: string;
+  preview: string;
+  views: string;
+  bookings: string;
+  radiusShort: string;
+  active: string;
+  sponsored: string;
+  goToPayment: string;
+  selectPhotoFirst: string;
+  editPhoto: string;
+  editorHint: string;
+  done: string;
+  close: string;
+  back: string;
+  subtitlePreviewDefault: string;
+  categoryBeauty: string;
+  removePhoto: string;
+  invalidLanguageTitle: string;
+  invalidLanguageDescription: string;
+  invalidLanguageTitleShort: string;
+  invalidLanguageDescriptionShort: string;
+  clearField: string;
+  nextField: string;
+  titleFieldName: string;
+  descriptionFieldName: string;
+  discountFieldName: string;
+  languageBadge: string;
 };
 
 function makeId(prefix = 'id') {
@@ -35,12 +93,7 @@ function calcPromotionPrice(radiusKm: number, days: number) {
   return Math.round(base + radiusPart + durationPart);
 }
 
-function normalizeLanguage(value: string): AppLang {
-  if (value === 'RU' || value === 'EN' || value === 'ES') return value;
-  return 'EN';
-}
-
-function getLabels(language: AppLang) {
+function getLabels(language: AppLanguage): NewPromotionLabels {
   if (language === 'RU') {
     return {
       pageTitle: 'Новая реклама',
@@ -50,7 +103,7 @@ function getLabels(language: AppLang) {
       gallery: 'Галерея',
       files: 'Файлы',
       addPhoto: 'Добавить фото',
-      dragHint: 'Нажмите по фото, чтобы редактировать. Первое фото будет главным.',
+      dragHint: 'Нажмите на фото, чтобы редактировать. Первое фото будет главным.',
       title: 'Заголовок',
       titlePlaceholder: 'Например: Keratin Hair Extensions',
       description: 'Описание',
@@ -80,6 +133,16 @@ function getLabels(language: AppLang) {
       subtitlePreviewDefault: 'Специальное предложение',
       categoryBeauty: 'Beauty',
       removePhoto: 'Удалить фото',
+      invalidLanguageTitle: 'Поле заголовка должно быть на выбранном языке интерфейса.',
+      invalidLanguageDescription: 'Поле описания должно быть на выбранном языке интерфейса.',
+      invalidLanguageTitleShort: 'Заголовок не соответствует выбранному языку.',
+      invalidLanguageDescriptionShort: 'Описание не соответствует выбранному языку.',
+      clearField: 'Очистить',
+      nextField: 'Далее',
+      titleFieldName: 'заголовок',
+      descriptionFieldName: 'описание',
+      discountFieldName: 'скидка',
+      languageBadge: 'Язык',
     };
   }
 
@@ -122,6 +185,172 @@ function getLabels(language: AppLang) {
       subtitlePreviewDefault: 'Oferta especial',
       categoryBeauty: 'Beauty',
       removePhoto: 'Eliminar foto',
+      invalidLanguageTitle: 'El título debe estar en el idioma seleccionado.',
+      invalidLanguageDescription: 'La descripción debe estar en el idioma seleccionado.',
+      invalidLanguageTitleShort: 'El título no coincide con el idioma seleccionado.',
+      invalidLanguageDescriptionShort: 'La descripción no coincide con el idioma seleccionado.',
+      clearField: 'Borrar',
+      nextField: 'Siguiente',
+      titleFieldName: 'título',
+      descriptionFieldName: 'descripción',
+      discountFieldName: 'descuento',
+      languageBadge: 'Idioma',
+    };
+  }
+
+  if (language === 'CZ') {
+    return {
+      pageTitle: 'Nová reklama',
+      photosTitle: 'Fotky reklamy',
+      photosHint: 'Přidejte 1 až 4 fotky',
+      camera: 'Kamera',
+      gallery: 'Galerie',
+      files: 'Soubory',
+      addPhoto: 'Přidat fotku',
+      dragHint: 'Klepněte na fotku pro úpravu. První fotka bude hlavní.',
+      title: 'Nadpis',
+      titlePlaceholder: 'Například: Keratin Hair Extensions',
+      description: 'Popis',
+      descriptionPlaceholder: 'Popište nabídku stručně a jasně',
+      discount: 'Sleva',
+      discountOptional: '(volitelné)',
+      percent: '%',
+      category: 'Kategorie',
+      radius: 'Okruh zobrazení',
+      duration: 'Doba trvání',
+      day1: '1 den',
+      days: 'dní',
+      estimatedPrice: 'Odhadovaná cena',
+      preview: 'Náhled',
+      views: 'Zobrazení',
+      bookings: 'Rezervace',
+      radiusShort: 'Okruh',
+      active: 'Aktivní',
+      sponsored: 'Sponsored',
+      goToPayment: 'Pokračovat k platbě',
+      selectPhotoFirst: 'Nejprve přidejte alespoň jednu fotku',
+      editPhoto: 'Úprava fotky',
+      editorHint: 'Posouvejte, přibližujte a otáčejte fotku',
+      done: 'Hotovo',
+      close: 'Zavřít',
+      back: 'Zpět',
+      subtitlePreviewDefault: 'Speciální nabídka',
+      categoryBeauty: 'Beauty',
+      removePhoto: 'Odstranit fotku',
+      invalidLanguageTitle: 'Nadpis musí být ve zvoleném jazyce.',
+      invalidLanguageDescription: 'Popis musí být ve zvoleném jazyce.',
+      invalidLanguageTitleShort: 'Nadpis neodpovídá zvolenému jazyku.',
+      invalidLanguageDescriptionShort: 'Popis neodpovídá zvolenému jazyku.',
+      clearField: 'Vymazat',
+      nextField: 'Další',
+      titleFieldName: 'nadpis',
+      descriptionFieldName: 'popis',
+      discountFieldName: 'sleva',
+      languageBadge: 'Jazyk',
+    };
+  }
+
+  if (language === 'DE') {
+    return {
+      pageTitle: 'Neue Werbung',
+      photosTitle: 'Werbefotos',
+      photosHint: 'Fügen Sie 1 bis 4 Fotos hinzu',
+      camera: 'Kamera',
+      gallery: 'Galerie',
+      files: 'Dateien',
+      addPhoto: 'Foto hinzufügen',
+      dragHint: 'Tippen Sie auf ein Foto, um es zu bearbeiten. Das erste Foto ist das Hauptfoto.',
+      title: 'Titel',
+      titlePlaceholder: 'Zum Beispiel: Keratin Hair Extensions',
+      description: 'Beschreibung',
+      descriptionPlaceholder: 'Beschreiben Sie das Angebot kurz und klar',
+      discount: 'Rabatt',
+      discountOptional: '(optional)',
+      percent: '%',
+      category: 'Kategorie',
+      radius: 'Anzeigeradius',
+      duration: 'Dauer',
+      day1: '1 Tag',
+      days: 'Tage',
+      estimatedPrice: 'Geschätzter Preis',
+      preview: 'Vorschau',
+      views: 'Aufrufe',
+      bookings: 'Buchungen',
+      radiusShort: 'Radius',
+      active: 'Aktiv',
+      sponsored: 'Sponsored',
+      goToPayment: 'Zur Zahlung',
+      selectPhotoFirst: 'Fügen Sie zuerst mindestens ein Foto hinzu',
+      editPhoto: 'Foto bearbeiten',
+      editorHint: 'Foto verschieben, zoomen und drehen',
+      done: 'Fertig',
+      close: 'Schließen',
+      back: 'Zurück',
+      subtitlePreviewDefault: 'Sonderangebot',
+      categoryBeauty: 'Beauty',
+      removePhoto: 'Foto entfernen',
+      invalidLanguageTitle: 'Der Titel muss in der ausgewählten Sprache sein.',
+      invalidLanguageDescription: 'Die Beschreibung muss in der ausgewählten Sprache sein.',
+      invalidLanguageTitleShort: 'Der Titel passt nicht zur ausgewählten Sprache.',
+      invalidLanguageDescriptionShort: 'Die Beschreibung passt nicht zur ausgewählten Sprache.',
+      clearField: 'Löschen',
+      nextField: 'Weiter',
+      titleFieldName: 'Titel',
+      descriptionFieldName: 'Beschreibung',
+      discountFieldName: 'Rabatt',
+      languageBadge: 'Sprache',
+    };
+  }
+
+  if (language === 'PL') {
+    return {
+      pageTitle: 'Nowa reklama',
+      photosTitle: 'Zdjęcia reklamy',
+      photosHint: 'Dodaj od 1 do 4 zdjęć',
+      camera: 'Aparat',
+      gallery: 'Galeria',
+      files: 'Pliki',
+      addPhoto: 'Dodaj zdjęcie',
+      dragHint: 'Dotknij zdjęcia, aby je edytować. Pierwsze zdjęcie będzie główne.',
+      title: 'Tytuł',
+      titlePlaceholder: 'Na przykład: Keratin Hair Extensions',
+      description: 'Opis',
+      descriptionPlaceholder: 'Opisz ofertę krótko i jasno',
+      discount: 'Zniżka',
+      discountOptional: '(opcjonalnie)',
+      percent: '%',
+      category: 'Kategoria',
+      radius: 'Promień wyświetlania',
+      duration: 'Czas trwania',
+      day1: '1 dzień',
+      days: 'dni',
+      estimatedPrice: 'Szacowana cena',
+      preview: 'Podgląd',
+      views: 'Wyświetlenia',
+      bookings: 'Rezerwacje',
+      radiusShort: 'Promień',
+      active: 'Aktywna',
+      sponsored: 'Sponsored',
+      goToPayment: 'Przejdź do płatności',
+      selectPhotoFirst: 'Najpierw dodaj co najmniej jedno zdjęcie',
+      editPhoto: 'Edycja zdjęcia',
+      editorHint: 'Przesuwaj, powiększaj i obracaj zdjęcie',
+      done: 'Gotowe',
+      close: 'Zamknij',
+      back: 'Wstecz',
+      subtitlePreviewDefault: 'Oferta specjalna',
+      categoryBeauty: 'Beauty',
+      removePhoto: 'Usuń zdjęcie',
+      invalidLanguageTitle: 'Tytuł musi być w wybranym języku.',
+      invalidLanguageDescription: 'Opis musi być w wybranym języku.',
+      invalidLanguageTitleShort: 'Tytuł nie pasuje do wybranego języka.',
+      invalidLanguageDescriptionShort: 'Opis nie pasuje do wybranego języka.',
+      clearField: 'Wyczyść',
+      nextField: 'Dalej',
+      titleFieldName: 'tytuł',
+      descriptionFieldName: 'opis',
+      discountFieldName: 'zniżka',
+      languageBadge: 'Język',
     };
   }
 
@@ -163,6 +392,16 @@ function getLabels(language: AppLang) {
     subtitlePreviewDefault: 'Special offer',
     categoryBeauty: 'Beauty',
     removePhoto: 'Remove photo',
+    invalidLanguageTitle: 'The title must match the selected app language.',
+    invalidLanguageDescription: 'The description must match the selected app language.',
+    invalidLanguageTitleShort: 'The title does not match the selected language.',
+    invalidLanguageDescriptionShort: 'The description does not match the selected language.',
+    clearField: 'Clear',
+    nextField: 'Next',
+    titleFieldName: 'title',
+    descriptionFieldName: 'description',
+    discountFieldName: 'discount',
+    languageBadge: 'Language',
   };
 }
 
@@ -174,6 +413,67 @@ function getPhotoTransform(photo: PromoPhoto) {
   return `translate(${photo.offsetX}px, ${photo.offsetY}px) scale(${photo.zoom}) rotate(${photo.rotate}deg)`;
 }
 
+function containsCyrillic(value: string) {
+  return /[А-Яа-яЁёІіЇїЄє]/.test(value);
+}
+
+function containsSpanishChars(value: string) {
+  return /[ñÑáéíóúÁÉÍÓÚ¿¡]/.test(value);
+}
+
+function containsCzechChars(value: string) {
+  return /[áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]/.test(value);
+}
+
+function containsGermanChars(value: string) {
+  return /[äöüßÄÖÜ]/.test(value);
+}
+
+function containsPolishChars(value: string) {
+  return /[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/.test(value);
+}
+
+function containsLatin(value: string) {
+  return /[A-Za-z]/.test(value);
+}
+
+function validateTextForLanguage(language: AppLanguage, value: string) {
+  const text = value.trim();
+
+  if (!text) return true;
+
+  if (language === 'RU') {
+    return containsCyrillic(text);
+  }
+
+  if (language === 'ES') {
+    return containsLatin(text) && !containsCyrillic(text);
+  }
+
+  if (language === 'CZ') {
+    return containsLatin(text) && !containsCyrillic(text);
+  }
+
+  if (language === 'DE') {
+    return containsLatin(text) && !containsCyrillic(text);
+  }
+
+  if (language === 'PL') {
+    return containsLatin(text) && !containsCyrillic(text);
+  }
+
+  return containsLatin(text) && !containsCyrillic(text);
+}
+
+function getLanguageHint(language: AppLanguage) {
+  if (language === 'RU') return 'RU';
+  if (language === 'ES') return 'ES';
+  if (language === 'CZ') return 'CZ';
+  if (language === 'DE') return 'DE';
+  if (language === 'PL') return 'PL';
+  return 'EN';
+}
+
 export default function NewPromotionPage() {
   const router = useRouter();
 
@@ -181,13 +481,17 @@ export default function NewPromotionPage() {
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const filesInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [language, setLanguage] = useState<AppLang>(normalizeLanguage(getSavedLanguage()));
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
+  const descriptionInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const discountInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [photos, setPhotos] = useState<PromoPhoto[]>([]);
   const [editingPhotoId, setEditingPhotoId] = useState<string | null>(null);
 
   const [title, setTitle] = useState('Keratin Hair Extensions');
   const [description, setDescription] = useState(
-    normalizeLanguage(getSavedLanguage()) === 'RU'
+    getSavedLanguage() === 'RU'
       ? 'Профессиональное наращивание волос с кератином. Блеск, длина и объём на месяцы вперёд.'
       : 'Professional keratin hair extensions. Shine, length and volume for months ahead.'
   );
@@ -197,11 +501,14 @@ export default function NewPromotionPage() {
   const [radiusKm, setRadiusKm] = useState(5);
   const [durationDays, setDurationDays] = useState(3);
 
+  const [titleError, setTitleError] = useState('');
+  const [descriptionError, setDescriptionError] = useState('');
+
   const labels = getLabels(language);
 
   useEffect(() => {
     const syncLanguage = () => {
-      setLanguage(normalizeLanguage(getSavedLanguage()));
+      setLanguage(getSavedLanguage());
     };
 
     syncLanguage();
@@ -215,6 +522,30 @@ export default function NewPromotionPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!title.trim()) {
+      setTitleError('');
+      return;
+    }
+
+    setTitleError(
+      validateTextForLanguage(language, title) ? '' : labels.invalidLanguageTitleShort
+    );
+  }, [title, language, labels.invalidLanguageTitleShort]);
+
+  useEffect(() => {
+    if (!description.trim()) {
+      setDescriptionError('');
+      return;
+    }
+
+    setDescriptionError(
+      validateTextForLanguage(language, description)
+        ? ''
+        : labels.invalidLanguageDescriptionShort
+    );
+  }, [description, language, labels.invalidLanguageDescriptionShort]);
+
   const activePhoto = useMemo(() => {
     return photos.find((item) => item.id === editingPhotoId) || null;
   }, [editingPhotoId, photos]);
@@ -222,10 +553,6 @@ export default function NewPromotionPage() {
   const price = useMemo(() => {
     return calcPromotionPrice(radiusKm, durationDays);
   }, [radiusKm, durationDays]);
-
-  const categoryLabel = useMemo(() => {
-    return categories.find((item) => item.id === categoryId)?.label || labels.categoryBeauty;
-  }, [categoryId, labels.categoryBeauty]);
 
   const previewTitle = title.trim() || 'Keratin Hair Extensions';
   const previewDescription = description.trim() || labels.subtitlePreviewDefault;
@@ -288,9 +615,50 @@ export default function NewPromotionPage() {
     );
   };
 
+  const moveToNextField = (field: 'title' | 'description' | 'discount') => {
+    if (field === 'title') {
+      descriptionInputRef.current?.focus();
+      return;
+    }
+
+    if (field === 'description') {
+      if (discountEnabled) {
+        discountInputRef.current?.focus();
+        return;
+      }
+      titleInputRef.current?.blur();
+      descriptionInputRef.current?.blur();
+      return;
+    }
+
+    discountInputRef.current?.blur();
+  };
+
+  const onFieldKeyDown = (
+    event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+    field: 'title' | 'description' | 'discount'
+  ) => {
+    if (event.key === 'Enter' && field !== 'description') {
+      event.preventDefault();
+      moveToNextField(field);
+    }
+  };
+
   const goToPayment = () => {
     if (!photos.length) {
       window.alert(labels.selectPhotoFirst);
+      return;
+    }
+
+    if (!validateTextForLanguage(language, title)) {
+      setTitleError(labels.invalidLanguageTitle);
+      titleInputRef.current?.focus();
+      return;
+    }
+
+    if (!validateTextForLanguage(language, description)) {
+      setDescriptionError(labels.invalidLanguageDescription);
+      descriptionInputRef.current?.focus();
       return;
     }
 
@@ -305,6 +673,7 @@ export default function NewPromotionPage() {
       price,
       photos,
       createdAt: new Date().toISOString(),
+      language,
     };
 
     localStorage.setItem('promotionDraft', JSON.stringify(payload));
@@ -372,19 +741,38 @@ export default function NewPromotionPage() {
               cursor: 'pointer',
             }}
             title={labels.back}
+            type="button"
           >
             ‹
           </button>
 
-          <div
-            style={{
-              textAlign: 'center',
-              fontWeight: 900,
-              fontSize: 20,
-              color: '#161a2e',
-            }}
-          >
-            {labels.pageTitle}
+          <div style={{ textAlign: 'center' }}>
+            <div
+              style={{
+                fontWeight: 900,
+                fontSize: 20,
+                color: '#161a2e',
+              }}
+            >
+              {labels.pageTitle}
+            </div>
+
+            <div
+              style={{
+                marginTop: 6,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '6px 12px',
+                borderRadius: 999,
+                background: '#f3f7ff',
+                color: '#3559d6',
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              {labels.languageBadge}: {getLanguageHint(language)}
+            </div>
           </div>
 
           <button
@@ -400,6 +788,7 @@ export default function NewPromotionPage() {
               cursor: 'pointer',
             }}
             title={labels.close}
+            type="button"
           >
             ×
           </button>
@@ -725,27 +1114,87 @@ export default function NewPromotionPage() {
           <div style={{ display: 'grid', gap: 14 }}>
             <div>
               <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>{labels.title}</div>
-              <div style={{ position: 'relative' }}>
+
+              <div
+                style={{
+                  position: 'relative',
+                  borderRadius: 16,
+                  border: titleError ? '1px solid #ff5a53' : '1px solid #ddd6cb',
+                  background: '#fff',
+                  paddingRight: 124,
+                }}
+              >
                 <input
+                  ref={titleInputRef}
                   value={title}
                   onChange={(e) => setTitle(e.target.value.slice(0, 60))}
+                  onKeyDown={(e) => onFieldKeyDown(e, 'title')}
                   placeholder={labels.titlePlaceholder}
                   style={{
                     width: '100%',
                     height: 54,
                     borderRadius: 16,
-                    border: '1px solid #ddd6cb',
+                    border: 'none',
                     padding: '0 14px',
                     fontSize: 16,
                     outline: 'none',
                     color: '#171b2e',
+                    background: 'transparent',
                   }}
                 />
+
                 <div
                   style={{
                     position: 'absolute',
-                    right: 12,
-                    bottom: 8,
+                    top: 7,
+                    right: 8,
+                    display: 'flex',
+                    gap: 6,
+                    alignItems: 'center',
+                  }}
+                >
+                  {title ? (
+                    <button
+                      type="button"
+                      onClick={() => setTitle('')}
+                      style={{
+                        height: 40,
+                        padding: '0 12px',
+                        border: 'none',
+                        borderRadius: 12,
+                        background: '#f4f5f7',
+                        color: '#7a8290',
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      ×
+                    </button>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    onClick={() => moveToNextField('title')}
+                    style={{
+                      height: 40,
+                      padding: '0 12px',
+                      border: 'none',
+                      borderRadius: 12,
+                      background: '#1faf46',
+                      color: '#fff',
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {labels.nextField}
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 14,
+                    bottom: -20,
                     fontSize: 12,
                     color: '#a0a8b5',
                     fontWeight: 700,
@@ -754,34 +1203,114 @@ export default function NewPromotionPage() {
                   {title.length}/60
                 </div>
               </div>
+
+              {titleError ? (
+                <div
+                  style={{
+                    marginTop: 24,
+                    fontSize: 12,
+                    color: '#ff5a53',
+                    fontWeight: 800,
+                  }}
+                >
+                  {titleError}
+                </div>
+              ) : (
+                <div style={{ height: 24 }} />
+              )}
             </div>
 
             <div>
               <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>
                 {labels.description}
               </div>
-              <div style={{ position: 'relative' }}>
+
+              <div
+                style={{
+                  position: 'relative',
+                  borderRadius: 16,
+                  border: descriptionError ? '1px solid #ff5a53' : '1px solid #ddd6cb',
+                  background: '#fff',
+                  paddingRight: 124,
+                }}
+              >
                 <textarea
+                  ref={descriptionInputRef}
                   value={description}
                   onChange={(e) => setDescription(e.target.value.slice(0, 150))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                      e.preventDefault();
+                      moveToNextField('description');
+                    }
+                  }}
                   placeholder={labels.descriptionPlaceholder}
-                  rows={3}
+                  rows={4}
                   style={{
                     width: '100%',
                     borderRadius: 16,
-                    border: '1px solid #ddd6cb',
+                    border: 'none',
                     padding: '14px',
                     fontSize: 16,
                     outline: 'none',
                     color: '#171b2e',
                     resize: 'none',
+                    background: 'transparent',
                   }}
                 />
+
                 <div
                   style={{
                     position: 'absolute',
-                    right: 12,
-                    bottom: 8,
+                    top: 8,
+                    right: 8,
+                    display: 'flex',
+                    gap: 6,
+                    alignItems: 'center',
+                  }}
+                >
+                  {description ? (
+                    <button
+                      type="button"
+                      onClick={() => setDescription('')}
+                      style={{
+                        height: 40,
+                        padding: '0 12px',
+                        border: 'none',
+                        borderRadius: 12,
+                        background: '#f4f5f7',
+                        color: '#7a8290',
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      ×
+                    </button>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    onClick={() => moveToNextField('description')}
+                    style={{
+                      height: 40,
+                      padding: '0 12px',
+                      border: 'none',
+                      borderRadius: 12,
+                      background: '#1faf46',
+                      color: '#fff',
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {labels.done}
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 14,
+                    bottom: -20,
                     fontSize: 12,
                     color: '#a0a8b5',
                     fontWeight: 700,
@@ -790,6 +1319,21 @@ export default function NewPromotionPage() {
                   {description.length}/150
                 </div>
               </div>
+
+              {descriptionError ? (
+                <div
+                  style={{
+                    marginTop: 24,
+                    fontSize: 12,
+                    color: '#ff5a53',
+                    fontWeight: 800,
+                  }}
+                >
+                  {descriptionError}
+                </div>
+              ) : (
+                <div style={{ height: 24 }} />
+              )}
             </div>
 
             <div>
@@ -843,7 +1387,7 @@ export default function NewPromotionPage() {
                     borderRadius: 16,
                     padding: 10,
                     display: 'grid',
-                    gridTemplateColumns: '110px 90px 50px',
+                    gridTemplateColumns: '110px 1fr 50px 86px',
                     gap: 8,
                     alignItems: 'center',
                   }}
@@ -864,10 +1408,12 @@ export default function NewPromotionPage() {
                   </div>
 
                   <input
+                    ref={discountInputRef}
                     value={discountPercent}
                     onChange={(e) =>
                       setDiscountPercent(e.target.value.replace(/\D/g, '').slice(0, 2))
                     }
+                    onKeyDown={(e) => onFieldKeyDown(e, 'discount')}
                     style={{
                       width: '100%',
                       height: 46,
@@ -892,16 +1438,30 @@ export default function NewPromotionPage() {
                       fontWeight: 900,
                     }}
                   >
-                    %
+                    {labels.percent}
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => moveToNextField('discount')}
+                    style={{
+                      height: 46,
+                      border: 'none',
+                      borderRadius: 12,
+                      background: '#1faf46',
+                      color: '#fff',
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {labels.done}
+                  </button>
                 </div>
               ) : null}
             </div>
 
             <div>
-              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>
-                {labels.category}
-              </div>
+              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>{labels.category}</div>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
@@ -952,9 +1512,7 @@ export default function NewPromotionPage() {
             </div>
 
             <div>
-              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>
-                {labels.duration}
-              </div>
+              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>{labels.duration}</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {durationOptions.map((item) => (
                   <button
@@ -1014,15 +1572,13 @@ export default function NewPromotionPage() {
                     ? 'день'
                     : 'дн.'
                   : durationDays === 1
-                    ? 'day'
-                    : 'days'}
+                    ? labels.day1
+                    : labels.days}
               </div>
             </div>
 
             <div>
-              <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 10 }}>
-                {labels.preview}
-              </div>
+              <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 10 }}>{labels.preview}</div>
 
               <div
                 style={{
@@ -1299,8 +1855,8 @@ export default function NewPromotionPage() {
                       {language === 'RU'
                         ? `${durationDays} дн.`
                         : durationDays === 1
-                          ? '1 day'
-                          : `${durationDays} days`}
+                          ? labels.day1
+                          : `${durationDays} ${labels.days}`}
                     </div>
                   </div>
                 </div>
