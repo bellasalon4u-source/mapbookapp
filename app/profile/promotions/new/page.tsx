@@ -14,6 +14,7 @@ import {
   getSavedLanguage,
   type AppLanguage,
 } from '../../../../services/i18n';
+import { formatDisplayPrice } from '../../../../services/currencyDisplay';
 
 const radiusOptions = [1, 3, 5, 10, 15, 25];
 const durationOptions = [1, 3, 7, 14];
@@ -80,10 +81,6 @@ type NewPromotionLabels = {
 
 function makeId(prefix = 'id') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function formatMoney(value: number) {
-  return `£${value.toFixed(0)}`;
 }
 
 function calcPromotionPrice(radiusKm: number, days: number) {
@@ -417,22 +414,6 @@ function containsCyrillic(value: string) {
   return /[А-Яа-яЁёІіЇїЄє]/.test(value);
 }
 
-function containsSpanishChars(value: string) {
-  return /[ñÑáéíóúÁÉÍÓÚ¿¡]/.test(value);
-}
-
-function containsCzechChars(value: string) {
-  return /[áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]/.test(value);
-}
-
-function containsGermanChars(value: string) {
-  return /[äöüßÄÖÜ]/.test(value);
-}
-
-function containsPolishChars(value: string) {
-  return /[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/.test(value);
-}
-
 function containsLatin(value: string) {
   return /[A-Za-z]/.test(value);
 }
@@ -444,22 +425,6 @@ function validateTextForLanguage(language: AppLanguage, value: string) {
 
   if (language === 'RU') {
     return containsCyrillic(text);
-  }
-
-  if (language === 'ES') {
-    return containsLatin(text) && !containsCyrillic(text);
-  }
-
-  if (language === 'CZ') {
-    return containsLatin(text) && !containsCyrillic(text);
-  }
-
-  if (language === 'DE') {
-    return containsLatin(text) && !containsCyrillic(text);
-  }
-
-  if (language === 'PL') {
-    return containsLatin(text) && !containsCyrillic(text);
   }
 
   return containsLatin(text) && !containsCyrillic(text);
@@ -550,7 +515,7 @@ export default function NewPromotionPage() {
     return photos.find((item) => item.id === editingPhotoId) || null;
   }, [editingPhotoId, photos]);
 
-  const price = useMemo(() => {
+  const priceGBP = useMemo(() => {
     return calcPromotionPrice(radiusKm, durationDays);
   }, [radiusKm, durationDays]);
 
@@ -670,7 +635,7 @@ export default function NewPromotionPage() {
       categoryId,
       radiusKm,
       durationDays,
-      price,
+      price: priceGBP,
       photos,
       createdAt: new Date().toISOString(),
       language,
@@ -1554,7 +1519,7 @@ export default function NewPromotionPage() {
                   {labels.estimatedPrice}
                 </div>
                 <div style={{ marginTop: 6, fontSize: 34, fontWeight: 900, color: '#ff5a53' }}>
-                  {formatMoney(price)}
+                  {formatDisplayPrice(priceGBP)}
                 </div>
               </div>
 
@@ -1878,7 +1843,7 @@ export default function NewPromotionPage() {
                 boxShadow: '0 10px 22px rgba(31,175,70,0.22)',
               }}
             >
-              {labels.goToPayment} &nbsp; {formatMoney(price)}
+              {labels.goToPayment} &nbsp; {formatDisplayPrice(priceGBP)}
             </button>
           </div>
         </div>
