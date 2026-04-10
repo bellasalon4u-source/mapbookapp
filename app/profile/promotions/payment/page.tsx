@@ -6,6 +6,7 @@ import { getSavedLanguage, type AppLanguage } from '../../../../services/i18n';
 import { addPromotion } from '../../../../services/promotionsStore';
 import { getAllMasters } from '../../../../services/masters';
 import { formatDisplayPrice } from '../../../../services/currencyDisplay';
+import { useLiveCurrencyRates } from '../../../../services/useLiveCurrencyRates';
 
 type AppLang = 'RU' | 'EN' | 'ES';
 
@@ -166,6 +167,8 @@ function getLabels(language: AppLang) {
 }
 
 export default function PromotionPaymentPage() {
+  useLiveCurrencyRates();
+
   const router = useRouter();
   const masters = getAllMasters();
 
@@ -252,10 +255,7 @@ export default function PromotionPaymentPage() {
         newPrice: '',
         validUntil: localizeTextForStorage(end.toLocaleDateString(), sourceLanguage),
         area: localizeTextForStorage(String(featuredMaster?.city || 'London'), sourceLanguage),
-        address: localizeTextForStorage(
-          String(featuredMaster?.city || 'London'),
-          sourceLanguage
-        ),
+        address: localizeTextForStorage(String(featuredMaster?.city || 'London'), sourceLanguage),
         distance: localizeTextForStorage(`${draft.radiusKm} km`, sourceLanguage),
       });
 
