@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getAllMasters } from '../services/masters';
 import { categories } from '../services/categories';
-import { t, getSavedLanguage, type AppLanguage } from '../services/i18n';
+import {
+  t,
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../services/i18n';
 import {
   getListings,
   subscribeToListingsStore,
@@ -516,14 +521,18 @@ export default function HomePage() {
     window.addEventListener('storage', syncHomeState);
     document.addEventListener('visibilitychange', handleVisibility);
 
-    const unsubscribe = subscribeToAppRegionSettings(syncHomeState);
+    const unsubscribeRegion = subscribeToAppRegionSettings(syncHomeState);
+    const unsubscribeLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
 
     return () => {
       window.removeEventListener('focus', syncHomeState);
       window.removeEventListener('pageshow', syncHomeState);
       window.removeEventListener('storage', syncHomeState);
       document.removeEventListener('visibilitychange', handleVisibility);
-      unsubscribe();
+      unsubscribeRegion();
+      unsubscribeLanguage();
     };
   }, []);
 
