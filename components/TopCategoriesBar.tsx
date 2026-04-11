@@ -122,7 +122,7 @@ function translateSubcategory(value: string, language: AppLanguage) {
     'Furniture Assembly': { EN: 'Furniture Assembly', ES: 'Montaje de muebles', RU: 'Сборка мебели', CZ: 'Montáž nábytku', DE: 'Möbelmontage', PL: 'Montaż mebli' },
     'Home Help': { EN: 'Home Help', ES: 'Ayuda en casa', RU: 'Помощь по дому', CZ: 'Pomoc v domácnosti', DE: 'Haushaltshilfe', PL: 'Pomoc domowa' },
 
-    Other: { EN: 'Other', ES: 'Otro', RU: 'Другое', CZ: 'Jiné', DE: 'Andere', PL: 'Inne' }
+    Other: { EN: 'Other', ES: 'Otro', RU: 'Другое', CZ: 'Jiné', DE: 'Andere', PL: 'Inne' },
   };
 
   return dict[value]?.[language] || value;
@@ -360,7 +360,7 @@ export default function TopCategoriesBar({
                           >
                             <img
                               src={src}
-                              alt={item.label}
+                              alt={translateCategoryLabel(item.id, language, item.label)}
                               style={{
                                 width: '100%',
                                 height: '100%',
@@ -570,7 +570,7 @@ export default function TopCategoriesBar({
             >
               <img
                 src={iconSrcMap.more}
-                alt="More"
+                alt={tr.more}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -657,7 +657,7 @@ export default function TopCategoriesBar({
                   >
                     <img
                       src={src}
-                      alt={item.label}
+                      alt={translateCategoryLabel(item.id, language, item.label)}
                       style={{
                         width: '100%',
                         height: '100%',
