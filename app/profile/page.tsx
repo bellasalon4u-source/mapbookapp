@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import BottomNav from '../../components/BottomNav';
+import BottomNav from '../../components/common/BottomNav';
 import {
   getSavedLanguage,
   subscribeToLanguageChange,
@@ -122,7 +122,7 @@ const profileTexts = {
     accountSettingsSub: 'Личные данные, приватность и безопасность',
     logout: 'Выйти',
     bonusesTitle: 'Ваши бонусы',
-    welcomeBonus: 'Welcome Bonus',
+    welcomeBonus: 'Приветственный бонус',
     referralBookings: 'Реферальные бронирования',
     inviteButton: 'Пригласить',
     verified: 'Аккаунт подтверждён',
@@ -155,7 +155,7 @@ const profileTexts = {
     accountSettingsSub: 'Osobní údaje, soukromí a bezpečnost',
     logout: 'Odhlásit se',
     bonusesTitle: 'Vaše bonusy',
-    welcomeBonus: 'Welcome Bonus',
+    welcomeBonus: 'Uvítací bonus',
     referralBookings: 'Doporučené rezervace zdarma',
     inviteButton: 'Pozvat',
     verified: 'Účet ověřen',
@@ -188,7 +188,7 @@ const profileTexts = {
     accountSettingsSub: 'Persönliche Daten, Datenschutz und Sicherheit',
     logout: 'Abmelden',
     bonusesTitle: 'Deine Boni',
-    welcomeBonus: 'Welcome Bonus',
+    welcomeBonus: 'Willkommensbonus',
     referralBookings: 'Empfehlungsbuchungen gratis',
     inviteButton: 'Einladen',
     verified: 'Konto bestätigt',
@@ -221,7 +221,7 @@ const profileTexts = {
     accountSettingsSub: 'Dane osobowe, prywatność i bezpieczeństwo',
     logout: 'Wyloguj się',
     bonusesTitle: 'Twoje bonusy',
-    welcomeBonus: 'Welcome Bonus',
+    welcomeBonus: 'Bonus powitalny',
     referralBookings: 'Rezerwacje z poleceń',
     inviteButton: 'Zaproś',
     verified: 'Konto potwierdzone',
@@ -240,7 +240,7 @@ type MenuItem = {
 export default function ProfilePage() {
   const router = useRouter();
 
-  const [language, setLanguage] = useState<AppLanguage>('EN');
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
   const [bookingsCount, setBookingsCount] = useState(0);
   const [savedMastersCount, setSavedMastersCount] = useState(
@@ -270,8 +270,7 @@ export default function ProfilePage() {
     const syncBookings = () => {
       const all = getBookings();
       const nextCount = all.filter(
-        (booking) =>
-          booking.status === 'upcoming' || booking.status === 'pending'
+        (booking) => booking.status === 'upcoming' || booking.status === 'pending'
       ).length;
       setBookingsCount(nextCount);
     };
