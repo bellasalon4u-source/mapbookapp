@@ -30,6 +30,7 @@ export default function BottomNav() {
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
+
     const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
@@ -46,84 +47,96 @@ export default function BottomNav() {
         language === 'RU' ? 'Главная' :
         language === 'CZ' ? 'Domů' :
         language === 'DE' ? 'Start' :
-        language === 'PL' ? 'Start' : 'Home',
+        language === 'PL' ? 'Start' :
+        'Home',
 
       messages:
         language === 'ES' ? 'Mensajes' :
         language === 'RU' ? 'Сообщения' :
         language === 'CZ' ? 'Zprávy' :
         language === 'DE' ? 'Nachrichten' :
-        language === 'PL' ? 'Wiadomości' : 'Messages',
+        language === 'PL' ? 'Wiadomości' :
+        'Messages',
 
       add:
         language === 'ES' ? 'Añadir' :
         language === 'RU' ? 'Добавить' :
         language === 'CZ' ? 'Přidat' :
         language === 'DE' ? 'Hinzufügen' :
-        language === 'PL' ? 'Dodaj' : 'Add',
+        language === 'PL' ? 'Dodaj' :
+        'Add',
 
       bookings:
         language === 'ES' ? 'Reservas' :
         language === 'RU' ? 'Брони' :
         language === 'CZ' ? 'Rezervace' :
         language === 'DE' ? 'Buchungen' :
-        language === 'PL' ? 'Rezerwacje' : 'Bookings',
+        language === 'PL' ? 'Rezerwacje' :
+        'Bookings',
 
       profile:
         language === 'ES' ? 'Perfil' :
         language === 'RU' ? 'Профиль' :
         language === 'CZ' ? 'Profil' :
         language === 'DE' ? 'Profil' :
-        language === 'PL' ? 'Profil' : 'Profile',
+        language === 'PL' ? 'Profil' :
+        'Profile',
 
       addService:
         language === 'ES' ? 'Añadir servicio' :
         language === 'RU' ? 'Добавить услугу' :
         language === 'CZ' ? 'Přidat službu' :
         language === 'DE' ? 'Service hinzufügen' :
-        language === 'PL' ? 'Dodaj usługę' : 'Add service',
+        language === 'PL' ? 'Dodaj usługę' :
+        'Add service',
 
       addPromotion:
         language === 'ES' ? 'Añadir promoción' :
         language === 'RU' ? 'Добавить рекламу' :
         language === 'CZ' ? 'Přidat reklamu' :
         language === 'DE' ? 'Werbung hinzufügen' :
-        language === 'PL' ? 'Dodaj reklamę' : 'Add promotion',
+        language === 'PL' ? 'Dodaj reklamę' :
+        'Add promotion',
 
       chooseAdd:
         language === 'ES' ? '¿Qué quieres añadir?' :
         language === 'RU' ? 'Что вы хотите добавить?' :
         language === 'CZ' ? 'Co chcete přidat?' :
         language === 'DE' ? 'Was möchten Sie hinzufügen?' :
-        language === 'PL' ? 'Co chcesz dodać?' : 'What do you want to add?',
+        language === 'PL' ? 'Co chcesz dodać?' :
+        'What do you want to add?',
 
       chooseAddSubtitle:
         language === 'ES' ? 'Elige lo que quieres crear' :
         language === 'RU' ? 'Выберите, что хотите создать' :
         language === 'CZ' ? 'Vyberte, co chcete vytvořit' :
         language === 'DE' ? 'Wählen Sie aus, was Sie erstellen möchten' :
-        language === 'PL' ? 'Wybierz, co chcesz utworzyć' : 'Choose what you want to create',
+        language === 'PL' ? 'Wybierz, co chcesz utworzyć' :
+        'Choose what you want to create',
 
       serviceDescription:
         language === 'ES' ? 'Publica un nuevo servicio para clientes' :
         language === 'RU' ? 'Разместите новую услугу для клиентов' :
         language === 'CZ' ? 'Přidejte novou službu pro klienty' :
         language === 'DE' ? 'Neue Dienstleistung für Kunden hinzufügen' :
-        language === 'PL' ? 'Dodaj nową usługę dla klientów' : 'Add a new service for clients',
+        language === 'PL' ? 'Dodaj nową usługę dla klientów' :
+        'Add a new service for clients',
 
       promotionDescription:
         language === 'ES' ? 'Promociona tu servicio y consigue más visitas' :
         language === 'RU' ? 'Продвигайте услугу и получайте больше просмотров' :
         language === 'CZ' ? 'Propagujte službu a získejte více zobrazení' :
         language === 'DE' ? 'Bewerben Sie Ihre Dienstleistung und erhalten Sie mehr Aufrufe' :
-        language === 'PL' ? 'Promuj usługę i zdobądź więcej wyświetleń' : 'Promote your service and get more views',
+        language === 'PL' ? 'Promuj usługę i zdobądź więcej wyświetleń' :
+        'Promote your service and get more views',
 
       cancel:
         language === 'ES' ? 'Cancelar' :
         language === 'RU' ? 'Отмена' :
         language === 'CZ' ? 'Zrušit' :
         language === 'DE' ? 'Abbrechen' :
-        language === 'PL' ? 'Anuluj' : 'Cancel',
+        language === 'PL' ? 'Anuluj' :
+        'Cancel',
     };
   }, [language]);
 
