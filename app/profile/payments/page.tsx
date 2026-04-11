@@ -41,6 +41,8 @@ const paymentTexts = {
     payoutReady: 'Ready for payouts',
     verificationNeeded: 'Verification recommended',
     bankAvailable: 'Business and manual transfer available',
+    trusted: 'Trusted payments',
+    trustedSub: 'Your checkout methods are ready and protected',
   },
   ES: {
     title: 'Métodos de pago',
@@ -72,6 +74,8 @@ const paymentTexts = {
     payoutReady: 'Listo para pagos',
     verificationNeeded: 'Se recomienda verificación',
     bankAvailable: 'Transferencia manual y pagos para empresas disponibles',
+    trusted: 'Pagos seguros',
+    trustedSub: 'Tus métodos de pago están listos y protegidos',
   },
   RU: {
     title: 'Способы оплаты',
@@ -103,6 +107,8 @@ const paymentTexts = {
     payoutReady: 'Готово к выплатам',
     verificationNeeded: 'Рекомендуется верификация',
     bankAvailable: 'Доступны business и manual transfer',
+    trusted: 'Надёжные платежи',
+    trustedSub: 'Ваши способы оплаты готовы и защищены',
   },
   CZ: {
     title: 'Platební metody',
@@ -134,6 +140,8 @@ const paymentTexts = {
     payoutReady: 'Připraveno pro výplaty',
     verificationNeeded: 'Doporučena verifikace',
     bankAvailable: 'Dostupný ruční a firemní převod',
+    trusted: 'Důvěryhodné platby',
+    trustedSub: 'Vaše platební metody jsou připravené a chráněné',
   },
   DE: {
     title: 'Zahlungsmethoden',
@@ -165,6 +173,8 @@ const paymentTexts = {
     payoutReady: 'Bereit für Auszahlungen',
     verificationNeeded: 'Verifizierung empfohlen',
     bankAvailable: 'Manuelle und Business-Überweisung verfügbar',
+    trusted: 'Sichere Zahlungen',
+    trustedSub: 'Deine Zahlungsmethoden sind bereit und geschützt',
   },
   PL: {
     title: 'Metody płatności',
@@ -196,22 +206,16 @@ const paymentTexts = {
     payoutReady: 'Gotowe do wypłat',
     verificationNeeded: 'Zalecana weryfikacja',
     bankAvailable: 'Dostępny przelew ręczny i firmowy',
+    trusted: 'Bezpieczne płatności',
+    trustedSub: 'Twoje metody płatności są gotowe i chronione',
   },
 } as const;
 
 function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange' | 'neutral') {
-  if (kind === 'green') {
-    return { background: '#eef9f1', color: '#2fa35a' };
-  }
-  if (kind === 'blue') {
-    return { background: '#eef4ff', color: '#2f7cf6' };
-  }
-  if (kind === 'pink') {
-    return { background: '#fff1f7', color: '#ff4fa0' };
-  }
-  if (kind === 'orange') {
-    return { background: '#fff5e8', color: '#d68612' };
-  }
+  if (kind === 'green') return { background: '#eef9f1', color: '#2fa35a' };
+  if (kind === 'blue') return { background: '#eef4ff', color: '#2f7cf6' };
+  if (kind === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
+  if (kind === 'orange') return { background: '#fff5e8', color: '#d68612' };
   return { background: '#f4efe8', color: '#6d6258' };
 }
 
@@ -318,6 +322,70 @@ export default function PaymentsPage() {
         >
           <div
             style={{
+              fontSize: 20,
+              fontWeight: 900,
+              color: '#17130f',
+            }}
+          >
+            {text.trusted}
+          </div>
+          <div
+            style={{
+              marginTop: 6,
+              fontSize: 14,
+              lineHeight: 1.55,
+              color: '#7b7268',
+              fontWeight: 700,
+            }}
+          >
+            {text.trustedSub}
+          </div>
+
+          <div
+            style={{
+              marginTop: 14,
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 10,
+            }}
+          >
+            <span
+              style={{
+                ...badgeStyle('green'),
+                borderRadius: 999,
+                padding: '10px 12px',
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              {text.secure}
+            </span>
+            <span
+              style={{
+                ...badgeStyle('blue'),
+                borderRadius: 999,
+                padding: '10px 12px',
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              {text.instantCheckout}
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 16,
+            borderRadius: 32,
+            border: '1px solid #f0e3d7',
+            background: 'linear-gradient(180deg, #ffffff 0%, #fff9f5 100%)',
+            padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
               display: 'flex',
               justifyContent: 'space-between',
               gap: 14,
@@ -371,15 +439,17 @@ export default function PaymentsPage() {
                 key={card.id}
                 style={{
                   borderRadius: 26,
-                  background: index === 0
-                    ? 'linear-gradient(180deg, #2f241c 0%, #1f1712 100%)'
-                    : '#fff',
+                  background:
+                    index === 0
+                      ? 'linear-gradient(180deg, #2f241c 0%, #1f1712 100%)'
+                      : '#fff',
                   color: index === 0 ? '#fff' : '#17130f',
                   border: index === 0 ? 'none' : '1px solid #efe4d7',
                   padding: 16,
-                  boxShadow: index === 0
-                    ? '0 14px 28px rgba(31,23,18,0.18)'
-                    : '0 8px 22px rgba(44,23,10,0.04)',
+                  boxShadow:
+                    index === 0
+                      ? '0 14px 28px rgba(31,23,18,0.18)'
+                      : '0 8px 22px rgba(44,23,10,0.04)',
                 }}
               >
                 <div
@@ -468,7 +538,10 @@ export default function PaymentsPage() {
                     style={{
                       height: 46,
                       borderRadius: 16,
-                      border: index === 0 ? '1px solid rgba(255,255,255,0.12)' : '1px solid #efe4d7',
+                      border:
+                        index === 0
+                          ? '1px solid rgba(255,255,255,0.12)'
+                          : '1px solid #efe4d7',
                       background: index === 0 ? 'rgba(255,255,255,0.08)' : '#fcfaf6',
                       color: index === 0 ? '#fff' : '#17130f',
                       fontSize: 13,
@@ -484,7 +557,10 @@ export default function PaymentsPage() {
                     style={{
                       height: 46,
                       borderRadius: 16,
-                      border: index === 0 ? '1px solid rgba(255,255,255,0.12)' : '1px solid #efe4d7',
+                      border:
+                        index === 0
+                          ? '1px solid rgba(255,255,255,0.12)'
+                          : '1px solid #efe4d7',
                       background: index === 0 ? 'rgba(255,255,255,0.08)' : '#fcfaf6',
                       color: index === 0 ? '#fff' : '#17130f',
                       fontSize: 13,
@@ -500,7 +576,10 @@ export default function PaymentsPage() {
                     style={{
                       height: 46,
                       borderRadius: 16,
-                      border: index === 0 ? '1px solid rgba(255,255,255,0.12)' : '1px solid #f2d6d6',
+                      border:
+                        index === 0
+                          ? '1px solid rgba(255,255,255,0.12)'
+                          : '1px solid #f2d6d6',
                       background: index === 0 ? 'rgba(255,255,255,0.08)' : '#fff5f5',
                       color: index === 0 ? '#fff' : '#ef4444',
                       fontSize: 13,
@@ -533,137 +612,136 @@ export default function PaymentsPage() {
         <div
           style={{
             marginTop: 16,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
-            }}
-          >
-            {text.paypal}
-          </div>
-          <div
-            style={{
-              marginTop: 6,
-              fontSize: 14,
-              lineHeight: 1.55,
-              color: '#7b7268',
-              fontWeight: 700,
-            }}
-          >
-            {text.paypalHint}
-          </div>
-
-          <div
-            style={{
-              marginTop: 14,
-              borderRadius: 24,
-              background: '#fcfaf6',
-              border: '1px solid #efe4d7',
-              padding: 16,
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 12,
-                alignItems: 'center',
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    fontSize: 16,
-                    fontWeight: 900,
-                    color: '#17130f',
-                  }}
-                >
-                  {payments.paypalEmail}
-                </div>
-                <div
-                  style={{
-                    marginTop: 6,
-                    fontSize: 13,
-                    color: '#7b7268',
-                    fontWeight: 700,
-                  }}
-                >
-                  {text.lastUsed}: PayPal
-                </div>
-              </div>
-
-              <span
-                style={{
-                  ...badgeStyle('blue'),
-                  borderRadius: 999,
-                  padding: '8px 12px',
-                  fontSize: 12,
-                  fontWeight: 900,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {text.connected}
-              </span>
-            </div>
-
-            <div
-              style={{
-                marginTop: 12,
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-              }}
-            >
-              <button
-                type="button"
-                style={{
-                  height: 48,
-                  borderRadius: 16,
-                  border: '1px solid #efe4d7',
-                  background: '#fff',
-                  color: '#17130f',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.edit}
-              </button>
-
-              <button
-                type="button"
-                style={{
-                  height: 48,
-                  borderRadius: 16,
-                  border: '1px solid #efe4d7',
-                  background: '#fff',
-                  color: '#17130f',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.setPrimary}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: 16,
             display: 'grid',
             gap: 16,
           }}
         >
+          <div
+            style={{
+              borderRadius: 30,
+              border: '1px solid #efe4d7',
+              background: '#fff',
+              padding: 18,
+              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+              }}
+            >
+              {text.paypal}
+            </div>
+            <div
+              style={{
+                marginTop: 6,
+                fontSize: 14,
+                lineHeight: 1.55,
+                color: '#7b7268',
+                fontWeight: 700,
+              }}
+            >
+              {text.paypalHint}
+            </div>
+
+            <div
+              style={{
+                marginTop: 14,
+                borderRadius: 24,
+                background: '#fcfaf6',
+                border: '1px solid #efe4d7',
+                padding: 16,
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  alignItems: 'center',
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
+                    {payments.paypalEmail}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 13,
+                      color: '#7b7268',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {text.lastUsed}: PayPal
+                  </div>
+                </div>
+
+                <span
+                  style={{
+                    ...badgeStyle('blue'),
+                    borderRadius: 999,
+                    padding: '8px 12px',
+                    fontSize: 12,
+                    fontWeight: 900,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {text.connected}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 12,
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 10,
+                }}
+              >
+                <button
+                  type="button"
+                  style={{
+                    height: 48,
+                    borderRadius: 16,
+                    border: '1px solid #efe4d7',
+                    background: '#fff',
+                    color: '#17130f',
+                    fontSize: 14,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.edit}
+                </button>
+
+                <button
+                  type="button"
+                  style={{
+                    height: 48,
+                    borderRadius: 16,
+                    border: '1px solid #efe4d7',
+                    background: '#fff',
+                    color: '#17130f',
+                    fontSize: 14,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.setPrimary}
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div
             style={{
               borderRadius: 30,
