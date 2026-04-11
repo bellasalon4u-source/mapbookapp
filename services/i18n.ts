@@ -3,6 +3,7 @@ export const APP_LANGUAGES = ['EN', 'ES', 'RU', 'CZ', 'DE', 'PL'] as const;
 export type AppLanguage = (typeof APP_LANGUAGES)[number];
 
 const STORAGE_KEY = 'mapbook_language';
+export const LANGUAGE_CHANGE_EVENT = 'mapbook:language-change';
 
 export const translations = {
   EN: {
@@ -252,7 +253,48 @@ export function getSavedLanguage(): AppLanguage {
 
 export function saveLanguage(language: AppLanguage) {
   if (typeof window === 'undefined') return;
+
   window.localStorage.setItem(STORAGE_KEY, language);
+
+  window.dispatchEvent(
+    new CustomEvent(LANGUAGE_CHANGE_EVENT, {
+      detail: { language },
+    })
+  );
+}
+
+export function subscribeToLanguageChange(callback: (language: AppLanguage) => void) {
+  if (typeof window === 'undefined') {
+    return () => {};
+  }
+
+  const handleCustomLanguageChange = (event: Event) => {
+    const customEvent = event as CustomEvent<{ language?: AppLanguage }>;
+    const nextLanguage = customEvent.detail?.language;
+
+    if (nextLanguage && isAppLanguage(nextLanguage)) {
+      callback(nextLanguage);
+      return;
+    }
+
+    callback(getSavedLanguage());
+  };
+
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key !== STORAGE_KEY) return;
+    callback(getSavedLanguage());
+  };
+
+  window.addEventListener(LANGUAGE_CHANGE_EVENT, handleCustomLanguageChange as EventListener);
+  window.addEventListener('storage', handleStorage);
+
+  return () => {
+    window.removeEventListener(
+      LANGUAGE_CHANGE_EVENT,
+      handleCustomLanguageChange as EventListener
+    );
+    window.removeEventListener('storage', handleStorage);
+  };
 }
 
 export function t(language: AppLanguage) {
