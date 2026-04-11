@@ -193,7 +193,13 @@ const pageTexts: Record<
     price: string;
     pricePlaceholder: string;
     location: string;
-    locationPlaceholder: string;
+    locationHint: string;
+    city: string;
+    cityPlaceholder: string;
+    district: string;
+    districtPlaceholder: string;
+    addressDetails: string;
+    addressDetailsPlaceholder: string;
     hours: string;
     hoursPlaceholder: string;
     availableToday: string;
@@ -222,6 +228,8 @@ const pageTexts: Record<
     publishService: string;
     pleaseEnterServiceTitle: string;
     pleaseEnterPrice: string;
+    pleaseEnterCity: string;
+    pleaseEnterDistrict: string;
     servicePublishedSuccessfully: string;
   }
 > = {
@@ -244,8 +252,14 @@ const pageTexts: Record<
     subcategory: 'Subcategory',
     price: 'Price',
     pricePlaceholder: 'Enter price',
-    location: 'Location / area',
-    locationPlaceholder: 'Select location / area',
+    location: 'Location',
+    locationHint: 'Add a clearer structured location for clients',
+    city: 'City / town',
+    cityPlaceholder: 'Enter city or town',
+    district: 'District / area',
+    districtPlaceholder: 'Enter district or area',
+    addressDetails: 'Address details',
+    addressDetailsPlaceholder: 'Building, street, floor, studio number...',
     hours: 'Working hours',
     hoursPlaceholder: 'Select hours',
     availableToday: 'Available today',
@@ -274,6 +288,8 @@ const pageTexts: Record<
     publishService: 'Publish service',
     pleaseEnterServiceTitle: 'Please enter service title',
     pleaseEnterPrice: 'Please enter price',
+    pleaseEnterCity: 'Please enter city / town',
+    pleaseEnterDistrict: 'Please enter district / area',
     servicePublishedSuccessfully: 'Service published successfully',
   },
   RU: {
@@ -295,8 +311,14 @@ const pageTexts: Record<
     subcategory: 'Подкатегория',
     price: 'Цена',
     pricePlaceholder: 'Введите цену',
-    location: 'Локация / район',
-    locationPlaceholder: 'Выберите локацию / район',
+    location: 'Локация',
+    locationHint: 'Добавьте более понятную локацию для клиентов',
+    city: 'Город / населённый пункт',
+    cityPlaceholder: 'Введите город или населённый пункт',
+    district: 'Район / зона',
+    districtPlaceholder: 'Введите район или зону',
+    addressDetails: 'Подробный адрес',
+    addressDetailsPlaceholder: 'Дом, улица, этаж, номер студии...',
     hours: 'Часы работы',
     hoursPlaceholder: 'Выберите часы',
     availableToday: 'Доступно сегодня',
@@ -325,6 +347,8 @@ const pageTexts: Record<
     publishService: 'Опубликовать услугу',
     pleaseEnterServiceTitle: 'Введите название услуги',
     pleaseEnterPrice: 'Введите цену',
+    pleaseEnterCity: 'Введите город / населённый пункт',
+    pleaseEnterDistrict: 'Введите район / зону',
     servicePublishedSuccessfully: 'Услуга успешно опубликована',
   },
   ES: {
@@ -346,8 +370,14 @@ const pageTexts: Record<
     subcategory: 'Subcategoría',
     price: 'Precio',
     pricePlaceholder: 'Introduce el precio',
-    location: 'Ubicación / zona',
-    locationPlaceholder: 'Selecciona ubicación / zona',
+    location: 'Ubicación',
+    locationHint: 'Añade una ubicación más clara para los clientes',
+    city: 'Ciudad / localidad',
+    cityPlaceholder: 'Introduce ciudad o localidad',
+    district: 'Distrito / zona',
+    districtPlaceholder: 'Introduce distrito o zona',
+    addressDetails: 'Dirección detallada',
+    addressDetailsPlaceholder: 'Edificio, calle, piso, número de estudio...',
     hours: 'Horario',
     hoursPlaceholder: 'Selecciona horario',
     availableToday: 'Disponible hoy',
@@ -376,6 +406,8 @@ const pageTexts: Record<
     publishService: 'Publicar servicio',
     pleaseEnterServiceTitle: 'Introduce el título del servicio',
     pleaseEnterPrice: 'Introduce el precio',
+    pleaseEnterCity: 'Introduce ciudad / localidad',
+    pleaseEnterDistrict: 'Introduce distrito / zona',
     servicePublishedSuccessfully: 'Servicio publicado con éxito',
   },
   CZ: {
@@ -397,8 +429,14 @@ const pageTexts: Record<
     subcategory: 'Podkategorie',
     price: 'Cena',
     pricePlaceholder: 'Zadejte cenu',
-    location: 'Lokalita / oblast',
-    locationPlaceholder: 'Vyberte lokalitu / oblast',
+    location: 'Lokalita',
+    locationHint: 'Přidejte jasnější lokalitu pro klienty',
+    city: 'Město / obec',
+    cityPlaceholder: 'Zadejte město nebo obec',
+    district: 'Čtvrť / oblast',
+    districtPlaceholder: 'Zadejte čtvrť nebo oblast',
+    addressDetails: 'Podrobná adresa',
+    addressDetailsPlaceholder: 'Budova, ulice, patro, číslo studia...',
     hours: 'Pracovní doba',
     hoursPlaceholder: 'Vyberte hodiny',
     availableToday: 'Dostupné dnes',
@@ -427,6 +465,8 @@ const pageTexts: Record<
     publishService: 'Publikovat službu',
     pleaseEnterServiceTitle: 'Zadejte název služby',
     pleaseEnterPrice: 'Zadejte cenu',
+    pleaseEnterCity: 'Zadejte město / obec',
+    pleaseEnterDistrict: 'Zadejte čtvrť / oblast',
     servicePublishedSuccessfully: 'Služba byla úspěšně publikována',
   },
   DE: {
@@ -448,8 +488,14 @@ const pageTexts: Record<
     subcategory: 'Unterkategorie',
     price: 'Preis',
     pricePlaceholder: 'Preis eingeben',
-    location: 'Standort / Bereich',
-    locationPlaceholder: 'Standort / Bereich wählen',
+    location: 'Standort',
+    locationHint: 'Füge einen klareren Standort für Kunden hinzu',
+    city: 'Stadt / Ort',
+    cityPlaceholder: 'Stadt oder Ort eingeben',
+    district: 'Bezirk / Gebiet',
+    districtPlaceholder: 'Bezirk oder Gebiet eingeben',
+    addressDetails: 'Adressdetails',
+    addressDetailsPlaceholder: 'Gebäude, Straße, Etage, Studio-Nummer...',
     hours: 'Arbeitszeiten',
     hoursPlaceholder: 'Zeiten wählen',
     availableToday: 'Heute verfügbar',
@@ -478,6 +524,8 @@ const pageTexts: Record<
     publishService: 'Dienstleistung veröffentlichen',
     pleaseEnterServiceTitle: 'Bitte Titel der Dienstleistung eingeben',
     pleaseEnterPrice: 'Bitte Preis eingeben',
+    pleaseEnterCity: 'Bitte Stadt / Ort eingeben',
+    pleaseEnterDistrict: 'Bitte Bezirk / Gebiet eingeben',
     servicePublishedSuccessfully: 'Dienstleistung erfolgreich veröffentlicht',
   },
   PL: {
@@ -499,8 +547,14 @@ const pageTexts: Record<
     subcategory: 'Podkategoria',
     price: 'Cena',
     pricePlaceholder: 'Wpisz cenę',
-    location: 'Lokalizacja / obszar',
-    locationPlaceholder: 'Wybierz lokalizację / obszar',
+    location: 'Lokalizacja',
+    locationHint: 'Dodaj bardziej przejrzystą lokalizację dla klientów',
+    city: 'Miasto / miejscowość',
+    cityPlaceholder: 'Wpisz miasto lub miejscowość',
+    district: 'Dzielnica / obszar',
+    districtPlaceholder: 'Wpisz dzielnicę lub obszar',
+    addressDetails: 'Szczegóły adresu',
+    addressDetailsPlaceholder: 'Budynek, ulica, piętro, numer studia...',
     hours: 'Godziny pracy',
     hoursPlaceholder: 'Wybierz godziny',
     availableToday: 'Dostępne dziś',
@@ -529,6 +583,8 @@ const pageTexts: Record<
     publishService: 'Opublikuj usługę',
     pleaseEnterServiceTitle: 'Wpisz nazwę usługi',
     pleaseEnterPrice: 'Wpisz cenę',
+    pleaseEnterCity: 'Wpisz miasto / miejscowość',
+    pleaseEnterDistrict: 'Wpisz dzielnicę / obszar',
     servicePublishedSuccessfully: 'Usługa została opublikowana',
   },
 };
@@ -1064,7 +1120,9 @@ export default function AddServicePage() {
   const [category, setCategory] = useState('Beauty');
   const [subcategory, setSubcategory] = useState('Hair');
   const [price, setPrice] = useState('');
-  const [location, setLocation] = useState('');
+  const [city, setCity] = useState('');
+  const [district, setDistrict] = useState('');
+  const [addressDetails, setAddressDetails] = useState('');
   const [hours, setHours] = useState('');
   const [availableToday, setAvailableToday] = useState(true);
 
@@ -1201,6 +1259,10 @@ export default function AddServicePage() {
     return `${country.dial} ${value.number.trim()}`;
   };
 
+  const composedLocation = [city.trim(), district.trim(), addressDetails.trim()]
+    .filter(Boolean)
+    .join(', ');
+
   const handlePublish = () => {
     if (!title.trim()) {
       alert(text.pleaseEnterServiceTitle);
@@ -1209,6 +1271,16 @@ export default function AddServicePage() {
 
     if (!price.trim()) {
       alert(text.pleaseEnterPrice);
+      return;
+    }
+
+    if (!city.trim()) {
+      alert(text.pleaseEnterCity);
+      return;
+    }
+
+    if (!district.trim()) {
+      alert(text.pleaseEnterDistrict);
       return;
     }
 
@@ -1230,7 +1302,7 @@ export default function AddServicePage() {
       category,
       subcategory,
       price: price.trim(),
-      location: location.trim(),
+      location: composedLocation,
       hours: hours.trim(),
       availableToday,
       serviceModes,
@@ -1643,12 +1715,28 @@ export default function AddServicePage() {
                 boxSizing: 'border-box',
               }}
             />
+          </SectionCard>
+        </section>
 
-            <FieldLabel required>{text.location}</FieldLabel>
+        <section style={{ padding: '16px 16px 0' }}>
+          <SectionCard title={text.location} required>
+            <div
+              style={{
+                fontSize: 14,
+                color: '#7a8490',
+                marginBottom: 16,
+                fontWeight: 700,
+                lineHeight: 1.4,
+              }}
+            >
+              {text.locationHint}
+            </div>
+
+            <FieldLabel required>{text.city}</FieldLabel>
             <input
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder={text.locationPlaceholder}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder={text.cityPlaceholder}
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
@@ -1661,6 +1749,45 @@ export default function AddServicePage() {
               }}
             />
 
+            <FieldLabel required>{text.district}</FieldLabel>
+            <input
+              value={district}
+              onChange={(e) => setDistrict(e.target.value)}
+              placeholder={text.districtPlaceholder}
+              style={{
+                width: '100%',
+                border: '1px solid #e7e0d6',
+                borderRadius: 16,
+                padding: '16px 14px',
+                fontSize: 17,
+                outline: 'none',
+                marginBottom: 18,
+                boxSizing: 'border-box',
+              }}
+            />
+
+            <FieldLabel>{text.addressDetails}</FieldLabel>
+            <textarea
+              value={addressDetails}
+              onChange={(e) => setAddressDetails(e.target.value)}
+              placeholder={text.addressDetailsPlaceholder}
+              rows={3}
+              style={{
+                width: '100%',
+                border: '1px solid #e7e0d6',
+                borderRadius: 16,
+                padding: '16px 14px',
+                fontSize: 17,
+                outline: 'none',
+                resize: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </SectionCard>
+        </section>
+
+        <section style={{ padding: '16px 16px 0' }}>
+          <SectionCard title={text.hours} required>
             <FieldLabel required>{text.hours}</FieldLabel>
             <input
               value={hours}
