@@ -23,7 +23,6 @@ import {
   type PromotionItem,
 } from '../services/promotionsStore';
 import {
-  getAppRegionSettings,
   getEffectiveSearchLocation,
   subscribeToAppRegionSettings,
 } from '../services/appRegionStore';
@@ -494,25 +493,36 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    const syncRegion = () => {
-      const regionSettings = getAppRegionSettings();
-      setLanguage(regionSettings.language || getSavedLanguage());
+    const syncHomeState = () => {
+      const nextLanguage = getSavedLanguage();
       const effective = getEffectiveSearchLocation();
+
+      setLanguage(nextLanguage);
       setSearchLocation(effective);
       setLocationLabel(effective.label);
       setRegionVersion((prev) => prev + 1);
     };
 
-    syncRegion();
+    syncHomeState();
 
-    window.addEventListener('focus', syncRegion);
-    window.addEventListener('storage', syncRegion);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        syncHomeState();
+      }
+    };
 
-    const unsubscribe = subscribeToAppRegionSettings(syncRegion);
+    window.addEventListener('focus', syncHomeState);
+    window.addEventListener('pageshow', syncHomeState);
+    window.addEventListener('storage', syncHomeState);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    const unsubscribe = subscribeToAppRegionSettings(syncHomeState);
 
     return () => {
-      window.removeEventListener('focus', syncRegion);
-      window.removeEventListener('storage', syncRegion);
+      window.removeEventListener('focus', syncHomeState);
+      window.removeEventListener('pageshow', syncHomeState);
+      window.removeEventListener('storage', syncHomeState);
+      document.removeEventListener('visibilitychange', handleVisibility);
       unsubscribe();
     };
   }, []);
