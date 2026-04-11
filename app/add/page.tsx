@@ -1,10 +1,624 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { addListing } from '../../services/listingsStore';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../services/i18n';
 
-const categories = [
+const addServiceTexts = {
+  EN: {
+    title: 'Add your service',
+    uploadPhotos: 'Upload photos',
+    serviceTitle: 'Service title',
+    serviceTitlePlaceholder: 'Enter service title',
+    description: 'Description',
+    descriptionPlaceholder: 'Describe your service...',
+    category: 'Category',
+    subcategory: 'Subcategory',
+    price: 'Price',
+    pricePlaceholder: 'Enter price',
+    location: 'Location / area',
+    locationPlaceholder: 'Select location / area',
+    hours: 'Working hours',
+    hoursPlaceholder: 'Select hours',
+    availableToday: 'Available today',
+    availableTodayHint: 'This affects the map pin status',
+    atClient: 'At client',
+    atMyPlace: 'At my place',
+    online: 'Online',
+    paymentMethods: 'Payment methods',
+    paymentMethodsHint: 'How can clients pay?',
+    cash: 'Cash',
+    card: 'Card',
+    wallet: 'E-money',
+    contact: 'Contact',
+    phone: 'Phone',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    publish: 'Publish service',
+    enterServiceTitle: 'Please enter service title',
+    enterPrice: 'Please enter price',
+    success: 'Service published successfully',
+    categories: {
+      Beauty: 'Beauty',
+      Wellness: 'Wellness',
+      Home: 'Home',
+      Repairs: 'Repairs',
+      Tech: 'Tech',
+      Pets: 'Pets',
+      Auto: 'Auto',
+      Moving: 'Moving',
+      Activities: 'Activities',
+      Events: 'Events',
+      Creative: 'Creative',
+    },
+    subcategories: {
+      Hair: 'Hair',
+      Nails: 'Nails',
+      Brows: 'Brows',
+      Lashes: 'Lashes',
+      Makeup: 'Makeup',
+      Keratin: 'Keratin',
+      Massage: 'Massage',
+      Spa: 'Spa',
+      Therapy: 'Therapy',
+      Recovery: 'Recovery',
+      Yoga: 'Yoga',
+      Cleaning: 'Cleaning',
+      Handyman: 'Handyman',
+      Plumbing: 'Plumbing',
+      Electrical: 'Electrical',
+      'Furniture assembly': 'Furniture assembly',
+      'Appliance repair': 'Appliance repair',
+      'Phone repair': 'Phone repair',
+      'Laptop repair': 'Laptop repair',
+      'TV repair': 'TV repair',
+      'Shoe repair': 'Shoe repair',
+      Phone: 'Phone',
+      Laptop: 'Laptop',
+      Tablet: 'Tablet',
+      'Computer help': 'Computer help',
+      Setup: 'Setup',
+      Grooming: 'Grooming',
+      'Dog walking': 'Dog walking',
+      'Pet sitting': 'Pet sitting',
+      'Pet taxi': 'Pet taxi',
+      Training: 'Training',
+      'Car wash': 'Car wash',
+      Detailing: 'Detailing',
+      Diagnostics: 'Diagnostics',
+      'Tire service': 'Tire service',
+      Delivery: 'Delivery',
+      'Moving help': 'Moving help',
+      'Furniture transport': 'Furniture transport',
+      Courier: 'Courier',
+      Fitness: 'Fitness',
+      Dance: 'Dance',
+      Tutor: 'Tutor',
+      'Kids activities': 'Kids activities',
+      Decorator: 'Decorator',
+      Host: 'Host',
+      Photographer: 'Photographer',
+      'Makeup for events': 'Makeup for events',
+      Design: 'Design',
+      Photo: 'Photo',
+      Video: 'Video',
+      Editing: 'Editing',
+      'Content creation': 'Content creation',
+    },
+  },
+  ES: {
+    title: 'Añadir servicio',
+    uploadPhotos: 'Subir fotos',
+    serviceTitle: 'Título del servicio',
+    serviceTitlePlaceholder: 'Introduce el título del servicio',
+    description: 'Descripción',
+    descriptionPlaceholder: 'Describe tu servicio...',
+    category: 'Categoría',
+    subcategory: 'Subcategoría',
+    price: 'Precio',
+    pricePlaceholder: 'Introduce el precio',
+    location: 'Ubicación / zona',
+    locationPlaceholder: 'Selecciona ubicación / zona',
+    hours: 'Horario de trabajo',
+    hoursPlaceholder: 'Selecciona horario',
+    availableToday: 'Disponible hoy',
+    availableTodayHint: 'Esto afecta al estado del pin en el mapa',
+    atClient: 'En casa del cliente',
+    atMyPlace: 'En mi local',
+    online: 'Online',
+    paymentMethods: 'Métodos de pago',
+    paymentMethodsHint: '¿Cómo pueden pagar los clientes?',
+    cash: 'Efectivo',
+    card: 'Tarjeta',
+    wallet: 'Dinero electrónico',
+    contact: 'Contacto',
+    phone: 'Teléfono',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    publish: 'Publicar servicio',
+    enterServiceTitle: 'Por favor, introduce el título del servicio',
+    enterPrice: 'Por favor, introduce el precio',
+    success: 'Servicio publicado con éxito',
+    categories: {
+      Beauty: 'Belleza',
+      Wellness: 'Bienestar',
+      Home: 'Hogar',
+      Repairs: 'Reparaciones',
+      Tech: 'Tecnología',
+      Pets: 'Mascotas',
+      Auto: 'Auto',
+      Moving: 'Mudanza',
+      Activities: 'Actividades',
+      Events: 'Eventos',
+      Creative: 'Creativo',
+    },
+    subcategories: {
+      Hair: 'Cabello',
+      Nails: 'Uñas',
+      Brows: 'Cejas',
+      Lashes: 'Pestañas',
+      Makeup: 'Maquillaje',
+      Keratin: 'Keratina',
+      Massage: 'Masaje',
+      Spa: 'Spa',
+      Therapy: 'Terapia',
+      Recovery: 'Recuperación',
+      Yoga: 'Yoga',
+      Cleaning: 'Limpieza',
+      Handyman: 'Manitas',
+      Plumbing: 'Fontanería',
+      Electrical: 'Electricidad',
+      'Furniture assembly': 'Montaje de muebles',
+      'Appliance repair': 'Reparación de electrodomésticos',
+      'Phone repair': 'Reparación de teléfonos',
+      'Laptop repair': 'Reparación de portátiles',
+      'TV repair': 'Reparación de TV',
+      'Shoe repair': 'Reparación de calzado',
+      Phone: 'Teléfono',
+      Laptop: 'Portátil',
+      Tablet: 'Tablet',
+      'Computer help': 'Ayuda informática',
+      Setup: 'Configuración',
+      Grooming: 'Peluquería',
+      'Dog walking': 'Paseo de perros',
+      'Pet sitting': 'Cuidado de mascotas',
+      'Pet taxi': 'Taxi para mascotas',
+      Training: 'Entrenamiento',
+      'Car wash': 'Lavado de coches',
+      Detailing: 'Detailing',
+      Diagnostics: 'Diagnóstico',
+      'Tire service': 'Servicio de neumáticos',
+      Delivery: 'Entrega',
+      'Moving help': 'Ayuda con mudanza',
+      'Furniture transport': 'Transporte de muebles',
+      Courier: 'Mensajería',
+      Fitness: 'Fitness',
+      Dance: 'Baile',
+      Tutor: 'Tutor',
+      'Kids activities': 'Actividades infantiles',
+      Decorator: 'Decorador',
+      Host: 'Anfitrión',
+      Photographer: 'Fotógrafo',
+      'Makeup for events': 'Maquillaje para eventos',
+      Design: 'Diseño',
+      Photo: 'Foto',
+      Video: 'Vídeo',
+      Editing: 'Edición',
+      'Content creation': 'Creación de contenido',
+    },
+  },
+  RU: {
+    title: 'Добавить услугу',
+    uploadPhotos: 'Загрузить фото',
+    serviceTitle: 'Название услуги',
+    serviceTitlePlaceholder: 'Введите название услуги',
+    description: 'Описание',
+    descriptionPlaceholder: 'Опишите вашу услугу...',
+    category: 'Категория',
+    subcategory: 'Подкатегория',
+    price: 'Цена',
+    pricePlaceholder: 'Введите цену',
+    location: 'Локация / район',
+    locationPlaceholder: 'Выберите локацию / район',
+    hours: 'Часы работы',
+    hoursPlaceholder: 'Выберите часы',
+    availableToday: 'Доступно сегодня',
+    availableTodayHint: 'Это влияет на статус пина на карте',
+    atClient: 'У клиента',
+    atMyPlace: 'У меня',
+    online: 'Онлайн',
+    paymentMethods: 'Способы оплаты',
+    paymentMethodsHint: 'Как клиенты могут оплатить?',
+    cash: 'Наличные',
+    card: 'Карта',
+    wallet: 'Электронные деньги',
+    contact: 'Контакты',
+    phone: 'Телефон',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    publish: 'Опубликовать услугу',
+    enterServiceTitle: 'Пожалуйста, введите название услуги',
+    enterPrice: 'Пожалуйста, введите цену',
+    success: 'Услуга успешно опубликована',
+    categories: {
+      Beauty: 'Красота',
+      Wellness: 'Велнес',
+      Home: 'Дом',
+      Repairs: 'Ремонт',
+      Tech: 'Техника',
+      Pets: 'Питомцы',
+      Auto: 'Авто',
+      Moving: 'Переезд',
+      Activities: 'Активности',
+      Events: 'События',
+      Creative: 'Креатив',
+    },
+    subcategories: {
+      Hair: 'Волосы',
+      Nails: 'Ногти',
+      Brows: 'Брови',
+      Lashes: 'Ресницы',
+      Makeup: 'Макияж',
+      Keratin: 'Кератин',
+      Massage: 'Массаж',
+      Spa: 'Спа',
+      Therapy: 'Терапия',
+      Recovery: 'Восстановление',
+      Yoga: 'Йога',
+      Cleaning: 'Уборка',
+      Handyman: 'Мастер на час',
+      Plumbing: 'Сантехника',
+      Electrical: 'Электрика',
+      'Furniture assembly': 'Сборка мебели',
+      'Appliance repair': 'Ремонт техники',
+      'Phone repair': 'Ремонт телефонов',
+      'Laptop repair': 'Ремонт ноутбуков',
+      'TV repair': 'Ремонт телевизоров',
+      'Shoe repair': 'Ремонт обуви',
+      Phone: 'Телефон',
+      Laptop: 'Ноутбук',
+      Tablet: 'Планшет',
+      'Computer help': 'Помощь с компьютером',
+      Setup: 'Настройка',
+      Grooming: 'Груминг',
+      'Dog walking': 'Выгул собак',
+      'Pet sitting': 'Передержка',
+      'Pet taxi': 'Пет-такси',
+      Training: 'Тренировка',
+      'Car wash': 'Мойка авто',
+      Detailing: 'Детейлинг',
+      Diagnostics: 'Диагностика',
+      'Tire service': 'Шиномонтаж',
+      Delivery: 'Доставка',
+      'Moving help': 'Помощь с переездом',
+      'Furniture transport': 'Перевозка мебели',
+      Courier: 'Курьер',
+      Fitness: 'Фитнес',
+      Dance: 'Танцы',
+      Tutor: 'Репетитор',
+      'Kids activities': 'Детские активности',
+      Decorator: 'Декоратор',
+      Host: 'Ведущий',
+      Photographer: 'Фотограф',
+      'Makeup for events': 'Макияж для мероприятий',
+      Design: 'Дизайн',
+      Photo: 'Фото',
+      Video: 'Видео',
+      Editing: 'Монтаж',
+      'Content creation': 'Создание контента',
+    },
+  },
+  CZ: {
+    title: 'Přidat službu',
+    uploadPhotos: 'Nahrát fotky',
+    serviceTitle: 'Název služby',
+    serviceTitlePlaceholder: 'Zadejte název služby',
+    description: 'Popis',
+    descriptionPlaceholder: 'Popište svou službu...',
+    category: 'Kategorie',
+    subcategory: 'Podkategorie',
+    price: 'Cena',
+    pricePlaceholder: 'Zadejte cenu',
+    location: 'Lokalita / oblast',
+    locationPlaceholder: 'Vyberte lokalitu / oblast',
+    hours: 'Pracovní doba',
+    hoursPlaceholder: 'Vyberte hodiny',
+    availableToday: 'Dostupné dnes',
+    availableTodayHint: 'To ovlivňuje stav pinu na mapě',
+    atClient: 'U klienta',
+    atMyPlace: 'U mě',
+    online: 'Online',
+    paymentMethods: 'Platební metody',
+    paymentMethodsHint: 'Jak mohou klienti platit?',
+    cash: 'Hotovost',
+    card: 'Karta',
+    wallet: 'Elektronické peníze',
+    contact: 'Kontakt',
+    phone: 'Telefon',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    publish: 'Publikovat službu',
+    enterServiceTitle: 'Zadejte prosím název služby',
+    enterPrice: 'Zadejte prosím cenu',
+    success: 'Služba byla úspěšně publikována',
+    categories: {
+      Beauty: 'Krása',
+      Wellness: 'Wellness',
+      Home: 'Domov',
+      Repairs: 'Opravy',
+      Tech: 'Technika',
+      Pets: 'Mazlíčci',
+      Auto: 'Auto',
+      Moving: 'Stěhování',
+      Activities: 'Aktivity',
+      Events: 'Události',
+      Creative: 'Kreativa',
+    },
+    subcategories: {
+      Hair: 'Vlasy',
+      Nails: 'Nehty',
+      Brows: 'Obočí',
+      Lashes: 'Řasy',
+      Makeup: 'Make-up',
+      Keratin: 'Keratin',
+      Massage: 'Masáž',
+      Spa: 'Spa',
+      Therapy: 'Terapie',
+      Recovery: 'Regenerace',
+      Yoga: 'Jóga',
+      Cleaning: 'Úklid',
+      Handyman: 'Hodinový manžel',
+      Plumbing: 'Instalatérství',
+      Electrical: 'Elektro',
+      'Furniture assembly': 'Montáž nábytku',
+      'Appliance repair': 'Oprava spotřebičů',
+      'Phone repair': 'Oprava telefonu',
+      'Laptop repair': 'Oprava notebooku',
+      'TV repair': 'Oprava televize',
+      'Shoe repair': 'Oprava obuvi',
+      Phone: 'Telefon',
+      Laptop: 'Notebook',
+      Tablet: 'Tablet',
+      'Computer help': 'Pomoc s počítačem',
+      Setup: 'Nastavení',
+      Grooming: 'Grooming',
+      'Dog walking': 'Venčení psů',
+      'Pet sitting': 'Hlídání mazlíčků',
+      'Pet taxi': 'Pet taxi',
+      Training: 'Trénink',
+      'Car wash': 'Mytí auta',
+      Detailing: 'Detailing',
+      Diagnostics: 'Diagnostika',
+      'Tire service': 'Pneuservis',
+      Delivery: 'Doručení',
+      'Moving help': 'Pomoc se stěhováním',
+      'Furniture transport': 'Přeprava nábytku',
+      Courier: 'Kurýr',
+      Fitness: 'Fitness',
+      Dance: 'Tanec',
+      Tutor: 'Lektor',
+      'Kids activities': 'Dětské aktivity',
+      Decorator: 'Dekoratér',
+      Host: 'Moderátor',
+      Photographer: 'Fotograf',
+      'Makeup for events': 'Make-up na akce',
+      Design: 'Design',
+      Photo: 'Foto',
+      Video: 'Video',
+      Editing: 'Editace',
+      'Content creation': 'Tvorba obsahu',
+    },
+  },
+  DE: {
+    title: 'Service hinzufügen',
+    uploadPhotos: 'Fotos hochladen',
+    serviceTitle: 'Servicetitel',
+    serviceTitlePlaceholder: 'Servicetitel eingeben',
+    description: 'Beschreibung',
+    descriptionPlaceholder: 'Beschreibe deinen Service...',
+    category: 'Kategorie',
+    subcategory: 'Unterkategorie',
+    price: 'Preis',
+    pricePlaceholder: 'Preis eingeben',
+    location: 'Ort / Gebiet',
+    locationPlaceholder: 'Ort / Gebiet auswählen',
+    hours: 'Arbeitszeiten',
+    hoursPlaceholder: 'Zeiten auswählen',
+    availableToday: 'Heute verfügbar',
+    availableTodayHint: 'Dies beeinflusst den Pin-Status auf der Karte',
+    atClient: 'Beim Kunden',
+    atMyPlace: 'Bei mir',
+    online: 'Online',
+    paymentMethods: 'Zahlungsmethoden',
+    paymentMethodsHint: 'Wie können Kunden bezahlen?',
+    cash: 'Bar',
+    card: 'Karte',
+    wallet: 'E-Geld',
+    contact: 'Kontakt',
+    phone: 'Telefon',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    publish: 'Service veröffentlichen',
+    enterServiceTitle: 'Bitte Servicetitel eingeben',
+    enterPrice: 'Bitte Preis eingeben',
+    success: 'Service erfolgreich veröffentlicht',
+    categories: {
+      Beauty: 'Beauty',
+      Wellness: 'Wellness',
+      Home: 'Zuhause',
+      Repairs: 'Reparaturen',
+      Tech: 'Technik',
+      Pets: 'Haustiere',
+      Auto: 'Auto',
+      Moving: 'Umzug',
+      Activities: 'Aktivitäten',
+      Events: 'Events',
+      Creative: 'Kreativ',
+    },
+    subcategories: {
+      Hair: 'Haare',
+      Nails: 'Nägel',
+      Brows: 'Augenbrauen',
+      Lashes: 'Wimpern',
+      Makeup: 'Make-up',
+      Keratin: 'Keratin',
+      Massage: 'Massage',
+      Spa: 'Spa',
+      Therapy: 'Therapie',
+      Recovery: 'Erholung',
+      Yoga: 'Yoga',
+      Cleaning: 'Reinigung',
+      Handyman: 'Handwerker',
+      Plumbing: 'Sanitär',
+      Electrical: 'Elektrik',
+      'Furniture assembly': 'Möbelmontage',
+      'Appliance repair': 'Gerätereparatur',
+      'Phone repair': 'Handyreparatur',
+      'Laptop repair': 'Laptop-Reparatur',
+      'TV repair': 'TV-Reparatur',
+      'Shoe repair': 'Schuhreparatur',
+      Phone: 'Telefon',
+      Laptop: 'Laptop',
+      Tablet: 'Tablet',
+      'Computer help': 'Computerhilfe',
+      Setup: 'Einrichtung',
+      Grooming: 'Pflege',
+      'Dog walking': 'Hunde ausführen',
+      'Pet sitting': 'Tiersitting',
+      'Pet taxi': 'Tier-Taxi',
+      Training: 'Training',
+      'Car wash': 'Autowäsche',
+      Detailing: 'Detailing',
+      Diagnostics: 'Diagnose',
+      'Tire service': 'Reifenservice',
+      Delivery: 'Lieferung',
+      'Moving help': 'Umzugshilfe',
+      'Furniture transport': 'Möbeltransport',
+      Courier: 'Kurier',
+      Fitness: 'Fitness',
+      Dance: 'Tanz',
+      Tutor: 'Nachhilfe',
+      'Kids activities': 'Kinderaktivitäten',
+      Decorator: 'Dekorateur',
+      Host: 'Moderator',
+      Photographer: 'Fotograf',
+      'Makeup for events': 'Make-up für Events',
+      Design: 'Design',
+      Photo: 'Foto',
+      Video: 'Video',
+      Editing: 'Bearbeitung',
+      'Content creation': 'Content-Erstellung',
+    },
+  },
+  PL: {
+    title: 'Dodaj usługę',
+    uploadPhotos: 'Prześlij zdjęcia',
+    serviceTitle: 'Nazwa usługi',
+    serviceTitlePlaceholder: 'Wpisz nazwę usługi',
+    description: 'Opis',
+    descriptionPlaceholder: 'Opisz swoją usługę...',
+    category: 'Kategoria',
+    subcategory: 'Podkategoria',
+    price: 'Cena',
+    pricePlaceholder: 'Wpisz cenę',
+    location: 'Lokalizacja / obszar',
+    locationPlaceholder: 'Wybierz lokalizację / obszar',
+    hours: 'Godziny pracy',
+    hoursPlaceholder: 'Wybierz godziny',
+    availableToday: 'Dostępne dziś',
+    availableTodayHint: 'To wpływa na status pina na mapie',
+    atClient: 'U klienta',
+    atMyPlace: 'U mnie',
+    online: 'Online',
+    paymentMethods: 'Metody płatności',
+    paymentMethodsHint: 'Jak klienci mogą zapłacić?',
+    cash: 'Gotówka',
+    card: 'Karta',
+    wallet: 'Pieniądz elektroniczny',
+    contact: 'Kontakt',
+    phone: 'Telefon',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    publish: 'Opublikuj usługę',
+    enterServiceTitle: 'Wpisz nazwę usługi',
+    enterPrice: 'Wpisz cenę',
+    success: 'Usługa została opublikowana',
+    categories: {
+      Beauty: 'Uroda',
+      Wellness: 'Wellness',
+      Home: 'Dom',
+      Repairs: 'Naprawy',
+      Tech: 'Technika',
+      Pets: 'Zwierzęta',
+      Auto: 'Auto',
+      Moving: 'Przeprowadzka',
+      Activities: 'Aktywności',
+      Events: 'Wydarzenia',
+      Creative: 'Kreatywne',
+    },
+    subcategories: {
+      Hair: 'Włosy',
+      Nails: 'Paznokcie',
+      Brows: 'Brwi',
+      Lashes: 'Rzęsy',
+      Makeup: 'Makijaż',
+      Keratin: 'Keratyna',
+      Massage: 'Masaż',
+      Spa: 'Spa',
+      Therapy: 'Terapia',
+      Recovery: 'Regeneracja',
+      Yoga: 'Joga',
+      Cleaning: 'Sprzątanie',
+      Handyman: 'Złota rączka',
+      Plumbing: 'Hydraulika',
+      Electrical: 'Elektryka',
+      'Furniture assembly': 'Montaż mebli',
+      'Appliance repair': 'Naprawa sprzętu',
+      'Phone repair': 'Naprawa telefonu',
+      'Laptop repair': 'Naprawa laptopa',
+      'TV repair': 'Naprawa telewizora',
+      'Shoe repair': 'Naprawa butów',
+      Phone: 'Telefon',
+      Laptop: 'Laptop',
+      Tablet: 'Tablet',
+      'Computer help': 'Pomoc komputerowa',
+      Setup: 'Konfiguracja',
+      Grooming: 'Grooming',
+      'Dog walking': 'Wyprowadzanie psów',
+      'Pet sitting': 'Opieka nad zwierzętami',
+      'Pet taxi': 'Taxi dla zwierząt',
+      Training: 'Trening',
+      'Car wash': 'Myjnia',
+      Detailing: 'Detailing',
+      Diagnostics: 'Diagnostyka',
+      'Tire service': 'Serwis opon',
+      Delivery: 'Dostawa',
+      'Moving help': 'Pomoc przy przeprowadzce',
+      'Furniture transport': 'Transport mebli',
+      Courier: 'Kurier',
+      Fitness: 'Fitness',
+      Dance: 'Taniec',
+      Tutor: 'Korepetytor',
+      'Kids activities': 'Zajęcia dla dzieci',
+      Decorator: 'Dekorator',
+      Host: 'Prowadzący',
+      Photographer: 'Fotograf',
+      'Makeup for events': 'Makijaż na wydarzenia',
+      Design: 'Design',
+      Photo: 'Zdjęcie',
+      Video: 'Wideo',
+      Editing: 'Edycja',
+      'Content creation': 'Tworzenie treści',
+    },
+  },
+} as const;
+
+const categoryKeys = [
   'Beauty',
   'Wellness',
   'Home',
@@ -16,7 +630,7 @@ const categories = [
   'Activities',
   'Events',
   'Creative',
-];
+] as const;
 
 const subcategoriesByCategory: Record<string, string[]> = {
   Beauty: ['Hair', 'Nails', 'Brows', 'Lashes', 'Makeup', 'Keratin'],
@@ -34,6 +648,7 @@ const subcategoriesByCategory: Record<string, string[]> = {
 
 export default function AddServicePage() {
   const router = useRouter();
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -56,7 +671,29 @@ export default function AddServicePage() {
   const [whatsapp, setWhatsapp] = useState('');
   const [telegram, setTelegram] = useState('');
 
-  const subcategories = subcategoriesByCategory[category] || [];
+  useEffect(() => {
+    setLanguage(getSavedLanguage());
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    return () => {
+      unsubLanguage();
+    };
+  }, []);
+
+  const text = addServiceTexts[language] || addServiceTexts.EN;
+
+  const categories = categoryKeys.map((key) => ({
+    value: key,
+    label: text.categories[key],
+  }));
+
+  const subcategories = (subcategoriesByCategory[category] || []).map((key) => ({
+    value: key,
+    label: text.subcategories[key as keyof typeof text.subcategories] || key,
+  }));
 
   const handleCategoryChange = (value: string) => {
     setCategory(value);
@@ -66,12 +703,12 @@ export default function AddServicePage() {
 
   const handlePublish = () => {
     if (!title.trim()) {
-      alert('Please enter service title');
+      alert(text.enterServiceTitle);
       return;
     }
 
     if (!price.trim()) {
-      alert('Please enter price');
+      alert(text.enterPrice);
       return;
     }
 
@@ -106,7 +743,7 @@ export default function AddServicePage() {
       photos: [],
     });
 
-    alert('Service published successfully');
+    alert(text.success);
     router.push('/');
   };
 
@@ -144,6 +781,7 @@ export default function AddServicePage() {
               fontSize: 30,
               color: '#1f2430',
               lineHeight: 1,
+              cursor: 'pointer',
             }}
           >
             ✕
@@ -156,12 +794,13 @@ export default function AddServicePage() {
               color: '#1f2430',
             }}
           >
-            Add your service
+            {text.title}
           </div>
         </header>
 
         <section style={{ padding: '18px 16px 0' }}>
           <button
+            type="button"
             style={{
               width: '100%',
               border: '1px solid #dfe4de',
@@ -172,6 +811,7 @@ export default function AddServicePage() {
               alignItems: 'center',
               gap: 14,
               boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
+              cursor: 'pointer',
             }}
           >
             <div
@@ -197,7 +837,7 @@ export default function AddServicePage() {
                 color: '#2d7b3c',
               }}
             >
-              Upload photos
+              {text.uploadPhotos}
             </span>
           </button>
         </section>
@@ -220,12 +860,12 @@ export default function AddServicePage() {
                 marginBottom: 8,
               }}
             >
-              Service title
+              {text.serviceTitle}
             </label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter service title"
+              placeholder={text.serviceTitlePlaceholder}
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
@@ -246,12 +886,12 @@ export default function AddServicePage() {
                 marginBottom: 8,
               }}
             >
-              Description
+              {text.description}
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe your service..."
+              placeholder={text.descriptionPlaceholder}
               rows={4}
               style={{
                 width: '100%',
@@ -284,7 +924,7 @@ export default function AddServicePage() {
                 marginBottom: 14,
               }}
             >
-              Category
+              {text.category}
             </div>
 
             <select
@@ -302,8 +942,8 @@ export default function AddServicePage() {
               }}
             >
               {categories.map((item) => (
-                <option key={item} value={item}>
-                  {item}
+                <option key={item.value} value={item.value}>
+                  {item.label}
                 </option>
               ))}
             </select>
@@ -315,7 +955,7 @@ export default function AddServicePage() {
                 marginBottom: 14,
               }}
             >
-              Subcategory
+              {text.subcategory}
             </div>
 
             <select
@@ -332,8 +972,8 @@ export default function AddServicePage() {
               }}
             >
               {subcategories.map((item) => (
-                <option key={item} value={item}>
-                  {item}
+                <option key={item.value} value={item.value}>
+                  {item.label}
                 </option>
               ))}
             </select>
@@ -358,12 +998,12 @@ export default function AddServicePage() {
                 marginBottom: 8,
               }}
             >
-              Price
+              {text.price}
             </label>
             <input
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              placeholder="Enter price"
+              placeholder={text.pricePlaceholder}
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
@@ -384,12 +1024,12 @@ export default function AddServicePage() {
                 marginBottom: 8,
               }}
             >
-              Location / area
+              {text.location}
             </label>
             <input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Select location / area"
+              placeholder={text.locationPlaceholder}
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
@@ -410,12 +1050,12 @@ export default function AddServicePage() {
                 marginBottom: 8,
               }}
             >
-              Working hours
+              {text.hours}
             </label>
             <input
               value={hours}
               onChange={(e) => setHours(e.target.value)}
-              placeholder="Select hours"
+              placeholder={text.hoursPlaceholder}
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
@@ -454,7 +1094,7 @@ export default function AddServicePage() {
                     fontWeight: 800,
                   }}
                 >
-                  Available today
+                  {text.availableToday}
                 </div>
                 <div
                   style={{
@@ -463,7 +1103,7 @@ export default function AddServicePage() {
                     marginTop: 4,
                   }}
                 >
-                  This affects the map pin status
+                  {text.availableTodayHint}
                 </div>
               </div>
 
@@ -476,6 +1116,7 @@ export default function AddServicePage() {
                   border: 'none',
                   background: availableToday ? '#4f91f1' : '#d6dbe2',
                   position: 'relative',
+                  cursor: 'pointer',
                 }}
               >
                 <span
@@ -511,9 +1152,10 @@ export default function AddServicePage() {
                   padding: '13px 10px',
                   fontSize: 15,
                   fontWeight: 700,
+                  cursor: 'pointer',
                 }}
               >
-                At client
+                {text.atClient}
               </button>
 
               <button
@@ -526,9 +1168,10 @@ export default function AddServicePage() {
                   padding: '13px 10px',
                   fontSize: 15,
                   fontWeight: 700,
+                  cursor: 'pointer',
                 }}
               >
-                At my place
+                {text.atMyPlace}
               </button>
 
               <button
@@ -541,9 +1184,10 @@ export default function AddServicePage() {
                   padding: '13px 10px',
                   fontSize: 15,
                   fontWeight: 700,
+                  cursor: 'pointer',
                 }}
               >
-                Online
+                {text.online}
               </button>
             </div>
           </div>
@@ -566,7 +1210,7 @@ export default function AddServicePage() {
                 marginBottom: 6,
               }}
             >
-              Payment methods
+              {text.paymentMethods}
             </div>
 
             <div
@@ -576,7 +1220,7 @@ export default function AddServicePage() {
                 marginBottom: 16,
               }}
             >
-              How can clients pay?
+              {text.paymentMethodsHint}
             </div>
 
             <div
@@ -598,10 +1242,11 @@ export default function AddServicePage() {
                   fontSize: 16,
                   fontWeight: 700,
                   color: '#1f2430',
+                  cursor: 'pointer',
                 }}
               >
                 <span style={{ fontSize: 22 }}>💵</span>
-                <span style={{ flex: 1, textAlign: 'left' }}>Cash</span>
+                <span style={{ flex: 1, textAlign: 'left' }}>{text.cash}</span>
                 <span style={{ fontSize: 18 }}>{cash ? '☑' : '☐'}</span>
               </button>
 
@@ -618,10 +1263,11 @@ export default function AddServicePage() {
                   fontSize: 16,
                   fontWeight: 700,
                   color: '#1f2430',
+                  cursor: 'pointer',
                 }}
               >
                 <span style={{ fontSize: 22 }}>💳</span>
-                <span style={{ flex: 1, textAlign: 'left' }}>Card</span>
+                <span style={{ flex: 1, textAlign: 'left' }}>{text.card}</span>
                 <span style={{ fontSize: 18 }}>{card ? '☑' : '☐'}</span>
               </button>
 
@@ -638,10 +1284,11 @@ export default function AddServicePage() {
                   fontSize: 16,
                   fontWeight: 700,
                   color: '#1f2430',
+                  cursor: 'pointer',
                 }}
               >
                 <span style={{ fontSize: 22 }}>👛</span>
-                <span style={{ flex: 1, textAlign: 'left' }}>E-money</span>
+                <span style={{ flex: 1, textAlign: 'left' }}>{text.wallet}</span>
                 <span style={{ fontSize: 18 }}>{wallet ? '☑' : '☐'}</span>
               </button>
             </div>
@@ -665,13 +1312,13 @@ export default function AddServicePage() {
                 marginBottom: 14,
               }}
             >
-              Contact
+              {text.contact}
             </div>
 
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="Phone"
+              placeholder={text.phone}
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
@@ -687,7 +1334,7 @@ export default function AddServicePage() {
             <input
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
-              placeholder="WhatsApp"
+              placeholder={text.whatsapp}
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
@@ -703,7 +1350,7 @@ export default function AddServicePage() {
             <input
               value={telegram}
               onChange={(e) => setTelegram(e.target.value)}
-              placeholder="Telegram"
+              placeholder={text.telegram}
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
@@ -743,9 +1390,10 @@ export default function AddServicePage() {
               fontSize: 18,
               fontWeight: 800,
               boxShadow: '0 10px 24px rgba(31,139,145,0.24)',
+              cursor: 'pointer',
             }}
           >
-            Publish service
+            {text.publish}
           </button>
         </div>
       </div>
