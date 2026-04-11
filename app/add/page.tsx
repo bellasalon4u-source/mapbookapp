@@ -9,6 +9,26 @@ import {
   type AppLanguage,
 } from '../../services/i18n';
 
+const countries = [
+  { code: 'GB', dial: '+44', flag: '🇬🇧', name: 'United Kingdom' },
+  { code: 'CZ', dial: '+420', flag: '🇨🇿', name: 'Czech Republic' },
+  { code: 'DE', dial: '+49', flag: '🇩🇪', name: 'Germany' },
+  { code: 'ES', dial: '+34', flag: '🇪🇸', name: 'Spain' },
+  { code: 'PL', dial: '+48', flag: '🇵🇱', name: 'Poland' },
+  { code: 'UA', dial: '+380', flag: '🇺🇦', name: 'Ukraine' },
+  { code: 'US', dial: '+1', flag: '🇺🇸', name: 'United States' },
+  { code: 'FR', dial: '+33', flag: '🇫🇷', name: 'France' },
+  { code: 'IT', dial: '+39', flag: '🇮🇹', name: 'Italy' },
+  { code: 'NL', dial: '+31', flag: '🇳🇱', name: 'Netherlands' },
+] as const;
+
+type CountryItem = (typeof countries)[number];
+
+type PhoneContactValue = {
+  countryCode: string;
+  number: string;
+};
+
 const categoriesByLanguage: Record<
   AppLanguage,
   {
@@ -151,422 +171,6 @@ const subcategoriesByCategory: Record<
       { value: 'Keratin', label: 'Keratyna' },
     ],
   },
-  Wellness: {
-    EN: [
-      { value: 'Massage', label: 'Massage' },
-      { value: 'Spa', label: 'Spa' },
-      { value: 'Therapy', label: 'Therapy' },
-      { value: 'Recovery', label: 'Recovery' },
-      { value: 'Yoga', label: 'Yoga' },
-    ],
-    RU: [
-      { value: 'Massage', label: 'Массаж' },
-      { value: 'Spa', label: 'Спа' },
-      { value: 'Therapy', label: 'Терапия' },
-      { value: 'Recovery', label: 'Восстановление' },
-      { value: 'Yoga', label: 'Йога' },
-    ],
-    ES: [
-      { value: 'Massage', label: 'Masaje' },
-      { value: 'Spa', label: 'Spa' },
-      { value: 'Therapy', label: 'Terapia' },
-      { value: 'Recovery', label: 'Recuperación' },
-      { value: 'Yoga', label: 'Yoga' },
-    ],
-    CZ: [
-      { value: 'Massage', label: 'Masáž' },
-      { value: 'Spa', label: 'Spa' },
-      { value: 'Therapy', label: 'Terapie' },
-      { value: 'Recovery', label: 'Regenerace' },
-      { value: 'Yoga', label: 'Jóga' },
-    ],
-    DE: [
-      { value: 'Massage', label: 'Massage' },
-      { value: 'Spa', label: 'Spa' },
-      { value: 'Therapy', label: 'Therapie' },
-      { value: 'Recovery', label: 'Erholung' },
-      { value: 'Yoga', label: 'Yoga' },
-    ],
-    PL: [
-      { value: 'Massage', label: 'Masaż' },
-      { value: 'Spa', label: 'Spa' },
-      { value: 'Therapy', label: 'Terapia' },
-      { value: 'Recovery', label: 'Regeneracja' },
-      { value: 'Yoga', label: 'Joga' },
-    ],
-  },
-  Home: {
-    EN: [
-      { value: 'Cleaning', label: 'Cleaning' },
-      { value: 'Handyman', label: 'Handyman' },
-      { value: 'Plumbing', label: 'Plumbing' },
-      { value: 'Electrical', label: 'Electrical' },
-      { value: 'Furniture assembly', label: 'Furniture assembly' },
-    ],
-    RU: [
-      { value: 'Cleaning', label: 'Уборка' },
-      { value: 'Handyman', label: 'Мастер на час' },
-      { value: 'Plumbing', label: 'Сантехника' },
-      { value: 'Electrical', label: 'Электрика' },
-      { value: 'Furniture assembly', label: 'Сборка мебели' },
-    ],
-    ES: [
-      { value: 'Cleaning', label: 'Limpieza' },
-      { value: 'Handyman', label: 'Manitas' },
-      { value: 'Plumbing', label: 'Fontanería' },
-      { value: 'Electrical', label: 'Electricidad' },
-      { value: 'Furniture assembly', label: 'Montaje de muebles' },
-    ],
-    CZ: [
-      { value: 'Cleaning', label: 'Úklid' },
-      { value: 'Handyman', label: 'Hodinový manžel' },
-      { value: 'Plumbing', label: 'Instalatérství' },
-      { value: 'Electrical', label: 'Elektroinstalace' },
-      { value: 'Furniture assembly', label: 'Montáž nábytku' },
-    ],
-    DE: [
-      { value: 'Cleaning', label: 'Reinigung' },
-      { value: 'Handyman', label: 'Handwerker' },
-      { value: 'Plumbing', label: 'Sanitär' },
-      { value: 'Electrical', label: 'Elektrik' },
-      { value: 'Furniture assembly', label: 'Möbelmontage' },
-    ],
-    PL: [
-      { value: 'Cleaning', label: 'Sprzątanie' },
-      { value: 'Handyman', label: 'Złota rączka' },
-      { value: 'Plumbing', label: 'Hydraulika' },
-      { value: 'Electrical', label: 'Elektryka' },
-      { value: 'Furniture assembly', label: 'Montaż mebli' },
-    ],
-  },
-  Repairs: {
-    EN: [
-      { value: 'Appliance repair', label: 'Appliance repair' },
-      { value: 'Phone repair', label: 'Phone repair' },
-      { value: 'Laptop repair', label: 'Laptop repair' },
-      { value: 'TV repair', label: 'TV repair' },
-      { value: 'Shoe repair', label: 'Shoe repair' },
-    ],
-    RU: [
-      { value: 'Appliance repair', label: 'Ремонт техники' },
-      { value: 'Phone repair', label: 'Ремонт телефона' },
-      { value: 'Laptop repair', label: 'Ремонт ноутбука' },
-      { value: 'TV repair', label: 'Ремонт ТВ' },
-      { value: 'Shoe repair', label: 'Ремонт обуви' },
-    ],
-    ES: [
-      { value: 'Appliance repair', label: 'Reparación de electrodomésticos' },
-      { value: 'Phone repair', label: 'Reparación de teléfono' },
-      { value: 'Laptop repair', label: 'Reparación de portátil' },
-      { value: 'TV repair', label: 'Reparación de TV' },
-      { value: 'Shoe repair', label: 'Reparación de calzado' },
-    ],
-    CZ: [
-      { value: 'Appliance repair', label: 'Oprava spotřebičů' },
-      { value: 'Phone repair', label: 'Oprava telefonu' },
-      { value: 'Laptop repair', label: 'Oprava notebooku' },
-      { value: 'TV repair', label: 'Oprava TV' },
-      { value: 'Shoe repair', label: 'Oprava obuvi' },
-    ],
-    DE: [
-      { value: 'Appliance repair', label: 'Gerätereparatur' },
-      { value: 'Phone repair', label: 'Handyreparatur' },
-      { value: 'Laptop repair', label: 'Laptop-Reparatur' },
-      { value: 'TV repair', label: 'TV-Reparatur' },
-      { value: 'Shoe repair', label: 'Schuhreparatur' },
-    ],
-    PL: [
-      { value: 'Appliance repair', label: 'Naprawa sprzętu' },
-      { value: 'Phone repair', label: 'Naprawa telefonu' },
-      { value: 'Laptop repair', label: 'Naprawa laptopa' },
-      { value: 'TV repair', label: 'Naprawa TV' },
-      { value: 'Shoe repair', label: 'Naprawa obuwia' },
-    ],
-  },
-  Tech: {
-    EN: [
-      { value: 'Phone', label: 'Phone' },
-      { value: 'Laptop', label: 'Laptop' },
-      { value: 'Tablet', label: 'Tablet' },
-      { value: 'Computer help', label: 'Computer help' },
-      { value: 'Setup', label: 'Setup' },
-    ],
-    RU: [
-      { value: 'Phone', label: 'Телефон' },
-      { value: 'Laptop', label: 'Ноутбук' },
-      { value: 'Tablet', label: 'Планшет' },
-      { value: 'Computer help', label: 'Помощь с компьютером' },
-      { value: 'Setup', label: 'Настройка' },
-    ],
-    ES: [
-      { value: 'Phone', label: 'Teléfono' },
-      { value: 'Laptop', label: 'Portátil' },
-      { value: 'Tablet', label: 'Tablet' },
-      { value: 'Computer help', label: 'Ayuda con ordenador' },
-      { value: 'Setup', label: 'Configuración' },
-    ],
-    CZ: [
-      { value: 'Phone', label: 'Telefon' },
-      { value: 'Laptop', label: 'Notebook' },
-      { value: 'Tablet', label: 'Tablet' },
-      { value: 'Computer help', label: 'Pomoc s počítačem' },
-      { value: 'Setup', label: 'Nastavení' },
-    ],
-    DE: [
-      { value: 'Phone', label: 'Telefon' },
-      { value: 'Laptop', label: 'Laptop' },
-      { value: 'Tablet', label: 'Tablet' },
-      { value: 'Computer help', label: 'Computerhilfe' },
-      { value: 'Setup', label: 'Einrichtung' },
-    ],
-    PL: [
-      { value: 'Phone', label: 'Telefon' },
-      { value: 'Laptop', label: 'Laptop' },
-      { value: 'Tablet', label: 'Tablet' },
-      { value: 'Computer help', label: 'Pomoc komputerowa' },
-      { value: 'Setup', label: 'Konfiguracja' },
-    ],
-  },
-  Pets: {
-    EN: [
-      { value: 'Grooming', label: 'Grooming' },
-      { value: 'Dog walking', label: 'Dog walking' },
-      { value: 'Pet sitting', label: 'Pet sitting' },
-      { value: 'Pet taxi', label: 'Pet taxi' },
-      { value: 'Training', label: 'Training' },
-    ],
-    RU: [
-      { value: 'Grooming', label: 'Груминг' },
-      { value: 'Dog walking', label: 'Выгул собак' },
-      { value: 'Pet sitting', label: 'Передержка' },
-      { value: 'Pet taxi', label: 'Пет-такси' },
-      { value: 'Training', label: 'Дрессировка' },
-    ],
-    ES: [
-      { value: 'Grooming', label: 'Peluquería' },
-      { value: 'Dog walking', label: 'Paseo de perros' },
-      { value: 'Pet sitting', label: 'Cuidado de mascotas' },
-      { value: 'Pet taxi', label: 'Taxi para mascotas' },
-      { value: 'Training', label: 'Entrenamiento' },
-    ],
-    CZ: [
-      { value: 'Grooming', label: 'Grooming' },
-      { value: 'Dog walking', label: 'Venčení psů' },
-      { value: 'Pet sitting', label: 'Hlídání mazlíčků' },
-      { value: 'Pet taxi', label: 'Pet taxi' },
-      { value: 'Training', label: 'Trénink' },
-    ],
-    DE: [
-      { value: 'Grooming', label: 'Grooming' },
-      { value: 'Dog walking', label: 'Hundespaziergang' },
-      { value: 'Pet sitting', label: 'Tiersitting' },
-      { value: 'Pet taxi', label: 'Tier-Taxi' },
-      { value: 'Training', label: 'Training' },
-    ],
-    PL: [
-      { value: 'Grooming', label: 'Grooming' },
-      { value: 'Dog walking', label: 'Wyprowadzanie psów' },
-      { value: 'Pet sitting', label: 'Opieka nad zwierzętami' },
-      { value: 'Pet taxi', label: 'Taxi dla zwierząt' },
-      { value: 'Training', label: 'Trening' },
-    ],
-  },
-  Auto: {
-    EN: [
-      { value: 'Car wash', label: 'Car wash' },
-      { value: 'Detailing', label: 'Detailing' },
-      { value: 'Diagnostics', label: 'Diagnostics' },
-      { value: 'Tire service', label: 'Tire service' },
-    ],
-    RU: [
-      { value: 'Car wash', label: 'Мойка авто' },
-      { value: 'Detailing', label: 'Детейлинг' },
-      { value: 'Diagnostics', label: 'Диагностика' },
-      { value: 'Tire service', label: 'Шиномонтаж' },
-    ],
-    ES: [
-      { value: 'Car wash', label: 'Lavado de coche' },
-      { value: 'Detailing', label: 'Detailing' },
-      { value: 'Diagnostics', label: 'Diagnóstico' },
-      { value: 'Tire service', label: 'Servicio de neumáticos' },
-    ],
-    CZ: [
-      { value: 'Car wash', label: 'Mytí auta' },
-      { value: 'Detailing', label: 'Detailing' },
-      { value: 'Diagnostics', label: 'Diagnostika' },
-      { value: 'Tire service', label: 'Pneuservis' },
-    ],
-    DE: [
-      { value: 'Car wash', label: 'Autowäsche' },
-      { value: 'Detailing', label: 'Detailing' },
-      { value: 'Diagnostics', label: 'Diagnose' },
-      { value: 'Tire service', label: 'Reifenservice' },
-    ],
-    PL: [
-      { value: 'Car wash', label: 'Myjnia' },
-      { value: 'Detailing', label: 'Detailing' },
-      { value: 'Diagnostics', label: 'Diagnostyka' },
-      { value: 'Tire service', label: 'Serwis opon' },
-    ],
-  },
-  Moving: {
-    EN: [
-      { value: 'Delivery', label: 'Delivery' },
-      { value: 'Moving help', label: 'Moving help' },
-      { value: 'Furniture transport', label: 'Furniture transport' },
-      { value: 'Courier', label: 'Courier' },
-    ],
-    RU: [
-      { value: 'Delivery', label: 'Доставка' },
-      { value: 'Moving help', label: 'Помощь с переездом' },
-      { value: 'Furniture transport', label: 'Перевозка мебели' },
-      { value: 'Courier', label: 'Курьер' },
-    ],
-    ES: [
-      { value: 'Delivery', label: 'Entrega' },
-      { value: 'Moving help', label: 'Ayuda con mudanza' },
-      { value: 'Furniture transport', label: 'Transporte de muebles' },
-      { value: 'Courier', label: 'Mensajero' },
-    ],
-    CZ: [
-      { value: 'Delivery', label: 'Doručení' },
-      { value: 'Moving help', label: 'Pomoc se stěhováním' },
-      { value: 'Furniture transport', label: 'Převoz nábytku' },
-      { value: 'Courier', label: 'Kurýr' },
-    ],
-    DE: [
-      { value: 'Delivery', label: 'Lieferung' },
-      { value: 'Moving help', label: 'Umzugshilfe' },
-      { value: 'Furniture transport', label: 'Möbeltransport' },
-      { value: 'Courier', label: 'Kurier' },
-    ],
-    PL: [
-      { value: 'Delivery', label: 'Dostawa' },
-      { value: 'Moving help', label: 'Pomoc przy przeprowadzce' },
-      { value: 'Furniture transport', label: 'Transport mebli' },
-      { value: 'Courier', label: 'Kurier' },
-    ],
-  },
-  Activities: {
-    EN: [
-      { value: 'Fitness', label: 'Fitness' },
-      { value: 'Dance', label: 'Dance' },
-      { value: 'Tutor', label: 'Tutor' },
-      { value: 'Kids activities', label: 'Kids activities' },
-    ],
-    RU: [
-      { value: 'Fitness', label: 'Фитнес' },
-      { value: 'Dance', label: 'Танцы' },
-      { value: 'Tutor', label: 'Репетитор' },
-      { value: 'Kids activities', label: 'Детские активности' },
-    ],
-    ES: [
-      { value: 'Fitness', label: 'Fitness' },
-      { value: 'Dance', label: 'Baile' },
-      { value: 'Tutor', label: 'Tutor' },
-      { value: 'Kids activities', label: 'Actividades para niños' },
-    ],
-    CZ: [
-      { value: 'Fitness', label: 'Fitness' },
-      { value: 'Dance', label: 'Tanec' },
-      { value: 'Tutor', label: 'Lektor' },
-      { value: 'Kids activities', label: 'Dětské aktivity' },
-    ],
-    DE: [
-      { value: 'Fitness', label: 'Fitness' },
-      { value: 'Dance', label: 'Tanz' },
-      { value: 'Tutor', label: 'Tutor' },
-      { value: 'Kids activities', label: 'Kinderaktivitäten' },
-    ],
-    PL: [
-      { value: 'Fitness', label: 'Fitness' },
-      { value: 'Dance', label: 'Taniec' },
-      { value: 'Tutor', label: 'Korepetytor' },
-      { value: 'Kids activities', label: 'Aktywności dla dzieci' },
-    ],
-  },
-  Events: {
-    EN: [
-      { value: 'Decorator', label: 'Decorator' },
-      { value: 'Host', label: 'Host' },
-      { value: 'Photographer', label: 'Photographer' },
-      { value: 'Makeup for events', label: 'Makeup for events' },
-    ],
-    RU: [
-      { value: 'Decorator', label: 'Декоратор' },
-      { value: 'Host', label: 'Ведущий' },
-      { value: 'Photographer', label: 'Фотограф' },
-      { value: 'Makeup for events', label: 'Макияж для мероприятий' },
-    ],
-    ES: [
-      { value: 'Decorator', label: 'Decorador' },
-      { value: 'Host', label: 'Anfitrión' },
-      { value: 'Photographer', label: 'Fotógrafo' },
-      { value: 'Makeup for events', label: 'Maquillaje para eventos' },
-    ],
-    CZ: [
-      { value: 'Decorator', label: 'Dekoratér' },
-      { value: 'Host', label: 'Moderátor' },
-      { value: 'Photographer', label: 'Fotograf' },
-      { value: 'Makeup for events', label: 'Make-up na akce' },
-    ],
-    DE: [
-      { value: 'Decorator', label: 'Dekorateur' },
-      { value: 'Host', label: 'Moderator' },
-      { value: 'Photographer', label: 'Fotograf' },
-      { value: 'Makeup for events', label: 'Make-up für Events' },
-    ],
-    PL: [
-      { value: 'Decorator', label: 'Dekorator' },
-      { value: 'Host', label: 'Prowadzący' },
-      { value: 'Photographer', label: 'Fotograf' },
-      { value: 'Makeup for events', label: 'Makijaż na wydarzenia' },
-    ],
-  },
-  Creative: {
-    EN: [
-      { value: 'Design', label: 'Design' },
-      { value: 'Photo', label: 'Photo' },
-      { value: 'Video', label: 'Video' },
-      { value: 'Editing', label: 'Editing' },
-      { value: 'Content creation', label: 'Content creation' },
-    ],
-    RU: [
-      { value: 'Design', label: 'Дизайн' },
-      { value: 'Photo', label: 'Фото' },
-      { value: 'Video', label: 'Видео' },
-      { value: 'Editing', label: 'Монтаж' },
-      { value: 'Content creation', label: 'Создание контента' },
-    ],
-    ES: [
-      { value: 'Design', label: 'Diseño' },
-      { value: 'Photo', label: 'Foto' },
-      { value: 'Video', label: 'Vídeo' },
-      { value: 'Editing', label: 'Edición' },
-      { value: 'Content creation', label: 'Creación de contenido' },
-    ],
-    CZ: [
-      { value: 'Design', label: 'Design' },
-      { value: 'Photo', label: 'Foto' },
-      { value: 'Video', label: 'Video' },
-      { value: 'Editing', label: 'Editace' },
-      { value: 'Content creation', label: 'Tvorba obsahu' },
-    ],
-    DE: [
-      { value: 'Design', label: 'Design' },
-      { value: 'Photo', label: 'Foto' },
-      { value: 'Video', label: 'Video' },
-      { value: 'Editing', label: 'Bearbeitung' },
-      { value: 'Content creation', label: 'Content-Erstellung' },
-    ],
-    PL: [
-      { value: 'Design', label: 'Design' },
-      { value: 'Photo', label: 'Zdjęcia' },
-      { value: 'Video', label: 'Wideo' },
-      { value: 'Editing', label: 'Edycja' },
-      { value: 'Content creation', label: 'Tworzenie treści' },
-    ],
-  },
 };
 
 const pageTexts: Record<
@@ -613,6 +217,9 @@ const pageTexts: Record<
     instagram: string;
     website: string;
     email: string;
+    chooseCountry: string;
+    searchCountry: string;
+    phoneNumber: string;
     publishService: string;
     pleaseEnterServiceTitle: string;
     pleaseEnterPrice: string;
@@ -661,6 +268,9 @@ const pageTexts: Record<
     instagram: 'Instagram',
     website: 'Website',
     email: 'Email',
+    chooseCountry: 'Choose country',
+    searchCountry: 'Search country or code',
+    phoneNumber: 'Phone number',
     publishService: 'Publish service',
     pleaseEnterServiceTitle: 'Please enter service title',
     pleaseEnterPrice: 'Please enter price',
@@ -708,6 +318,9 @@ const pageTexts: Record<
     instagram: 'Instagram',
     website: 'Сайт',
     email: 'Email',
+    chooseCountry: 'Выберите страну',
+    searchCountry: 'Поиск страны или кода',
+    phoneNumber: 'Номер телефона',
     publishService: 'Опубликовать услугу',
     pleaseEnterServiceTitle: 'Введите название услуги',
     pleaseEnterPrice: 'Введите цену',
@@ -755,6 +368,9 @@ const pageTexts: Record<
     instagram: 'Instagram',
     website: 'Sitio web',
     email: 'Email',
+    chooseCountry: 'Elegir país',
+    searchCountry: 'Buscar país o código',
+    phoneNumber: 'Número de teléfono',
     publishService: 'Publicar servicio',
     pleaseEnterServiceTitle: 'Introduce el título del servicio',
     pleaseEnterPrice: 'Introduce el precio',
@@ -802,6 +418,9 @@ const pageTexts: Record<
     instagram: 'Instagram',
     website: 'Web',
     email: 'Email',
+    chooseCountry: 'Vyberte zemi',
+    searchCountry: 'Hledat zemi nebo kód',
+    phoneNumber: 'Telefonní číslo',
     publishService: 'Publikovat službu',
     pleaseEnterServiceTitle: 'Zadejte název služby',
     pleaseEnterPrice: 'Zadejte cenu',
@@ -849,6 +468,9 @@ const pageTexts: Record<
     instagram: 'Instagram',
     website: 'Website',
     email: 'E-Mail',
+    chooseCountry: 'Land wählen',
+    searchCountry: 'Land oder Code suchen',
+    phoneNumber: 'Telefonnummer',
     publishService: 'Dienstleistung veröffentlichen',
     pleaseEnterServiceTitle: 'Bitte Titel der Dienstleistung eingeben',
     pleaseEnterPrice: 'Bitte Preis eingeben',
@@ -896,6 +518,9 @@ const pageTexts: Record<
     instagram: 'Instagram',
     website: 'Strona internetowa',
     email: 'Email',
+    chooseCountry: 'Wybierz kraj',
+    searchCountry: 'Szukaj kraju lub kodu',
+    phoneNumber: 'Numer telefonu',
     publishService: 'Opublikuj usługę',
     pleaseEnterServiceTitle: 'Wpisz nazwę usługi',
     pleaseEnterPrice: 'Wpisz cenę',
@@ -1087,6 +712,265 @@ function ContactInput({
   );
 }
 
+function PhoneChannelInput({
+  icon,
+  label,
+  value,
+  onChange,
+  text,
+}: {
+  icon: string;
+  label: string;
+  value: PhoneContactValue;
+  onChange: (next: PhoneContactValue) => void;
+  text: {
+    chooseCountry: string;
+    searchCountry: string;
+    phoneNumber: string;
+  };
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const selectedCountry =
+    countries.find((item) => item.code === value.countryCode) || countries[0];
+
+  const filteredCountries = countries.filter((item) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      item.name.toLowerCase().includes(q) ||
+      item.dial.toLowerCase().includes(q) ||
+      item.code.toLowerCase().includes(q)
+    );
+  });
+
+  return (
+    <div
+      style={{
+        border: '1px solid #e7e0d6',
+        borderRadius: 18,
+        background: '#fff',
+        padding: 14,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          marginBottom: 10,
+        }}
+      >
+        <div
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 12,
+            background: '#f7f5f1',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 20,
+            flexShrink: 0,
+          }}
+        >
+          {icon}
+        </div>
+
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 800,
+            color: '#1f2430',
+          }}
+        >
+          {label}
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '130px 1fr',
+          gap: 10,
+        }}
+      >
+        <div style={{ position: 'relative' }}>
+          <button
+            type="button"
+            onClick={() => setOpen((prev) => !prev)}
+            style={{
+              width: '100%',
+              height: 50,
+              border: '1px solid #ece5da',
+              borderRadius: 14,
+              background: '#fcfbf9',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 8,
+              padding: '0 12px',
+              cursor: 'pointer',
+              color: '#1f2430',
+              fontSize: 15,
+              fontWeight: 800,
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span>{selectedCountry.flag}</span>
+              <span>{selectedCountry.dial}</span>
+            </span>
+            <span>▾</span>
+          </button>
+
+          {open ? (
+            <div
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 'calc(100% + 8px)',
+                width: 280,
+                maxWidth: 'calc(100vw - 40px)',
+                background: '#fff',
+                border: '1px solid #e7e0d6',
+                borderRadius: 18,
+                boxShadow: '0 12px 28px rgba(0,0,0,0.12)',
+                padding: 12,
+                zIndex: 40,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: '#7a8490',
+                  marginBottom: 8,
+                }}
+              >
+                {text.chooseCountry}
+              </div>
+
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={text.searchCountry}
+                style={{
+                  width: '100%',
+                  border: '1px solid #ece5da',
+                  borderRadius: 12,
+                  padding: '12px 10px',
+                  fontSize: 14,
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  marginBottom: 10,
+                }}
+              />
+
+              <div
+                style={{
+                  maxHeight: 220,
+                  overflowY: 'auto',
+                  display: 'grid',
+                  gap: 6,
+                }}
+              >
+                {filteredCountries.map((item) => (
+                  <button
+                    key={item.code}
+                    type="button"
+                    onClick={() => {
+                      onChange({
+                        ...value,
+                        countryCode: item.code,
+                      });
+                      setOpen(false);
+                      setSearch('');
+                    }}
+                    style={{
+                      border: '1px solid #f0e9de',
+                      background: '#fff',
+                      borderRadius: 12,
+                      padding: '10px 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 10,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        minWidth: 0,
+                      }}
+                    >
+                      <span>{item.flag}</span>
+                      <span
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: '#1f2430',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {item.name}
+                      </span>
+                    </span>
+
+                    <span
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 800,
+                        color: '#5f6b77',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {item.dial}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <input
+          value={value.number}
+          onChange={(e) =>
+            onChange({
+              ...value,
+              number: e.target.value,
+            })
+          }
+          placeholder={text.phoneNumber}
+          inputMode="tel"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          style={{
+            width: '100%',
+            border: '1px solid #ece5da',
+            borderRadius: 14,
+            padding: '14px 12px',
+            fontSize: 16,
+            outline: 'none',
+            boxSizing: 'border-box',
+            background: '#fcfbf9',
+            color: '#1f2430',
+            height: 50,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function AddServicePage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -1109,11 +993,27 @@ export default function AddServicePage() {
   const [card, setCard] = useState(true);
   const [wallet, setWallet] = useState(false);
 
-  const [phone, setPhone] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [businessWhatsapp, setBusinessWhatsapp] = useState('');
-  const [telegram, setTelegram] = useState('');
-  const [viber, setViber] = useState('');
+  const [phone, setPhone] = useState<PhoneContactValue>({
+    countryCode: 'GB',
+    number: '',
+  });
+  const [whatsapp, setWhatsapp] = useState<PhoneContactValue>({
+    countryCode: 'GB',
+    number: '',
+  });
+  const [businessWhatsapp, setBusinessWhatsapp] = useState<PhoneContactValue>({
+    countryCode: 'GB',
+    number: '',
+  });
+  const [telegram, setTelegram] = useState<PhoneContactValue>({
+    countryCode: 'GB',
+    number: '',
+  });
+  const [viber, setViber] = useState<PhoneContactValue>({
+    countryCode: 'GB',
+    number: '',
+  });
+
   const [instagram, setInstagram] = useState('');
   const [website, setWebsite] = useState('');
   const [email, setEmail] = useState('');
@@ -1212,6 +1112,12 @@ export default function AddServicePage() {
     });
   };
 
+  const formatPhoneValue = (value: PhoneContactValue) => {
+    const country = countries.find((item) => item.code === value.countryCode) || countries[0];
+    if (!value.number.trim()) return '';
+    return `${country.dial} ${value.number.trim()}`;
+  };
+
   const handlePublish = () => {
     if (!title.trim()) {
       alert(text.pleaseEnterServiceTitle);
@@ -1247,11 +1153,11 @@ export default function AddServicePage() {
       serviceModes,
       paymentMethods,
       contact: {
-        phone: phone.trim(),
-        whatsapp: whatsapp.trim(),
-        telegram: telegram.trim(),
-        businessWhatsapp: businessWhatsapp.trim(),
-        viber: viber.trim(),
+        phone: formatPhoneValue(phone),
+        whatsapp: formatPhoneValue(whatsapp),
+        telegram: formatPhoneValue(telegram),
+        businessWhatsapp: formatPhoneValue(businessWhatsapp),
+        viber: formatPhoneValue(viber),
         instagram: instagram.trim(),
         website: website.trim(),
         email: email.trim(),
@@ -1893,48 +1799,64 @@ export default function AddServicePage() {
             </div>
 
             <div style={{ display: 'grid', gap: 12 }}>
-              <ContactInput
+              <PhoneChannelInput
                 icon="📞"
                 label={text.phone}
                 value={phone}
                 onChange={setPhone}
-                placeholder={text.phone}
-                inputMode="tel"
+                text={{
+                  chooseCountry: text.chooseCountry,
+                  searchCountry: text.searchCountry,
+                  phoneNumber: text.phoneNumber,
+                }}
               />
 
-              <ContactInput
+              <PhoneChannelInput
                 icon="🟢"
                 label={text.whatsapp}
                 value={whatsapp}
                 onChange={setWhatsapp}
-                placeholder={text.whatsapp}
-                inputMode="tel"
+                text={{
+                  chooseCountry: text.chooseCountry,
+                  searchCountry: text.searchCountry,
+                  phoneNumber: text.phoneNumber,
+                }}
               />
 
-              <ContactInput
+              <PhoneChannelInput
                 icon="💼"
                 label={text.businessWhatsapp}
                 value={businessWhatsapp}
                 onChange={setBusinessWhatsapp}
-                placeholder={text.businessWhatsapp}
-                inputMode="tel"
+                text={{
+                  chooseCountry: text.chooseCountry,
+                  searchCountry: text.searchCountry,
+                  phoneNumber: text.phoneNumber,
+                }}
               />
 
-              <ContactInput
+              <PhoneChannelInput
                 icon="✈️"
                 label={text.telegram}
                 value={telegram}
                 onChange={setTelegram}
-                placeholder={text.telegram}
+                text={{
+                  chooseCountry: text.chooseCountry,
+                  searchCountry: text.searchCountry,
+                  phoneNumber: text.phoneNumber,
+                }}
               />
 
-              <ContactInput
+              <PhoneChannelInput
                 icon="🟣"
                 label={text.viber}
                 value={viber}
                 onChange={setViber}
-                placeholder={text.viber}
-                inputMode="tel"
+                text={{
+                  chooseCountry: text.chooseCountry,
+                  searchCountry: text.searchCountry,
+                  phoneNumber: text.phoneNumber,
+                }}
               />
 
               <ContactInput
