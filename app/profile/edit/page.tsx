@@ -32,7 +32,17 @@ type ContactItem = {
   icon: string;
   title: Record<AppLanguage, string>;
   placeholder: Record<AppLanguage, string>;
+  accent: 'pink' | 'green' | 'blue' | 'violet' | 'orange';
 };
+
+type ExtraProfileData = {
+  district: string;
+  address: string;
+  contacts: Record<ContactKey, string>;
+  avatarHistory: string[];
+};
+
+const EXTRA_PROFILE_STORAGE_KEY = 'mapbook_profile_extra_v1';
 
 const COUNTRIES: CountryOption[] = [
   { code: 'GB', dial: '+44', flag: '🇬🇧', label: 'United Kingdom' },
@@ -49,6 +59,7 @@ const CONTACT_ITEMS: ContactItem[] = [
   {
     key: 'whatsapp',
     icon: '💬',
+    accent: 'green',
     title: {
       EN: 'WhatsApp',
       ES: 'WhatsApp',
@@ -69,6 +80,7 @@ const CONTACT_ITEMS: ContactItem[] = [
   {
     key: 'businessWhatsapp',
     icon: '🏢',
+    accent: 'blue',
     title: {
       EN: 'Business WhatsApp',
       ES: 'WhatsApp Business',
@@ -89,6 +101,7 @@ const CONTACT_ITEMS: ContactItem[] = [
   {
     key: 'telegram',
     icon: '✈️',
+    accent: 'violet',
     title: {
       EN: 'Telegram',
       ES: 'Telegram',
@@ -109,6 +122,7 @@ const CONTACT_ITEMS: ContactItem[] = [
   {
     key: 'viber',
     icon: '📞',
+    accent: 'pink',
     title: {
       EN: 'Viber',
       ES: 'Viber',
@@ -129,6 +143,7 @@ const CONTACT_ITEMS: ContactItem[] = [
   {
     key: 'instagram',
     icon: '📸',
+    accent: 'pink',
     title: {
       EN: 'Instagram',
       ES: 'Instagram',
@@ -149,6 +164,7 @@ const CONTACT_ITEMS: ContactItem[] = [
   {
     key: 'website',
     icon: '🌐',
+    accent: 'orange',
     title: {
       EN: 'Website',
       ES: 'Sitio web',
@@ -169,6 +185,7 @@ const CONTACT_ITEMS: ContactItem[] = [
   {
     key: 'email',
     icon: '✉️',
+    accent: 'blue',
     title: {
       EN: 'Email',
       ES: 'Email',
@@ -192,6 +209,7 @@ const editProfileTexts = {
   EN: {
     title: 'Edit profile',
     save: 'Save',
+    subtitle: 'Profile, contacts and location',
     profilePhoto: 'Profile photo',
     uploadFromCamera: 'Camera',
     uploadFromGallery: 'Gallery',
@@ -214,10 +232,15 @@ const editProfileTexts = {
     countrySearch: 'Search country or code',
     emailSmartHint: 'Use a real email for bookings and notifications',
     saved: 'Profile saved',
+    basicInfo: 'Basic information',
+    locationInfo: 'Location',
+    required: 'Required',
+    optional: 'Optional',
   },
   ES: {
     title: 'Editar perfil',
     save: 'Guardar',
+    subtitle: 'Perfil, contactos y ubicación',
     profilePhoto: 'Foto de perfil',
     uploadFromCamera: 'Cámara',
     uploadFromGallery: 'Galería',
@@ -240,10 +263,15 @@ const editProfileTexts = {
     countrySearch: 'Buscar país o código',
     emailSmartHint: 'Usa un email real para reservas y notificaciones',
     saved: 'Perfil guardado',
+    basicInfo: 'Información básica',
+    locationInfo: 'Ubicación',
+    required: 'Obligatorio',
+    optional: 'Opcional',
   },
   RU: {
     title: 'Редактировать профиль',
     save: 'Сохранить',
+    subtitle: 'Профиль, контакты и локация',
     profilePhoto: 'Фото профиля',
     uploadFromCamera: 'Камера',
     uploadFromGallery: 'Галерея',
@@ -266,10 +294,15 @@ const editProfileTexts = {
     countrySearch: 'Поиск страны или кода',
     emailSmartHint: 'Используйте реальный email для бронирований и уведомлений',
     saved: 'Профиль сохранён',
+    basicInfo: 'Основная информация',
+    locationInfo: 'Локация',
+    required: 'Обязательно',
+    optional: 'Необязательно',
   },
   CZ: {
     title: 'Upravit profil',
     save: 'Uložit',
+    subtitle: 'Profil, kontakty a poloha',
     profilePhoto: 'Profilová fotka',
     uploadFromCamera: 'Kamera',
     uploadFromGallery: 'Galerie',
@@ -292,10 +325,15 @@ const editProfileTexts = {
     countrySearch: 'Hledat stát nebo kód',
     emailSmartHint: 'Použijte skutečný email pro rezervace a oznámení',
     saved: 'Profil uložen',
+    basicInfo: 'Základní informace',
+    locationInfo: 'Poloha',
+    required: 'Povinné',
+    optional: 'Volitelné',
   },
   DE: {
     title: 'Profil bearbeiten',
     save: 'Speichern',
+    subtitle: 'Profil, Kontakte und Standort',
     profilePhoto: 'Profilfoto',
     uploadFromCamera: 'Kamera',
     uploadFromGallery: 'Galerie',
@@ -318,10 +356,15 @@ const editProfileTexts = {
     countrySearch: 'Land oder Vorwahl suchen',
     emailSmartHint: 'Nutze eine echte E-Mail für Buchungen und Benachrichtigungen',
     saved: 'Profil gespeichert',
+    basicInfo: 'Grundinformationen',
+    locationInfo: 'Standort',
+    required: 'Pflicht',
+    optional: 'Optional',
   },
   PL: {
     title: 'Edytuj profil',
     save: 'Zapisz',
+    subtitle: 'Profil, kontakty i lokalizacja',
     profilePhoto: 'Zdjęcie profilowe',
     uploadFromCamera: 'Aparat',
     uploadFromGallery: 'Galeria',
@@ -344,6 +387,10 @@ const editProfileTexts = {
     countrySearch: 'Szukaj kraju lub kodu',
     emailSmartHint: 'Użyj prawdziwego emaila do rezerwacji i powiadomień',
     saved: 'Profil zapisany',
+    basicInfo: 'Podstawowe informacje',
+    locationInfo: 'Lokalizacja',
+    required: 'Wymagane',
+    optional: 'Opcjonalne',
   },
 } as const;
 
@@ -364,9 +411,7 @@ function splitFullName(fullName: string) {
 
 function getDefaultCountryByPhone(phone: string) {
   const normalized = phone.trim();
-  return (
-    COUNTRIES.find((country) => normalized.startsWith(country.dial)) || COUNTRIES[0]
-  );
+  return COUNTRIES.find((country) => normalized.startsWith(country.dial)) || COUNTRIES[0];
 }
 
 function stripDialCode(phone: string, dial: string) {
@@ -375,6 +420,106 @@ function stripDialCode(phone: string, dial: string) {
     return trimmed.slice(dial.length).trim();
   }
   return trimmed.replace(/[^\d]/g, '');
+}
+
+function readExtraProfileData(): ExtraProfileData {
+  if (typeof window === 'undefined') {
+    return {
+      district: '',
+      address: '',
+      contacts: {
+        whatsapp: '',
+        businessWhatsapp: '',
+        telegram: '',
+        viber: '',
+        instagram: '',
+        website: '',
+        email: '',
+      },
+      avatarHistory: [],
+    };
+  }
+
+  try {
+    const raw = window.localStorage.getItem(EXTRA_PROFILE_STORAGE_KEY);
+    if (!raw) {
+      return {
+        district: '',
+        address: '',
+        contacts: {
+          whatsapp: '',
+          businessWhatsapp: '',
+          telegram: '',
+          viber: '',
+          instagram: '',
+          website: '',
+          email: '',
+        },
+        avatarHistory: [],
+      };
+    }
+
+    const parsed = JSON.parse(raw) as Partial<ExtraProfileData>;
+    return {
+      district: parsed.district || '',
+      address: parsed.address || '',
+      contacts: {
+        whatsapp: parsed.contacts?.whatsapp || '',
+        businessWhatsapp: parsed.contacts?.businessWhatsapp || '',
+        telegram: parsed.contacts?.telegram || '',
+        viber: parsed.contacts?.viber || '',
+        instagram: parsed.contacts?.instagram || '',
+        website: parsed.contacts?.website || '',
+        email: parsed.contacts?.email || '',
+      },
+      avatarHistory: Array.isArray(parsed.avatarHistory) ? parsed.avatarHistory : [],
+    };
+  } catch {
+    return {
+      district: '',
+      address: '',
+      contacts: {
+        whatsapp: '',
+        businessWhatsapp: '',
+        telegram: '',
+        viber: '',
+        instagram: '',
+        website: '',
+        email: '',
+      },
+      avatarHistory: [],
+    };
+  }
+}
+
+function saveExtraProfileData(data: ExtraProfileData) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(EXTRA_PROFILE_STORAGE_KEY, JSON.stringify(data));
+}
+
+function getAccentColors(accent: ContactItem['accent']) {
+  if (accent === 'green') return { bg: '#eef9f1', color: '#2fa35a' };
+  if (accent === 'blue') return { bg: '#eef4ff', color: '#2f7cf6' };
+  if (accent === 'violet') return { bg: '#f3efff', color: '#7a5af8' };
+  if (accent === 'orange') return { bg: '#fff5e8', color: '#d68612' };
+  return { bg: '#fff1f7', color: '#ff4fa0' };
+}
+
+function fieldLabel(title: string, helper: string) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        gap: 10,
+        alignItems: 'center',
+        marginBottom: 8,
+      }}
+    >
+      <span style={{ fontSize: 14, fontWeight: 900, color: '#17130f' }}>{title}</span>
+      <span style={{ fontSize: 12, fontWeight: 800, color: '#8a7f74' }}>{helper}</span>
+    </div>
+  );
 }
 
 export default function EditProfilePage() {
@@ -387,6 +532,7 @@ export default function EditProfilePage() {
   const [language, setLanguage] = useState<AppLanguage>('EN');
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
 
+  const initialExtra = readExtraProfileData();
   const initialName = splitFullName(getUserProfile().fullName);
   const initialCountry = getDefaultCountryByPhone(getUserProfile().phone);
 
@@ -398,26 +544,26 @@ export default function EditProfilePage() {
     stripDialCode(getUserProfile().phone, initialCountry.dial)
   );
   const [city, setCity] = useState(getUserProfile().city);
-  const [district, setDistrict] = useState('');
-  const [address, setAddress] = useState('');
+  const [district, setDistrict] = useState(initialExtra.district);
+  const [address, setAddress] = useState(initialExtra.address);
   const [bio, setBio] = useState(getUserProfile().bio);
   const [avatar, setAvatar] = useState(getUserProfile().avatar);
   const [avatarHistory, setAvatarHistory] = useState<string[]>([
     getUserProfile().avatar,
+    ...initialExtra.avatarHistory,
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
     'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80',
     'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
   ]);
-
   const [countrySearch, setCountrySearch] = useState('');
   const [contacts, setContacts] = useState<Record<ContactKey, string>>({
-    whatsapp: '',
-    businessWhatsapp: '',
-    telegram: '',
-    viber: '',
-    instagram: '',
-    website: '',
-    email: getUserProfile().email,
+    whatsapp: initialExtra.contacts.whatsapp,
+    businessWhatsapp: initialExtra.contacts.businessWhatsapp,
+    telegram: initialExtra.contacts.telegram,
+    viber: initialExtra.contacts.viber,
+    instagram: initialExtra.contacts.instagram,
+    website: initialExtra.contacts.website,
+    email: initialExtra.contacts.email || getUserProfile().email,
   });
 
   useEffect(() => {
@@ -427,6 +573,7 @@ export default function EditProfilePage() {
 
     const syncProfile = () => {
       const next = getUserProfile();
+      const extra = readExtraProfileData();
       const name = splitFullName(next.fullName);
       const country = getDefaultCountryByPhone(next.phone);
 
@@ -437,16 +584,24 @@ export default function EditProfilePage() {
       setPhoneCountry(country);
       setPhoneNumber(stripDialCode(next.phone, country.dial));
       setCity(next.city);
+      setDistrict(extra.district || '');
+      setAddress(extra.address || '');
       setBio(next.bio);
       setAvatar(next.avatar);
-      setAvatarHistory((prev) => {
-        const merged = [next.avatar, ...prev].filter(Boolean);
-        return Array.from(new Set(merged)).slice(0, 8);
+      setAvatarHistory((prev) =>
+        Array.from(
+          new Set([next.avatar, ...extra.avatarHistory, ...prev].filter(Boolean))
+        ).slice(0, 12)
+      );
+      setContacts({
+        whatsapp: extra.contacts.whatsapp || '',
+        businessWhatsapp: extra.contacts.businessWhatsapp || '',
+        telegram: extra.contacts.telegram || '',
+        viber: extra.contacts.viber || '',
+        instagram: extra.contacts.instagram || '',
+        website: extra.contacts.website || '',
+        email: extra.contacts.email || next.email,
       });
-      setContacts((prev) => ({
-        ...prev,
-        email: next.email,
-      }));
     };
 
     syncLanguage();
@@ -488,7 +643,7 @@ export default function EditProfilePage() {
       if (!result) return;
 
       setAvatar(result);
-      setAvatarHistory((prev) => [result, ...prev.filter((item) => item !== result)].slice(0, 8));
+      setAvatarHistory((prev) => [result, ...prev.filter((item) => item !== result)].slice(0, 12));
     };
     reader.readAsDataURL(file);
     event.target.value = '';
@@ -505,6 +660,16 @@ export default function EditProfilePage() {
       city,
       bio,
       avatar,
+    });
+
+    saveExtraProfileData({
+      district,
+      address,
+      contacts: {
+        ...contacts,
+        email,
+      },
+      avatarHistory,
     });
 
     alert(text.saved);
@@ -568,16 +733,28 @@ export default function EditProfilePage() {
             ←
           </button>
 
-          <h1
-            style={{
-              margin: 0,
-              fontSize: 22,
-              fontWeight: 900,
-              color: '#17130f',
-            }}
-          >
-            {text.title}
-          </h1>
+          <div>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 22,
+                fontWeight: 900,
+                color: '#17130f',
+              }}
+            >
+              {text.title}
+            </h1>
+            <div
+              style={{
+                marginTop: 4,
+                fontSize: 13,
+                color: '#7b7268',
+                fontWeight: 700,
+              }}
+            >
+              {text.subtitle}
+            </div>
+          </div>
 
           <button
             type="button"
@@ -761,11 +938,20 @@ export default function EditProfilePage() {
             boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 14,
+            }}
+          >
+            {text.basicInfo}
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <label>
-              <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 900, color: '#17130f' }}>
-                {text.firstName}
-              </div>
+              {fieldLabel(text.firstName, text.required)}
               <input
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
@@ -778,14 +964,13 @@ export default function EditProfilePage() {
                   padding: '0 16px',
                   fontSize: 16,
                   outline: 'none',
+                  boxSizing: 'border-box',
                 }}
               />
             </label>
 
             <label>
-              <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 900, color: '#17130f' }}>
-                {text.lastName}
-              </div>
+              {fieldLabel(text.lastName, text.required)}
               <input
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
@@ -798,15 +983,14 @@ export default function EditProfilePage() {
                   padding: '0 16px',
                   fontSize: 16,
                   outline: 'none',
+                  boxSizing: 'border-box',
                 }}
               />
             </label>
           </div>
 
           <div style={{ marginTop: 14 }}>
-            <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 900, color: '#17130f' }}>
-              {text.phone}
-            </div>
+            {fieldLabel(text.phone, text.required)}
 
             <input
               value={countrySearch}
@@ -822,6 +1006,7 @@ export default function EditProfilePage() {
                 fontSize: 14,
                 outline: 'none',
                 marginBottom: 10,
+                boxSizing: 'border-box',
               }}
             />
 
@@ -900,78 +1085,14 @@ export default function EditProfilePage() {
                   padding: '0 16px',
                   fontSize: 16,
                   outline: 'none',
+                  boxSizing: 'border-box',
                 }}
               />
             </div>
           </div>
 
           <div style={{ marginTop: 14 }}>
-            <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 900, color: '#17130f' }}>
-              {text.city}
-            </div>
-            <input
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder={text.cityPlaceholder}
-              style={{
-                width: '100%',
-                height: 54,
-                borderRadius: 18,
-                border: '1px solid #efe4d7',
-                background: '#fffdf9',
-                padding: '0 16px',
-                fontSize: 16,
-                outline: 'none',
-              }}
-            />
-          </div>
-
-          <div style={{ marginTop: 14 }}>
-            <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 900, color: '#17130f' }}>
-              {text.district}
-            </div>
-            <input
-              value={district}
-              onChange={(e) => setDistrict(e.target.value)}
-              placeholder={text.districtPlaceholder}
-              style={{
-                width: '100%',
-                height: 54,
-                borderRadius: 18,
-                border: '1px solid #efe4d7',
-                background: '#fffdf9',
-                padding: '0 16px',
-                fontSize: 16,
-                outline: 'none',
-              }}
-            />
-          </div>
-
-          <div style={{ marginTop: 14 }}>
-            <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 900, color: '#17130f' }}>
-              {text.address}
-            </div>
-            <input
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder={text.addressPlaceholder}
-              style={{
-                width: '100%',
-                height: 54,
-                borderRadius: 18,
-                border: '1px solid #efe4d7',
-                background: '#fffdf9',
-                padding: '0 16px',
-                fontSize: 16,
-                outline: 'none',
-              }}
-            />
-          </div>
-
-          <div style={{ marginTop: 14 }}>
-            <div style={{ marginBottom: 8, fontSize: 14, fontWeight: 900, color: '#17130f' }}>
-              {text.bio}
-            </div>
+            {fieldLabel(text.bio, text.optional)}
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
@@ -986,6 +1107,89 @@ export default function EditProfilePage() {
                 padding: '14px 16px',
                 fontSize: 16,
                 outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 18,
+            borderRadius: 32,
+            background: '#fff',
+            border: '1px solid #efe4d7',
+            padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 14,
+            }}
+          >
+            {text.locationInfo}
+          </div>
+
+          <div style={{ marginTop: 2 }}>
+            {fieldLabel(text.city, text.required)}
+            <input
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder={text.cityPlaceholder}
+              style={{
+                width: '100%',
+                height: 54,
+                borderRadius: 18,
+                border: '1px solid #efe4d7',
+                background: '#fffdf9',
+                padding: '0 16px',
+                fontSize: 16,
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+
+          <div style={{ marginTop: 14 }}>
+            {fieldLabel(text.district, text.optional)}
+            <input
+              value={district}
+              onChange={(e) => setDistrict(e.target.value)}
+              placeholder={text.districtPlaceholder}
+              style={{
+                width: '100%',
+                height: 54,
+                borderRadius: 18,
+                border: '1px solid #efe4d7',
+                background: '#fffdf9',
+                padding: '0 16px',
+                fontSize: 16,
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+
+          <div style={{ marginTop: 14 }}>
+            {fieldLabel(text.address, text.optional)}
+            <input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder={text.addressPlaceholder}
+              style={{
+                width: '100%',
+                height: 54,
+                borderRadius: 18,
+                border: '1px solid #efe4d7',
+                background: '#fffdf9',
+                padding: '0 16px',
+                fontSize: 16,
+                outline: 'none',
+                boxSizing: 'border-box',
               }}
             />
           </div>
@@ -1024,86 +1228,97 @@ export default function EditProfilePage() {
           </div>
 
           <div style={{ marginTop: 14, display: 'grid', gap: 14 }}>
-            {CONTACT_ITEMS.map((item) => (
-              <div
-                key={item.key}
-                style={{
-                  borderRadius: 22,
-                  border: '1px solid #efe4d7',
-                  background: '#fcfaf6',
-                  padding: 14,
-                }}
-              >
+            {CONTACT_ITEMS.map((item) => {
+              const accent = getAccentColors(item.accent);
+
+              return (
                 <div
+                  key={item.key}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    marginBottom: 10,
+                    borderRadius: 22,
+                    border: '1px solid #efe4d7',
+                    background: '#fcfaf6',
+                    padding: 14,
                   }}
                 >
                   <div
                     style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: 14,
-                      background: '#fff1f7',
-                      color: '#ff4fa0',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 18,
+                      gap: 10,
+                      marginBottom: 10,
                     }}
                   >
-                    {item.icon}
+                    <div
+                      style={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: 14,
+                        background: accent.bg,
+                        color: accent.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 18,
+                      }}
+                    >
+                      {item.icon}
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: 15,
+                        fontWeight: 900,
+                        color: '#17130f',
+                      }}
+                    >
+                      {item.title[language]}
+                    </div>
                   </div>
 
-                  <div
+                  <input
+                    value={item.key === 'email' ? email : contacts[item.key]}
+                    onChange={(e) => {
+                      if (item.key === 'email') {
+                        setEmail(e.target.value);
+                        setContacts((prev) => ({ ...prev, email: e.target.value }));
+                        return;
+                      }
+
+                      setContacts((prev) => ({
+                        ...prev,
+                        [item.key]: e.target.value,
+                      }));
+                    }}
+                    placeholder={item.placeholder[language]}
                     style={{
+                      width: '100%',
+                      height: 52,
+                      borderRadius: 16,
+                      border: '1px solid #efe4d7',
+                      background: '#fff',
+                      padding: '0 14px',
                       fontSize: 15,
-                      fontWeight: 900,
-                      color: '#17130f',
+                      outline: 'none',
+                      boxSizing: 'border-box',
                     }}
-                  >
-                    {item.title[language]}
-                  </div>
+                  />
+
+                  {item.key === 'email' ? (
+                    <div
+                      style={{
+                        marginTop: 8,
+                        fontSize: 12,
+                        color: '#8a7f74',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {text.emailSmartHint}
+                    </div>
+                  ) : null}
                 </div>
-
-                <input
-                  value={contacts[item.key]}
-                  onChange={(e) =>
-                    setContacts((prev) => ({
-                      ...prev,
-                      [item.key]: e.target.value,
-                    }))
-                  }
-                  placeholder={item.placeholder[language]}
-                  style={{
-                    width: '100%',
-                    height: 52,
-                    borderRadius: 16,
-                    border: '1px solid #efe4d7',
-                    background: '#fff',
-                    padding: '0 14px',
-                    fontSize: 15,
-                    outline: 'none',
-                  }}
-                />
-
-                {item.key === 'email' ? (
-                  <div
-                    style={{
-                      marginTop: 8,
-                      fontSize: 12,
-                      color: '#8a7f74',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {text.emailSmartHint}
-                  </div>
-                ) : null}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
