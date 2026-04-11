@@ -21,8 +21,11 @@ const inviteTexts = {
       'For every friend who pays their first £5 unlock, you receive 1 free booking reward.',
     activeForever: 'Works continuously',
     invited: 'Invited',
+    invitedSub: 'People joined by your link',
     paid: 'Paid',
+    paidSub: 'Friends who completed first unlock',
     freeBookings: 'Free bookings',
+    freeBookingsSub: 'Available referral rewards',
     yourLink: 'Your link',
     yourLinkText:
       'Send the link to your friends. They get a £5 bonus for the first booking, and you get a free booking once they pay.',
@@ -37,6 +40,7 @@ const inviteTexts = {
     welcomeBonus: 'Welcome bonus',
     referralBonus: 'Referral rewards',
     totalAvailable: 'Total available',
+    linkReady: 'Referral link is ready to share',
   },
   ES: {
     title: 'Invitar amigos',
@@ -45,8 +49,11 @@ const inviteTexts = {
       'Por cada amigo que pague su primer unlock de £5, recibes 1 recompensa de reserva gratis.',
     activeForever: 'Funciona siempre',
     invited: 'Invitados',
+    invitedSub: 'Personas que entraron por tu enlace',
     paid: 'Pagaron',
+    paidSub: 'Amigos que completaron el primer unlock',
     freeBookings: 'Reservas gratis',
+    freeBookingsSub: 'Recompensas disponibles',
     yourLink: 'Tu enlace',
     yourLinkText:
       'Envía el enlace a tus amigos. Ellos reciben un bono de £5 en la primera reserva y tú obtienes una reserva gratis cuando paguen.',
@@ -61,6 +68,7 @@ const inviteTexts = {
     welcomeBonus: 'Bono de bienvenida',
     referralBonus: 'Bonos por referidos',
     totalAvailable: 'Total disponible',
+    linkReady: 'El enlace de invitación está listo para compartir',
   },
   RU: {
     title: 'Пригласить друзей',
@@ -69,8 +77,11 @@ const inviteTexts = {
       'За каждого друга, который оплатит свой первый £5 unlock, вы получите 1 бесплатное бронирование.',
     activeForever: 'Это работает постоянно',
     invited: 'Приглашено',
+    invitedSub: 'Людей пришло по вашей ссылке',
     paid: 'Оплатили',
-    freeBookings: 'Бесплатных бронирований',
+    paidSub: 'Друзья с первым оплаченным unlock',
+    freeBookings: 'Бесплатные бронирования',
+    freeBookingsSub: 'Доступные награды по рефералам',
     yourLink: 'Ваша ссылка',
     yourLinkText:
       'Отправьте ссылку друзьям. Они получат бонус £5 на первое бронирование, а вы — бесплатное бронирование, когда они оплатят.',
@@ -85,6 +96,7 @@ const inviteTexts = {
     welcomeBonus: 'Welcome Bonus',
     referralBonus: 'Реферальные бонусы',
     totalAvailable: 'Всего доступно',
+    linkReady: 'Реферальная ссылка готова к отправке',
   },
   CZ: {
     title: 'Pozvat přátele',
@@ -93,8 +105,11 @@ const inviteTexts = {
       'Za každého přítele, který zaplatí svůj první £5 unlock, získáte 1 rezervaci zdarma.',
     activeForever: 'Funguje neustále',
     invited: 'Pozváno',
+    invitedSub: 'Lidé, kteří přišli přes váš odkaz',
     paid: 'Zaplatili',
+    paidSub: 'Přátelé s prvním zaplaceným unlockem',
     freeBookings: 'Rezervace zdarma',
+    freeBookingsSub: 'Dostupné referral odměny',
     yourLink: 'Váš odkaz',
     yourLinkText:
       'Pošlete odkaz přátelům. Oni získají bonus £5 na první rezervaci a vy získáte rezervaci zdarma, když zaplatí.',
@@ -109,6 +124,7 @@ const inviteTexts = {
     welcomeBonus: 'Welcome Bonus',
     referralBonus: 'Bonusy za doporučení',
     totalAvailable: 'Celkem dostupné',
+    linkReady: 'Referral odkaz je připraven ke sdílení',
   },
   DE: {
     title: 'Freunde einladen',
@@ -117,8 +133,11 @@ const inviteTexts = {
       'Für jeden Freund, der seinen ersten £5 Unlock bezahlt, erhältst du 1 kostenlose Buchung.',
     activeForever: 'Funktioniert dauerhaft',
     invited: 'Eingeladen',
+    invitedSub: 'Personen über deinen Link',
     paid: 'Bezahlt',
+    paidSub: 'Freunde mit erstem bezahlten Unlock',
     freeBookings: 'Kostenlose Buchungen',
+    freeBookingsSub: 'Verfügbare Empfehlungsprämien',
     yourLink: 'Dein Link',
     yourLinkText:
       'Sende den Link an deine Freunde. Sie erhalten £5 Bonus für die erste Buchung und du bekommst eine kostenlose Buchung, sobald sie zahlen.',
@@ -133,6 +152,7 @@ const inviteTexts = {
     welcomeBonus: 'Welcome Bonus',
     referralBonus: 'Empfehlungsboni',
     totalAvailable: 'Insgesamt verfügbar',
+    linkReady: 'Einladungslink ist bereit zum Teilen',
   },
   PL: {
     title: 'Zaproś znajomych',
@@ -141,8 +161,11 @@ const inviteTexts = {
       'Za każdego znajomego, który opłaci swój pierwszy £5 unlock, otrzymasz 1 darmową rezerwację.',
     activeForever: 'Działa cały czas',
     invited: 'Zaproszono',
+    invitedSub: 'Osoby, które weszły przez twój link',
     paid: 'Zapłacili',
+    paidSub: 'Znajomi z pierwszym opłaconym unlockiem',
     freeBookings: 'Darmowe rezerwacje',
+    freeBookingsSub: 'Dostępne nagrody z poleceń',
     yourLink: 'Twój link',
     yourLinkText:
       'Wyślij link znajomym. Otrzymają bonus £5 na pierwszą rezerwację, a Ty dostaniesz darmową rezerwację, gdy zapłacą.',
@@ -157,6 +180,7 @@ const inviteTexts = {
     welcomeBonus: 'Welcome Bonus',
     referralBonus: 'Bonusy poleceń',
     totalAvailable: 'Łącznie dostępne',
+    linkReady: 'Link polecający jest gotowy do udostępnienia',
   },
 } as const;
 
@@ -178,6 +202,30 @@ function getStatusStyles(status: string) {
   return {
     background: '#fff5e8',
     color: '#d68612',
+  };
+}
+
+function getStatCardStyles(type: 'pink' | 'blue' | 'green') {
+  if (type === 'pink') {
+    return {
+      background: 'linear-gradient(180deg, #fff1f7 0%, #ffe8f2 100%)',
+      color: '#ff4fa0',
+      shadow: '0 10px 24px rgba(255,79,160,0.10)',
+    };
+  }
+
+  if (type === 'blue') {
+    return {
+      background: 'linear-gradient(180deg, #eef4ff 0%, #e7f0ff 100%)',
+      color: '#2f7cf6',
+      shadow: '0 10px 24px rgba(47,124,246,0.10)',
+    };
+  }
+
+  return {
+    background: 'linear-gradient(180deg, #eef9f1 0%, #e6f7eb 100%)',
+    color: '#2fa35a',
+    shadow: '0 10px 24px rgba(47,163,90,0.10)',
   };
 }
 
@@ -254,6 +302,10 @@ export default function InviteFriendsPage() {
     }
   };
 
+  const invitedCard = getStatCardStyles('pink');
+  const paidCard = getStatCardStyles('blue');
+  const freeCard = getStatCardStyles('green');
+
   return (
     <main
       style={{
@@ -266,7 +318,7 @@ export default function InviteFriendsPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '54px 1fr',
+            gridTemplateColumns: '54px 1fr 54px',
             alignItems: 'center',
             gap: 12,
             marginBottom: 18,
@@ -295,11 +347,12 @@ export default function InviteFriendsPage() {
               fontWeight: 900,
               color: '#17130f',
               textAlign: 'center',
-              paddingRight: 54,
             }}
           >
             {text.title}
           </div>
+
+          <div />
         </div>
 
         <div
@@ -380,54 +433,114 @@ export default function InviteFriendsPage() {
         >
           <div
             style={{
-              borderRadius: 26,
+              borderRadius: 28,
               padding: 16,
-              background: '#fff1f7',
-              color: '#ff4fa0',
-              boxShadow: '0 10px 24px rgba(255,79,160,0.10)',
+              background: invitedCard.background,
+              color: invitedCard.color,
+              boxShadow: invitedCard.shadow,
             }}
           >
-            <div style={{ fontSize: 20, marginBottom: 10 }}>👥</div>
-            <div style={{ fontSize: 12, lineHeight: 1.3, fontWeight: 800, minHeight: 32 }}>
+            <div style={{ fontSize: 22 }}>👥</div>
+            <div
+              style={{
+                marginTop: 10,
+                fontSize: 12,
+                lineHeight: 1.25,
+                fontWeight: 900,
+                minHeight: 30,
+              }}
+            >
               {text.invited}
             </div>
-            <div style={{ marginTop: 10, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
+            <div
+              style={{
+                marginTop: 6,
+                fontSize: 11,
+                lineHeight: 1.3,
+                fontWeight: 800,
+                opacity: 0.85,
+                minHeight: 28,
+              }}
+            >
+              {text.invitedSub}
+            </div>
+            <div style={{ marginTop: 12, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
               {referralState.invitedCount || 0}
             </div>
           </div>
 
           <div
             style={{
-              borderRadius: 26,
+              borderRadius: 28,
               padding: 16,
-              background: '#eef4ff',
-              color: '#2f7cf6',
-              boxShadow: '0 10px 24px rgba(47,124,246,0.10)',
+              background: paidCard.background,
+              color: paidCard.color,
+              boxShadow: paidCard.shadow,
             }}
           >
-            <div style={{ fontSize: 20, marginBottom: 10 }}>💳</div>
-            <div style={{ fontSize: 12, lineHeight: 1.3, fontWeight: 800, minHeight: 32 }}>
+            <div style={{ fontSize: 22 }}>💳</div>
+            <div
+              style={{
+                marginTop: 10,
+                fontSize: 12,
+                lineHeight: 1.25,
+                fontWeight: 900,
+                minHeight: 30,
+              }}
+            >
               {text.paid}
             </div>
-            <div style={{ marginTop: 10, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
+            <div
+              style={{
+                marginTop: 6,
+                fontSize: 11,
+                lineHeight: 1.3,
+                fontWeight: 800,
+                opacity: 0.85,
+                minHeight: 28,
+              }}
+            >
+              {text.paidSub}
+            </div>
+            <div style={{ marginTop: 12, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
               {referralState.completedReferralsCount || 0}
             </div>
           </div>
 
           <div
             style={{
-              borderRadius: 26,
+              borderRadius: 28,
               padding: 16,
-              background: '#eef9f1',
-              color: '#2fa35a',
-              boxShadow: '0 10px 24px rgba(47,163,90,0.10)',
+              background: freeCard.background,
+              color: freeCard.color,
+              boxShadow: freeCard.shadow,
             }}
           >
-            <div style={{ fontSize: 20, marginBottom: 10 }}>🎟️</div>
-            <div style={{ fontSize: 12, lineHeight: 1.3, fontWeight: 800, minHeight: 32 }}>
+            <div style={{ fontSize: 22 }}>🎟️</div>
+            <div
+              style={{
+                marginTop: 10,
+                fontSize: 12,
+                lineHeight: 1.25,
+                fontWeight: 900,
+                minHeight: 30,
+              }}
+            >
               {text.freeBookings}
             </div>
-            <div style={{ marginTop: 10, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
+            <div
+              style={{
+                marginTop: 6,
+                fontSize: 11,
+                lineHeight: 1.3,
+                fontWeight: 800,
+                opacity: 0.85,
+                minHeight: 28,
+              }}
+            >
+              {text.freeBookingsSub}
+            </div>
+            <div style={{ marginTop: 12, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
               {referralState.freeBookingsAvailable || 0}
             </div>
           </div>
@@ -463,6 +576,20 @@ export default function InviteFriendsPage() {
             }}
           >
             {text.yourLinkText}
+          </div>
+
+          <div
+            style={{
+              marginTop: 12,
+              borderRadius: 18,
+              background: '#eef9f1',
+              padding: '12px 14px',
+              fontSize: 13,
+              color: '#2fa35a',
+              fontWeight: 900,
+            }}
+          >
+            {text.linkReady}
           </div>
 
           <div
@@ -534,7 +661,7 @@ export default function InviteFriendsPage() {
 
         <div
           style={{
-            marginTop: 16,
+            marginTop: 18,
             fontSize: 20,
             fontWeight: 900,
             color: '#17130f',
@@ -658,7 +785,7 @@ export default function InviteFriendsPage() {
             <div
               style={{
                 borderRadius: 22,
-                background: '#fff6e8',
+                background: '#fff5e8',
                 padding: '16px 18px',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -721,7 +848,7 @@ export default function InviteFriendsPage() {
         </div>
       </div>
 
-      <BottomNav />
+      <BottomNav active="profile" />
     </main>
   );
 }
