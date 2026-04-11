@@ -1,37 +1,249 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { getMasterById } from '../../../../services/masters';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../../services/i18n';
+import { formatDisplayPrice } from '../../../../services/currencyDisplay';
 
 type DateStatus = 'free' | 'full';
 
-function getMonthLabel(monthIndex: number) {
-  const labels = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-  return labels[monthIndex];
+function getTexts(language: AppLanguage) {
+  if (language === 'RU') {
+    return {
+      bookingDataNotFound: 'Данные бронирования не найдены',
+      chooseDate: 'Выберите дату',
+      selectedServices: 'Выбранные услуги',
+      totalDuration: 'Общая длительность',
+      totalPrice: 'Общая цена',
+      today: 'Сегодня',
+      chooseYear: 'Выберите год',
+      chooseMonth: 'Выберите месяц',
+      available: 'Доступно',
+      unavailable: 'Недоступно',
+      todayLabel: 'Сегодня',
+      selectedDate: 'Выбранная дата',
+      notSelected: 'Не выбрано',
+      chooseTime: 'Выбрать время',
+      from: 'от',
+      zeroMinutes: '0м',
+      monthsFull: [
+        'Январь',
+        'Февраль',
+        'Март',
+        'Апрель',
+        'Май',
+        'Июнь',
+        'Июль',
+        'Август',
+        'Сентябрь',
+        'Октябрь',
+        'Ноябрь',
+        'Декабрь',
+      ],
+      monthsShort: ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'],
+      weekdaysShort: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    };
+  }
+
+  if (language === 'ES') {
+    return {
+      bookingDataNotFound: 'Datos de reserva no encontrados',
+      chooseDate: 'Elige fecha',
+      selectedServices: 'Servicios seleccionados',
+      totalDuration: 'Duración total',
+      totalPrice: 'Precio total',
+      today: 'Hoy',
+      chooseYear: 'Elige año',
+      chooseMonth: 'Elige mes',
+      available: 'Disponible',
+      unavailable: 'No disponible',
+      todayLabel: 'Hoy',
+      selectedDate: 'Fecha seleccionada',
+      notSelected: 'No seleccionada',
+      chooseTime: 'Elegir hora',
+      from: 'desde',
+      zeroMinutes: '0 min',
+      monthsFull: [
+        'Enero',
+        'Febrero',
+        'Marzo',
+        'Abril',
+        'Mayo',
+        'Junio',
+        'Julio',
+        'Agosto',
+        'Septiembre',
+        'Octubre',
+        'Noviembre',
+        'Diciembre',
+      ],
+      monthsShort: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
+      weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+    };
+  }
+
+  if (language === 'CZ') {
+    return {
+      bookingDataNotFound: 'Údaje rezervace nebyly nalezeny',
+      chooseDate: 'Vyberte datum',
+      selectedServices: 'Vybrané služby',
+      totalDuration: 'Celková délka',
+      totalPrice: 'Celková cena',
+      today: 'Dnes',
+      chooseYear: 'Vyberte rok',
+      chooseMonth: 'Vyberte měsíc',
+      available: 'Dostupné',
+      unavailable: 'Nedostupné',
+      todayLabel: 'Dnes',
+      selectedDate: 'Vybrané datum',
+      notSelected: 'Nevybráno',
+      chooseTime: 'Vybrat čas',
+      from: 'od',
+      zeroMinutes: '0 min',
+      monthsFull: [
+        'Leden',
+        'Únor',
+        'Březen',
+        'Duben',
+        'Květen',
+        'Červen',
+        'Červenec',
+        'Srpen',
+        'Září',
+        'Říjen',
+        'Listopad',
+        'Prosinec',
+      ],
+      monthsShort: ['led', 'úno', 'bře', 'dub', 'kvě', 'čen', 'čvc', 'srp', 'zář', 'říj', 'lis', 'pro'],
+      weekdaysShort: ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'],
+    };
+  }
+
+  if (language === 'DE') {
+    return {
+      bookingDataNotFound: 'Buchungsdaten nicht gefunden',
+      chooseDate: 'Datum wählen',
+      selectedServices: 'Ausgewählte Leistungen',
+      totalDuration: 'Gesamtdauer',
+      totalPrice: 'Gesamtpreis',
+      today: 'Heute',
+      chooseYear: 'Jahr wählen',
+      chooseMonth: 'Monat wählen',
+      available: 'Verfügbar',
+      unavailable: 'Nicht verfügbar',
+      todayLabel: 'Heute',
+      selectedDate: 'Ausgewähltes Datum',
+      notSelected: 'Nicht ausgewählt',
+      chooseTime: 'Zeit wählen',
+      from: 'ab',
+      zeroMinutes: '0 Min',
+      monthsFull: [
+        'Januar',
+        'Februar',
+        'März',
+        'April',
+        'Mai',
+        'Juni',
+        'Juli',
+        'August',
+        'September',
+        'Oktober',
+        'November',
+        'Dezember',
+      ],
+      monthsShort: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+      weekdaysShort: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+    };
+  }
+
+  if (language === 'PL') {
+    return {
+      bookingDataNotFound: 'Nie znaleziono danych rezerwacji',
+      chooseDate: 'Wybierz datę',
+      selectedServices: 'Wybrane usługi',
+      totalDuration: 'Łączny czas',
+      totalPrice: 'Łączna cena',
+      today: 'Dziś',
+      chooseYear: 'Wybierz rok',
+      chooseMonth: 'Wybierz miesiąc',
+      available: 'Dostępne',
+      unavailable: 'Niedostępne',
+      todayLabel: 'Dziś',
+      selectedDate: 'Wybrana data',
+      notSelected: 'Nie wybrano',
+      chooseTime: 'Wybierz godzinę',
+      from: 'od',
+      zeroMinutes: '0 min',
+      monthsFull: [
+        'Styczeń',
+        'Luty',
+        'Marzec',
+        'Kwiecień',
+        'Maj',
+        'Czerwiec',
+        'Lipiec',
+        'Sierpień',
+        'Wrzesień',
+        'Październik',
+        'Listopad',
+        'Grudzień',
+      ],
+      monthsShort: ['sty', 'lut', 'mar', 'kwi', 'maj', 'cze', 'lip', 'sie', 'wrz', 'paź', 'lis', 'gru'],
+      weekdaysShort: ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'],
+    };
+  }
+
+  return {
+    bookingDataNotFound: 'Booking data not found',
+    chooseDate: 'Choose date',
+    selectedServices: 'Selected services',
+    totalDuration: 'Total duration',
+    totalPrice: 'Total price',
+    today: 'Today',
+    chooseYear: 'Choose year',
+    chooseMonth: 'Choose month',
+    available: 'Available',
+    unavailable: 'Unavailable',
+    todayLabel: 'Today',
+    selectedDate: 'Selected date',
+    notSelected: 'Not selected',
+    chooseTime: 'Choose time',
+    from: 'from',
+    zeroMinutes: '0m',
+    monthsFull: [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ],
+    monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    weekdaysShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+  };
 }
 
-function getShortMonthLabel(monthIndex: number) {
-  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return labels[monthIndex];
+function getMonthLabel(monthIndex: number, language: AppLanguage) {
+  return getTexts(language).monthsFull[monthIndex];
 }
 
-function getWeekdayShort(date: Date) {
-  const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  return labels[date.getDay()];
+function getShortMonthLabel(monthIndex: number, language: AppLanguage) {
+  return getTexts(language).monthsShort[monthIndex];
+}
+
+function getWeekdayShort(date: Date, language: AppLanguage) {
+  return getTexts(language).weekdaysShort[date.getDay()];
 }
 
 function getDateKey(date: Date) {
@@ -50,8 +262,8 @@ function sameDay(a: Date, b: Date) {
 }
 
 function parseDurationToMinutes(value: string) {
-  const hourMatch = value.match(/(\d+)\s*h/);
-  const minuteMatch = value.match(/(\d+)\s*m/);
+  const hourMatch = value.match(/(\d+)\s*h/i);
+  const minuteMatch = value.match(/(\d+)\s*m/i);
 
   const hours = hourMatch ? Number(hourMatch[1]) : 0;
   const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
@@ -59,9 +271,27 @@ function parseDurationToMinutes(value: string) {
   return hours * 60 + minutes;
 }
 
-function formatMinutes(minutes: number) {
+function formatMinutes(minutes: number, language: AppLanguage) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
+
+  if (language === 'RU') {
+    if (h > 0 && m > 0) return `${h}ч ${m}м`;
+    if (h > 0) return `${h}ч`;
+    return `${m}м`;
+  }
+
+  if (language === 'DE') {
+    if (h > 0 && m > 0) return `${h}Std ${m}Min`;
+    if (h > 0) return `${h}Std`;
+    return `${m}Min`;
+  }
+
+  if (language === 'ES' || language === 'CZ' || language === 'PL') {
+    if (h > 0 && m > 0) return `${h}h ${m}min`;
+    if (h > 0) return `${h}h`;
+    return `${m}min`;
+  }
 
   if (h > 0 && m > 0) return `${h}h ${m}m`;
   if (h > 0) return `${h}h`;
@@ -118,6 +348,10 @@ export default function BookingDatePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+
+  const text = useMemo(() => getTexts(language), [language]);
+
   const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
   const servicesParam = searchParams.get('services') || '';
 
@@ -138,8 +372,20 @@ export default function BookingDatePage() {
   const [selectedDateKey, setSelectedDateKey] = useState('');
   const [pickerMode, setPickerMode] = useState<'closed' | 'year' | 'month'>('closed');
 
+  useEffect(() => {
+    setLanguage(getSavedLanguage());
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    return () => {
+      unsubLanguage();
+    };
+  }, []);
+
   if (!master || !selectedItems.length) {
-    return <main style={{ padding: 24 }}>Booking data not found</main>;
+    return <main style={{ padding: 24 }}>{text.bookingDataNotFound}</main>;
   }
 
   const totalPrice = selectedItems.reduce((sum, item) => sum + item.price, 0);
@@ -188,12 +434,13 @@ export default function BookingDatePage() {
               border: '1px solid #e7ddd0',
               background: '#fff',
               fontSize: 24,
+              cursor: 'pointer',
             }}
           >
             ←
           </button>
 
-          <div style={{ fontSize: 30, fontWeight: 800 }}>Choose date</div>
+          <div style={{ fontSize: 30, fontWeight: 800 }}>{text.chooseDate}</div>
 
           <button
             onClick={() => router.push('/')}
@@ -204,6 +451,7 @@ export default function BookingDatePage() {
               border: '1px solid #e7ddd0',
               background: '#fff',
               fontSize: 22,
+              cursor: 'pointer',
             }}
           >
             ⌂
@@ -218,7 +466,7 @@ export default function BookingDatePage() {
             padding: 16,
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 800 }}>Selected services</div>
+          <div style={{ fontSize: 22, fontWeight: 800 }}>{text.selectedServices}</div>
 
           <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {selectedItems.map((item) => (
@@ -247,10 +495,14 @@ export default function BookingDatePage() {
 
                 <div>
                   <div style={{ fontSize: 17, fontWeight: 800 }}>{item.title}</div>
-                  <div style={{ marginTop: 4, color: '#746b62', fontSize: 14 }}>{item.duration}</div>
+                  <div style={{ marginTop: 4, color: '#746b62', fontSize: 14 }}>
+                    {item.duration}
+                  </div>
                 </div>
 
-                <div style={{ fontSize: 16, fontWeight: 800 }}>£{item.price}</div>
+                <div style={{ fontSize: 16, fontWeight: 800 }}>
+                  {formatDisplayPrice(item.price)}
+                </div>
               </div>
             ))}
           </div>
@@ -264,16 +516,20 @@ export default function BookingDatePage() {
             }}
           >
             <div style={{ background: '#f7f1e8', borderRadius: 18, padding: 12 }}>
-              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>Total duration</div>
+              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>
+                {text.totalDuration}
+              </div>
               <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
-                {formatMinutes(totalMinutes)}
+                {formatMinutes(totalMinutes, language)}
               </div>
             </div>
 
             <div style={{ background: '#f7f1e8', borderRadius: 18, padding: 12 }}>
-              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>Total price</div>
+              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>
+                {text.totalPrice}
+              </div>
               <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
-                £{totalPrice}
+                {formatDisplayPrice(totalPrice)}
               </div>
             </div>
           </div>
@@ -309,13 +565,14 @@ export default function BookingDatePage() {
                 border: '1px solid #e4d8ca',
                 background: '#fff',
                 fontSize: 22,
+                cursor: 'pointer',
               }}
             >
               ‹
             </button>
 
             <div style={{ fontSize: 24, fontWeight: 800, textAlign: 'center' }}>
-              {getMonthLabel(activeMonth)} {activeYear}
+              {getMonthLabel(activeMonth, language)} {activeYear}
             </div>
 
             <button
@@ -327,6 +584,7 @@ export default function BookingDatePage() {
                 border: '1px solid #e4d8ca',
                 background: '#fff',
                 fontSize: 20,
+                cursor: 'pointer',
               }}
             >
               📅
@@ -345,6 +603,7 @@ export default function BookingDatePage() {
                 border: '1px solid #e4d8ca',
                 background: '#fff',
                 fontSize: 22,
+                cursor: 'pointer',
               }}
             >
               ›
@@ -352,7 +611,7 @@ export default function BookingDatePage() {
           </div>
 
           <div style={{ marginTop: 10, color: '#6c645c', fontSize: 14, fontWeight: 700 }}>
-            Today: {today.getDate()} {getShortMonthLabel(today.getMonth())} {today.getFullYear()}
+            {text.today}: {today.getDate()} {getShortMonthLabel(today.getMonth(), language)} {today.getFullYear()}
           </div>
 
           {pickerMode === 'year' && (
@@ -365,7 +624,9 @@ export default function BookingDatePage() {
                 padding: 14,
               }}
             >
-              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>Choose year</div>
+              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>
+                {text.chooseYear}
+              </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 {years.map((year) => {
@@ -385,6 +646,7 @@ export default function BookingDatePage() {
                         background: active ? '#e6f8ec' : '#fff',
                         fontWeight: 800,
                         fontSize: 16,
+                        cursor: 'pointer',
                       }}
                     >
                       {year}
@@ -405,7 +667,9 @@ export default function BookingDatePage() {
                 padding: 14,
               }}
             >
-              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>Choose month</div>
+              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>
+                {text.chooseMonth}
+              </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 {monthDates.map((date) => {
@@ -425,9 +689,10 @@ export default function BookingDatePage() {
                         background: active ? '#e6f8ec' : '#fff',
                         fontWeight: 800,
                         fontSize: 15,
+                        cursor: 'pointer',
                       }}
                     >
-                      {getMonthLabel(date.getMonth())} {activeYear}
+                      {getMonthLabel(date.getMonth(), language)} {activeYear}
                     </button>
                   );
                 })}
@@ -464,13 +729,18 @@ export default function BookingDatePage() {
                     padding: '14px 10px',
                     textAlign: 'center',
                     opacity: disabled ? 0.8 : 1,
+                    cursor: disabled ? 'not-allowed' : 'pointer',
                     ...styles,
                   }}
                 >
-                  <div style={{ fontSize: 13, fontWeight: 700 }}>{getWeekdayShort(date)}</div>
-                  <div style={{ fontSize: 26, fontWeight: 900, marginTop: 4 }}>{date.getDate()}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>
+                    {getWeekdayShort(date, language)}
+                  </div>
+                  <div style={{ fontSize: 26, fontWeight: 900, marginTop: 4 }}>
+                    {date.getDate()}
+                  </div>
                   <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4 }}>
-                    {getShortMonthLabel(date.getMonth())}
+                    {getShortMonthLabel(date.getMonth(), language)}
                   </div>
                 </button>
               );
@@ -498,7 +768,7 @@ export default function BookingDatePage() {
                   display: 'inline-block',
                 }}
               />
-              Available
+              {text.available}
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -512,7 +782,7 @@ export default function BookingDatePage() {
                   display: 'inline-block',
                 }}
               />
-              Unavailable
+              {text.unavailable}
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -526,7 +796,7 @@ export default function BookingDatePage() {
                   display: 'inline-block',
                 }}
               />
-              Today
+              {text.todayLabel}
             </div>
           </div>
         </div>
@@ -553,11 +823,13 @@ export default function BookingDatePage() {
           }}
         >
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>Selected date</div>
+            <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>
+              {text.selectedDate}
+            </div>
             <div style={{ fontSize: 22, fontWeight: 900, marginTop: 6 }}>
               {selectedDate
-                ? `${selectedDate.getDate()} ${getShortMonthLabel(selectedDate.getMonth())} ${selectedDate.getFullYear()}`
-                : 'Not selected'}
+                ? `${selectedDate.getDate()} ${getShortMonthLabel(selectedDate.getMonth(), language)} ${selectedDate.getFullYear()}`
+                : text.notSelected}
             </div>
           </div>
 
@@ -568,7 +840,7 @@ export default function BookingDatePage() {
 
               const servicesEncoded = encodeURIComponent(selectedServiceSlugs.join(','));
               const dateEncoded = encodeURIComponent(
-                `${selectedDate.getDate()} ${getShortMonthLabel(selectedDate.getMonth())} ${selectedDate.getFullYear()}`
+                `${selectedDate.getDate()} ${getShortMonthLabel(selectedDate.getMonth(), language)} ${selectedDate.getFullYear()}`
               );
 
               router.push(
@@ -583,9 +855,10 @@ export default function BookingDatePage() {
               padding: '18px 26px',
               fontWeight: 800,
               fontSize: 18,
+              cursor: selectedDate ? 'pointer' : 'not-allowed',
             }}
           >
-            Choose time
+            {text.chooseTime}
           </button>
         </div>
       </div>
