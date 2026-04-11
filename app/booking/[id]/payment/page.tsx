@@ -52,7 +52,7 @@ function getTexts(language: AppLanguage) {
     return {
       masterNotFound: 'Специалист не найден',
       selectedServicesNotFound: 'Выбранные услуги не найдены',
-      holdDeposit: 'Внести депозит',
+      holdDeposit: 'Оплата депозита',
       holdDepositAmount: 'Депозит £5',
       selectedProcedures: 'Выбранные процедуры',
       totalDuration: 'Общая длительность',
@@ -68,6 +68,15 @@ function getTexts(language: AppLanguage) {
       secureBookingFee: 'Безопасный сбор за бронь',
       holdDepositButton: 'Заморозить депозит £5',
       emptyValue: '—',
+      choosePaymentMethod: 'Способ оплаты',
+      protectedPayment: 'Безопасная оплата',
+      protectedPaymentSub: 'Ваш депозит защищён системой MapBook',
+      card: 'Банковская карта',
+      paypal: 'PayPal',
+      appleGoogle: 'Apple Pay / Google Pay',
+      paymentReady: 'Готово к оплате',
+      bookingSummary: 'Сводка бронирования',
+      paymentWillUnlock: 'Контакты и точный адрес откроются после оплаты',
     };
   }
 
@@ -75,7 +84,7 @@ function getTexts(language: AppLanguage) {
     return {
       masterNotFound: 'Profesional no encontrado',
       selectedServicesNotFound: 'Servicios seleccionados no encontrados',
-      holdDeposit: 'Pagar depósito',
+      holdDeposit: 'Pago del depósito',
       holdDepositAmount: 'Depósito de £5',
       selectedProcedures: 'Procedimientos seleccionados',
       totalDuration: 'Duración total',
@@ -91,6 +100,15 @@ function getTexts(language: AppLanguage) {
       secureBookingFee: 'Tarifa segura de reserva',
       holdDepositButton: 'Retener depósito de £5',
       emptyValue: '—',
+      choosePaymentMethod: 'Método de pago',
+      protectedPayment: 'Pago seguro',
+      protectedPaymentSub: 'Tu depósito está protegido por el sistema MapBook',
+      card: 'Tarjeta bancaria',
+      paypal: 'PayPal',
+      appleGoogle: 'Apple Pay / Google Pay',
+      paymentReady: 'Listo para pagar',
+      bookingSummary: 'Resumen de la reserva',
+      paymentWillUnlock: 'Los contactos y la dirección exacta se abrirán después del pago',
     };
   }
 
@@ -98,7 +116,7 @@ function getTexts(language: AppLanguage) {
     return {
       masterNotFound: 'Specialista nebyl nalezen',
       selectedServicesNotFound: 'Vybrané služby nebyly nalezeny',
-      holdDeposit: 'Zaplatit zálohu',
+      holdDeposit: 'Platba zálohy',
       holdDepositAmount: 'Záloha £5',
       selectedProcedures: 'Vybrané procedury',
       totalDuration: 'Celková délka',
@@ -114,6 +132,15 @@ function getTexts(language: AppLanguage) {
       secureBookingFee: 'Bezpečný rezervační poplatek',
       holdDepositButton: 'Zablokovat zálohu £5',
       emptyValue: '—',
+      choosePaymentMethod: 'Způsob platby',
+      protectedPayment: 'Bezpečná platba',
+      protectedPaymentSub: 'Vaše záloha je chráněna systémem MapBook',
+      card: 'Platební karta',
+      paypal: 'PayPal',
+      appleGoogle: 'Apple Pay / Google Pay',
+      paymentReady: 'Připraveno k platbě',
+      bookingSummary: 'Souhrn rezervace',
+      paymentWillUnlock: 'Kontakty a přesná adresa se otevřou po zaplacení',
     };
   }
 
@@ -121,7 +148,7 @@ function getTexts(language: AppLanguage) {
     return {
       masterNotFound: 'Spezialist nicht gefunden',
       selectedServicesNotFound: 'Ausgewählte Leistungen nicht gefunden',
-      holdDeposit: 'Anzahlung leisten',
+      holdDeposit: 'Anzahlungszahlung',
       holdDepositAmount: '£5 Anzahlung',
       selectedProcedures: 'Ausgewählte Behandlungen',
       totalDuration: 'Gesamtdauer',
@@ -137,6 +164,15 @@ function getTexts(language: AppLanguage) {
       secureBookingFee: 'Sichere Buchungsgebühr',
       holdDepositButton: '£5 Anzahlung reservieren',
       emptyValue: '—',
+      choosePaymentMethod: 'Zahlungsmethode',
+      protectedPayment: 'Sichere Zahlung',
+      protectedPaymentSub: 'Deine Anzahlung ist durch das MapBook-System geschützt',
+      card: 'Bankkarte',
+      paypal: 'PayPal',
+      appleGoogle: 'Apple Pay / Google Pay',
+      paymentReady: 'Bereit zur Zahlung',
+      bookingSummary: 'Buchungsübersicht',
+      paymentWillUnlock: 'Kontakte und genaue Adresse werden nach der Zahlung geöffnet',
     };
   }
 
@@ -144,7 +180,7 @@ function getTexts(language: AppLanguage) {
     return {
       masterNotFound: 'Specjalista nie został znaleziony',
       selectedServicesNotFound: 'Nie znaleziono wybranych usług',
-      holdDeposit: 'Wpłać depozyt',
+      holdDeposit: 'Płatność depozytu',
       holdDepositAmount: 'Depozyt £5',
       selectedProcedures: 'Wybrane zabiegi',
       totalDuration: 'Łączny czas',
@@ -160,13 +196,22 @@ function getTexts(language: AppLanguage) {
       secureBookingFee: 'Bezpieczna opłata rezerwacyjna',
       holdDepositButton: 'Zablokuj depozyt £5',
       emptyValue: '—',
+      choosePaymentMethod: 'Metoda płatności',
+      protectedPayment: 'Bezpieczna płatność',
+      protectedPaymentSub: 'Twój depozyt jest chroniony przez system MapBook',
+      card: 'Karta bankowa',
+      paypal: 'PayPal',
+      appleGoogle: 'Apple Pay / Google Pay',
+      paymentReady: 'Gotowe do płatności',
+      bookingSummary: 'Podsumowanie rezerwacji',
+      paymentWillUnlock: 'Kontakty i dokładny adres otworzą się po płatności',
     };
   }
 
   return {
     masterNotFound: 'Master not found',
     selectedServicesNotFound: 'Selected services not found',
-    holdDeposit: 'Hold deposit',
+    holdDeposit: 'Deposit payment',
     holdDepositAmount: '£5 hold deposit',
     selectedProcedures: 'Selected procedures',
     totalDuration: 'Total duration',
@@ -182,8 +227,26 @@ function getTexts(language: AppLanguage) {
     secureBookingFee: 'Secure booking fee',
     holdDepositButton: 'Hold £5 deposit',
     emptyValue: '—',
+    choosePaymentMethod: 'Payment method',
+    protectedPayment: 'Protected payment',
+    protectedPaymentSub: 'Your deposit is protected by the MapBook system',
+    card: 'Bank card',
+    paypal: 'PayPal',
+    appleGoogle: 'Apple Pay / Google Pay',
+    paymentReady: 'Ready to pay',
+    bookingSummary: 'Booking summary',
+    paymentWillUnlock: 'Contacts and exact address will unlock after payment',
   };
 }
+
+function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange') {
+  if (kind === 'green') return { background: '#eef9f1', color: '#2fa35a' };
+  if (kind === 'blue') return { background: '#eef4ff', color: '#2f7cf6' };
+  if (kind === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
+  return { background: '#fff5e8', color: '#d68612' };
+}
+
+type PaymentMethod = 'card' | 'paypal' | 'wallet';
 
 export default function BookingPaymentPage() {
   const params = useParams();
@@ -191,6 +254,7 @@ export default function BookingPaymentPage() {
   const searchParams = useSearchParams();
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('card');
 
   const text = useMemo(() => getTexts(language), [language]);
   const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
@@ -243,14 +307,21 @@ export default function BookingPaymentPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fcf8f2',
+        background: '#fbf7ef',
         fontFamily: 'Arial, sans-serif',
-        color: '#1d1712',
-        paddingBottom: 110,
+        color: '#17130f',
+        paddingBottom: 120,
       }}
     >
-      <div style={{ maxWidth: 420, margin: '0 auto', padding: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: 20 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '54px 1fr 54px',
+            alignItems: 'center',
+            gap: 12,
+          }}
+        >
           <button
             onClick={() => router.back()}
             style={{
@@ -261,14 +332,33 @@ export default function BookingPaymentPage() {
               background: '#fff',
               fontSize: 24,
               cursor: 'pointer',
+              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
             }}
           >
             ←
           </button>
 
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 30, fontWeight: 800 }}>{text.holdDeposit}</div>
-            <div style={{ marginTop: 8, color: '#7a7066' }}>{text.holdDepositAmount}</div>
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 900,
+                color: '#17130f',
+                lineHeight: 1.05,
+              }}
+            >
+              {text.holdDeposit}
+            </div>
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 15,
+                color: '#7a7066',
+                fontWeight: 700,
+              }}
+            >
+              {text.holdDepositAmount}
+            </div>
           </div>
 
           <button
@@ -281,6 +371,7 @@ export default function BookingPaymentPage() {
               background: '#fff',
               fontSize: 22,
               cursor: 'pointer',
+              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
             }}
           >
             ⌂
@@ -289,48 +380,260 @@ export default function BookingPaymentPage() {
 
         <div
           style={{
-            marginTop: 22,
-            background: '#fff',
-            border: '1px solid #e4d8ca',
-            borderRadius: 28,
+            marginTop: 18,
+            borderRadius: 30,
+            border: '1px solid #f0e3d7',
+            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
             padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 800 }}>{text.selectedProcedures}</div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              marginBottom: 12,
+            }}
+          >
+            <div
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 18,
+                background: '#eef9f1',
+                color: '#2fa35a',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 26,
+              }}
+            >
+              🛡️
+            </div>
 
-          <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div>
+              <div
+                style={{
+                  fontSize: 20,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {text.protectedPayment}
+              </div>
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  color: '#7b7268',
+                  fontWeight: 700,
+                }}
+              >
+                {text.protectedPaymentSub}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 10,
+            }}
+          >
+            <span
+              style={{
+                ...badgeStyle('green'),
+                borderRadius: 999,
+                padding: '10px 14px',
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              {text.paymentReady}
+            </span>
+
+            <span
+              style={{
+                ...badgeStyle('blue'),
+                borderRadius: 999,
+                padding: '10px 14px',
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              {text.paymentWillUnlock}
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 16,
+            borderRadius: 30,
+            border: '1px solid #efe4d7',
+            background: '#fff',
+            padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 20,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 12,
+            }}
+          >
+            {text.choosePaymentMethod}
+          </div>
+
+          <div style={{ display: 'grid', gap: 10 }}>
+            {[
+              { id: 'card' as PaymentMethod, icon: '💳', title: text.card, color: 'pink' as const },
+              { id: 'paypal' as PaymentMethod, icon: '🅿️', title: text.paypal, color: 'blue' as const },
+              { id: 'wallet' as PaymentMethod, icon: '📱', title: text.appleGoogle, color: 'green' as const },
+            ].map((method) => {
+              const active = selectedMethod === method.id;
+              return (
+                <button
+                  key={method.id}
+                  type="button"
+                  onClick={() => setSelectedMethod(method.id)}
+                  style={{
+                    width: '100%',
+                    borderRadius: 22,
+                    border: active ? '2px solid #ff4fa0' : '1px solid #efe4d7',
+                    background: active ? '#fff8fb' : '#fcfaf6',
+                    padding: 14,
+                    display: 'grid',
+                    gridTemplateColumns: '46px 1fr auto',
+                    gap: 12,
+                    alignItems: 'center',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 46,
+                      height: 46,
+                      borderRadius: 16,
+                      ...badgeStyle(method.color),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 22,
+                    }}
+                  >
+                    {method.icon}
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
+                    {method.title}
+                  </div>
+
+                  <div
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 999,
+                      border: active ? '7px solid #ff4fa0' : '2px solid #d8d0c5',
+                      background: '#fff',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 16,
+            borderRadius: 30,
+            border: '1px solid #efe4d7',
+            background: '#fff',
+            padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 20,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 12,
+            }}
+          >
+            {text.selectedProcedures}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {selectedItems.map((item) => (
               <div
                 key={item.slug}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '56px 1fr auto',
+                  gridTemplateColumns: '64px 1fr auto',
                   gap: 12,
                   alignItems: 'center',
                   padding: 10,
-                  borderRadius: 18,
-                  background: '#faf6ef',
+                  borderRadius: 20,
+                  background: '#fcfaf6',
+                  border: '1px solid #f1e8dc',
                 }}
               >
                 <img
                   src={item.image}
                   alt={item.title}
                   style={{
-                    width: 56,
-                    height: 56,
+                    width: 64,
+                    height: 64,
                     objectFit: 'cover',
-                    borderRadius: 14,
+                    borderRadius: 16,
+                    display: 'block',
                   }}
                 />
 
                 <div>
-                  <div style={{ fontSize: 17, fontWeight: 800 }}>{item.title}</div>
-                  <div style={{ marginTop: 4, color: '#746b62', fontSize: 14 }}>
+                  <div
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
+                    {item.title}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 4,
+                      color: '#746b62',
+                      fontSize: 14,
+                      fontWeight: 700,
+                    }}
+                  >
                     {item.duration}
                   </div>
                 </div>
 
-                <div style={{ fontSize: 16, fontWeight: 800 }}>
+                <div
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
                   {formatDisplayPrice(item.price)}
                 </div>
               </div>
@@ -348,14 +651,27 @@ export default function BookingPaymentPage() {
             <div
               style={{
                 background: '#f7f1e8',
-                borderRadius: 18,
-                padding: 12,
+                borderRadius: 20,
+                padding: 14,
               }}
             >
-              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: '#6c645c',
+                  fontWeight: 800,
+                }}
+              >
                 {text.totalDuration}
               </div>
-              <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
+              <div
+                style={{
+                  fontSize: 24,
+                  fontWeight: 900,
+                  marginTop: 6,
+                  color: '#17130f',
+                }}
+              >
                 {formatMinutes(totalMinutes, language)}
               </div>
             </div>
@@ -363,28 +679,63 @@ export default function BookingPaymentPage() {
             <div
               style={{
                 background: '#f7f1e8',
-                borderRadius: 18,
-                padding: 12,
+                borderRadius: 20,
+                padding: 14,
               }}
             >
-              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: '#6c645c',
+                  fontWeight: 800,
+                }}
+              >
                 {text.totalPrice}
               </div>
-              <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
+              <div
+                style={{
+                  fontSize: 24,
+                  fontWeight: 900,
+                  marginTop: 6,
+                  color: '#17130f',
+                }}
+              >
                 {formatDisplayPrice(totalPrice)}
               </div>
             </div>
           </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 16,
+            borderRadius: 30,
+            border: '1px solid #efe4d7',
+            background: '#fff',
+            padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 20,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 12,
+            }}
+          >
+            {text.bookingSummary}
+          </div>
 
           <div
             style={{
-              marginTop: 18,
-              background: '#e0f2e3',
-              color: '#1f6d35',
               borderRadius: 22,
-              padding: 18,
-              fontWeight: 700,
-              lineHeight: 1.5,
+              background: '#eef9f1',
+              color: '#1f6d35',
+              padding: 16,
+              fontWeight: 800,
+              lineHeight: 1.55,
+              fontSize: 14,
             }}
           >
             {text.holdInfoLine1}
@@ -394,25 +745,44 @@ export default function BookingPaymentPage() {
 
           <div
             style={{
-              marginTop: 18,
-              background: '#f8f4ee',
-              color: '#5e554d',
+              marginTop: 14,
               borderRadius: 22,
-              padding: 18,
-              lineHeight: 1.6,
+              background: '#fcfaf6',
+              border: '1px solid #f1e8dc',
+              padding: 16,
+              color: '#5e554d',
+              lineHeight: 1.7,
+              fontSize: 14,
+              fontWeight: 700,
             }}
           >
-            {text.date}: {date}
-            <br />
-            {text.time}: {time}
-            <br />
-            {text.customer}: {firstName} {lastName}
-            <br />
-            {text.phone}: {phone}
-            <br />
-            {text.email}: {email || text.emptyValue}
-            <br />
-            {text.social}: {social || text.emptyValue}
+            <div>
+              {text.date}: <span style={{ color: '#17130f', fontWeight: 900 }}>{date}</span>
+            </div>
+            <div>
+              {text.time}: <span style={{ color: '#17130f', fontWeight: 900 }}>{time}</span>
+            </div>
+            <div>
+              {text.customer}:{' '}
+              <span style={{ color: '#17130f', fontWeight: 900 }}>
+                {firstName} {lastName}
+              </span>
+            </div>
+            <div>
+              {text.phone}: <span style={{ color: '#17130f', fontWeight: 900 }}>{phone}</span>
+            </div>
+            <div>
+              {text.email}:{' '}
+              <span style={{ color: '#17130f', fontWeight: 900 }}>
+                {email || text.emptyValue}
+              </span>
+            </div>
+            <div>
+              {text.social}:{' '}
+              <span style={{ color: '#17130f', fontWeight: 900 }}>
+                {social || text.emptyValue}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -423,20 +793,43 @@ export default function BookingPaymentPage() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: '#fff',
+          background: 'rgba(255,255,255,0.96)',
+          backdropFilter: 'blur(10px)',
           borderTop: '1px solid #e6ddd1',
-          padding: '14px 16px',
+          padding: '14px 16px calc(14px + env(safe-area-inset-bottom))',
         }}
       >
-        <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 14, alignItems: 'center' }}>
+        <div
+          style={{
+            maxWidth: 430,
+            margin: '0 auto',
+            display: 'flex',
+            gap: 14,
+            alignItems: 'center',
+          }}
+        >
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>
+            <div
+              style={{
+                fontSize: 13,
+                color: '#6c645c',
+                fontWeight: 800,
+              }}
+            >
               {text.secureBookingFee}
             </div>
-            <div style={{ fontSize: 30, fontWeight: 900, marginTop: 6 }}>
+            <div
+              style={{
+                fontSize: 30,
+                fontWeight: 900,
+                marginTop: 4,
+                color: '#17130f',
+              }}
+            >
               {formatDisplayPrice(5)}
             </div>
           </div>
+
           <button
             onClick={() =>
               router.push(
@@ -453,13 +846,15 @@ export default function BookingPaymentPage() {
             }
             style={{
               border: 'none',
-              background: '#2e9746',
+              background: 'linear-gradient(180deg, #2fa35a 0%, #238247 100%)',
               color: '#fff',
-              borderRadius: 24,
-              padding: '18px 26px',
-              fontWeight: 800,
-              fontSize: 18,
+              borderRadius: 22,
+              padding: '18px 24px',
+              fontWeight: 900,
+              fontSize: 16,
               cursor: 'pointer',
+              boxShadow: '0 12px 24px rgba(47,163,90,0.20)',
+              whiteSpace: 'nowrap',
             }}
           >
             {text.holdDepositButton}
