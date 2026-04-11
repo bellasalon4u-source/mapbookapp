@@ -1,12 +1,18 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { getMasterById } from '../../../../services/masters';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../../services/i18n';
+import { formatDisplayPrice } from '../../../../services/currencyDisplay';
 
 function parseDurationToMinutes(value: string) {
-  const hourMatch = value.match(/(\d+)\s*h/);
-  const minuteMatch = value.match(/(\d+)\s*m/);
+  const hourMatch = value.match(/(\d+)\s*h/i);
+  const minuteMatch = value.match(/(\d+)\s*m/i);
 
   const hours = hourMatch ? Number(hourMatch[1]) : 0;
   const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
@@ -14,19 +20,155 @@ function parseDurationToMinutes(value: string) {
   return hours * 60 + minutes;
 }
 
-function formatMinutes(minutes: number) {
+function formatMinutes(minutes: number, language: AppLanguage) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
+
+  if (language === 'RU') {
+    if (h > 0 && m > 0) return `${h}ч ${m}м`;
+    if (h > 0) return `${h}ч`;
+    return `${m}м`;
+  }
+
+  if (language === 'DE') {
+    if (h > 0 && m > 0) return `${h}Std ${m}Min`;
+    if (h > 0) return `${h}Std`;
+    return `${m}Min`;
+  }
+
+  if (language === 'ES' || language === 'CZ' || language === 'PL') {
+    if (h > 0 && m > 0) return `${h}h ${m}min`;
+    if (h > 0) return `${h}h`;
+    return `${m}min`;
+  }
 
   if (h > 0 && m > 0) return `${h}h ${m}m`;
   if (h > 0) return `${h}h`;
   return `${m}m`;
 }
 
+function getTexts(language: AppLanguage) {
+  if (language === 'RU') {
+    return {
+      masterNotFound: 'Специалист не найден',
+      selectedServicesNotFound: 'Выбранные услуги не найдены',
+      yourDetails: 'Ваши данные',
+      selectedProcedures: 'Выбранные процедуры',
+      totalDuration: 'Общая длительность',
+      totalPrice: 'Общая цена',
+      firstName: 'Имя',
+      lastName: 'Фамилия',
+      phone: 'Телефон',
+      email: 'Email',
+      social: 'Соцсеть / мессенджер',
+      nextStep: 'Следующий шаг',
+      holdDeposit: 'Внести депозит',
+      continue: 'Продолжить',
+    };
+  }
+
+  if (language === 'ES') {
+    return {
+      masterNotFound: 'Profesional no encontrado',
+      selectedServicesNotFound: 'Servicios seleccionados no encontrados',
+      yourDetails: 'Tus datos',
+      selectedProcedures: 'Procedimientos seleccionados',
+      totalDuration: 'Duración total',
+      totalPrice: 'Precio total',
+      firstName: 'Nombre',
+      lastName: 'Apellido',
+      phone: 'Teléfono',
+      email: 'Email',
+      social: 'Red social / mensajero',
+      nextStep: 'Siguiente paso',
+      holdDeposit: 'Pagar depósito',
+      continue: 'Continuar',
+    };
+  }
+
+  if (language === 'CZ') {
+    return {
+      masterNotFound: 'Specialista nebyl nalezen',
+      selectedServicesNotFound: 'Vybrané služby nebyly nalezeny',
+      yourDetails: 'Vaše údaje',
+      selectedProcedures: 'Vybrané procedury',
+      totalDuration: 'Celková délka',
+      totalPrice: 'Celková cena',
+      firstName: 'Jméno',
+      lastName: 'Příjmení',
+      phone: 'Telefon',
+      email: 'Email',
+      social: 'Sociální síť / messenger',
+      nextStep: 'Další krok',
+      holdDeposit: 'Zaplatit zálohu',
+      continue: 'Pokračovat',
+    };
+  }
+
+  if (language === 'DE') {
+    return {
+      masterNotFound: 'Spezialist nicht gefunden',
+      selectedServicesNotFound: 'Ausgewählte Leistungen nicht gefunden',
+      yourDetails: 'Deine Daten',
+      selectedProcedures: 'Ausgewählte Behandlungen',
+      totalDuration: 'Gesamtdauer',
+      totalPrice: 'Gesamtpreis',
+      firstName: 'Vorname',
+      lastName: 'Nachname',
+      phone: 'Telefon',
+      email: 'Email',
+      social: 'Soziales Netzwerk / Messenger',
+      nextStep: 'Nächster Schritt',
+      holdDeposit: 'Anzahlung leisten',
+      continue: 'Weiter',
+    };
+  }
+
+  if (language === 'PL') {
+    return {
+      masterNotFound: 'Specjalista nie został znaleziony',
+      selectedServicesNotFound: 'Nie znaleziono wybranych usług',
+      yourDetails: 'Twoje dane',
+      selectedProcedures: 'Wybrane zabiegi',
+      totalDuration: 'Łączny czas',
+      totalPrice: 'Łączna cena',
+      firstName: 'Imię',
+      lastName: 'Nazwisko',
+      phone: 'Telefon',
+      email: 'Email',
+      social: 'Social media / komunikator',
+      nextStep: 'Następny krok',
+      holdDeposit: 'Wpłać depozyt',
+      continue: 'Dalej',
+    };
+  }
+
+  return {
+    masterNotFound: 'Master not found',
+    selectedServicesNotFound: 'Selected services not found',
+    yourDetails: 'Your details',
+    selectedProcedures: 'Selected procedures',
+    totalDuration: 'Total duration',
+    totalPrice: 'Total price',
+    firstName: 'First name',
+    lastName: 'Last name',
+    phone: 'Phone',
+    email: 'Email',
+    social: 'Social / messenger',
+    nextStep: 'Next step',
+    holdDeposit: 'Hold deposit',
+    continue: 'Continue',
+  };
+}
+
 export default function BookingDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+
+  const text = useMemo(() => getTexts(language), [language]);
 
   const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
 
@@ -40,8 +182,20 @@ export default function BookingDetailsPage() {
   const [email, setEmail] = useState('');
   const [social, setSocial] = useState('');
 
+  useEffect(() => {
+    setLanguage(getSavedLanguage());
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    return () => {
+      unsubLanguage();
+    };
+  }, []);
+
   if (!master) {
-    return <main style={{ padding: 24 }}>Master not found</main>;
+    return <main style={{ padding: 24 }}>{text.masterNotFound}</main>;
   }
 
   const selectedServiceSlugs = servicesParam
@@ -54,7 +208,7 @@ export default function BookingDetailsPage() {
   );
 
   if (!selectedItems.length) {
-    return <main style={{ padding: 24 }}>Selected services not found</main>;
+    return <main style={{ padding: 24 }}>{text.selectedServicesNotFound}</main>;
   }
 
   const totalPrice = selectedItems.reduce((sum, item) => sum + item.price, 0);
@@ -96,12 +250,13 @@ export default function BookingDetailsPage() {
               border: '1px solid #e7ddd0',
               background: '#fff',
               fontSize: 24,
+              cursor: 'pointer',
             }}
           >
             ←
           </button>
 
-          <div style={{ fontSize: 30, fontWeight: 800 }}>Your details</div>
+          <div style={{ fontSize: 30, fontWeight: 800 }}>{text.yourDetails}</div>
 
           <button
             onClick={() => router.push('/')}
@@ -112,6 +267,7 @@ export default function BookingDetailsPage() {
               border: '1px solid #e7ddd0',
               background: '#fff',
               fontSize: 22,
+              cursor: 'pointer',
             }}
           >
             ⌂
@@ -126,7 +282,7 @@ export default function BookingDetailsPage() {
             padding: 18,
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 800 }}>Selected procedures</div>
+          <div style={{ fontSize: 22, fontWeight: 800 }}>{text.selectedProcedures}</div>
 
           <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {selectedItems.map((item) => (
@@ -160,7 +316,9 @@ export default function BookingDetailsPage() {
                   </div>
                 </div>
 
-                <div style={{ fontSize: 16, fontWeight: 800 }}>£{item.price}</div>
+                <div style={{ fontSize: 16, fontWeight: 800 }}>
+                  {formatDisplayPrice(item.price)}
+                </div>
               </div>
             ))}
           </div>
@@ -180,9 +338,11 @@ export default function BookingDetailsPage() {
                 padding: 12,
               }}
             >
-              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>Total duration</div>
+              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>
+                {text.totalDuration}
+              </div>
               <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
-                {formatMinutes(totalMinutes)}
+                {formatMinutes(totalMinutes, language)}
               </div>
             </div>
 
@@ -193,9 +353,11 @@ export default function BookingDetailsPage() {
                 padding: 12,
               }}
             >
-              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>Total price</div>
+              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>
+                {text.totalPrice}
+              </div>
               <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
-                £{totalPrice}
+                {formatDisplayPrice(totalPrice)}
               </div>
             </div>
           </div>
@@ -218,7 +380,7 @@ export default function BookingDetailsPage() {
             <input
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              placeholder="First name"
+              placeholder={text.firstName}
               style={{
                 width: '100%',
                 padding: '18px 18px',
@@ -227,13 +389,14 @@ export default function BookingDetailsPage() {
                 fontSize: 18,
                 outline: 'none',
                 background: '#fff',
+                boxSizing: 'border-box',
               }}
             />
 
             <input
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              placeholder="Last name"
+              placeholder={text.lastName}
               style={{
                 width: '100%',
                 padding: '18px 18px',
@@ -242,13 +405,14 @@ export default function BookingDetailsPage() {
                 fontSize: 18,
                 outline: 'none',
                 background: '#fff',
+                boxSizing: 'border-box',
               }}
             />
 
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="Phone"
+              placeholder={text.phone}
               style={{
                 width: '100%',
                 padding: '18px 18px',
@@ -257,13 +421,14 @@ export default function BookingDetailsPage() {
                 fontSize: 18,
                 outline: 'none',
                 background: '#fff',
+                boxSizing: 'border-box',
               }}
             />
 
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
+              placeholder={text.email}
               style={{
                 width: '100%',
                 padding: '18px 18px',
@@ -272,13 +437,14 @@ export default function BookingDetailsPage() {
                 fontSize: 18,
                 outline: 'none',
                 background: '#fff',
+                boxSizing: 'border-box',
               }}
             />
 
             <input
               value={social}
               onChange={(e) => setSocial(e.target.value)}
-              placeholder="Social / messenger"
+              placeholder={text.social}
               style={{
                 width: '100%',
                 padding: '18px 18px',
@@ -287,6 +453,7 @@ export default function BookingDetailsPage() {
                 fontSize: 18,
                 outline: 'none',
                 background: '#fff',
+                boxSizing: 'border-box',
               }}
             />
           </div>
@@ -314,8 +481,12 @@ export default function BookingDetailsPage() {
           }}
         >
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>Next step</div>
-            <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>Hold deposit</div>
+            <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>
+              {text.nextStep}
+            </div>
+            <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>
+              {text.holdDeposit}
+            </div>
           </div>
 
           <button
@@ -343,9 +514,10 @@ export default function BookingDetailsPage() {
               padding: '18px 26px',
               fontWeight: 800,
               fontSize: 18,
+              cursor: isValid ? 'pointer' : 'not-allowed',
             }}
           >
-            Continue
+            {text.continue}
           </button>
         </div>
       </div>
