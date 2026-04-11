@@ -39,13 +39,13 @@ const RealMap = dynamic(() => import('../components/RealMap'), {
   ssr: false,
 });
 
-const popularSearches = [
-  'Dog hotel',
-  'Carpet cleaning',
-  'Phone repair',
-  'Hair extensions',
-  'Massage',
-  'Moving help',
+const getPopularSearches = (tr: ReturnType<typeof t>) => [
+  tr.popularSearchDogHotel,
+  tr.popularSearchCarpetCleaning,
+  tr.popularSearchPhoneRepair,
+  tr.popularSearchHairExtensions,
+  tr.popularSearchMassage,
+  tr.popularSearchMovingHelp,
 ];
 
 type SearchResult =
@@ -243,7 +243,19 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
   const normalized = String(category || '').toLowerCase();
   const found = categories.find((item) => item.id === normalized);
 
-  if (!found) return 'Service';
+  if (!found) {
+    return language === 'ES'
+      ? 'Servicio'
+      : language === 'RU'
+      ? 'Услуга'
+      : language === 'CZ'
+      ? 'Služba'
+      : language === 'DE'
+      ? 'Service'
+      : language === 'PL'
+      ? 'Usługa'
+      : 'Service';
+  }
 
   const map: Record<string, Record<AppLanguage, string>> = {
     beauty: {
@@ -488,6 +500,7 @@ export default function HomePage() {
   const [currencyVersion, setCurrencyVersion] = useState(0);
 
   const tr = t(language);
+  const popularSearches = getPopularSearches(tr);
 
   const [adSecondsLeft, setAdSecondsLeft] = useState(12 * 3600 + 24 * 60);
   const [adViews] = useState(184);
@@ -1484,11 +1497,7 @@ export default function HomePage() {
                     color: '#223145',
                   }}
                 >
-                  {language === 'RU'
-                    ? `Горячие предложения рядом с ${locationLabel}`
-                    : language === 'ES'
-                    ? `Ofertas cerca de ${locationLabel}`
-                    : `Hot offers near ${locationLabel}`}
+                  {`${tr.hotOffersNear} ${locationLabel}`}
                 </h2>
 
                 <button
@@ -1572,7 +1581,7 @@ export default function HomePage() {
                             boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
                           }}
                         >
-                          Sponsored
+                          {tr.sponsored}
                         </div>
                       </div>
 
@@ -1596,12 +1605,7 @@ export default function HomePage() {
                             color: '#6b7280',
                           }}
                         >
-                          {promo.subtitle ||
-                            (language === 'RU'
-                              ? 'Специальное предложение рядом с вами'
-                              : language === 'ES'
-                              ? 'Oferta especial cerca de ti'
-                              : 'Special offer near you')}
+                          {promo.subtitle || tr.specialOfferNearYou}
                         </div>
 
                         <div
@@ -1612,11 +1616,7 @@ export default function HomePage() {
                             color: '#ff4f93',
                           }}
                         >
-                          {language === 'RU'
-                            ? `Просмотры: ${promo.views}`
-                            : language === 'ES'
-                            ? `Vistas: ${promo.views}`
-                            : `Views: ${promo.views}`}
+                          {`${tr.viewsLabel}: ${promo.views}`}
                         </div>
                       </div>
                     </button>
@@ -1642,7 +1642,7 @@ export default function HomePage() {
                           cursor: 'pointer',
                         }}
                       >
-                        {language === 'RU' ? 'Открыть' : language === 'ES' ? 'Ver' : 'View'}
+                        {tr.viewAction}
                       </button>
 
                       <button
@@ -1659,7 +1659,7 @@ export default function HomePage() {
                           boxShadow: '0 6px 14px rgba(255,79,147,0.25)',
                         }}
                       >
-                        {language === 'RU' ? 'Бронь' : language === 'ES' ? 'Reservar' : 'Book'}
+                        {tr.bookAction}
                       </button>
                     </div>
                   </div>
