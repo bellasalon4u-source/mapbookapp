@@ -9,14 +9,11 @@ import {
   type PromotionItem,
   type PromotionStatus,
 } from '../../../services/promotionsStore';
-import { getSavedLanguage } from '../../../services/i18n';
-
-type AppLang = 'RU' | 'EN' | 'ES';
-
-function normalizeLanguage(value: string): AppLang {
-  if (value === 'RU' || value === 'EN' || value === 'ES') return value;
-  return 'EN';
-}
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
 
 function formatMoney(value: number) {
   return `£${value.toFixed(0)}`;
@@ -35,7 +32,7 @@ function getPromotionDays(item: PromotionItem) {
   return Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
 }
 
-function getTimeLeftLabel(endAt: string, language: AppLang) {
+function getTimeLeftLabel(endAt: string, language: AppLanguage) {
   const end = new Date(endAt).getTime();
   const now = Date.now();
   const diff = end - now;
@@ -43,6 +40,9 @@ function getTimeLeftLabel(endAt: string, language: AppLang) {
   if (diff <= 0) {
     if (language === 'RU') return 'Истекла';
     if (language === 'ES') return 'Finalizada';
+    if (language === 'CZ') return 'Ukončeno';
+    if (language === 'DE') return 'Beendet';
+    if (language === 'PL') return 'Zakończono';
     return 'Ended';
   }
 
@@ -52,6 +52,9 @@ function getTimeLeftLabel(endAt: string, language: AppLang) {
 
   if (language === 'RU') return `${days}д ${hours}ч осталось`;
   if (language === 'ES') return `quedan ${days}d ${hours}h`;
+  if (language === 'CZ') return `zbývá ${days}d ${hours}h`;
+  if (language === 'DE') return `${days}T ${hours}Std übrig`;
+  if (language === 'PL') return `zostało ${days}d ${hours}h`;
   return `${days}d ${hours}h left`;
 }
 
@@ -62,7 +65,7 @@ function isPromotionActiveNow(item: PromotionItem) {
   return item.status === 'active' && now >= start && now <= end;
 }
 
-function getLabels(language: AppLang) {
+function getLabels(language: AppLanguage) {
   if (language === 'RU') {
     return {
       pageTitle: 'Мои рекламы',
@@ -81,9 +84,7 @@ function getLabels(language: AppLang) {
       bookingsSmall: 'Брони',
       radiusSmall: 'Радиус',
       reactivate: 'Активировать повторно',
-      reactivateDisabled: 'Активировать повторно',
       deactivate: 'Деактивировать',
-      expired: 'Истекла',
       noAds: 'У вас пока нет рекламных объявлений',
       noAdsHint: 'Создайте первую рекламу и запустите её после оплаты',
       totalSpent: 'Потрачено',
@@ -111,13 +112,95 @@ function getLabels(language: AppLang) {
       bookingsSmall: 'Reservas',
       radiusSmall: 'Radio',
       reactivate: 'Activar de nuevo',
-      reactivateDisabled: 'Activar de nuevo',
       deactivate: 'Desactivar',
-      expired: 'Finalizada',
       noAds: 'Todavía no tienes anuncios',
       noAdsHint: 'Crea tu primer anuncio y lánzalo después del pago',
       totalSpent: 'Gastado',
       noRefund: 'El dinero del anuncio no se reembolsa',
+      statusActiveIcon: '✓',
+      statusInactiveIcon: '✕',
+    };
+  }
+
+  if (language === 'CZ') {
+    return {
+      pageTitle: 'Moje reklamy',
+      pageSubtitle: 'Vytvářejte, spouštějte a spravujte svou reklamu',
+      activeAds: 'Aktivní',
+      totalViews: 'Zobrazení',
+      bookings: 'Rezervace',
+      radius: 'Rádius',
+      createPromotion: 'Vytvořit reklamu',
+      createPromotionSubtitle: 'Spustit novou reklamu',
+      yourAds: 'Vaše reklamy',
+      active: 'Aktivní',
+      inactive: 'Neaktivní',
+      sponsored: 'Sponsored',
+      views: 'Zobrazení',
+      bookingsSmall: 'Rezervace',
+      radiusSmall: 'Rádius',
+      reactivate: 'Znovu aktivovat',
+      deactivate: 'Deaktivovat',
+      noAds: 'Zatím nemáte žádné reklamy',
+      noAdsHint: 'Vytvořte svou první reklamu a spusťte ji po platbě',
+      totalSpent: 'Utraceno',
+      noRefund: 'Peníze za reklamu se nevracejí',
+      statusActiveIcon: '✓',
+      statusInactiveIcon: '✕',
+    };
+  }
+
+  if (language === 'DE') {
+    return {
+      pageTitle: 'Meine Werbung',
+      pageSubtitle: 'Erstellen, starten und verwalten Sie Ihre Werbung',
+      activeAds: 'Aktiv',
+      totalViews: 'Aufrufe',
+      bookings: 'Buchungen',
+      radius: 'Radius',
+      createPromotion: 'Werbung erstellen',
+      createPromotionSubtitle: 'Neue Werbung starten',
+      yourAds: 'Ihre Anzeigen',
+      active: 'Aktiv',
+      inactive: 'Inaktiv',
+      sponsored: 'Sponsored',
+      views: 'Aufrufe',
+      bookingsSmall: 'Buchungen',
+      radiusSmall: 'Radius',
+      reactivate: 'Erneut aktivieren',
+      deactivate: 'Deaktivieren',
+      noAds: 'Sie haben noch keine Werbeanzeigen',
+      noAdsHint: 'Erstellen Sie Ihre erste Werbung und starten Sie sie nach der Zahlung',
+      totalSpent: 'Ausgegeben',
+      noRefund: 'Werbekosten werden nicht erstattet',
+      statusActiveIcon: '✓',
+      statusInactiveIcon: '✕',
+    };
+  }
+
+  if (language === 'PL') {
+    return {
+      pageTitle: 'Moje reklamy',
+      pageSubtitle: 'Twórz, uruchamiaj i zarządzaj reklamami',
+      activeAds: 'Aktywne',
+      totalViews: 'Wyświetlenia',
+      bookings: 'Rezerwacje',
+      radius: 'Promień',
+      createPromotion: 'Dodaj reklamę',
+      createPromotionSubtitle: 'Uruchom nową reklamę',
+      yourAds: 'Twoje reklamy',
+      active: 'Aktywna',
+      inactive: 'Nieaktywna',
+      sponsored: 'Sponsored',
+      views: 'Wyświetlenia',
+      bookingsSmall: 'Rezerwacje',
+      radiusSmall: 'Promień',
+      reactivate: 'Aktywuj ponownie',
+      deactivate: 'Dezaktywuj',
+      noAds: 'Nie masz jeszcze żadnych reklam',
+      noAdsHint: 'Utwórz swoją pierwszą reklamę i uruchom ją po płatności',
+      totalSpent: 'Wydano',
+      noRefund: 'Pieniądze za reklamę nie podlegają zwrotowi',
       statusActiveIcon: '✓',
       statusInactiveIcon: '✕',
     };
@@ -140,9 +223,7 @@ function getLabels(language: AppLang) {
     bookingsSmall: 'Bookings',
     radiusSmall: 'Radius',
     reactivate: 'Reactivate',
-    reactivateDisabled: 'Reactivate',
     deactivate: 'Deactivate',
-    expired: 'Ended',
     noAds: 'You do not have any promotions yet',
     noAdsHint: 'Create your first promotion and launch it after payment',
     totalSpent: 'Spent',
@@ -155,35 +236,30 @@ function getLabels(language: AppLang) {
 export default function PromotionsPage() {
   const router = useRouter();
 
-  const [language, setLanguage] = useState<AppLang>(normalizeLanguage(getSavedLanguage()));
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [promotions, setPromotions] = useState<PromotionItem[]>([]);
 
   const labels = getLabels(language);
 
   useEffect(() => {
     const load = () => {
-      const currentLanguage = normalizeLanguage(getSavedLanguage());
-      setPromotions(getPromotions(currentLanguage));
+      setPromotions(getPromotions(getSavedLanguage()));
     };
 
     load();
-
     return subscribeToPromotionsStore(load);
   }, []);
 
   useEffect(() => {
-    const syncLanguage = () => {
-      setLanguage(normalizeLanguage(getSavedLanguage()));
-    };
+    setLanguage(getSavedLanguage());
 
-    syncLanguage();
-
-    window.addEventListener('focus', syncLanguage);
-    window.addEventListener('storage', syncLanguage);
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+      setPromotions(getPromotions(nextLanguage));
+    });
 
     return () => {
-      window.removeEventListener('focus', syncLanguage);
-      window.removeEventListener('storage', syncLanguage);
+      unsubLanguage();
     };
   }, []);
 
