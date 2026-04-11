@@ -2,216 +2,191 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import BottomNav from '../../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
 import {
   getReferralState,
   subscribeToReferralStore,
-  type ReferralState,
 } from '../../services/referralStore';
-import { getWalletState, subscribeToWalletStore, type WalletState } from '../../services/walletStore';
+import BottomNav from '../../../components/common/BottomNav';
 
 const inviteTexts = {
   EN: {
     title: 'Invite friends',
     heroTitle: 'Invite a friend — get a free booking',
     heroText:
-      'For every friend who pays their first £5 unlock, you get 1 free booking.',
-    permanent: 'This works permanently',
+      'For every friend who pays their first £5 unlock, you receive 1 free booking reward.',
+    activeForever: 'Works continuously',
     invited: 'Invited',
     paid: 'Paid',
     freeBookings: 'Free bookings',
     yourLink: 'Your link',
-    linkText:
-      'Share your link with friends. They get a £5 first booking bonus, and you get a free booking when they pay.',
-    share: 'Share link',
+    yourLinkText:
+      'Send the link to your friends. They get a £5 bonus for the first booking, and you get a free booking once they pay.',
     copy: 'Copy',
-    howItWorks: 'How it works',
-    step1: 'Invite a friend',
-    step1Text: 'Send your referral link any way you like.',
-    step2: 'Friend registers and pays',
-    step2Text: 'When your friend pays their first £5 unlock, it counts.',
-    step3: 'You get a free booking',
-    step3Text: 'We credit you with 1 free booking for your next unlock.',
+    copied: 'Copied',
+    share: 'Share link',
     invitedFriends: 'Invited friends',
-    bonuses: 'Your bonuses',
-    welcomeBonus: 'Welcome Bonus',
-    referralBonuses: 'Referral bonuses',
-    totalAvailable: 'Total available',
-    copied: 'Link copied',
-    registered: 'Registered',
     paidStatus: 'Paid',
-    rewardEarned: 'Reward earned',
-    pendingPayment: 'Waiting for payment',
+    countedStatus: 'Counted',
+    waitingStatus: 'Waiting for payment',
+    bonuses: 'Your bonuses',
+    welcomeBonus: 'Welcome bonus',
+    referralBonus: 'Referral rewards',
+    totalAvailable: 'Total available',
   },
   ES: {
     title: 'Invitar amigos',
     heroTitle: 'Invita a un amigo — consigue una reserva gratis',
     heroText:
-      'Por cada amigo que pague su primer unlock de £5, recibes 1 reserva gratis.',
-    permanent: 'Funciona siempre',
+      'Por cada amigo que pague su primer unlock de £5, recibes 1 recompensa de reserva gratis.',
+    activeForever: 'Funciona siempre',
     invited: 'Invitados',
     paid: 'Pagaron',
     freeBookings: 'Reservas gratis',
     yourLink: 'Tu enlace',
-    linkText:
-      'Comparte tu enlace con amigos. Ellos reciben un bono de £5 y tú una reserva gratis cuando paguen.',
-    share: 'Compartir enlace',
+    yourLinkText:
+      'Envía el enlace a tus amigos. Ellos reciben un bono de £5 en la primera reserva y tú obtienes una reserva gratis cuando paguen.',
     copy: 'Copiar',
-    howItWorks: 'Cómo funciona',
-    step1: 'Invita a un amigo',
-    step1Text: 'Envía tu enlace como prefieras.',
-    step2: 'El amigo se registra y paga',
-    step2Text: 'Cuando tu amigo paga su primer unlock de £5, cuenta.',
-    step3: 'Recibes una reserva gratis',
-    step3Text: 'Te acreditamos 1 reserva gratis para tu próximo unlock.',
+    copied: 'Copiado',
+    share: 'Compartir enlace',
     invitedFriends: 'Amigos invitados',
+    paidStatus: 'Pagó',
+    countedStatus: 'Contado',
+    waitingStatus: 'Esperando pago',
     bonuses: 'Tus bonos',
-    welcomeBonus: 'Welcome Bonus',
-    referralBonuses: 'Bonos por referidos',
+    welcomeBonus: 'Bono de bienvenida',
+    referralBonus: 'Bonos por referidos',
     totalAvailable: 'Total disponible',
-    copied: 'Enlace copiado',
-    registered: 'Registrado',
-    paidStatus: 'Pagado',
-    rewardEarned: 'Recompensa recibida',
-    pendingPayment: 'Esperando pago',
   },
   RU: {
     title: 'Пригласить друзей',
     heroTitle: 'Пригласите друга — получите бесплатное бронирование',
     heroText:
       'За каждого друга, который оплатит свой первый £5 unlock, вы получите 1 бесплатное бронирование.',
-    permanent: 'Это работает постоянно',
+    activeForever: 'Это работает постоянно',
     invited: 'Приглашено',
     paid: 'Оплатили',
     freeBookings: 'Бесплатных бронирований',
     yourLink: 'Ваша ссылка',
-    linkText:
+    yourLinkText:
       'Отправьте ссылку друзьям. Они получат бонус £5 на первое бронирование, а вы — бесплатное бронирование, когда они оплатят.',
-    share: 'Поделиться ссылкой',
     copy: 'Скопировать',
-    howItWorks: 'Как это работает',
-    step1: 'Пригласите друга',
-    step1Text: 'Отправьте свою ссылку любым удобным способом.',
-    step2: 'Друг регистрируется и оплачивает',
-    step2Text: 'Когда друг оплачивает свой первый £5 unlock, это засчитывается.',
-    step3: 'Вы получаете бесплатное бронирование',
-    step3Text: 'Мы начисляем вам 1 бесплатное бронирование на следующий unlock.',
+    copied: 'Скопировано',
+    share: 'Поделиться ссылкой',
     invitedFriends: 'Приглашённые друзья',
+    paidStatus: 'Оплатил',
+    countedStatus: 'Зачтено',
+    waitingStatus: 'Ожидает оплату',
     bonuses: 'Ваши бонусы',
     welcomeBonus: 'Welcome Bonus',
-    referralBonuses: 'Реферальные бонусы',
+    referralBonus: 'Реферальные бонусы',
     totalAvailable: 'Всего доступно',
-    copied: 'Ссылка скопирована',
-    registered: 'Зарегистрировался',
-    paidStatus: 'Оплатил',
-    rewardEarned: 'Зачтено',
-    pendingPayment: 'Ожидает оплату',
   },
   CZ: {
     title: 'Pozvat přátele',
     heroTitle: 'Pozvěte přítele — získejte rezervaci zdarma',
     heroText:
       'Za každého přítele, který zaplatí svůj první £5 unlock, získáte 1 rezervaci zdarma.',
-    permanent: 'Funguje to trvale',
+    activeForever: 'Funguje neustále',
     invited: 'Pozváno',
     paid: 'Zaplatili',
-    freeBookings: 'Rezervací zdarma',
+    freeBookings: 'Rezervace zdarma',
     yourLink: 'Váš odkaz',
-    linkText:
-      'Pošlete odkaz přátelům. Oni dostanou bonus £5 a vy rezervaci zdarma, když zaplatí.',
-    share: 'Sdílet odkaz',
+    yourLinkText:
+      'Pošlete odkaz přátelům. Oni získají bonus £5 na první rezervaci a vy získáte rezervaci zdarma, když zaplatí.',
     copy: 'Kopírovat',
-    howItWorks: 'Jak to funguje',
-    step1: 'Pozvěte přítele',
-    step1Text: 'Pošlete svůj odkaz jakýmkoliv způsobem.',
-    step2: 'Přítel se zaregistruje a zaplatí',
-    step2Text: 'Když přítel zaplatí svůj první £5 unlock, započítá se to.',
-    step3: 'Získáte rezervaci zdarma',
-    step3Text: 'Připíšeme vám 1 rezervaci zdarma na další unlock.',
+    copied: 'Zkopírováno',
+    share: 'Sdílet odkaz',
     invitedFriends: 'Pozvaní přátelé',
+    paidStatus: 'Zaplatil',
+    countedStatus: 'Započteno',
+    waitingStatus: 'Čeká na platbu',
     bonuses: 'Vaše bonusy',
     welcomeBonus: 'Welcome Bonus',
-    referralBonuses: 'Doporučovací bonusy',
+    referralBonus: 'Bonusy za doporučení',
     totalAvailable: 'Celkem dostupné',
-    copied: 'Odkaz zkopírován',
-    registered: 'Registrován',
-    paidStatus: 'Zaplatil',
-    rewardEarned: 'Započítáno',
-    pendingPayment: 'Čeká na platbu',
   },
   DE: {
     title: 'Freunde einladen',
-    heroTitle: 'Lade einen Freund ein — erhalte eine kostenlose Buchung',
+    heroTitle: 'Freund einladen — kostenlose Buchung erhalten',
     heroText:
       'Für jeden Freund, der seinen ersten £5 Unlock bezahlt, erhältst du 1 kostenlose Buchung.',
-    permanent: 'Das funktioniert dauerhaft',
+    activeForever: 'Funktioniert dauerhaft',
     invited: 'Eingeladen',
     paid: 'Bezahlt',
     freeBookings: 'Kostenlose Buchungen',
     yourLink: 'Dein Link',
-    linkText:
-      'Teile deinen Link mit Freunden. Sie erhalten £5 Bonus, und du eine kostenlose Buchung, wenn sie zahlen.',
-    share: 'Link teilen',
+    yourLinkText:
+      'Sende den Link an deine Freunde. Sie erhalten £5 Bonus für die erste Buchung und du bekommst eine kostenlose Buchung, sobald sie zahlen.',
     copy: 'Kopieren',
-    howItWorks: 'So funktioniert es',
-    step1: 'Freund einladen',
-    step1Text: 'Sende deinen Link auf beliebigem Weg.',
-    step2: 'Freund registriert sich und zahlt',
-    step2Text: 'Wenn dein Freund seinen ersten £5 Unlock zahlt, zählt es.',
-    step3: 'Du erhältst eine kostenlose Buchung',
-    step3Text: 'Wir schreiben dir 1 kostenlose Buchung für deinen nächsten Unlock gut.',
+    copied: 'Kopiert',
+    share: 'Link teilen',
     invitedFriends: 'Eingeladene Freunde',
+    paidStatus: 'Bezahlt',
+    countedStatus: 'Angerechnet',
+    waitingStatus: 'Wartet auf Zahlung',
     bonuses: 'Deine Boni',
     welcomeBonus: 'Welcome Bonus',
-    referralBonuses: 'Empfehlungsboni',
+    referralBonus: 'Empfehlungsboni',
     totalAvailable: 'Insgesamt verfügbar',
-    copied: 'Link kopiert',
-    registered: 'Registriert',
-    paidStatus: 'Bezahlt',
-    rewardEarned: 'Gutgeschrieben',
-    pendingPayment: 'Wartet auf Zahlung',
   },
   PL: {
     title: 'Zaproś znajomych',
-    heroTitle: 'Zaproś znajomego — otrzymaj darmową rezerwację',
+    heroTitle: 'Zaproś znajomego — odbierz darmową rezerwację',
     heroText:
-      'Za każdego znajomego, który opłaci swój pierwszy unlock £5, otrzymasz 1 darmową rezerwację.',
-    permanent: 'To działa cały czas',
+      'Za każdego znajomego, który opłaci swój pierwszy £5 unlock, otrzymasz 1 darmową rezerwację.',
+    activeForever: 'Działa cały czas',
     invited: 'Zaproszono',
     paid: 'Zapłacili',
-    freeBookings: 'Darmowych rezerwacji',
+    freeBookings: 'Darmowe rezerwacje',
     yourLink: 'Twój link',
-    linkText:
-      'Udostępnij link znajomym. Oni dostaną bonus £5, a Ty darmową rezerwację, gdy zapłacą.',
-    share: 'Udostępnij link',
+    yourLinkText:
+      'Wyślij link znajomym. Otrzymają bonus £5 na pierwszą rezerwację, a Ty dostaniesz darmową rezerwację, gdy zapłacą.',
     copy: 'Kopiuj',
-    howItWorks: 'Jak to działa',
-    step1: 'Zaproś znajomego',
-    step1Text: 'Wyślij link w dowolny sposób.',
-    step2: 'Znajomy rejestruje się i płaci',
-    step2Text: 'Gdy znajomy opłaci swój pierwszy unlock £5, zostanie to zaliczone.',
-    step3: 'Otrzymujesz darmową rezerwację',
-    step3Text: 'Przyznamy Ci 1 darmową rezerwację na kolejny unlock.',
+    copied: 'Skopiowano',
+    share: 'Udostępnij link',
     invitedFriends: 'Zaproszeni znajomi',
+    paidStatus: 'Zapłacił',
+    countedStatus: 'Zaliczone',
+    waitingStatus: 'Oczekuje płatności',
     bonuses: 'Twoje bonusy',
     welcomeBonus: 'Welcome Bonus',
-    referralBonuses: 'Bonusy poleceń',
+    referralBonus: 'Bonusy poleceń',
     totalAvailable: 'Łącznie dostępne',
-    copied: 'Skopiowano link',
-    registered: 'Zarejestrowano',
-    paidStatus: 'Zapłacił',
-    rewardEarned: 'Zaliczone',
-    pendingPayment: 'Oczekuje na płatność',
   },
 } as const;
+
+function getStatusStyles(status: string) {
+  if (status === 'paid') {
+    return {
+      background: '#eef9f1',
+      color: '#2fa35a',
+    };
+  }
+
+  if (status === 'counted') {
+    return {
+      background: '#eef4ff',
+      color: '#2f7cf6',
+    };
+  }
+
+  return {
+    background: '#fff5e8',
+    color: '#d68612',
+  };
+}
 
 export default function InviteFriendsPage() {
   const router = useRouter();
 
-  const [language, setLanguage] = useState<AppLanguage>('EN');
-  const [referral, setReferral] = useState<ReferralState>(getReferralState());
-  const [wallet, setWallet] = useState<WalletState>(getWalletState());
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [copied, setCopied] = useState(false);
+  const [referralState, setReferralState] = useState(getReferralState());
 
   useEffect(() => {
     const syncLanguage = () => {
@@ -219,225 +194,526 @@ export default function InviteFriendsPage() {
     };
 
     const syncReferral = () => {
-      setReferral(getReferralState());
-    };
-
-    const syncWallet = () => {
-      setWallet(getWalletState());
+      setReferralState(getReferralState());
     };
 
     syncLanguage();
     syncReferral();
-    syncWallet();
 
-    window.addEventListener('focus', syncLanguage);
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
     const unsubReferral = subscribeToReferralStore(syncReferral);
-    const unsubWallet = subscribeToWalletStore(syncWallet);
 
     return () => {
-      window.removeEventListener('focus', syncLanguage);
+      unsubLanguage();
       unsubReferral();
-      unsubWallet();
     };
   }, []);
 
-  const text = useMemo(
-    () => inviteTexts[language as keyof typeof inviteTexts] || inviteTexts.EN,
-    [language]
-  );
+  const text = inviteTexts[language as keyof typeof inviteTexts] || inviteTexts.EN;
 
-  const totalAvailable = wallet.welcomeBonus + wallet.referralCredits;
+  const shareLink =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/invite/${referralState.referralCode || 'mapbook'}`
+      : `https://mapbook.app/invite/${referralState.referralCode || 'mapbook'}`;
+
+  const referralBonusAmount = useMemo(() => {
+    return Number((referralState.completedReferralsCount || 0) * 5);
+  }, [referralState.completedReferralsCount]);
+
+  const totalAvailable = useMemo(() => {
+    return Number((referralState.welcomeBonus || 0) + referralBonusAmount);
+  }, [referralBonusAmount, referralState.welcomeBonus]);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(referral.referralLink);
-      alert(text.copied);
-    } catch {
-      alert(text.copied);
+      await navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  const getStatusLabel = (status: ReferralState['friends'][number]['status']) => {
-    if (status === 'registered') return text.registered;
-    if (status === 'paid') return text.paidStatus;
-    if (status === 'reward_earned') return text.rewardEarned;
-    return text.pendingPayment;
-  };
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'MapBook Invite',
+          text: shareLink,
+          url: shareLink,
+        });
+        return;
+      }
 
-  const getStatusStyle = (status: ReferralState['friends'][number]['status']) => {
-    if (status === 'reward_earned' || status === 'paid') {
-      return 'bg-[#e8f5ea] text-[#2d8a55]';
+      await handleCopy();
+    } catch (error) {
+      console.error(error);
     }
-
-    if (status === 'pending_payment') {
-      return 'bg-[#fff1df] text-[#c67610]';
-    }
-
-    return 'bg-[#f2ede7] text-[#5c5046]';
   };
 
   return (
-    <main className="min-h-screen bg-[#fcf8f2] px-4 py-6 pb-24">
-      <div className="mx-auto max-w-md">
-        <div className="flex items-center justify-between gap-3">
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#fbf7ef',
+        padding: '20px 16px 110px',
+      }}
+    >
+      <div style={{ maxWidth: 430, margin: '0 auto' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '54px 1fr',
+            alignItems: 'center',
+            gap: 12,
+            marginBottom: 18,
+          }}
+        >
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-xl text-[#241c16] shadow-sm"
+            style={{
+              width: 54,
+              height: 54,
+              borderRadius: 999,
+              border: '1px solid #efe4d7',
+              background: '#fff',
+              fontSize: 26,
+              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              cursor: 'pointer',
+            }}
           >
             ←
           </button>
 
-          <h1 className="text-xl font-bold text-[#1d1712]">{text.title}</h1>
-
-          <div className="h-11 w-11" />
+          <div
+            style={{
+              fontSize: 22,
+              fontWeight: 900,
+              color: '#17130f',
+              textAlign: 'center',
+              paddingRight: 54,
+            }}
+          >
+            {text.title}
+          </div>
         </div>
 
-        <div className="mt-6 rounded-[30px] border border-[#efe4d7] bg-white p-5 shadow-sm">
-          <div className="text-2xl font-extrabold leading-tight text-[#1d1712]">
+        <div
+          style={{
+            borderRadius: 32,
+            border: '1px solid #f0e3d7',
+            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
+            padding: 20,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 22,
+              background: '#fff1f7',
+              color: '#ff4fa0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 30,
+              marginBottom: 16,
+            }}
+          >
+            🎁
+          </div>
+
+          <div
+            style={{
+              fontSize: 28,
+              lineHeight: 1.14,
+              fontWeight: 900,
+              color: '#17130f',
+            }}
+          >
             {text.heroTitle}
           </div>
-          <p className="mt-3 text-sm leading-6 text-[#6f6458]">{text.heroText}</p>
 
-          <div className="mt-4 inline-flex items-center rounded-full bg-[#edf7ed] px-3 py-2 text-xs font-bold text-[#2d8a55]">
-            {text.permanent}
+          <div
+            style={{
+              marginTop: 14,
+              fontSize: 16,
+              lineHeight: 1.7,
+              color: '#756b62',
+              fontWeight: 700,
+            }}
+          >
+            {text.heroText}
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              borderRadius: 999,
+              background: '#eef9f1',
+              color: '#2fa35a',
+              padding: '11px 14px',
+              fontSize: 13,
+              fontWeight: 900,
+            }}
+          >
+            <span>⚡</span>
+            <span>{text.activeForever}</span>
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-3 gap-3">
-          <div className="rounded-[24px] bg-[#2f241c] p-4 text-center text-white shadow-sm">
-            <div className="text-xs text-[#d9cdbd]">{text.invited}</div>
-            <div className="mt-2 text-3xl font-extrabold">{referral.invitedCount}</div>
+        <div
+          style={{
+            marginTop: 16,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: 10,
+          }}
+        >
+          <div
+            style={{
+              borderRadius: 26,
+              padding: 16,
+              background: '#fff1f7',
+              color: '#ff4fa0',
+              boxShadow: '0 10px 24px rgba(255,79,160,0.10)',
+            }}
+          >
+            <div style={{ fontSize: 20, marginBottom: 10 }}>👥</div>
+            <div style={{ fontSize: 12, lineHeight: 1.3, fontWeight: 800, minHeight: 32 }}>
+              {text.invited}
+            </div>
+            <div style={{ marginTop: 10, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
+              {referralState.invitedCount || 0}
+            </div>
           </div>
 
-          <div className="rounded-[24px] bg-[#2f241c] p-4 text-center text-white shadow-sm">
-            <div className="text-xs text-[#d9cdbd]">{text.paid}</div>
-            <div className="mt-2 text-3xl font-extrabold">{referral.paidCount}</div>
+          <div
+            style={{
+              borderRadius: 26,
+              padding: 16,
+              background: '#eef4ff',
+              color: '#2f7cf6',
+              boxShadow: '0 10px 24px rgba(47,124,246,0.10)',
+            }}
+          >
+            <div style={{ fontSize: 20, marginBottom: 10 }}>💳</div>
+            <div style={{ fontSize: 12, lineHeight: 1.3, fontWeight: 800, minHeight: 32 }}>
+              {text.paid}
+            </div>
+            <div style={{ marginTop: 10, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
+              {referralState.completedReferralsCount || 0}
+            </div>
           </div>
 
-          <div className="rounded-[24px] bg-[#2f241c] p-4 text-center text-white shadow-sm">
-            <div className="text-xs text-[#d9cdbd]">{text.freeBookings}</div>
-            <div className="mt-2 text-3xl font-extrabold">
-              {referral.freeBookingsAvailable}
+          <div
+            style={{
+              borderRadius: 26,
+              padding: 16,
+              background: '#eef9f1',
+              color: '#2fa35a',
+              boxShadow: '0 10px 24px rgba(47,163,90,0.10)',
+            }}
+          >
+            <div style={{ fontSize: 20, marginBottom: 10 }}>🎟️</div>
+            <div style={{ fontSize: 12, lineHeight: 1.3, fontWeight: 800, minHeight: 32 }}>
+              {text.freeBookings}
+            </div>
+            <div style={{ marginTop: 10, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
+              {referralState.freeBookingsAvailable || 0}
             </div>
           </div>
         </div>
 
-        <div className="mt-6 rounded-[28px] border border-[#efe4d7] bg-white p-4 shadow-sm">
-          <div className="text-sm font-extrabold text-[#1d1712]">{text.yourLink}</div>
-          <p className="mt-2 text-sm leading-6 text-[#6f6458]">{text.linkText}</p>
+        <div
+          style={{
+            marginTop: 16,
+            borderRadius: 30,
+            border: '1px solid #efe4d7',
+            background: '#fff',
+            padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+            }}
+          >
+            {text.yourLink}
+          </div>
 
-          <div className="mt-4 flex items-center gap-2 rounded-2xl border border-[#efe4d7] bg-[#fffdf9] px-4 py-3">
-            <div className="min-w-0 flex-1 truncate text-sm text-[#1d1712]">
-              {referral.referralLink}
+          <div
+            style={{
+              marginTop: 10,
+              fontSize: 15,
+              lineHeight: 1.7,
+              color: '#756b62',
+              fontWeight: 700,
+            }}
+          >
+            {text.yourLinkText}
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              borderRadius: 24,
+              background: '#fcfaf6',
+              border: '1px solid #efe4d7',
+              padding: 12,
+              display: 'grid',
+              gridTemplateColumns: '1fr auto',
+              gap: 10,
+              alignItems: 'center',
+            }}
+          >
+            <div
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                fontSize: 16,
+                fontWeight: 800,
+                color: '#17130f',
+                padding: '0 4px',
+              }}
+            >
+              {shareLink}
             </div>
+
             <button
               type="button"
               onClick={handleCopy}
-              className="rounded-xl border border-[#efe4d7] bg-white px-3 py-2 text-xs font-bold text-[#2f241c]"
+              style={{
+                minWidth: 118,
+                height: 52,
+                borderRadius: 18,
+                border: '1px solid #f1d9e6',
+                background: copied ? '#eef9f1' : '#fff1f7',
+                color: copied ? '#2fa35a' : '#ff4fa0',
+                fontSize: 15,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
             >
-              {text.copy}
+              {copied ? text.copied : text.copy}
             </button>
           </div>
 
           <button
             type="button"
-            onClick={handleCopy}
-            className="mt-4 w-full rounded-2xl bg-[#2f241c] px-4 py-4 text-sm font-bold text-white"
+            onClick={handleShare}
+            style={{
+              marginTop: 12,
+              width: '100%',
+              height: 56,
+              border: 'none',
+              borderRadius: 20,
+              background: 'linear-gradient(180deg, #ff62aa 0%, #ff4fa0 100%)',
+              color: '#fff',
+              fontSize: 17,
+              fontWeight: 900,
+              boxShadow: '0 12px 24px rgba(255,79,160,0.20)',
+              cursor: 'pointer',
+            }}
           >
             {text.share}
           </button>
         </div>
 
-        <div className="mt-6 rounded-[28px] border border-[#efe4d7] bg-white p-4 shadow-sm">
-          <div className="text-base font-extrabold text-[#1d1712]">{text.howItWorks}</div>
-
-          <div className="mt-4 space-y-4">
-            <div>
-              <div className="text-sm font-bold text-[#1d1712]">1. {text.step1}</div>
-              <div className="mt-1 text-sm leading-6 text-[#6f6458]">{text.step1Text}</div>
-            </div>
-
-            <div>
-              <div className="text-sm font-bold text-[#1d1712]">2. {text.step2}</div>
-              <div className="mt-1 text-sm leading-6 text-[#6f6458]">{text.step2Text}</div>
-            </div>
-
-            <div>
-              <div className="text-sm font-bold text-[#1d1712]">3. {text.step3}</div>
-              <div className="mt-1 text-sm leading-6 text-[#6f6458]">{text.step3Text}</div>
-            </div>
-          </div>
+        <div
+          style={{
+            marginTop: 16,
+            fontSize: 20,
+            fontWeight: 900,
+            color: '#17130f',
+          }}
+        >
+          {text.invitedFriends}
         </div>
 
-        <div className="mt-6">
-          <h2 className="text-lg font-extrabold text-[#1d1712]">{text.invitedFriends}</h2>
+        <div
+          style={{
+            marginTop: 12,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 14,
+          }}
+        >
+          {referralState.invitedFriends.map((friend) => {
+            const statusText =
+              friend.status === 'paid'
+                ? text.paidStatus
+                : friend.status === 'counted'
+                  ? text.countedStatus
+                  : text.waitingStatus;
 
-          <div className="mt-4 space-y-4">
-            {referral.friends.map((friend) => (
+            const statusStyles = getStatusStyles(friend.status);
+
+            return (
               <div
                 key={friend.id}
-                className="rounded-[28px] border border-[#efe4d7] bg-white p-4 shadow-sm"
+                style={{
+                  borderRadius: 28,
+                  background: '#fff',
+                  border: '1px solid #efe4d7',
+                  padding: 16,
+                  boxShadow: '0 10px 24px rgba(44, 23, 10, 0.04)',
+                  display: 'grid',
+                  gridTemplateColumns: '74px 1fr auto',
+                  gap: 14,
+                  alignItems: 'center',
+                }}
               >
-                <div className="flex items-start gap-3">
-                  <img
-                    src={
-                      friend.avatar ||
-                      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80'
-                    }
-                    alt={friend.name}
-                    className="h-14 w-14 rounded-2xl object-cover"
-                  />
+                <img
+                  src={friend.avatar}
+                  alt={friend.name}
+                  style={{
+                    width: 74,
+                    height: 74,
+                    borderRadius: 22,
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
+                />
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-extrabold text-[#1d1712]">
-                          {friend.name}
-                        </div>
-                        <div className="mt-1 text-xs text-[#8a7d70]">
-                          {new Date(friend.joinedAt).toLocaleDateString()}
-                        </div>
-                      </div>
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
+                    {friend.name}
+                  </div>
 
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-bold ${getStatusStyle(friend.status)}`}
-                      >
-                        {getStatusLabel(friend.status)}
-                      </span>
-                    </div>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 14,
+                      color: '#8a7f74',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {friend.date}
                   </div>
                 </div>
+
+                <div
+                  style={{
+                    borderRadius: 999,
+                    padding: '11px 14px',
+                    fontSize: 13,
+                    fontWeight: 900,
+                    whiteSpace: 'nowrap',
+                    ...statusStyles,
+                  }}
+                >
+                  {statusText}
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
 
-        <div className="mt-6 rounded-[28px] border border-[#efe4d7] bg-white p-4 shadow-sm">
-          <div className="text-base font-extrabold text-[#1d1712]">{text.bonuses}</div>
+        <div
+          style={{
+            marginTop: 18,
+            borderRadius: 30,
+            border: '1px solid #efe4d7',
+            background: '#fff',
+            padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 20,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 14,
+            }}
+          >
+            {text.bonuses}
+          </div>
 
-          <div className="mt-4 space-y-3">
-            <div className="flex items-center justify-between gap-3 rounded-2xl bg-[#faf6ef] px-4 py-3">
+          <div
+            style={{
+              display: 'grid',
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                borderRadius: 22,
+                background: '#fff6e8',
+                padding: '16px 18px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 12,
+                alignItems: 'center',
+              }}
+            >
               <div>
-                <div className="text-sm font-bold text-[#1d1712]">{text.welcomeBonus}</div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
+                  {text.welcomeBonus}
+                </div>
               </div>
-              <div className="text-sm font-extrabold text-[#1d1712]">
-                £{wallet.welcomeBonus.toFixed(2)}
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#d68612' }}>
+                £{Number(referralState.welcomeBonus || 0).toFixed(2)}
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-3 rounded-2xl bg-[#faf6ef] px-4 py-3">
+            <div
+              style={{
+                borderRadius: 22,
+                background: '#fff1f7',
+                padding: '16px 18px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 12,
+                alignItems: 'center',
+              }}
+            >
               <div>
-                <div className="text-sm font-bold text-[#1d1712]">{text.referralBonuses}</div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
+                  {text.referralBonus}
+                </div>
               </div>
-              <div className="text-sm font-extrabold text-[#1d1712]">
-                £{wallet.referralCredits.toFixed(2)}
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#ff4fa0' }}>
+                £{referralBonusAmount.toFixed(2)}
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-3 rounded-2xl bg-[#f2ede7] px-4 py-3">
-              <div className="text-sm font-extrabold text-[#1d1712]">{text.totalAvailable}</div>
-              <div className="text-base font-extrabold text-[#1d1712]">
+            <div
+              style={{
+                borderRadius: 24,
+                background: 'linear-gradient(180deg, #eef9f1 0%, #e7f7ed 100%)',
+                padding: '18px 18px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 12,
+                alignItems: 'center',
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 20, fontWeight: 900, color: '#17130f' }}>
+                  {text.totalAvailable}
+                </div>
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 900, color: '#2fa35a' }}>
                 £{totalAvailable.toFixed(2)}
               </div>
             </div>
@@ -445,7 +721,7 @@ export default function InviteFriendsPage() {
         </div>
       </div>
 
-      <BottomNav active="profile" />
+      <BottomNav />
     </main>
   );
 }
