@@ -22,6 +22,21 @@ const bookingsTexts = {
     welcomeBonus: 'Welcome Bonus used',
     referralUsed: 'Referral booking used',
     empty: 'No bookings in this section yet',
+    serviceDetails: 'Service details',
+    bookingSummary: 'Booking summary',
+    total: 'Total',
+    dateTime: 'Date & time',
+    contactAndAddress: 'Contact and address',
+    hiddenUntilPaid: 'Exact address, route and direct contact are available after payment',
+    writeSeller: 'Write to seller',
+    callSeller: 'Call seller',
+    routeToMaster: 'Route to master',
+    exactAddress: 'Exact address',
+    detailsUnlocked: 'Details unlocked',
+    secureBooking: 'Secure booking',
+    providerPhone: 'Phone',
+    providerEmail: 'Email',
+    routeLocked: 'Route after payment',
   },
   ES: {
     title: 'Mis reservas',
@@ -33,6 +48,21 @@ const bookingsTexts = {
     welcomeBonus: 'Welcome Bonus usado',
     referralUsed: 'Reserva por referido usada',
     empty: 'Todavía no hay reservas en esta sección',
+    serviceDetails: 'Detalles del servicio',
+    bookingSummary: 'Resumen de la reserva',
+    total: 'Total',
+    dateTime: 'Fecha y hora',
+    contactAndAddress: 'Contacto y dirección',
+    hiddenUntilPaid: 'La dirección exacta, la ruta y el contacto directo estarán disponibles después del pago',
+    writeSeller: 'Escribir al profesional',
+    callSeller: 'Llamar al profesional',
+    routeToMaster: 'Ruta al profesional',
+    exactAddress: 'Dirección exacta',
+    detailsUnlocked: 'Detalles desbloqueados',
+    secureBooking: 'Reserva segura',
+    providerPhone: 'Teléfono',
+    providerEmail: 'Email',
+    routeLocked: 'Ruta después del pago',
   },
   RU: {
     title: 'Мои бронирования',
@@ -44,6 +74,21 @@ const bookingsTexts = {
     welcomeBonus: 'Использован Welcome Bonus',
     referralUsed: 'Использовано бесплатное бронирование',
     empty: 'В этом разделе пока нет бронирований',
+    serviceDetails: 'Подробнее об услуге',
+    bookingSummary: 'Сводка бронирования',
+    total: 'Итого',
+    dateTime: 'Дата и время',
+    contactAndAddress: 'Контакты и адрес',
+    hiddenUntilPaid: 'Точный адрес, маршрут и прямой контакт доступны только после оплаты',
+    writeSeller: 'Написать мастеру',
+    callSeller: 'Позвонить мастеру',
+    routeToMaster: 'Маршрут к мастеру',
+    exactAddress: 'Точный адрес',
+    detailsUnlocked: 'Доступ открыт',
+    secureBooking: 'Безопасное бронирование',
+    providerPhone: 'Телефон',
+    providerEmail: 'Email',
+    routeLocked: 'Маршрут после оплаты',
   },
   CZ: {
     title: 'Moje rezervace',
@@ -55,6 +100,21 @@ const bookingsTexts = {
     welcomeBonus: 'Použit Welcome Bonus',
     referralUsed: 'Použita rezervace zdarma',
     empty: 'V této sekci zatím nejsou žádné rezervace',
+    serviceDetails: 'Detail služby',
+    bookingSummary: 'Souhrn rezervace',
+    total: 'Celkem',
+    dateTime: 'Datum a čas',
+    contactAndAddress: 'Kontakt a adresa',
+    hiddenUntilPaid: 'Přesná adresa, trasa a přímý kontakt jsou dostupné až po zaplacení',
+    writeSeller: 'Napsat specialistovi',
+    callSeller: 'Zavolat specialistovi',
+    routeToMaster: 'Trasa ke specialistovi',
+    exactAddress: 'Přesná adresa',
+    detailsUnlocked: 'Detaily odemčeny',
+    secureBooking: 'Bezpečná rezervace',
+    providerPhone: 'Telefon',
+    providerEmail: 'Email',
+    routeLocked: 'Trasa po zaplacení',
   },
   DE: {
     title: 'Meine Buchungen',
@@ -66,6 +126,21 @@ const bookingsTexts = {
     welcomeBonus: 'Welcome Bonus verwendet',
     referralUsed: 'Kostenlose Empfehlung verwendet',
     empty: 'In diesem Bereich gibt es noch keine Buchungen',
+    serviceDetails: 'Servicedetails',
+    bookingSummary: 'Buchungsübersicht',
+    total: 'Gesamt',
+    dateTime: 'Datum & Uhrzeit',
+    contactAndAddress: 'Kontakt und Adresse',
+    hiddenUntilPaid: 'Genaue Adresse, Route und direkter Kontakt sind erst nach der Zahlung verfügbar',
+    writeSeller: 'Dem Anbieter schreiben',
+    callSeller: 'Anbieter anrufen',
+    routeToMaster: 'Route zum Anbieter',
+    exactAddress: 'Genaue Adresse',
+    detailsUnlocked: 'Details freigeschaltet',
+    secureBooking: 'Sichere Buchung',
+    providerPhone: 'Telefon',
+    providerEmail: 'E-Mail',
+    routeLocked: 'Route nach Zahlung',
   },
   PL: {
     title: 'Moje rezerwacje',
@@ -77,6 +152,21 @@ const bookingsTexts = {
     welcomeBonus: 'Użyto Welcome Bonus',
     referralUsed: 'Użyto darmowej rezerwacji',
     empty: 'W tej sekcji nie ma jeszcze rezerwacji',
+    serviceDetails: 'Szczegóły usługi',
+    bookingSummary: 'Podsumowanie rezerwacji',
+    total: 'Łącznie',
+    dateTime: 'Data i godzina',
+    contactAndAddress: 'Kontakt i adres',
+    hiddenUntilPaid: 'Dokładny adres, trasa i bezpośredni kontakt są dostępne dopiero po opłacie',
+    writeSeller: 'Napisz do specjalisty',
+    callSeller: 'Zadzwoń do specjalisty',
+    routeToMaster: 'Trasa do specjalisty',
+    exactAddress: 'Dokładny adres',
+    detailsUnlocked: 'Dane odblokowane',
+    secureBooking: 'Bezpieczna rezerwacja',
+    providerPhone: 'Telefon',
+    providerEmail: 'Email',
+    routeLocked: 'Trasa po płatności',
   },
 } as const;
 
@@ -84,6 +174,34 @@ type TabKey = 'upcoming' | 'completed' | 'cancelled';
 
 function formatPrice(price: number) {
   return `£${price.toFixed(2)}`;
+}
+
+function getStatusStyles(status: BookingStatus) {
+  if (status === 'pending') {
+    return {
+      background: '#fff5e8',
+      color: '#d68612',
+    };
+  }
+
+  if (status === 'completed') {
+    return {
+      background: '#eef9f1',
+      color: '#2fa35a',
+    };
+  }
+
+  if (status === 'cancelled') {
+    return {
+      background: '#fff1f1',
+      color: '#ef4444',
+    };
+  }
+
+  return {
+    background: '#eef4ff',
+    color: '#2f7cf6',
+  };
 }
 
 export default function ProfileBookingsPage() {
@@ -141,140 +259,575 @@ export default function ProfileBookingsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fcf8f2] px-4 py-6 pb-24">
-      <div className="mx-auto max-w-md">
-        <div className="flex items-center justify-between gap-3">
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#fbf7ef',
+        padding: '20px 16px 110px',
+      }}
+    >
+      <div style={{ maxWidth: 430, margin: '0 auto' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '54px 1fr 54px',
+            alignItems: 'center',
+            gap: 12,
+          }}
+        >
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-xl text-[#241c16] shadow-sm"
+            style={{
+              width: 54,
+              height: 54,
+              borderRadius: 999,
+              border: '1px solid #efe4d7',
+              background: '#fff',
+              fontSize: 26,
+              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              cursor: 'pointer',
+            }}
           >
             ←
           </button>
 
-          <h1 className="text-xl font-bold text-[#1d1712]">{text.title}</h1>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 22,
+              fontWeight: 900,
+              color: '#17130f',
+              textAlign: 'center',
+            }}
+          >
+            {text.title}
+          </h1>
 
-          <div className="h-11 w-11" />
+          <div />
         </div>
 
-        <div className="mt-6 flex gap-2 overflow-x-auto pb-1">
-          <button
-            type="button"
-            onClick={() => setActiveTab('upcoming')}
-            className={`rounded-full px-4 py-2 text-sm font-bold ${
-              activeTab === 'upcoming'
-                ? 'bg-[#2f241c] text-white'
-                : 'border border-[#efe4d7] bg-white text-[#3a2d24]'
-            }`}
-          >
-            {text.upcoming}
-          </button>
+        <div
+          style={{
+            marginTop: 18,
+            display: 'flex',
+            gap: 10,
+            overflowX: 'auto',
+            paddingBottom: 2,
+          }}
+        >
+          {([
+            { key: 'upcoming', label: text.upcoming },
+            { key: 'completed', label: text.completed },
+            { key: 'cancelled', label: text.cancelled },
+          ] as const).map((item) => {
+            const active = activeTab === item.key;
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('completed')}
-            className={`rounded-full px-4 py-2 text-sm font-bold ${
-              activeTab === 'completed'
-                ? 'bg-[#2f241c] text-white'
-                : 'border border-[#efe4d7] bg-white text-[#3a2d24]'
-            }`}
-          >
-            {text.completed}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('cancelled')}
-            className={`rounded-full px-4 py-2 text-sm font-bold ${
-              activeTab === 'cancelled'
-                ? 'bg-[#2f241c] text-white'
-                : 'border border-[#efe4d7] bg-white text-[#3a2d24]'
-            }`}
-          >
-            {text.cancelled}
-          </button>
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setActiveTab(item.key)}
+                style={{
+                  border: 'none',
+                  borderRadius: 999,
+                  padding: '14px 20px',
+                  fontWeight: 900,
+                  fontSize: 15,
+                  whiteSpace: 'nowrap',
+                  background: active ? '#2f241c' : '#fff',
+                  color: active ? '#fff' : '#2b231d',
+                  boxShadow: active ? '0 10px 22px rgba(47,36,28,0.18)' : 'inset 0 0 0 1px #efe4d7',
+                  cursor: 'pointer',
+                }}
+              >
+                {item.label}
+              </button>
+            );
+          })}
         </div>
 
-        <div className="mt-6 space-y-4">
+        <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 16 }}>
           {filteredBookings.length === 0 && (
-            <div className="rounded-[28px] border border-[#efe4d7] bg-white p-6 text-center text-sm font-medium text-[#7a7065] shadow-sm">
+            <div
+              style={{
+                borderRadius: 30,
+                border: '1px solid #efe4d7',
+                background: '#fff',
+                padding: 24,
+                textAlign: 'center',
+                fontSize: 15,
+                fontWeight: 700,
+                color: '#7a7065',
+                boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+              }}
+            >
               {text.empty}
             </div>
           )}
 
-          {filteredBookings.map((booking) => (
-            <div
-              key={booking.id}
-              className="rounded-[28px] border border-[#efe4d7] bg-white p-4 shadow-sm"
-            >
-              <div className="flex items-start gap-3">
-                <img
-                  src={
-                    booking.masterAvatar ||
-                    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80'
-                  }
-                  alt={booking.masterName}
-                  className="h-16 w-16 rounded-2xl object-cover"
-                />
+          {filteredBookings.map((booking) => {
+            const detailsUnlocked =
+              booking.unlockFeePaid || booking.usedWelcomeBonus || booking.usedReferralCredit;
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h2 className="truncate text-base font-extrabold text-[#1d1712]">
-                        {booking.masterName}
-                      </h2>
-                      <p className="mt-1 text-sm text-[#6f6458]">{booking.serviceName}</p>
-                      <p className="mt-1 text-xs text-[#8a7d70]">{booking.location}</p>
+            return (
+              <div
+                key={booking.id}
+                style={{
+                  borderRadius: 30,
+                  border: '1px solid #efe4d7',
+                  background: '#fff',
+                  padding: 16,
+                  boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '76px 1fr auto',
+                    gap: 14,
+                    alignItems: 'start',
+                  }}
+                >
+                  <img
+                    src={
+                      booking.masterAvatar ||
+                      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80'
+                    }
+                    alt={booking.masterName}
+                    style={{
+                      width: 76,
+                      height: 76,
+                      borderRadius: 22,
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
+                  />
+
+                  <div style={{ minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 20,
+                        fontWeight: 900,
+                        color: '#17130f',
+                        lineHeight: 1.15,
+                      }}
+                    >
+                      {booking.masterName}
                     </div>
 
-                    <div className="text-right">
-                      <div className="text-sm font-bold text-[#1d1712]">
+                    <div
+                      style={{
+                        marginTop: 6,
+                        fontSize: 15,
+                        color: '#70665d',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {booking.serviceName}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 8,
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 8,
+                      }}
+                    >
+                      <span
+                        style={{
+                          borderRadius: 999,
+                          padding: '8px 12px',
+                          fontSize: 12,
+                          fontWeight: 900,
+                          ...getStatusStyles(booking.status),
+                        }}
+                      >
+                        {getStatusLabel(booking.status)}
+                      </span>
+
+                      {booking.unlockFeePaid && (
+                        <span
+                          style={{
+                            borderRadius: 999,
+                            padding: '8px 12px',
+                            fontSize: 12,
+                            fontWeight: 900,
+                            background: '#eef4ff',
+                            color: '#2f7cf6',
+                          }}
+                        >
+                          {text.unlockPaid}
+                        </span>
+                      )}
+
+                      {booking.usedWelcomeBonus && (
+                        <span
+                          style={{
+                            borderRadius: 999,
+                            padding: '8px 12px',
+                            fontSize: 12,
+                            fontWeight: 900,
+                            background: '#fff5e8',
+                            color: '#d68612',
+                          }}
+                        >
+                          {text.welcomeBonus}
+                        </span>
+                      )}
+
+                      {booking.usedReferralCredit && (
+                        <span
+                          style={{
+                            borderRadius: 999,
+                            padding: '8px 12px',
+                            fontSize: 12,
+                            fontWeight: 900,
+                            background: '#fff1f7',
+                            color: '#ff4fa0',
+                          }}
+                        >
+                          {text.referralUsed}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 900,
+                      color: '#17130f',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {formatPrice(booking.price)}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 14,
+                    borderRadius: 24,
+                    background: '#fcfaf6',
+                    border: '1px solid #f1e8dc',
+                    padding: 14,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 900,
+                      color: '#17130f',
+                      marginBottom: 12,
+                    }}
+                  >
+                    {text.bookingSummary}
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        borderRadius: 18,
+                        background: '#fff',
+                        padding: 12,
+                        border: '1px solid #efe4d7',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#877d73',
+                          fontWeight: 800,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {text.dateTime}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 900,
+                          color: '#17130f',
+                          lineHeight: 1.45,
+                        }}
+                      >
+                        {booking.dateLabel}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        borderRadius: 18,
+                        background: '#fff',
+                        padding: 12,
+                        border: '1px solid #efe4d7',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#877d73',
+                          fontWeight: 800,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {text.total}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 18,
+                          fontWeight: 900,
+                          color: '#17130f',
+                        }}
+                      >
                         {formatPrice(booking.price)}
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-3 text-sm font-medium text-[#5f5449]">
-                    {booking.dateLabel}
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-bold ${
-                        booking.status === 'pending'
-                          ? 'bg-[#fff1df] text-[#c67610]'
-                          : booking.status === 'completed'
-                          ? 'bg-[#e9f7ea] text-[#2e8b57]'
-                          : booking.status === 'cancelled'
-                          ? 'bg-[#fdeaea] text-[#c94d4d]'
-                          : 'bg-[#f2ede7] text-[#5c5046]'
-                      }`}
+                  <div
+                    style={{
+                      marginTop: 12,
+                      borderRadius: 18,
+                      background: detailsUnlocked ? '#eef9f1' : '#fff6e8',
+                      padding: 12,
+                      border: detailsUnlocked ? '1px solid #dcecdf' : '1px solid #f4e3c5',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 900,
+                        color: detailsUnlocked ? '#2fa35a' : '#d68612',
+                        marginBottom: 6,
+                      }}
                     >
-                      {getStatusLabel(booking.status)}
-                    </span>
+                      {detailsUnlocked ? text.detailsUnlocked : text.secureBooking}
+                    </div>
 
-                    {booking.unlockFeePaid && (
-                      <span className="rounded-full bg-[#f2ede7] px-3 py-1 text-xs font-bold text-[#5c5046]">
-                        {text.unlockPaid}
-                      </span>
-                    )}
-
-                    {booking.usedWelcomeBonus && (
-                      <span className="rounded-full bg-[#e8f5ea] px-3 py-1 text-xs font-bold text-[#2d8a55]">
-                        {text.welcomeBonus}
-                      </span>
-                    )}
-
-                    {booking.usedReferralCredit && (
-                      <span className="rounded-full bg-[#eef3ff] px-3 py-1 text-xs font-bold text-[#4b67c2]">
-                        {text.referralUsed}
-                      </span>
-                    )}
+                    <div
+                      style={{
+                        fontSize: 13,
+                        lineHeight: 1.5,
+                        color: detailsUnlocked ? '#2f6f46' : '#8d6c24',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {detailsUnlocked
+                        ? `${text.exactAddress}: ${booking.location}`
+                        : text.hiddenUntilPaid}
+                    </div>
                   </div>
                 </div>
+
+                <div
+                  style={{
+                    marginTop: 14,
+                    borderRadius: 24,
+                    border: '1px solid #f1e8dc',
+                    background: '#fff',
+                    padding: 14,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 900,
+                      color: '#17130f',
+                      marginBottom: 12,
+                    }}
+                  >
+                    {text.contactAndAddress}
+                  </div>
+
+                  <div style={{ display: 'grid', gap: 10 }}>
+                    <div
+                      style={{
+                        borderRadius: 18,
+                        background: '#fcfaf6',
+                        padding: 12,
+                        border: '1px solid #f1e8dc',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#877d73',
+                          fontWeight: 800,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {text.providerPhone}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 900,
+                          color: detailsUnlocked ? '#17130f' : '#a19488',
+                        }}
+                      >
+                        {detailsUnlocked ? '+44 7700 123456' : '••••••••••'}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        borderRadius: 18,
+                        background: '#fcfaf6',
+                        padding: 12,
+                        border: '1px solid #f1e8dc',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#877d73',
+                          fontWeight: 800,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {text.providerEmail}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 900,
+                          color: detailsUnlocked ? '#17130f' : '#a19488',
+                        }}
+                      >
+                        {detailsUnlocked ? 'master@mapbook.app' : '••••••••••'}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        borderRadius: 18,
+                        background: '#fcfaf6',
+                        padding: 12,
+                        border: '1px solid #f1e8dc',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#877d73',
+                          fontWeight: 800,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {text.exactAddress}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 900,
+                          color: detailsUnlocked ? '#17130f' : '#a19488',
+                          lineHeight: 1.45,
+                        }}
+                      >
+                        {detailsUnlocked ? booking.location : '••••••••••'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 12,
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: 10,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      disabled={!detailsUnlocked}
+                      style={{
+                        height: 52,
+                        borderRadius: 18,
+                        border: 'none',
+                        background: detailsUnlocked ? '#eef4ff' : '#f2f1ef',
+                        color: detailsUnlocked ? '#2f7cf6' : '#b0a79e',
+                        fontSize: 15,
+                        fontWeight: 900,
+                        cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
+                      }}
+                    >
+                      {text.writeSeller}
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={!detailsUnlocked}
+                      style={{
+                        height: 52,
+                        borderRadius: 18,
+                        border: 'none',
+                        background: detailsUnlocked ? '#eef9f1' : '#f2f1ef',
+                        color: detailsUnlocked ? '#2fa35a' : '#b0a79e',
+                        fontSize: 15,
+                        fontWeight: 900,
+                        cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
+                      }}
+                    >
+                      {text.callSeller}
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={!detailsUnlocked}
+                    style={{
+                      marginTop: 10,
+                      width: '100%',
+                      height: 54,
+                      borderRadius: 20,
+                      border: 'none',
+                      background: detailsUnlocked
+                        ? 'linear-gradient(180deg, #ff62aa 0%, #ff4fa0 100%)'
+                        : '#f2f1ef',
+                      color: detailsUnlocked ? '#fff' : '#b0a79e',
+                      fontSize: 16,
+                      fontWeight: 900,
+                      boxShadow: detailsUnlocked
+                        ? '0 12px 24px rgba(255,79,160,0.18)'
+                        : 'none',
+                      cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
+                    }}
+                  >
+                    {detailsUnlocked ? text.routeToMaster : text.routeLocked}
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => router.push(`/master/${booking.masterId}`)}
+                  style={{
+                    marginTop: 14,
+                    width: '100%',
+                    height: 56,
+                    borderRadius: 22,
+                    border: 'none',
+                    background: 'linear-gradient(180deg, #2b221c 0%, #1f1712 100%)',
+                    color: '#fff',
+                    fontSize: 16,
+                    fontWeight: 900,
+                    boxShadow: '0 14px 28px rgba(31,23,18,0.20)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.serviceDetails}
+                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
