@@ -30,6 +30,12 @@ const helpTexts = {
     secureSub: 'Your requests are handled securely',
     found: 'Found',
     results: 'results',
+    noResults: 'No questions found',
+    noResultsSub: 'Try another keyword or contact support directly',
+    supportCard: 'Support access',
+    supportCardSub: 'Fast help for bookings, payments and account issues',
+    browseGuides: 'Browse guides',
+    browseGuidesSub: 'Open instructions for bookings, refunds and safety',
   },
   ES: {
     title: 'Centro de ayuda',
@@ -55,6 +61,12 @@ const helpTexts = {
     secureSub: 'Tus solicitudes se gestionan de forma segura',
     found: 'Encontrado',
     results: 'resultados',
+    noResults: 'No se encontraron preguntas',
+    noResultsSub: 'Prueba otra palabra o contacta soporte directamente',
+    supportCard: 'Acceso a soporte',
+    supportCardSub: 'Ayuda rápida para reservas, pagos y cuenta',
+    browseGuides: 'Explorar guías',
+    browseGuidesSub: 'Abre instrucciones sobre reservas, reembolsos y seguridad',
   },
   RU: {
     title: 'Центр помощи',
@@ -80,6 +92,12 @@ const helpTexts = {
     secureSub: 'Ваши обращения обрабатываются безопасно',
     found: 'Найдено',
     results: 'результатов',
+    noResults: 'Вопросы не найдены',
+    noResultsSub: 'Попробуйте другое слово или сразу напишите в поддержку',
+    supportCard: 'Доступ к поддержке',
+    supportCardSub: 'Быстрая помощь по бронированиям, оплатам и аккаунту',
+    browseGuides: 'Открыть гайды',
+    browseGuidesSub: 'Инструкции по бронированиям, возвратам и безопасности',
   },
   CZ: {
     title: 'Centrum pomoci',
@@ -105,6 +123,12 @@ const helpTexts = {
     secureSub: 'Vaše požadavky jsou řešeny bezpečně',
     found: 'Nalezeno',
     results: 'výsledků',
+    noResults: 'Žádné otázky nenalezeny',
+    noResultsSub: 'Zkuste jiné slovo nebo kontaktujte podporu',
+    supportCard: 'Přístup k podpoře',
+    supportCardSub: 'Rychlá pomoc s rezervacemi, platbami a účtem',
+    browseGuides: 'Otevřít návody',
+    browseGuidesSub: 'Pokyny k rezervacím, refundům a bezpečnosti',
   },
   DE: {
     title: 'Hilfezentrum',
@@ -130,6 +154,12 @@ const helpTexts = {
     secureSub: 'Deine Anfragen werden sicher bearbeitet',
     found: 'Gefunden',
     results: 'Ergebnisse',
+    noResults: 'Keine Fragen gefunden',
+    noResultsSub: 'Versuche ein anderes Wort oder kontaktiere direkt den Support',
+    supportCard: 'Support-Zugang',
+    supportCardSub: 'Schnelle Hilfe bei Buchungen, Zahlungen und Konto',
+    browseGuides: 'Guides öffnen',
+    browseGuidesSub: 'Anleitungen zu Buchungen, Rückerstattungen und Sicherheit',
   },
   PL: {
     title: 'Centrum pomocy',
@@ -155,6 +185,12 @@ const helpTexts = {
     secureSub: 'Twoje zgłoszenia są obsługiwane bezpiecznie',
     found: 'Znaleziono',
     results: 'wyników',
+    noResults: 'Nie znaleziono pytań',
+    noResultsSub: 'Spróbuj innego słowa lub napisz do wsparcia',
+    supportCard: 'Dostęp do wsparcia',
+    supportCardSub: 'Szybka pomoc w sprawie rezerwacji, płatności i konta',
+    browseGuides: 'Otwórz poradniki',
+    browseGuidesSub: 'Instrukcje dotyczące rezerwacji, zwrotów i bezpieczeństwa',
   },
 } as const;
 
@@ -434,68 +470,119 @@ export default function HelpPage() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gap: 12 }}>
-            {filteredQuestions.map((question, index) => {
-              const accent = getQuestionAccent(index);
+          {filteredQuestions.length === 0 ? (
+            <div
+              style={{
+                borderRadius: 24,
+                background: '#fcfaf6',
+                border: '1px solid #f1e8dc',
+                padding: 22,
+                textAlign: 'center',
+              }}
+            >
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  margin: '0 auto 12px',
+                  borderRadius: 18,
+                  background: '#f4efe8',
+                  color: '#6d6258',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 24,
+                }}
+              >
+                ?
+              </div>
 
-              return (
-                <button
-                  key={question}
-                  type="button"
-                  style={{
-                    width: '100%',
-                    display: 'grid',
-                    gridTemplateColumns: '44px 1fr auto',
-                    gap: 14,
-                    alignItems: 'center',
-                    border: '1px solid #f1e8dc',
-                    borderRadius: 24,
-                    background: '#fff',
-                    padding: '14px 16px',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <div
+              <div
+                style={{
+                  fontSize: 17,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {text.noResults}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 14,
+                  lineHeight: 1.55,
+                  color: '#7b7268',
+                  fontWeight: 700,
+                }}
+              >
+                {text.noResultsSub}
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: 12 }}>
+              {filteredQuestions.map((question, index) => {
+                const accent = getQuestionAccent(index);
+
+                return (
+                  <button
+                    key={question}
+                    type="button"
                     style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 16,
-                      background: accent.bg,
-                      color: accent.color,
-                      display: 'flex',
+                      width: '100%',
+                      display: 'grid',
+                      gridTemplateColumns: '44px 1fr auto',
+                      gap: 14,
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 20,
+                      border: '1px solid #f1e8dc',
+                      borderRadius: 24,
+                      background: '#fff',
+                      padding: '14px 16px',
+                      textAlign: 'left',
+                      cursor: 'pointer',
                     }}
                   >
-                    {accent.icon}
-                  </div>
+                    <div
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 16,
+                        background: accent.bg,
+                        color: accent.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 20,
+                      }}
+                    >
+                      {accent.icon}
+                    </div>
 
-                  <div
-                    style={{
-                      fontSize: 15,
-                      lineHeight: 1.45,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
-                    {question}
-                  </div>
+                    <div
+                      style={{
+                        fontSize: 15,
+                        lineHeight: 1.45,
+                        fontWeight: 900,
+                        color: '#17130f',
+                      }}
+                    >
+                      {question}
+                    </div>
 
-                  <span
-                    style={{
-                      fontSize: 18,
-                      color: '#938475',
-                      fontWeight: 900,
-                    }}
-                  >
-                    ›
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                    <span
+                      style={{
+                        fontSize: 18,
+                        color: '#938475',
+                        fontWeight: 900,
+                      }}
+                    >
+                      ›
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div
@@ -707,25 +794,179 @@ export default function HelpPage() {
             <div
               style={{
                 marginTop: 12,
-                borderRadius: 18,
-                background: '#fff',
-                padding: '12px 14px',
-                fontSize: 13,
-                color: '#2fa35a',
-                fontWeight: 900,
+                display: 'grid',
+                gridTemplateColumns: '1fr',
+                gap: 10,
               }}
             >
-              {text.secure}
-            </div>
+              <div
+                style={{
+                  borderRadius: 18,
+                  background: '#fff',
+                  padding: '12px 14px',
+                  fontSize: 13,
+                  color: '#2fa35a',
+                  fontWeight: 900,
+                }}
+              >
+                {text.secure}
+              </div>
 
+              <div
+                style={{
+                  borderRadius: 18,
+                  background: '#fff',
+                  padding: '12px 14px',
+                  fontSize: 13,
+                  color: '#56705e',
+                  fontWeight: 700,
+                  lineHeight: 1.45,
+                }}
+              >
+                {text.secureSub}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              border: '1px solid #efe4d7',
+              borderRadius: 30,
+              background: '#fff',
+              padding: 18,
+              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+            }}
+          >
             <div
               style={{
-                marginTop: 8,
-                fontSize: 13,
-                lineHeight: 1.45,
-                color: '#56705e',
-                fontWeight: 700,
+                display: 'grid',
+                gridTemplateColumns: '46px 1fr auto',
+                gap: 14,
+                alignItems: 'center',
               }}
             >
-              {text.secureSub}
+              <div
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 16,
+                  background: '#f3efff',
+                  color: '#7a5af8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                }}
+              >
+                🧭
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
+                  {text.supportCard}
+                </div>
+                <div
+                  style={{
+                    marginTop: 4,
+                    fontSize: 13,
+                    lineHeight: 1.45,
+                    color: '#7b7268',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.supportCardSub}
+                </div>
+              </div>
+
+              <span
+                style={{
+                  fontSize: 18,
+                  color: '#938475',
+                  fontWeight: 900,
+                }}
+              >
+                {text.open}
+              </span>
             </div>
+          </div>
+
+          <div
+            style={{
+              border: '1px solid #efe4d7',
+              borderRadius: 30,
+              background: '#fff',
+              padding: 18,
+              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+            }}
+          >
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '46px 1fr auto',
+                gap: 14,
+                alignItems: 'center',
+              }}
+            >
+              <div
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 16,
+                  background: '#fff1f7',
+                  color: '#ff4fa0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                }}
+              >
+                📘
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
+                  {text.browseGuides}
+                </div>
+                <div
+                  style={{
+                    marginTop: 4,
+                    fontSize: 13,
+                    lineHeight: 1.45,
+                    color: '#7b7268',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.browseGuidesSub}
+                </div>
+              </div>
+
+              <span
+                style={{
+                  fontSize: 18,
+                  color: '#938475',
+                  fontWeight: 900,
+                }}
+              >
+                {text.open}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <BottomNav active="profile" />
+    </main>
+  );
+}
