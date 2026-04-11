@@ -24,6 +24,9 @@ const savedMastersTexts = {
     ratingLabel: 'Rating',
     cityFallback: 'London',
     availableNow: 'Available now',
+    likedProfessionals: 'Liked professionals',
+    quickAccess: 'Quick access to your favourites',
+    trustedChoice: 'Trusted choice',
   },
   ES: {
     title: 'Profesionales guardados',
@@ -37,6 +40,9 @@ const savedMastersTexts = {
     ratingLabel: 'Valoración',
     cityFallback: 'London',
     availableNow: 'Disponible ahora',
+    likedProfessionals: 'Profesionales favoritos',
+    quickAccess: 'Acceso rápido a tus favoritos',
+    trustedChoice: 'Elección confiable',
   },
   RU: {
     title: 'Сохранённые мастера',
@@ -50,6 +56,9 @@ const savedMastersTexts = {
     ratingLabel: 'Рейтинг',
     cityFallback: 'London',
     availableNow: 'Доступен сейчас',
+    likedProfessionals: 'Избранные специалисты',
+    quickAccess: 'Быстрый доступ к вашим избранным',
+    trustedChoice: 'Надёжный выбор',
   },
   CZ: {
     title: 'Uložení specialisté',
@@ -63,6 +72,9 @@ const savedMastersTexts = {
     ratingLabel: 'Hodnocení',
     cityFallback: 'London',
     availableNow: 'Dostupný nyní',
+    likedProfessionals: 'Oblíbení specialisté',
+    quickAccess: 'Rychlý přístup k oblíbeným',
+    trustedChoice: 'Důvěryhodná volba',
   },
   DE: {
     title: 'Gespeicherte Profis',
@@ -76,6 +88,9 @@ const savedMastersTexts = {
     ratingLabel: 'Bewertung',
     cityFallback: 'London',
     availableNow: 'Jetzt verfügbar',
+    likedProfessionals: 'Favorisierte Profis',
+    quickAccess: 'Schnellzugriff auf deine Favoriten',
+    trustedChoice: 'Vertrauenswürdige Wahl',
   },
   PL: {
     title: 'Zapisani specjaliści',
@@ -89,6 +104,9 @@ const savedMastersTexts = {
     ratingLabel: 'Ocena',
     cityFallback: 'London',
     availableNow: 'Dostępny teraz',
+    likedProfessionals: 'Ulubieni specjaliści',
+    quickAccess: 'Szybki dostęp do ulubionych',
+    trustedChoice: 'Zaufany wybór',
   },
 } as const;
 
@@ -220,10 +238,10 @@ export default function SavedMastersPage() {
         >
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              display: 'grid',
+              gridTemplateColumns: '1fr auto',
               gap: 14,
+              alignItems: 'start',
             }}
           >
             <div>
@@ -234,7 +252,7 @@ export default function SavedMastersPage() {
                   color: '#17130f',
                 }}
               >
-                {text.savedCount}
+                {text.likedProfessionals}
               </div>
               <div
                 style={{
@@ -242,24 +260,63 @@ export default function SavedMastersPage() {
                   fontSize: 14,
                   color: '#7b7268',
                   fontWeight: 700,
+                  lineHeight: 1.55,
                 }}
               >
-                {savedMasters.length}
+                {text.quickAccess}
               </div>
             </div>
 
             <div
               style={{
+                minWidth: 84,
+                borderRadius: 20,
+                background: '#fff1f7',
+                color: '#ff4fa0',
+                padding: '14px 12px',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1 }}>
+                {savedMasters.length}
+              </div>
+              <div style={{ marginTop: 4, fontSize: 11, fontWeight: 900 }}>
+                {text.savedCount}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: 14,
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 10,
+            }}
+          >
+            <span
+              style={{
                 ...accentStyle('pink'),
                 borderRadius: 999,
                 padding: '10px 14px',
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: 900,
-                whiteSpace: 'nowrap',
               }}
             >
               ❤️ {savedMasters.length}
-            </div>
+            </span>
+
+            <span
+              style={{
+                ...accentStyle('blue'),
+                borderRadius: 999,
+                padding: '10px 14px',
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              {text.trustedChoice}
+            </span>
           </div>
         </div>
 
