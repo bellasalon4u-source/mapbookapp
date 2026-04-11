@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { addListing } from '../../services/listingsStore';
 import {
@@ -577,8 +577,10 @@ const pageTexts: Record<
     photosSection: string;
     photosHint: string;
     uploadPhotos: string;
+    tapMainPhotoHint: string;
+    mainPhoto: string;
+    deletePhoto: string;
     requiredFieldsHint: string;
-    requiredMark: string;
     serviceTitle: string;
     serviceTitlePlaceholder: string;
     description: string;
@@ -617,8 +619,10 @@ const pageTexts: Record<
     photosSection: 'Photos',
     photosHint: 'Add great photos to get more views',
     uploadPhotos: 'Upload photos',
+    tapMainPhotoHint: 'Tap any photo to make it main',
+    mainPhoto: 'Main',
+    deletePhoto: 'Delete photo',
     requiredFieldsHint: '* Required fields',
-    requiredMark: '*',
     serviceTitle: 'Service title',
     serviceTitlePlaceholder: 'Enter service title',
     description: 'Description',
@@ -656,8 +660,10 @@ const pageTexts: Record<
     photosSection: 'Фото',
     photosHint: 'Добавьте хорошие фото, чтобы получить больше просмотров',
     uploadPhotos: 'Загрузить фото',
+    tapMainPhotoHint: 'Нажмите на фото, чтобы сделать его главным',
+    mainPhoto: 'Главное',
+    deletePhoto: 'Удалить фото',
     requiredFieldsHint: '* Обязательные поля',
-    requiredMark: '*',
     serviceTitle: 'Название услуги',
     serviceTitlePlaceholder: 'Введите название услуги',
     description: 'Описание',
@@ -695,8 +701,10 @@ const pageTexts: Record<
     photosSection: 'Fotos',
     photosHint: 'Añade buenas fotos para conseguir más visitas',
     uploadPhotos: 'Subir fotos',
+    tapMainPhotoHint: 'Toca una foto para ponerla como principal',
+    mainPhoto: 'Principal',
+    deletePhoto: 'Eliminar foto',
     requiredFieldsHint: '* Campos obligatorios',
-    requiredMark: '*',
     serviceTitle: 'Título del servicio',
     serviceTitlePlaceholder: 'Introduce el título del servicio',
     description: 'Descripción',
@@ -734,8 +742,10 @@ const pageTexts: Record<
     photosSection: 'Fotky',
     photosHint: 'Přidejte kvalitní fotky pro více zobrazení',
     uploadPhotos: 'Nahrát fotky',
+    tapMainPhotoHint: 'Klepněte na fotku pro nastavení hlavní',
+    mainPhoto: 'Hlavní',
+    deletePhoto: 'Smazat fotku',
     requiredFieldsHint: '* Povinná pole',
-    requiredMark: '*',
     serviceTitle: 'Název služby',
     serviceTitlePlaceholder: 'Zadejte název služby',
     description: 'Popis',
@@ -773,8 +783,10 @@ const pageTexts: Record<
     photosSection: 'Fotos',
     photosHint: 'Füge gute Fotos hinzu, um mehr Aufrufe zu erhalten',
     uploadPhotos: 'Fotos hochladen',
+    tapMainPhotoHint: 'Tippe auf ein Foto, um es als Hauptfoto festzulegen',
+    mainPhoto: 'Hauptfoto',
+    deletePhoto: 'Foto löschen',
     requiredFieldsHint: '* Pflichtfelder',
-    requiredMark: '*',
     serviceTitle: 'Titel der Dienstleistung',
     serviceTitlePlaceholder: 'Titel der Dienstleistung eingeben',
     description: 'Beschreibung',
@@ -812,8 +824,10 @@ const pageTexts: Record<
     photosSection: 'Zdjęcia',
     photosHint: 'Dodaj dobre zdjęcia, aby zdobyć więcej wyświetleń',
     uploadPhotos: 'Prześlij zdjęcia',
+    tapMainPhotoHint: 'Dotknij zdjęcia, aby ustawić je jako główne',
+    mainPhoto: 'Główne',
+    deletePhoto: 'Usuń zdjęcie',
     requiredFieldsHint: '* Pola obowiązkowe',
-    requiredMark: '*',
     serviceTitle: 'Nazwa usługi',
     serviceTitlePlaceholder: 'Wpisz nazwę usługi',
     description: 'Opis',
@@ -845,6 +859,12 @@ const pageTexts: Record<
     pleaseEnterPrice: 'Wpisz cenę',
     servicePublishedSuccessfully: 'Usługa została opublikowana',
   },
+};
+
+type ServicePhotoItem = {
+  id: string;
+  file: File;
+  preview: string;
 };
 
 function SectionCard({
@@ -941,6 +961,7 @@ function FieldLabel({
 
 export default function AddServicePage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [title, setTitle] = useState('');
@@ -964,6 +985,8 @@ export default function AddServicePage() {
   const [whatsapp, setWhatsapp] = useState('');
   const [telegram, setTelegram] = useState('');
 
+  const [photos, setPhotos] = useState<ServicePhotoItem[]>([]);
+
   useEffect(() => {
     setLanguage(getSavedLanguage());
 
@@ -975,6 +998,14 @@ export default function AddServicePage() {
       unsubLanguage();
     };
   }, []);
+
+  useEffect(() => {
+    return () => {
+      photos.forEach((item) => {
+        URL.revokeObjectURL(item.preview);
+      });
+    };
+  }, [photos]);
 
   const text = pageTexts[language] || pageTexts.EN;
   const categories = categoriesByLanguage[language] || categoriesByLanguage.EN;
@@ -1004,6 +1035,49 @@ export default function AddServicePage() {
       subcategoriesByCategory[value]?.EN ||
       [];
     setSubcategory(nextSubs[0]?.value || '');
+  };
+
+  const handleOpenFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFilesSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const nextFiles = Array.from(event.target.files || []);
+    if (!nextFiles.length) return;
+
+    const imageFiles = nextFiles.filter((file) => file.type.startsWith('image/'));
+    if (!imageFiles.length) return;
+
+    const mapped = imageFiles.map((file, index) => ({
+      id: `${file.name}-${file.size}-${Date.now()}-${index}`,
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setPhotos((prev) => [...prev, ...mapped].slice(0, 8));
+
+    event.target.value = '';
+  };
+
+  const handleRemovePhoto = (photoId: string) => {
+    setPhotos((prev) => {
+      const found = prev.find((item) => item.id === photoId);
+      if (found) {
+        URL.revokeObjectURL(found.preview);
+      }
+      return prev.filter((item) => item.id !== photoId);
+    });
+  };
+
+  const handleSetMainPhoto = (photoId: string) => {
+    setPhotos((prev) => {
+      const index = prev.findIndex((item) => item.id === photoId);
+      if (index <= 0) return prev;
+      const next = [...prev];
+      const [selected] = next.splice(index, 1);
+      next.unshift(selected);
+      return next;
+    });
   };
 
   const handlePublish = () => {
@@ -1045,7 +1119,7 @@ export default function AddServicePage() {
         whatsapp: whatsapp.trim(),
         telegram: telegram.trim(),
       },
-      photos: [],
+      photos: photos.map((item) => item.preview),
     });
 
     alert(text.servicePublishedSuccessfully);
@@ -1131,6 +1205,15 @@ export default function AddServicePage() {
               padding: 16,
             }}
           >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFilesSelected}
+              style={{ display: 'none' }}
+            />
+
             <div
               style={{
                 display: 'flex',
@@ -1177,6 +1260,7 @@ export default function AddServicePage() {
 
             <button
               type="button"
+              onClick={handleOpenFilePicker}
               style={{
                 width: '100%',
                 border: '1px dashed #cad8cb',
@@ -1186,6 +1270,7 @@ export default function AddServicePage() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 14,
+                cursor: 'pointer',
               }}
             >
               <div
@@ -1219,6 +1304,112 @@ export default function AddServicePage() {
                 </div>
               </div>
             </button>
+
+            {photos.length > 0 ? (
+              <>
+                <div
+                  style={{
+                    marginTop: 14,
+                    fontSize: 13,
+                    color: '#7a8490',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.tapMainPhotoHint}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 12,
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: 10,
+                  }}
+                >
+                  {photos.map((photo, index) => (
+                    <div
+                      key={photo.id}
+                      style={{
+                        position: 'relative',
+                        borderRadius: 18,
+                        overflow: 'hidden',
+                        border: index === 0 ? '3px solid #2d7b3c' : '1px solid #e7e0d6',
+                        background: '#f8f8f8',
+                        aspectRatio: '1 / 1',
+                        boxShadow: index === 0 ? '0 8px 18px rgba(45,123,60,0.14)' : 'none',
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => handleSetMainPhoto(photo.id)}
+                        style={{
+                          border: 'none',
+                          padding: 0,
+                          margin: 0,
+                          width: '100%',
+                          height: '100%',
+                          background: 'transparent',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <img
+                          src={photo.preview}
+                          alt={`service-${index + 1}`}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block',
+                          }}
+                        />
+                      </button>
+
+                      {index === 0 ? (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            left: 8,
+                            bottom: 8,
+                            background: 'rgba(45,123,60,0.92)',
+                            color: '#fff',
+                            borderRadius: 999,
+                            padding: '6px 10px',
+                            fontSize: 11,
+                            fontWeight: 900,
+                          }}
+                        >
+                          {text.mainPhoto}
+                        </div>
+                      ) : null}
+
+                      <button
+                        type="button"
+                        aria-label={text.deletePhoto}
+                        onClick={() => handleRemovePhoto(photo.id)}
+                        style={{
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          width: 32,
+                          height: 32,
+                          borderRadius: 999,
+                          border: 'none',
+                          background: 'rgba(255,255,255,0.96)',
+                          color: '#1f2430',
+                          fontSize: 20,
+                          fontWeight: 900,
+                          lineHeight: 1,
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 10px rgba(0,0,0,0.12)',
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : null}
           </div>
         </section>
 
