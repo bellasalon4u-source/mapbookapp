@@ -9,7 +9,618 @@ import {
   type AppLanguage,
 } from '../../services/i18n';
 
-const addServiceTexts = {
+const categoriesByLanguage: Record<
+  AppLanguage,
+  {
+    value: string;
+    label: string;
+  }[]
+> = {
+  EN: [
+    { value: 'Beauty', label: 'Beauty' },
+    { value: 'Wellness', label: 'Wellness' },
+    { value: 'Home', label: 'Home' },
+    { value: 'Repairs', label: 'Repairs' },
+    { value: 'Tech', label: 'Tech' },
+    { value: 'Pets', label: 'Pets' },
+    { value: 'Auto', label: 'Auto' },
+    { value: 'Moving', label: 'Moving' },
+    { value: 'Activities', label: 'Activities' },
+    { value: 'Events', label: 'Events' },
+    { value: 'Creative', label: 'Creative' },
+  ],
+  RU: [
+    { value: 'Beauty', label: 'Красота' },
+    { value: 'Wellness', label: 'Велнес' },
+    { value: 'Home', label: 'Дом' },
+    { value: 'Repairs', label: 'Ремонт' },
+    { value: 'Tech', label: 'Техника' },
+    { value: 'Pets', label: 'Питомцы' },
+    { value: 'Auto', label: 'Авто' },
+    { value: 'Moving', label: 'Переезд' },
+    { value: 'Activities', label: 'Активности' },
+    { value: 'Events', label: 'События' },
+    { value: 'Creative', label: 'Креатив' },
+  ],
+  ES: [
+    { value: 'Beauty', label: 'Belleza' },
+    { value: 'Wellness', label: 'Bienestar' },
+    { value: 'Home', label: 'Hogar' },
+    { value: 'Repairs', label: 'Reparaciones' },
+    { value: 'Tech', label: 'Tecnología' },
+    { value: 'Pets', label: 'Mascotas' },
+    { value: 'Auto', label: 'Auto' },
+    { value: 'Moving', label: 'Mudanza' },
+    { value: 'Activities', label: 'Actividades' },
+    { value: 'Events', label: 'Eventos' },
+    { value: 'Creative', label: 'Creativo' },
+  ],
+  CZ: [
+    { value: 'Beauty', label: 'Krása' },
+    { value: 'Wellness', label: 'Wellness' },
+    { value: 'Home', label: 'Domov' },
+    { value: 'Repairs', label: 'Opravy' },
+    { value: 'Tech', label: 'Technika' },
+    { value: 'Pets', label: 'Mazlíčci' },
+    { value: 'Auto', label: 'Auto' },
+    { value: 'Moving', label: 'Stěhování' },
+    { value: 'Activities', label: 'Aktivity' },
+    { value: 'Events', label: 'Události' },
+    { value: 'Creative', label: 'Kreativa' },
+  ],
+  DE: [
+    { value: 'Beauty', label: 'Beauty' },
+    { value: 'Wellness', label: 'Wellness' },
+    { value: 'Home', label: 'Zuhause' },
+    { value: 'Repairs', label: 'Reparaturen' },
+    { value: 'Tech', label: 'Technik' },
+    { value: 'Pets', label: 'Haustiere' },
+    { value: 'Auto', label: 'Auto' },
+    { value: 'Moving', label: 'Umzug' },
+    { value: 'Activities', label: 'Aktivitäten' },
+    { value: 'Events', label: 'Events' },
+    { value: 'Creative', label: 'Kreativ' },
+  ],
+  PL: [
+    { value: 'Beauty', label: 'Uroda' },
+    { value: 'Wellness', label: 'Wellness' },
+    { value: 'Home', label: 'Dom' },
+    { value: 'Repairs', label: 'Naprawy' },
+    { value: 'Tech', label: 'Technika' },
+    { value: 'Pets', label: 'Zwierzęta' },
+    { value: 'Auto', label: 'Auto' },
+    { value: 'Moving', label: 'Przeprowadzka' },
+    { value: 'Activities', label: 'Aktywności' },
+    { value: 'Events', label: 'Wydarzenia' },
+    { value: 'Creative', label: 'Kreatywne' },
+  ],
+};
+
+const subcategoriesByCategory: Record<
+  string,
+  Record<
+    AppLanguage,
+    {
+      value: string;
+      label: string;
+    }[]
+  >
+> = {
+  Beauty: {
+    EN: [
+      { value: 'Hair', label: 'Hair' },
+      { value: 'Nails', label: 'Nails' },
+      { value: 'Brows', label: 'Brows' },
+      { value: 'Lashes', label: 'Lashes' },
+      { value: 'Makeup', label: 'Makeup' },
+      { value: 'Keratin', label: 'Keratin' },
+    ],
+    RU: [
+      { value: 'Hair', label: 'Волосы' },
+      { value: 'Nails', label: 'Ногти' },
+      { value: 'Brows', label: 'Брови' },
+      { value: 'Lashes', label: 'Ресницы' },
+      { value: 'Makeup', label: 'Макияж' },
+      { value: 'Keratin', label: 'Кератин' },
+    ],
+    ES: [
+      { value: 'Hair', label: 'Cabello' },
+      { value: 'Nails', label: 'Uñas' },
+      { value: 'Brows', label: 'Cejas' },
+      { value: 'Lashes', label: 'Pestañas' },
+      { value: 'Makeup', label: 'Maquillaje' },
+      { value: 'Keratin', label: 'Keratina' },
+    ],
+    CZ: [
+      { value: 'Hair', label: 'Vlasy' },
+      { value: 'Nails', label: 'Nehty' },
+      { value: 'Brows', label: 'Obočí' },
+      { value: 'Lashes', label: 'Řasy' },
+      { value: 'Makeup', label: 'Make-up' },
+      { value: 'Keratin', label: 'Keratin' },
+    ],
+    DE: [
+      { value: 'Hair', label: 'Haare' },
+      { value: 'Nails', label: 'Nägel' },
+      { value: 'Brows', label: 'Augenbrauen' },
+      { value: 'Lashes', label: 'Wimpern' },
+      { value: 'Makeup', label: 'Make-up' },
+      { value: 'Keratin', label: 'Keratin' },
+    ],
+    PL: [
+      { value: 'Hair', label: 'Włosy' },
+      { value: 'Nails', label: 'Paznokcie' },
+      { value: 'Brows', label: 'Brwi' },
+      { value: 'Lashes', label: 'Rzęsy' },
+      { value: 'Makeup', label: 'Makijaż' },
+      { value: 'Keratin', label: 'Keratyna' },
+    ],
+  },
+
+  Wellness: {
+    EN: [
+      { value: 'Massage', label: 'Massage' },
+      { value: 'Spa', label: 'Spa' },
+      { value: 'Therapy', label: 'Therapy' },
+      { value: 'Recovery', label: 'Recovery' },
+      { value: 'Yoga', label: 'Yoga' },
+    ],
+    RU: [
+      { value: 'Massage', label: 'Массаж' },
+      { value: 'Spa', label: 'Спа' },
+      { value: 'Therapy', label: 'Терапия' },
+      { value: 'Recovery', label: 'Восстановление' },
+      { value: 'Yoga', label: 'Йога' },
+    ],
+    ES: [
+      { value: 'Massage', label: 'Masaje' },
+      { value: 'Spa', label: 'Spa' },
+      { value: 'Therapy', label: 'Terapia' },
+      { value: 'Recovery', label: 'Recuperación' },
+      { value: 'Yoga', label: 'Yoga' },
+    ],
+    CZ: [
+      { value: 'Massage', label: 'Masáž' },
+      { value: 'Spa', label: 'Spa' },
+      { value: 'Therapy', label: 'Terapie' },
+      { value: 'Recovery', label: 'Regenerace' },
+      { value: 'Yoga', label: 'Jóga' },
+    ],
+    DE: [
+      { value: 'Massage', label: 'Massage' },
+      { value: 'Spa', label: 'Spa' },
+      { value: 'Therapy', label: 'Therapie' },
+      { value: 'Recovery', label: 'Erholung' },
+      { value: 'Yoga', label: 'Yoga' },
+    ],
+    PL: [
+      { value: 'Massage', label: 'Masaż' },
+      { value: 'Spa', label: 'Spa' },
+      { value: 'Therapy', label: 'Terapia' },
+      { value: 'Recovery', label: 'Regeneracja' },
+      { value: 'Yoga', label: 'Joga' },
+    ],
+  },
+
+  Home: {
+    EN: [
+      { value: 'Cleaning', label: 'Cleaning' },
+      { value: 'Handyman', label: 'Handyman' },
+      { value: 'Plumbing', label: 'Plumbing' },
+      { value: 'Electrical', label: 'Electrical' },
+      { value: 'Furniture assembly', label: 'Furniture assembly' },
+    ],
+    RU: [
+      { value: 'Cleaning', label: 'Уборка' },
+      { value: 'Handyman', label: 'Мастер на час' },
+      { value: 'Plumbing', label: 'Сантехника' },
+      { value: 'Electrical', label: 'Электрика' },
+      { value: 'Furniture assembly', label: 'Сборка мебели' },
+    ],
+    ES: [
+      { value: 'Cleaning', label: 'Limpieza' },
+      { value: 'Handyman', label: 'Manitas' },
+      { value: 'Plumbing', label: 'Fontanería' },
+      { value: 'Electrical', label: 'Electricidad' },
+      { value: 'Furniture assembly', label: 'Montaje de muebles' },
+    ],
+    CZ: [
+      { value: 'Cleaning', label: 'Úklid' },
+      { value: 'Handyman', label: 'Hodinový manžel' },
+      { value: 'Plumbing', label: 'Instalatérství' },
+      { value: 'Electrical', label: 'Elektroinstalace' },
+      { value: 'Furniture assembly', label: 'Montáž nábytku' },
+    ],
+    DE: [
+      { value: 'Cleaning', label: 'Reinigung' },
+      { value: 'Handyman', label: 'Handwerker' },
+      { value: 'Plumbing', label: 'Sanitär' },
+      { value: 'Electrical', label: 'Elektrik' },
+      { value: 'Furniture assembly', label: 'Möbelmontage' },
+    ],
+    PL: [
+      { value: 'Cleaning', label: 'Sprzątanie' },
+      { value: 'Handyman', label: 'Złota rączka' },
+      { value: 'Plumbing', label: 'Hydraulika' },
+      { value: 'Electrical', label: 'Elektryka' },
+      { value: 'Furniture assembly', label: 'Montaż mebli' },
+    ],
+  },
+
+  Repairs: {
+    EN: [
+      { value: 'Appliance repair', label: 'Appliance repair' },
+      { value: 'Phone repair', label: 'Phone repair' },
+      { value: 'Laptop repair', label: 'Laptop repair' },
+      { value: 'TV repair', label: 'TV repair' },
+      { value: 'Shoe repair', label: 'Shoe repair' },
+    ],
+    RU: [
+      { value: 'Appliance repair', label: 'Ремонт техники' },
+      { value: 'Phone repair', label: 'Ремонт телефона' },
+      { value: 'Laptop repair', label: 'Ремонт ноутбука' },
+      { value: 'TV repair', label: 'Ремонт ТВ' },
+      { value: 'Shoe repair', label: 'Ремонт обуви' },
+    ],
+    ES: [
+      { value: 'Appliance repair', label: 'Reparación de electrodomésticos' },
+      { value: 'Phone repair', label: 'Reparación de teléfono' },
+      { value: 'Laptop repair', label: 'Reparación de portátil' },
+      { value: 'TV repair', label: 'Reparación de TV' },
+      { value: 'Shoe repair', label: 'Reparación de calzado' },
+    ],
+    CZ: [
+      { value: 'Appliance repair', label: 'Oprava spotřebičů' },
+      { value: 'Phone repair', label: 'Oprava telefonu' },
+      { value: 'Laptop repair', label: 'Oprava notebooku' },
+      { value: 'TV repair', label: 'Oprava TV' },
+      { value: 'Shoe repair', label: 'Oprava obuvi' },
+    ],
+    DE: [
+      { value: 'Appliance repair', label: 'Gerätereparatur' },
+      { value: 'Phone repair', label: 'Handyreparatur' },
+      { value: 'Laptop repair', label: 'Laptop-Reparatur' },
+      { value: 'TV repair', label: 'TV-Reparatur' },
+      { value: 'Shoe repair', label: 'Schuhreparatur' },
+    ],
+    PL: [
+      { value: 'Appliance repair', label: 'Naprawa sprzętu' },
+      { value: 'Phone repair', label: 'Naprawa telefonu' },
+      { value: 'Laptop repair', label: 'Naprawa laptopa' },
+      { value: 'TV repair', label: 'Naprawa TV' },
+      { value: 'Shoe repair', label: 'Naprawa obuwia' },
+    ],
+  },
+
+  Tech: {
+    EN: [
+      { value: 'Phone', label: 'Phone' },
+      { value: 'Laptop', label: 'Laptop' },
+      { value: 'Tablet', label: 'Tablet' },
+      { value: 'Computer help', label: 'Computer help' },
+      { value: 'Setup', label: 'Setup' },
+    ],
+    RU: [
+      { value: 'Phone', label: 'Телефон' },
+      { value: 'Laptop', label: 'Ноутбук' },
+      { value: 'Tablet', label: 'Планшет' },
+      { value: 'Computer help', label: 'Помощь с компьютером' },
+      { value: 'Setup', label: 'Настройка' },
+    ],
+    ES: [
+      { value: 'Phone', label: 'Teléfono' },
+      { value: 'Laptop', label: 'Portátil' },
+      { value: 'Tablet', label: 'Tablet' },
+      { value: 'Computer help', label: 'Ayuda con ordenador' },
+      { value: 'Setup', label: 'Configuración' },
+    ],
+    CZ: [
+      { value: 'Phone', label: 'Telefon' },
+      { value: 'Laptop', label: 'Notebook' },
+      { value: 'Tablet', label: 'Tablet' },
+      { value: 'Computer help', label: 'Pomoc s počítačem' },
+      { value: 'Setup', label: 'Nastavení' },
+    ],
+    DE: [
+      { value: 'Phone', label: 'Telefon' },
+      { value: 'Laptop', label: 'Laptop' },
+      { value: 'Tablet', label: 'Tablet' },
+      { value: 'Computer help', label: 'Computerhilfe' },
+      { value: 'Setup', label: 'Einrichtung' },
+    ],
+    PL: [
+      { value: 'Phone', label: 'Telefon' },
+      { value: 'Laptop', label: 'Laptop' },
+      { value: 'Tablet', label: 'Tablet' },
+      { value: 'Computer help', label: 'Pomoc komputerowa' },
+      { value: 'Setup', label: 'Konfiguracja' },
+    ],
+  },
+
+  Pets: {
+    EN: [
+      { value: 'Grooming', label: 'Grooming' },
+      { value: 'Dog walking', label: 'Dog walking' },
+      { value: 'Pet sitting', label: 'Pet sitting' },
+      { value: 'Pet taxi', label: 'Pet taxi' },
+      { value: 'Training', label: 'Training' },
+    ],
+    RU: [
+      { value: 'Grooming', label: 'Груминг' },
+      { value: 'Dog walking', label: 'Выгул собак' },
+      { value: 'Pet sitting', label: 'Передержка' },
+      { value: 'Pet taxi', label: 'Пет-такси' },
+      { value: 'Training', label: 'Дрессировка' },
+    ],
+    ES: [
+      { value: 'Grooming', label: 'Peluquería' },
+      { value: 'Dog walking', label: 'Paseo de perros' },
+      { value: 'Pet sitting', label: 'Cuidado de mascotas' },
+      { value: 'Pet taxi', label: 'Taxi para mascotas' },
+      { value: 'Training', label: 'Entrenamiento' },
+    ],
+    CZ: [
+      { value: 'Grooming', label: 'Grooming' },
+      { value: 'Dog walking', label: 'Venčení psů' },
+      { value: 'Pet sitting', label: 'Hlídání mazlíčků' },
+      { value: 'Pet taxi', label: 'Pet taxi' },
+      { value: 'Training', label: 'Trénink' },
+    ],
+    DE: [
+      { value: 'Grooming', label: 'Grooming' },
+      { value: 'Dog walking', label: 'Hundespaziergang' },
+      { value: 'Pet sitting', label: 'Tiersitting' },
+      { value: 'Pet taxi', label: 'Tier-Taxi' },
+      { value: 'Training', label: 'Training' },
+    ],
+    PL: [
+      { value: 'Grooming', label: 'Grooming' },
+      { value: 'Dog walking', label: 'Wyprowadzanie psów' },
+      { value: 'Pet sitting', label: 'Opieka nad zwierzętami' },
+      { value: 'Pet taxi', label: 'Taxi dla zwierząt' },
+      { value: 'Training', label: 'Trening' },
+    ],
+  },
+
+  Auto: {
+    EN: [
+      { value: 'Car wash', label: 'Car wash' },
+      { value: 'Detailing', label: 'Detailing' },
+      { value: 'Diagnostics', label: 'Diagnostics' },
+      { value: 'Tire service', label: 'Tire service' },
+    ],
+    RU: [
+      { value: 'Car wash', label: 'Мойка авто' },
+      { value: 'Detailing', label: 'Детейлинг' },
+      { value: 'Diagnostics', label: 'Диагностика' },
+      { value: 'Tire service', label: 'Шиномонтаж' },
+    ],
+    ES: [
+      { value: 'Car wash', label: 'Lavado de coche' },
+      { value: 'Detailing', label: 'Detailing' },
+      { value: 'Diagnostics', label: 'Diagnóstico' },
+      { value: 'Tire service', label: 'Servicio de neumáticos' },
+    ],
+    CZ: [
+      { value: 'Car wash', label: 'Mytí auta' },
+      { value: 'Detailing', label: 'Detailing' },
+      { value: 'Diagnostics', label: 'Diagnostika' },
+      { value: 'Tire service', label: 'Pneuservis' },
+    ],
+    DE: [
+      { value: 'Car wash', label: 'Autowäsche' },
+      { value: 'Detailing', label: 'Detailing' },
+      { value: 'Diagnostics', label: 'Diagnose' },
+      { value: 'Tire service', label: 'Reifenservice' },
+    ],
+    PL: [
+      { value: 'Car wash', label: 'Myjnia' },
+      { value: 'Detailing', label: 'Detailing' },
+      { value: 'Diagnostics', label: 'Diagnostyka' },
+      { value: 'Tire service', label: 'Serwis opon' },
+    ],
+  },
+
+  Moving: {
+    EN: [
+      { value: 'Delivery', label: 'Delivery' },
+      { value: 'Moving help', label: 'Moving help' },
+      { value: 'Furniture transport', label: 'Furniture transport' },
+      { value: 'Courier', label: 'Courier' },
+    ],
+    RU: [
+      { value: 'Delivery', label: 'Доставка' },
+      { value: 'Moving help', label: 'Помощь с переездом' },
+      { value: 'Furniture transport', label: 'Перевозка мебели' },
+      { value: 'Courier', label: 'Курьер' },
+    ],
+    ES: [
+      { value: 'Delivery', label: 'Entrega' },
+      { value: 'Moving help', label: 'Ayuda con mudanza' },
+      { value: 'Furniture transport', label: 'Transporte de muebles' },
+      { value: 'Courier', label: 'Mensajero' },
+    ],
+    CZ: [
+      { value: 'Delivery', label: 'Doručení' },
+      { value: 'Moving help', label: 'Pomoc se stěhováním' },
+      { value: 'Furniture transport', label: 'Převoz nábytku' },
+      { value: 'Courier', label: 'Kurýr' },
+    ],
+    DE: [
+      { value: 'Delivery', label: 'Lieferung' },
+      { value: 'Moving help', label: 'Umzugshilfe' },
+      { value: 'Furniture transport', label: 'Möbeltransport' },
+      { value: 'Courier', label: 'Kurier' },
+    ],
+    PL: [
+      { value: 'Delivery', label: 'Dostawa' },
+      { value: 'Moving help', label: 'Pomoc przy przeprowadzce' },
+      { value: 'Furniture transport', label: 'Transport mebli' },
+      { value: 'Courier', label: 'Kurier' },
+    ],
+  },
+
+  Activities: {
+    EN: [
+      { value: 'Fitness', label: 'Fitness' },
+      { value: 'Dance', label: 'Dance' },
+      { value: 'Tutor', label: 'Tutor' },
+      { value: 'Kids activities', label: 'Kids activities' },
+    ],
+    RU: [
+      { value: 'Fitness', label: 'Фитнес' },
+      { value: 'Dance', label: 'Танцы' },
+      { value: 'Tutor', label: 'Репетитор' },
+      { value: 'Kids activities', label: 'Детские активности' },
+    ],
+    ES: [
+      { value: 'Fitness', label: 'Fitness' },
+      { value: 'Dance', label: 'Baile' },
+      { value: 'Tutor', label: 'Tutor' },
+      { value: 'Kids activities', label: 'Actividades para niños' },
+    ],
+    CZ: [
+      { value: 'Fitness', label: 'Fitness' },
+      { value: 'Dance', label: 'Tanec' },
+      { value: 'Tutor', label: 'Lektor' },
+      { value: 'Kids activities', label: 'Dětské aktivity' },
+    ],
+    DE: [
+      { value: 'Fitness', label: 'Fitness' },
+      { value: 'Dance', label: 'Tanz' },
+      { value: 'Tutor', label: 'Tutor' },
+      { value: 'Kids activities', label: 'Kinderaktivitäten' },
+    ],
+    PL: [
+      { value: 'Fitness', label: 'Fitness' },
+      { value: 'Dance', label: 'Taniec' },
+      { value: 'Tutor', label: 'Korepetytor' },
+      { value: 'Kids activities', label: 'Aktywności dla dzieci' },
+    ],
+  },
+
+  Events: {
+    EN: [
+      { value: 'Decorator', label: 'Decorator' },
+      { value: 'Host', label: 'Host' },
+      { value: 'Photographer', label: 'Photographer' },
+      { value: 'Makeup for events', label: 'Makeup for events' },
+    ],
+    RU: [
+      { value: 'Decorator', label: 'Декоратор' },
+      { value: 'Host', label: 'Ведущий' },
+      { value: 'Photographer', label: 'Фотограф' },
+      { value: 'Makeup for events', label: 'Макияж для мероприятий' },
+    ],
+    ES: [
+      { value: 'Decorator', label: 'Decorador' },
+      { value: 'Host', label: 'Anfitrión' },
+      { value: 'Photographer', label: 'Fotógrafo' },
+      { value: 'Makeup for events', label: 'Maquillaje para eventos' },
+    ],
+    CZ: [
+      { value: 'Decorator', label: 'Dekoratér' },
+      { value: 'Host', label: 'Moderátor' },
+      { value: 'Photographer', label: 'Fotograf' },
+      { value: 'Makeup for events', label: 'Make-up na akce' },
+    ],
+    DE: [
+      { value: 'Decorator', label: 'Dekorateur' },
+      { value: 'Host', label: 'Moderator' },
+      { value: 'Photographer', label: 'Fotograf' },
+      { value: 'Makeup for events', label: 'Make-up für Events' },
+    ],
+    PL: [
+      { value: 'Decorator', label: 'Dekorator' },
+      { value: 'Host', label: 'Prowadzący' },
+      { value: 'Photographer', label: 'Fotograf' },
+      { value: 'Makeup for events', label: 'Makijaż na wydarzenia' },
+    ],
+  },
+
+  Creative: {
+    EN: [
+      { value: 'Design', label: 'Design' },
+      { value: 'Photo', label: 'Photo' },
+      { value: 'Video', label: 'Video' },
+      { value: 'Editing', label: 'Editing' },
+      { value: 'Content creation', label: 'Content creation' },
+    ],
+    RU: [
+      { value: 'Design', label: 'Дизайн' },
+      { value: 'Photo', label: 'Фото' },
+      { value: 'Video', label: 'Видео' },
+      { value: 'Editing', label: 'Монтаж' },
+      { value: 'Content creation', label: 'Создание контента' },
+    ],
+    ES: [
+      { value: 'Design', label: 'Diseño' },
+      { value: 'Photo', label: 'Foto' },
+      { value: 'Video', label: 'Vídeo' },
+      { value: 'Editing', label: 'Edición' },
+      { value: 'Content creation', label: 'Creación de contenido' },
+    ],
+    CZ: [
+      { value: 'Design', label: 'Design' },
+      { value: 'Photo', label: 'Foto' },
+      { value: 'Video', label: 'Video' },
+      { value: 'Editing', label: 'Editace' },
+      { value: 'Content creation', label: 'Tvorba obsahu' },
+    ],
+    DE: [
+      { value: 'Design', label: 'Design' },
+      { value: 'Photo', label: 'Foto' },
+      { value: 'Video', label: 'Video' },
+      { value: 'Editing', label: 'Bearbeitung' },
+      { value: 'Content creation', label: 'Content-Erstellung' },
+    ],
+    PL: [
+      { value: 'Design', label: 'Design' },
+      { value: 'Photo', label: 'Zdjęcia' },
+      { value: 'Video', label: 'Wideo' },
+      { value: 'Editing', label: 'Edycja' },
+      { value: 'Content creation', label: 'Tworzenie treści' },
+    ],
+  },
+};
+
+const pageTexts: Record<
+  AppLanguage,
+  {
+    title: string;
+    uploadPhotos: string;
+    serviceTitle: string;
+    serviceTitlePlaceholder: string;
+    description: string;
+    descriptionPlaceholder: string;
+    category: string;
+    subcategory: string;
+    price: string;
+    pricePlaceholder: string;
+    location: string;
+    locationPlaceholder: string;
+    hours: string;
+    hoursPlaceholder: string;
+    availableToday: string;
+    availableTodayHint: string;
+    atClient: string;
+    atMyPlace: string;
+    online: string;
+    paymentMethods: string;
+    paymentMethodsHint: string;
+    cash: string;
+    card: string;
+    wallet: string;
+    contact: string;
+    phone: string;
+    whatsapp: string;
+    telegram: string;
+    publishService: string;
+    pleaseEnterServiceTitle: string;
+    pleaseEnterPrice: string;
+    servicePublishedSuccessfully: string;
+  }
+> = {
   EN: {
     title: 'Add your service',
     uploadPhotos: 'Upload photos',
@@ -39,178 +650,10 @@ const addServiceTexts = {
     phone: 'Phone',
     whatsapp: 'WhatsApp',
     telegram: 'Telegram',
-    publish: 'Publish service',
-    enterServiceTitle: 'Please enter service title',
-    enterPrice: 'Please enter price',
-    success: 'Service published successfully',
-    categories: {
-      Beauty: 'Beauty',
-      Wellness: 'Wellness',
-      Home: 'Home',
-      Repairs: 'Repairs',
-      Tech: 'Tech',
-      Pets: 'Pets',
-      Auto: 'Auto',
-      Moving: 'Moving',
-      Activities: 'Activities',
-      Events: 'Events',
-      Creative: 'Creative',
-    },
-    subcategories: {
-      Hair: 'Hair',
-      Nails: 'Nails',
-      Brows: 'Brows',
-      Lashes: 'Lashes',
-      Makeup: 'Makeup',
-      Keratin: 'Keratin',
-      Massage: 'Massage',
-      Spa: 'Spa',
-      Therapy: 'Therapy',
-      Recovery: 'Recovery',
-      Yoga: 'Yoga',
-      Cleaning: 'Cleaning',
-      Handyman: 'Handyman',
-      Plumbing: 'Plumbing',
-      Electrical: 'Electrical',
-      'Furniture assembly': 'Furniture assembly',
-      'Appliance repair': 'Appliance repair',
-      'Phone repair': 'Phone repair',
-      'Laptop repair': 'Laptop repair',
-      'TV repair': 'TV repair',
-      'Shoe repair': 'Shoe repair',
-      Phone: 'Phone',
-      Laptop: 'Laptop',
-      Tablet: 'Tablet',
-      'Computer help': 'Computer help',
-      Setup: 'Setup',
-      Grooming: 'Grooming',
-      'Dog walking': 'Dog walking',
-      'Pet sitting': 'Pet sitting',
-      'Pet taxi': 'Pet taxi',
-      Training: 'Training',
-      'Car wash': 'Car wash',
-      Detailing: 'Detailing',
-      Diagnostics: 'Diagnostics',
-      'Tire service': 'Tire service',
-      Delivery: 'Delivery',
-      'Moving help': 'Moving help',
-      'Furniture transport': 'Furniture transport',
-      Courier: 'Courier',
-      Fitness: 'Fitness',
-      Dance: 'Dance',
-      Tutor: 'Tutor',
-      'Kids activities': 'Kids activities',
-      Decorator: 'Decorator',
-      Host: 'Host',
-      Photographer: 'Photographer',
-      'Makeup for events': 'Makeup for events',
-      Design: 'Design',
-      Photo: 'Photo',
-      Video: 'Video',
-      Editing: 'Editing',
-      'Content creation': 'Content creation',
-    },
-  },
-  ES: {
-    title: 'Añadir servicio',
-    uploadPhotos: 'Subir fotos',
-    serviceTitle: 'Título del servicio',
-    serviceTitlePlaceholder: 'Introduce el título del servicio',
-    description: 'Descripción',
-    descriptionPlaceholder: 'Describe tu servicio...',
-    category: 'Categoría',
-    subcategory: 'Subcategoría',
-    price: 'Precio',
-    pricePlaceholder: 'Introduce el precio',
-    location: 'Ubicación / zona',
-    locationPlaceholder: 'Selecciona ubicación / zona',
-    hours: 'Horario de trabajo',
-    hoursPlaceholder: 'Selecciona horario',
-    availableToday: 'Disponible hoy',
-    availableTodayHint: 'Esto afecta al estado del pin en el mapa',
-    atClient: 'En casa del cliente',
-    atMyPlace: 'En mi local',
-    online: 'Online',
-    paymentMethods: 'Métodos de pago',
-    paymentMethodsHint: '¿Cómo pueden pagar los clientes?',
-    cash: 'Efectivo',
-    card: 'Tarjeta',
-    wallet: 'Dinero electrónico',
-    contact: 'Contacto',
-    phone: 'Teléfono',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    publish: 'Publicar servicio',
-    enterServiceTitle: 'Por favor, introduce el título del servicio',
-    enterPrice: 'Por favor, introduce el precio',
-    success: 'Servicio publicado con éxito',
-    categories: {
-      Beauty: 'Belleza',
-      Wellness: 'Bienestar',
-      Home: 'Hogar',
-      Repairs: 'Reparaciones',
-      Tech: 'Tecnología',
-      Pets: 'Mascotas',
-      Auto: 'Auto',
-      Moving: 'Mudanza',
-      Activities: 'Actividades',
-      Events: 'Eventos',
-      Creative: 'Creativo',
-    },
-    subcategories: {
-      Hair: 'Cabello',
-      Nails: 'Uñas',
-      Brows: 'Cejas',
-      Lashes: 'Pestañas',
-      Makeup: 'Maquillaje',
-      Keratin: 'Keratina',
-      Massage: 'Masaje',
-      Spa: 'Spa',
-      Therapy: 'Terapia',
-      Recovery: 'Recuperación',
-      Yoga: 'Yoga',
-      Cleaning: 'Limpieza',
-      Handyman: 'Manitas',
-      Plumbing: 'Fontanería',
-      Electrical: 'Electricidad',
-      'Furniture assembly': 'Montaje de muebles',
-      'Appliance repair': 'Reparación de electrodomésticos',
-      'Phone repair': 'Reparación de teléfonos',
-      'Laptop repair': 'Reparación de portátiles',
-      'TV repair': 'Reparación de TV',
-      'Shoe repair': 'Reparación de calzado',
-      Phone: 'Teléfono',
-      Laptop: 'Portátil',
-      Tablet: 'Tablet',
-      'Computer help': 'Ayuda informática',
-      Setup: 'Configuración',
-      Grooming: 'Peluquería',
-      'Dog walking': 'Paseo de perros',
-      'Pet sitting': 'Cuidado de mascotas',
-      'Pet taxi': 'Taxi para mascotas',
-      Training: 'Entrenamiento',
-      'Car wash': 'Lavado de coches',
-      Detailing: 'Detailing',
-      Diagnostics: 'Diagnóstico',
-      'Tire service': 'Servicio de neumáticos',
-      Delivery: 'Entrega',
-      'Moving help': 'Ayuda con mudanza',
-      'Furniture transport': 'Transporte de muebles',
-      Courier: 'Mensajería',
-      Fitness: 'Fitness',
-      Dance: 'Baile',
-      Tutor: 'Tutor',
-      'Kids activities': 'Actividades infantiles',
-      Decorator: 'Decorador',
-      Host: 'Anfitrión',
-      Photographer: 'Fotógrafo',
-      'Makeup for events': 'Maquillaje para eventos',
-      Design: 'Diseño',
-      Photo: 'Foto',
-      Video: 'Vídeo',
-      Editing: 'Edición',
-      'Content creation': 'Creación de contenido',
-    },
+    publishService: 'Publish service',
+    pleaseEnterServiceTitle: 'Please enter service title',
+    pleaseEnterPrice: 'Please enter price',
+    servicePublishedSuccessfully: 'Service published successfully',
   },
   RU: {
     title: 'Добавить услугу',
@@ -241,77 +684,44 @@ const addServiceTexts = {
     phone: 'Телефон',
     whatsapp: 'WhatsApp',
     telegram: 'Telegram',
-    publish: 'Опубликовать услугу',
-    enterServiceTitle: 'Пожалуйста, введите название услуги',
-    enterPrice: 'Пожалуйста, введите цену',
-    success: 'Услуга успешно опубликована',
-    categories: {
-      Beauty: 'Красота',
-      Wellness: 'Велнес',
-      Home: 'Дом',
-      Repairs: 'Ремонт',
-      Tech: 'Техника',
-      Pets: 'Питомцы',
-      Auto: 'Авто',
-      Moving: 'Переезд',
-      Activities: 'Активности',
-      Events: 'События',
-      Creative: 'Креатив',
-    },
-    subcategories: {
-      Hair: 'Волосы',
-      Nails: 'Ногти',
-      Brows: 'Брови',
-      Lashes: 'Ресницы',
-      Makeup: 'Макияж',
-      Keratin: 'Кератин',
-      Massage: 'Массаж',
-      Spa: 'Спа',
-      Therapy: 'Терапия',
-      Recovery: 'Восстановление',
-      Yoga: 'Йога',
-      Cleaning: 'Уборка',
-      Handyman: 'Мастер на час',
-      Plumbing: 'Сантехника',
-      Electrical: 'Электрика',
-      'Furniture assembly': 'Сборка мебели',
-      'Appliance repair': 'Ремонт техники',
-      'Phone repair': 'Ремонт телефонов',
-      'Laptop repair': 'Ремонт ноутбуков',
-      'TV repair': 'Ремонт телевизоров',
-      'Shoe repair': 'Ремонт обуви',
-      Phone: 'Телефон',
-      Laptop: 'Ноутбук',
-      Tablet: 'Планшет',
-      'Computer help': 'Помощь с компьютером',
-      Setup: 'Настройка',
-      Grooming: 'Груминг',
-      'Dog walking': 'Выгул собак',
-      'Pet sitting': 'Передержка',
-      'Pet taxi': 'Пет-такси',
-      Training: 'Тренировка',
-      'Car wash': 'Мойка авто',
-      Detailing: 'Детейлинг',
-      Diagnostics: 'Диагностика',
-      'Tire service': 'Шиномонтаж',
-      Delivery: 'Доставка',
-      'Moving help': 'Помощь с переездом',
-      'Furniture transport': 'Перевозка мебели',
-      Courier: 'Курьер',
-      Fitness: 'Фитнес',
-      Dance: 'Танцы',
-      Tutor: 'Репетитор',
-      'Kids activities': 'Детские активности',
-      Decorator: 'Декоратор',
-      Host: 'Ведущий',
-      Photographer: 'Фотограф',
-      'Makeup for events': 'Макияж для мероприятий',
-      Design: 'Дизайн',
-      Photo: 'Фото',
-      Video: 'Видео',
-      Editing: 'Монтаж',
-      'Content creation': 'Создание контента',
-    },
+    publishService: 'Опубликовать услугу',
+    pleaseEnterServiceTitle: 'Введите название услуги',
+    pleaseEnterPrice: 'Введите цену',
+    servicePublishedSuccessfully: 'Услуга успешно опубликована',
+  },
+  ES: {
+    title: 'Añadir tu servicio',
+    uploadPhotos: 'Subir fotos',
+    serviceTitle: 'Título del servicio',
+    serviceTitlePlaceholder: 'Introduce el título del servicio',
+    description: 'Descripción',
+    descriptionPlaceholder: 'Describe tu servicio...',
+    category: 'Categoría',
+    subcategory: 'Subcategoría',
+    price: 'Precio',
+    pricePlaceholder: 'Introduce el precio',
+    location: 'Ubicación / zona',
+    locationPlaceholder: 'Selecciona ubicación / zona',
+    hours: 'Horario',
+    hoursPlaceholder: 'Selecciona horario',
+    availableToday: 'Disponible hoy',
+    availableTodayHint: 'Esto afecta el estado del pin en el mapa',
+    atClient: 'A domicilio',
+    atMyPlace: 'En mi lugar',
+    online: 'Online',
+    paymentMethods: 'Métodos de pago',
+    paymentMethodsHint: '¿Cómo pueden pagar los clientes?',
+    cash: 'Efectivo',
+    card: 'Tarjeta',
+    wallet: 'Dinero electrónico',
+    contact: 'Contacto',
+    phone: 'Teléfono',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    publishService: 'Publicar servicio',
+    pleaseEnterServiceTitle: 'Introduce el título del servicio',
+    pleaseEnterPrice: 'Introduce el precio',
+    servicePublishedSuccessfully: 'Servicio publicado con éxito',
   },
   CZ: {
     title: 'Přidat službu',
@@ -333,104 +743,37 @@ const addServiceTexts = {
     atClient: 'U klienta',
     atMyPlace: 'U mě',
     online: 'Online',
-    paymentMethods: 'Platební metody',
-    paymentMethodsHint: 'Jak mohou klienti platit?',
+    paymentMethods: 'Způsoby platby',
+    paymentMethodsHint: 'Jak mohou klienti zaplatit?',
     cash: 'Hotovost',
     card: 'Karta',
     wallet: 'Elektronické peníze',
-    contact: 'Kontakt',
+    contact: 'Kontakty',
     phone: 'Telefon',
     whatsapp: 'WhatsApp',
     telegram: 'Telegram',
-    publish: 'Publikovat službu',
-    enterServiceTitle: 'Zadejte prosím název služby',
-    enterPrice: 'Zadejte prosím cenu',
-    success: 'Služba byla úspěšně publikována',
-    categories: {
-      Beauty: 'Krása',
-      Wellness: 'Wellness',
-      Home: 'Domov',
-      Repairs: 'Opravy',
-      Tech: 'Technika',
-      Pets: 'Mazlíčci',
-      Auto: 'Auto',
-      Moving: 'Stěhování',
-      Activities: 'Aktivity',
-      Events: 'Události',
-      Creative: 'Kreativa',
-    },
-    subcategories: {
-      Hair: 'Vlasy',
-      Nails: 'Nehty',
-      Brows: 'Obočí',
-      Lashes: 'Řasy',
-      Makeup: 'Make-up',
-      Keratin: 'Keratin',
-      Massage: 'Masáž',
-      Spa: 'Spa',
-      Therapy: 'Terapie',
-      Recovery: 'Regenerace',
-      Yoga: 'Jóga',
-      Cleaning: 'Úklid',
-      Handyman: 'Hodinový manžel',
-      Plumbing: 'Instalatérství',
-      Electrical: 'Elektro',
-      'Furniture assembly': 'Montáž nábytku',
-      'Appliance repair': 'Oprava spotřebičů',
-      'Phone repair': 'Oprava telefonu',
-      'Laptop repair': 'Oprava notebooku',
-      'TV repair': 'Oprava televize',
-      'Shoe repair': 'Oprava obuvi',
-      Phone: 'Telefon',
-      Laptop: 'Notebook',
-      Tablet: 'Tablet',
-      'Computer help': 'Pomoc s počítačem',
-      Setup: 'Nastavení',
-      Grooming: 'Grooming',
-      'Dog walking': 'Venčení psů',
-      'Pet sitting': 'Hlídání mazlíčků',
-      'Pet taxi': 'Pet taxi',
-      Training: 'Trénink',
-      'Car wash': 'Mytí auta',
-      Detailing: 'Detailing',
-      Diagnostics: 'Diagnostika',
-      'Tire service': 'Pneuservis',
-      Delivery: 'Doručení',
-      'Moving help': 'Pomoc se stěhováním',
-      'Furniture transport': 'Přeprava nábytku',
-      Courier: 'Kurýr',
-      Fitness: 'Fitness',
-      Dance: 'Tanec',
-      Tutor: 'Lektor',
-      'Kids activities': 'Dětské aktivity',
-      Decorator: 'Dekoratér',
-      Host: 'Moderátor',
-      Photographer: 'Fotograf',
-      'Makeup for events': 'Make-up na akce',
-      Design: 'Design',
-      Photo: 'Foto',
-      Video: 'Video',
-      Editing: 'Editace',
-      'Content creation': 'Tvorba obsahu',
-    },
+    publishService: 'Publikovat službu',
+    pleaseEnterServiceTitle: 'Zadejte název služby',
+    pleaseEnterPrice: 'Zadejte cenu',
+    servicePublishedSuccessfully: 'Služba byla úspěšně publikována',
   },
   DE: {
-    title: 'Service hinzufügen',
+    title: 'Dienstleistung hinzufügen',
     uploadPhotos: 'Fotos hochladen',
-    serviceTitle: 'Servicetitel',
-    serviceTitlePlaceholder: 'Servicetitel eingeben',
+    serviceTitle: 'Titel der Dienstleistung',
+    serviceTitlePlaceholder: 'Titel der Dienstleistung eingeben',
     description: 'Beschreibung',
-    descriptionPlaceholder: 'Beschreibe deinen Service...',
+    descriptionPlaceholder: 'Beschreibe deine Dienstleistung...',
     category: 'Kategorie',
     subcategory: 'Unterkategorie',
     price: 'Preis',
     pricePlaceholder: 'Preis eingeben',
-    location: 'Ort / Gebiet',
-    locationPlaceholder: 'Ort / Gebiet auswählen',
+    location: 'Standort / Bereich',
+    locationPlaceholder: 'Standort / Bereich wählen',
     hours: 'Arbeitszeiten',
-    hoursPlaceholder: 'Zeiten auswählen',
+    hoursPlaceholder: 'Zeiten wählen',
     availableToday: 'Heute verfügbar',
-    availableTodayHint: 'Dies beeinflusst den Pin-Status auf der Karte',
+    availableTodayHint: 'Das beeinflusst den Status des Kartenpins',
     atClient: 'Beim Kunden',
     atMyPlace: 'Bei mir',
     online: 'Online',
@@ -443,77 +786,10 @@ const addServiceTexts = {
     phone: 'Telefon',
     whatsapp: 'WhatsApp',
     telegram: 'Telegram',
-    publish: 'Service veröffentlichen',
-    enterServiceTitle: 'Bitte Servicetitel eingeben',
-    enterPrice: 'Bitte Preis eingeben',
-    success: 'Service erfolgreich veröffentlicht',
-    categories: {
-      Beauty: 'Beauty',
-      Wellness: 'Wellness',
-      Home: 'Zuhause',
-      Repairs: 'Reparaturen',
-      Tech: 'Technik',
-      Pets: 'Haustiere',
-      Auto: 'Auto',
-      Moving: 'Umzug',
-      Activities: 'Aktivitäten',
-      Events: 'Events',
-      Creative: 'Kreativ',
-    },
-    subcategories: {
-      Hair: 'Haare',
-      Nails: 'Nägel',
-      Brows: 'Augenbrauen',
-      Lashes: 'Wimpern',
-      Makeup: 'Make-up',
-      Keratin: 'Keratin',
-      Massage: 'Massage',
-      Spa: 'Spa',
-      Therapy: 'Therapie',
-      Recovery: 'Erholung',
-      Yoga: 'Yoga',
-      Cleaning: 'Reinigung',
-      Handyman: 'Handwerker',
-      Plumbing: 'Sanitär',
-      Electrical: 'Elektrik',
-      'Furniture assembly': 'Möbelmontage',
-      'Appliance repair': 'Gerätereparatur',
-      'Phone repair': 'Handyreparatur',
-      'Laptop repair': 'Laptop-Reparatur',
-      'TV repair': 'TV-Reparatur',
-      'Shoe repair': 'Schuhreparatur',
-      Phone: 'Telefon',
-      Laptop: 'Laptop',
-      Tablet: 'Tablet',
-      'Computer help': 'Computerhilfe',
-      Setup: 'Einrichtung',
-      Grooming: 'Pflege',
-      'Dog walking': 'Hunde ausführen',
-      'Pet sitting': 'Tiersitting',
-      'Pet taxi': 'Tier-Taxi',
-      Training: 'Training',
-      'Car wash': 'Autowäsche',
-      Detailing: 'Detailing',
-      Diagnostics: 'Diagnose',
-      'Tire service': 'Reifenservice',
-      Delivery: 'Lieferung',
-      'Moving help': 'Umzugshilfe',
-      'Furniture transport': 'Möbeltransport',
-      Courier: 'Kurier',
-      Fitness: 'Fitness',
-      Dance: 'Tanz',
-      Tutor: 'Nachhilfe',
-      'Kids activities': 'Kinderaktivitäten',
-      Decorator: 'Dekorateur',
-      Host: 'Moderator',
-      Photographer: 'Fotograf',
-      'Makeup for events': 'Make-up für Events',
-      Design: 'Design',
-      Photo: 'Foto',
-      Video: 'Video',
-      Editing: 'Bearbeitung',
-      'Content creation': 'Content-Erstellung',
-    },
+    publishService: 'Dienstleistung veröffentlichen',
+    pleaseEnterServiceTitle: 'Bitte Titel der Dienstleistung eingeben',
+    pleaseEnterPrice: 'Bitte Preis eingeben',
+    servicePublishedSuccessfully: 'Dienstleistung erfolgreich veröffentlicht',
   },
   PL: {
     title: 'Dodaj usługę',
@@ -531,7 +807,7 @@ const addServiceTexts = {
     hours: 'Godziny pracy',
     hoursPlaceholder: 'Wybierz godziny',
     availableToday: 'Dostępne dziś',
-    availableTodayHint: 'To wpływa na status pina na mapie',
+    availableTodayHint: 'Wpływa to na status pinezki na mapie',
     atClient: 'U klienta',
     atMyPlace: 'U mnie',
     online: 'Online',
@@ -544,112 +820,17 @@ const addServiceTexts = {
     phone: 'Telefon',
     whatsapp: 'WhatsApp',
     telegram: 'Telegram',
-    publish: 'Opublikuj usługę',
-    enterServiceTitle: 'Wpisz nazwę usługi',
-    enterPrice: 'Wpisz cenę',
-    success: 'Usługa została opublikowana',
-    categories: {
-      Beauty: 'Uroda',
-      Wellness: 'Wellness',
-      Home: 'Dom',
-      Repairs: 'Naprawy',
-      Tech: 'Technika',
-      Pets: 'Zwierzęta',
-      Auto: 'Auto',
-      Moving: 'Przeprowadzka',
-      Activities: 'Aktywności',
-      Events: 'Wydarzenia',
-      Creative: 'Kreatywne',
-    },
-    subcategories: {
-      Hair: 'Włosy',
-      Nails: 'Paznokcie',
-      Brows: 'Brwi',
-      Lashes: 'Rzęsy',
-      Makeup: 'Makijaż',
-      Keratin: 'Keratyna',
-      Massage: 'Masaż',
-      Spa: 'Spa',
-      Therapy: 'Terapia',
-      Recovery: 'Regeneracja',
-      Yoga: 'Joga',
-      Cleaning: 'Sprzątanie',
-      Handyman: 'Złota rączka',
-      Plumbing: 'Hydraulika',
-      Electrical: 'Elektryka',
-      'Furniture assembly': 'Montaż mebli',
-      'Appliance repair': 'Naprawa sprzętu',
-      'Phone repair': 'Naprawa telefonu',
-      'Laptop repair': 'Naprawa laptopa',
-      'TV repair': 'Naprawa telewizora',
-      'Shoe repair': 'Naprawa butów',
-      Phone: 'Telefon',
-      Laptop: 'Laptop',
-      Tablet: 'Tablet',
-      'Computer help': 'Pomoc komputerowa',
-      Setup: 'Konfiguracja',
-      Grooming: 'Grooming',
-      'Dog walking': 'Wyprowadzanie psów',
-      'Pet sitting': 'Opieka nad zwierzętami',
-      'Pet taxi': 'Taxi dla zwierząt',
-      Training: 'Trening',
-      'Car wash': 'Myjnia',
-      Detailing: 'Detailing',
-      Diagnostics: 'Diagnostyka',
-      'Tire service': 'Serwis opon',
-      Delivery: 'Dostawa',
-      'Moving help': 'Pomoc przy przeprowadzce',
-      'Furniture transport': 'Transport mebli',
-      Courier: 'Kurier',
-      Fitness: 'Fitness',
-      Dance: 'Taniec',
-      Tutor: 'Korepetytor',
-      'Kids activities': 'Zajęcia dla dzieci',
-      Decorator: 'Dekorator',
-      Host: 'Prowadzący',
-      Photographer: 'Fotograf',
-      'Makeup for events': 'Makijaż na wydarzenia',
-      Design: 'Design',
-      Photo: 'Zdjęcie',
-      Video: 'Wideo',
-      Editing: 'Edycja',
-      'Content creation': 'Tworzenie treści',
-    },
+    publishService: 'Opublikuj usługę',
+    pleaseEnterServiceTitle: 'Wpisz nazwę usługi',
+    pleaseEnterPrice: 'Wpisz cenę',
+    servicePublishedSuccessfully: 'Usługa została opublikowana',
   },
-} as const;
-
-const categoryKeys = [
-  'Beauty',
-  'Wellness',
-  'Home',
-  'Repairs',
-  'Tech',
-  'Pets',
-  'Auto',
-  'Moving',
-  'Activities',
-  'Events',
-  'Creative',
-] as const;
-
-const subcategoriesByCategory: Record<string, string[]> = {
-  Beauty: ['Hair', 'Nails', 'Brows', 'Lashes', 'Makeup', 'Keratin'],
-  Wellness: ['Massage', 'Spa', 'Therapy', 'Recovery', 'Yoga'],
-  Home: ['Cleaning', 'Handyman', 'Plumbing', 'Electrical', 'Furniture assembly'],
-  Repairs: ['Appliance repair', 'Phone repair', 'Laptop repair', 'TV repair', 'Shoe repair'],
-  Tech: ['Phone', 'Laptop', 'Tablet', 'Computer help', 'Setup'],
-  Pets: ['Grooming', 'Dog walking', 'Pet sitting', 'Pet taxi', 'Training'],
-  Auto: ['Car wash', 'Detailing', 'Diagnostics', 'Tire service'],
-  Moving: ['Delivery', 'Moving help', 'Furniture transport', 'Courier'],
-  Activities: ['Fitness', 'Dance', 'Tutor', 'Kids activities'],
-  Events: ['Decorator', 'Host', 'Photographer', 'Makeup for events'],
-  Creative: ['Design', 'Photo', 'Video', 'Editing', 'Content creation'],
 };
 
 export default function AddServicePage() {
   const router = useRouter();
-  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
 
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Beauty');
@@ -683,32 +864,44 @@ export default function AddServicePage() {
     };
   }, []);
 
-  const text = addServiceTexts[language] || addServiceTexts.EN;
+  const text = pageTexts[language] || pageTexts.EN;
+  const categories = categoriesByLanguage[language] || categoriesByLanguage.EN;
 
-  const categories = categoryKeys.map((key) => ({
-    value: key,
-    label: text.categories[key],
-  }));
+  const subcategories = useMemo(() => {
+    const map = subcategoriesByCategory[category];
+    if (!map) return [] as { value: string; label: string }[];
+    return map[language] || map.EN || [];
+  }, [category, language]);
 
-  const subcategories = (subcategoriesByCategory[category] || []).map((key) => ({
-    value: key,
-    label: text.subcategories[key as keyof typeof text.subcategories] || key,
-  }));
+  useEffect(() => {
+    if (!subcategories.length) {
+      setSubcategory('');
+      return;
+    }
+
+    const exists = subcategories.some((item) => item.value === subcategory);
+    if (!exists) {
+      setSubcategory(subcategories[0].value);
+    }
+  }, [subcategory, subcategories]);
 
   const handleCategoryChange = (value: string) => {
     setCategory(value);
-    const nextSubs = subcategoriesByCategory[value] || [];
-    setSubcategory(nextSubs[0] || '');
+    const nextSubs =
+      subcategoriesByCategory[value]?.[language] ||
+      subcategoriesByCategory[value]?.EN ||
+      [];
+    setSubcategory(nextSubs[0]?.value || '');
   };
 
   const handlePublish = () => {
     if (!title.trim()) {
-      alert(text.enterServiceTitle);
+      alert(text.pleaseEnterServiceTitle);
       return;
     }
 
     if (!price.trim()) {
-      alert(text.enterPrice);
+      alert(text.pleaseEnterPrice);
       return;
     }
 
@@ -743,7 +936,7 @@ export default function AddServicePage() {
       photos: [],
     });
 
-    alert(text.success);
+    alert(text.servicePublishedSuccessfully);
     router.push('/');
   };
 
@@ -781,7 +974,6 @@ export default function AddServicePage() {
               fontSize: 30,
               color: '#1f2430',
               lineHeight: 1,
-              cursor: 'pointer',
             }}
           >
             ✕
@@ -811,7 +1003,6 @@ export default function AddServicePage() {
               alignItems: 'center',
               gap: 14,
               boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
-              cursor: 'pointer',
             }}
           >
             <div
@@ -1108,6 +1299,7 @@ export default function AddServicePage() {
               </div>
 
               <button
+                type="button"
                 onClick={() => setAvailableToday((v) => !v)}
                 style={{
                   width: 64,
@@ -1116,7 +1308,6 @@ export default function AddServicePage() {
                   border: 'none',
                   background: availableToday ? '#4f91f1' : '#d6dbe2',
                   position: 'relative',
-                  cursor: 'pointer',
                 }}
               >
                 <span
@@ -1143,6 +1334,7 @@ export default function AddServicePage() {
               }}
             >
               <button
+                type="button"
                 onClick={() => setAtClient((v) => !v)}
                 style={{
                   borderRadius: 14,
@@ -1152,13 +1344,13 @@ export default function AddServicePage() {
                   padding: '13px 10px',
                   fontSize: 15,
                   fontWeight: 700,
-                  cursor: 'pointer',
                 }}
               >
                 {text.atClient}
               </button>
 
               <button
+                type="button"
                 onClick={() => setAtMyPlace((v) => !v)}
                 style={{
                   borderRadius: 14,
@@ -1168,13 +1360,13 @@ export default function AddServicePage() {
                   padding: '13px 10px',
                   fontSize: 15,
                   fontWeight: 700,
-                  cursor: 'pointer',
                 }}
               >
                 {text.atMyPlace}
               </button>
 
               <button
+                type="button"
                 onClick={() => setOnline((v) => !v)}
                 style={{
                   borderRadius: 14,
@@ -1184,7 +1376,6 @@ export default function AddServicePage() {
                   padding: '13px 10px',
                   fontSize: 15,
                   fontWeight: 700,
-                  cursor: 'pointer',
                 }}
               >
                 {text.online}
@@ -1230,6 +1421,7 @@ export default function AddServicePage() {
               }}
             >
               <button
+                type="button"
                 onClick={() => setCash((v) => !v)}
                 style={{
                   borderRadius: 14,
@@ -1242,7 +1434,6 @@ export default function AddServicePage() {
                   fontSize: 16,
                   fontWeight: 700,
                   color: '#1f2430',
-                  cursor: 'pointer',
                 }}
               >
                 <span style={{ fontSize: 22 }}>💵</span>
@@ -1251,6 +1442,7 @@ export default function AddServicePage() {
               </button>
 
               <button
+                type="button"
                 onClick={() => setCard((v) => !v)}
                 style={{
                   borderRadius: 14,
@@ -1263,7 +1455,6 @@ export default function AddServicePage() {
                   fontSize: 16,
                   fontWeight: 700,
                   color: '#1f2430',
-                  cursor: 'pointer',
                 }}
               >
                 <span style={{ fontSize: 22 }}>💳</span>
@@ -1272,6 +1463,7 @@ export default function AddServicePage() {
               </button>
 
               <button
+                type="button"
                 onClick={() => setWallet((v) => !v)}
                 style={{
                   borderRadius: 14,
@@ -1284,7 +1476,6 @@ export default function AddServicePage() {
                   fontSize: 16,
                   fontWeight: 700,
                   color: '#1f2430',
-                  cursor: 'pointer',
                 }}
               >
                 <span style={{ fontSize: 22 }}>👛</span>
@@ -1379,6 +1570,7 @@ export default function AddServicePage() {
       >
         <div style={{ maxWidth: 430, margin: '0 auto' }}>
           <button
+            type="button"
             onClick={handlePublish}
             style={{
               width: '100%',
@@ -1390,10 +1582,9 @@ export default function AddServicePage() {
               fontSize: 18,
               fontWeight: 800,
               boxShadow: '0 10px 24px rgba(31,139,145,0.24)',
-              cursor: 'pointer',
             }}
           >
-            {text.publish}
+            {text.publishService}
           </button>
         </div>
       </div>
