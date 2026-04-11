@@ -1,8 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getMasterById } from '../../../../services/masters';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../../services/i18n';
 
 type FilterType = 'newest' | 'highest' | 'photos';
 
@@ -91,11 +96,102 @@ function stars(count: number) {
   return '★'.repeat(count) + '☆'.repeat(5 - count);
 }
 
+function getTexts(language: AppLanguage) {
+  if (language === 'RU') {
+    return {
+      masterNotFound: 'Специалист не найден',
+      title: 'Отзывы',
+      basedOn: 'На основе',
+      reviewsWord: 'отзывов',
+      newest: 'Новые',
+      highest: 'С высоким рейтингом',
+      photos: 'С фото',
+      verifiedVisit: 'Подтверждённый визит',
+      fullReview: 'Полный отзыв',
+      reviewPhoto: 'Фото отзыва',
+    };
+  }
+
+  if (language === 'ES') {
+    return {
+      masterNotFound: 'Profesional no encontrado',
+      title: 'Reseñas',
+      basedOn: 'Basado en',
+      reviewsWord: 'reseñas',
+      newest: 'Más recientes',
+      highest: 'Mejor valoradas',
+      photos: 'Con fotos',
+      verifiedVisit: 'Visita verificada',
+      fullReview: 'Reseña completa',
+      reviewPhoto: 'Foto de reseña',
+    };
+  }
+
+  if (language === 'CZ') {
+    return {
+      masterNotFound: 'Specialista nebyl nalezen',
+      title: 'Recenze',
+      basedOn: 'Na základě',
+      reviewsWord: 'recenzí',
+      newest: 'Nejnovější',
+      highest: 'Nejlépe hodnocené',
+      photos: 'S fotkami',
+      verifiedVisit: 'Ověřená návštěva',
+      fullReview: 'Celá recenze',
+      reviewPhoto: 'Fotka recenze',
+    };
+  }
+
+  if (language === 'DE') {
+    return {
+      masterNotFound: 'Spezialist nicht gefunden',
+      title: 'Bewertungen',
+      basedOn: 'Basierend auf',
+      reviewsWord: 'Bewertungen',
+      newest: 'Neueste',
+      highest: 'Am besten bewertet',
+      photos: 'Mit Fotos',
+      verifiedVisit: 'Verifizierter Besuch',
+      fullReview: 'Vollständige Bewertung',
+      reviewPhoto: 'Bewertungsfoto',
+    };
+  }
+
+  if (language === 'PL') {
+    return {
+      masterNotFound: 'Specjalista nie został znaleziony',
+      title: 'Opinie',
+      basedOn: 'Na podstawie',
+      reviewsWord: 'opinii',
+      newest: 'Najnowsze',
+      highest: 'Najwyżej oceniane',
+      photos: 'Ze zdjęciami',
+      verifiedVisit: 'Zweryfikowana wizyta',
+      fullReview: 'Pełna opinia',
+      reviewPhoto: 'Zdjęcie opinii',
+    };
+  }
+
+  return {
+    masterNotFound: 'Master not found',
+    title: 'Reviews',
+    basedOn: 'Based on',
+    reviewsWord: 'reviews',
+    newest: 'Newest',
+    highest: 'Highest rated',
+    photos: 'With photos',
+    verifiedVisit: 'Verified visit',
+    fullReview: 'Full review',
+    reviewPhoto: 'Review photo',
+  };
+}
+
 export default function ReviewsPage() {
   const params = useParams();
   const router = useRouter();
   const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
 
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [filter, setFilter] = useState<FilterType>('newest');
   const [selectedReview, setSelectedReview] = useState<ReviewItem | null>(null);
   const [photoViewer, setPhotoViewer] = useState<{
@@ -103,8 +199,22 @@ export default function ReviewsPage() {
     index: number;
   } | null>(null);
 
+  useEffect(() => {
+    setLanguage(getSavedLanguage());
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    return () => {
+      unsubLanguage();
+    };
+  }, []);
+
+  const text = useMemo(() => getTexts(language), [language]);
+
   if (!master) {
-    return <main style={{ padding: 24 }}>Master not found</main>;
+    return <main style={{ padding: 24 }}>{text.masterNotFound}</main>;
   }
 
   const reviews = useMemo(() => {
@@ -181,12 +291,13 @@ export default function ReviewsPage() {
               background: '#fff',
               fontSize: 24,
               boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+              cursor: 'pointer',
             }}
           >
             ←
           </button>
 
-          <div style={{ fontSize: 30, fontWeight: 900 }}>Reviews</div>
+          <div style={{ fontSize: 30, fontWeight: 900 }}>{text.title}</div>
 
           <button
             onClick={() => router.push('/')}
@@ -198,6 +309,7 @@ export default function ReviewsPage() {
               background: '#fff',
               fontSize: 22,
               boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+              cursor: 'pointer',
             }}
           >
             ⌂
@@ -245,7 +357,7 @@ export default function ReviewsPage() {
           </div>
 
           <div style={{ marginTop: 14, color: '#7a7066', fontSize: 17 }}>
-            Based on {master.reviews} reviews
+            {text.basedOn} {master.reviews} {text.reviewsWord}
           </div>
 
           <div
@@ -310,9 +422,9 @@ export default function ReviewsPage() {
           }}
         >
           {[
-            { key: 'newest', label: 'Newest' },
-            { key: 'highest', label: 'Highest rated' },
-            { key: 'photos', label: 'With photos' },
+            { key: 'newest', label: text.newest },
+            { key: 'highest', label: text.highest },
+            { key: 'photos', label: text.photos },
           ].map((item) => {
             const active = filter === item.key;
             return (
@@ -329,6 +441,7 @@ export default function ReviewsPage() {
                   background: active ? '#35a24a' : '#fff',
                   color: active ? '#fff' : '#2b231d',
                   boxShadow: active ? 'none' : 'inset 0 0 0 1px #e5d9cb',
+                  cursor: 'pointer',
                 }}
               >
                 {item.label}
@@ -356,6 +469,7 @@ export default function ReviewsPage() {
                 padding: 20,
                 textAlign: 'left',
                 boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+                cursor: 'pointer',
               }}
             >
               <div
@@ -409,7 +523,7 @@ export default function ReviewsPage() {
                         }}
                       >
                         <span>✔</span>
-                        <span>Verified visit</span>
+                        <span>{text.verifiedVisit}</span>
                       </div>
                     )}
                   </div>
@@ -475,6 +589,7 @@ export default function ReviewsPage() {
                         padding: 0,
                         border: 'none',
                         background: 'transparent',
+                        cursor: 'pointer',
                       }}
                     >
                       <img
@@ -535,12 +650,13 @@ export default function ReviewsPage() {
                   border: '1px solid #e3d9cc',
                   background: '#fff',
                   fontSize: 24,
+                  cursor: 'pointer',
                 }}
               >
                 ✕
               </button>
 
-              <div style={{ fontSize: 22, fontWeight: 900 }}>Full review</div>
+              <div style={{ fontSize: 22, fontWeight: 900 }}>{text.fullReview}</div>
 
               <button
                 onClick={() => router.push('/')}
@@ -551,6 +667,7 @@ export default function ReviewsPage() {
                   border: '1px solid #e3d9cc',
                   background: '#fff',
                   fontSize: 22,
+                  cursor: 'pointer',
                 }}
               >
                 ⌂
@@ -609,7 +726,7 @@ export default function ReviewsPage() {
                         }}
                       >
                         <span>✔</span>
-                        <span>Verified visit</span>
+                        <span>{text.verifiedVisit}</span>
                       </div>
                     )}
                   </div>
@@ -669,6 +786,7 @@ export default function ReviewsPage() {
                         padding: 0,
                         border: 'none',
                         background: 'transparent',
+                        cursor: 'pointer',
                       }}
                     >
                       <img
@@ -735,6 +853,7 @@ export default function ReviewsPage() {
                   background: 'rgba(255,255,255,0.14)',
                   color: '#fff',
                   fontSize: 28,
+                  cursor: 'pointer',
                 }}
               >
                 ✕
@@ -750,6 +869,7 @@ export default function ReviewsPage() {
                   background: 'rgba(255,255,255,0.14)',
                   color: '#fff',
                   fontSize: 22,
+                  cursor: 'pointer',
                 }}
               >
                 ⌂
@@ -767,7 +887,7 @@ export default function ReviewsPage() {
             >
               <img
                 src={photoViewer.images[photoViewer.index]}
-                alt="Review photo"
+                alt={text.reviewPhoto}
                 style={{
                   width: '100%',
                   maxWidth: 380,
@@ -797,6 +917,7 @@ export default function ReviewsPage() {
                       background: 'rgba(0,0,0,0.42)',
                       color: '#fff',
                       fontSize: 28,
+                      cursor: 'pointer',
                     }}
                   >
                     ‹
@@ -816,6 +937,7 @@ export default function ReviewsPage() {
                       background: 'rgba(0,0,0,0.42)',
                       color: '#fff',
                       fontSize: 28,
+                      cursor: 'pointer',
                     }}
                   >
                     ›
