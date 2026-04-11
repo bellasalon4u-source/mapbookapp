@@ -218,6 +218,7 @@ const currencyOptions: {
 function readStoredCurrency(): CurrencyCode {
   if (typeof window === 'undefined') return 'GBP';
   const value = window.localStorage.getItem(CURRENCY_STORAGE_KEY);
+
   if (
     value === 'GBP' ||
     value === 'EUR' ||
@@ -229,6 +230,7 @@ function readStoredCurrency(): CurrencyCode {
   ) {
     return value;
   }
+
   return 'GBP';
 }
 
@@ -245,7 +247,9 @@ function readStoredLocation(): StoredLocation | null {
 
   try {
     const parsed = JSON.parse(raw) as StoredLocation;
+
     if (!parsed || typeof parsed !== 'object') return null;
+
     return {
       source: parsed.source === 'current' ? 'current' : 'region',
       label: String(parsed.label || ''),
@@ -314,14 +318,22 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 export default function LanguageRegionPage() {
   const router = useRouter();
 
-  const [language, setLanguage] = useState<AppLanguage>('EN');
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
   const [selectedLanguage, setSelectedLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [selectedRegion, setSelectedRegion] = useState(getUserProfile().region);
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>(readStoredCurrency());
-  const [selectedLocationMode, setSelectedLocationMode] = useState<'current' | 'region'>('region');
-  const [selectedLocation, setSelectedLocation] = useState<StoredLocation | null>(readStoredLocation());
+  const [selectedLocationMode, setSelectedLocationMode] = useState<'current' | 'region'>(
+    readStoredLocation()?.source || 'region'
+  );
+  const [selectedLocation, setSelectedLocation] = useState<StoredLocation | null>(
+    readStoredLocation()
+  );
   const [isLocating, setIsLocating] = useState(false);
+
+  useEffect(() => {
+    saveLanguage(language);
+  }, [language]);
 
   useEffect(() => {
     const syncLanguage = () => {
@@ -348,10 +360,13 @@ export default function LanguageRegionPage() {
     setSelectedCurrency(readStoredCurrency());
 
     window.addEventListener('focus', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
+
     const unsubProfile = subscribeToUserProfile(syncProfile);
 
     return () => {
       window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
       unsubProfile();
     };
   }, []);
@@ -420,6 +435,7 @@ export default function LanguageRegionPage() {
 
   const handleSave = () => {
     saveLanguage(selectedLanguage);
+    setLanguage(selectedLanguage);
     saveStoredCurrency(selectedCurrency);
 
     const finalLocation =
@@ -441,7 +457,10 @@ export default function LanguageRegionPage() {
       region: selectedRegion,
     });
 
-    alert(text.saved);
+    alert(
+      (pageTexts[selectedLanguage as keyof typeof pageTexts] || pageTexts.EN).saved
+    );
+
     router.push('/profile');
   };
 
@@ -582,6 +601,7 @@ export default function LanguageRegionPage() {
                   type="button"
                   onClick={() => {
                     setSelectedRegion(option.value);
+
                     if (selectedLocationMode === 'region') {
                       setSelectedLocation({
                         source: 'region',
@@ -801,4 +821,4 @@ export default function LanguageRegionPage() {
       <BottomNav active="profile" />
     </main>
   );
-}
+}  просто помни .и анализируй сразу что к чему относится .что б не путатб нтчего .теперь давай дальше без ошибок. што мне делать щас чтоб исправить все те проблемы со скринами и языками как на фото .что тнбе надо еще или ты уже понимаешь?
