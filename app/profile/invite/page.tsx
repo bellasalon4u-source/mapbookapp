@@ -2,309 +2,219 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  getSavedLanguage,
-  subscribeToLanguageChange,
-  type AppLanguage,
-} from '../../../services/i18n';
-import {
-  getReferralState,
-  subscribeToReferralStore,
-} from '../../services/referralStore';
 import BottomNav from '../../../components/common/BottomNav';
+import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
 
 const inviteTexts = {
   EN: {
     title: 'Invite friends',
-    heroTitle: 'Invite a friend — get a free booking',
-    heroText:
-      'For every friend who pays their first £5 unlock, you receive 1 free booking reward.',
-    activeForever: 'Works continuously',
-    invited: 'Invited',
-    invitedSub: 'People joined by your link',
-    paid: 'Paid',
-    paidSub: 'Friends who completed first unlock',
-    freeBookings: 'Free bookings',
-    freeBookingsSub: 'Available referral rewards',
-    yourLink: 'Your link',
-    yourLinkText:
-      'Send the link to your friends. They get a £5 bonus for the first booking, and you get a free booking once they pay.',
+    subtitle: 'Share MapBook and earn bonuses',
+    heroTitle: 'Invite and get rewards',
+    heroSub: 'Invite friends to MapBook and receive bonuses when they join and book.',
+    yourCode: 'Your referral code',
     copy: 'Copy',
     copied: 'Copied',
-    share: 'Share link',
-    invitedFriends: 'Invited friends',
-    paidStatus: 'Paid',
-    countedStatus: 'Counted',
-    waitingStatus: 'Waiting for payment',
-    bonuses: 'Your bonuses',
-    welcomeBonus: 'Welcome bonus',
-    referralBonus: 'Referral rewards',
-    totalAvailable: 'Total available',
-    linkReady: 'Referral link is ready to share',
+    inviteLink: 'Invite link',
+    rewards: 'Rewards',
+    reward1: 'Get a bonus for each new joined user',
+    reward2: 'Get booking bonus after first completed booking',
+    reward3: 'Track referrals and reward history in one place',
+    stats: 'Your stats',
+    invited: 'Invited',
+    joined: 'Joined',
+    earned: 'Earned',
+    history: 'Referral history',
+    empty: 'No referrals yet',
+    emptySub: 'Share your code with friends and your referral activity will appear here.',
+    share: 'Share code',
+    statusJoined: 'Joined',
+    statusBooked: 'Booked',
+    statusPending: 'Pending',
   },
   ES: {
     title: 'Invitar amigos',
-    heroTitle: 'Invita a un amigo — consigue una reserva gratis',
-    heroText:
-      'Por cada amigo que pague su primer unlock de £5, recibes 1 recompensa de reserva gratis.',
-    activeForever: 'Funciona siempre',
-    invited: 'Invitados',
-    invitedSub: 'Personas que entraron por tu enlace',
-    paid: 'Pagaron',
-    paidSub: 'Amigos que completaron el primer unlock',
-    freeBookings: 'Reservas gratis',
-    freeBookingsSub: 'Recompensas disponibles',
-    yourLink: 'Tu enlace',
-    yourLinkText:
-      'Envía el enlace a tus amigos. Ellos reciben un bono de £5 en la primera reserva y tú obtienes una reserva gratis cuando paguen.',
+    subtitle: 'Comparte MapBook y gana bonos',
+    heroTitle: 'Invita y recibe recompensas',
+    heroSub: 'Invita amigos a MapBook y recibe bonos cuando se unan y reserven.',
+    yourCode: 'Tu código de referido',
     copy: 'Copiar',
     copied: 'Copiado',
-    share: 'Compartir enlace',
-    invitedFriends: 'Amigos invitados',
-    paidStatus: 'Pagó',
-    countedStatus: 'Contado',
-    waitingStatus: 'Esperando pago',
-    bonuses: 'Tus bonos',
-    welcomeBonus: 'Bono de bienvenida',
-    referralBonus: 'Bonos por referidos',
-    totalAvailable: 'Total disponible',
-    linkReady: 'El enlace de invitación está listo para compartir',
+    inviteLink: 'Enlace de invitación',
+    rewards: 'Recompensas',
+    reward1: 'Recibe un bono por cada nuevo usuario que se una',
+    reward2: 'Recibe bono de reserva después de la primera reserva completada',
+    reward3: 'Sigue referidos e historial de recompensas en un solo lugar',
+    stats: 'Tus estadísticas',
+    invited: 'Invitados',
+    joined: 'Unidos',
+    earned: 'Ganado',
+    history: 'Historial de referidos',
+    empty: 'Aún no hay referidos',
+    emptySub: 'Comparte tu código con amigos y tu actividad aparecerá aquí.',
+    share: 'Compartir código',
+    statusJoined: 'Unido',
+    statusBooked: 'Reservó',
+    statusPending: 'Pendiente',
   },
   RU: {
     title: 'Пригласить друзей',
-    heroTitle: 'Пригласите друга — получите бесплатное бронирование',
-    heroText:
-      'За каждого друга, который оплатит свой первый £5 unlock, вы получите 1 бесплатное бронирование.',
-    activeForever: 'Это работает постоянно',
-    invited: 'Приглашено',
-    invitedSub: 'Людей пришло по вашей ссылке',
-    paid: 'Оплатили',
-    paidSub: 'Друзья с первым оплаченным unlock',
-    freeBookings: 'Бесплатные бронирования',
-    freeBookingsSub: 'Доступные награды по рефералам',
-    yourLink: 'Ваша ссылка',
-    yourLinkText:
-      'Отправьте ссылку друзьям. Они получат бонус £5 на первое бронирование, а вы — бесплатное бронирование, когда они оплатят.',
-    copy: 'Скопировать',
+    subtitle: 'Делитесь MapBook и получайте бонусы',
+    heroTitle: 'Приглашайте и получайте награды',
+    heroSub: 'Приглашайте друзей в MapBook и получайте бонусы, когда они регистрируются и бронируют.',
+    yourCode: 'Ваш реферальный код',
+    copy: 'Копировать',
     copied: 'Скопировано',
-    share: 'Поделиться ссылкой',
-    invitedFriends: 'Приглашённые друзья',
-    paidStatus: 'Оплатил',
-    countedStatus: 'Зачтено',
-    waitingStatus: 'Ожидает оплату',
-    bonuses: 'Ваши бонусы',
-    welcomeBonus: 'Welcome Bonus',
-    referralBonus: 'Реферальные бонусы',
-    totalAvailable: 'Всего доступно',
-    linkReady: 'Реферальная ссылка готова к отправке',
+    inviteLink: 'Ссылка-приглашение',
+    rewards: 'Награды',
+    reward1: 'Получайте бонус за каждого нового присоединившегося пользователя',
+    reward2: 'Получайте бонус после первого завершённого бронирования',
+    reward3: 'Отслеживайте рефералов и историю наград в одном месте',
+    stats: 'Ваша статистика',
+    invited: 'Приглашено',
+    joined: 'Присоединились',
+    earned: 'Заработано',
+    history: 'История рефералов',
+    empty: 'Пока нет рефералов',
+    emptySub: 'Поделитесь кодом с друзьями, и здесь появится ваша активность.',
+    share: 'Поделиться кодом',
+    statusJoined: 'Присоединился',
+    statusBooked: 'Забронировал',
+    statusPending: 'Ожидает',
   },
   CZ: {
     title: 'Pozvat přátele',
-    heroTitle: 'Pozvěte přítele — získejte rezervaci zdarma',
-    heroText:
-      'Za každého přítele, který zaplatí svůj první £5 unlock, získáte 1 rezervaci zdarma.',
-    activeForever: 'Funguje neustále',
-    invited: 'Pozváno',
-    invitedSub: 'Lidé, kteří přišli přes váš odkaz',
-    paid: 'Zaplatili',
-    paidSub: 'Přátelé s prvním zaplaceným unlockem',
-    freeBookings: 'Rezervace zdarma',
-    freeBookingsSub: 'Dostupné referral odměny',
-    yourLink: 'Váš odkaz',
-    yourLinkText:
-      'Pošlete odkaz přátelům. Oni získají bonus £5 na první rezervaci a vy získáte rezervaci zdarma, když zaplatí.',
+    subtitle: 'Sdílejte MapBook a získejte bonusy',
+    heroTitle: 'Pozvěte a získejte odměny',
+    heroSub: 'Pozvěte přátele do MapBook a získejte bonusy, když se připojí a rezervují.',
+    yourCode: 'Váš referral kód',
     copy: 'Kopírovat',
     copied: 'Zkopírováno',
-    share: 'Sdílet odkaz',
-    invitedFriends: 'Pozvaní přátelé',
-    paidStatus: 'Zaplatil',
-    countedStatus: 'Započteno',
-    waitingStatus: 'Čeká na platbu',
-    bonuses: 'Vaše bonusy',
-    welcomeBonus: 'Welcome Bonus',
-    referralBonus: 'Bonusy za doporučení',
-    totalAvailable: 'Celkem dostupné',
-    linkReady: 'Referral odkaz je připraven ke sdílení',
+    inviteLink: 'Referral odkaz',
+    rewards: 'Odměny',
+    reward1: 'Získejte bonus za každého nového uživatele',
+    reward2: 'Získejte bonus po první dokončené rezervaci',
+    reward3: 'Sledujte referraly a historii odměn na jednom místě',
+    stats: 'Vaše statistiky',
+    invited: 'Pozváno',
+    joined: 'Připojeno',
+    earned: 'Získáno',
+    history: 'Historie referralů',
+    empty: 'Zatím žádné referraly',
+    emptySub: 'Sdílejte svůj kód s přáteli a aktivita se zobrazí zde.',
+    share: 'Sdílet kód',
+    statusJoined: 'Připojeno',
+    statusBooked: 'Rezervováno',
+    statusPending: 'Čeká',
   },
   DE: {
     title: 'Freunde einladen',
-    heroTitle: 'Freund einladen — kostenlose Buchung erhalten',
-    heroText:
-      'Für jeden Freund, der seinen ersten £5 Unlock bezahlt, erhältst du 1 kostenlose Buchung.',
-    activeForever: 'Funktioniert dauerhaft',
-    invited: 'Eingeladen',
-    invitedSub: 'Personen über deinen Link',
-    paid: 'Bezahlt',
-    paidSub: 'Freunde mit erstem bezahlten Unlock',
-    freeBookings: 'Kostenlose Buchungen',
-    freeBookingsSub: 'Verfügbare Empfehlungsprämien',
-    yourLink: 'Dein Link',
-    yourLinkText:
-      'Sende den Link an deine Freunde. Sie erhalten £5 Bonus für die erste Buchung und du bekommst eine kostenlose Buchung, sobald sie zahlen.',
+    subtitle: 'Teile MapBook und erhalte Boni',
+    heroTitle: 'Einladen und Belohnungen erhalten',
+    heroSub: 'Lade Freunde zu MapBook ein und erhalte Boni, wenn sie beitreten und buchen.',
+    yourCode: 'Dein Empfehlungscode',
     copy: 'Kopieren',
     copied: 'Kopiert',
-    share: 'Link teilen',
-    invitedFriends: 'Eingeladene Freunde',
-    paidStatus: 'Bezahlt',
-    countedStatus: 'Angerechnet',
-    waitingStatus: 'Wartet auf Zahlung',
-    bonuses: 'Deine Boni',
-    welcomeBonus: 'Welcome Bonus',
-    referralBonus: 'Empfehlungsboni',
-    totalAvailable: 'Insgesamt verfügbar',
-    linkReady: 'Einladungslink ist bereit zum Teilen',
+    inviteLink: 'Einladungslink',
+    rewards: 'Belohnungen',
+    reward1: 'Erhalte einen Bonus für jeden neuen Nutzer',
+    reward2: 'Erhalte einen Buchungsbonus nach der ersten abgeschlossenen Buchung',
+    reward3: 'Verfolge Empfehlungen und Bonusverlauf an einem Ort',
+    stats: 'Deine Statistik',
+    invited: 'Eingeladen',
+    joined: 'Beigetreten',
+    earned: 'Verdient',
+    history: 'Empfehlungsverlauf',
+    empty: 'Noch keine Empfehlungen',
+    emptySub: 'Teile deinen Code mit Freunden und deine Aktivität erscheint hier.',
+    share: 'Code teilen',
+    statusJoined: 'Beigetreten',
+    statusBooked: 'Gebucht',
+    statusPending: 'Ausstehend',
   },
   PL: {
     title: 'Zaproś znajomych',
-    heroTitle: 'Zaproś znajomego — odbierz darmową rezerwację',
-    heroText:
-      'Za każdego znajomego, który opłaci swój pierwszy £5 unlock, otrzymasz 1 darmową rezerwację.',
-    activeForever: 'Działa cały czas',
-    invited: 'Zaproszono',
-    invitedSub: 'Osoby, które weszły przez twój link',
-    paid: 'Zapłacili',
-    paidSub: 'Znajomi z pierwszym opłaconym unlockiem',
-    freeBookings: 'Darmowe rezerwacje',
-    freeBookingsSub: 'Dostępne nagrody z poleceń',
-    yourLink: 'Twój link',
-    yourLinkText:
-      'Wyślij link znajomym. Otrzymają bonus £5 na pierwszą rezerwację, a Ty dostaniesz darmową rezerwację, gdy zapłacą.',
+    subtitle: 'Udostępniaj MapBook i zdobywaj bonusy',
+    heroTitle: 'Zaproś i odbieraj nagrody',
+    heroSub: 'Zaproś znajomych do MapBook i odbieraj bonusy, gdy dołączą i zarezerwują.',
+    yourCode: 'Twój kod polecający',
     copy: 'Kopiuj',
     copied: 'Skopiowano',
-    share: 'Udostępnij link',
-    invitedFriends: 'Zaproszeni znajomi',
-    paidStatus: 'Zapłacił',
-    countedStatus: 'Zaliczone',
-    waitingStatus: 'Oczekuje płatności',
-    bonuses: 'Twoje bonusy',
-    welcomeBonus: 'Welcome Bonus',
-    referralBonus: 'Bonusy poleceń',
-    totalAvailable: 'Łącznie dostępne',
-    linkReady: 'Link polecający jest gotowy do udostępnienia',
+    inviteLink: 'Link polecający',
+    rewards: 'Nagrody',
+    reward1: 'Otrzymuj bonus za każdego nowego użytkownika',
+    reward2: 'Otrzymuj bonus po pierwszej zakończonej rezerwacji',
+    reward3: 'Śledź polecenia i historię nagród w jednym miejscu',
+    stats: 'Twoje statystyki',
+    invited: 'Zaproszono',
+    joined: 'Dołączyli',
+    earned: 'Zyskano',
+    history: 'Historia poleceń',
+    empty: 'Brak poleceń',
+    emptySub: 'Udostępnij kod znajomym, a aktywność pojawi się tutaj.',
+    share: 'Udostępnij kod',
+    statusJoined: 'Dołączył',
+    statusBooked: 'Zarezerwował',
+    statusPending: 'Oczekuje',
   },
 } as const;
 
-function getStatusStyles(status: string) {
-  if (status === 'paid') {
-    return {
-      background: '#eef9f1',
-      color: '#2fa35a',
-    };
-  }
+type InviteItem = {
+  id: string;
+  name: string;
+  status: 'joined' | 'booked' | 'pending';
+  reward: number;
+};
 
-  if (status === 'counted') {
-    return {
-      background: '#eef4ff',
-      color: '#2f7cf6',
-    };
-  }
+const inviteHistory: InviteItem[] = [
+  { id: '1', name: 'Anna', status: 'booked', reward: 10 },
+  { id: '2', name: 'Sofia', status: 'joined', reward: 5 },
+  { id: '3', name: 'Mila', status: 'pending', reward: 0 },
+];
 
-  return {
-    background: '#fff5e8',
-    color: '#d68612',
-  };
+function statusStyle(status: InviteItem['status']) {
+  if (status === 'booked') return { background: '#eef9f1', color: '#2fa35a' };
+  if (status === 'joined') return { background: '#eef4ff', color: '#2f7cf6' };
+  return { background: '#fff5e8', color: '#d68612' };
 }
 
-function getStatCardStyles(type: 'pink' | 'blue' | 'green') {
-  if (type === 'pink') {
-    return {
-      background: 'linear-gradient(180deg, #fff1f7 0%, #ffe8f2 100%)',
-      color: '#ff4fa0',
-      shadow: '0 10px 24px rgba(255,79,160,0.10)',
-    };
-  }
-
-  if (type === 'blue') {
-    return {
-      background: 'linear-gradient(180deg, #eef4ff 0%, #e7f0ff 100%)',
-      color: '#2f7cf6',
-      shadow: '0 10px 24px rgba(47,124,246,0.10)',
-    };
-  }
-
-  return {
-    background: 'linear-gradient(180deg, #eef9f1 0%, #e6f7eb 100%)',
-    color: '#2fa35a',
-    shadow: '0 10px 24px rgba(47,163,90,0.10)',
-  };
-}
-
-export default function InviteFriendsPage() {
+export default function InvitePage() {
   const router = useRouter();
-
-  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [language, setLanguage] = useState<AppLanguage>('EN');
   const [copied, setCopied] = useState(false);
-  const [referralState, setReferralState] = useState(getReferralState());
 
   useEffect(() => {
-    const syncLanguage = () => {
-      setLanguage(getSavedLanguage());
-    };
-
-    const syncReferral = () => {
-      setReferralState(getReferralState());
-    };
-
+    const syncLanguage = () => setLanguage(getSavedLanguage());
     syncLanguage();
-    syncReferral();
-
-    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
-      setLanguage(nextLanguage);
-    });
-
-    const unsubReferral = subscribeToReferralStore(syncReferral);
+    window.addEventListener('focus', syncLanguage);
 
     return () => {
-      unsubLanguage();
-      unsubReferral();
+      window.removeEventListener('focus', syncLanguage);
     };
   }, []);
 
-  const text = inviteTexts[language as keyof typeof inviteTexts] || inviteTexts.EN;
+  const text = useMemo(
+    () => inviteTexts[language as keyof typeof inviteTexts] || inviteTexts.EN,
+    [language]
+  );
 
-  const shareLink =
-    typeof window !== 'undefined'
-      ? `${window.location.origin}/invite/${referralState.referralCode || 'mapbook'}`
-      : `https://mapbook.app/invite/${referralState.referralCode || 'mapbook'}`;
+  const referralCode = 'MAP-ALEX-2026';
+  const inviteLink = `https://mapbook.app/invite/${referralCode}`;
 
-  const referralBonusAmount = useMemo(() => {
-    return Number((referralState.completedReferralsCount || 0) * 5);
-  }, [referralState.completedReferralsCount]);
-
-  const totalAvailable = useMemo(() => {
-    return Number((referralState.welcomeBonus || 0) + referralBonusAmount);
-  }, [referralBonusAmount, referralState.welcomeBonus]);
+  const statusLabel = (status: InviteItem['status']) => {
+    if (status === 'booked') return text.statusBooked;
+    if (status === 'joined') return text.statusJoined;
+    return text.statusPending;
+  };
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(shareLink);
+      await navigator.clipboard.writeText(referralCode);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    } catch (error) {
-      console.error(error);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
     }
   };
-
-  const handleShare = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: 'MapBook Invite',
-          text: shareLink,
-          url: shareLink,
-        });
-        return;
-      }
-
-      await handleCopy();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const invitedCard = getStatCardStyles('pink');
-  const paidCard = getStatCardStyles('blue');
-  const freeCard = getStatCardStyles('green');
 
   return (
     <main
@@ -321,7 +231,6 @@ export default function InviteFriendsPage() {
             gridTemplateColumns: '54px 1fr 54px',
             alignItems: 'center',
             gap: 12,
-            marginBottom: 18,
           }}
         >
           <button
@@ -341,15 +250,20 @@ export default function InviteFriendsPage() {
             ←
           </button>
 
-          <div
-            style={{
-              fontSize: 22,
-              fontWeight: 900,
-              color: '#17130f',
-              textAlign: 'center',
-            }}
-          >
-            {text.title}
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 22, fontWeight: 900, color: '#17130f' }}>
+              {text.title}
+            </div>
+            <div
+              style={{
+                marginTop: 4,
+                fontSize: 13,
+                color: '#7b7268',
+                fontWeight: 700,
+              }}
+            >
+              {text.subtitle}
+            </div>
           </div>
 
           <div />
@@ -357,279 +271,92 @@ export default function InviteFriendsPage() {
 
         <div
           style={{
+            marginTop: 18,
             borderRadius: 32,
             border: '1px solid #f0e3d7',
             background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
-            padding: 20,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
-          <div
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: 22,
-              background: '#fff1f7',
-              color: '#ff4fa0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 30,
-              marginBottom: 16,
-            }}
-          >
-            🎁
-          </div>
-
-          <div
-            style={{
-              fontSize: 28,
-              lineHeight: 1.14,
-              fontWeight: 900,
-              color: '#17130f',
-            }}
-          >
-            {text.heroTitle}
-          </div>
-
-          <div
-            style={{
-              marginTop: 14,
-              fontSize: 16,
-              lineHeight: 1.7,
-              color: '#756b62',
-              fontWeight: 700,
-            }}
-          >
-            {text.heroText}
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              borderRadius: 999,
-              background: '#eef9f1',
-              color: '#2fa35a',
-              padding: '11px 14px',
-              fontSize: 13,
-              fontWeight: 900,
-            }}
-          >
-            <span>⚡</span>
-            <span>{text.activeForever}</span>
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: 16,
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-            gap: 10,
-          }}
-        >
-          <div
-            style={{
-              borderRadius: 28,
-              padding: 16,
-              background: invitedCard.background,
-              color: invitedCard.color,
-              boxShadow: invitedCard.shadow,
-            }}
-          >
-            <div style={{ fontSize: 22 }}>👥</div>
-            <div
-              style={{
-                marginTop: 10,
-                fontSize: 12,
-                lineHeight: 1.25,
-                fontWeight: 900,
-                minHeight: 30,
-              }}
-            >
-              {text.invited}
-            </div>
-            <div
-              style={{
-                marginTop: 6,
-                fontSize: 11,
-                lineHeight: 1.3,
-                fontWeight: 800,
-                opacity: 0.85,
-                minHeight: 28,
-              }}
-            >
-              {text.invitedSub}
-            </div>
-            <div style={{ marginTop: 12, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
-              {referralState.invitedCount || 0}
-            </div>
-          </div>
-
-          <div
-            style={{
-              borderRadius: 28,
-              padding: 16,
-              background: paidCard.background,
-              color: paidCard.color,
-              boxShadow: paidCard.shadow,
-            }}
-          >
-            <div style={{ fontSize: 22 }}>💳</div>
-            <div
-              style={{
-                marginTop: 10,
-                fontSize: 12,
-                lineHeight: 1.25,
-                fontWeight: 900,
-                minHeight: 30,
-              }}
-            >
-              {text.paid}
-            </div>
-            <div
-              style={{
-                marginTop: 6,
-                fontSize: 11,
-                lineHeight: 1.3,
-                fontWeight: 800,
-                opacity: 0.85,
-                minHeight: 28,
-              }}
-            >
-              {text.paidSub}
-            </div>
-            <div style={{ marginTop: 12, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
-              {referralState.completedReferralsCount || 0}
-            </div>
-          </div>
-
-          <div
-            style={{
-              borderRadius: 28,
-              padding: 16,
-              background: freeCard.background,
-              color: freeCard.color,
-              boxShadow: freeCard.shadow,
-            }}
-          >
-            <div style={{ fontSize: 22 }}>🎟️</div>
-            <div
-              style={{
-                marginTop: 10,
-                fontSize: 12,
-                lineHeight: 1.25,
-                fontWeight: 900,
-                minHeight: 30,
-              }}
-            >
-              {text.freeBookings}
-            </div>
-            <div
-              style={{
-                marginTop: 6,
-                fontSize: 11,
-                lineHeight: 1.3,
-                fontWeight: 800,
-                opacity: 0.85,
-                minHeight: 28,
-              }}
-            >
-              {text.freeBookingsSub}
-            </div>
-            <div style={{ marginTop: 12, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
-              {referralState.freeBookingsAvailable || 0}
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: 16,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
             padding: 18,
             boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           <div
             style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
+              display: 'grid',
+              gridTemplateColumns: '56px 1fr',
+              gap: 12,
+              alignItems: 'center',
             }}
           >
-            {text.yourLink}
-          </div>
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 20,
+                background: '#fff1f7',
+                color: '#ff4fa0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 26,
+              }}
+            >
+              🎁
+            </div>
 
-          <div
-            style={{
-              marginTop: 10,
-              fontSize: 15,
-              lineHeight: 1.7,
-              color: '#756b62',
-              fontWeight: 700,
-            }}
-          >
-            {text.yourLinkText}
-          </div>
-
-          <div
-            style={{
-              marginTop: 12,
-              borderRadius: 18,
-              background: '#eef9f1',
-              padding: '12px 14px',
-              fontSize: 13,
-              color: '#2fa35a',
-              fontWeight: 900,
-            }}
-          >
-            {text.linkReady}
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#17130f' }}>
+                {text.heroTitle}
+              </div>
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 14,
+                  lineHeight: 1.55,
+                  color: '#7b7268',
+                  fontWeight: 700,
+                }}
+              >
+                {text.heroSub}
+              </div>
+            </div>
           </div>
 
           <div
             style={{
               marginTop: 16,
               borderRadius: 24,
-              background: '#fcfaf6',
-              border: '1px solid #efe4d7',
-              padding: 12,
-              display: 'grid',
-              gridTemplateColumns: '1fr auto',
-              gap: 10,
-              alignItems: 'center',
+              background: '#fff',
+              border: '1px solid #f1e8dc',
+              padding: 16,
             }}
           >
+            <div style={{ fontSize: 13, color: '#8b8277', fontWeight: 800 }}>
+              {text.yourCode}
+            </div>
             <div
               style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                fontSize: 16,
-                fontWeight: 800,
+                marginTop: 8,
+                fontSize: 26,
+                fontWeight: 900,
                 color: '#17130f',
-                padding: '0 4px',
+                letterSpacing: 1,
               }}
             >
-              {shareLink}
+              {referralCode}
             </div>
 
             <button
               type="button"
               onClick={handleCopy}
               style={{
-                minWidth: 118,
-                height: 52,
+                marginTop: 12,
+                border: 'none',
                 borderRadius: 18,
-                border: '1px solid #f1d9e6',
-                background: copied ? '#eef9f1' : '#fff1f7',
-                color: copied ? '#2fa35a' : '#ff4fa0',
-                fontSize: 15,
+                background: '#2f241c',
+                color: '#fff',
+                minHeight: 48,
+                padding: '0 18px',
+                fontSize: 14,
                 fontWeight: 900,
                 cursor: 'pointer',
               }}
@@ -638,121 +365,21 @@ export default function InviteFriendsPage() {
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={handleShare}
+          <div
             style={{
               marginTop: 12,
-              width: '100%',
-              height: 56,
-              border: 'none',
               borderRadius: 20,
-              background: 'linear-gradient(180deg, #ff62aa 0%, #ff4fa0 100%)',
-              color: '#fff',
-              fontSize: 17,
-              fontWeight: 900,
-              boxShadow: '0 12px 24px rgba(255,79,160,0.20)',
-              cursor: 'pointer',
+              background: '#eef4ff',
+              padding: '12px 14px',
+              fontSize: 13,
+              color: '#2f5dc4',
+              fontWeight: 800,
+              lineHeight: 1.45,
+              wordBreak: 'break-all',
             }}
           >
-            {text.share}
-          </button>
-        </div>
-
-        <div
-          style={{
-            marginTop: 18,
-            fontSize: 20,
-            fontWeight: 900,
-            color: '#17130f',
-          }}
-        >
-          {text.invitedFriends}
-        </div>
-
-        <div
-          style={{
-            marginTop: 12,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 14,
-          }}
-        >
-          {referralState.invitedFriends.map((friend) => {
-            const statusText =
-              friend.status === 'paid'
-                ? text.paidStatus
-                : friend.status === 'counted'
-                  ? text.countedStatus
-                  : text.waitingStatus;
-
-            const statusStyles = getStatusStyles(friend.status);
-
-            return (
-              <div
-                key={friend.id}
-                style={{
-                  borderRadius: 28,
-                  background: '#fff',
-                  border: '1px solid #efe4d7',
-                  padding: 16,
-                  boxShadow: '0 10px 24px rgba(44, 23, 10, 0.04)',
-                  display: 'grid',
-                  gridTemplateColumns: '74px 1fr auto',
-                  gap: 14,
-                  alignItems: 'center',
-                }}
-              >
-                <img
-                  src={friend.avatar}
-                  alt={friend.name}
-                  style={{
-                    width: 74,
-                    height: 74,
-                    borderRadius: 22,
-                    objectFit: 'cover',
-                    display: 'block',
-                  }}
-                />
-
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: 18,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
-                    {friend.name}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 6,
-                      fontSize: 14,
-                      color: '#8a7f74',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {friend.date}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    borderRadius: 999,
-                    padding: '11px 14px',
-                    fontSize: 13,
-                    fontWeight: 900,
-                    whiteSpace: 'nowrap',
-                    ...statusStyles,
-                  }}
-                >
-                  {statusText}
-                </div>
-              </div>
-            );
-          })}
+            {text.inviteLink}: {inviteLink}
+          </div>
         </div>
 
         <div
@@ -761,91 +388,235 @@ export default function InviteFriendsPage() {
             borderRadius: 30,
             border: '1px solid #efe4d7',
             background: '#fff',
-            padding: 18,
+            padding: 16,
             boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           <div
             style={{
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: 900,
               color: '#17130f',
-              marginBottom: 14,
+              marginBottom: 12,
             }}
           >
-            {text.bonuses}
+            {text.rewards}
+          </div>
+
+          <div style={{ display: 'grid', gap: 10 }}>
+            {[text.reward1, text.reward2, text.reward3].map((item) => (
+              <div
+                key={item}
+                style={{
+                  borderRadius: 20,
+                  background: '#fcfaf6',
+                  border: '1px solid #f1e8dc',
+                  padding: 14,
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  color: '#6d6258',
+                  fontWeight: 700,
+                }}
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 18,
+            borderRadius: 30,
+            border: '1px solid #efe4d7',
+            background: '#fff',
+            padding: 16,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 12,
+            }}
+          >
+            {text.stats}
           </div>
 
           <div
             style={{
               display: 'grid',
-              gap: 12,
+              gridTemplateColumns: '1fr 1fr 1fr',
+              gap: 10,
             }}
           >
             <div
               style={{
                 borderRadius: 22,
-                background: '#fff5e8',
-                padding: '16px 18px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 12,
-                alignItems: 'center',
+                background: '#fff',
+                border: '1px solid #f1e8dc',
+                padding: 14,
               }}
             >
-              <div>
-                <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
-                  {text.welcomeBonus}
-                </div>
+              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800 }}>
+                {text.invited}
               </div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: '#d68612' }}>
-                £{Number(referralState.welcomeBonus || 0).toFixed(2)}
+              <div style={{ marginTop: 8, fontSize: 24, fontWeight: 900, color: '#17130f' }}>
+                12
               </div>
             </div>
 
             <div
               style={{
                 borderRadius: 22,
-                background: '#fff1f7',
-                padding: '16px 18px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 12,
-                alignItems: 'center',
+                background: '#fff',
+                border: '1px solid #f1e8dc',
+                padding: 14,
               }}
             >
-              <div>
-                <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
-                  {text.referralBonus}
-                </div>
+              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800 }}>
+                {text.joined}
               </div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: '#ff4fa0' }}>
-                £{referralBonusAmount.toFixed(2)}
+              <div style={{ marginTop: 8, fontSize: 24, fontWeight: 900, color: '#17130f' }}>
+                8
               </div>
             </div>
 
             <div
               style={{
-                borderRadius: 24,
-                background: 'linear-gradient(180deg, #eef9f1 0%, #e7f7ed 100%)',
-                padding: '18px 18px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 12,
-                alignItems: 'center',
+                borderRadius: 22,
+                background: '#fff',
+                border: '1px solid #f1e8dc',
+                padding: 14,
               }}
             >
-              <div>
-                <div style={{ fontSize: 20, fontWeight: 900, color: '#17130f' }}>
-                  {text.totalAvailable}
-                </div>
+              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800 }}>
+                {text.earned}
               </div>
-              <div style={{ fontSize: 24, fontWeight: 900, color: '#2fa35a' }}>
-                £{totalAvailable.toFixed(2)}
+              <div style={{ marginTop: 8, fontSize: 24, fontWeight: 900, color: '#17130f' }}>
+                £15
               </div>
             </div>
           </div>
         </div>
+
+        <div
+          style={{
+            marginTop: 18,
+            borderRadius: 30,
+            border: '1px solid #efe4d7',
+            background: '#fff',
+            padding: 16,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 12,
+            }}
+          >
+            {text.history}
+          </div>
+
+          {inviteHistory.length === 0 ? (
+            <div
+              style={{
+                borderRadius: 24,
+                background: '#fcfaf6',
+                border: '1px solid #f1e8dc',
+                padding: 22,
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: 17, fontWeight: 900, color: '#17130f' }}>{text.empty}</div>
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 14,
+                  lineHeight: 1.55,
+                  color: '#7b7268',
+                  fontWeight: 700,
+                }}
+              >
+                {text.emptySub}
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: 12 }}>
+              {inviteHistory.map((item) => {
+                const badge = statusStyle(item.status);
+
+                return (
+                  <div
+                    key={item.id}
+                    style={{
+                      borderRadius: 24,
+                      border: '1px solid #f1e8dc',
+                      background: '#fff',
+                      padding: 14,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 12,
+                        alignItems: 'center',
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                          {item.name}
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 6,
+                            display: 'inline-flex',
+                            borderRadius: 999,
+                            padding: '8px 12px',
+                            fontSize: 12,
+                            fontWeight: 900,
+                            ...badge,
+                          }}
+                        >
+                          {statusLabel(item.status)}
+                        </div>
+                      </div>
+
+                      <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
+                        £{item.reward}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          style={{
+            marginTop: 18,
+            width: '100%',
+            border: 'none',
+            borderRadius: 24,
+            background: 'linear-gradient(180deg, #2b221c 0%, #1f1712 100%)',
+            color: '#fff',
+            minHeight: 56,
+            fontSize: 16,
+            fontWeight: 900,
+            cursor: 'pointer',
+            boxShadow: '0 14px 28px rgba(31,23,18,0.20)',
+          }}
+        >
+          {text.share}
+        </button>
       </div>
 
       <BottomNav active="profile" />
