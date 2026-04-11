@@ -2,13 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSavedLanguage, type AppLanguage } from '../../../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../../services/i18n';
 import { addPromotion } from '../../../../services/promotionsStore';
 import { getAllMasters } from '../../../../services/masters';
 import { formatDisplayPrice } from '../../../../services/currencyDisplay';
 import { useLiveCurrencyRates } from '../../../../services/useLiveCurrencyRates';
-
-type AppLang = 'RU' | 'EN' | 'ES';
 
 type PromoPhoto = {
   id: string;
@@ -35,11 +37,6 @@ type PromotionDraft = {
 
 const PROMO_LANGUAGES: AppLanguage[] = ['EN', 'ES', 'RU', 'CZ', 'DE', 'PL'];
 
-function normalizeLanguage(value: string): AppLang {
-  if (value === 'RU' || value === 'EN' || value === 'ES') return value;
-  return 'EN';
-}
-
 function makeId(prefix = 'promo') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -61,7 +58,7 @@ function localizeTextForStorage(text: string, sourceLanguage: AppLanguage) {
   return localized;
 }
 
-function getLabels(language: AppLang) {
+function getLabels(language: AppLanguage) {
   if (language === 'RU') {
     return {
       title: 'Оплата рекламы',
@@ -132,6 +129,111 @@ function getLabels(language: AppLang) {
     };
   }
 
+  if (language === 'CZ') {
+    return {
+      title: 'Platba reklamy',
+      subtitle: 'Před publikací vyberte způsob platby',
+      summary: 'Shrnutí reklamy',
+      paymentMethod: 'Způsob platby',
+      card: 'Bankovní karta',
+      crypto: 'Kryptoměna',
+      wallet: 'Interní zůstatek',
+      total: 'Celkem k úhradě',
+      publish: 'Zaplatit a spustit',
+      processing: 'Zpracování platby...',
+      back: 'Zpět',
+      close: 'Zavřít',
+      noDraft: 'Koncept reklamy nebyl nalezen',
+      returnToCreate: 'Vrátit se k vytvoření',
+      paidSecurely: 'Bezpečné publikování po zaplacení',
+      adTitle: 'Reklama',
+      views: 'Zobrazení',
+      bookings: 'Rezervace',
+      radius: 'Okruh',
+      activeAfterPay: 'Aktivuje se až po úspěšné platbě',
+      cryptoInfo: 'Podporováno: BTC, ETH, USDT, USDC',
+      walletInfo: 'Částka bude odečtena z interního zůstatku aplikace',
+      cardInfo: 'Visa, Mastercard, Apple Pay, Google Pay',
+      promoStatus: 'Stav',
+      waitingPayment: 'Čeká na platbu',
+      sponsored: 'Sponsored',
+      publishSuccess: 'Reklama byla zaplacena a spuštěna',
+      duration: 'Doba trvání',
+      daysShort: 'dnů',
+      specialOffer: 'Speciální nabídka',
+    };
+  }
+
+  if (language === 'DE') {
+    return {
+      title: 'Zahlung der Werbung',
+      subtitle: 'Wähle vor der Veröffentlichung eine Zahlungsmethode',
+      summary: 'Zusammenfassung der Werbung',
+      paymentMethod: 'Zahlungsmethode',
+      card: 'Bankkarte',
+      crypto: 'Krypto',
+      wallet: 'Interner Kontostand',
+      total: 'Zu zahlen',
+      publish: 'Bezahlen und veröffentlichen',
+      processing: 'Zahlung wird verarbeitet...',
+      back: 'Zurück',
+      close: 'Schließen',
+      noDraft: 'Werbeentwurf wurde nicht gefunden',
+      returnToCreate: 'Zur Erstellung zurückkehren',
+      paidSecurely: 'Sichere Veröffentlichung nach Zahlung',
+      adTitle: 'Werbung',
+      views: 'Aufrufe',
+      bookings: 'Buchungen',
+      radius: 'Radius',
+      activeAfterPay: 'Wird erst nach erfolgreicher Zahlung aktiviert',
+      cryptoInfo: 'Unterstützt: BTC, ETH, USDT, USDC',
+      walletInfo: 'Der Betrag wird vom internen App-Guthaben abgebucht',
+      cardInfo: 'Visa, Mastercard, Apple Pay, Google Pay',
+      promoStatus: 'Status',
+      waitingPayment: 'Wartet auf Zahlung',
+      sponsored: 'Sponsored',
+      publishSuccess: 'Die Werbung wurde bezahlt und veröffentlicht',
+      duration: 'Dauer',
+      daysShort: 'Tage',
+      specialOffer: 'Sonderangebot',
+    };
+  }
+
+  if (language === 'PL') {
+    return {
+      title: 'Płatność za reklamę',
+      subtitle: 'Wybierz metodę płatności przed publikacją',
+      summary: 'Podsumowanie reklamy',
+      paymentMethod: 'Metoda płatności',
+      card: 'Karta bankowa',
+      crypto: 'Krypto',
+      wallet: 'Saldo wewnętrzne',
+      total: 'Do zapłaty',
+      publish: 'Zapłać i uruchom',
+      processing: 'Przetwarzanie płatności...',
+      back: 'Wstecz',
+      close: 'Zamknij',
+      noDraft: 'Nie znaleziono szkicu reklamy',
+      returnToCreate: 'Wróć do tworzenia',
+      paidSecurely: 'Bezpieczna publikacja po opłaceniu',
+      adTitle: 'Reklama',
+      views: 'Wyświetlenia',
+      bookings: 'Rezerwacje',
+      radius: 'Promień',
+      activeAfterPay: 'Aktywuje się dopiero po udanej płatności',
+      cryptoInfo: 'Obsługiwane: BTC, ETH, USDT, USDC',
+      walletInfo: 'Kwota zostanie pobrana z salda wewnętrznego aplikacji',
+      cardInfo: 'Visa, Mastercard, Apple Pay, Google Pay',
+      promoStatus: 'Status',
+      waitingPayment: 'Oczekuje na płatność',
+      sponsored: 'Sponsored',
+      publishSuccess: 'Reklama została opłacona i opublikowana',
+      duration: 'Czas trwania',
+      daysShort: 'dni',
+      specialOffer: 'Oferta specjalna',
+    };
+  }
+
   return {
     title: 'Promotion payment',
     subtitle: 'Choose a payment method before publishing',
@@ -172,26 +274,22 @@ export default function PromotionPaymentPage() {
   const router = useRouter();
   const masters = getAllMasters();
 
-  const [language, setLanguage] = useState<AppLang>(normalizeLanguage(getSavedLanguage()));
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [draft, setDraft] = useState<PromotionDraft | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'crypto' | 'wallet'>('card');
   const [isPaying, setIsPaying] = useState(false);
 
-  const labels = getLabels(language);
+  const labels = useMemo(() => getLabels(language), [language]);
 
   useEffect(() => {
-    const syncLanguage = () => {
-      setLanguage(normalizeLanguage(getSavedLanguage()));
-    };
+    setLanguage(getSavedLanguage());
 
-    syncLanguage();
-
-    window.addEventListener('focus', syncLanguage);
-    window.addEventListener('storage', syncLanguage);
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
 
     return () => {
-      window.removeEventListener('focus', syncLanguage);
-      window.removeEventListener('storage', syncLanguage);
+      unsubLanguage();
     };
   }, []);
 
@@ -353,7 +451,14 @@ export default function PromotionPaymentPage() {
 
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 20, fontWeight: 900 }}>{labels.title}</div>
-            <div style={{ fontSize: 13, color: '#727b88', fontWeight: 700, marginTop: 4 }}>
+            <div
+              style={{
+                fontSize: 13,
+                color: '#727b88',
+                fontWeight: 700,
+                marginTop: 4,
+              }}
+            >
               {labels.subtitle}
             </div>
           </div>
@@ -386,7 +491,9 @@ export default function PromotionPaymentPage() {
             marginBottom: 16,
           }}
         >
-          <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 12 }}>{labels.summary}</div>
+          <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 12 }}>
+            {labels.summary}
+          </div>
 
           <div
             style={{
@@ -669,7 +776,14 @@ export default function PromotionPaymentPage() {
               }}
             >
               <div style={{ fontSize: 16, fontWeight: 900 }}>{labels.card}</div>
-              <div style={{ fontSize: 13, color: '#727b88', fontWeight: 700, marginTop: 4 }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: '#727b88',
+                  fontWeight: 700,
+                  marginTop: 4,
+                }}
+              >
                 {labels.cardInfo}
               </div>
             </button>
@@ -687,7 +801,14 @@ export default function PromotionPaymentPage() {
               }}
             >
               <div style={{ fontSize: 16, fontWeight: 900 }}>{labels.crypto}</div>
-              <div style={{ fontSize: 13, color: '#727b88', fontWeight: 700, marginTop: 4 }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: '#727b88',
+                  fontWeight: 700,
+                  marginTop: 4,
+                }}
+              >
                 {labels.cryptoInfo}
               </div>
             </button>
@@ -705,7 +826,14 @@ export default function PromotionPaymentPage() {
               }}
             >
               <div style={{ fontSize: 16, fontWeight: 900 }}>{labels.wallet}</div>
-              <div style={{ fontSize: 13, color: '#727b88', fontWeight: 700, marginTop: 4 }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: '#727b88',
+                  fontWeight: 700,
+                  marginTop: 4,
+                }}
+              >
                 {labels.walletInfo}
               </div>
             </button>
@@ -779,7 +907,9 @@ export default function PromotionPaymentPage() {
               opacity: isPaying ? 0.8 : 1,
             }}
           >
-            {isPaying ? labels.processing : `${labels.publish} · ${formatDisplayPrice(draft.price)}`}
+            {isPaying
+              ? labels.processing
+              : `${labels.publish} · ${formatDisplayPrice(draft.price)}`}
           </button>
         </div>
       </div>
