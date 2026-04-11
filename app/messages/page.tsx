@@ -2,6 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import BottomNav from '../../components/common/BottomNav';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../services/i18n';
 import {
   getChatThreads,
   getUnreadMessagesCount,
@@ -9,9 +15,55 @@ import {
   type ChatThread,
 } from '../../services/chatStore';
 
+const messagesTexts = {
+  EN: {
+    title: 'Messages',
+    allCaughtUp: 'All caught up',
+    unreadSingle: 'unread message',
+    unreadPlural: 'unread messages',
+    searchPlaceholder: 'Search chats...',
+  },
+  ES: {
+    title: 'Mensajes',
+    allCaughtUp: 'Todo al día',
+    unreadSingle: 'mensaje no leído',
+    unreadPlural: 'mensajes no leídos',
+    searchPlaceholder: 'Buscar chats...',
+  },
+  RU: {
+    title: 'Сообщения',
+    allCaughtUp: 'Все сообщения прочитаны',
+    unreadSingle: 'непрочитанное сообщение',
+    unreadPlural: 'непрочитанных сообщений',
+    searchPlaceholder: 'Поиск чатов...',
+  },
+  CZ: {
+    title: 'Zprávy',
+    allCaughtUp: 'Vše je přečteno',
+    unreadSingle: 'nepřečtená zpráva',
+    unreadPlural: 'nepřečtených zpráv',
+    searchPlaceholder: 'Hledat chaty...',
+  },
+  DE: {
+    title: 'Nachrichten',
+    allCaughtUp: 'Alles gelesen',
+    unreadSingle: 'ungelesene Nachricht',
+    unreadPlural: 'ungelesene Nachrichten',
+    searchPlaceholder: 'Chats suchen...',
+  },
+  PL: {
+    title: 'Wiadomości',
+    allCaughtUp: 'Wszystko przeczytane',
+    unreadSingle: 'nieprzeczytana wiadomość',
+    unreadPlural: 'nieprzeczytanych wiadomości',
+    searchPlaceholder: 'Szukaj czatów...',
+  },
+} as const;
+
 export default function MessagesPage() {
   const router = useRouter();
 
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [threads, setThreads] = useState<ChatThread[]>([]);
   const [search, setSearch] = useState('');
 
@@ -25,9 +77,55 @@ export default function MessagesPage() {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    setLanguage(getSavedLanguage());
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    return () => {
+      unsubLanguage();
+    };
+  }, []);
+
+  const text = messagesTexts[language as keyof typeof messagesTexts] || messagesTexts.EN;
+
   const unreadTotal = useMemo(() => {
     return getUnreadMessagesCount();
   }, [threads]);
+
+  const unreadText = useMemo(() => {
+    if (unreadTotal <= 0) {
+      return text.allCaughtUp;
+    }
+
+    if (language === 'EN') {
+      return `${unreadTotal} ${unreadTotal === 1 ? text.unreadSingle : text.unreadPlural}`;
+    }
+
+    if (language === 'ES') {
+      return `${unreadTotal} ${unreadTotal === 1 ? text.unreadSingle : text.unreadPlural}`;
+    }
+
+    if (language === 'RU') {
+      return `${unreadTotal} ${text.unreadPlural}`;
+    }
+
+    if (language === 'CZ') {
+      return `${unreadTotal} ${unreadTotal === 1 ? text.unreadSingle : text.unreadPlural}`;
+    }
+
+    if (language === 'DE') {
+      return `${unreadTotal} ${unreadTotal === 1 ? text.unreadSingle : text.unreadPlural}`;
+    }
+
+    if (language === 'PL') {
+      return `${unreadTotal} ${text.unreadPlural}`;
+    }
+
+    return `${unreadTotal} ${text.unreadPlural}`;
+  }, [language, text, unreadTotal]);
 
   const filteredThreads = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -50,7 +148,7 @@ export default function MessagesPage() {
         background: '#f5f3ef',
         fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
-        paddingBottom: 88,
+        paddingBottom: 104,
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -73,6 +171,7 @@ export default function MessagesPage() {
                 borderRadius: 999,
                 fontSize: 24,
                 boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                cursor: 'pointer',
               }}
             >
               ←
@@ -87,7 +186,7 @@ export default function MessagesPage() {
                   lineHeight: 1.2,
                 }}
               >
-                Messages
+                {text.title}
               </div>
               <div
                 style={{
@@ -97,9 +196,7 @@ export default function MessagesPage() {
                   fontWeight: 700,
                 }}
               >
-                {unreadTotal > 0
-                  ? `${unreadTotal} unread message${unreadTotal > 1 ? 's' : ''}`
-                  : 'All caught up'}
+                {unreadText}
               </div>
             </div>
           </div>
@@ -121,7 +218,7 @@ export default function MessagesPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search chats..."
+              placeholder={text.searchPlaceholder}
               style={{
                 flex: 1,
                 border: 'none',
@@ -160,6 +257,7 @@ export default function MessagesPage() {
                     gap: 14,
                     alignItems: 'start',
                     textAlign: 'left',
+                    cursor: 'pointer',
                   }}
                 >
                   <div style={{ position: 'relative' }}>
@@ -270,122 +368,7 @@ export default function MessagesPage() {
         </section>
       </div>
 
-      <nav
-        style={{
-          position: 'fixed',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(245,243,239,0.98)',
-          borderTop: '1px solid #e3ddd5',
-          backdropFilter: 'blur(10px)',
-          zIndex: 50,
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 430,
-            margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            alignItems: 'center',
-            padding: '10px 8px 12px',
-          }}
-        >
-          <button
-            onClick={() => router.push('/')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-              color: '#6e7b8a',
-            }}
-          >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>⌂</span>
-            <span style={{ fontSize: 12, fontWeight: 700 }}>Home</span>
-          </button>
-
-          <button
-            onClick={() => router.push('/messages')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-              color: '#1f5d99',
-              position: 'relative',
-            }}
-          >
-            <div style={{ position: 'relative' }}>
-              <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>✉</span>
-
-              {unreadTotal > 0 && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: -6,
-                    right: -10,
-                    minWidth: 18,
-                    height: 18,
-                    padding: '0 5px',
-                    borderRadius: 999,
-                    background: '#e53935',
-                    color: '#fff',
-                    fontSize: 11,
-                    fontWeight: 800,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 3px 8px rgba(229,57,53,0.35)',
-                    border: '2px solid #f5f3ef',
-                  }}
-                >
-                  {unreadTotal > 9 ? '9+' : unreadTotal}
-                </span>
-              )}
-            </div>
-
-            <span style={{ fontSize: 12, fontWeight: 800 }}>Messages</span>
-          </button>
-
-          <button
-            onClick={() => router.push('/bookings')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-              color: '#6e7b8a',
-            }}
-          >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>▤</span>
-            <span style={{ fontSize: 12, fontWeight: 700 }}>Bookings</span>
-          </button>
-
-          <button
-            onClick={() => router.push('/profile')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-              color: '#6e7b8a',
-            }}
-          >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>◉</span>
-            <span style={{ fontSize: 12, fontWeight: 700 }}>Profile</span>
-          </button>
-        </div>
-      </nav>
+      <BottomNav />
     </main>
   );
 }
