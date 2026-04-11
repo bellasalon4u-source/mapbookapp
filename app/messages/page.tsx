@@ -22,6 +22,8 @@ const messagesTexts = {
     unreadSingle: 'unread message',
     unreadPlural: 'unread messages',
     searchPlaceholder: 'Search chats...',
+    noChats: 'No chats yet',
+    noChatsHint: 'When you start messaging professionals, your chats will appear here.',
   },
   ES: {
     title: 'Mensajes',
@@ -29,6 +31,8 @@ const messagesTexts = {
     unreadSingle: 'mensaje no leído',
     unreadPlural: 'mensajes no leídos',
     searchPlaceholder: 'Buscar chats...',
+    noChats: 'Aún no hay chats',
+    noChatsHint: 'Cuando empieces a escribir a profesionales, tus chats aparecerán aquí.',
   },
   RU: {
     title: 'Сообщения',
@@ -36,6 +40,8 @@ const messagesTexts = {
     unreadSingle: 'непрочитанное сообщение',
     unreadPlural: 'непрочитанных сообщений',
     searchPlaceholder: 'Поиск чатов...',
+    noChats: 'Чатов пока нет',
+    noChatsHint: 'Когда вы начнёте писать специалистам, ваши чаты появятся здесь.',
   },
   CZ: {
     title: 'Zprávy',
@@ -43,6 +49,8 @@ const messagesTexts = {
     unreadSingle: 'nepřečtená zpráva',
     unreadPlural: 'nepřečtených zpráv',
     searchPlaceholder: 'Hledat chaty...',
+    noChats: 'Zatím žádné chaty',
+    noChatsHint: 'Jakmile začnete psát profesionálům, vaše chaty se zobrazí zde.',
   },
   DE: {
     title: 'Nachrichten',
@@ -50,6 +58,8 @@ const messagesTexts = {
     unreadSingle: 'ungelesene Nachricht',
     unreadPlural: 'ungelesene Nachrichten',
     searchPlaceholder: 'Chats suchen...',
+    noChats: 'Noch keine Chats',
+    noChatsHint: 'Sobald du Fachleuten schreibst, erscheinen deine Chats hier.',
   },
   PL: {
     title: 'Wiadomości',
@@ -57,6 +67,8 @@ const messagesTexts = {
     unreadSingle: 'nieprzeczytana wiadomość',
     unreadPlural: 'nieprzeczytanych wiadomości',
     searchPlaceholder: 'Szukaj czatów...',
+    noChats: 'Brak czatów',
+    noChatsHint: 'Gdy zaczniesz pisać do specjalistów, Twoje czaty pojawią się tutaj.',
   },
 } as const;
 
@@ -239,6 +251,40 @@ export default function MessagesPage() {
               gap: 14,
             }}
           >
+            {filteredThreads.length === 0 ? (
+              <div
+                style={{
+                  background: '#fff',
+                  border: '1px solid #ece4d9',
+                  borderRadius: 24,
+                  boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+                  padding: 24,
+                  textAlign: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 800,
+                    color: '#253140',
+                    marginBottom: 8,
+                  }}
+                >
+                  {text.noChats}
+                </div>
+                <div
+                  style={{
+                    fontSize: 15,
+                    color: '#6d7784',
+                    lineHeight: 1.45,
+                    fontWeight: 600,
+                  }}
+                >
+                  {text.noChatsHint}
+                </div>
+              </div>
+            ) : null}
+
             {filteredThreads.map((thread) => {
               const lastMessage = thread.messages[thread.messages.length - 1];
 
