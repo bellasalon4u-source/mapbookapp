@@ -14,97 +14,92 @@ const categoriesByLanguage: Record<
   {
     value: string;
     label: string;
+    icon: string;
   }[]
 > = {
   EN: [
-    { value: 'Beauty', label: 'Beauty' },
-    { value: 'Wellness', label: 'Wellness' },
-    { value: 'Home', label: 'Home' },
-    { value: 'Repairs', label: 'Repairs' },
-    { value: 'Tech', label: 'Tech' },
-    { value: 'Pets', label: 'Pets' },
-    { value: 'Auto', label: 'Auto' },
-    { value: 'Moving', label: 'Moving' },
-    { value: 'Activities', label: 'Activities' },
-    { value: 'Events', label: 'Events' },
-    { value: 'Creative', label: 'Creative' },
+    { value: 'Beauty', label: 'Beauty', icon: '💄' },
+    { value: 'Wellness', label: 'Wellness', icon: '🧘' },
+    { value: 'Home', label: 'Home', icon: '🏠' },
+    { value: 'Repairs', label: 'Repairs', icon: '🛠️' },
+    { value: 'Tech', label: 'Tech', icon: '📱' },
+    { value: 'Pets', label: 'Pets', icon: '🐾' },
+    { value: 'Auto', label: 'Auto', icon: '🚗' },
+    { value: 'Moving', label: 'Moving', icon: '📦' },
+    { value: 'Activities', label: 'Activities', icon: '🎯' },
+    { value: 'Events', label: 'Events', icon: '🎉' },
+    { value: 'Creative', label: 'Creative', icon: '🎨' },
   ],
   RU: [
-    { value: 'Beauty', label: 'Красота' },
-    { value: 'Wellness', label: 'Велнес' },
-    { value: 'Home', label: 'Дом' },
-    { value: 'Repairs', label: 'Ремонт' },
-    { value: 'Tech', label: 'Техника' },
-    { value: 'Pets', label: 'Питомцы' },
-    { value: 'Auto', label: 'Авто' },
-    { value: 'Moving', label: 'Переезд' },
-    { value: 'Activities', label: 'Активности' },
-    { value: 'Events', label: 'События' },
-    { value: 'Creative', label: 'Креатив' },
+    { value: 'Beauty', label: 'Красота', icon: '💄' },
+    { value: 'Wellness', label: 'Велнес', icon: '🧘' },
+    { value: 'Home', label: 'Дом', icon: '🏠' },
+    { value: 'Repairs', label: 'Ремонт', icon: '🛠️' },
+    { value: 'Tech', label: 'Техника', icon: '📱' },
+    { value: 'Pets', label: 'Питомцы', icon: '🐾' },
+    { value: 'Auto', label: 'Авто', icon: '🚗' },
+    { value: 'Moving', label: 'Переезд', icon: '📦' },
+    { value: 'Activities', label: 'Активности', icon: '🎯' },
+    { value: 'Events', label: 'События', icon: '🎉' },
+    { value: 'Creative', label: 'Креатив', icon: '🎨' },
   ],
   ES: [
-    { value: 'Beauty', label: 'Belleza' },
-    { value: 'Wellness', label: 'Bienestar' },
-    { value: 'Home', label: 'Hogar' },
-    { value: 'Repairs', label: 'Reparaciones' },
-    { value: 'Tech', label: 'Tecnología' },
-    { value: 'Pets', label: 'Mascotas' },
-    { value: 'Auto', label: 'Auto' },
-    { value: 'Moving', label: 'Mudanza' },
-    { value: 'Activities', label: 'Actividades' },
-    { value: 'Events', label: 'Eventos' },
-    { value: 'Creative', label: 'Creativo' },
+    { value: 'Beauty', label: 'Belleza', icon: '💄' },
+    { value: 'Wellness', label: 'Bienestar', icon: '🧘' },
+    { value: 'Home', label: 'Hogar', icon: '🏠' },
+    { value: 'Repairs', label: 'Reparaciones', icon: '🛠️' },
+    { value: 'Tech', label: 'Tecnología', icon: '📱' },
+    { value: 'Pets', label: 'Mascotas', icon: '🐾' },
+    { value: 'Auto', label: 'Auto', icon: '🚗' },
+    { value: 'Moving', label: 'Mudanza', icon: '📦' },
+    { value: 'Activities', label: 'Actividades', icon: '🎯' },
+    { value: 'Events', label: 'Eventos', icon: '🎉' },
+    { value: 'Creative', label: 'Creativo', icon: '🎨' },
   ],
   CZ: [
-    { value: 'Beauty', label: 'Krása' },
-    { value: 'Wellness', label: 'Wellness' },
-    { value: 'Home', label: 'Domov' },
-    { value: 'Repairs', label: 'Opravy' },
-    { value: 'Tech', label: 'Technika' },
-    { value: 'Pets', label: 'Mazlíčci' },
-    { value: 'Auto', label: 'Auto' },
-    { value: 'Moving', label: 'Stěhování' },
-    { value: 'Activities', label: 'Aktivity' },
-    { value: 'Events', label: 'Události' },
-    { value: 'Creative', label: 'Kreativa' },
+    { value: 'Beauty', label: 'Krása', icon: '💄' },
+    { value: 'Wellness', label: 'Wellness', icon: '🧘' },
+    { value: 'Home', label: 'Domov', icon: '🏠' },
+    { value: 'Repairs', label: 'Opravy', icon: '🛠️' },
+    { value: 'Tech', label: 'Technika', icon: '📱' },
+    { value: 'Pets', label: 'Mazlíčci', icon: '🐾' },
+    { value: 'Auto', label: 'Auto', icon: '🚗' },
+    { value: 'Moving', label: 'Stěhování', icon: '📦' },
+    { value: 'Activities', label: 'Aktivity', icon: '🎯' },
+    { value: 'Events', label: 'Události', icon: '🎉' },
+    { value: 'Creative', label: 'Kreativa', icon: '🎨' },
   ],
   DE: [
-    { value: 'Beauty', label: 'Beauty' },
-    { value: 'Wellness', label: 'Wellness' },
-    { value: 'Home', label: 'Zuhause' },
-    { value: 'Repairs', label: 'Reparaturen' },
-    { value: 'Tech', label: 'Technik' },
-    { value: 'Pets', label: 'Haustiere' },
-    { value: 'Auto', label: 'Auto' },
-    { value: 'Moving', label: 'Umzug' },
-    { value: 'Activities', label: 'Aktivitäten' },
-    { value: 'Events', label: 'Events' },
-    { value: 'Creative', label: 'Kreativ' },
+    { value: 'Beauty', label: 'Beauty', icon: '💄' },
+    { value: 'Wellness', label: 'Wellness', icon: '🧘' },
+    { value: 'Home', label: 'Zuhause', icon: '🏠' },
+    { value: 'Repairs', label: 'Reparaturen', icon: '🛠️' },
+    { value: 'Tech', label: 'Technik', icon: '📱' },
+    { value: 'Pets', label: 'Haustiere', icon: '🐾' },
+    { value: 'Auto', label: 'Auto', icon: '🚗' },
+    { value: 'Moving', label: 'Umzug', icon: '📦' },
+    { value: 'Activities', label: 'Aktivitäten', icon: '🎯' },
+    { value: 'Events', label: 'Events', icon: '🎉' },
+    { value: 'Creative', label: 'Kreativ', icon: '🎨' },
   ],
   PL: [
-    { value: 'Beauty', label: 'Uroda' },
-    { value: 'Wellness', label: 'Wellness' },
-    { value: 'Home', label: 'Dom' },
-    { value: 'Repairs', label: 'Naprawy' },
-    { value: 'Tech', label: 'Technika' },
-    { value: 'Pets', label: 'Zwierzęta' },
-    { value: 'Auto', label: 'Auto' },
-    { value: 'Moving', label: 'Przeprowadzka' },
-    { value: 'Activities', label: 'Aktywności' },
-    { value: 'Events', label: 'Wydarzenia' },
-    { value: 'Creative', label: 'Kreatywne' },
+    { value: 'Beauty', label: 'Uroda', icon: '💄' },
+    { value: 'Wellness', label: 'Wellness', icon: '🧘' },
+    { value: 'Home', label: 'Dom', icon: '🏠' },
+    { value: 'Repairs', label: 'Naprawy', icon: '🛠️' },
+    { value: 'Tech', label: 'Technika', icon: '📱' },
+    { value: 'Pets', label: 'Zwierzęta', icon: '🐾' },
+    { value: 'Auto', label: 'Auto', icon: '🚗' },
+    { value: 'Moving', label: 'Przeprowadzka', icon: '📦' },
+    { value: 'Activities', label: 'Aktywności', icon: '🎯' },
+    { value: 'Events', label: 'Wydarzenia', icon: '🎉' },
+    { value: 'Creative', label: 'Kreatywne', icon: '🎨' },
   ],
 };
 
 const subcategoriesByCategory: Record<
   string,
-  Record<
-    AppLanguage,
-    {
-      value: string;
-      label: string;
-    }[]
-  >
+  Record<AppLanguage, { value: string; label: string }[]>
 > = {
   Beauty: {
     EN: [
@@ -156,7 +151,6 @@ const subcategoriesByCategory: Record<
       { value: 'Keratin', label: 'Keratyna' },
     ],
   },
-
   Wellness: {
     EN: [
       { value: 'Massage', label: 'Massage' },
@@ -201,7 +195,6 @@ const subcategoriesByCategory: Record<
       { value: 'Yoga', label: 'Joga' },
     ],
   },
-
   Home: {
     EN: [
       { value: 'Cleaning', label: 'Cleaning' },
@@ -246,7 +239,6 @@ const subcategoriesByCategory: Record<
       { value: 'Furniture assembly', label: 'Montaż mebli' },
     ],
   },
-
   Repairs: {
     EN: [
       { value: 'Appliance repair', label: 'Appliance repair' },
@@ -291,7 +283,6 @@ const subcategoriesByCategory: Record<
       { value: 'Shoe repair', label: 'Naprawa obuwia' },
     ],
   },
-
   Tech: {
     EN: [
       { value: 'Phone', label: 'Phone' },
@@ -336,7 +327,6 @@ const subcategoriesByCategory: Record<
       { value: 'Setup', label: 'Konfiguracja' },
     ],
   },
-
   Pets: {
     EN: [
       { value: 'Grooming', label: 'Grooming' },
@@ -381,7 +371,6 @@ const subcategoriesByCategory: Record<
       { value: 'Training', label: 'Trening' },
     ],
   },
-
   Auto: {
     EN: [
       { value: 'Car wash', label: 'Car wash' },
@@ -420,7 +409,6 @@ const subcategoriesByCategory: Record<
       { value: 'Tire service', label: 'Serwis opon' },
     ],
   },
-
   Moving: {
     EN: [
       { value: 'Delivery', label: 'Delivery' },
@@ -459,7 +447,6 @@ const subcategoriesByCategory: Record<
       { value: 'Courier', label: 'Kurier' },
     ],
   },
-
   Activities: {
     EN: [
       { value: 'Fitness', label: 'Fitness' },
@@ -498,7 +485,6 @@ const subcategoriesByCategory: Record<
       { value: 'Kids activities', label: 'Aktywności dla dzieci' },
     ],
   },
-
   Events: {
     EN: [
       { value: 'Decorator', label: 'Decorator' },
@@ -537,7 +523,6 @@ const subcategoriesByCategory: Record<
       { value: 'Makeup for events', label: 'Makijaż na wydarzenia' },
     ],
   },
-
   Creative: {
     EN: [
       { value: 'Design', label: 'Design' },
@@ -588,7 +573,12 @@ const pageTexts: Record<
   AppLanguage,
   {
     title: string;
+    subtitle: string;
+    photosSection: string;
+    photosHint: string;
     uploadPhotos: string;
+    requiredFieldsHint: string;
+    requiredMark: string;
     serviceTitle: string;
     serviceTitlePlaceholder: string;
     description: string;
@@ -623,7 +613,12 @@ const pageTexts: Record<
 > = {
   EN: {
     title: 'Add your service',
+    subtitle: 'Create a strong listing for clients nearby',
+    photosSection: 'Photos',
+    photosHint: 'Add great photos to get more views',
     uploadPhotos: 'Upload photos',
+    requiredFieldsHint: '* Required fields',
+    requiredMark: '*',
     serviceTitle: 'Service title',
     serviceTitlePlaceholder: 'Enter service title',
     description: 'Description',
@@ -657,7 +652,12 @@ const pageTexts: Record<
   },
   RU: {
     title: 'Добавить услугу',
+    subtitle: 'Создайте сильное объявление для клиентов рядом',
+    photosSection: 'Фото',
+    photosHint: 'Добавьте хорошие фото, чтобы получить больше просмотров',
     uploadPhotos: 'Загрузить фото',
+    requiredFieldsHint: '* Обязательные поля',
+    requiredMark: '*',
     serviceTitle: 'Название услуги',
     serviceTitlePlaceholder: 'Введите название услуги',
     description: 'Описание',
@@ -691,7 +691,12 @@ const pageTexts: Record<
   },
   ES: {
     title: 'Añadir tu servicio',
+    subtitle: 'Crea un anuncio fuerte para clientes cercanos',
+    photosSection: 'Fotos',
+    photosHint: 'Añade buenas fotos para conseguir más visitas',
     uploadPhotos: 'Subir fotos',
+    requiredFieldsHint: '* Campos obligatorios',
+    requiredMark: '*',
     serviceTitle: 'Título del servicio',
     serviceTitlePlaceholder: 'Introduce el título del servicio',
     description: 'Descripción',
@@ -725,7 +730,12 @@ const pageTexts: Record<
   },
   CZ: {
     title: 'Přidat službu',
+    subtitle: 'Vytvořte silnou nabídku pro klienty v okolí',
+    photosSection: 'Fotky',
+    photosHint: 'Přidejte kvalitní fotky pro více zobrazení',
     uploadPhotos: 'Nahrát fotky',
+    requiredFieldsHint: '* Povinná pole',
+    requiredMark: '*',
     serviceTitle: 'Název služby',
     serviceTitlePlaceholder: 'Zadejte název služby',
     description: 'Popis',
@@ -759,7 +769,12 @@ const pageTexts: Record<
   },
   DE: {
     title: 'Dienstleistung hinzufügen',
+    subtitle: 'Erstelle ein starkes Angebot für Kunden in der Nähe',
+    photosSection: 'Fotos',
+    photosHint: 'Füge gute Fotos hinzu, um mehr Aufrufe zu erhalten',
     uploadPhotos: 'Fotos hochladen',
+    requiredFieldsHint: '* Pflichtfelder',
+    requiredMark: '*',
     serviceTitle: 'Titel der Dienstleistung',
     serviceTitlePlaceholder: 'Titel der Dienstleistung eingeben',
     description: 'Beschreibung',
@@ -793,7 +808,12 @@ const pageTexts: Record<
   },
   PL: {
     title: 'Dodaj usługę',
+    subtitle: 'Stwórz mocne ogłoszenie dla klientów w pobliżu',
+    photosSection: 'Zdjęcia',
+    photosHint: 'Dodaj dobre zdjęcia, aby zdobyć więcej wyświetleń',
     uploadPhotos: 'Prześlij zdjęcia',
+    requiredFieldsHint: '* Pola obowiązkowe',
+    requiredMark: '*',
     serviceTitle: 'Nazwa usługi',
     serviceTitlePlaceholder: 'Wpisz nazwę usługi',
     description: 'Opis',
@@ -826,6 +846,98 @@ const pageTexts: Record<
     servicePublishedSuccessfully: 'Usługa została opublikowana',
   },
 };
+
+function SectionCard({
+  title,
+  children,
+  required,
+}: {
+  title: string;
+  children: React.ReactNode;
+  required?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        background: '#fff',
+        borderRadius: 28,
+        padding: 18,
+        boxShadow: '0 6px 18px rgba(0,0,0,0.05)',
+        border: '1px solid #ebe4da',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          marginBottom: 14,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 19,
+            fontWeight: 900,
+            color: '#1f2430',
+          }}
+        >
+          {title}
+        </div>
+
+        {required ? (
+          <span
+            style={{
+              color: '#ff4d4f',
+              fontSize: 18,
+              fontWeight: 900,
+              lineHeight: 1,
+            }}
+          >
+            *
+          </span>
+        ) : null}
+      </div>
+
+      {children}
+    </div>
+  );
+}
+
+function FieldLabel({
+  children,
+  required,
+}: {
+  children: React.ReactNode;
+  required?: boolean;
+}) {
+  return (
+    <label
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        fontSize: 16,
+        fontWeight: 800,
+        marginBottom: 8,
+        color: '#1f2430',
+      }}
+    >
+      <span>{children}</span>
+      {required ? (
+        <span
+          style={{
+            color: '#ff4d4f',
+            fontSize: 16,
+            fontWeight: 900,
+            lineHeight: 1,
+          }}
+        >
+          *
+        </span>
+      ) : null}
+    </label>
+  );
+}
 
 export default function AddServicePage() {
   const router = useRouter();
@@ -947,7 +1059,7 @@ export default function AddServicePage() {
         background: '#f7f5f1',
         fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
-        paddingBottom: 120,
+        paddingBottom: 124,
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -961,98 +1073,158 @@ export default function AddServicePage() {
             borderBottom: '1px solid #e6dfd5',
             padding: '16px 16px 14px',
             display: 'grid',
-            gridTemplateColumns: '44px 1fr',
+            gridTemplateColumns: '52px 1fr',
             gap: 14,
             alignItems: 'center',
           }}
         >
           <button
+            type="button"
             onClick={() => router.push('/')}
             style={{
-              border: 'none',
-              background: 'transparent',
-              fontSize: 30,
+              width: 52,
+              height: 52,
+              borderRadius: 999,
+              border: '1px solid #e5ddd1',
+              background: '#fff',
+              fontSize: 28,
               color: '#1f2430',
               lineHeight: 1,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
             }}
           >
             ✕
           </button>
 
-          <div
-            style={{
-              fontSize: 22,
-              fontWeight: 800,
-              color: '#1f2430',
-            }}
-          >
-            {text.title}
+          <div>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 900,
+                color: '#1f2430',
+                lineHeight: 1.15,
+              }}
+            >
+              {text.title}
+            </div>
+            <div
+              style={{
+                marginTop: 4,
+                fontSize: 13,
+                color: '#7a8490',
+                fontWeight: 700,
+                lineHeight: 1.4,
+              }}
+            >
+              {text.subtitle}
+            </div>
           </div>
         </header>
 
-        <section style={{ padding: '18px 16px 0' }}>
-          <button
-            type="button"
+        <section style={{ padding: '16px 16px 0' }}>
+          <div
             style={{
-              width: '100%',
-              border: '1px solid #dfe4de',
               background: '#fff',
-              borderRadius: 18,
-              padding: '18px 16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
+              borderRadius: 24,
+              border: '1px solid #ebe4da',
+              boxShadow: '0 6px 18px rgba(0,0,0,0.05)',
+              padding: 16,
             }}
           >
             <div
               style={{
-                width: 44,
-                height: 44,
-                borderRadius: 12,
-                border: '2px solid #4ea560',
-                color: '#4ea560',
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+                gap: 12,
+                marginBottom: 14,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 900,
+                    color: '#1f2430',
+                  }}
+                >
+                  {text.photosSection}
+                </div>
+                <div
+                  style={{
+                    marginTop: 4,
+                    fontSize: 13,
+                    color: '#7a8490',
+                    fontWeight: 700,
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {text.photosHint}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  color: '#7a8490',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {text.requiredFieldsHint}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              style={{
+                width: '100%',
+                border: '1px dashed #cad8cb',
+                background: '#fcfffc',
+                borderRadius: 22,
+                padding: '18px 16px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 28,
-                lineHeight: 1,
+                gap: 14,
               }}
             >
-              +
-            </div>
-            <span
-              style={{
-                fontSize: 18,
-                fontWeight: 700,
-                color: '#2d7b3c',
-              }}
-            >
-              {text.uploadPhotos}
-            </span>
-          </button>
+              <div
+                style={{
+                  width: 54,
+                  height: 54,
+                  borderRadius: 16,
+                  border: '2px solid #4ea560',
+                  color: '#4ea560',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 30,
+                  fontWeight: 700,
+                  flexShrink: 0,
+                  background: '#f4fbf5',
+                }}
+              >
+                +
+              </div>
+
+              <div style={{ textAlign: 'left' }}>
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 800,
+                    color: '#2d7b3c',
+                  }}
+                >
+                  {text.uploadPhotos}
+                </div>
+              </div>
+            </button>
+          </div>
         </section>
 
-        <section style={{ padding: '18px 16px 0' }}>
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 22,
-              padding: 18,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
-              border: '1px solid #ebe4da',
-            }}
-          >
-            <label
-              style={{
-                display: 'block',
-                fontSize: 16,
-                fontWeight: 700,
-                marginBottom: 8,
-              }}
-            >
-              {text.serviceTitle}
-            </label>
+        <section style={{ padding: '16px 16px 0' }}>
+          <SectionCard title={text.serviceTitle} required>
+            <FieldLabel required>{text.serviceTitle}</FieldLabel>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -1060,8 +1232,8 @@ export default function AddServicePage() {
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
-                borderRadius: 14,
-                padding: '15px 14px',
+                borderRadius: 16,
+                padding: '16px 14px',
                 fontSize: 17,
                 outline: 'none',
                 marginBottom: 18,
@@ -1069,94 +1241,59 @@ export default function AddServicePage() {
               }}
             />
 
-            <label
-              style={{
-                display: 'block',
-                fontSize: 16,
-                fontWeight: 700,
-                marginBottom: 8,
-              }}
-            >
-              {text.description}
-            </label>
+            <FieldLabel required>{text.description}</FieldLabel>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={text.descriptionPlaceholder}
-              rows={4}
+              rows={5}
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
-                borderRadius: 14,
-                padding: '15px 14px',
+                borderRadius: 16,
+                padding: '16px 14px',
                 fontSize: 17,
                 outline: 'none',
                 resize: 'none',
                 boxSizing: 'border-box',
               }}
             />
-          </div>
+          </SectionCard>
         </section>
 
-        <section style={{ padding: '14px 16px 0' }}>
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 22,
-              padding: 18,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
-              border: '1px solid #ebe4da',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 800,
-                marginBottom: 14,
-              }}
-            >
-              {text.category}
-            </div>
-
+        <section style={{ padding: '16px 16px 0' }}>
+          <SectionCard title={text.category} required>
+            <FieldLabel required>{text.category}</FieldLabel>
             <select
               value={category}
               onChange={(e) => handleCategoryChange(e.target.value)}
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
-                borderRadius: 14,
-                padding: '15px 14px',
+                borderRadius: 16,
+                padding: '16px 14px',
                 fontSize: 17,
                 outline: 'none',
-                marginBottom: 14,
+                marginBottom: 18,
                 background: '#fff',
               }}
             >
               {categories.map((item) => (
                 <option key={item.value} value={item.value}>
-                  {item.label}
+                  {item.icon} {item.label}
                 </option>
               ))}
             </select>
 
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 800,
-                marginBottom: 14,
-              }}
-            >
-              {text.subcategory}
-            </div>
-
+            <FieldLabel required>{text.subcategory}</FieldLabel>
             <select
               value={subcategory}
               onChange={(e) => setSubcategory(e.target.value)}
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
-                borderRadius: 14,
-                padding: '15px 14px',
+                borderRadius: 16,
+                padding: '16px 14px',
                 fontSize: 17,
                 outline: 'none',
                 background: '#fff',
@@ -1168,29 +1305,12 @@ export default function AddServicePage() {
                 </option>
               ))}
             </select>
-          </div>
+          </SectionCard>
         </section>
 
-        <section style={{ padding: '14px 16px 0' }}>
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 22,
-              padding: 18,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
-              border: '1px solid #ebe4da',
-            }}
-          >
-            <label
-              style={{
-                display: 'block',
-                fontSize: 16,
-                fontWeight: 700,
-                marginBottom: 8,
-              }}
-            >
-              {text.price}
-            </label>
+        <section style={{ padding: '16px 16px 0' }}>
+          <SectionCard title={text.price} required>
+            <FieldLabel required>{text.price}</FieldLabel>
             <input
               value={price}
               onChange={(e) => setPrice(e.target.value)}
@@ -1198,8 +1318,8 @@ export default function AddServicePage() {
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
-                borderRadius: 14,
-                padding: '15px 14px',
+                borderRadius: 16,
+                padding: '16px 14px',
                 fontSize: 17,
                 outline: 'none',
                 marginBottom: 18,
@@ -1207,16 +1327,7 @@ export default function AddServicePage() {
               }}
             />
 
-            <label
-              style={{
-                display: 'block',
-                fontSize: 16,
-                fontWeight: 700,
-                marginBottom: 8,
-              }}
-            >
-              {text.location}
-            </label>
+            <FieldLabel required>{text.location}</FieldLabel>
             <input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
@@ -1224,8 +1335,8 @@ export default function AddServicePage() {
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
-                borderRadius: 14,
-                padding: '15px 14px',
+                borderRadius: 16,
+                padding: '16px 14px',
                 fontSize: 17,
                 outline: 'none',
                 marginBottom: 18,
@@ -1233,16 +1344,7 @@ export default function AddServicePage() {
               }}
             />
 
-            <label
-              style={{
-                display: 'block',
-                fontSize: 16,
-                fontWeight: 700,
-                marginBottom: 8,
-              }}
-            >
-              {text.hours}
-            </label>
+            <FieldLabel required>{text.hours}</FieldLabel>
             <input
               value={hours}
               onChange={(e) => setHours(e.target.value)}
@@ -1250,26 +1352,18 @@ export default function AddServicePage() {
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
-                borderRadius: 14,
-                padding: '15px 14px',
+                borderRadius: 16,
+                padding: '16px 14px',
                 fontSize: 17,
                 outline: 'none',
                 boxSizing: 'border-box',
               }}
             />
-          </div>
+          </SectionCard>
         </section>
 
-        <section style={{ padding: '14px 16px 0' }}>
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 22,
-              padding: 18,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
-              border: '1px solid #ebe4da',
-            }}
-          >
+        <section style={{ padding: '16px 16px 0' }}>
+          <SectionCard title={text.availableToday}>
             <div
               style={{
                 display: 'flex',
@@ -1278,24 +1372,15 @@ export default function AddServicePage() {
                 gap: 12,
               }}
             >
-              <div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 800,
-                  }}
-                >
-                  {text.availableToday}
-                </div>
-                <div
-                  style={{
-                    fontSize: 14,
-                    color: '#7a8490',
-                    marginTop: 4,
-                  }}
-                >
-                  {text.availableTodayHint}
-                </div>
+              <div
+                style={{
+                  fontSize: 14,
+                  color: '#7a8490',
+                  fontWeight: 700,
+                  lineHeight: 1.4,
+                }}
+              >
+                {text.availableTodayHint}
               </div>
 
               <button
@@ -1308,6 +1393,7 @@ export default function AddServicePage() {
                   border: 'none',
                   background: availableToday ? '#4f91f1' : '#d6dbe2',
                   position: 'relative',
+                  flexShrink: 0,
                 }}
               >
                 <span
@@ -1337,13 +1423,13 @@ export default function AddServicePage() {
                 type="button"
                 onClick={() => setAtClient((v) => !v)}
                 style={{
-                  borderRadius: 14,
+                  borderRadius: 16,
                   border: atClient ? '2px solid #5aa764' : '1px solid #ddd8cf',
                   background: atClient ? '#5aa764' : '#faf8f4',
                   color: atClient ? '#fff' : '#1f2430',
-                  padding: '13px 10px',
+                  padding: '14px 10px',
                   fontSize: 15,
-                  fontWeight: 700,
+                  fontWeight: 800,
                 }}
               >
                 {text.atClient}
@@ -1353,13 +1439,13 @@ export default function AddServicePage() {
                 type="button"
                 onClick={() => setAtMyPlace((v) => !v)}
                 style={{
-                  borderRadius: 14,
+                  borderRadius: 16,
                   border: atMyPlace ? '2px solid #5aa764' : '1px solid #ddd8cf',
                   background: atMyPlace ? '#5aa764' : '#faf8f4',
                   color: atMyPlace ? '#fff' : '#1f2430',
-                  padding: '13px 10px',
+                  padding: '14px 10px',
                   fontSize: 15,
-                  fontWeight: 700,
+                  fontWeight: 800,
                 }}
               >
                 {text.atMyPlace}
@@ -1369,74 +1455,52 @@ export default function AddServicePage() {
                 type="button"
                 onClick={() => setOnline((v) => !v)}
                 style={{
-                  borderRadius: 14,
+                  borderRadius: 16,
                   border: online ? '2px solid #5aa764' : '1px solid #ddd8cf',
                   background: online ? '#5aa764' : '#faf8f4',
                   color: online ? '#fff' : '#1f2430',
-                  padding: '13px 10px',
+                  padding: '14px 10px',
                   fontSize: 15,
-                  fontWeight: 700,
+                  fontWeight: 800,
                 }}
               >
                 {text.online}
               </button>
             </div>
-          </div>
+          </SectionCard>
         </section>
 
-        <section style={{ padding: '14px 16px 0' }}>
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 22,
-              padding: 18,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
-              border: '1px solid #ebe4da',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 800,
-                marginBottom: 6,
-              }}
-            >
-              {text.paymentMethods}
-            </div>
-
+        <section style={{ padding: '16px 16px 0' }}>
+          <SectionCard title={text.paymentMethods}>
             <div
               style={{
                 fontSize: 14,
                 color: '#7a8490',
                 marginBottom: 16,
+                fontWeight: 700,
               }}
             >
               {text.paymentMethodsHint}
             </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gap: 10,
-              }}
-            >
+            <div style={{ display: 'grid', gap: 10 }}>
               <button
                 type="button"
                 onClick={() => setCash((v) => !v)}
                 style={{
-                  borderRadius: 14,
+                  borderRadius: 18,
                   border: cash ? '2px solid #4f91f1' : '1px solid #ddd8cf',
                   background: cash ? '#eef5ff' : '#fff',
-                  padding: '14px 14px',
+                  padding: '16px 14px',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 12,
                   fontSize: 16,
-                  fontWeight: 700,
+                  fontWeight: 800,
                   color: '#1f2430',
                 }}
               >
-                <span style={{ fontSize: 22 }}>💵</span>
+                <span style={{ fontSize: 24 }}>💵</span>
                 <span style={{ flex: 1, textAlign: 'left' }}>{text.cash}</span>
                 <span style={{ fontSize: 18 }}>{cash ? '☑' : '☐'}</span>
               </button>
@@ -1445,19 +1509,19 @@ export default function AddServicePage() {
                 type="button"
                 onClick={() => setCard((v) => !v)}
                 style={{
-                  borderRadius: 14,
+                  borderRadius: 18,
                   border: card ? '2px solid #4f91f1' : '1px solid #ddd8cf',
                   background: card ? '#eef5ff' : '#fff',
-                  padding: '14px 14px',
+                  padding: '16px 14px',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 12,
                   fontSize: 16,
-                  fontWeight: 700,
+                  fontWeight: 800,
                   color: '#1f2430',
                 }}
               >
-                <span style={{ fontSize: 22 }}>💳</span>
+                <span style={{ fontSize: 24 }}>💳</span>
                 <span style={{ flex: 1, textAlign: 'left' }}>{text.card}</span>
                 <span style={{ fontSize: 18 }}>{card ? '☑' : '☐'}</span>
               </button>
@@ -1466,46 +1530,29 @@ export default function AddServicePage() {
                 type="button"
                 onClick={() => setWallet((v) => !v)}
                 style={{
-                  borderRadius: 14,
+                  borderRadius: 18,
                   border: wallet ? '2px solid #4f91f1' : '1px solid #ddd8cf',
                   background: wallet ? '#eef5ff' : '#fff',
-                  padding: '14px 14px',
+                  padding: '16px 14px',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 12,
                   fontSize: 16,
-                  fontWeight: 700,
+                  fontWeight: 800,
                   color: '#1f2430',
                 }}
               >
-                <span style={{ fontSize: 22 }}>👛</span>
+                <span style={{ fontSize: 24 }}>👛</span>
                 <span style={{ flex: 1, textAlign: 'left' }}>{text.wallet}</span>
                 <span style={{ fontSize: 18 }}>{wallet ? '☑' : '☐'}</span>
               </button>
             </div>
-          </div>
+          </SectionCard>
         </section>
 
-        <section style={{ padding: '14px 16px 0' }}>
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 22,
-              padding: 18,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
-              border: '1px solid #ebe4da',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 800,
-                marginBottom: 14,
-              }}
-            >
-              {text.contact}
-            </div>
-
+        <section style={{ padding: '16px 16px 0' }}>
+          <SectionCard title={text.contact}>
+            <FieldLabel>{text.phone}</FieldLabel>
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
@@ -1513,15 +1560,16 @@ export default function AddServicePage() {
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
-                borderRadius: 14,
-                padding: '15px 14px',
+                borderRadius: 16,
+                padding: '16px 14px',
                 fontSize: 17,
                 outline: 'none',
-                marginBottom: 12,
+                marginBottom: 14,
                 boxSizing: 'border-box',
               }}
             />
 
+            <FieldLabel>{text.whatsapp}</FieldLabel>
             <input
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
@@ -1529,15 +1577,16 @@ export default function AddServicePage() {
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
-                borderRadius: 14,
-                padding: '15px 14px',
+                borderRadius: 16,
+                padding: '16px 14px',
                 fontSize: 17,
                 outline: 'none',
-                marginBottom: 12,
+                marginBottom: 14,
                 boxSizing: 'border-box',
               }}
             />
 
+            <FieldLabel>{text.telegram}</FieldLabel>
             <input
               value={telegram}
               onChange={(e) => setTelegram(e.target.value)}
@@ -1545,14 +1594,14 @@ export default function AddServicePage() {
               style={{
                 width: '100%',
                 border: '1px solid #e7e0d6',
-                borderRadius: 14,
-                padding: '15px 14px',
+                borderRadius: 16,
+                padding: '16px 14px',
                 fontSize: 17,
                 outline: 'none',
                 boxSizing: 'border-box',
               }}
             />
-          </div>
+          </SectionCard>
         </section>
       </div>
 
@@ -1577,10 +1626,10 @@ export default function AddServicePage() {
               border: 'none',
               background: 'linear-gradient(180deg, #279ca2 0%, #1f8b91 100%)',
               color: '#fff',
-              borderRadius: 18,
+              borderRadius: 20,
               padding: '18px 18px',
               fontSize: 18,
-              fontWeight: 800,
+              fontWeight: 900,
               boxShadow: '0 10px 24px rgba(31,139,145,0.24)',
             }}
           >
