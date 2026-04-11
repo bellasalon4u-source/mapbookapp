@@ -9,7 +9,11 @@ import {
 } from '../../../services/promotionsStore';
 import { getAllMasters } from '../../../services/masters';
 import { categories } from '../../../services/categories';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
 import { formatDisplayPrice } from '../../../services/currencyDisplay';
 
 function SectionCard({
@@ -231,6 +235,18 @@ function parsePriceNumber(value: string | undefined) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function getCategoryLabel(
+  promotion: PromotionItem | null,
+  fallback: string
+) {
+  if (!promotion) return fallback;
+  return (
+    categories.find((item) => item.id === promotion.categoryId)?.label ||
+    promotion.categoryId ||
+    fallback
+  );
+}
+
 export default function PromotionDetailsPage() {
   const router = useRouter();
   const params = useParams();
@@ -242,18 +258,14 @@ export default function PromotionDetailsPage() {
   const text = getTexts(language);
 
   useEffect(() => {
-    const syncLanguage = () => {
-      setLanguage(getSavedLanguage());
-    };
+    setLanguage(getSavedLanguage());
 
-    syncLanguage();
-
-    window.addEventListener('focus', syncLanguage);
-    window.addEventListener('storage', syncLanguage);
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
 
     return () => {
-      window.removeEventListener('focus', syncLanguage);
-      window.removeEventListener('storage', syncLanguage);
+      unsubLanguage();
     };
   }, []);
 
@@ -277,12 +289,7 @@ export default function PromotionDetailsPage() {
   }, [promotion]);
 
   const categoryLabel = useMemo(() => {
-    if (!promotion) return text.beauty;
-    return (
-      categories.find((item) => item.id === promotion.categoryId)?.label ||
-      promotion.categoryId ||
-      text.beauty
-    );
+    return getCategoryLabel(promotion, text.beauty);
   }, [promotion, text.beauty]);
 
   const oldPriceValue = useMemo(() => parsePriceNumber(promotion?.oldPrice), [promotion?.oldPrice]);
