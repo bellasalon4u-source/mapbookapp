@@ -22,8 +22,6 @@ const countries = [
   { code: 'NL', dial: '+31', flag: '🇳🇱', name: 'Netherlands' },
 ] as const;
 
-type CountryItem = (typeof countries)[number];
-
 type PhoneContactValue = {
   countryCode: string;
   number: string;
@@ -184,6 +182,7 @@ const pageTexts: Record<
     tapMainPhotoHint: string;
     mainPhoto: string;
     deletePhoto: string;
+    clearField: string;
     requiredFieldsHint: string;
     serviceTitle: string;
     serviceTitlePlaceholder: string;
@@ -235,6 +234,7 @@ const pageTexts: Record<
     tapMainPhotoHint: 'Tap any photo to make it main',
     mainPhoto: 'Main',
     deletePhoto: 'Delete photo',
+    clearField: 'Clear field',
     requiredFieldsHint: '* Required fields',
     serviceTitle: 'Service title',
     serviceTitlePlaceholder: 'Enter service title',
@@ -285,6 +285,7 @@ const pageTexts: Record<
     tapMainPhotoHint: 'Нажмите на фото, чтобы сделать его главным',
     mainPhoto: 'Главное',
     deletePhoto: 'Удалить фото',
+    clearField: 'Очистить поле',
     requiredFieldsHint: '* Обязательные поля',
     serviceTitle: 'Название услуги',
     serviceTitlePlaceholder: 'Введите название услуги',
@@ -335,6 +336,7 @@ const pageTexts: Record<
     tapMainPhotoHint: 'Toca una foto para ponerla como principal',
     mainPhoto: 'Principal',
     deletePhoto: 'Eliminar foto',
+    clearField: 'Borrar campo',
     requiredFieldsHint: '* Campos obligatorios',
     serviceTitle: 'Título del servicio',
     serviceTitlePlaceholder: 'Introduce el título del servicio',
@@ -385,6 +387,7 @@ const pageTexts: Record<
     tapMainPhotoHint: 'Klepněte na fotku pro nastavení hlavní',
     mainPhoto: 'Hlavní',
     deletePhoto: 'Smazat fotku',
+    clearField: 'Vymazat pole',
     requiredFieldsHint: '* Povinná pole',
     serviceTitle: 'Název služby',
     serviceTitlePlaceholder: 'Zadejte název služby',
@@ -435,6 +438,7 @@ const pageTexts: Record<
     tapMainPhotoHint: 'Tippe auf ein Foto, um es als Hauptfoto festzulegen',
     mainPhoto: 'Hauptfoto',
     deletePhoto: 'Foto löschen',
+    clearField: 'Feld leeren',
     requiredFieldsHint: '* Pflichtfelder',
     serviceTitle: 'Titel der Dienstleistung',
     serviceTitlePlaceholder: 'Titel der Dienstleistung eingeben',
@@ -485,6 +489,7 @@ const pageTexts: Record<
     tapMainPhotoHint: 'Dotknij zdjęcia, aby ustawić je jako główne',
     mainPhoto: 'Główne',
     deletePhoto: 'Usuń zdjęcie',
+    clearField: 'Wyczyść pole',
     requiredFieldsHint: '* Pola obowiązkowe',
     serviceTitle: 'Nazwa usługi',
     serviceTitlePlaceholder: 'Wpisz nazwę usługi',
@@ -533,6 +538,21 @@ type ServicePhotoItem = {
   file: File;
   preview: string;
 };
+
+function normalizeInstagram(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  if (trimmed.startsWith('@')) return trimmed;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  return `@${trimmed.replace(/^@+/, '')}`;
+}
+
+function normalizeWebsite(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  return `https://${trimmed}`;
+}
 
 function SectionCard({
   title,
@@ -626,22 +646,60 @@ function FieldLabel({
   );
 }
 
+function ClearValueButton({
+  onClick,
+  title,
+}: {
+  onClick: () => void;
+  title: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={title}
+      title={title}
+      onClick={onClick}
+      style={{
+        width: 30,
+        height: 30,
+        borderRadius: 999,
+        border: 'none',
+        background: '#ece7df',
+        color: '#5f6b77',
+        fontSize: 18,
+        fontWeight: 900,
+        lineHeight: 1,
+        cursor: 'pointer',
+        flexShrink: 0,
+      }}
+    >
+      ×
+    </button>
+  );
+}
+
 function ContactInput({
   icon,
   label,
   value,
   onChange,
+  onBlur,
+  onClear,
   placeholder,
   inputMode = 'text',
   type = 'text',
+  clearTitle,
 }: {
   icon: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
+  onClear?: () => void;
   placeholder: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
   type?: string;
+  clearTitle: string;
 }) {
   return (
     <div
@@ -650,108 +708,7 @@ function ContactInput({
         borderRadius: 18,
         background: '#fff',
         padding: 14,
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          marginBottom: 10,
-        }}
-      >
-        <div
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: 12,
-            background: '#f7f5f1',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 20,
-            flexShrink: 0,
-          }}
-        >
-          {icon}
-        </div>
-
-        <div
-          style={{
-            fontSize: 15,
-            fontWeight: 800,
-            color: '#1f2430',
-          }}
-        >
-          {label}
-        </div>
-      </div>
-
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        inputMode={inputMode}
-        type={type}
-        autoCapitalize="none"
-        autoCorrect="off"
-        spellCheck={false}
-        style={{
-          width: '100%',
-          border: '1px solid #ece5da',
-          borderRadius: 14,
-          padding: '14px 12px',
-          fontSize: 16,
-          outline: 'none',
-          boxSizing: 'border-box',
-          background: '#fcfbf9',
-          color: '#1f2430',
-        }}
-      />
-    </div>
-  );
-}
-
-function PhoneChannelInput({
-  icon,
-  label,
-  value,
-  onChange,
-  text,
-}: {
-  icon: string;
-  label: string;
-  value: PhoneContactValue;
-  onChange: (next: PhoneContactValue) => void;
-  text: {
-    chooseCountry: string;
-    searchCountry: string;
-    phoneNumber: string;
-  };
-}) {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState('');
-
-  const selectedCountry =
-    countries.find((item) => item.code === value.countryCode) || countries[0];
-
-  const filteredCountries = countries.filter((item) => {
-    const q = search.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      item.name.toLowerCase().includes(q) ||
-      item.dial.toLowerCase().includes(q) ||
-      item.code.toLowerCase().includes(q)
-    );
-  });
-
-  return (
-    <div
-      style={{
-        border: '1px solid #e7e0d6',
-        borderRadius: 18,
-        background: '#fff',
-        padding: 14,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
       }}
     >
       <div
@@ -792,8 +749,130 @@ function PhoneChannelInput({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '130px 1fr',
+          gridTemplateColumns: onClear && value ? '1fr auto' : '1fr',
+          gap: 8,
+          alignItems: 'center',
+        }}
+      >
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
+          placeholder={placeholder}
+          inputMode={inputMode}
+          type={type}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          style={{
+            width: '100%',
+            border: '1px solid #ece5da',
+            borderRadius: 14,
+            padding: '14px 12px',
+            fontSize: 16,
+            outline: 'none',
+            boxSizing: 'border-box',
+            background: '#fcfbf9',
+            color: '#1f2430',
+          }}
+        />
+
+        {onClear && value ? (
+          <ClearValueButton onClick={onClear} title={clearTitle} />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function PhoneChannelInput({
+  icon,
+  label,
+  value,
+  onChange,
+  onClear,
+  clearTitle,
+  text,
+}: {
+  icon: string;
+  label: string;
+  value: PhoneContactValue;
+  onChange: (next: PhoneContactValue) => void;
+  onClear: () => void;
+  clearTitle: string;
+  text: {
+    chooseCountry: string;
+    searchCountry: string;
+    phoneNumber: string;
+  };
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const selectedCountry =
+    countries.find((item) => item.code === value.countryCode) || countries[0];
+
+  const filteredCountries = countries.filter((item) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      item.name.toLowerCase().includes(q) ||
+      item.dial.toLowerCase().includes(q) ||
+      item.code.toLowerCase().includes(q)
+    );
+  });
+
+  return (
+    <div
+      style={{
+        border: '1px solid #e7e0d6',
+        borderRadius: 18,
+        background: '#fff',
+        padding: 14,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
           gap: 10,
+          marginBottom: 10,
+        }}
+      >
+        <div
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 12,
+            background: '#f7f5f1',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 20,
+            flexShrink: 0,
+          }}
+        >
+          {icon}
+        </div>
+
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 800,
+            color: '#1f2430',
+          }}
+        >
+          {label}
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: value.number ? '130px 1fr auto' : '130px 1fr',
+          gap: 10,
+          alignItems: 'center',
         }}
       >
         <div style={{ position: 'relative' }}>
@@ -966,6 +1045,10 @@ function PhoneChannelInput({
             height: 50,
           }}
         />
+
+        {value.number ? (
+          <ClearValueButton onClick={onClear} title={clearTitle} />
+        ) : null}
       </div>
     </div>
   );
@@ -1158,9 +1241,9 @@ export default function AddServicePage() {
         telegram: formatPhoneValue(telegram),
         businessWhatsapp: formatPhoneValue(businessWhatsapp),
         viber: formatPhoneValue(viber),
-        instagram: instagram.trim(),
-        website: website.trim(),
-        email: email.trim(),
+        instagram: normalizeInstagram(instagram),
+        website: normalizeWebsite(website),
+        email: email.trim().toLowerCase(),
       } as any,
       photos: photos.map((item) => item.preview),
     });
@@ -1804,6 +1887,8 @@ export default function AddServicePage() {
                 label={text.phone}
                 value={phone}
                 onChange={setPhone}
+                onClear={() => setPhone({ ...phone, number: '' })}
+                clearTitle={text.clearField}
                 text={{
                   chooseCountry: text.chooseCountry,
                   searchCountry: text.searchCountry,
@@ -1816,6 +1901,8 @@ export default function AddServicePage() {
                 label={text.whatsapp}
                 value={whatsapp}
                 onChange={setWhatsapp}
+                onClear={() => setWhatsapp({ ...whatsapp, number: '' })}
+                clearTitle={text.clearField}
                 text={{
                   chooseCountry: text.chooseCountry,
                   searchCountry: text.searchCountry,
@@ -1828,6 +1915,8 @@ export default function AddServicePage() {
                 label={text.businessWhatsapp}
                 value={businessWhatsapp}
                 onChange={setBusinessWhatsapp}
+                onClear={() => setBusinessWhatsapp({ ...businessWhatsapp, number: '' })}
+                clearTitle={text.clearField}
                 text={{
                   chooseCountry: text.chooseCountry,
                   searchCountry: text.searchCountry,
@@ -1840,6 +1929,8 @@ export default function AddServicePage() {
                 label={text.telegram}
                 value={telegram}
                 onChange={setTelegram}
+                onClear={() => setTelegram({ ...telegram, number: '' })}
+                clearTitle={text.clearField}
                 text={{
                   chooseCountry: text.chooseCountry,
                   searchCountry: text.searchCountry,
@@ -1852,6 +1943,8 @@ export default function AddServicePage() {
                 label={text.viber}
                 value={viber}
                 onChange={setViber}
+                onClear={() => setViber({ ...viber, number: '' })}
+                clearTitle={text.clearField}
                 text={{
                   chooseCountry: text.chooseCountry,
                   searchCountry: text.searchCountry,
@@ -1864,6 +1957,9 @@ export default function AddServicePage() {
                 label={text.instagram}
                 value={instagram}
                 onChange={setInstagram}
+                onBlur={() => setInstagram((prev) => normalizeInstagram(prev))}
+                onClear={() => setInstagram('')}
+                clearTitle={text.clearField}
                 placeholder={text.instagram}
               />
 
@@ -1872,6 +1968,9 @@ export default function AddServicePage() {
                 label={text.website}
                 value={website}
                 onChange={setWebsite}
+                onBlur={() => setWebsite((prev) => normalizeWebsite(prev))}
+                onClear={() => setWebsite('')}
+                clearTitle={text.clearField}
                 placeholder={text.website}
                 inputMode="url"
               />
@@ -1881,6 +1980,9 @@ export default function AddServicePage() {
                 label={text.email}
                 value={email}
                 onChange={setEmail}
+                onBlur={() => setEmail((prev) => prev.trim().toLowerCase())}
+                onClear={() => setEmail('')}
+                clearTitle={text.clearField}
                 placeholder={text.email}
                 inputMode="email"
                 type="email"
