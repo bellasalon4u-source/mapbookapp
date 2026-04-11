@@ -9,6 +9,9 @@ const legalTexts = {
   EN: {
     title: 'Legal information',
     subtitle: 'Policies, rules, payments and account rights',
+    heroTitle: 'Platform rules and legal documents',
+    heroSub:
+      'Everything important about privacy, payments, refunds, account rights and safe use of MapBook.',
     terms: 'Terms & Conditions',
     termsSub: 'Rules for using MapBook platform',
     privacy: 'Privacy Policy',
@@ -27,10 +30,16 @@ const legalTexts = {
     supportSub: 'How to contact support and resolve issues',
     sectionTitle: 'Legal sections',
     note: 'These pages should later be replaced with final legally reviewed texts before public launch.',
+    protected: 'Protected by MapBook',
+    launchReady: 'Pre-launch legal structure',
+    open: 'Open',
   },
   ES: {
     title: 'Información legal',
     subtitle: 'Políticas, reglas, pagos y derechos de cuenta',
+    heroTitle: 'Reglas de la plataforma y documentos legales',
+    heroSub:
+      'Todo lo importante sobre privacidad, pagos, reembolsos, derechos de cuenta y uso seguro de MapBook.',
     terms: 'Términos y condiciones',
     termsSub: 'Reglas para usar la plataforma MapBook',
     privacy: 'Política de privacidad',
@@ -49,10 +58,16 @@ const legalTexts = {
     supportSub: 'Cómo contactar soporte y resolver problemas',
     sectionTitle: 'Secciones legales',
     note: 'Estas páginas deberán sustituirse después por textos legales finales revisados antes del lanzamiento público.',
+    protected: 'Protegido por MapBook',
+    launchReady: 'Estructura legal pre-lanzamiento',
+    open: 'Abrir',
   },
   RU: {
     title: 'Юридическая информация',
     subtitle: 'Политики, правила, платежи и права аккаунта',
+    heroTitle: 'Правила платформы и юридические документы',
+    heroSub:
+      'Всё важное о конфиденциальности, платежах, возвратах, правах аккаунта и безопасном использовании MapBook.',
     terms: 'Условия использования',
     termsSub: 'Правила использования платформы MapBook',
     privacy: 'Политика конфиденциальности',
@@ -71,10 +86,16 @@ const legalTexts = {
     supportSub: 'Как связаться с поддержкой и решить спорные вопросы',
     sectionTitle: 'Юридические разделы',
     note: 'Позже эти страницы нужно заменить на финальные юридически проверенные тексты перед публичным запуском.',
+    protected: 'Защищено MapBook',
+    launchReady: 'Pre-launch юридическая структура',
+    open: 'Открыть',
   },
   CZ: {
     title: 'Právní informace',
     subtitle: 'Zásady, pravidla, platby a práva účtu',
+    heroTitle: 'Pravidla platformy a právní dokumenty',
+    heroSub:
+      'Vše důležité o soukromí, platbách, refundech, právech účtu a bezpečném používání MapBook.',
     terms: 'Obchodní podmínky',
     termsSub: 'Pravidla používání platformy MapBook',
     privacy: 'Zásady ochrany osobních údajů',
@@ -93,10 +114,16 @@ const legalTexts = {
     supportSub: 'Jak kontaktovat podporu a řešit problémy',
     sectionTitle: 'Právní sekce',
     note: 'Tyto stránky je později potřeba nahradit finálními právně zkontrolovanými texty před veřejným spuštěním.',
+    protected: 'Chráněno MapBook',
+    launchReady: 'Právní struktura před spuštěním',
+    open: 'Otevřít',
   },
   DE: {
     title: 'Rechtliche Informationen',
     subtitle: 'Richtlinien, Regeln, Zahlungen und Kontorechte',
+    heroTitle: 'Plattformregeln und rechtliche Dokumente',
+    heroSub:
+      'Alles Wichtige zu Datenschutz, Zahlungen, Rückerstattungen, Kontorechten und sicherer Nutzung von MapBook.',
     terms: 'AGB',
     termsSub: 'Regeln für die Nutzung der MapBook-Plattform',
     privacy: 'Datenschutzerklärung',
@@ -115,10 +142,16 @@ const legalTexts = {
     supportSub: 'Wie du den Support kontaktierst und Probleme klärst',
     sectionTitle: 'Rechtliche Bereiche',
     note: 'Diese Seiten sollten später vor dem öffentlichen Launch durch final juristisch geprüfte Texte ersetzt werden.',
+    protected: 'Durch MapBook geschützt',
+    launchReady: 'Pre-Launch Rechtsstruktur',
+    open: 'Öffnen',
   },
   PL: {
     title: 'Informacje prawne',
     subtitle: 'Polityki, zasady, płatności i prawa konta',
+    heroTitle: 'Zasady platformy i dokumenty prawne',
+    heroSub:
+      'Wszystko, co ważne o prywatności, płatnościach, zwrotach, prawach konta i bezpiecznym korzystaniu z MapBook.',
     terms: 'Regulamin',
     termsSub: 'Zasady korzystania z platformy MapBook',
     privacy: 'Polityka prywatności',
@@ -137,6 +170,9 @@ const legalTexts = {
     supportSub: 'Jak kontaktować się z pomocą i rozwiązywać problemy',
     sectionTitle: 'Sekcje prawne',
     note: 'Te strony powinny zostać później zastąpione finalnymi tekstami prawnymi przed publicznym uruchomieniem.',
+    protected: 'Chronione przez MapBook',
+    launchReady: 'Struktura prawna przed startem',
+    open: 'Otwórz',
   },
 } as const;
 
@@ -300,119 +336,99 @@ export default function LegalPage() {
         <div
           style={{
             marginTop: 18,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 16,
+            borderRadius: 32,
+            border: '1px solid #f0e3d7',
+            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
+            padding: 18,
             boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           <div
             style={{
-              fontSize: 16,
-              fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
+              display: 'grid',
+              gridTemplateColumns: '56px 1fr',
+              gap: 12,
+              alignItems: 'center',
+              marginBottom: 14,
             }}
           >
-            {text.sectionTitle}
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 20,
+                background: '#fff1f7',
+                color: '#ff4fa0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 26,
+              }}
+            >
+              ⚖️
+            </div>
+
+            <div>
+              <div
+                style={{
+                  fontSize: 20,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {text.heroTitle}
+              </div>
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 14,
+                  lineHeight: 1.55,
+                  color: '#7b7268',
+                  fontWeight: 700,
+                }}
+              >
+                {text.heroSub}
+              </div>
+            </div>
           </div>
 
-          <div style={{ display: 'grid', gap: 12 }}>
-            {items.map((item) => {
-              const accent = accentStyles(item.accent);
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 10,
+            }}
+          >
+            <div
+              style={{
+                borderRadius: 999,
+                padding: '10px 14px',
+                background: '#eef9f1',
+                color: '#2fa35a',
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              🛡️ {text.protected}
+            </div>
 
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => alert(`${item.title} — coming next`)}
-                  style={{
-                    width: '100%',
-                    display: 'grid',
-                    gridTemplateColumns: '46px 1fr auto',
-                    gap: 14,
-                    alignItems: 'center',
-                    padding: '14px 16px',
-                    textAlign: 'left',
-                    border: '1px solid #f1e8dc',
-                    borderRadius: 24,
-                    background: '#fff',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 46,
-                      height: 46,
-                      borderRadius: 16,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 20,
-                      ...accent,
-                    }}
-                  >
-                    {item.icon}
-                  </div>
-
-                  <div style={{ minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 15,
-                        fontWeight: 900,
-                        color: '#17130f',
-                      }}
-                    >
-                      {item.title}
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: 4,
-                        fontSize: 13,
-                        lineHeight: 1.45,
-                        color: '#7b7268',
-                        fontWeight: 700,
-                      }}
-                    >
-                      {item.subtitle}
-                    </div>
-                  </div>
-
-                  <span
-                    style={{
-                      fontSize: 20,
-                      color: '#938475',
-                      fontWeight: 900,
-                    }}
-                  >
-                    ›
-                  </span>
-                </button>
-              );
-            })}
+            <div
+              style={{
+                borderRadius: 999,
+                padding: '10px 14px',
+                background: '#eef4ff',
+                color: '#2f7cf6',
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              📘 {text.launchReady}
+            </div>
           </div>
         </div>
 
         <div
           style={{
-            marginTop: 16,
-            borderRadius: 24,
-            background: '#fff8f2',
-            border: '1px solid #f1e3d3',
-            padding: 16,
-            fontSize: 13,
-            lineHeight: 1.6,
-            color: '#8a6f52',
-            fontWeight: 700,
-          }}
-        >
-          {text.note}
-        </div>
-      </div>
-
-      <BottomNav active="profile" />
-    </main>
-  );
-}
+            marginTop: 18,
+            borderRadius: 30,
+            border: '1px solid
