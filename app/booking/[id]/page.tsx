@@ -4,6 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { getMasterById, getAllMasters } from '../../../services/masters';
 import { getListings } from '../../../services/listingsStore';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
+import { formatDisplayPrice } from '../../../services/currencyDisplay';
 
 type ListingLike = {
   id: string | number;
@@ -65,11 +71,117 @@ function listingToMasterShape(listing: ListingLike, index: number) {
   };
 }
 
+function getTexts(language: AppLanguage) {
+  if (language === 'RU') {
+    return {
+      notFound: 'Специалист не найден',
+      chooseServices: 'Выберите услуги',
+      services: 'Услуги',
+      totalDuration: 'Общая длительность',
+      totalPrice: 'Общая цена',
+      continue: 'Продолжить',
+      from: 'от',
+      providerFallback: 'Специалист',
+      serviceProviderFallback: 'Исполнитель услуг',
+      serviceFallback: 'Основная услуга',
+      premiumOption: 'Премиум вариант',
+      zeroMinutes: '0м',
+    };
+  }
+
+  if (language === 'ES') {
+    return {
+      notFound: 'Profesional no encontrado',
+      chooseServices: 'Elige servicios',
+      services: 'Servicios',
+      totalDuration: 'Duración total',
+      totalPrice: 'Precio total',
+      continue: 'Continuar',
+      from: 'desde',
+      providerFallback: 'Profesional',
+      serviceProviderFallback: 'Proveedor de servicios',
+      serviceFallback: 'Servicio principal',
+      premiumOption: 'Opción premium',
+      zeroMinutes: '0 min',
+    };
+  }
+
+  if (language === 'CZ') {
+    return {
+      notFound: 'Specialista nebyl nalezen',
+      chooseServices: 'Vyberte služby',
+      services: 'Služby',
+      totalDuration: 'Celková délka',
+      totalPrice: 'Celková cena',
+      continue: 'Pokračovat',
+      from: 'od',
+      providerFallback: 'Specialista',
+      serviceProviderFallback: 'Poskytovatel služeb',
+      serviceFallback: 'Hlavní služba',
+      premiumOption: 'Prémiová možnost',
+      zeroMinutes: '0 min',
+    };
+  }
+
+  if (language === 'DE') {
+    return {
+      notFound: 'Spezialist nicht gefunden',
+      chooseServices: 'Dienstleistungen wählen',
+      services: 'Dienstleistungen',
+      totalDuration: 'Gesamtdauer',
+      totalPrice: 'Gesamtpreis',
+      continue: 'Weiter',
+      from: 'ab',
+      providerFallback: 'Spezialist',
+      serviceProviderFallback: 'Dienstleister',
+      serviceFallback: 'Hauptservice',
+      premiumOption: 'Premium-Option',
+      zeroMinutes: '0 Min',
+    };
+  }
+
+  if (language === 'PL') {
+    return {
+      notFound: 'Specjalista nie został znaleziony',
+      chooseServices: 'Wybierz usługi',
+      services: 'Usługi',
+      totalDuration: 'Łączny czas',
+      totalPrice: 'Łączna cena',
+      continue: 'Dalej',
+      from: 'od',
+      providerFallback: 'Specjalista',
+      serviceProviderFallback: 'Usługodawca',
+      serviceFallback: 'Usługa główna',
+      premiumOption: 'Opcja premium',
+      zeroMinutes: '0 min',
+    };
+  }
+
+  return {
+    notFound: 'Master not found',
+    chooseServices: 'Choose services',
+    services: 'Services',
+    totalDuration: 'Total duration',
+    totalPrice: 'Total price',
+    continue: 'Continue',
+    from: 'from',
+    providerFallback: 'Provider',
+    serviceProviderFallback: 'Service provider',
+    serviceFallback: 'Main service',
+    premiumOption: 'Premium option',
+    zeroMinutes: '0m',
+  };
+}
+
 export default function BookingServicePage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = String(params.id);
+
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+
+  const text = useMemo(() => getTexts(language), [language]);
 
   const allMasters = getAllMasters() as any[];
   const listings = getListings() as ListingLike[];
@@ -80,17 +192,61 @@ export default function BookingServicePage() {
 
     const listingIndex = listings.findIndex((item) => String(item.id) === id);
     if (listingIndex !== -1) {
-      return listingToMasterShape(listings[listingIndex], listingIndex);
+      const mapped = listingToMasterShape(listings[listingIndex], listingIndex);
+      return {
+        ...mapped,
+        name: listings[listingIndex].title || text.providerFallback,
+        title: listings[listingIndex].subcategory || text.serviceProviderFallback,
+        services: [
+          {
+            slug: 'main-service',
+            title:
+              listings[listingIndex].subcategory ||
+              listings[listingIndex].title ||
+              text.serviceFallback,
+            duration: listings[listingIndex].hours || '1h',
+            price:
+              Number(String(listings[listingIndex].price || '').replace(/[^\d.]/g, '')) || 45,
+            image:
+              mapped.services?.[0]?.image ||
+              mapped.avatar,
+          },
+          {
+            slug: 'premium-service',
+            title: text.premiumOption,
+            duration: '2h',
+            price:
+              (Number(String(listings[listingIndex].price || '').replace(/[^\d.]/g, '')) || 45) +
+              20,
+            image:
+              mapped.services?.[1]?.image ||
+              mapped.services?.[0]?.image ||
+              mapped.avatar,
+          },
+        ],
+      };
     }
 
     const fallbackMaster = allMasters.find((item: any) => String(item.id) === id);
     if (fallbackMaster) return fallbackMaster;
 
     return null;
-  }, [id, listings, allMasters]);
+  }, [id, listings, allMasters, text]);
 
   const preselectedService = searchParams.get('service') || '';
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+
+  useEffect(() => {
+    setLanguage(getSavedLanguage());
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    return () => {
+      unsubLanguage();
+    };
+  }, []);
 
   useEffect(() => {
     if (!master) return;
@@ -106,7 +262,7 @@ export default function BookingServicePage() {
   }, [master, preselectedService]);
 
   if (!master) {
-    return <main style={{ padding: 24 }}>Master not found</main>;
+    return <main style={{ padding: 24 }}>{text.notFound}</main>;
   }
 
   const toggleService = (slug: string) => {
@@ -143,6 +299,36 @@ export default function BookingServicePage() {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
 
+    if (language === 'RU') {
+      if (h > 0 && m > 0) return `${h}ч ${m}м`;
+      if (h > 0) return `${h}ч`;
+      return `${m}м`;
+    }
+
+    if (language === 'ES') {
+      if (h > 0 && m > 0) return `${h}h ${m}min`;
+      if (h > 0) return `${h}h`;
+      return `${m}min`;
+    }
+
+    if (language === 'CZ') {
+      if (h > 0 && m > 0) return `${h}h ${m}min`;
+      if (h > 0) return `${h}h`;
+      return `${m}min`;
+    }
+
+    if (language === 'DE') {
+      if (h > 0 && m > 0) return `${h}Std ${m}Min`;
+      if (h > 0) return `${h}Std`;
+      return `${m}Min`;
+    }
+
+    if (language === 'PL') {
+      if (h > 0 && m > 0) return `${h}h ${m}min`;
+      if (h > 0) return `${h}h`;
+      return `${m}min`;
+    }
+
     if (h > 0 && m > 0) return `${h}h ${m}m`;
     if (h > 0) return `${h}h`;
     return `${m}m`;
@@ -176,12 +362,13 @@ export default function BookingServicePage() {
               border: '1px solid #e7ddd0',
               background: '#fff',
               fontSize: 24,
+              cursor: 'pointer',
             }}
           >
             ←
           </button>
 
-          <div style={{ fontSize: 30, fontWeight: 800 }}>Choose services</div>
+          <div style={{ fontSize: 30, fontWeight: 800 }}>{text.chooseServices}</div>
 
           <button
             onClick={() => router.push('/')}
@@ -192,6 +379,7 @@ export default function BookingServicePage() {
               border: '1px solid #e7ddd0',
               background: '#fff',
               fontSize: 22,
+              cursor: 'pointer',
             }}
           >
             ⌂
@@ -229,7 +417,7 @@ export default function BookingServicePage() {
           </div>
         </div>
 
-        <h2 style={{ marginTop: 28, fontSize: 30 }}>Services</h2>
+        <h2 style={{ marginTop: 28, fontSize: 30 }}>{text.services}</h2>
 
         <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
           {master.services.map((service: any) => {
@@ -250,6 +438,7 @@ export default function BookingServicePage() {
                   gridTemplateColumns: '96px 1fr auto',
                   gap: 14,
                   alignItems: 'center',
+                  cursor: 'pointer',
                 }}
               >
                 <img
@@ -268,8 +457,15 @@ export default function BookingServicePage() {
                   <div style={{ marginTop: 8, color: '#746b62', fontSize: 16 }}>
                     {service.duration}
                   </div>
-                  <div style={{ marginTop: 8, color: '#231b15', fontSize: 17, fontWeight: 700 }}>
-                    from £{service.price}
+                  <div
+                    style={{
+                      marginTop: 8,
+                      color: '#231b15',
+                      fontSize: 17,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {formatDisplayPrice(service.price, 45, true, text.from)}
                   </div>
                 </div>
 
@@ -318,19 +514,19 @@ export default function BookingServicePage() {
           >
             <div>
               <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>
-                Total duration
+                {text.totalDuration}
               </div>
               <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>
-                {selectedItems.length ? formatMinutes(totalMinutes) : '0m'}
+                {selectedItems.length ? formatMinutes(totalMinutes) : text.zeroMinutes}
               </div>
             </div>
 
             <div>
               <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>
-                Total price
+                {text.totalPrice}
               </div>
               <div style={{ fontSize: 28, fontWeight: 900, marginTop: 6 }}>
-                £{totalPrice}
+                {formatDisplayPrice(totalPrice)}
               </div>
             </div>
           </div>
@@ -352,9 +548,10 @@ export default function BookingServicePage() {
               padding: '18px 26px',
               fontWeight: 800,
               fontSize: 20,
+              cursor: selectedItems.length ? 'pointer' : 'not-allowed',
             }}
           >
-            Continue
+            {text.continue}
           </button>
         </div>
       </div>
