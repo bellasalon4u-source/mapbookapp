@@ -14,6 +14,7 @@ const settingsTexts = {
   EN: {
     title: 'Account settings',
     subtitle: 'Privacy, security, legal information and account actions',
+    profileSection: 'Your account',
     personal: 'Personal details',
     personalSub: 'Name, email, phone and profile information',
     privacy: 'Privacy',
@@ -22,23 +23,27 @@ const settingsTexts = {
     securitySub: 'Password, sign-in and protection',
     legal: 'Legal information',
     legalSub: 'Terms, privacy policy and platform rules',
+    languageRegion: 'Language & region',
+    languageRegionSub: 'App language, country, currency and location mode',
+    notifications: 'Notifications',
+    notificationsSub: 'Bookings, messages and system alerts',
+    payments: 'Payments & wallet',
+    paymentsSub: 'Cards, balance, refunds and payout settings',
     deleteAccount: 'Delete account',
     deleteAccountSub: 'Permanently remove your profile',
     logout: 'Log out',
-    profileSection: 'Your account',
+    logoutSub: 'Sign out from your current session',
     verified: 'Verified',
     status: 'Secure account',
     dangerZone: 'Danger zone',
     comingSoonPrivacy: 'Privacy settings coming soon',
     comingSoonSecurity: 'Security settings coming soon',
     comingSoonDelete: 'Delete account flow coming soon',
-    accountOverview: 'Account overview',
-    quickControls: 'Quick controls',
-    protected: 'Protected profile',
   },
   ES: {
     title: 'Configuración de la cuenta',
     subtitle: 'Privacidad, seguridad, información legal y acciones de cuenta',
+    profileSection: 'Tu cuenta',
     personal: 'Datos personales',
     personalSub: 'Nombre, email, teléfono e información del perfil',
     privacy: 'Privacidad',
@@ -47,23 +52,27 @@ const settingsTexts = {
     securitySub: 'Contraseña, acceso y protección',
     legal: 'Información legal',
     legalSub: 'Términos, privacidad y reglas de la plataforma',
+    languageRegion: 'Idioma y región',
+    languageRegionSub: 'Idioma de la app, país, moneda y ubicación',
+    notifications: 'Notificaciones',
+    notificationsSub: 'Reservas, mensajes y alertas del sistema',
+    payments: 'Pagos y billetera',
+    paymentsSub: 'Tarjetas, saldo, reembolsos y pagos',
     deleteAccount: 'Eliminar cuenta',
     deleteAccountSub: 'Eliminar permanentemente tu perfil',
     logout: 'Cerrar sesión',
-    profileSection: 'Tu cuenta',
+    logoutSub: 'Salir de la sesión actual',
     verified: 'Verificado',
     status: 'Cuenta segura',
     dangerZone: 'Zona de riesgo',
     comingSoonPrivacy: 'La configuración de privacidad llegará pronto',
     comingSoonSecurity: 'La configuración de seguridad llegará pronto',
     comingSoonDelete: 'El flujo para eliminar la cuenta llegará pronto',
-    accountOverview: 'Resumen de la cuenta',
-    quickControls: 'Controles rápidos',
-    protected: 'Perfil protegido',
   },
   RU: {
     title: 'Настройки аккаунта',
     subtitle: 'Приватность, безопасность, юридическая информация и действия аккаунта',
+    profileSection: 'Ваш аккаунт',
     personal: 'Личные данные',
     personalSub: 'Имя, email, телефон и данные профиля',
     privacy: 'Приватность',
@@ -72,23 +81,27 @@ const settingsTexts = {
     securitySub: 'Пароль, вход и защита аккаунта',
     legal: 'Юридическая информация',
     legalSub: 'Условия, приватность и правила платформы',
+    languageRegion: 'Язык и регион',
+    languageRegionSub: 'Язык приложения, страна, валюта и локация',
+    notifications: 'Уведомления',
+    notificationsSub: 'Бронирования, сообщения и системные оповещения',
+    payments: 'Платежи и кошелёк',
+    paymentsSub: 'Карты, баланс, возвраты и настройки выплат',
     deleteAccount: 'Удалить аккаунт',
     deleteAccountSub: 'Полностью удалить ваш профиль',
     logout: 'Выйти из аккаунта',
-    profileSection: 'Ваш аккаунт',
+    logoutSub: 'Завершить текущую сессию',
     verified: 'Проверено',
     status: 'Аккаунт защищён',
     dangerZone: 'Опасная зона',
     comingSoonPrivacy: 'Настройки приватности скоро появятся',
     comingSoonSecurity: 'Настройки безопасности скоро появятся',
     comingSoonDelete: 'Функция удаления аккаунта скоро появится',
-    accountOverview: 'Обзор аккаунта',
-    quickControls: 'Быстрые настройки',
-    protected: 'Профиль защищён',
   },
   CZ: {
     title: 'Nastavení účtu',
     subtitle: 'Soukromí, zabezpečení, právní informace a akce účtu',
+    profileSection: 'Váš účet',
     personal: 'Osobní údaje',
     personalSub: 'Jméno, email, telefon a údaje profilu',
     privacy: 'Soukromí',
@@ -97,23 +110,27 @@ const settingsTexts = {
     securitySub: 'Heslo, přihlášení a ochrana',
     legal: 'Právní informace',
     legalSub: 'Podmínky, soukromí a pravidla platformy',
+    languageRegion: 'Jazyk a region',
+    languageRegionSub: 'Jazyk aplikace, země, měna a poloha',
+    notifications: 'Oznámení',
+    notificationsSub: 'Rezervace, zprávy a systémová upozornění',
+    payments: 'Platby a peněženka',
+    paymentsSub: 'Karty, zůstatek, refundy a výplaty',
     deleteAccount: 'Smazat účet',
     deleteAccountSub: 'Trvale odstranit váš profil',
     logout: 'Odhlásit se',
-    profileSection: 'Váš účet',
+    logoutSub: 'Odhlásit aktuální relaci',
     verified: 'Ověřeno',
     status: 'Bezpečný účet',
     dangerZone: 'Riziková zóna',
     comingSoonPrivacy: 'Nastavení soukromí již brzy',
     comingSoonSecurity: 'Nastavení zabezpečení již brzy',
     comingSoonDelete: 'Odstranění účtu již brzy',
-    accountOverview: 'Přehled účtu',
-    quickControls: 'Rychlé ovládání',
-    protected: 'Chráněný profil',
   },
   DE: {
     title: 'Kontoeinstellungen',
     subtitle: 'Datenschutz, Sicherheit, rechtliche Infos und Kontoaktionen',
+    profileSection: 'Dein Konto',
     personal: 'Persönliche Daten',
     personalSub: 'Name, E-Mail, Telefon und Profilinformationen',
     privacy: 'Datenschutz',
@@ -122,23 +139,27 @@ const settingsTexts = {
     securitySub: 'Passwort, Anmeldung und Schutz',
     legal: 'Rechtliche Informationen',
     legalSub: 'AGB, Datenschutz und Plattformregeln',
+    languageRegion: 'Sprache & Region',
+    languageRegionSub: 'App-Sprache, Land, Währung und Standort',
+    notifications: 'Benachrichtigungen',
+    notificationsSub: 'Buchungen, Nachrichten und Systemhinweise',
+    payments: 'Zahlungen & Wallet',
+    paymentsSub: 'Karten, Guthaben, Rückerstattungen und Auszahlungen',
     deleteAccount: 'Konto löschen',
     deleteAccountSub: 'Dein Profil dauerhaft löschen',
     logout: 'Abmelden',
-    profileSection: 'Dein Konto',
+    logoutSub: 'Aktuelle Sitzung beenden',
     verified: 'Verifiziert',
     status: 'Geschütztes Konto',
     dangerZone: 'Gefahrenbereich',
     comingSoonPrivacy: 'Datenschutzeinstellungen folgen bald',
     comingSoonSecurity: 'Sicherheitseinstellungen folgen bald',
     comingSoonDelete: 'Kontolöschung folgt bald',
-    accountOverview: 'Kontoübersicht',
-    quickControls: 'Schnellzugriff',
-    protected: 'Geschütztes Profil',
   },
   PL: {
     title: 'Ustawienia konta',
     subtitle: 'Prywatność, bezpieczeństwo, informacje prawne i działania konta',
+    profileSection: 'Twoje konto',
     personal: 'Dane osobowe',
     personalSub: 'Imię, email, telefon i dane profilu',
     privacy: 'Prywatność',
@@ -147,19 +168,22 @@ const settingsTexts = {
     securitySub: 'Hasło, logowanie i ochrona',
     legal: 'Informacje prawne',
     legalSub: 'Warunki, prywatność i zasady platformy',
+    languageRegion: 'Język i region',
+    languageRegionSub: 'Język aplikacji, kraj, waluta i lokalizacja',
+    notifications: 'Powiadomienia',
+    notificationsSub: 'Rezerwacje, wiadomości i alerty systemowe',
+    payments: 'Płatności i portfel',
+    paymentsSub: 'Karty, saldo, zwroty i ustawienia wypłat',
     deleteAccount: 'Usuń konto',
     deleteAccountSub: 'Trwale usuń swój profil',
     logout: 'Wyloguj się',
-    profileSection: 'Twoje konto',
+    logoutSub: 'Zakończ bieżącą sesję',
     verified: 'Zweryfikowano',
     status: 'Bezpieczne konto',
     dangerZone: 'Strefa ryzyka',
     comingSoonPrivacy: 'Ustawienia prywatności już wkrótce',
     comingSoonSecurity: 'Ustawienia bezpieczeństwa już wkrótce',
     comingSoonDelete: 'Usuwanie konta już wkrótce',
-    accountOverview: 'Przegląd konta',
-    quickControls: 'Szybkie ustawienia',
-    protected: 'Chroniony profil',
   },
 } as const;
 
@@ -167,7 +191,6 @@ type SettingsItem = {
   id: string;
   title: string;
   subtitle: string;
-  danger?: boolean;
   icon: string;
   accent: 'pink' | 'green' | 'blue' | 'violet' | 'orange' | 'danger' | 'neutral';
   onClick: () => void;
@@ -215,85 +238,83 @@ export default function AccountSettingsPage() {
     [language]
   );
 
-  const mainItems = useMemo<SettingsItem[]>(
-    () => [
-      {
-        id: 'personal',
-        title: text.personal,
-        subtitle: text.personalSub,
-        icon: '👤',
-        accent: 'blue',
-        onClick: () => router.push('/profile/edit'),
-      },
-      {
-        id: 'privacy',
-        title: text.privacy,
-        subtitle: text.privacySub,
-        icon: '🔒',
-        accent: 'green',
-        onClick: () => alert(text.comingSoonPrivacy),
-      },
-      {
-        id: 'security',
-        title: text.security,
-        subtitle: text.securitySub,
-        icon: '🛡️',
-        accent: 'violet',
-        onClick: () => alert(text.comingSoonSecurity),
-      },
-      {
-        id: 'legal',
-        title: text.legal,
-        subtitle: text.legalSub,
-        icon: '⚖️',
-        accent: 'orange',
-        onClick: () => router.push('/profile/legal'),
-      },
-    ],
-    [
-      router,
-      text.comingSoonPrivacy,
-      text.comingSoonSecurity,
-      text.legal,
-      text.legalSub,
-      text.personal,
-      text.personalSub,
-      text.privacy,
-      text.privacySub,
-      text.security,
-      text.securitySub,
-    ]
-  );
+  const mainItems: SettingsItem[] = [
+    {
+      id: 'personal',
+      title: text.personal,
+      subtitle: text.personalSub,
+      icon: '👤',
+      accent: 'blue',
+      onClick: () => router.push('/profile/edit'),
+    },
+    {
+      id: 'language-region',
+      title: text.languageRegion,
+      subtitle: text.languageRegionSub,
+      icon: '🌍',
+      accent: 'orange',
+      onClick: () => router.push('/profile/language-region'),
+    },
+    {
+      id: 'notifications',
+      title: text.notifications,
+      subtitle: text.notificationsSub,
+      icon: '🔔',
+      accent: 'pink',
+      onClick: () => router.push('/profile/notifications'),
+    },
+    {
+      id: 'payments',
+      title: text.payments,
+      subtitle: text.paymentsSub,
+      icon: '💳',
+      accent: 'green',
+      onClick: () => router.push('/profile/payments'),
+    },
+    {
+      id: 'privacy',
+      title: text.privacy,
+      subtitle: text.privacySub,
+      icon: '🔒',
+      accent: 'green',
+      onClick: () => alert(text.comingSoonPrivacy),
+    },
+    {
+      id: 'security',
+      title: text.security,
+      subtitle: text.securitySub,
+      icon: '🛡️',
+      accent: 'violet',
+      onClick: () => alert(text.comingSoonSecurity),
+    },
+    {
+      id: 'legal',
+      title: text.legal,
+      subtitle: text.legalSub,
+      icon: '⚖️',
+      accent: 'blue',
+      onClick: () => router.push('/profile/legal'),
+    },
+  ];
 
-  const dangerItems = useMemo<SettingsItem[]>(
-    () => [
-      {
-        id: 'delete',
-        title: text.deleteAccount,
-        subtitle: text.deleteAccountSub,
-        danger: true,
-        icon: '🗑️',
-        accent: 'danger',
-        onClick: () => alert(text.comingSoonDelete),
-      },
-      {
-        id: 'logout',
-        title: text.logout,
-        subtitle: '',
-        danger: true,
-        icon: '⎋',
-        accent: 'danger',
-        onClick: () => router.push('/'),
-      },
-    ],
-    [
-      router,
-      text.comingSoonDelete,
-      text.deleteAccount,
-      text.deleteAccountSub,
-      text.logout,
-    ]
-  );
+  const dangerItems: SettingsItem[] = [
+    {
+      id: 'delete',
+      title: text.deleteAccount,
+      subtitle: text.deleteAccountSub,
+      icon: '🗑️',
+      accent: 'danger',
+      onClick: () => alert(text.comingSoonDelete),
+    },
+    {
+      id: 'logout',
+      title: text.logout,
+      subtitle: text.logoutSub,
+      icon: '⎋',
+      accent: 'danger',
+      onClick: () => router.push('/'),
+    },
+  ];
 
   return (
     <main
@@ -358,8 +379,8 @@ export default function AccountSettingsPage() {
           style={{
             marginTop: 18,
             borderRadius: 32,
-            border: '1px solid #f0e3d7',
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
+            border: '1px solid #efe4d7',
+            background: '#fff',
             padding: 18,
             boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
@@ -372,13 +393,13 @@ export default function AccountSettingsPage() {
               marginBottom: 14,
             }}
           >
-            {text.accountOverview}
+            {text.profileSection}
           </div>
 
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '76px 1fr',
+              gridTemplateColumns: '72px 1fr',
               gap: 14,
               alignItems: 'center',
             }}
@@ -387,8 +408,8 @@ export default function AccountSettingsPage() {
               src={profile.avatar}
               alt={profile.fullName}
               style={{
-                width: 76,
-                height: 76,
+                width: 72,
+                height: 72,
                 borderRadius: 24,
                 objectFit: 'cover',
                 display: 'block',
@@ -442,26 +463,13 @@ export default function AccountSettingsPage() {
                   {text.status}
                 </span>
 
-                <span
-                  style={{
-                    borderRadius: 999,
-                    padding: '8px 12px',
-                    background: '#eef4ff',
-                    color: '#2f7cf6',
-                    fontSize: 12,
-                    fontWeight: 900,
-                  }}
-                >
-                  {text.protected}
-                </span>
-
                 {profile.isVerified ? (
                   <span
                     style={{
                       borderRadius: 999,
                       padding: '8px 12px',
-                      background: '#fff1f7',
-                      color: '#ff4fa0',
+                      background: '#eef4ff',
+                      color: '#2f7cf6',
                       fontSize: 12,
                       fontWeight: 900,
                     }}
@@ -477,17 +485,6 @@ export default function AccountSettingsPage() {
         <div
           style={{
             marginTop: 18,
-            fontSize: 16,
-            fontWeight: 900,
-            color: '#17130f',
-            marginBottom: 12,
-          }}
-        >
-          {text.quickControls}
-        </div>
-
-        <div
-          style={{
             overflow: 'hidden',
             borderRadius: 30,
             border: '1px solid #efe4d7',
@@ -638,19 +635,17 @@ export default function AccountSettingsPage() {
                     {item.title}
                   </div>
 
-                  {item.subtitle ? (
-                    <div
-                      style={{
-                        marginTop: 4,
-                        fontSize: 13,
-                        lineHeight: 1.45,
-                        color: '#b66161',
-                        fontWeight: 700,
-                      }}
-                    >
-                      {item.subtitle}
-                    </div>
-                  ) : null}
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontSize: 13,
+                      lineHeight: 1.45,
+                      color: '#b66161',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {item.subtitle}
+                  </div>
                 </div>
 
                 <span
