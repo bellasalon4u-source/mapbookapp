@@ -15,6 +15,9 @@ const notificationTexts = {
   EN: {
     title: 'Notifications',
     subtitle: 'Choose what you want to receive from MapBook',
+    overview: 'Notification overview',
+    overviewSub: 'Control booking, message and system updates in one place',
+    activeNow: 'Active now',
     messages: 'Messages',
     messagesSub: 'New chats and replies from professionals',
     bookings: 'Bookings',
@@ -29,10 +32,14 @@ const notificationTexts = {
     disabled: 'Disabled',
     important: 'Important',
     recommended: 'Recommended',
+    protected: 'Protected by MapBook',
   },
   ES: {
     title: 'Notificaciones',
     subtitle: 'Elige qué quieres recibir de MapBook',
+    overview: 'Resumen de notificaciones',
+    overviewSub: 'Controla reservas, mensajes y actualizaciones del sistema en un solo lugar',
+    activeNow: 'Activo ahora',
     messages: 'Mensajes',
     messagesSub: 'Nuevos chats y respuestas de profesionales',
     bookings: 'Reservas',
@@ -47,10 +54,14 @@ const notificationTexts = {
     disabled: 'Desactivado',
     important: 'Importante',
     recommended: 'Recomendado',
+    protected: 'Protegido por MapBook',
   },
   RU: {
     title: 'Уведомления',
     subtitle: 'Выберите, какие уведомления получать от MapBook',
+    overview: 'Обзор уведомлений',
+    overviewSub: 'Управляйте сообщениями, бронями и системными обновлениями в одном месте',
+    activeNow: 'Активно сейчас',
     messages: 'Сообщения',
     messagesSub: 'Новые чаты и ответы от мастеров',
     bookings: 'Бронирования',
@@ -65,10 +76,14 @@ const notificationTexts = {
     disabled: 'Выключено',
     important: 'Важно',
     recommended: 'Рекомендуется',
+    protected: 'Защищено MapBook',
   },
   CZ: {
     title: 'Oznámení',
     subtitle: 'Vyberte, jaká oznámení chcete dostávat od MapBook',
+    overview: 'Přehled oznámení',
+    overviewSub: 'Spravujte rezervace, zprávy a systémové aktualizace na jednom místě',
+    activeNow: 'Aktivní nyní',
     messages: 'Zprávy',
     messagesSub: 'Nové chaty a odpovědi od specialistů',
     bookings: 'Rezervace',
@@ -83,10 +98,14 @@ const notificationTexts = {
     disabled: 'Vypnuto',
     important: 'Důležité',
     recommended: 'Doporučeno',
+    protected: 'Chráněno MapBook',
   },
   DE: {
     title: 'Benachrichtigungen',
     subtitle: 'Wähle, welche Mitteilungen du von MapBook erhalten möchtest',
+    overview: 'Benachrichtigungsübersicht',
+    overviewSub: 'Verwalte Buchungen, Nachrichten und Systemupdates an einem Ort',
+    activeNow: 'Jetzt aktiv',
     messages: 'Nachrichten',
     messagesSub: 'Neue Chats und Antworten von Profis',
     bookings: 'Buchungen',
@@ -101,10 +120,14 @@ const notificationTexts = {
     disabled: 'Inaktiv',
     important: 'Wichtig',
     recommended: 'Empfohlen',
+    protected: 'Durch MapBook geschützt',
   },
   PL: {
     title: 'Powiadomienia',
     subtitle: 'Wybierz, jakie powiadomienia chcesz otrzymywać od MapBook',
+    overview: 'Przegląd powiadomień',
+    overviewSub: 'Zarządzaj rezerwacjami, wiadomościami i aktualizacjami systemu w jednym miejscu',
+    activeNow: 'Aktywne teraz',
     messages: 'Wiadomości',
     messagesSub: 'Nowe czaty i odpowiedzi od specjalistów',
     bookings: 'Rezerwacje',
@@ -119,6 +142,7 @@ const notificationTexts = {
     disabled: 'Wyłączone',
     important: 'Ważne',
     recommended: 'Zalecane',
+    protected: 'Chronione przez MapBook',
   },
 } as const;
 
@@ -248,6 +272,8 @@ export default function NotificationsPage() {
     },
   ];
 
+  const enabledCount = items.filter((item) => profile.notificationSettings[item.key]).length;
+
   return (
     <main
       style={{
@@ -305,6 +331,97 @@ export default function NotificationsPage() {
           </div>
 
           <div />
+        </div>
+
+        <div
+          style={{
+            marginTop: 18,
+            borderRadius: 30,
+            border: '1px solid #f0e3d7',
+            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
+            padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: 14,
+              alignItems: 'flex-start',
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: 20,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {text.overview}
+              </div>
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 14,
+                  lineHeight: 1.55,
+                  color: '#7b7268',
+                  fontWeight: 700,
+                }}
+              >
+                {text.overviewSub}
+              </div>
+            </div>
+
+            <div
+              style={{
+                borderRadius: 18,
+                background: '#fff1f7',
+                color: '#ff4fa0',
+                minWidth: 72,
+                padding: '12px 12px',
+                textAlign: 'center',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 24,
+                  fontWeight: 900,
+                  lineHeight: 1,
+                }}
+              >
+                {enabledCount}
+              </div>
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 11,
+                  fontWeight: 900,
+                }}
+              >
+                {text.activeNow}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: 14,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              borderRadius: 999,
+              padding: '10px 14px',
+              background: '#eef9f1',
+              color: '#2fa35a',
+              fontSize: 12,
+              fontWeight: 900,
+            }}
+          >
+            <span>🛡️</span>
+            <span>{text.protected}</span>
+          </div>
         </div>
 
         <div style={{ marginTop: 18, display: 'grid', gap: 14 }}>
