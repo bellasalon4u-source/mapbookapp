@@ -1,12 +1,142 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getMasterById } from '../../../services/masters';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
+
+const pageTexts: Record<
+  AppLanguage,
+  {
+    notFound: string;
+    gallery: string;
+    bookNow: string;
+    availableNow: string;
+    offlineNow: string;
+    from: string;
+    trustedByClients: string;
+    verifiedReviews: string;
+    startingPrice: string;
+    priceList: string;
+    premiumService: string;
+    book: string;
+    close: string;
+  }
+> = {
+  EN: {
+    notFound: 'Master not found',
+    gallery: 'Gallery',
+    bookNow: 'Book now',
+    availableNow: 'Available now',
+    offlineNow: 'Offline now',
+    from: 'from',
+    trustedByClients: 'Trusted by clients',
+    verifiedReviews: 'verified reviews',
+    startingPrice: 'Starting price',
+    priceList: 'Price list',
+    premiumService: 'Premium service with professional result',
+    book: 'Book',
+    close: 'Close',
+  },
+  RU: {
+    notFound: 'Мастер не найден',
+    gallery: 'Галерея',
+    bookNow: 'Забронировать',
+    availableNow: 'Доступен сейчас',
+    offlineNow: 'Сейчас не в сети',
+    from: 'от',
+    trustedByClients: 'Клиенты доверяют',
+    verifiedReviews: 'проверенных отзывов',
+    startingPrice: 'Стартовая цена',
+    priceList: 'Прайс-лист',
+    premiumService: 'Премиум услуга с профессиональным результатом',
+    book: 'Бронь',
+    close: 'Закрыть',
+  },
+  ES: {
+    notFound: 'Profesional no encontrado',
+    gallery: 'Galería',
+    bookNow: 'Reservar',
+    availableNow: 'Disponible ahora',
+    offlineNow: 'Ahora no disponible',
+    from: 'desde',
+    trustedByClients: 'Clientes confían',
+    verifiedReviews: 'reseñas verificadas',
+    startingPrice: 'Precio inicial',
+    priceList: 'Lista de precios',
+    premiumService: 'Servicio premium con resultado profesional',
+    book: 'Reservar',
+    close: 'Cerrar',
+  },
+  CZ: {
+    notFound: 'Specialista nenalezen',
+    gallery: 'Galerie',
+    bookNow: 'Rezervovat',
+    availableNow: 'Dostupný nyní',
+    offlineNow: 'Nyní offline',
+    from: 'od',
+    trustedByClients: 'Klienti důvěřují',
+    verifiedReviews: 'ověřených recenzí',
+    startingPrice: 'Počáteční cena',
+    priceList: 'Ceník',
+    premiumService: 'Prémiová služba s profesionálním výsledkem',
+    book: 'Rezervovat',
+    close: 'Zavřít',
+  },
+  DE: {
+    notFound: 'Anbieter nicht gefunden',
+    gallery: 'Galerie',
+    bookNow: 'Jetzt buchen',
+    availableNow: 'Jetzt verfügbar',
+    offlineNow: 'Jetzt offline',
+    from: 'ab',
+    trustedByClients: 'Von Kunden geschätzt',
+    verifiedReviews: 'verifizierte Bewertungen',
+    startingPrice: 'Startpreis',
+    priceList: 'Preisliste',
+    premiumService: 'Premium-Service mit professionellem Ergebnis',
+    book: 'Buchen',
+    close: 'Schließen',
+  },
+  PL: {
+    notFound: 'Specjalista nie znaleziony',
+    gallery: 'Galeria',
+    bookNow: 'Zarezerwuj',
+    availableNow: 'Dostępny teraz',
+    offlineNow: 'Teraz offline',
+    from: 'od',
+    trustedByClients: 'Klienci ufają',
+    verifiedReviews: 'zweryfikowanych opinii',
+    startingPrice: 'Cena początkowa',
+    priceList: 'Cennik',
+    premiumService: 'Usługa premium z profesjonalnym efektem',
+    book: 'Rezerwuj',
+    close: 'Zamknij',
+  },
+};
 
 export default function MasterPage() {
   const params = useParams();
   const router = useRouter();
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+
+  useEffect(() => {
+    setLanguage(getSavedLanguage());
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    return () => {
+      unsubLanguage();
+    };
+  }, []);
+
+  const text = pageTexts[language] || pageTexts.EN;
   const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
 
   const [liked, setLiked] = useState(false);
@@ -16,7 +146,7 @@ export default function MasterPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   if (!master) {
-    return <main style={{ padding: 24 }}>Master not found</main>;
+    return <main style={{ padding: 24 }}>{text.notFound}</main>;
   }
 
   const previewImages = master.gallery.slice(0, 3);
@@ -194,7 +324,7 @@ export default function MasterPage() {
               }}
             >
               <span style={{ fontSize: 24, lineHeight: 1 }}>📷</span>
-              <span>Gallery</span>
+              <span>{text.gallery}</span>
             </button>
           </div>
 
@@ -296,7 +426,7 @@ export default function MasterPage() {
               boxShadow: '0 12px 26px rgba(46,151,70,0.25)',
             }}
           >
-            Book now
+            {text.bookNow}
           </button>
         </div>
 
@@ -325,7 +455,7 @@ export default function MasterPage() {
                 fontWeight: 700,
               }}
             >
-              {master.availableNow ? 'Available now' : 'Offline now'}
+              {master.availableNow ? text.availableNow : text.offlineNow}
             </div>
 
             <div
@@ -337,7 +467,7 @@ export default function MasterPage() {
                 fontWeight: 800,
               }}
             >
-              from £{master.priceFrom}
+              {text.from} £{master.priceFrom}
             </div>
           </div>
 
@@ -373,7 +503,7 @@ export default function MasterPage() {
                 marginBottom: 14,
               }}
             >
-              Trusted by clients
+              {text.trustedByClients}
             </div>
 
             <div
@@ -457,7 +587,7 @@ export default function MasterPage() {
                     lineHeight: 1.2,
                   }}
                 >
-                  {master.reviews} verified reviews
+                  {master.reviews} {text.verifiedReviews}
                 </div>
               </div>
 
@@ -478,7 +608,7 @@ export default function MasterPage() {
                     fontWeight: 700,
                   }}
                 >
-                  Starting price
+                  {text.startingPrice}
                 </div>
                 <div
                   style={{
@@ -495,7 +625,7 @@ export default function MasterPage() {
             </div>
           </button>
 
-          <h2 style={{ marginTop: 28, fontSize: 30 }}>Price list</h2>
+          <h2 style={{ marginTop: 28, fontSize: 30 }}>{text.priceList}</h2>
 
           <div
             style={{
@@ -573,7 +703,7 @@ export default function MasterPage() {
                       }}
                     >
                       <span style={{ color: '#7a7066', fontWeight: 700 }}>
-                        from
+                        {text.from}
                       </span>
                       <span>£{service.price}</span>
                     </div>
@@ -596,7 +726,7 @@ export default function MasterPage() {
                       lineHeight: 1.35,
                     }}
                   >
-                    Premium service with professional result
+                    {text.premiumService}
                   </div>
 
                   <button
@@ -615,7 +745,7 @@ export default function MasterPage() {
                       boxShadow: '0 10px 22px rgba(46,151,70,0.18)',
                     }}
                   >
-                    Book
+                    {text.book}
                   </button>
                 </div>
               </div>
@@ -667,7 +797,7 @@ export default function MasterPage() {
                 ✕
               </button>
 
-              <div style={{ fontSize: 22, fontWeight: 800 }}>Gallery</div>
+              <div style={{ fontSize: 22, fontWeight: 800 }}>{text.gallery}</div>
 
               <button
                 onClick={() => {
