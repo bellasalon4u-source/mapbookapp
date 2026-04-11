@@ -9,6 +9,8 @@ const helpTexts = {
   EN: {
     title: 'Help Centre',
     subtitle: 'Support, answers and useful guides',
+    heroTitle: 'We are here to help',
+    heroSub: 'Find answers, open guides and contact support in one place',
     searchPlaceholder: 'Search questions',
     popular: 'Popular questions',
     question1: 'How does booking work?',
@@ -26,10 +28,14 @@ const helpTexts = {
     open: 'Open',
     secure: 'Safe support',
     secureSub: 'Your requests are handled securely',
+    found: 'Found',
+    results: 'results',
   },
   ES: {
     title: 'Centro de ayuda',
     subtitle: 'Soporte, respuestas y guías útiles',
+    heroTitle: 'Estamos aquí para ayudarte',
+    heroSub: 'Encuentra respuestas, abre guías y contacta soporte en un solo lugar',
     searchPlaceholder: 'Buscar preguntas',
     popular: 'Preguntas populares',
     question1: '¿Cómo funciona la reserva?',
@@ -42,15 +48,19 @@ const helpTexts = {
     articles: 'Artículos de ayuda',
     articlesSub: 'Instrucciones y guías útiles',
     fastReply: 'Respondemos rápido',
-    fastReplySub: 'Tiempo medio de respuesta — около 2 horas',
+    fastReplySub: 'Tiempo medio de respuesta — alrededor de 2 horas',
     faq: 'FAQ',
     open: 'Abrir',
     secure: 'Soporte seguro',
     secureSub: 'Tus solicitudes se gestionan de forma segura',
+    found: 'Encontrado',
+    results: 'resultados',
   },
   RU: {
     title: 'Центр помощи',
     subtitle: 'Поддержка, ответы и полезные инструкции',
+    heroTitle: 'Мы рядом, если нужна помощь',
+    heroSub: 'Найдите ответы, откройте гайды и свяжитесь с поддержкой в одном месте',
     searchPlaceholder: 'Поиск по вопросам',
     popular: 'Популярные вопросы',
     question1: 'Как работает бронирование?',
@@ -68,10 +78,14 @@ const helpTexts = {
     open: 'Открыть',
     secure: 'Безопасная поддержка',
     secureSub: 'Ваши обращения обрабатываются безопасно',
+    found: 'Найдено',
+    results: 'результатов',
   },
   CZ: {
     title: 'Centrum pomoci',
     subtitle: 'Podpora, odpovědi a užitečné návody',
+    heroTitle: 'Jsme tu, abychom pomohli',
+    heroSub: 'Najděte odpovědi, otevřete návody a kontaktujte podporu na jednom místě',
     searchPlaceholder: 'Hledat otázky',
     popular: 'Populární otázky',
     question1: 'Jak funguje rezervace?',
@@ -89,10 +103,14 @@ const helpTexts = {
     open: 'Otevřít',
     secure: 'Bezpečná podpora',
     secureSub: 'Vaše požadavky jsou řešeny bezpečně',
+    found: 'Nalezeno',
+    results: 'výsledků',
   },
   DE: {
     title: 'Hilfezentrum',
     subtitle: 'Support, Antworten und nützliche Guides',
+    heroTitle: 'Wir sind da, um zu helfen',
+    heroSub: 'Finde Antworten, öffne Guides und kontaktiere den Support an einem Ort',
     searchPlaceholder: 'Fragen suchen',
     popular: 'Beliebte Fragen',
     question1: 'Wie funktioniert die Buchung?',
@@ -110,10 +128,14 @@ const helpTexts = {
     open: 'Öffnen',
     secure: 'Sicherer Support',
     secureSub: 'Deine Anfragen werden sicher bearbeitet',
+    found: 'Gefunden',
+    results: 'Ergebnisse',
   },
   PL: {
     title: 'Centrum pomocy',
     subtitle: 'Wsparcie, odpowiedzi i przydatne poradniki',
+    heroTitle: 'Jesteśmy tutaj, aby pomóc',
+    heroSub: 'Znajdź odpowiedzi, otwórz poradniki i skontaktuj się ze wsparciem w jednym miejscu',
     searchPlaceholder: 'Szukaj pytań',
     popular: 'Popularne pytania',
     question1: 'Jak działa rezerwacja?',
@@ -131,6 +153,8 @@ const helpTexts = {
     open: 'Otwórz',
     secure: 'Bezpieczne wsparcie',
     secureSub: 'Twoje zgłoszenia są obsługiwane bezpiecznie',
+    found: 'Znaleziono',
+    results: 'wyników',
   },
 } as const;
 
@@ -255,6 +279,55 @@ export default function HelpPage() {
         >
           <div
             style={{
+              display: 'grid',
+              gridTemplateColumns: '56px 1fr',
+              gap: 12,
+              alignItems: 'center',
+              marginBottom: 14,
+            }}
+          >
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 20,
+                background: '#fff1f7',
+                color: '#ff4fa0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 26,
+              }}
+            >
+              💬
+            </div>
+
+            <div>
+              <div
+                style={{
+                  fontSize: 20,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {text.heroTitle}
+              </div>
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 14,
+                  lineHeight: 1.55,
+                  color: '#7b7268',
+                  fontWeight: 700,
+                }}
+              >
+                {text.heroSub}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
               display: 'flex',
               alignItems: 'center',
               gap: 10,
@@ -272,50 +345,49 @@ export default function HelpPage() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 22,
+                flexShrink: 0,
               }}
             >
               🔎
             </div>
 
-            <div>
-              <div
+            <div style={{ flex: 1 }}>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={text.searchPlaceholder}
                 style={{
-                  fontSize: 16,
-                  fontWeight: 900,
+                  width: '100%',
+                  height: 56,
+                  borderRadius: 20,
+                  border: '1px solid #efe4d7',
+                  background: '#fff',
+                  padding: '0 16px',
+                  fontSize: 15,
                   color: '#17130f',
+                  outline: 'none',
+                  boxSizing: 'border-box',
                 }}
-              >
-                {text.faq}
-              </div>
-              <div
-                style={{
-                  marginTop: 2,
-                  fontSize: 13,
-                  color: '#7b7268',
-                  fontWeight: 700,
-                }}
-              >
-                {text.popular}
-              </div>
+              />
             </div>
           </div>
 
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={text.searchPlaceholder}
+          <div
             style={{
-              width: '100%',
-              height: 56,
-              borderRadius: 20,
-              border: '1px solid #efe4d7',
-              background: '#fff',
-              padding: '0 16px',
-              fontSize: 15,
-              color: '#17130f',
-              outline: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              borderRadius: 999,
+              padding: '10px 14px',
+              background: '#eef9f1',
+              color: '#2fa35a',
+              fontSize: 12,
+              fontWeight: 900,
             }}
-          />
+          >
+            <span>🛡️</span>
+            <span>{text.secure}</span>
+          </div>
         </div>
 
         <div
@@ -330,13 +402,36 @@ export default function HelpPage() {
         >
           <div
             style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: 12,
+              alignItems: 'center',
               marginBottom: 12,
             }}
           >
-            {text.popular}
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+              }}
+            >
+              {text.popular}
+            </div>
+
+            <div
+              style={{
+                borderRadius: 999,
+                padding: '8px 12px',
+                background: '#f4efe8',
+                color: '#6d6258',
+                fontSize: 12,
+                fontWeight: 900,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {text.found}: {filteredQuestions.length} {text.results}
+            </div>
           </div>
 
           <div style={{ display: 'grid', gap: 12 }}>
@@ -634,11 +729,3 @@ export default function HelpPage() {
             >
               {text.secureSub}
             </div>
-          </div>
-        </div>
-      </div>
-
-      <BottomNav active="profile" />
-    </main>
-  );
-}
