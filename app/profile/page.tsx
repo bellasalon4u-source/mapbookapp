@@ -3,8 +3,12 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import BottomNav from '../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../services/i18n';
+import BottomNav from '../../components/BottomNav';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../services/i18n';
 import {
   getUserProfile,
   subscribeToUserProfile,
@@ -289,7 +293,9 @@ export default function ProfilePage() {
     syncWallet();
     syncReferral();
 
-    window.addEventListener('focus', syncLanguage);
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
 
     const unsubProfile = subscribeToUserProfile(syncProfile);
     const unsubBookings = subscribeToBookingsStore(syncBookings);
@@ -297,7 +303,7 @@ export default function ProfilePage() {
     const unsubReferral = subscribeToReferralStore(syncReferral);
 
     return () => {
-      window.removeEventListener('focus', syncLanguage);
+      unsubLanguage();
       unsubProfile();
       unsubBookings();
       unsubWallet();
@@ -572,7 +578,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <BottomNav active="profile" />
+      <BottomNav />
     </main>
   );
 }
