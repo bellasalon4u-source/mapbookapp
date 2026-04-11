@@ -34,6 +34,12 @@ const balanceTexts = {
     instantWallet: 'Fast wallet payments',
     secureWallet: 'Protected by secure checkout',
     walletReady: 'Ready to use',
+    walletOverview: 'Wallet overview',
+    rewardsReady: 'Rewards ready',
+    totalActivity: 'Total activity',
+    protected: 'Protected',
+    quickActions: 'Quick actions',
+    useNow: 'Use now',
   },
   ES: {
     title: 'Saldo MapBook',
@@ -57,6 +63,12 @@ const balanceTexts = {
     instantWallet: 'Pagos rápidos con saldo',
     secureWallet: 'Protegido por pago seguro',
     walletReady: 'Listo para usar',
+    walletOverview: 'Resumen de billetera',
+    rewardsReady: 'Recompensas listas',
+    totalActivity: 'Actividad total',
+    protected: 'Protegido',
+    quickActions: 'Acciones rápidas',
+    useNow: 'Usar ahora',
   },
   RU: {
     title: 'Баланс MapBook',
@@ -80,6 +92,12 @@ const balanceTexts = {
     instantWallet: 'Быстрые оплаты с баланса',
     secureWallet: 'Защищено безопасной оплатой',
     walletReady: 'Готово к использованию',
+    walletOverview: 'Обзор кошелька',
+    rewardsReady: 'Бонусы готовы',
+    totalActivity: 'Общая активность',
+    protected: 'Защищено',
+    quickActions: 'Быстрые действия',
+    useNow: 'Использовать',
   },
   CZ: {
     title: 'Zůstatek MapBook',
@@ -103,6 +121,12 @@ const balanceTexts = {
     instantWallet: 'Rychlé platby ze zůstatku',
     secureWallet: 'Chráněno bezpečnou platbou',
     walletReady: 'Připraveno k použití',
+    walletOverview: 'Přehled peněženky',
+    rewardsReady: 'Bonusy připraveny',
+    totalActivity: 'Celková aktivita',
+    protected: 'Chráněno',
+    quickActions: 'Rychlé akce',
+    useNow: 'Použít',
   },
   DE: {
     title: 'MapBook Guthaben',
@@ -126,6 +150,12 @@ const balanceTexts = {
     instantWallet: 'Schnelle Wallet-Zahlungen',
     secureWallet: 'Durch sicheren Checkout geschützt',
     walletReady: 'Bereit zur Nutzung',
+    walletOverview: 'Wallet-Übersicht',
+    rewardsReady: 'Boni bereit',
+    totalActivity: 'Gesamtaktivität',
+    protected: 'Geschützt',
+    quickActions: 'Schnellaktionen',
+    useNow: 'Jetzt nutzen',
   },
   PL: {
     title: 'Saldo MapBook',
@@ -149,6 +179,12 @@ const balanceTexts = {
     instantWallet: 'Szybkie płatności z salda',
     secureWallet: 'Chronione bezpieczną płatnością',
     walletReady: 'Gotowe do użycia',
+    walletOverview: 'Przegląd portfela',
+    rewardsReady: 'Bonusy gotowe',
+    totalActivity: 'Całkowita aktywność',
+    protected: 'Chronione',
+    quickActions: 'Szybkie akcje',
+    useNow: 'Użyj teraz',
   },
 } as const;
 
@@ -160,34 +196,26 @@ function formatMoney(value: number) {
 
 function getStatusStyle(tx: WalletTransaction) {
   if (tx.status === 'pending') {
-    return {
-      background: '#fff5e8',
-      color: '#d68612',
-    };
+    return { background: '#fff5e8', color: '#d68612' };
   }
-
   if (tx.status === 'credited') {
-    return {
-      background: '#eef9f1',
-      color: '#2fa35a',
-    };
+    return { background: '#eef9f1', color: '#2fa35a' };
   }
-
   if (tx.status === 'failed') {
-    return {
-      background: '#fff1f1',
-      color: '#ef4444',
-    };
+    return { background: '#fff1f1', color: '#ef4444' };
   }
-
-  return {
-    background: '#f4efe8',
-    color: '#5c5046',
-  };
+  return { background: '#f4efe8', color: '#5c5046' };
 }
 
 function getAmountColor(amount: number) {
   return amount >= 0 ? '#2fa35a' : '#17130f';
+}
+
+function getTransactionIcon(tx: WalletTransaction) {
+  if (tx.amount > 0) return { icon: '↘', bg: '#eef9f1', color: '#2fa35a' };
+  if (tx.status === 'pending') return { icon: '⏳', bg: '#fff5e8', color: '#d68612' };
+  if (tx.status === 'failed') return { icon: '✕', bg: '#fff1f1', color: '#ef4444' };
+  return { icon: '↗', bg: '#eef4ff', color: '#2f7cf6' };
 }
 
 export default function BalancePage() {
@@ -229,17 +257,18 @@ export default function BalancePage() {
     if (filter === 'incoming') {
       return items.filter((item) => item.amount > 0);
     }
-
     if (filter === 'outgoing') {
       return items.filter((item) => item.amount < 0);
     }
-
     if (filter === 'pending') {
       return items.filter((item) => item.status === 'pending');
     }
-
     return items;
   }, [filter, wallet.transactions]);
+
+  const totalActivity = useMemo(() => {
+    return (wallet.transactions || []).reduce((sum, item) => sum + Math.abs(item.amount), 0);
+  }, [wallet.transactions]);
 
   return (
     <main
@@ -276,15 +305,7 @@ export default function BalancePage() {
           </button>
 
           <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                fontSize: 22,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.title}
-            </div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: '#17130f' }}>{text.title}</div>
             <div
               style={{
                 marginTop: 4,
@@ -328,23 +349,43 @@ export default function BalancePage() {
         >
           <div
             style={{
-              fontSize: 14,
-              color: '#dacdbf',
-              fontWeight: 800,
+              display: 'grid',
+              gridTemplateColumns: '1fr auto',
+              gap: 14,
+              alignItems: 'start',
             }}
           >
-            {text.available}
-          </div>
+            <div>
+              <div style={{ fontSize: 14, color: '#dacdbf', fontWeight: 800 }}>{text.available}</div>
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 48,
+                  lineHeight: 1,
+                  fontWeight: 900,
+                }}
+              >
+                £{wallet.availableBalance.toFixed(2)}
+              </div>
+            </div>
 
-          <div
-            style={{
-              marginTop: 6,
-              fontSize: 48,
-              lineHeight: 1,
-              fontWeight: 900,
-            }}
-          >
-            £{wallet.availableBalance.toFixed(2)}
+            <div
+              style={{
+                borderRadius: 20,
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                padding: '14px 12px',
+                textAlign: 'center',
+                minWidth: 96,
+              }}
+            >
+              <div style={{ fontSize: 12, color: '#d9cdbd', fontWeight: 800 }}>
+                {text.totalActivity}
+              </div>
+              <div style={{ marginTop: 6, fontSize: 22, fontWeight: 900, color: '#fff' }}>
+                £{totalActivity.toFixed(2)}
+              </div>
+            </div>
           </div>
 
           <div
@@ -439,127 +480,148 @@ export default function BalancePage() {
         <div
           style={{
             marginTop: 16,
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-            gap: 10,
+            borderRadius: 30,
+            border: '1px solid #efe4d7',
+            background: '#fff',
+            padding: 16,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
-          <button
-            type="button"
+          <div
             style={{
-              border: '1px solid #efe4d7',
-              borderRadius: 26,
-              padding: 14,
-              background: '#fff',
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.04)',
-              cursor: 'pointer',
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 12,
             }}
           >
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 18,
-                background: '#fff1f7',
-                color: '#ff4fa0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 24,
-                margin: '0 auto',
-              }}
-            >
-              +
-            </div>
-            <div
-              style={{
-                marginTop: 10,
-                fontSize: 13,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.topUp}
-            </div>
-          </button>
+            {text.quickActions}
+          </div>
 
-          <button
-            type="button"
+          <div
             style={{
-              border: '1px solid #efe4d7',
-              borderRadius: 26,
-              padding: 14,
-              background: '#fff',
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.04)',
-              cursor: 'pointer',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gap: 10,
             }}
           >
-            <div
+            <button
+              type="button"
               style={{
-                width: 48,
-                height: 48,
-                borderRadius: 18,
-                background: '#eef4ff',
-                color: '#2f7cf6',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 22,
-                margin: '0 auto',
+                border: '1px solid #efe4d7',
+                borderRadius: 26,
+                padding: 14,
+                background: '#fff',
+                boxShadow: '0 10px 22px rgba(44, 23, 10, 0.04)',
+                cursor: 'pointer',
               }}
             >
-              💳
-            </div>
-            <div
-              style={{
-                marginTop: 10,
-                fontSize: 13,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.payWithBalance}
-            </div>
-          </button>
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 18,
+                  background: '#fff1f7',
+                  color: '#ff4fa0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 24,
+                  margin: '0 auto',
+                }}
+              >
+                +
+              </div>
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 13,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {text.topUp}
+              </div>
+            </button>
 
-          <button
-            type="button"
-            style={{
-              border: '1px solid #efe4d7',
-              borderRadius: 26,
-              padding: 14,
-              background: '#fff',
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.04)',
-              cursor: 'pointer',
-            }}
-          >
-            <div
+            <button
+              type="button"
               style={{
-                width: 48,
-                height: 48,
-                borderRadius: 18,
-                background: '#eef9f1',
-                color: '#2fa35a',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 22,
-                margin: '0 auto',
+                border: '1px solid #efe4d7',
+                borderRadius: 26,
+                padding: 14,
+                background: '#fff',
+                boxShadow: '0 10px 22px rgba(44, 23, 10, 0.04)',
+                cursor: 'pointer',
               }}
             >
-              ↗
-            </div>
-            <div
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 18,
+                  background: '#eef4ff',
+                  color: '#2f7cf6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                  margin: '0 auto',
+                }}
+              >
+                💳
+              </div>
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 13,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {text.payWithBalance}
+              </div>
+            </button>
+
+            <button
+              type="button"
               style={{
-                marginTop: 10,
-                fontSize: 13,
-                fontWeight: 900,
-                color: '#17130f',
+                border: '1px solid #efe4d7',
+                borderRadius: 26,
+                padding: 14,
+                background: '#fff',
+                boxShadow: '0 10px 22px rgba(44, 23, 10, 0.04)',
+                cursor: 'pointer',
               }}
             >
-              {text.withdraw}
-            </div>
-          </button>
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 18,
+                  background: '#eef9f1',
+                  color: '#2fa35a',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                  margin: '0 auto',
+                }}
+              >
+                ↗
+              </div>
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 13,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {text.withdraw}
+              </div>
+            </button>
+          </div>
         </div>
 
         <div
@@ -574,24 +636,48 @@ export default function BalancePage() {
         >
           <div
             style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
             }}
           >
-            {text.howItWorks}
-          </div>
+            <div>
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {text.walletOverview}
+              </div>
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 15,
+                  lineHeight: 1.7,
+                  color: '#756b62',
+                  fontWeight: 700,
+                }}
+              >
+                {text.howItWorksText}
+              </div>
+            </div>
 
-          <div
-            style={{
-              marginTop: 10,
-              fontSize: 15,
-              lineHeight: 1.7,
-              color: '#756b62',
-              fontWeight: 700,
-            }}
-          >
-            {text.howItWorksText}
+            <div
+              style={{
+                borderRadius: 18,
+                background: '#fff5e8',
+                color: '#d68612',
+                padding: '10px 12px',
+                fontSize: 12,
+                fontWeight: 900,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {text.rewardsReady}
+            </div>
           </div>
 
           <div
@@ -626,6 +712,19 @@ export default function BalancePage() {
               }}
             >
               {text.secureWallet}
+            </div>
+
+            <div
+              style={{
+                borderRadius: 999,
+                padding: '10px 12px',
+                background: '#fff1f7',
+                color: '#ff4fa0',
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              {text.protected}
             </div>
           </div>
         </div>
@@ -700,6 +799,7 @@ export default function BalancePage() {
         >
           {filteredTransactions.map((tx) => {
             const statusStyle = getStatusStyle(tx);
+            const txIcon = getTransactionIcon(tx);
 
             return (
               <div
@@ -714,12 +814,29 @@ export default function BalancePage() {
               >
                 <div
                   style={{
-                    display: 'flex',
+                    display: 'grid',
+                    gridTemplateColumns: '46px 1fr auto',
+                    gap: 14,
                     alignItems: 'start',
-                    justifyContent: 'space-between',
-                    gap: 12,
                   }}
                 >
+                  <div
+                    style={{
+                      width: 46,
+                      height: 46,
+                      borderRadius: 16,
+                      background: txIcon.bg,
+                      color: txIcon.color,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 20,
+                      fontWeight: 900,
+                    }}
+                  >
+                    {txIcon.icon}
+                  </div>
+
                   <div style={{ minWidth: 0 }}>
                     <div
                       style={{
