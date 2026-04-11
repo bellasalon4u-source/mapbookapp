@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { categories } from '../../../../services/categories';
 import {
   getSavedLanguage,
+  subscribeToLanguageChange,
   type AppLanguage,
 } from '../../../../services/i18n';
 import { formatDisplayPrice } from '../../../../services/currencyDisplay';
@@ -66,7 +67,6 @@ type NewPromotionLabels = {
   close: string;
   back: string;
   subtitlePreviewDefault: string;
-  categoryBeauty: string;
   removePhoto: string;
   invalidLanguageTitle: string;
   invalidLanguageDescription: string;
@@ -129,12 +129,13 @@ function getLabels(language: AppLanguage): NewPromotionLabels {
       close: 'Закрыть',
       back: 'Назад',
       subtitlePreviewDefault: 'Специальное предложение',
-      categoryBeauty: 'Beauty',
       removePhoto: 'Удалить фото',
       invalidLanguageTitle: 'Поле заголовка должно быть на выбранном языке интерфейса.',
-      invalidLanguageDescription: 'Поле описания должно быть на выбранном языке интерфейса.',
+      invalidLanguageDescription:
+        'Поле описания должно быть на выбранном языке интерфейса.',
       invalidLanguageTitleShort: 'Заголовок не соответствует выбранному языку.',
-      invalidLanguageDescriptionShort: 'Описание не соответствует выбранному языку.',
+      invalidLanguageDescriptionShort:
+        'Описание не соответствует выбранному языку.',
       clearField: 'Очистить',
       nextField: 'Далее',
       titleFieldName: 'заголовок',
@@ -181,12 +182,14 @@ function getLabels(language: AppLanguage): NewPromotionLabels {
       close: 'Cerrar',
       back: 'Atrás',
       subtitlePreviewDefault: 'Oferta especial',
-      categoryBeauty: 'Beauty',
       removePhoto: 'Eliminar foto',
       invalidLanguageTitle: 'El título debe estar en el idioma seleccionado.',
-      invalidLanguageDescription: 'La descripción debe estar en el idioma seleccionado.',
-      invalidLanguageTitleShort: 'El título no coincide con el idioma seleccionado.',
-      invalidLanguageDescriptionShort: 'La descripción no coincide con el idioma seleccionado.',
+      invalidLanguageDescription:
+        'La descripción debe estar en el idioma seleccionado.',
+      invalidLanguageTitleShort:
+        'El título no coincide con el idioma seleccionado.',
+      invalidLanguageDescriptionShort:
+        'La descripción no coincide con el idioma seleccionado.',
       clearField: 'Borrar',
       nextField: 'Siguiente',
       titleFieldName: 'título',
@@ -233,7 +236,6 @@ function getLabels(language: AppLanguage): NewPromotionLabels {
       close: 'Zavřít',
       back: 'Zpět',
       subtitlePreviewDefault: 'Speciální nabídka',
-      categoryBeauty: 'Beauty',
       removePhoto: 'Odstranit fotku',
       invalidLanguageTitle: 'Nadpis musí být ve zvoleném jazyce.',
       invalidLanguageDescription: 'Popis musí být ve zvoleném jazyce.',
@@ -257,7 +259,8 @@ function getLabels(language: AppLanguage): NewPromotionLabels {
       gallery: 'Galerie',
       files: 'Dateien',
       addPhoto: 'Foto hinzufügen',
-      dragHint: 'Tippen Sie auf ein Foto, um es zu bearbeiten. Das erste Foto ist das Hauptfoto.',
+      dragHint:
+        'Tippen Sie auf ein Foto, um es zu bearbeiten. Das erste Foto ist das Hauptfoto.',
       title: 'Titel',
       titlePlaceholder: 'Zum Beispiel: Keratin Hair Extensions',
       description: 'Beschreibung',
@@ -285,12 +288,15 @@ function getLabels(language: AppLanguage): NewPromotionLabels {
       close: 'Schließen',
       back: 'Zurück',
       subtitlePreviewDefault: 'Sonderangebot',
-      categoryBeauty: 'Beauty',
       removePhoto: 'Foto entfernen',
-      invalidLanguageTitle: 'Der Titel muss in der ausgewählten Sprache sein.',
-      invalidLanguageDescription: 'Die Beschreibung muss in der ausgewählten Sprache sein.',
-      invalidLanguageTitleShort: 'Der Titel passt nicht zur ausgewählten Sprache.',
-      invalidLanguageDescriptionShort: 'Die Beschreibung passt nicht zur ausgewählten Sprache.',
+      invalidLanguageTitle:
+        'Der Titel muss in der ausgewählten Sprache sein.',
+      invalidLanguageDescription:
+        'Die Beschreibung muss in der ausgewählten Sprache sein.',
+      invalidLanguageTitleShort:
+        'Der Titel passt nicht zur ausgewählten Sprache.',
+      invalidLanguageDescriptionShort:
+        'Die Beschreibung passt nicht zur ausgewählten Sprache.',
       clearField: 'Löschen',
       nextField: 'Weiter',
       titleFieldName: 'Titel',
@@ -309,7 +315,8 @@ function getLabels(language: AppLanguage): NewPromotionLabels {
       gallery: 'Galeria',
       files: 'Pliki',
       addPhoto: 'Dodaj zdjęcie',
-      dragHint: 'Dotknij zdjęcia, aby je edytować. Pierwsze zdjęcie będzie główne.',
+      dragHint:
+        'Dotknij zdjęcia, aby je edytować. Pierwsze zdjęcie będzie główne.',
       title: 'Tytuł',
       titlePlaceholder: 'Na przykład: Keratin Hair Extensions',
       description: 'Opis',
@@ -337,7 +344,6 @@ function getLabels(language: AppLanguage): NewPromotionLabels {
       close: 'Zamknij',
       back: 'Wstecz',
       subtitlePreviewDefault: 'Oferta specjalna',
-      categoryBeauty: 'Beauty',
       removePhoto: 'Usuń zdjęcie',
       invalidLanguageTitle: 'Tytuł musi być w wybranym języku.',
       invalidLanguageDescription: 'Opis musi być w wybranym języku.',
@@ -347,7 +353,7 @@ function getLabels(language: AppLanguage): NewPromotionLabels {
       nextField: 'Dalej',
       titleFieldName: 'tytuł',
       descriptionFieldName: 'opis',
-      discountFieldName: 'zniżка',
+      discountFieldName: 'zniżka',
       languageBadge: 'Język',
     };
   }
@@ -360,7 +366,8 @@ function getLabels(language: AppLanguage): NewPromotionLabels {
     gallery: 'Gallery',
     files: 'Files',
     addPhoto: 'Add photo',
-    dragHint: 'Tap a photo to edit it. The first photo will be the main one.',
+    dragHint:
+      'Tap a photo to edit it. The first photo will be the main one.',
     title: 'Title',
     titlePlaceholder: 'For example: Keratin Hair Extensions',
     description: 'Description',
@@ -388,12 +395,15 @@ function getLabels(language: AppLanguage): NewPromotionLabels {
     close: 'Close',
     back: 'Back',
     subtitlePreviewDefault: 'Special offer',
-    categoryBeauty: 'Beauty',
     removePhoto: 'Remove photo',
-    invalidLanguageTitle: 'The title must match the selected app language.',
-    invalidLanguageDescription: 'The description must match the selected app language.',
-    invalidLanguageTitleShort: 'The title does not match the selected language.',
-    invalidLanguageDescriptionShort: 'The description does not match the selected language.',
+    invalidLanguageTitle:
+      'The title must match the selected app language.',
+    invalidLanguageDescription:
+      'The description must match the selected app language.',
+    invalidLanguageTitleShort:
+      'The title does not match the selected language.',
+    invalidLanguageDescriptionShort:
+      'The description does not match the selected language.',
     clearField: 'Clear',
     nextField: 'Next',
     titleFieldName: 'title',
@@ -403,8 +413,26 @@ function getLabels(language: AppLanguage): NewPromotionLabels {
   };
 }
 
-function getCategoryLabel(item: { id: string; label?: string }) {
-  return item.label || item.id;
+function translateCategoryLabel(categoryId: string, language: AppLanguage, fallback?: string) {
+  const map: Record<string, Record<AppLanguage, string>> = {
+    beauty: { EN: 'Beauty', ES: 'Belleza', RU: 'Красота', CZ: 'Krása', DE: 'Beauty', PL: 'Uroda' },
+    barber: { EN: 'Barber', ES: 'Barbero', RU: 'Барбер', CZ: 'Barber', DE: 'Barber', PL: 'Barber' },
+    wellness: { EN: 'Wellness', ES: 'Bienestar', RU: 'Велнес', CZ: 'Wellness', DE: 'Wellness', PL: 'Wellness' },
+    home: { EN: 'Home', ES: 'Hogar', RU: 'Дом', CZ: 'Domov', DE: 'Zuhause', PL: 'Dom' },
+    repairs: { EN: 'Repairs', ES: 'Reparaciones', RU: 'Ремонт', CZ: 'Opravy', DE: 'Reparaturen', PL: 'Naprawy' },
+    tech: { EN: 'Tech', ES: 'Tecnología', RU: 'Техника', CZ: 'Technika', DE: 'Technik', PL: 'Technika' },
+    pets: { EN: 'Pets', ES: 'Mascotas', RU: 'Питомцы', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęta' },
+    fashion: { EN: 'Fashion', ES: 'Moda', RU: 'Мода', CZ: 'Móda', DE: 'Mode', PL: 'Moda' },
+    auto: { EN: 'Auto', ES: 'Auto', RU: 'Авто', CZ: 'Auto', DE: 'Auto', PL: 'Auto' },
+    moving: { EN: 'Moving', ES: 'Mudanza', RU: 'Переезд', CZ: 'Stěhování', DE: 'Umzug', PL: 'Przeprowadzka' },
+    fitness: { EN: 'Fitness', ES: 'Fitness', RU: 'Фитнес', CZ: 'Fitness', DE: 'Fitness', PL: 'Fitness' },
+    education: { EN: 'Education', ES: 'Educación', RU: 'Обучение', CZ: 'Vzdělání', DE: 'Bildung', PL: 'Edukacja' },
+    events: { EN: 'Events', ES: 'Eventos', RU: 'События', CZ: 'Události', DE: 'Events', PL: 'Wydarzenia' },
+    activities: { EN: 'Activities', ES: 'Actividades', RU: 'Активности', CZ: 'Aktivity', DE: 'Aktivitäten', PL: 'Aktywności' },
+    creative: { EN: 'Creative', ES: 'Creativo', RU: 'Креатив', CZ: 'Kreativa', DE: 'Kreativ', PL: 'Kreatywne' },
+  };
+
+  return map[categoryId]?.[language] || fallback || categoryId;
 }
 
 function getPhotoTransform(photo: PromoPhoto) {
@@ -472,23 +500,19 @@ export default function NewPromotionPage() {
   const [titleError, setTitleError] = useState('');
   const [descriptionError, setDescriptionError] = useState('');
 
-  const labels = getLabels(language);
-
   useEffect(() => {
-    const syncLanguage = () => {
-      setLanguage(getSavedLanguage());
-    };
+    setLanguage(getSavedLanguage());
 
-    syncLanguage();
-
-    window.addEventListener('focus', syncLanguage);
-    window.addEventListener('storage', syncLanguage);
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
 
     return () => {
-      window.removeEventListener('focus', syncLanguage);
-      window.removeEventListener('storage', syncLanguage);
+      unsubLanguage();
     };
   }, []);
+
+  const labels = useMemo(() => getLabels(language), [language]);
 
   useEffect(() => {
     if (!title.trim()) {
@@ -530,7 +554,10 @@ export default function NewPromotionPage() {
   const addFilesToPhotos = (fileList: FileList | null) => {
     if (!fileList) return;
 
-    const files = Array.from(fileList).slice(0, MAX_PHOTOS - photos.length);
+    const freeSlots = MAX_PHOTOS - photos.length;
+    if (freeSlots <= 0) return;
+
+    const files = Array.from(fileList).slice(0, freeSlots);
     if (!files.length) return;
 
     files.forEach((file) => {
@@ -774,7 +801,14 @@ export default function NewPromotionPage() {
           <div style={{ fontSize: 15, fontWeight: 900, marginBottom: 4 }}>
             {labels.photosTitle}
           </div>
-          <div style={{ fontSize: 13, color: '#727b88', marginBottom: 12, fontWeight: 700 }}>
+          <div
+            style={{
+              fontSize: 13,
+              color: '#727b88',
+              marginBottom: 12,
+              fontWeight: 700,
+            }}
+          >
             {labels.photosHint}
           </div>
 
@@ -1001,7 +1035,9 @@ export default function NewPromotionPage() {
                   cursor: 'pointer',
                 }}
               >
-                <div style={{ fontSize: 42, lineHeight: 1, marginBottom: 8 }}>+</div>
+                <div style={{ fontSize: 42, lineHeight: 1, marginBottom: 8 }}>
+                  +
+                </div>
                 <div>{labels.addPhoto}</div>
               </button>
             )}
@@ -1081,7 +1117,9 @@ export default function NewPromotionPage() {
 
           <div style={{ display: 'grid', gap: 14 }}>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>{labels.title}</div>
+              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>
+                {labels.title}
+              </div>
 
               <div
                 style={{
@@ -1135,6 +1173,7 @@ export default function NewPromotionPage() {
                         fontWeight: 900,
                         cursor: 'pointer',
                       }}
+                      title={labels.clearField}
                     >
                       ×
                     </button>
@@ -1251,6 +1290,7 @@ export default function NewPromotionPage() {
                         fontWeight: 900,
                         cursor: 'pointer',
                       }}
+                      title={labels.clearField}
                     >
                       ×
                     </button>
@@ -1316,7 +1356,9 @@ export default function NewPromotionPage() {
               >
                 <div style={{ fontSize: 14, fontWeight: 900 }}>
                   {labels.discount}{' '}
-                  <span style={{ color: '#727b88' }}>{labels.discountOptional}</span>
+                  <span style={{ color: '#727b88' }}>
+                    {labels.discountOptional}
+                  </span>
                 </div>
 
                 <button
@@ -1429,7 +1471,9 @@ export default function NewPromotionPage() {
             </div>
 
             <div>
-              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>{labels.category}</div>
+              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>
+                {labels.category}
+              </div>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
@@ -1447,14 +1491,16 @@ export default function NewPromotionPage() {
               >
                 {categories.map((item) => (
                   <option key={item.id} value={item.id}>
-                    {getCategoryLabel(item)}
+                    {translateCategoryLabel(item.id, language, item.label)}
                   </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>{labels.radius}</div>
+              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>
+                {labels.radius}
+              </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {radiusOptions.map((item) => (
                   <button
@@ -1465,7 +1511,10 @@ export default function NewPromotionPage() {
                       minWidth: 74,
                       height: 42,
                       borderRadius: 999,
-                      border: radiusKm === item ? '2px solid #ff5a53' : '1px solid #ddd6cb',
+                      border:
+                        radiusKm === item
+                          ? '2px solid #ff5a53'
+                          : '1px solid #ddd6cb',
                       background: '#fff',
                       color: radiusKm === item ? '#ff4a43' : '#171b2e',
                       fontWeight: 900,
@@ -1480,7 +1529,9 @@ export default function NewPromotionPage() {
             </div>
 
             <div>
-              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>{labels.duration}</div>
+              <div style={{ fontSize: 14, fontWeight: 900, marginBottom: 8 }}>
+                {labels.duration}
+              </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {durationOptions.map((item) => (
                   <button
@@ -1491,7 +1542,10 @@ export default function NewPromotionPage() {
                       minWidth: 86,
                       height: 42,
                       borderRadius: 999,
-                      border: durationDays === item ? '2px solid #ff5a53' : '1px solid #ddd6cb',
+                      border:
+                        durationDays === item
+                          ? '2px solid #ff5a53'
+                          : '1px solid #ddd6cb',
                       background: '#fff',
                       color: durationDays === item ? '#ff4a43' : '#171b2e',
                       fontWeight: 900,
@@ -1518,10 +1572,23 @@ export default function NewPromotionPage() {
               }}
             >
               <div>
-                <div style={{ fontSize: 13, color: '#727b88', fontWeight: 800 }}>
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: '#727b88',
+                    fontWeight: 800,
+                  }}
+                >
                   {labels.estimatedPrice}
                 </div>
-                <div style={{ marginTop: 6, fontSize: 34, fontWeight: 900, color: '#ff5a53' }}>
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 34,
+                    fontWeight: 900,
+                    color: '#ff5a53',
+                  }}
+                >
                   {formatDisplayPrice(priceGBP)}
                 </div>
               </div>
@@ -1546,7 +1613,9 @@ export default function NewPromotionPage() {
             </div>
 
             <div>
-              <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 10 }}>{labels.preview}</div>
+              <div style={{ fontSize: 18, fontWeight: 900, marginBottom: 10 }}>
+                {labels.preview}
+              </div>
 
               <div
                 style={{
@@ -1558,10 +1627,22 @@ export default function NewPromotionPage() {
                 }}
               >
                 <div style={{ position: 'relative' }}>
-                  <div style={{ display: 'flex', gap: 0, height: 120, background: '#f3f4f6' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 0,
+                      height: 120,
+                      background: '#f3f4f6',
+                    }}
+                  >
                     {photos.length > 0 ? (
                       <>
-                        <div style={{ flex: photos.length === 1 ? 1 : 1.3, overflow: 'hidden' }}>
+                        <div
+                          style={{
+                            flex: photos.length === 1 ? 1 : 1.3,
+                            overflow: 'hidden',
+                          }}
+                        >
                           <img
                             src={photos[0].src}
                             alt="Preview main"
@@ -1580,11 +1661,18 @@ export default function NewPromotionPage() {
                             style={{
                               flex: 1,
                               display: 'grid',
-                              gridTemplateRows: photos.length >= 4 ? '1fr 1fr' : '1fr',
+                              gridTemplateRows:
+                                photos.length >= 4 ? '1fr 1fr' : '1fr',
                               gap: 0,
                             }}
                           >
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
+                            <div
+                              style={{
+                                display: 'grid',
+                                gridTemplateColumns: '1fr 1fr',
+                                gap: 0,
+                              }}
+                            >
                               {photos[1] ? (
                                 <img
                                   src={photos[1].src}
@@ -1738,10 +1826,23 @@ export default function NewPromotionPage() {
                         background: '#fff',
                       }}
                     >
-                      <div style={{ fontSize: 12, color: '#7a8290', fontWeight: 800 }}>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#7a8290',
+                          fontWeight: 800,
+                        }}
+                      >
                         {labels.views}
                       </div>
-                      <div style={{ marginTop: 6, fontSize: 16, color: '#2f63d8', fontWeight: 900 }}>
+                      <div
+                        style={{
+                          marginTop: 6,
+                          fontSize: 16,
+                          color: '#2f63d8',
+                          fontWeight: 900,
+                        }}
+                      >
                         0
                       </div>
                     </div>
@@ -1754,10 +1855,23 @@ export default function NewPromotionPage() {
                         background: '#fff',
                       }}
                     >
-                      <div style={{ fontSize: 12, color: '#7a8290', fontWeight: 800 }}>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#7a8290',
+                          fontWeight: 800,
+                        }}
+                      >
                         {labels.bookings}
                       </div>
-                      <div style={{ marginTop: 6, fontSize: 16, color: '#1ea84a', fontWeight: 900 }}>
+                      <div
+                        style={{
+                          marginTop: 6,
+                          fontSize: 16,
+                          color: '#1ea84a',
+                          fontWeight: 900,
+                        }}
+                      >
                         0
                       </div>
                     </div>
@@ -1770,10 +1884,23 @@ export default function NewPromotionPage() {
                         background: '#fff',
                       }}
                     >
-                      <div style={{ fontSize: 12, color: '#7a8290', fontWeight: 800 }}>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#7a8290',
+                          fontWeight: 800,
+                        }}
+                      >
                         {labels.radiusShort}
                       </div>
-                      <div style={{ marginTop: 6, fontSize: 16, color: '#ff4a43', fontWeight: 900 }}>
+                      <div
+                        style={{
+                          marginTop: 6,
+                          fontSize: 16,
+                          color: '#ff4a43',
+                          fontWeight: 900,
+                        }}
+                      >
                         {radiusKm} km
                       </div>
                     </div>
@@ -2036,7 +2163,10 @@ export default function NewPromotionPage() {
                     type="button"
                     onClick={() =>
                       updatePhoto(activePhoto.id, {
-                        zoom: Math.max(0.8, Number((activePhoto.zoom - 0.1).toFixed(2))),
+                        zoom: Math.max(
+                          0.8,
+                          Number((activePhoto.zoom - 0.1).toFixed(2))
+                        ),
                       })
                     }
                     style={{
@@ -2066,7 +2196,10 @@ export default function NewPromotionPage() {
                     type="button"
                     onClick={() =>
                       updatePhoto(activePhoto.id, {
-                        zoom: Math.min(2.5, Number((activePhoto.zoom + 0.1).toFixed(2))),
+                        zoom: Math.min(
+                          2.5,
+                          Number((activePhoto.zoom + 0.1).toFixed(2))
+                        ),
                       })
                     }
                     style={{
@@ -2144,7 +2277,9 @@ export default function NewPromotionPage() {
                     borderRadius: 14,
                     overflow: 'hidden',
                     border:
-                      photo.id === activePhoto.id ? '3px solid #27ae45' : '1px solid #ddd6cb',
+                      photo.id === activePhoto.id
+                        ? '3px solid #27ae45'
+                        : '1px solid #ddd6cb',
                     background: '#f3f4f6',
                     cursor: 'pointer',
                     padding: 0,
@@ -2181,6 +2316,7 @@ export default function NewPromotionPage() {
                       fontSize: 16,
                       cursor: 'pointer',
                     }}
+                    title={labels.removePhoto}
                   >
                     ×
                   </button>
