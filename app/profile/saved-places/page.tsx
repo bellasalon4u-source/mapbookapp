@@ -17,6 +17,9 @@ const savedPlacesTexts = {
     route: 'Build route',
     nearby: 'Nearby',
     city: 'City',
+    favouritePlaces: 'Favourite places',
+    quickAccess: 'Quick access to saved map locations',
+    trustedPlace: 'Saved location',
   },
   ES: {
     title: 'Lugares guardados',
@@ -29,6 +32,9 @@ const savedPlacesTexts = {
     route: 'Crear ruta',
     nearby: 'Cerca',
     city: 'Ciudad',
+    favouritePlaces: 'Lugares favoritos',
+    quickAccess: 'Acceso rápido a ubicaciones guardadas',
+    trustedPlace: 'Ubicación guardada',
   },
   RU: {
     title: 'Сохранённые места',
@@ -41,6 +47,9 @@ const savedPlacesTexts = {
     route: 'Построить маршрут',
     nearby: 'Рядом',
     city: 'Город',
+    favouritePlaces: 'Избранные места',
+    quickAccess: 'Быстрый доступ к сохранённым локациям',
+    trustedPlace: 'Сохранённая локация',
   },
   CZ: {
     title: 'Uložená místa',
@@ -53,6 +62,9 @@ const savedPlacesTexts = {
     route: 'Naplánovat trasu',
     nearby: 'Blízko',
     city: 'Město',
+    favouritePlaces: 'Oblíbená místa',
+    quickAccess: 'Rychlý přístup k uloženým místům',
+    trustedPlace: 'Uložená lokalita',
   },
   DE: {
     title: 'Gespeicherte Orte',
@@ -65,6 +77,9 @@ const savedPlacesTexts = {
     route: 'Route planen',
     nearby: 'In der Nähe',
     city: 'Stadt',
+    favouritePlaces: 'Lieblingsorte',
+    quickAccess: 'Schnellzugriff auf gespeicherte Orte',
+    trustedPlace: 'Gespeicherter Ort',
   },
   PL: {
     title: 'Zapisane miejsca',
@@ -77,6 +92,9 @@ const savedPlacesTexts = {
     route: 'Wyznacz trasę',
     nearby: 'W pobliżu',
     city: 'Miasto',
+    favouritePlaces: 'Ulubione miejsca',
+    quickAccess: 'Szybki dostęp do zapisanych lokalizacji',
+    trustedPlace: 'Zapisana lokalizacja',
   },
 } as const;
 
@@ -191,335 +209,3 @@ export default function SavedPlacesPage() {
 
           <div style={{ textAlign: 'center' }}>
             <div
-              style={{
-                fontSize: 22,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.title}
-            </div>
-            <div
-              style={{
-                marginTop: 4,
-                fontSize: 13,
-                color: '#7b7268',
-                fontWeight: 700,
-              }}
-            >
-              {text.subtitle}
-            </div>
-          </div>
-
-          <div />
-        </div>
-
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 30,
-            border: '1px solid #f0e3d7',
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 14,
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: 20,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.savedCount}
-              </div>
-              <div
-                style={{
-                  marginTop: 6,
-                  fontSize: 14,
-                  color: '#7b7268',
-                  fontWeight: 700,
-                }}
-              >
-                {places.length}
-              </div>
-            </div>
-
-            <div
-              style={{
-                ...accentStyle('orange'),
-                borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 13,
-                fontWeight: 900,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              📍 {places.length}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ marginTop: 18, display: 'grid', gap: 14 }}>
-          {places.length === 0 && (
-            <div
-              style={{
-                borderRadius: 30,
-                border: '1px solid #efe4d7',
-                background: '#fff',
-                padding: 24,
-                textAlign: 'center',
-                boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-              }}
-            >
-              <div
-                style={{
-                  width: 64,
-                  height: 64,
-                  margin: '0 auto 14px',
-                  borderRadius: 22,
-                  background: '#fff5e8',
-                  color: '#d68612',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 28,
-                }}
-              >
-                📍
-              </div>
-
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.empty}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 8,
-                  fontSize: 14,
-                  lineHeight: 1.6,
-                  color: '#7a7065',
-                  fontWeight: 700,
-                }}
-              >
-                {text.emptySub}
-              </div>
-            </div>
-          )}
-
-          {places.map((place, index) => (
-            <div
-              key={place.id}
-              style={{
-                borderRadius: 30,
-                border: '1px solid #efe4d7',
-                background: '#fff',
-                padding: 16,
-                boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '96px 1fr',
-                  gap: 14,
-                  alignItems: 'start',
-                }}
-              >
-                <div style={{ position: 'relative' }}>
-                  <img
-                    src={place.image}
-                    alt={place.title}
-                    style={{
-                      width: 96,
-                      height: 96,
-                      borderRadius: 24,
-                      objectFit: 'cover',
-                      display: 'block',
-                      boxShadow: '0 10px 22px rgba(44, 23, 10, 0.10)',
-                    }}
-                  />
-
-                  <div
-                    style={{
-                      position: 'absolute',
-                      right: -3,
-                      bottom: -3,
-                      width: 26,
-                      height: 26,
-                      borderRadius: 999,
-                      background: '#2fa35a',
-                      border: '3px solid #fff',
-                      boxShadow: '0 6px 14px rgba(47,163,90,0.22)',
-                    }}
-                  />
-                </div>
-
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'start',
-                      justifyContent: 'space-between',
-                      gap: 10,
-                    }}
-                  >
-                    <div style={{ minWidth: 0 }}>
-                      <div
-                        style={{
-                          fontSize: 19,
-                          fontWeight: 900,
-                          color: '#17130f',
-                          lineHeight: 1.15,
-                        }}
-                      >
-                        {place.title}
-                      </div>
-
-                      <div
-                        style={{
-                          marginTop: 6,
-                          fontSize: 14,
-                          color: '#7b7268',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {place.subtitle}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        ...accentStyle(index % 2 === 0 ? 'blue' : 'green'),
-                        borderRadius: 16,
-                        padding: '9px 12px',
-                        fontSize: 12,
-                        fontWeight: 900,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {text.nearby}
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 12,
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: 8,
-                    }}
-                  >
-                    <span
-                      style={{
-                        ...accentStyle('orange'),
-                        borderRadius: 999,
-                        padding: '8px 12px',
-                        fontSize: 12,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {text.city}
-                    </span>
-
-                    <span
-                      style={{
-                        ...accentStyle('blue'),
-                        borderRadius: 999,
-                        padding: '8px 12px',
-                        fontSize: 12,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {place.lat.toFixed(3)}, {place.lng.toFixed(3)}
-                    </span>
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 14,
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr 1fr',
-                      gap: 10,
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => router.push('/')}
-                      style={{
-                        border: 'none',
-                        borderRadius: 18,
-                        background: 'linear-gradient(180deg, #2b221c 0%, #1f1712 100%)',
-                        color: '#fff',
-                        minHeight: 48,
-                        padding: '0 12px',
-                        fontSize: 13,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                        boxShadow: '0 12px 24px rgba(31,23,18,0.18)',
-                      }}
-                    >
-                      {text.openMap}
-                    </button>
-
-                    <button
-                      type="button"
-                      style={{
-                        border: '1px solid #dce8ff',
-                        borderRadius: 18,
-                        background: '#eef4ff',
-                        color: '#2f7cf6',
-                        minHeight: 48,
-                        padding: '0 12px',
-                        fontSize: 13,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {text.route}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleRemove(place.id)}
-                      style={{
-                        border: '1px solid #f1d9e6',
-                        borderRadius: 18,
-                        background: '#fff1f7',
-                        color: '#ff4fa0',
-                        minHeight: 48,
-                        padding: '0 12px',
-                        fontSize: 13,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {text.remove}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <BottomNav active="profile" />
-    </main>
-  );
-}
