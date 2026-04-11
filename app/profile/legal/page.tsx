@@ -431,4 +431,118 @@ export default function LegalPage() {
           style={{
             marginTop: 18,
             borderRadius: 30,
-            border: '1px solid
+            border: '1px solid #efe4d7',
+            background: '#fff',
+            padding: 16,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 12,
+            }}
+          >
+            {text.sectionTitle}
+          </div>
+
+          <div style={{ display: 'grid', gap: 12 }}>
+            {items.map((item) => {
+              const accent = accentStyles(item.accent);
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => alert(`${item.title} — coming next`)}
+                  style={{
+                    width: '100%',
+                    display: 'grid',
+                    gridTemplateColumns: '46px 1fr auto',
+                    gap: 14,
+                    alignItems: 'center',
+                    padding: '14px 16px',
+                    textAlign: 'left',
+                    border: '1px solid #f1e8dc',
+                    borderRadius: 24,
+                    background: '#fff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 46,
+                      height: 46,
+                      borderRadius: 16,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 20,
+                      ...accent,
+                    }}
+                  >
+                    {item.icon}
+                  </div>
+
+                  <div style={{ minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 15,
+                        fontWeight: 900,
+                        color: '#17130f',
+                      }}
+                    >
+                      {item.title}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 4,
+                        fontSize: 13,
+                        lineHeight: 1.45,
+                        color: '#7b7268',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {item.subtitle}
+                    </div>
+                  </div>
+
+                  <span
+                    style={{
+                      fontSize: 18,
+                      color: '#938475',
+                      fontWeight: 900,
+                    }}
+                  >
+                    {text.open}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 16,
+            borderRadius: 24,
+            background: '#fff8f2',
+            border: '1px solid #f1e3d3',
+            padding: 16,
+            fontSize: 13,
+            lineHeight: 1.6,
+            color: '#8a6f52',
+            fontWeight: 700,
+          }}
+        >
+          {text.note}
+        </div>
+      </div>
+
+      <BottomNav active="profile" />
+    </main>
+  );
+}
