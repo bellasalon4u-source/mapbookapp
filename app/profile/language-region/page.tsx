@@ -34,204 +34,299 @@ const pageTexts = {
     title: 'Language & region',
     save: 'Save',
     languageSection: 'Languages available in app',
-    regionSection: 'Countries/regions',
+    regionSection: 'Countries / regions',
     currencySection: 'Currency',
     locationSection: 'Location',
     useCurrentLocation: 'Use current location',
     currentLocationHint: 'Use your device GPS for search and map results',
     useRegionLocation: 'Use selected region',
-    regionLocationHint: 'Search near the selected country/region center',
+    regionLocationHint: 'Search near the selected country or region center',
     locationLoading: 'Getting current location...',
     locationSuccess: 'Current location selected',
     locationError: 'Unable to get current location',
     saved: 'Settings saved',
     selected: 'Selected',
+    languageApp: 'App language',
+    britishPound: 'British Pound',
+    euro: 'Euro',
+    usDollar: 'US Dollar',
+    polishZloty: 'Polish Zloty',
+    czechKoruna: 'Czech Koruna',
+    ukrainianHryvnia: 'Ukrainian Hryvnia',
+    uaeDirham: 'UAE Dirham',
+    londonEurope: 'London · Europe',
+    madridEurope: 'Madrid · Europe',
+    pragueEurope: 'Prague · Europe',
+    berlinEurope: 'Berlin · Europe',
+    warsawEurope: 'Warsaw · Europe',
+    kyivEurope: 'Kyiv · Europe',
+    newYorkNA: 'New York · North America',
+    dubaiME: 'Dubai · Middle East',
   },
   ES: {
     title: 'Idioma y región',
     save: 'Guardar',
     languageSection: 'Idiomas disponibles en la app',
-    regionSection: 'Países/regiones',
+    regionSection: 'Países / regiones',
     currencySection: 'Moneda',
     locationSection: 'Ubicación',
     useCurrentLocation: 'Usar ubicación actual',
     currentLocationHint: 'Usa el GPS del dispositivo para búsqueda y mapa',
     useRegionLocation: 'Usar región seleccionada',
-    regionLocationHint: 'Buscar cerca del centro del país/región seleccionado',
+    regionLocationHint: 'Buscar cerca del centro del país o región seleccionados',
     locationLoading: 'Obteniendo ubicación actual...',
     locationSuccess: 'Ubicación actual seleccionada',
     locationError: 'No se pudo obtener la ubicación',
     saved: 'Ajustes guardados',
     selected: 'Seleccionado',
+    languageApp: 'Idioma de la app',
+    britishPound: 'Libra esterlina',
+    euro: 'Euro',
+    usDollar: 'Dólar estadounidense',
+    polishZloty: 'Zloty polaco',
+    czechKoruna: 'Corona checa',
+    ukrainianHryvnia: 'Grivna ucraniana',
+    uaeDirham: 'Dirham de EAU',
+    londonEurope: 'Londres · Europa',
+    madridEurope: 'Madrid · Europa',
+    pragueEurope: 'Praga · Europa',
+    berlinEurope: 'Berlín · Europa',
+    warsawEurope: 'Varsovia · Europa',
+    kyivEurope: 'Kyiv · Europa',
+    newYorkNA: 'Nueva York · Norteamérica',
+    dubaiME: 'Dubái · Oriente Medio',
   },
   RU: {
     title: 'Язык и регион',
     save: 'Сохранить',
     languageSection: 'Языки приложения',
-    regionSection: 'Страны/регионы',
+    regionSection: 'Страны / регионы',
     currencySection: 'Валюта',
     locationSection: 'Локация',
     useCurrentLocation: 'Использовать текущую локацию',
     currentLocationHint: 'Использовать GPS телефона для поиска и карты',
     useRegionLocation: 'Использовать выбранный регион',
-    regionLocationHint: 'Искать рядом с центром выбранной страны/региона',
+    regionLocationHint: 'Искать рядом с центром выбранной страны или региона',
     locationLoading: 'Определяем текущую локацию...',
     locationSuccess: 'Текущая локация выбрана',
     locationError: 'Не удалось определить локацию',
     saved: 'Настройки сохранены',
     selected: 'Выбрано',
+    languageApp: 'Язык приложения',
+    britishPound: 'Британский фунт',
+    euro: 'Евро',
+    usDollar: 'Доллар США',
+    polishZloty: 'Польский злотый',
+    czechKoruna: 'Чешская крона',
+    ukrainianHryvnia: 'Украинская гривна',
+    uaeDirham: 'Дирхам ОАЭ',
+    londonEurope: 'Лондон · Европа',
+    madridEurope: 'Мадрид · Европа',
+    pragueEurope: 'Прага · Европа',
+    berlinEurope: 'Берлин · Европа',
+    warsawEurope: 'Варшава · Европа',
+    kyivEurope: 'Киев · Европа',
+    newYorkNA: 'Нью-Йорк · Северная Америка',
+    dubaiME: 'Дубай · Ближний Восток',
   },
   CZ: {
     title: 'Jazyk a region',
     save: 'Uložit',
     languageSection: 'Jazyky aplikace',
-    regionSection: 'Země/regiony',
+    regionSection: 'Země / regiony',
     currencySection: 'Měna',
     locationSection: 'Poloha',
     useCurrentLocation: 'Použít aktuální polohu',
     currentLocationHint: 'Použít GPS zařízení pro hledání a mapu',
     useRegionLocation: 'Použít vybraný region',
-    regionLocationHint: 'Hledat poblíž středu vybrané země/regionu',
+    regionLocationHint: 'Hledat poblíž středu vybrané země nebo regionu',
     locationLoading: 'Zjišťuji aktuální polohu...',
     locationSuccess: 'Aktuální poloha vybrána',
     locationError: 'Nepodařilo se zjistit polohu',
     saved: 'Nastavení uloženo',
     selected: 'Vybráno',
+    languageApp: 'Jazyk aplikace',
+    britishPound: 'Britská libra',
+    euro: 'Euro',
+    usDollar: 'Americký dolar',
+    polishZloty: 'Polský zlotý',
+    czechKoruna: 'Česká koruna',
+    ukrainianHryvnia: 'Ukrajinská hřivna',
+    uaeDirham: 'Dirham SAE',
+    londonEurope: 'Londýn · Evropa',
+    madridEurope: 'Madrid · Evropa',
+    pragueEurope: 'Praha · Evropa',
+    berlinEurope: 'Berlín · Evropa',
+    warsawEurope: 'Varšava · Evropa',
+    kyivEurope: 'Kyjev · Evropa',
+    newYorkNA: 'New York · Severní Amerika',
+    dubaiME: 'Dubaj · Blízký východ',
   },
   DE: {
     title: 'Sprache & Region',
     save: 'Speichern',
     languageSection: 'Verfügbare App-Sprachen',
-    regionSection: 'Länder/Regionen',
+    regionSection: 'Länder / Regionen',
     currencySection: 'Währung',
     locationSection: 'Standort',
     useCurrentLocation: 'Aktuellen Standort verwenden',
     currentLocationHint: 'GPS des Geräts für Suche und Karte verwenden',
     useRegionLocation: 'Ausgewählte Region verwenden',
-    regionLocationHint: 'In der Nähe des Zentrums der gewählten Region suchen',
+    regionLocationHint: 'In der Nähe des Zentrums des gewählten Landes oder der Region suchen',
     locationLoading: 'Aktueller Standort wird ermittelt...',
     locationSuccess: 'Aktueller Standort ausgewählt',
     locationError: 'Standort konnte nicht ermittelt werden',
     saved: 'Einstellungen gespeichert',
     selected: 'Ausgewählt',
+    languageApp: 'App-Sprache',
+    britishPound: 'Britisches Pfund',
+    euro: 'Euro',
+    usDollar: 'US-Dollar',
+    polishZloty: 'Polnischer Zloty',
+    czechKoruna: 'Tschechische Krone',
+    ukrainianHryvnia: 'Ukrainische Hrywnja',
+    uaeDirham: 'VAE-Dirham',
+    londonEurope: 'London · Europa',
+    madridEurope: 'Madrid · Europa',
+    pragueEurope: 'Prag · Europa',
+    berlinEurope: 'Berlin · Europa',
+    warsawEurope: 'Warschau · Europa',
+    kyivEurope: 'Kyjiw · Europa',
+    newYorkNA: 'New York · Nordamerika',
+    dubaiME: 'Dubai · Naher Osten',
   },
   PL: {
     title: 'Język i region',
     save: 'Zapisz',
     languageSection: 'Języki aplikacji',
-    regionSection: 'Kraje/regiony',
+    regionSection: 'Kraje / regiony',
     currencySection: 'Waluta',
     locationSection: 'Lokalizacja',
     useCurrentLocation: 'Użyj bieżącej lokalizacji',
     currentLocationHint: 'Użyj GPS telefonu do wyszukiwania i mapy',
     useRegionLocation: 'Użyj wybranego regionu',
-    regionLocationHint: 'Szukaj w pobliżu centrum wybranego kraju/regionu',
+    regionLocationHint: 'Szukaj w pobliżu centrum wybranego kraju lub regionu',
     locationLoading: 'Pobieranie bieżącej lokalizacji...',
     locationSuccess: 'Wybrano bieżącą lokalizację',
     locationError: 'Nie udało się pobrać lokalizacji',
     saved: 'Ustawienia zapisane',
     selected: 'Wybrano',
+    languageApp: 'Język aplikacji',
+    britishPound: 'Funt brytyjski',
+    euro: 'Euro',
+    usDollar: 'Dolar amerykański',
+    polishZloty: 'Złoty polski',
+    czechKoruna: 'Korona czeska',
+    ukrainianHryvnia: 'Hrywna ukraińska',
+    uaeDirham: 'Dirham ZEA',
+    londonEurope: 'Londyn · Europa',
+    madridEurope: 'Madryt · Europa',
+    pragueEurope: 'Praga · Europa',
+    berlinEurope: 'Berlin · Europa',
+    warsawEurope: 'Warszawa · Europa',
+    kyivEurope: 'Kijów · Europa',
+    newYorkNA: 'Nowy Jork · Ameryka Północna',
+    dubaiME: 'Dubaj · Bliski Wschód',
   },
 } as const;
 
-const languageOptions: { value: AppLanguage; label: string; subtitle: string; flag: string }[] = [
-  { value: 'EN', label: 'English', subtitle: 'App language', flag: '🇬🇧' },
-  { value: 'ES', label: 'Español', subtitle: 'Idioma de la app', flag: '🇪🇸' },
-  { value: 'RU', label: 'Русский', subtitle: 'Язык приложения', flag: '🇷🇺' },
-  { value: 'CZ', label: 'Čeština', subtitle: 'Jazyk aplikace', flag: '🇨🇿' },
-  { value: 'DE', label: 'Deutsch', subtitle: 'App-Sprache', flag: '🇩🇪' },
-  { value: 'PL', label: 'Polski', subtitle: 'Język aplikacji', flag: '🇵🇱' },
+const languageOptions: { value: AppLanguage; label: string; flag: string }[] = [
+  { value: 'EN', label: 'English', flag: '🇬🇧' },
+  { value: 'ES', label: 'Español', flag: '🇪🇸' },
+  { value: 'RU', label: 'Русский', flag: '🇷🇺' },
+  { value: 'CZ', label: 'Čeština', flag: '🇨🇿' },
+  { value: 'DE', label: 'Deutsch', flag: '🇩🇪' },
+  { value: 'PL', label: 'Polski', flag: '🇵🇱' },
 ];
 
-const regionOptions = [
-  {
-    value: 'United Kingdom',
-    label: 'United Kingdom',
-    subtitle: 'London · Europe',
-    flag: '🇬🇧',
-    lat: 51.5074,
-    lng: -0.1278,
-    currency: 'GBP' as CurrencyCode,
-  },
-  {
-    value: 'Spain',
-    label: 'Spain',
-    subtitle: 'Madrid · Europe',
-    flag: '🇪🇸',
-    lat: 40.4168,
-    lng: -3.7038,
-    currency: 'EUR' as CurrencyCode,
-  },
-  {
-    value: 'Czech Republic',
-    label: 'Czech Republic',
-    subtitle: 'Prague · Europe',
-    flag: '🇨🇿',
-    lat: 50.0755,
-    lng: 14.4378,
-    currency: 'CZK' as CurrencyCode,
-  },
-  {
-    value: 'Germany',
-    label: 'Germany',
-    subtitle: 'Berlin · Europe',
-    flag: '🇩🇪',
-    lat: 52.52,
-    lng: 13.405,
-    currency: 'EUR' as CurrencyCode,
-  },
-  {
-    value: 'Poland',
-    label: 'Poland',
-    subtitle: 'Warsaw · Europe',
-    flag: '🇵🇱',
-    lat: 52.2297,
-    lng: 21.0122,
-    currency: 'PLN' as CurrencyCode,
-  },
-  {
-    value: 'Ukraine',
-    label: 'Ukraine',
-    subtitle: 'Kyiv · Europe',
-    flag: '🇺🇦',
-    lat: 50.4501,
-    lng: 30.5234,
-    currency: 'UAH' as CurrencyCode,
-  },
-  {
-    value: 'United States',
-    label: 'United States',
-    subtitle: 'New York · North America',
-    flag: '🇺🇸',
-    lat: 40.7128,
-    lng: -74.006,
-    currency: 'USD' as CurrencyCode,
-  },
-  {
-    value: 'United Arab Emirates',
-    label: 'United Arab Emirates',
-    subtitle: 'Dubai · Middle East',
-    flag: '🇦🇪',
-    lat: 25.2048,
-    lng: 55.2708,
-    currency: 'AED' as CurrencyCode,
-  },
-] as const;
+function getRegionOptions(text: (typeof pageTexts)['EN']) {
+  return [
+    {
+      value: 'United Kingdom',
+      label: 'United Kingdom',
+      subtitle: text.londonEurope,
+      flag: '🇬🇧',
+      lat: 51.5074,
+      lng: -0.1278,
+      currency: 'GBP' as CurrencyCode,
+    },
+    {
+      value: 'Spain',
+      label: 'Spain',
+      subtitle: text.madridEurope,
+      flag: '🇪🇸',
+      lat: 40.4168,
+      lng: -3.7038,
+      currency: 'EUR' as CurrencyCode,
+    },
+    {
+      value: 'Czech Republic',
+      label: 'Czech Republic',
+      subtitle: text.pragueEurope,
+      flag: '🇨🇿',
+      lat: 50.0755,
+      lng: 14.4378,
+      currency: 'CZK' as CurrencyCode,
+    },
+    {
+      value: 'Germany',
+      label: 'Germany',
+      subtitle: text.berlinEurope,
+      flag: '🇩🇪',
+      lat: 52.52,
+      lng: 13.405,
+      currency: 'EUR' as CurrencyCode,
+    },
+    {
+      value: 'Poland',
+      label: 'Poland',
+      subtitle: text.warsawEurope,
+      flag: '🇵🇱',
+      lat: 52.2297,
+      lng: 21.0122,
+      currency: 'PLN' as CurrencyCode,
+    },
+    {
+      value: 'Ukraine',
+      label: 'Ukraine',
+      subtitle: text.kyivEurope,
+      flag: '🇺🇦',
+      lat: 50.4501,
+      lng: 30.5234,
+      currency: 'UAH' as CurrencyCode,
+    },
+    {
+      value: 'United States',
+      label: 'United States',
+      subtitle: text.newYorkNA,
+      flag: '🇺🇸',
+      lat: 40.7128,
+      lng: -74.006,
+      currency: 'USD' as CurrencyCode,
+    },
+    {
+      value: 'United Arab Emirates',
+      label: 'United Arab Emirates',
+      subtitle: text.dubaiME,
+      flag: '🇦🇪',
+      lat: 25.2048,
+      lng: 55.2708,
+      currency: 'AED' as CurrencyCode,
+    },
+  ] as const;
+}
 
-const currencyOptions: {
-  value: CurrencyCode;
-  symbol: string;
-  title: string;
-  subtitle: string;
-}[] = [
-  { value: 'GBP', symbol: '£', title: 'GBP', subtitle: 'British Pound' },
-  { value: 'EUR', symbol: '€', title: 'EUR', subtitle: 'Euro' },
-  { value: 'USD', symbol: '$', title: 'USD', subtitle: 'US Dollar' },
-  { value: 'PLN', symbol: 'zł', title: 'PLN', subtitle: 'Polish Zloty' },
-  { value: 'CZK', symbol: 'Kč', title: 'CZK', subtitle: 'Czech Koruna' },
-  { value: 'UAH', symbol: '₴', title: 'UAH', subtitle: 'Ukrainian Hryvnia' },
-  { value: 'AED', symbol: 'AED', title: 'AED', subtitle: 'UAE Dirham' },
-];
+function getCurrencyOptions(text: (typeof pageTexts)['EN']) {
+  return [
+    { value: 'GBP', symbol: '£', title: 'GBP', subtitle: text.britishPound },
+    { value: 'EUR', symbol: '€', title: 'EUR', subtitle: text.euro },
+    { value: 'USD', symbol: '$', title: 'USD', subtitle: text.usDollar },
+    { value: 'PLN', symbol: 'zł', title: 'PLN', subtitle: text.polishZloty },
+    { value: 'CZK', symbol: 'Kč', title: 'CZK', subtitle: text.czechKoruna },
+    { value: 'UAH', symbol: '₴', title: 'UAH', subtitle: text.ukrainianHryvnia },
+    { value: 'AED', symbol: 'AED', title: 'AED', subtitle: text.uaeDirham },
+  ] as const;
+}
 
 function getCurrentLocationLabel(language: AppLanguage) {
   if (language === 'ES') return 'Ubicación actual';
@@ -308,8 +403,7 @@ export default function LanguageRegionPage() {
     initialRegionSettings.locationMode === 'current' ? 'current' : 'region'
   );
   const [selectedLocation, setSelectedLocation] = useState<StoredLocation>({
-    source:
-      initialRegionSettings.locationMode === 'current' ? 'current' : 'region',
+    source: initialRegionSettings.locationMode === 'current' ? 'current' : 'region',
     label:
       initialRegionSettings.locationMode === 'current'
         ? initialRegionSettings.currentLocation.label
@@ -353,6 +447,9 @@ export default function LanguageRegionPage() {
     () => pageTexts[language as keyof typeof pageTexts] || pageTexts.EN,
     [language]
   );
+
+  const regionOptions = useMemo(() => getRegionOptions(text), [text]);
+  const currencyOptions = useMemo(() => getCurrencyOptions(text), [text]);
 
   const selectedRegionMeta =
     regionOptions.find((item) => item.value === selectedRegion) || regionOptions[0];
@@ -398,6 +495,7 @@ export default function LanguageRegionPage() {
         setSelectedLocationMode('current');
         setSelectedLocation(nextLocation);
         setIsLocating(false);
+        alert(text.locationSuccess);
       },
       () => {
         setIsLocating(false);
@@ -480,6 +578,7 @@ export default function LanguageRegionPage() {
               fontWeight: 900,
               color: '#17130f',
               boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              cursor: 'pointer',
             }}
           >
             ←
@@ -507,6 +606,7 @@ export default function LanguageRegionPage() {
               padding: '11px 16px',
               fontSize: 14,
               fontWeight: 900,
+              cursor: 'pointer',
             }}
           >
             {text.save}
@@ -547,6 +647,7 @@ export default function LanguageRegionPage() {
                       index !== languageOptions.length - 1 ? '1px solid #eee7dc' : 'none',
                     textAlign: 'left',
                     borderRadius: 18,
+                    cursor: 'pointer',
                   }}
                 >
                   <div style={{ fontSize: 24 }}>{option.flag}</div>
@@ -556,7 +657,7 @@ export default function LanguageRegionPage() {
                       {option.label}
                     </div>
                     <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
-                      {option.subtitle}
+                      {text.languageApp}
                     </div>
                   </div>
 
@@ -616,6 +717,7 @@ export default function LanguageRegionPage() {
                       index !== regionOptions.length - 1 ? '1px solid #eee7dc' : 'none',
                     textAlign: 'left',
                     borderRadius: 18,
+                    cursor: 'pointer',
                   }}
                 >
                   <div style={{ fontSize: 24 }}>{option.flag}</div>
@@ -670,6 +772,7 @@ export default function LanguageRegionPage() {
                       index !== currencyOptions.length - 1 ? '1px solid #eee7dc' : 'none',
                     textAlign: 'left',
                     borderRadius: 18,
+                    cursor: 'pointer',
                   }}
                 >
                   <div
@@ -731,6 +834,7 @@ export default function LanguageRegionPage() {
                 border: 'none',
                 textAlign: 'left',
                 borderRadius: 18,
+                cursor: 'pointer',
               }}
             >
               <div style={{ fontSize: 24 }}>📍</div>
@@ -762,6 +866,7 @@ export default function LanguageRegionPage() {
               border: 'none',
               textAlign: 'left',
               borderRadius: 18,
+              cursor: 'pointer',
             }}
           >
             <div style={{ fontSize: 24 }}>🗺️</div>
