@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import BottomNav from '../../../components/BottomNav';
+import BottomNav from '../../../components/common/BottomNav';
 import {
   getSavedLanguage,
   saveLanguage,
@@ -10,14 +10,15 @@ import {
   type AppLanguage,
 } from '../../../services/i18n';
 import {
+  getAppRegionSettings,
+  updateAppRegionSettings,
+} from '../../../services/appRegionStore';
+import {
   getUserProfile,
   subscribeToUserProfile,
   updateUserProfile,
   type UserProfile,
 } from '../../services/userProfileStore';
-
-const CURRENCY_STORAGE_KEY = 'mapbook_currency';
-const LOCATION_STORAGE_KEY = 'mapbook_location_pref';
 
 type CurrencyCode = 'GBP' | 'EUR' | 'USD' | 'PLN' | 'CZK' | 'UAH' | 'AED';
 
@@ -143,16 +144,86 @@ const languageOptions: { value: AppLanguage; label: string; subtitle: string; fl
 ];
 
 const regionOptions = [
-  { value: 'United Kingdom', label: 'United Kingdom', subtitle: 'London · Europe', flag: '🇬🇧', lat: 51.5074, lng: -0.1278 },
-  { value: 'Spain', label: 'Spain', subtitle: 'Madrid · Europe', flag: '🇪🇸', lat: 40.4168, lng: -3.7038 },
-  { value: 'Czech Republic', label: 'Czech Republic', subtitle: 'Prague · Europe', flag: '🇨🇿', lat: 50.0755, lng: 14.4378 },
-  { value: 'Germany', label: 'Germany', subtitle: 'Berlin · Europe', flag: '🇩🇪', lat: 52.52, lng: 13.405 },
-  { value: 'Poland', label: 'Poland', subtitle: 'Warsaw · Europe', flag: '🇵🇱', lat: 52.2297, lng: 21.0122 },
-  { value: 'Ukraine', label: 'Ukraine', subtitle: 'Kyiv · Europe', flag: '🇺🇦', lat: 50.4501, lng: 30.5234 },
-  { value: 'United Arab Emirates', label: 'United Arab Emirates', subtitle: 'Dubai · Middle East', flag: '🇦🇪', lat: 25.2048, lng: 55.2708 },
+  {
+    value: 'United Kingdom',
+    label: 'United Kingdom',
+    subtitle: 'London · Europe',
+    flag: '🇬🇧',
+    lat: 51.5074,
+    lng: -0.1278,
+    currency: 'GBP' as CurrencyCode,
+  },
+  {
+    value: 'Spain',
+    label: 'Spain',
+    subtitle: 'Madrid · Europe',
+    flag: '🇪🇸',
+    lat: 40.4168,
+    lng: -3.7038,
+    currency: 'EUR' as CurrencyCode,
+  },
+  {
+    value: 'Czech Republic',
+    label: 'Czech Republic',
+    subtitle: 'Prague · Europe',
+    flag: '🇨🇿',
+    lat: 50.0755,
+    lng: 14.4378,
+    currency: 'CZK' as CurrencyCode,
+  },
+  {
+    value: 'Germany',
+    label: 'Germany',
+    subtitle: 'Berlin · Europe',
+    flag: '🇩🇪',
+    lat: 52.52,
+    lng: 13.405,
+    currency: 'EUR' as CurrencyCode,
+  },
+  {
+    value: 'Poland',
+    label: 'Poland',
+    subtitle: 'Warsaw · Europe',
+    flag: '🇵🇱',
+    lat: 52.2297,
+    lng: 21.0122,
+    currency: 'PLN' as CurrencyCode,
+  },
+  {
+    value: 'Ukraine',
+    label: 'Ukraine',
+    subtitle: 'Kyiv · Europe',
+    flag: '🇺🇦',
+    lat: 50.4501,
+    lng: 30.5234,
+    currency: 'UAH' as CurrencyCode,
+  },
+  {
+    value: 'United States',
+    label: 'United States',
+    subtitle: 'New York · North America',
+    flag: '🇺🇸',
+    lat: 40.7128,
+    lng: -74.006,
+    currency: 'USD' as CurrencyCode,
+  },
+  {
+    value: 'United Arab Emirates',
+    label: 'United Arab Emirates',
+    subtitle: 'Dubai · Middle East',
+    flag: '🇦🇪',
+    lat: 25.2048,
+    lng: 55.2708,
+    currency: 'AED' as CurrencyCode,
+  },
 ] as const;
 
-const currencyOptions = [
+const currencyOptions: {
+  value: CurrencyCode;
+  symbol: string;
+  title: string;
+  subtitle: string;
+}[] = [
   { value: 'GBP', symbol: '£', title: 'GBP', subtitle: 'British Pound' },
   { value: 'EUR', symbol: '€', title: 'EUR', subtitle: 'Euro' },
   { value: 'USD', symbol: '$', title: 'USD', subtitle: 'US Dollar' },
@@ -160,45 +231,15 @@ const currencyOptions = [
   { value: 'CZK', symbol: 'Kč', title: 'CZK', subtitle: 'Czech Koruna' },
   { value: 'UAH', symbol: '₴', title: 'UAH', subtitle: 'Ukrainian Hryvnia' },
   { value: 'AED', symbol: 'AED', title: 'AED', subtitle: 'UAE Dirham' },
-] as const;
+];
 
-function readStoredCurrency(): CurrencyCode {
-  if (typeof window === 'undefined') return 'GBP';
-  const value = window.localStorage.getItem(CURRENCY_STORAGE_KEY);
-  if (value === 'GBP' || value === 'EUR' || value === 'USD' || value === 'PLN' || value === 'CZK' || value === 'UAH' || value === 'AED') {
-    return value;
-  }
-  return 'GBP';
-}
-
-function saveStoredCurrency(currency: CurrencyCode) {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(CURRENCY_STORAGE_KEY, currency);
-}
-
-function readStoredLocation(): StoredLocation | null {
-  if (typeof window === 'undefined') return null;
-  const raw = window.localStorage.getItem(LOCATION_STORAGE_KEY);
-  if (!raw) return null;
-
-  try {
-    const parsed = JSON.parse(raw) as StoredLocation;
-    if (!parsed || typeof parsed !== 'object') return null;
-
-    return {
-      source: parsed.source === 'current' ? 'current' : 'region',
-      label: String(parsed.label || ''),
-      lat: typeof parsed.lat === 'number' ? parsed.lat : null,
-      lng: typeof parsed.lng === 'number' ? parsed.lng : null,
-    };
-  } catch {
-    return null;
-  }
-}
-
-function saveStoredLocation(value: StoredLocation) {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(value));
+function getCurrentLocationLabel(language: AppLanguage) {
+  if (language === 'ES') return 'Ubicación actual';
+  if (language === 'RU') return 'Текущее местоположение';
+  if (language === 'CZ') return 'Aktuální poloha';
+  if (language === 'DE') return 'Aktueller Standort';
+  if (language === 'PL') return 'Bieżąca lokalizacja';
+  return 'Current location';
 }
 
 function formatCoords(lat: number | null, lng: number | null) {
@@ -253,40 +294,48 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 export default function LanguageRegionPage() {
   const router = useRouter();
 
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
   const [selectedLanguage, setSelectedLanguage] = useState<AppLanguage>(getSavedLanguage());
-  const [selectedRegion, setSelectedRegion] = useState(getUserProfile().region);
-  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>(readStoredCurrency());
-  const [selectedLocationMode, setSelectedLocationMode] = useState<'current' | 'region'>(
-    readStoredLocation()?.source || 'region'
+
+  const initialRegionSettings = getAppRegionSettings();
+
+  const [selectedRegion, setSelectedRegion] = useState(initialRegionSettings.region);
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>(
+    initialRegionSettings.currency as CurrencyCode
   );
-  const [selectedLocation, setSelectedLocation] = useState<StoredLocation | null>(readStoredLocation());
+  const [selectedLocationMode, setSelectedLocationMode] = useState<'current' | 'region'>(
+    initialRegionSettings.locationMode === 'current' ? 'current' : 'region'
+  );
+  const [selectedLocation, setSelectedLocation] = useState<StoredLocation>({
+    source:
+      initialRegionSettings.locationMode === 'current' ? 'current' : 'region',
+    label:
+      initialRegionSettings.locationMode === 'current'
+        ? initialRegionSettings.currentLocation.label
+        : initialRegionSettings.customLocation.label,
+    lat:
+      initialRegionSettings.locationMode === 'current'
+        ? initialRegionSettings.currentLocation.lat
+        : initialRegionSettings.customLocation.lat,
+    lng:
+      initialRegionSettings.locationMode === 'current'
+        ? initialRegionSettings.currentLocation.lng
+        : initialRegionSettings.customLocation.lng,
+  });
+
   const [isLocating, setIsLocating] = useState(false);
 
   useEffect(() => {
-    const syncLanguage = (nextLanguage?: AppLanguage) => {
-      const value = nextLanguage || getSavedLanguage();
-      setSelectedLanguage(value);
-    };
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+      setSelectedLanguage(nextLanguage);
+    });
 
     const syncProfile = () => {
-      const nextProfile = getUserProfile();
-      setProfile(nextProfile);
-      setSelectedRegion(nextProfile.region);
+      setProfile(getUserProfile());
     };
 
-    syncLanguage();
-    syncProfile();
-
-    const storedLocation = readStoredLocation();
-    if (storedLocation) {
-      setSelectedLocation(storedLocation);
-      setSelectedLocationMode(storedLocation.source);
-    }
-
-    setSelectedCurrency(readStoredCurrency());
-
-    const unsubLanguage = subscribeToLanguageChange(syncLanguage);
     const unsubProfile = subscribeToUserProfile(syncProfile);
 
     return () => {
@@ -295,9 +344,14 @@ export default function LanguageRegionPage() {
     };
   }, []);
 
+  useEffect(() => {
+    saveLanguage(selectedLanguage);
+    setLanguage(selectedLanguage);
+  }, [selectedLanguage]);
+
   const text = useMemo(
-    () => pageTexts[selectedLanguage as keyof typeof pageTexts] || pageTexts.EN,
-    [selectedLanguage]
+    () => pageTexts[language as keyof typeof pageTexts] || pageTexts.EN,
+    [language]
   );
 
   const selectedRegionMeta =
@@ -336,7 +390,7 @@ export default function LanguageRegionPage() {
       (position) => {
         const nextLocation: StoredLocation = {
           source: 'current',
-          label: text.locationSuccess,
+          label: getCurrentLocationLabel(selectedLanguage),
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
@@ -359,21 +413,36 @@ export default function LanguageRegionPage() {
 
   const handleSave = () => {
     saveLanguage(selectedLanguage);
-    saveStoredCurrency(selectedCurrency);
 
-    const finalLocation =
-      selectedLocationMode === 'region'
+    const regionLocation = {
+      lat: selectedRegionMeta.lat,
+      lng: selectedRegionMeta.lng,
+      label: selectedRegionMeta.label,
+    };
+
+    const currentLocation =
+      selectedLocationMode === 'current'
         ? {
-            source: 'region' as const,
-            label: selectedRegionMeta.label,
-            lat: selectedRegionMeta.lat,
-            lng: selectedRegionMeta.lng,
+            lat: selectedLocation?.lat ?? null,
+            lng: selectedLocation?.lng ?? null,
+            label: selectedLocation?.label || getCurrentLocationLabel(selectedLanguage),
           }
-        : selectedLocation;
+        : {
+            lat: initialRegionSettings.currentLocation.lat,
+            lng: initialRegionSettings.currentLocation.lng,
+            label:
+              initialRegionSettings.currentLocation.label ||
+              getCurrentLocationLabel(selectedLanguage),
+          };
 
-    if (finalLocation) {
-      saveStoredLocation(finalLocation);
-    }
+    updateAppRegionSettings({
+      language: selectedLanguage,
+      region: selectedRegion,
+      currency: selectedCurrency,
+      locationMode: selectedLocationMode === 'current' ? 'current' : 'custom',
+      currentLocation,
+      customLocation: regionLocation,
+    });
 
     updateUserProfile({
       language: selectedLanguage,
@@ -384,7 +453,10 @@ export default function LanguageRegionPage() {
   };
 
   return (
-    <main className="min-h-screen px-4 py-5 pb-24" style={{ background: '#f7f3eb' }}>
+    <main
+      className="min-h-screen px-4 py-5 pb-24"
+      style={{ background: '#f7f3eb' }}
+    >
       <div className="mx-auto max-w-md">
         <div
           style={{
@@ -517,6 +589,10 @@ export default function LanguageRegionPage() {
                   type="button"
                   onClick={() => {
                     setSelectedRegion(option.value);
+
+                    if (selectedCurrency === selectedRegionMeta.currency) {
+                      setSelectedCurrency(option.currency);
+                    }
 
                     if (selectedLocationMode === 'region') {
                       setSelectedLocation({
