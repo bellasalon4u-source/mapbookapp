@@ -604,9 +604,15 @@ const pageTexts: Record<
     card: string;
     wallet: string;
     contact: string;
+    contactHint: string;
     phone: string;
     whatsapp: string;
+    businessWhatsapp: string;
     telegram: string;
+    viber: string;
+    instagram: string;
+    website: string;
+    email: string;
     publishService: string;
     pleaseEnterServiceTitle: string;
     pleaseEnterPrice: string;
@@ -645,10 +651,16 @@ const pageTexts: Record<
     cash: 'Cash',
     card: 'Card',
     wallet: 'E-money',
-    contact: 'Contact',
+    contact: 'Contacts',
+    contactHint: 'Add every contact channel separately',
     phone: 'Phone',
     whatsapp: 'WhatsApp',
+    businessWhatsapp: 'Business WhatsApp',
     telegram: 'Telegram',
+    viber: 'Viber',
+    instagram: 'Instagram',
+    website: 'Website',
+    email: 'Email',
     publishService: 'Publish service',
     pleaseEnterServiceTitle: 'Please enter service title',
     pleaseEnterPrice: 'Please enter price',
@@ -687,9 +699,15 @@ const pageTexts: Record<
     card: 'Карта',
     wallet: 'Электронные деньги',
     contact: 'Контакты',
+    contactHint: 'Добавьте каждый канал связи отдельно',
     phone: 'Телефон',
     whatsapp: 'WhatsApp',
+    businessWhatsapp: 'Business WhatsApp',
     telegram: 'Telegram',
+    viber: 'Viber',
+    instagram: 'Instagram',
+    website: 'Сайт',
+    email: 'Email',
     publishService: 'Опубликовать услугу',
     pleaseEnterServiceTitle: 'Введите название услуги',
     pleaseEnterPrice: 'Введите цену',
@@ -727,10 +745,16 @@ const pageTexts: Record<
     cash: 'Efectivo',
     card: 'Tarjeta',
     wallet: 'Dinero electrónico',
-    contact: 'Contacto',
+    contact: 'Contactos',
+    contactHint: 'Añade cada canal de contacto por separado',
     phone: 'Teléfono',
     whatsapp: 'WhatsApp',
+    businessWhatsapp: 'WhatsApp Business',
     telegram: 'Telegram',
+    viber: 'Viber',
+    instagram: 'Instagram',
+    website: 'Sitio web',
+    email: 'Email',
     publishService: 'Publicar servicio',
     pleaseEnterServiceTitle: 'Introduce el título del servicio',
     pleaseEnterPrice: 'Introduce el precio',
@@ -769,9 +793,15 @@ const pageTexts: Record<
     card: 'Karta',
     wallet: 'Elektronické peníze',
     contact: 'Kontakty',
+    contactHint: 'Přidejte každý kontakt zvlášť',
     phone: 'Telefon',
     whatsapp: 'WhatsApp',
+    businessWhatsapp: 'Business WhatsApp',
     telegram: 'Telegram',
+    viber: 'Viber',
+    instagram: 'Instagram',
+    website: 'Web',
+    email: 'Email',
     publishService: 'Publikovat službu',
     pleaseEnterServiceTitle: 'Zadejte název služby',
     pleaseEnterPrice: 'Zadejte cenu',
@@ -809,10 +839,16 @@ const pageTexts: Record<
     cash: 'Bar',
     card: 'Karte',
     wallet: 'E-Geld',
-    contact: 'Kontakt',
+    contact: 'Kontakte',
+    contactHint: 'Jeden Kontaktkanal separat hinzufügen',
     phone: 'Telefon',
     whatsapp: 'WhatsApp',
+    businessWhatsapp: 'Business WhatsApp',
     telegram: 'Telegram',
+    viber: 'Viber',
+    instagram: 'Instagram',
+    website: 'Website',
+    email: 'E-Mail',
     publishService: 'Dienstleistung veröffentlichen',
     pleaseEnterServiceTitle: 'Bitte Titel der Dienstleistung eingeben',
     pleaseEnterPrice: 'Bitte Preis eingeben',
@@ -850,10 +886,16 @@ const pageTexts: Record<
     cash: 'Gotówka',
     card: 'Karta',
     wallet: 'Pieniądz elektroniczny',
-    contact: 'Kontakt',
+    contact: 'Kontakty',
+    contactHint: 'Dodaj każdy kanał kontaktu osobno',
     phone: 'Telefon',
     whatsapp: 'WhatsApp',
+    businessWhatsapp: 'Business WhatsApp',
     telegram: 'Telegram',
+    viber: 'Viber',
+    instagram: 'Instagram',
+    website: 'Strona internetowa',
+    email: 'Email',
     publishService: 'Opublikuj usługę',
     pleaseEnterServiceTitle: 'Wpisz nazwę usługi',
     pleaseEnterPrice: 'Wpisz cenę',
@@ -959,6 +1001,92 @@ function FieldLabel({
   );
 }
 
+function ContactInput({
+  icon,
+  label,
+  value,
+  onChange,
+  placeholder,
+  inputMode = 'text',
+  type = 'text',
+}: {
+  icon: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  type?: string;
+}) {
+  return (
+    <div
+      style={{
+        border: '1px solid #e7e0d6',
+        borderRadius: 18,
+        background: '#fff',
+        padding: 14,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          marginBottom: 10,
+        }}
+      >
+        <div
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 12,
+            background: '#f7f5f1',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 20,
+            flexShrink: 0,
+          }}
+        >
+          {icon}
+        </div>
+
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 800,
+            color: '#1f2430',
+          }}
+        >
+          {label}
+        </div>
+      </div>
+
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        inputMode={inputMode}
+        type={type}
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        style={{
+          width: '100%',
+          border: '1px solid #ece5da',
+          borderRadius: 14,
+          padding: '14px 12px',
+          fontSize: 16,
+          outline: 'none',
+          boxSizing: 'border-box',
+          background: '#fcfbf9',
+          color: '#1f2430',
+        }}
+      />
+    </div>
+  );
+}
+
 export default function AddServicePage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -983,7 +1111,12 @@ export default function AddServicePage() {
 
   const [phone, setPhone] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+  const [businessWhatsapp, setBusinessWhatsapp] = useState('');
   const [telegram, setTelegram] = useState('');
+  const [viber, setViber] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [website, setWebsite] = useState('');
+  const [email, setEmail] = useState('');
 
   const [photos, setPhotos] = useState<ServicePhotoItem[]>([]);
 
@@ -1055,7 +1188,6 @@ export default function AddServicePage() {
     }));
 
     setPhotos((prev) => [...prev, ...mapped].slice(0, 8));
-
     event.target.value = '';
   };
 
@@ -1118,7 +1250,12 @@ export default function AddServicePage() {
         phone: phone.trim(),
         whatsapp: whatsapp.trim(),
         telegram: telegram.trim(),
-      },
+        businessWhatsapp: businessWhatsapp.trim(),
+        viber: viber.trim(),
+        instagram: instagram.trim(),
+        website: website.trim(),
+        email: email.trim(),
+      } as any,
       photos: photos.map((item) => item.preview),
     });
 
@@ -1743,55 +1880,90 @@ export default function AddServicePage() {
 
         <section style={{ padding: '16px 16px 0' }}>
           <SectionCard title={text.contact}>
-            <FieldLabel>{text.phone}</FieldLabel>
-            <input
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder={text.phone}
+            <div
               style={{
-                width: '100%',
-                border: '1px solid #e7e0d6',
-                borderRadius: 16,
-                padding: '16px 14px',
-                fontSize: 17,
-                outline: 'none',
-                marginBottom: 14,
-                boxSizing: 'border-box',
+                fontSize: 14,
+                color: '#7a8490',
+                marginBottom: 16,
+                fontWeight: 700,
+                lineHeight: 1.4,
               }}
-            />
+            >
+              {text.contactHint}
+            </div>
 
-            <FieldLabel>{text.whatsapp}</FieldLabel>
-            <input
-              value={whatsapp}
-              onChange={(e) => setWhatsapp(e.target.value)}
-              placeholder={text.whatsapp}
-              style={{
-                width: '100%',
-                border: '1px solid #e7e0d6',
-                borderRadius: 16,
-                padding: '16px 14px',
-                fontSize: 17,
-                outline: 'none',
-                marginBottom: 14,
-                boxSizing: 'border-box',
-              }}
-            />
+            <div style={{ display: 'grid', gap: 12 }}>
+              <ContactInput
+                icon="📞"
+                label={text.phone}
+                value={phone}
+                onChange={setPhone}
+                placeholder={text.phone}
+                inputMode="tel"
+              />
 
-            <FieldLabel>{text.telegram}</FieldLabel>
-            <input
-              value={telegram}
-              onChange={(e) => setTelegram(e.target.value)}
-              placeholder={text.telegram}
-              style={{
-                width: '100%',
-                border: '1px solid #e7e0d6',
-                borderRadius: 16,
-                padding: '16px 14px',
-                fontSize: 17,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
-            />
+              <ContactInput
+                icon="🟢"
+                label={text.whatsapp}
+                value={whatsapp}
+                onChange={setWhatsapp}
+                placeholder={text.whatsapp}
+                inputMode="tel"
+              />
+
+              <ContactInput
+                icon="💼"
+                label={text.businessWhatsapp}
+                value={businessWhatsapp}
+                onChange={setBusinessWhatsapp}
+                placeholder={text.businessWhatsapp}
+                inputMode="tel"
+              />
+
+              <ContactInput
+                icon="✈️"
+                label={text.telegram}
+                value={telegram}
+                onChange={setTelegram}
+                placeholder={text.telegram}
+              />
+
+              <ContactInput
+                icon="🟣"
+                label={text.viber}
+                value={viber}
+                onChange={setViber}
+                placeholder={text.viber}
+                inputMode="tel"
+              />
+
+              <ContactInput
+                icon="📸"
+                label={text.instagram}
+                value={instagram}
+                onChange={setInstagram}
+                placeholder={text.instagram}
+              />
+
+              <ContactInput
+                icon="🌐"
+                label={text.website}
+                value={website}
+                onChange={setWebsite}
+                placeholder={text.website}
+                inputMode="url"
+              />
+
+              <ContactInput
+                icon="✉️"
+                label={text.email}
+                value={email}
+                onChange={setEmail}
+                placeholder={text.email}
+                inputMode="email"
+                type="email"
+              />
+            </div>
           </SectionCard>
         </section>
       </div>
