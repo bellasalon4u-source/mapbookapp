@@ -69,6 +69,33 @@ function getCategoryAccent(category?: string) {
   return '#ff4f93';
 }
 
+function getFallbackServiceLabel(language: AppLanguage) {
+  if (language === 'ES') return 'Servicio';
+  if (language === 'RU') return 'Услуга';
+  if (language === 'CZ') return 'Služba';
+  if (language === 'DE') return 'Service';
+  if (language === 'PL') return 'Usługa';
+  return 'Service';
+}
+
+function getFallbackProLabel(language: AppLanguage) {
+  if (language === 'ES') return 'Profesional';
+  if (language === 'RU') return 'Специалист';
+  if (language === 'CZ') return 'Profesionál';
+  if (language === 'DE') return 'Profi';
+  if (language === 'PL') return 'Specjalista';
+  return 'Pro';
+}
+
+function getCurrentLocationLabel(language: AppLanguage) {
+  if (language === 'ES') return 'Ubicación actual';
+  if (language === 'RU') return 'Текущее местоположение';
+  if (language === 'CZ') return 'Aktuální poloha';
+  if (language === 'DE') return 'Aktueller Standort';
+  if (language === 'PL') return 'Bieżąca lokalizacja';
+  return 'Current location';
+}
+
 function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') {
   const normalized = String(category || '').toLowerCase();
 
@@ -131,7 +158,15 @@ function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') 
     },
   };
 
-  return labels[normalized]?.[language] || category || 'Service';
+  return labels[normalized]?.[language] || category || getFallbackServiceLabel(language);
+}
+
+function getMarkerAlt(master: MasterItem, language: AppLanguage) {
+  return master.name || master.title || getFallbackProLabel(language);
+}
+
+function getSelectedMasterName(master: MasterItem, language: AppLanguage) {
+  return master.name || master.title || getFallbackProLabel(language);
 }
 
 function getTileUrl(mode: 'map' | 'satellite' = 'map') {
@@ -165,6 +200,7 @@ function formatPrice(value: string | number | undefined, trObj: ReturnType<typeo
 
 function buildMarkerIcon(
   master: MasterItem,
+  language: AppLanguage,
   isSelected: boolean,
   isLiked: boolean
 ): DivIcon {
@@ -212,7 +248,7 @@ function buildMarkerIcon(
         ">
           <img
             src="${avatar}"
-            alt="${master.name || master.title || 'Master'}"
+            alt="${getMarkerAlt(master, language)}"
             style="
               width:${photoSize}px;
               height:${photoSize}px;
@@ -331,8 +367,10 @@ function FitBoundsLayer({
 }
 
 function UserLocationLayer({
+  language,
   onLocationFound,
 }: {
+  language: AppLanguage;
   onLocationFound: (coords: [number, number] | null) => void;
 }) {
   const map = useMap();
@@ -350,7 +388,7 @@ function UserLocationLayer({
       if (cancelled) return;
 
       const coords: [number, number] = [event.latlng.lat, event.latlng.lng];
-      setCurrentLocation(coords[0], coords[1], 'Current location');
+      setCurrentLocation(coords[0], coords[1], getCurrentLocationLabel(language));
       onLocationFound(coords);
     };
 
@@ -367,7 +405,7 @@ function UserLocationLayer({
       map.off('locationfound', handleFound);
       map.off('locationerror', handleError);
     };
-  }, [map, onLocationFound]);
+  }, [map, language, onLocationFound]);
 
   return null;
 }
@@ -494,7 +532,7 @@ export default function RealMap({
           url={getTileUrl(mapMode)}
         />
 
-        <UserLocationLayer onLocationFound={setCurrentDetectedLocation} />
+        <UserLocationLayer language={language} onLocationFound={setCurrentDetectedLocation} />
         <FitBoundsLayer masters={safeMasters} focusLocation={focusLocation} />
         <RecenterToUserLayer
           targetLocation={focusLocation}
@@ -537,7 +575,7 @@ export default function RealMap({
             <Marker
               key={String(master.id)}
               position={[master.lat as number, master.lng as number]}
-              icon={buildMarkerIcon(master, isSelected, isLiked)}
+              icon={buildMarkerIcon(master, language, isSelected, isLiked)}
               eventHandlers={{
                 mousedown: () => {
                   ignoreNextMapClickRef.current = true;
@@ -592,7 +630,7 @@ export default function RealMap({
             <div style={{ position: 'relative' }}>
               <img
                 src={selectedMaster.avatar}
-                alt={selectedMaster.name || selectedMaster.title || 'Pro'}
+                alt={getSelectedMasterName(selectedMaster, language)}
                 style={{
                   width: 96,
                   height: 96,
@@ -639,7 +677,7 @@ export default function RealMap({
                   marginBottom: 8,
                 }}
               >
-                {selectedMaster.name || selectedMaster.title || 'Pro'}
+                {getSelectedMasterName(selectedMaster, language)}
               </div>
 
               <div
