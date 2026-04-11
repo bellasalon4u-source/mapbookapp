@@ -56,10 +56,16 @@ const profileTexts = {
     accountSettingsSub: 'Personal data, privacy and security',
     logout: 'Log out',
     bonusesTitle: 'Your bonuses',
-    welcomeBonus: 'Welcome Bonus',
-    referralBookings: 'Referral free bookings',
+    bonusesSubtitle: 'Invite friends, earn rewards and use free bookings',
+    welcomeBonus: 'Welcome bonus',
+    referralBookings: 'Free bookings',
+    referralProgress: 'Friends paid',
     inviteButton: 'Invite',
-    verified: 'Account verified',
+    verified: 'Verified account',
+    availableNow: 'Available now',
+    quickAccess: 'Quick access',
+    profileCardTitle: 'Your profile',
+    memberSince: 'MapBook member',
   },
   ES: {
     title: 'Perfil',
@@ -89,10 +95,16 @@ const profileTexts = {
     accountSettingsSub: 'Datos personales, privacidad y seguridad',
     logout: 'Cerrar sesión',
     bonusesTitle: 'Tus bonos',
+    bonusesSubtitle: 'Invita amigos, gana recompensas y usa reservas gratis',
     welcomeBonus: 'Bono de bienvenida',
-    referralBookings: 'Reservas gratis por referidos',
+    referralBookings: 'Reservas gratis',
+    referralProgress: 'Amigos pagaron',
     inviteButton: 'Invitar',
     verified: 'Cuenta verificada',
+    availableNow: 'Disponible ahora',
+    quickAccess: 'Acceso rápido',
+    profileCardTitle: 'Tu perfil',
+    memberSince: 'Miembro de MapBook',
   },
   RU: {
     title: 'Профиль',
@@ -122,10 +134,16 @@ const profileTexts = {
     accountSettingsSub: 'Личные данные, приватность и безопасность',
     logout: 'Выйти',
     bonusesTitle: 'Ваши бонусы',
+    bonusesSubtitle: 'Приглашайте друзей, получайте бонусы и бесплатные бронирования',
     welcomeBonus: 'Приветственный бонус',
-    referralBookings: 'Реферальные бронирования',
+    referralBookings: 'Бесплатные бронирования',
+    referralProgress: 'Друзей оплатили',
     inviteButton: 'Пригласить',
     verified: 'Аккаунт подтверждён',
+    availableNow: 'Доступно сейчас',
+    quickAccess: 'Быстрый доступ',
+    profileCardTitle: 'Ваш профиль',
+    memberSince: 'Пользователь MapBook',
   },
   CZ: {
     title: 'Profil',
@@ -155,10 +173,16 @@ const profileTexts = {
     accountSettingsSub: 'Osobní údaje, soukromí a bezpečnost',
     logout: 'Odhlásit se',
     bonusesTitle: 'Vaše bonusy',
+    bonusesSubtitle: 'Pozvěte přátele, získejte odměny a rezervace zdarma',
     welcomeBonus: 'Uvítací bonus',
-    referralBookings: 'Doporučené rezervace zdarma',
+    referralBookings: 'Rezervace zdarma',
+    referralProgress: 'Přátelé zaplatili',
     inviteButton: 'Pozvat',
     verified: 'Účet ověřen',
+    availableNow: 'Dostupné nyní',
+    quickAccess: 'Rychlý přístup',
+    profileCardTitle: 'Váš profil',
+    memberSince: 'Člen MapBook',
   },
   DE: {
     title: 'Profil',
@@ -188,10 +212,16 @@ const profileTexts = {
     accountSettingsSub: 'Persönliche Daten, Datenschutz und Sicherheit',
     logout: 'Abmelden',
     bonusesTitle: 'Deine Boni',
+    bonusesSubtitle: 'Lade Freunde ein, sammle Belohnungen und kostenlose Buchungen',
     welcomeBonus: 'Willkommensbonus',
-    referralBookings: 'Empfehlungsbuchungen gratis',
+    referralBookings: 'Kostenlose Buchungen',
+    referralProgress: 'Freunde bezahlt',
     inviteButton: 'Einladen',
     verified: 'Konto bestätigt',
+    availableNow: 'Jetzt verfügbar',
+    quickAccess: 'Schnellzugriff',
+    profileCardTitle: 'Dein Profil',
+    memberSince: 'MapBook Mitglied',
   },
   PL: {
     title: 'Profil',
@@ -221,10 +251,16 @@ const profileTexts = {
     accountSettingsSub: 'Dane osobowe, prywatność i bezpieczeństwo',
     logout: 'Wyloguj się',
     bonusesTitle: 'Twoje bonusy',
+    bonusesSubtitle: 'Zapraszaj znajomych, odbieraj bonusy i darmowe rezerwacje',
     welcomeBonus: 'Bonus powitalny',
-    referralBookings: 'Rezerwacje z poleceń',
+    referralBookings: 'Darmowe rezerwacje',
+    referralProgress: 'Znajomi zapłacili',
     inviteButton: 'Zaproś',
     verified: 'Konto potwierdzone',
+    availableNow: 'Dostępne teraz',
+    quickAccess: 'Szybki dostęp',
+    profileCardTitle: 'Twój profil',
+    memberSince: 'Użytkownik MapBook',
   },
 } as const;
 
@@ -235,7 +271,54 @@ type MenuItem = {
   href?: string;
   rightLabel?: string;
   danger?: boolean;
+  icon: string;
+  accent?: 'pink' | 'green' | 'blue' | 'violet' | 'orange' | 'neutral' | 'danger';
 };
+
+function getAccentStyles(
+  accent: MenuItem['accent'] = 'neutral',
+  filled = false
+): React.CSSProperties {
+  if (accent === 'pink') {
+    return filled
+      ? { background: '#ff4fa0', color: '#fff' }
+      : { background: '#fff1f7', color: '#ff4fa0' };
+  }
+
+  if (accent === 'green') {
+    return filled
+      ? { background: '#2fa35a', color: '#fff' }
+      : { background: '#eef9f1', color: '#2fa35a' };
+  }
+
+  if (accent === 'blue') {
+    return filled
+      ? { background: '#2f7cf6', color: '#fff' }
+      : { background: '#eef4ff', color: '#2f7cf6' };
+  }
+
+  if (accent === 'violet') {
+    return filled
+      ? { background: '#7a5af8', color: '#fff' }
+      : { background: '#f3efff', color: '#7a5af8' };
+  }
+
+  if (accent === 'orange') {
+    return filled
+      ? { background: '#f59e0b', color: '#fff' }
+      : { background: '#fff6e8', color: '#d97706' };
+  }
+
+  if (accent === 'danger') {
+    return filled
+      ? { background: '#ef4444', color: '#fff' }
+      : { background: '#fff1f1', color: '#ef4444' };
+  }
+
+  return filled
+    ? { background: '#2f241c', color: '#fff' }
+    : { background: '#f6efe6', color: '#5f5247' };
+}
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -254,6 +337,9 @@ export default function ProfilePage() {
   );
   const [referralFreeBookings, setReferralFreeBookings] = useState(
     getReferralState().freeBookingsAvailable
+  );
+  const [paidFriendsCount, setPaidFriendsCount] = useState(
+    getReferralState().completedReferralsCount || 0
   );
 
   useEffect(() => {
@@ -284,6 +370,7 @@ export default function ProfilePage() {
     const syncReferral = () => {
       const referral = getReferralState();
       setReferralFreeBookings(referral.freeBookingsAvailable);
+      setPaidFriendsCount(referral.completedReferralsCount || 0);
     };
 
     syncLanguage();
@@ -319,6 +406,8 @@ export default function ProfilePage() {
         title: text.myBookings,
         subtitle: text.myBookingsSub,
         href: '/profile/bookings',
+        icon: '📅',
+        accent: 'green',
       },
       {
         id: 'saved-masters',
@@ -326,18 +415,24 @@ export default function ProfilePage() {
         subtitle: text.savedMastersSub,
         href: '/profile/saved-masters',
         rightLabel: savedMastersCount > 0 ? String(savedMastersCount) : undefined,
+        icon: '❤️',
+        accent: 'pink',
       },
       {
         id: 'saved-places',
         title: text.savedPlaces,
         subtitle: text.savedPlacesSub,
         href: '/profile/saved-places',
+        icon: '📍',
+        accent: 'orange',
       },
       {
         id: 'messages',
         title: text.messages,
         subtitle: text.messagesSub,
         href: '/messages',
+        icon: '✉️',
+        accent: 'blue',
       },
       {
         id: 'balance',
@@ -345,6 +440,8 @@ export default function ProfilePage() {
         subtitle: text.balanceSub,
         href: '/profile/balance',
         rightLabel: `£${availableBalance.toFixed(2)}`,
+        icon: '💳',
+        accent: 'violet',
       },
       {
         id: 'invite',
@@ -352,42 +449,56 @@ export default function ProfilePage() {
         subtitle: text.inviteFriendsSub,
         href: '/profile/invite',
         rightLabel: referralFreeBookings > 0 ? `${referralFreeBookings}` : undefined,
+        icon: '🎁',
+        accent: 'pink',
       },
       {
         id: 'payments',
         title: text.paymentMethods,
         subtitle: text.paymentMethodsSub,
         href: '/profile/payments',
+        icon: '💼',
+        accent: 'blue',
       },
       {
         id: 'notifications',
         title: text.notifications,
         subtitle: text.notificationsSub,
         href: '/profile/notifications',
+        icon: '🔔',
+        accent: 'orange',
       },
       {
         id: 'language-region',
         title: text.languageRegion,
         subtitle: `${profile.language} · ${profile.region}`,
         href: '/profile/language-region',
+        icon: '🌍',
+        accent: 'green',
       },
       {
         id: 'help',
         title: text.help,
         subtitle: text.helpSub,
         href: '/profile/help',
+        icon: '❓',
+        accent: 'violet',
       },
       {
         id: 'settings',
         title: text.accountSettings,
         subtitle: text.accountSettingsSub,
         href: '/profile/settings',
+        icon: '⚙️',
+        accent: 'neutral',
       },
       {
         id: 'logout',
         title: text.logout,
         danger: true,
         href: '/',
+        icon: '⎋',
+        accent: 'danger',
       },
     ],
     [
@@ -422,144 +533,645 @@ export default function ProfilePage() {
   );
 
   return (
-    <main className="min-h-screen bg-[#fcf8f2] px-4 py-6 pb-24">
-      <div className="mx-auto max-w-md">
-        <div className="flex items-start justify-between gap-4">
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#fbf7ef',
+        padding: '20px 16px 110px',
+      }}
+    >
+      <div style={{ maxWidth: 430, margin: '0 auto' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr auto',
+            gap: 14,
+            alignItems: 'start',
+          }}
+        >
           <div>
-            <h1 className="text-3xl font-bold text-[#1d1712]">{text.title}</h1>
-            <p className="mt-1 text-sm text-[#7a7065]">{text.subtitle}</p>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '7px 12px',
+                borderRadius: 999,
+                background: '#fff',
+                border: '1px solid #efe4d7',
+                boxShadow: '0 8px 20px rgba(44, 23, 10, 0.04)',
+                marginBottom: 12,
+              }}
+            >
+              <span style={{ fontSize: 14 }}>👤</span>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 900,
+                  color: '#6f6458',
+                  letterSpacing: 0.3,
+                }}
+              >
+                {text.profileCardTitle}
+              </span>
+            </div>
+
+            <h1
+              style={{
+                fontSize: 40,
+                lineHeight: 1.02,
+                fontWeight: 900,
+                color: '#17130f',
+                margin: 0,
+              }}
+            >
+              {text.title}
+            </h1>
+
+            <p
+              style={{
+                marginTop: 8,
+                fontSize: 15,
+                lineHeight: 1.55,
+                color: '#7b7268',
+                fontWeight: 700,
+              }}
+            >
+              {text.subtitle}
+            </p>
           </div>
 
           <button
             type="button"
             onClick={() => router.push('/profile/settings')}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-xl text-[#241c16] shadow-sm"
+            style={{
+              width: 58,
+              height: 58,
+              borderRadius: 999,
+              border: '1px solid #efe4d7',
+              background: '#fff',
+              fontSize: 24,
+              color: '#241c16',
+              boxShadow: '0 10px 24px rgba(44, 23, 10, 0.06)',
+              cursor: 'pointer',
+            }}
           >
             ⚙️
           </button>
         </div>
 
-        {(welcomeBonus > 0 || referralFreeBookings > 0) && (
-          <div className="mt-5 rounded-[28px] border border-[#efe4d7] bg-white p-4 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
+        {(welcomeBonus > 0 || referralFreeBookings > 0 || paidFriendsCount > 0) && (
+          <div
+            style={{
+              marginTop: 18,
+              borderRadius: 30,
+              border: '1px solid #f0e3d7',
+              background: 'linear-gradient(180deg, #ffffff 0%, #fff8f5 100%)',
+              padding: 18,
+              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 14,
+                alignItems: 'flex-start',
+              }}
+            >
               <div>
-                <div className="text-base font-extrabold text-[#1d1712]">
+                <div
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
                   {text.bonusesTitle}
                 </div>
 
-                {welcomeBonus > 0 && (
-                  <div className="mt-2 text-sm leading-6 text-[#6f6458]">
-                    {text.welcomeBonus}:{' '}
-                    <span className="font-bold">£{welcomeBonus.toFixed(2)}</span>
-                  </div>
-                )}
-
-                {referralFreeBookings > 0 && (
-                  <div className="mt-1 text-sm leading-6 text-[#6f6458]">
-                    {text.referralBookings}:{' '}
-                    <span className="font-bold">{referralFreeBookings}</span>
-                  </div>
-                )}
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 14,
+                    lineHeight: 1.45,
+                    color: '#7b7268',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.bonusesSubtitle}
+                </div>
               </div>
 
               <button
                 type="button"
                 onClick={() => router.push('/profile/invite')}
-                className="rounded-2xl bg-[#2f241c] px-4 py-3 text-sm font-bold text-white"
+                style={{
+                  ...getAccentStyles('pink', true),
+                  border: 'none',
+                  borderRadius: 18,
+                  minHeight: 52,
+                  padding: '0 18px',
+                  fontSize: 15,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  boxShadow: '0 12px 24px rgba(255,79,160,0.22)',
+                }}
               >
                 {text.inviteButton}
               </button>
             </div>
+
+            <div
+              style={{
+                marginTop: 16,
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: 10,
+              }}
+            >
+              <div
+                style={{
+                  borderRadius: 22,
+                  padding: 14,
+                  ...getAccentStyles('orange', false),
+                }}
+              >
+                <div style={{ fontSize: 20, marginBottom: 8 }}>🎉</div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    lineHeight: 1.3,
+                    fontWeight: 800,
+                    opacity: 0.88,
+                    minHeight: 30,
+                  }}
+                >
+                  {text.welcomeBonus}
+                </div>
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 26,
+                    fontWeight: 900,
+                  }}
+                >
+                  £{welcomeBonus.toFixed(2)}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  borderRadius: 22,
+                  padding: 14,
+                  ...getAccentStyles('green', false),
+                }}
+              >
+                <div style={{ fontSize: 20, marginBottom: 8 }}>✅</div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    lineHeight: 1.3,
+                    fontWeight: 800,
+                    opacity: 0.88,
+                    minHeight: 30,
+                  }}
+                >
+                  {text.referralProgress}
+                </div>
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 26,
+                    fontWeight: 900,
+                  }}
+                >
+                  {paidFriendsCount}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  borderRadius: 22,
+                  padding: 14,
+                  ...getAccentStyles('pink', false),
+                }}
+              >
+                <div style={{ fontSize: 20, marginBottom: 8 }}>🎁</div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    lineHeight: 1.3,
+                    fontWeight: 800,
+                    opacity: 0.88,
+                    minHeight: 30,
+                  }}
+                >
+                  {text.referralBookings}
+                </div>
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 26,
+                    fontWeight: 900,
+                  }}
+                >
+                  {referralFreeBookings}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
-        <div className="mt-6 rounded-[32px] border border-[#efe4d7] bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-4">
-            <img
-              src={profile.avatar}
-              alt={profile.fullName}
-              className="h-20 w-20 rounded-3xl object-cover"
-            />
+        <div
+          style={{
+            marginTop: 18,
+            borderRadius: 32,
+            border: '1px solid #efe4d7',
+            background: '#fff',
+            padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '88px 1fr',
+              gap: 16,
+              alignItems: 'center',
+            }}
+          >
+            <div style={{ position: 'relative' }}>
+              <img
+                src={profile.avatar}
+                alt={profile.fullName}
+                style={{
+                  width: 88,
+                  height: 88,
+                  borderRadius: 28,
+                  objectFit: 'cover',
+                  display: 'block',
+                  boxShadow: '0 12px 26px rgba(44, 23, 10, 0.12)',
+                }}
+              />
 
-            <div className="min-w-0">
-              <h2 className="truncate text-xl font-bold text-[#1d1712]">
-                {profile.fullName}
-              </h2>
-              <p className="mt-1 truncate text-sm text-[#7a7065]">{profile.email}</p>
-              <p className="mt-1 text-sm text-[#7a7065]">{profile.phone}</p>
-              <p className="mt-1 text-sm text-[#7a7065]">{profile.city}</p>
+              <div
+                style={{
+                  position: 'absolute',
+                  right: -4,
+                  bottom: -4,
+                  width: 26,
+                  height: 26,
+                  borderRadius: 999,
+                  background: '#2fa35a',
+                  border: '3px solid #fff',
+                  boxShadow: '0 6px 14px rgba(47,163,90,0.22)',
+                }}
+              />
+            </div>
 
-              {profile.isVerified && (
-                <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#f4ecdf] px-3 py-2 text-xs font-bold text-[#4b4137]">
-                  <span>🛡️</span>
-                  <span>{text.verified}</span>
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: 24,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    lineHeight: 1.1,
+                  }}
+                >
+                  {profile.fullName}
+                </h2>
+
+                <span
+                  style={{
+                    ...getAccentStyles('green', false),
+                    borderRadius: 999,
+                    padding: '7px 10px',
+                    fontSize: 11,
+                    fontWeight: 900,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {text.availableNow}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 15,
+                  color: '#73695f',
+                  fontWeight: 700,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {profile.email}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 15,
+                  color: '#73695f',
+                  fontWeight: 700,
+                }}
+              >
+                {profile.phone}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 15,
+                  color: '#73695f',
+                  fontWeight: 700,
+                }}
+              >
+                {profile.city}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 10,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 8,
+                }}
+              >
+                {profile.isVerified && (
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      borderRadius: 999,
+                      padding: '9px 12px',
+                      ...getAccentStyles('green', false),
+                      fontSize: 12,
+                      fontWeight: 900,
+                    }}
+                  >
+                    <span>🛡️</span>
+                    <span>{text.verified}</span>
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    borderRadius: 999,
+                    padding: '9px 12px',
+                    ...getAccentStyles('blue', false),
+                    fontSize: 12,
+                    fontWeight: 900,
+                  }}
+                >
+                  <span>✨</span>
+                  <span>{text.memberSince}</span>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => router.push('/profile/edit')}
-            className="mt-5 w-full rounded-2xl bg-[#2f241c] px-4 py-4 text-sm font-bold text-white"
+            style={{
+              marginTop: 18,
+              width: '100%',
+              border: 'none',
+              borderRadius: 22,
+              padding: '17px 18px',
+              background: 'linear-gradient(180deg, #2b221c 0%, #1f1712 100%)',
+              color: '#fff',
+              fontSize: 17,
+              fontWeight: 900,
+              cursor: 'pointer',
+              boxShadow: '0 14px 28px rgba(31,23,18,0.20)',
+            }}
           >
             {text.editProfile}
           </button>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => router.push('/profile/bookings')}
-            className="rounded-3xl bg-[#2f241c] p-4 text-left text-white"
+        <div style={{ marginTop: 18 }}>
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 12,
+            }}
           >
-            <p className="text-xs text-[#d9cdbd]">{text.upcomingBookings}</p>
-            <p className="mt-2 text-3xl font-bold">{bookingsCount}</p>
-          </button>
+            {text.quickAccess}
+          </div>
 
-          <button
-            type="button"
-            onClick={() => router.push('/profile/saved-masters')}
-            className="rounded-3xl bg-[#f2e9dc] p-4 text-left text-[#241d17]"
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 12,
+            }}
           >
-            <p className="text-xs text-[#6e5f51]">{text.savedMasters}</p>
-            <p className="mt-2 text-3xl font-bold">{savedMastersCount}</p>
-          </button>
+            <button
+              type="button"
+              onClick={() => router.push('/profile/bookings')}
+              style={{
+                border: 'none',
+                borderRadius: 28,
+                padding: 18,
+                textAlign: 'left',
+                background: 'linear-gradient(180deg, #2d241d 0%, #1f1712 100%)',
+                color: '#fff',
+                boxShadow: '0 12px 26px rgba(31,23,18,0.16)',
+                cursor: 'pointer',
+              }}
+            >
+              <div style={{ fontSize: 24, marginBottom: 10 }}>📅</div>
+              <div
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.35,
+                  color: '#dbcfc1',
+                  fontWeight: 800,
+                  minHeight: 34,
+                }}
+              >
+                {text.upcomingBookings}
+              </div>
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 40,
+                  fontWeight: 900,
+                  lineHeight: 1,
+                }}
+              >
+                {bookingsCount}
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push('/profile/saved-masters')}
+              style={{
+                border: '1px solid #efe4d7',
+                borderRadius: 28,
+                padding: 18,
+                textAlign: 'left',
+                background: '#fff',
+                color: '#17130f',
+                boxShadow: '0 12px 26px rgba(44, 23, 10, 0.05)',
+                cursor: 'pointer',
+              }}
+            >
+              <div style={{ fontSize: 24, marginBottom: 10 }}>❤️</div>
+              <div
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.35,
+                  color: '#7a7167',
+                  fontWeight: 800,
+                  minHeight: 34,
+                }}
+              >
+                {text.savedMasters}
+              </div>
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 40,
+                  fontWeight: 900,
+                  lineHeight: 1,
+                  color: '#17130f',
+                }}
+              >
+                {savedMastersCount}
+              </div>
+            </button>
+          </div>
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-[28px] border border-[#efe4d7] bg-white shadow-sm">
+        <div
+          style={{
+            marginTop: 18,
+            overflow: 'hidden',
+            borderRadius: 30,
+            border: '1px solid #efe4d7',
+            background: '#fff',
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
           {menuItems.map((item, index) => {
+            const accentStyles = getAccentStyles(item.accent, false);
+
             const content = (
               <div
-                className={`flex items-center justify-between gap-3 px-5 py-4 ${
-                  index !== 0 ? 'border-t border-[#f3eadf]' : ''
-                }`}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '44px 1fr auto',
+                  gap: 14,
+                  alignItems: 'center',
+                  padding: '16px 18px',
+                  borderTop: index !== 0 ? '1px solid #f4eadf' : 'none',
+                }}
               >
-                <div className="min-w-0">
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 16,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 20,
+                    ...accentStyles,
+                  }}
+                >
+                  {item.icon}
+                </div>
+
+                <div style={{ minWidth: 0 }}>
                   <div
-                    className={`text-sm font-bold ${
-                      item.danger ? 'text-red-600' : 'text-[#1d1712]'
-                    }`}
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 900,
+                      color: item.danger ? '#ef4444' : '#17130f',
+                    }}
                   >
                     {item.title}
                   </div>
 
-                  {item.subtitle && (
-                    <div className="mt-1 text-xs leading-5 text-[#7a7065]">
+                  {item.subtitle ? (
+                    <div
+                      style={{
+                        marginTop: 4,
+                        fontSize: 13,
+                        lineHeight: 1.45,
+                        color: '#7b7268',
+                        fontWeight: 700,
+                      }}
+                    >
                       {item.subtitle}
                     </div>
-                  )}
+                  ) : null}
                 </div>
 
-                {!item.danger && (
-                  <div className="flex items-center gap-2">
-                    {item.rightLabel && (
-                      <span className="rounded-full bg-[#f5ede2] px-2.5 py-1 text-xs font-bold text-[#6e6154]">
+                {!item.danger ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                    }}
+                  >
+                    {item.rightLabel ? (
+                      <span
+                        style={{
+                          borderRadius: 999,
+                          padding: '7px 10px',
+                          ...getAccentStyles(item.accent, false),
+                          fontSize: 12,
+                          fontWeight: 900,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
                         {item.rightLabel}
                       </span>
-                    )}
-                    <span className="text-base text-[#8c7d70]">›</span>
+                    ) : null}
+
+                    <span
+                      style={{
+                        fontSize: 20,
+                        color: '#938475',
+                        fontWeight: 900,
+                      }}
+                    >
+                      ›
+                    </span>
                   </div>
+                ) : (
+                  <span
+                    style={{
+                      fontSize: 20,
+                      color: '#ef4444',
+                      fontWeight: 900,
+                    }}
+                  >
+                    ›
+                  </span>
                 )}
               </div>
             );
@@ -569,7 +1181,14 @@ export default function ProfilePage() {
             }
 
             return (
-              <Link key={item.id} href={item.href} className="block">
+              <Link
+                key={item.id}
+                href={item.href}
+                style={{
+                  display: 'block',
+                  textDecoration: 'none',
+                }}
+              >
                 {content}
               </Link>
             );
