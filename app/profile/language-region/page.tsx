@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import BottomNav from '../../../components/common/BottomNav';
+import BottomNav from '../../../components/BottomNav';
 import {
   getSavedLanguage,
   saveLanguage,
+  subscribeToLanguageChange,
   type AppLanguage,
 } from '../../../services/i18n';
 import {
@@ -142,70 +143,16 @@ const languageOptions: { value: AppLanguage; label: string; subtitle: string; fl
 ];
 
 const regionOptions = [
-  {
-    value: 'United Kingdom',
-    label: 'United Kingdom',
-    subtitle: 'London · Europe',
-    flag: '🇬🇧',
-    lat: 51.5074,
-    lng: -0.1278,
-  },
-  {
-    value: 'Spain',
-    label: 'Spain',
-    subtitle: 'Madrid · Europe',
-    flag: '🇪🇸',
-    lat: 40.4168,
-    lng: -3.7038,
-  },
-  {
-    value: 'Czech Republic',
-    label: 'Czech Republic',
-    subtitle: 'Prague · Europe',
-    flag: '🇨🇿',
-    lat: 50.0755,
-    lng: 14.4378,
-  },
-  {
-    value: 'Germany',
-    label: 'Germany',
-    subtitle: 'Berlin · Europe',
-    flag: '🇩🇪',
-    lat: 52.52,
-    lng: 13.405,
-  },
-  {
-    value: 'Poland',
-    label: 'Poland',
-    subtitle: 'Warsaw · Europe',
-    flag: '🇵🇱',
-    lat: 52.2297,
-    lng: 21.0122,
-  },
-  {
-    value: 'Ukraine',
-    label: 'Ukraine',
-    subtitle: 'Kyiv · Europe',
-    flag: '🇺🇦',
-    lat: 50.4501,
-    lng: 30.5234,
-  },
-  {
-    value: 'United Arab Emirates',
-    label: 'United Arab Emirates',
-    subtitle: 'Dubai · Middle East',
-    flag: '🇦🇪',
-    lat: 25.2048,
-    lng: 55.2708,
-  },
+  { value: 'United Kingdom', label: 'United Kingdom', subtitle: 'London · Europe', flag: '🇬🇧', lat: 51.5074, lng: -0.1278 },
+  { value: 'Spain', label: 'Spain', subtitle: 'Madrid · Europe', flag: '🇪🇸', lat: 40.4168, lng: -3.7038 },
+  { value: 'Czech Republic', label: 'Czech Republic', subtitle: 'Prague · Europe', flag: '🇨🇿', lat: 50.0755, lng: 14.4378 },
+  { value: 'Germany', label: 'Germany', subtitle: 'Berlin · Europe', flag: '🇩🇪', lat: 52.52, lng: 13.405 },
+  { value: 'Poland', label: 'Poland', subtitle: 'Warsaw · Europe', flag: '🇵🇱', lat: 52.2297, lng: 21.0122 },
+  { value: 'Ukraine', label: 'Ukraine', subtitle: 'Kyiv · Europe', flag: '🇺🇦', lat: 50.4501, lng: 30.5234 },
+  { value: 'United Arab Emirates', label: 'United Arab Emirates', subtitle: 'Dubai · Middle East', flag: '🇦🇪', lat: 25.2048, lng: 55.2708 },
 ] as const;
 
-const currencyOptions: {
-  value: CurrencyCode;
-  symbol: string;
-  title: string;
-  subtitle: string;
-}[] = [
+const currencyOptions = [
   { value: 'GBP', symbol: '£', title: 'GBP', subtitle: 'British Pound' },
   { value: 'EUR', symbol: '€', title: 'EUR', subtitle: 'Euro' },
   { value: 'USD', symbol: '$', title: 'USD', subtitle: 'US Dollar' },
@@ -213,24 +160,14 @@ const currencyOptions: {
   { value: 'CZK', symbol: 'Kč', title: 'CZK', subtitle: 'Czech Koruna' },
   { value: 'UAH', symbol: '₴', title: 'UAH', subtitle: 'Ukrainian Hryvnia' },
   { value: 'AED', symbol: 'AED', title: 'AED', subtitle: 'UAE Dirham' },
-];
+] as const;
 
 function readStoredCurrency(): CurrencyCode {
   if (typeof window === 'undefined') return 'GBP';
   const value = window.localStorage.getItem(CURRENCY_STORAGE_KEY);
-
-  if (
-    value === 'GBP' ||
-    value === 'EUR' ||
-    value === 'USD' ||
-    value === 'PLN' ||
-    value === 'CZK' ||
-    value === 'UAH' ||
-    value === 'AED'
-  ) {
+  if (value === 'GBP' || value === 'EUR' || value === 'USD' || value === 'PLN' || value === 'CZK' || value === 'UAH' || value === 'AED') {
     return value;
   }
-
   return 'GBP';
 }
 
@@ -241,13 +178,11 @@ function saveStoredCurrency(currency: CurrencyCode) {
 
 function readStoredLocation(): StoredLocation | null {
   if (typeof window === 'undefined') return null;
-
   const raw = window.localStorage.getItem(LOCATION_STORAGE_KEY);
   if (!raw) return null;
 
   try {
     const parsed = JSON.parse(raw) as StoredLocation;
-
     if (!parsed || typeof parsed !== 'object') return null;
 
     return {
@@ -318,7 +253,6 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 export default function LanguageRegionPage() {
   const router = useRouter();
 
-  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
   const [selectedLanguage, setSelectedLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [selectedRegion, setSelectedRegion] = useState(getUserProfile().region);
@@ -326,20 +260,13 @@ export default function LanguageRegionPage() {
   const [selectedLocationMode, setSelectedLocationMode] = useState<'current' | 'region'>(
     readStoredLocation()?.source || 'region'
   );
-  const [selectedLocation, setSelectedLocation] = useState<StoredLocation | null>(
-    readStoredLocation()
-  );
+  const [selectedLocation, setSelectedLocation] = useState<StoredLocation | null>(readStoredLocation());
   const [isLocating, setIsLocating] = useState(false);
 
   useEffect(() => {
-    saveLanguage(language);
-  }, [language]);
-
-  useEffect(() => {
-    const syncLanguage = () => {
-      const nextLanguage = getSavedLanguage();
-      setLanguage(nextLanguage);
-      setSelectedLanguage(nextLanguage);
+    const syncLanguage = (nextLanguage?: AppLanguage) => {
+      const value = nextLanguage || getSavedLanguage();
+      setSelectedLanguage(value);
     };
 
     const syncProfile = () => {
@@ -359,21 +286,18 @@ export default function LanguageRegionPage() {
 
     setSelectedCurrency(readStoredCurrency());
 
-    window.addEventListener('focus', syncLanguage);
-    window.addEventListener('storage', syncLanguage);
-
+    const unsubLanguage = subscribeToLanguageChange(syncLanguage);
     const unsubProfile = subscribeToUserProfile(syncProfile);
 
     return () => {
-      window.removeEventListener('focus', syncLanguage);
-      window.removeEventListener('storage', syncLanguage);
+      unsubLanguage();
       unsubProfile();
     };
   }, []);
 
   const text = useMemo(
-    () => pageTexts[language as keyof typeof pageTexts] || pageTexts.EN,
-    [language]
+    () => pageTexts[selectedLanguage as keyof typeof pageTexts] || pageTexts.EN,
+    [selectedLanguage]
   );
 
   const selectedRegionMeta =
@@ -435,7 +359,6 @@ export default function LanguageRegionPage() {
 
   const handleSave = () => {
     saveLanguage(selectedLanguage);
-    setLanguage(selectedLanguage);
     saveStoredCurrency(selectedCurrency);
 
     const finalLocation =
@@ -457,18 +380,11 @@ export default function LanguageRegionPage() {
       region: selectedRegion,
     });
 
-    alert(
-      (pageTexts[selectedLanguage as keyof typeof pageTexts] || pageTexts.EN).saved
-    );
-
-    router.push('/profile');
+    alert((pageTexts[selectedLanguage as keyof typeof pageTexts] || pageTexts.EN).saved);
   };
 
   return (
-    <main
-      className="min-h-screen px-4 py-5 pb-24"
-      style={{ background: '#f7f3eb' }}
-    >
+    <main className="min-h-screen px-4 py-5 pb-24" style={{ background: '#f7f3eb' }}>
       <div className="mx-auto max-w-md">
         <div
           style={{
@@ -818,7 +734,7 @@ export default function LanguageRegionPage() {
         </div>
       </div>
 
-      <BottomNav active="profile" />
+      <BottomNav />
     </main>
   );
-}  просто помни .и анализируй сразу что к чему относится .что б не путатб нтчего .теперь давай дальше без ошибок. што мне делать щас чтоб исправить все те проблемы со скринами и языками как на фото .что тнбе надо еще или ты уже понимаешь?
+}
