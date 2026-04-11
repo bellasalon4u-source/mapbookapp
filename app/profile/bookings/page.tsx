@@ -14,6 +14,7 @@ import {
 const bookingsTexts = {
   EN: {
     title: 'My bookings',
+    subtitle: 'Upcoming visits, completed services and booking access',
     upcoming: 'Upcoming',
     completed: 'Completed',
     cancelled: 'Cancelled',
@@ -37,9 +38,13 @@ const bookingsTexts = {
     providerPhone: 'Phone',
     providerEmail: 'Email',
     routeLocked: 'Route after payment',
+    bookingAccess: 'Booking access',
+    provider: 'Provider',
+    paymentProtected: 'Protected booking details',
   },
   ES: {
     title: 'Mis reservas',
+    subtitle: 'Próximas visitas, servicios completados y acceso a reservas',
     upcoming: 'Próximas',
     completed: 'Completadas',
     cancelled: 'Canceladas',
@@ -63,9 +68,13 @@ const bookingsTexts = {
     providerPhone: 'Teléfono',
     providerEmail: 'Email',
     routeLocked: 'Ruta después del pago',
+    bookingAccess: 'Acceso a la reserva',
+    provider: 'Profesional',
+    paymentProtected: 'Datos protegidos de la reserva',
   },
   RU: {
     title: 'Мои бронирования',
+    subtitle: 'Предстоящие визиты, завершённые услуги и доступ к бронированию',
     upcoming: 'Предстоящие',
     completed: 'Завершённые',
     cancelled: 'Отменённые',
@@ -89,9 +98,13 @@ const bookingsTexts = {
     providerPhone: 'Телефон',
     providerEmail: 'Email',
     routeLocked: 'Маршрут после оплаты',
+    bookingAccess: 'Доступ к бронированию',
+    provider: 'Исполнитель',
+    paymentProtected: 'Защищённые данные бронирования',
   },
   CZ: {
     title: 'Moje rezervace',
+    subtitle: 'Nadcházející návštěvy, dokončené služby a přístup k rezervaci',
     upcoming: 'Nadcházející',
     completed: 'Dokončené',
     cancelled: 'Zrušené',
@@ -115,9 +128,13 @@ const bookingsTexts = {
     providerPhone: 'Telefon',
     providerEmail: 'Email',
     routeLocked: 'Trasa po zaplacení',
+    bookingAccess: 'Přístup k rezervaci',
+    provider: 'Poskytovatel',
+    paymentProtected: 'Chráněné údaje rezervace',
   },
   DE: {
     title: 'Meine Buchungen',
+    subtitle: 'Bevorstehende Besuche, abgeschlossene Services und Buchungszugriff',
     upcoming: 'Bevorstehend',
     completed: 'Abgeschlossen',
     cancelled: 'Storniert',
@@ -141,9 +158,13 @@ const bookingsTexts = {
     providerPhone: 'Telefon',
     providerEmail: 'E-Mail',
     routeLocked: 'Route nach Zahlung',
+    bookingAccess: 'Buchungszugriff',
+    provider: 'Anbieter',
+    paymentProtected: 'Geschützte Buchungsdaten',
   },
   PL: {
     title: 'Moje rezerwacje',
+    subtitle: 'Nadchodzące wizyty, zakończone usługi i dostęp do rezerwacji',
     upcoming: 'Nadchodzące',
     completed: 'Zakończone',
     cancelled: 'Anulowane',
@@ -167,6 +188,9 @@ const bookingsTexts = {
     providerPhone: 'Telefon',
     providerEmail: 'Email',
     routeLocked: 'Trasa po płatności',
+    bookingAccess: 'Dostęp do rezerwacji',
+    provider: 'Wykonawca',
+    paymentProtected: 'Chronione dane rezerwacji',
   },
 } as const;
 
@@ -178,30 +202,22 @@ function formatPrice(price: number) {
 
 function getStatusStyles(status: BookingStatus) {
   if (status === 'pending') {
-    return {
-      background: '#fff5e8',
-      color: '#d68612',
-    };
+    return { background: '#fff5e8', color: '#d68612' };
   }
-
   if (status === 'completed') {
-    return {
-      background: '#eef9f1',
-      color: '#2fa35a',
-    };
+    return { background: '#eef9f1', color: '#2fa35a' };
   }
-
   if (status === 'cancelled') {
-    return {
-      background: '#fff1f1',
-      color: '#ef4444',
-    };
+    return { background: '#fff1f1', color: '#ef4444' };
   }
+  return { background: '#eef4ff', color: '#2f7cf6' };
+}
 
-  return {
-    background: '#eef4ff',
-    color: '#2f7cf6',
-  };
+function getStatusIcon(status: BookingStatus) {
+  if (status === 'pending') return '⏳';
+  if (status === 'completed') return '✓';
+  if (status === 'cancelled') return '✕';
+  return '📅';
 }
 
 export default function ProfileBookingsPage() {
@@ -292,17 +308,28 @@ export default function ProfileBookingsPage() {
             ←
           </button>
 
-          <h1
-            style={{
-              margin: 0,
-              fontSize: 22,
-              fontWeight: 900,
-              color: '#17130f',
-              textAlign: 'center',
-            }}
-          >
-            {text.title}
-          </h1>
+          <div style={{ textAlign: 'center' }}>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 22,
+                fontWeight: 900,
+                color: '#17130f',
+              }}
+            >
+              {text.title}
+            </h1>
+            <div
+              style={{
+                marginTop: 4,
+                fontSize: 13,
+                color: '#7b7268',
+                fontWeight: 700,
+              }}
+            >
+              {text.subtitle}
+            </div>
+          </div>
 
           <div />
         </div>
@@ -337,7 +364,9 @@ export default function ProfileBookingsPage() {
                   whiteSpace: 'nowrap',
                   background: active ? '#2f241c' : '#fff',
                   color: active ? '#fff' : '#2b231d',
-                  boxShadow: active ? '0 10px 22px rgba(47,36,28,0.18)' : 'inset 0 0 0 1px #efe4d7',
+                  boxShadow: active
+                    ? '0 10px 22px rgba(47,36,28,0.18)'
+                    : 'inset 0 0 0 1px #efe4d7',
                   cursor: 'pointer',
                 }}
               >
@@ -407,6 +436,17 @@ export default function ProfileBookingsPage() {
                   <div style={{ minWidth: 0 }}>
                     <div
                       style={{
+                        fontSize: 12,
+                        fontWeight: 800,
+                        color: '#8a7f74',
+                        marginBottom: 6,
+                      }}
+                    >
+                      {text.provider}
+                    </div>
+
+                    <div
+                      style={{
                         fontSize: 20,
                         fontWeight: 900,
                         color: '#17130f',
@@ -426,72 +466,6 @@ export default function ProfileBookingsPage() {
                     >
                       {booking.serviceName}
                     </div>
-
-                    <div
-                      style={{
-                        marginTop: 8,
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: 8,
-                      }}
-                    >
-                      <span
-                        style={{
-                          borderRadius: 999,
-                          padding: '8px 12px',
-                          fontSize: 12,
-                          fontWeight: 900,
-                          ...getStatusStyles(booking.status),
-                        }}
-                      >
-                        {getStatusLabel(booking.status)}
-                      </span>
-
-                      {booking.unlockFeePaid && (
-                        <span
-                          style={{
-                            borderRadius: 999,
-                            padding: '8px 12px',
-                            fontSize: 12,
-                            fontWeight: 900,
-                            background: '#eef4ff',
-                            color: '#2f7cf6',
-                          }}
-                        >
-                          {text.unlockPaid}
-                        </span>
-                      )}
-
-                      {booking.usedWelcomeBonus && (
-                        <span
-                          style={{
-                            borderRadius: 999,
-                            padding: '8px 12px',
-                            fontSize: 12,
-                            fontWeight: 900,
-                            background: '#fff5e8',
-                            color: '#d68612',
-                          }}
-                        >
-                          {text.welcomeBonus}
-                        </span>
-                      )}
-
-                      {booking.usedReferralCredit && (
-                        <span
-                          style={{
-                            borderRadius: 999,
-                            padding: '8px 12px',
-                            fontSize: 12,
-                            fontWeight: 900,
-                            background: '#fff1f7',
-                            color: '#ff4fa0',
-                          }}
-                        >
-                          {text.referralUsed}
-                        </span>
-                      )}
-                    </div>
                   </div>
 
                   <div
@@ -504,6 +478,76 @@ export default function ProfileBookingsPage() {
                   >
                     {formatPrice(booking.price)}
                   </div>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 12,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 8,
+                  }}
+                >
+                  <span
+                    style={{
+                      borderRadius: 999,
+                      padding: '8px 12px',
+                      fontSize: 12,
+                      fontWeight: 900,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      ...getStatusStyles(booking.status),
+                    }}
+                  >
+                    <span>{getStatusIcon(booking.status)}</span>
+                    <span>{getStatusLabel(booking.status)}</span>
+                  </span>
+
+                  {booking.unlockFeePaid && (
+                    <span
+                      style={{
+                        borderRadius: 999,
+                        padding: '8px 12px',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        background: '#eef4ff',
+                        color: '#2f7cf6',
+                      }}
+                    >
+                      {text.unlockPaid}
+                    </span>
+                  )}
+
+                  {booking.usedWelcomeBonus && (
+                    <span
+                      style={{
+                        borderRadius: 999,
+                        padding: '8px 12px',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        background: '#fff5e8',
+                        color: '#d68612',
+                      }}
+                    >
+                      {text.welcomeBonus}
+                    </span>
+                  )}
+
+                  {booking.usedReferralCredit && (
+                    <span
+                      style={{
+                        borderRadius: 999,
+                        padding: '8px 12px',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        background: '#fff1f7',
+                        color: '#ff4fa0',
+                      }}
+                    >
+                      {text.referralUsed}
+                    </span>
+                  )}
                 </div>
 
                 <div
@@ -639,13 +683,36 @@ export default function ProfileBookingsPage() {
                 >
                   <div
                     style={{
-                      fontSize: 15,
-                      fontWeight: 900,
-                      color: '#17130f',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      gap: 12,
+                      alignItems: 'center',
                       marginBottom: 12,
                     }}
                   >
-                    {text.contactAndAddress}
+                    <div
+                      style={{
+                        fontSize: 15,
+                        fontWeight: 900,
+                        color: '#17130f',
+                      }}
+                    >
+                      {text.contactAndAddress}
+                    </div>
+
+                    <span
+                      style={{
+                        borderRadius: 999,
+                        padding: '8px 10px',
+                        background: detailsUnlocked ? '#eef9f1' : '#fff5e8',
+                        color: detailsUnlocked ? '#2fa35a' : '#d68612',
+                        fontSize: 11,
+                        fontWeight: 900,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {detailsUnlocked ? text.bookingAccess : text.paymentProtected}
+                    </span>
                   </div>
 
                   <div style={{ display: 'grid', gap: 10 }}>
