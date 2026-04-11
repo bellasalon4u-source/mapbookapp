@@ -32,6 +32,7 @@ type StoredLocation = {
 const pageTexts = {
   EN: {
     title: 'Language & region',
+    subtitle: 'App language, country, currency and location mode',
     save: 'Save',
     languageSection: 'Languages available in app',
     regionSection: 'Countries / regions',
@@ -47,6 +48,8 @@ const pageTexts = {
     saved: 'Settings saved',
     selected: 'Selected',
     languageApp: 'App language',
+    overview: 'Current setup',
+    livePreview: 'Live preview',
     britishPound: 'British Pound',
     euro: 'Euro',
     usDollar: 'US Dollar',
@@ -65,6 +68,7 @@ const pageTexts = {
   },
   ES: {
     title: 'Idioma y región',
+    subtitle: 'Idioma de la app, país, moneda y modo de ubicación',
     save: 'Guardar',
     languageSection: 'Idiomas disponibles en la app',
     regionSection: 'Países / regiones',
@@ -80,6 +84,8 @@ const pageTexts = {
     saved: 'Ajustes guardados',
     selected: 'Seleccionado',
     languageApp: 'Idioma de la app',
+    overview: 'Configuración actual',
+    livePreview: 'Vista previa',
     britishPound: 'Libra esterlina',
     euro: 'Euro',
     usDollar: 'Dólar estadounidense',
@@ -98,6 +104,7 @@ const pageTexts = {
   },
   RU: {
     title: 'Язык и регион',
+    subtitle: 'Язык приложения, страна, валюта и режим локации',
     save: 'Сохранить',
     languageSection: 'Языки приложения',
     regionSection: 'Страны / регионы',
@@ -113,6 +120,8 @@ const pageTexts = {
     saved: 'Настройки сохранены',
     selected: 'Выбрано',
     languageApp: 'Язык приложения',
+    overview: 'Текущая конфигурация',
+    livePreview: 'Предпросмотр',
     britishPound: 'Британский фунт',
     euro: 'Евро',
     usDollar: 'Доллар США',
@@ -131,6 +140,7 @@ const pageTexts = {
   },
   CZ: {
     title: 'Jazyk a region',
+    subtitle: 'Jazyk aplikace, země, měna a režim polohy',
     save: 'Uložit',
     languageSection: 'Jazyky aplikace',
     regionSection: 'Země / regiony',
@@ -146,6 +156,8 @@ const pageTexts = {
     saved: 'Nastavení uloženo',
     selected: 'Vybráno',
     languageApp: 'Jazyk aplikace',
+    overview: 'Aktuální nastavení',
+    livePreview: 'Náhled',
     britishPound: 'Britská libra',
     euro: 'Euro',
     usDollar: 'Americký dolar',
@@ -164,6 +176,7 @@ const pageTexts = {
   },
   DE: {
     title: 'Sprache & Region',
+    subtitle: 'App-Sprache, Land, Währung und Standortmodus',
     save: 'Speichern',
     languageSection: 'Verfügbare App-Sprachen',
     regionSection: 'Länder / Regionen',
@@ -179,6 +192,8 @@ const pageTexts = {
     saved: 'Einstellungen gespeichert',
     selected: 'Ausgewählt',
     languageApp: 'App-Sprache',
+    overview: 'Aktuelle Konfiguration',
+    livePreview: 'Vorschau',
     britishPound: 'Britisches Pfund',
     euro: 'Euro',
     usDollar: 'US-Dollar',
@@ -197,6 +212,7 @@ const pageTexts = {
   },
   PL: {
     title: 'Język i region',
+    subtitle: 'Język aplikacji, kraj, waluta i tryb lokalizacji',
     save: 'Zapisz',
     languageSection: 'Języki aplikacji',
     regionSection: 'Kraje / regiony',
@@ -212,6 +228,8 @@ const pageTexts = {
     saved: 'Ustawienia zapisane',
     selected: 'Wybrano',
     languageApp: 'Język aplikacji',
+    overview: 'Aktualna konfiguracja',
+    livePreview: 'Podgląd',
     britishPound: 'Funt brytyjski',
     euro: 'Euro',
     usDollar: 'Dolar amerykański',
@@ -552,14 +570,17 @@ export default function LanguageRegionPage() {
 
   return (
     <main
-      className="min-h-screen px-4 py-5 pb-24"
-      style={{ background: '#f7f3eb' }}
+      style={{
+        minHeight: '100vh',
+        background: '#fbf7ef',
+        padding: '20px 16px 110px',
+      }}
     >
-      <div className="mx-auto max-w-md">
+      <div style={{ maxWidth: 430, margin: '0 auto' }}>
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '48px 1fr auto',
+            gridTemplateColumns: '54px 1fr auto',
             alignItems: 'center',
             gap: 12,
             marginBottom: 18,
@@ -569,31 +590,43 @@ export default function LanguageRegionPage() {
             type="button"
             onClick={() => router.back()}
             style={{
-              width: 48,
-              height: 48,
+              width: 54,
+              height: 54,
               borderRadius: 999,
               border: '1px solid #e8dfd2',
               background: '#fff',
-              fontSize: 24,
+              fontSize: 26,
               fontWeight: 900,
               color: '#17130f',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
               cursor: 'pointer',
             }}
           >
             ←
           </button>
 
-          <h1
-            style={{
-              fontSize: 24,
-              fontWeight: 900,
-              color: '#17130f',
-              margin: 0,
-            }}
-          >
-            {text.title}
-          </h1>
+          <div>
+            <h1
+              style={{
+                fontSize: 24,
+                fontWeight: 900,
+                color: '#17130f',
+                margin: 0,
+              }}
+            >
+              {text.title}
+            </h1>
+            <div
+              style={{
+                marginTop: 4,
+                fontSize: 13,
+                color: '#7b7268',
+                fontWeight: 700,
+              }}
+            >
+              {text.subtitle}
+            </div>
+          </div>
 
           <button
             type="button"
@@ -603,14 +636,93 @@ export default function LanguageRegionPage() {
               background: '#17130f',
               color: '#fff',
               borderRadius: 999,
-              padding: '11px 16px',
+              padding: '12px 18px',
               fontSize: 14,
               fontWeight: 900,
               cursor: 'pointer',
+              boxShadow: '0 10px 20px rgba(23,19,15,0.18)',
             }}
           >
             {text.save}
           </button>
+        </div>
+
+        <div
+          style={{
+            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
+            borderRadius: 30,
+            padding: 18,
+            border: '1px solid #eee5d9',
+            boxShadow: '0 12px 28px rgba(0,0,0,0.04)',
+            marginBottom: 14,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 12,
+            }}
+          >
+            {text.overview}
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gap: 10,
+            }}
+          >
+            <div
+              style={{
+                borderRadius: 18,
+                background: '#fff',
+                border: '1px solid #f1e8dc',
+                padding: 14,
+              }}
+            >
+              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800, marginBottom: 4 }}>
+                {text.languageApp}
+              </div>
+              <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
+                {languageOptions.find((item) => item.value === selectedLanguage)?.flag}{' '}
+                {languageOptions.find((item) => item.value === selectedLanguage)?.label}
+              </div>
+            </div>
+
+            <div
+              style={{
+                borderRadius: 18,
+                background: '#fff',
+                border: '1px solid #f1e8dc',
+                padding: 14,
+              }}
+            >
+              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800, marginBottom: 4 }}>
+                {text.selected}
+              </div>
+              <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
+                {selectedRegion} · {selectedCurrency}
+              </div>
+            </div>
+
+            <div
+              style={{
+                borderRadius: 18,
+                background: '#fff',
+                border: '1px solid #f1e8dc',
+                padding: 14,
+              }}
+            >
+              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800, marginBottom: 4 }}>
+                {text.livePreview}
+              </div>
+              <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
+                {locationSummary}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div
@@ -915,7 +1027,7 @@ export default function LanguageRegionPage() {
         </div>
       </div>
 
-      <BottomNav />
+      <BottomNav active="profile" />
     </main>
   );
 }
