@@ -1,560 +1,380 @@
 'use client';
 
-import Link from 'next/link';
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../components/common/BottomNav';
-import {
-  getSavedLanguage,
-  subscribeToLanguageChange,
-  type AppLanguage,
-} from '../../services/i18n';
+import { getSavedLanguage, type AppLanguage } from '../../services/i18n';
 import {
   getUserProfile,
   subscribeToUserProfile,
   type UserProfile,
 } from '../services/userProfileStore';
+import { getWalletState, subscribeToWalletStore, type WalletState } from '../services/walletStore';
 import {
   getBookings,
   subscribeToBookingsStore,
+  type BookingItem,
 } from '../services/bookingsStore';
 import {
-  getWalletState,
-  subscribeToWalletStore,
-} from '../services/walletStore';
-import {
-  getReferralState,
-  subscribeToReferralStore,
-} from '../services/referralStore';
+  getLikedMasterIds,
+  subscribeToLikedMasters,
+} from '../../services/likedMastersStore';
 
 const profileTexts = {
   EN: {
     title: 'Profile',
-    subtitle: 'Manage your account, bookings, rewards and settings',
+    subtitle: 'Your account, activity and quick actions',
+    verified: 'Verified',
+    secure: 'Secure account',
     editProfile: 'Edit profile',
-    upcomingBookings: 'Upcoming bookings',
-    savedMasters: 'Saved masters',
+    editProfileSub: 'Photo, bio, contacts and personal details',
     myBookings: 'My bookings',
-    myBookingsSub: 'Upcoming, completed and cancelled',
-    savedMastersSub: 'Professionals you liked',
+    myBookingsSub: 'Upcoming, completed and cancelled bookings',
+    savedMasters: 'Saved masters',
+    savedMastersSub: 'Professionals you liked and saved',
     savedPlaces: 'Saved places',
-    savedPlacesSub: 'Favourite locations on the map',
-    messages: 'Messages',
-    messagesSub: 'Your chats with professionals',
-    balance: 'MapBook Balance',
-    balanceSub: 'Top up, withdraw and history',
-    inviteFriends: 'Invite friends',
-    inviteFriendsSub: '1 friend = 1 free booking',
-    paymentMethods: 'Payment methods',
-    paymentMethodsSub: 'Cards, PayPal, Google Pay and crypto',
+    savedPlacesSub: 'Favourite map locations and routes',
+    balance: 'Balance',
+    balanceSub: 'Wallet, refunds and transactions',
+    payments: 'Payment methods',
+    paymentsSub: 'Cards, PayPal, wallets and payouts',
     notifications: 'Notifications',
-    notificationsSub: 'Push, messages and bookings',
-    languageRegion: 'Language & region',
+    notificationsSub: 'Messages, bookings and reminders',
     help: 'Help Centre',
-    helpSub: 'FAQ, support and useful articles',
-    accountSettings: 'Account settings',
-    accountSettingsSub: 'Personal data, privacy and security',
-    logout: 'Log out',
-    bonusesTitle: 'Your bonuses',
-    bonusesSubtitle: 'Invite friends, earn rewards and use free bookings',
-    welcomeBonus: 'Welcome bonus',
-    referralBookings: 'Free bookings',
-    referralProgress: 'Friends paid',
-    inviteButton: 'Invite',
-    verified: 'Verified account',
-    availableNow: 'Available now',
-    quickAccess: 'Quick access',
-    profileCardTitle: 'Your profile',
-    memberSince: 'MapBook member',
-    walletAvailable: 'Available balance',
-    accountLevel: 'Account level',
-    premiumUser: 'Premium profile',
-    viewAll: 'View all',
+    helpSub: 'Answers, support and useful guides',
+    legal: 'Legal information',
+    legalSub: 'Policies, rules and payment terms',
+    settings: 'Account settings',
+    settingsSub: 'Privacy, security and account actions',
+    languageRegion: 'Language & region',
+    languageRegionSub: 'Language, country, currency and location',
+    overview: 'Overview',
+    bookingsCount: 'Bookings',
+    savedCount: 'Saved',
+    walletReady: 'Wallet ready',
+    open: 'Open',
   },
   ES: {
     title: 'Perfil',
-    subtitle: 'Administra tu cuenta, reservas, recompensas y ajustes',
+    subtitle: 'Tu cuenta, actividad y accesos rápidos',
+    verified: 'Verificado',
+    secure: 'Cuenta segura',
     editProfile: 'Editar perfil',
-    upcomingBookings: 'Próximas reservas',
-    savedMasters: 'Profesionales guardados',
+    editProfileSub: 'Foto, bio, contactos y datos personales',
     myBookings: 'Mis reservas',
-    myBookingsSub: 'Próximas, completadas y canceladas',
-    savedMastersSub: 'Profesionales que te gustaron',
+    myBookingsSub: 'Reservas próximas, completadas y canceladas',
+    savedMasters: 'Profesionales guardados',
+    savedMastersSub: 'Profesionales que te gustaron y guardaste',
     savedPlaces: 'Lugares guardados',
-    savedPlacesSub: 'Ubicaciones favoritas en el mapa',
-    messages: 'Mensajes',
-    messagesSub: 'Tus chats con profesionales',
-    balance: 'Saldo MapBook',
-    balanceSub: 'Recargar, retirar e historial',
-    inviteFriends: 'Invitar amigos',
-    inviteFriendsSub: '1 amigo = 1 reserva gratis',
-    paymentMethods: 'Métodos de pago',
-    paymentMethodsSub: 'Tarjetas, PayPal, Google Pay y cripto',
+    savedPlacesSub: 'Ubicaciones favoritas del mapa y rutas',
+    balance: 'Saldo',
+    balanceSub: 'Billetera, reembolsos y transacciones',
+    payments: 'Métodos de pago',
+    paymentsSub: 'Tarjetas, PayPal, billeteras y pagos',
     notifications: 'Notificaciones',
-    notificationsSub: 'Push, mensajes y reservas',
-    languageRegion: 'Idioma y región',
+    notificationsSub: 'Mensajes, reservas y recordatorios',
     help: 'Centro de ayuda',
-    helpSub: 'FAQ, soporte y artículos útiles',
-    accountSettings: 'Configuración de la cuenta',
-    accountSettingsSub: 'Datos personales, privacidad y seguridad',
-    logout: 'Cerrar sesión',
-    bonusesTitle: 'Tus bonos',
-    bonusesSubtitle: 'Invita amigos, gana recompensas y usa reservas gratis',
-    welcomeBonus: 'Bono de bienvenida',
-    referralBookings: 'Reservas gratis',
-    referralProgress: 'Amigos pagaron',
-    inviteButton: 'Invitar',
-    verified: 'Cuenta verificada',
-    availableNow: 'Disponible ahora',
-    quickAccess: 'Acceso rápido',
-    profileCardTitle: 'Tu perfil',
-    memberSince: 'Miembro de MapBook',
-    walletAvailable: 'Saldo disponible',
-    accountLevel: 'Nivel de cuenta',
-    premiumUser: 'Perfil premium',
-    viewAll: 'Ver todo',
+    helpSub: 'Respuestas, soporte y guías útiles',
+    legal: 'Información legal',
+    legalSub: 'Políticas, reglas y términos de pago',
+    settings: 'Configuración de la cuenta',
+    settingsSub: 'Privacidad, seguridad y acciones de cuenta',
+    languageRegion: 'Idioma y región',
+    languageRegionSub: 'Idioma, país, moneda y ubicación',
+    overview: 'Resumen',
+    bookingsCount: 'Reservas',
+    savedCount: 'Guardados',
+    walletReady: 'Billetera lista',
+    open: 'Abrir',
   },
   RU: {
     title: 'Профиль',
-    subtitle: 'Управляйте аккаунтом, бронированиями, бонусами и настройками',
+    subtitle: 'Ваш аккаунт, активность и быстрые действия',
+    verified: 'Проверено',
+    secure: 'Аккаунт защищён',
     editProfile: 'Редактировать профиль',
-    upcomingBookings: 'Предстоящие бронирования',
-    savedMasters: 'Сохранённые мастера',
+    editProfileSub: 'Фото, bio, контакты и личные данные',
     myBookings: 'Мои бронирования',
-    myBookingsSub: 'Предстоящие, завершённые и отменённые',
-    savedMastersSub: 'Мастера, которые вам понравились',
+    myBookingsSub: 'Предстоящие, завершённые и отменённые записи',
+    savedMasters: 'Сохранённые мастера',
+    savedMastersSub: 'Мастера, которые вам понравились и сохранены',
     savedPlaces: 'Сохранённые места',
-    savedPlacesSub: 'Любимые локации на карте',
-    messages: 'Сообщения',
-    messagesSub: 'Ваши чаты с мастерами',
-    balance: 'Баланс MapBook',
-    balanceSub: 'Пополнение, вывод и история операций',
-    inviteFriends: 'Пригласить друзей',
-    inviteFriendsSub: '1 друг = 1 бесплатное бронирование',
-    paymentMethods: 'Способы оплаты',
-    paymentMethodsSub: 'Карты, PayPal, Google Pay и крипта',
+    savedPlacesSub: 'Любимые локации на карте и маршруты',
+    balance: 'Баланс',
+    balanceSub: 'Кошелёк, возвраты и транзакции',
+    payments: 'Способы оплаты',
+    paymentsSub: 'Карты, PayPal, кошельки и выплаты',
     notifications: 'Уведомления',
-    notificationsSub: 'Push, сообщения и бронирования',
-    languageRegion: 'Язык и регион',
+    notificationsSub: 'Сообщения, бронирования и напоминания',
     help: 'Центр помощи',
-    helpSub: 'FAQ, поддержка и полезные статьи',
-    accountSettings: 'Настройки аккаунта',
-    accountSettingsSub: 'Личные данные, приватность и безопасность',
-    logout: 'Выйти',
-    bonusesTitle: 'Ваши бонусы',
-    bonusesSubtitle: 'Приглашайте друзей, получайте бонусы и бесплатные бронирования',
-    welcomeBonus: 'Приветственный бонус',
-    referralBookings: 'Бесплатные бронирования',
-    referralProgress: 'Друзей оплатили',
-    inviteButton: 'Пригласить',
-    verified: 'Аккаунт подтверждён',
-    availableNow: 'Доступно сейчас',
-    quickAccess: 'Быстрый доступ',
-    profileCardTitle: 'Ваш профиль',
-    memberSince: 'Пользователь MapBook',
-    walletAvailable: 'Доступный баланс',
-    accountLevel: 'Уровень аккаунта',
-    premiumUser: 'Премиум профиль',
-    viewAll: 'Смотреть всё',
+    helpSub: 'Ответы, поддержка и полезные гайды',
+    legal: 'Юридическая информация',
+    legalSub: 'Политики, правила и условия оплаты',
+    settings: 'Настройки аккаунта',
+    settingsSub: 'Приватность, безопасность и действия аккаунта',
+    languageRegion: 'Язык и регион',
+    languageRegionSub: 'Язык, страна, валюта и локация',
+    overview: 'Обзор',
+    bookingsCount: 'Бронирования',
+    savedCount: 'Сохранено',
+    walletReady: 'Кошелёк готов',
+    open: 'Открыть',
   },
   CZ: {
     title: 'Profil',
-    subtitle: 'Spravujte svůj účet, rezervace, bonusy a nastavení',
+    subtitle: 'Váš účet, aktivita a rychlé akce',
+    verified: 'Ověřeno',
+    secure: 'Bezpečný účet',
     editProfile: 'Upravit profil',
-    upcomingBookings: 'Nadcházející rezervace',
-    savedMasters: 'Uložení specialisté',
+    editProfileSub: 'Fotka, bio, kontakty a osobní údaje',
     myBookings: 'Moje rezervace',
-    myBookingsSub: 'Nadcházející, dokončené a zrušené',
-    savedMastersSub: 'Specialisté, kteří se vám líbí',
+    myBookingsSub: 'Nadcházející, dokončené a zrušené rezervace',
+    savedMasters: 'Uložení specialisté',
+    savedMastersSub: 'Specialisté, které jste si oblíbili',
     savedPlaces: 'Uložená místa',
-    savedPlacesSub: 'Oblíbené lokace na mapě',
-    messages: 'Zprávy',
-    messagesSub: 'Vaše chaty se specialisty',
-    balance: 'Zůstatek MapBook',
-    balanceSub: 'Dobití, výběr a historie',
-    inviteFriends: 'Pozvat přátele',
-    inviteFriendsSub: '1 přítel = 1 rezervace zdarma',
-    paymentMethods: 'Platební metody',
-    paymentMethodsSub: 'Karty, PayPal, Google Pay a crypto',
+    savedPlacesSub: 'Oblíbená místa na mapě a trasy',
+    balance: 'Zůstatek',
+    balanceSub: 'Peněženka, refundy a transakce',
+    payments: 'Platební metody',
+    paymentsSub: 'Karty, PayPal, peněženky a výplaty',
     notifications: 'Oznámení',
-    notificationsSub: 'Push, zprávy a rezervace',
-    languageRegion: 'Jazyk a region',
+    notificationsSub: 'Zprávy, rezervace a připomínky',
     help: 'Centrum pomoci',
-    helpSub: 'FAQ, podpora a užitečné články',
-    accountSettings: 'Nastavení účtu',
-    accountSettingsSub: 'Osobní údaje, soukromí a bezpečnost',
-    logout: 'Odhlásit se',
-    bonusesTitle: 'Vaše bonusy',
-    bonusesSubtitle: 'Pozvěte přátele, získejte odměny a rezervace zdarma',
-    welcomeBonus: 'Uvítací bonus',
-    referralBookings: 'Rezervace zdarma',
-    referralProgress: 'Přátelé zaplatili',
-    inviteButton: 'Pozvat',
-    verified: 'Účet ověřen',
-    availableNow: 'Dostupné nyní',
-    quickAccess: 'Rychlý přístup',
-    profileCardTitle: 'Váš profil',
-    memberSince: 'Člen MapBook',
-    walletAvailable: 'Dostupný zůstatek',
-    accountLevel: 'Úroveň účtu',
-    premiumUser: 'Premium profil',
-    viewAll: 'Zobrazit vše',
+    helpSub: 'Odpovědi, podpora a užitečné návody',
+    legal: 'Právní informace',
+    legalSub: 'Zásady, pravidla a platební podmínky',
+    settings: 'Nastavení účtu',
+    settingsSub: 'Soukromí, zabezpečení a akce účtu',
+    languageRegion: 'Jazyk a region',
+    languageRegionSub: 'Jazyk, země, měna a poloha',
+    overview: 'Přehled',
+    bookingsCount: 'Rezervace',
+    savedCount: 'Uloženo',
+    walletReady: 'Peněženka připravena',
+    open: 'Otevřít',
   },
   DE: {
     title: 'Profil',
-    subtitle: 'Verwalte dein Konto, Buchungen, Boni und Einstellungen',
+    subtitle: 'Dein Konto, Aktivität und Schnellzugriffe',
+    verified: 'Verifiziert',
+    secure: 'Geschütztes Konto',
     editProfile: 'Profil bearbeiten',
-    upcomingBookings: 'Bevorstehende Buchungen',
-    savedMasters: 'Gespeicherte Profis',
+    editProfileSub: 'Foto, Bio, Kontakte und persönliche Daten',
     myBookings: 'Meine Buchungen',
-    myBookingsSub: 'Bevorstehend, abgeschlossen und storniert',
-    savedMastersSub: 'Profis, die dir gefallen haben',
+    myBookingsSub: 'Bevorstehende, abgeschlossene und stornierte Buchungen',
+    savedMasters: 'Gespeicherte Profis',
+    savedMastersSub: 'Profis, die dir gefallen und die du gespeichert hast',
     savedPlaces: 'Gespeicherte Orte',
-    savedPlacesSub: 'Lieblingsorte auf der Karte',
-    messages: 'Nachrichten',
-    messagesSub: 'Deine Chats mit Profis',
-    balance: 'MapBook Guthaben',
-    balanceSub: 'Aufladen, auszahlen und Verlauf',
-    inviteFriends: 'Freunde einladen',
-    inviteFriendsSub: '1 Freund = 1 kostenlose Buchung',
-    paymentMethods: 'Zahlungsmethoden',
-    paymentMethodsSub: 'Karten, PayPal, Google Pay und Krypto',
+    savedPlacesSub: 'Lieblingsorte auf der Karte und Routen',
+    balance: 'Guthaben',
+    balanceSub: 'Wallet, Rückerstattungen und Transaktionen',
+    payments: 'Zahlungsmethoden',
+    paymentsSub: 'Karten, PayPal, Wallets und Auszahlungen',
     notifications: 'Benachrichtigungen',
-    notificationsSub: 'Push, Nachrichten und Buchungen',
-    languageRegion: 'Sprache & Region',
+    notificationsSub: 'Nachrichten, Buchungen und Erinnerungen',
     help: 'Hilfezentrum',
-    helpSub: 'FAQ, Support und nützliche Artikel',
-    accountSettings: 'Kontoeinstellungen',
-    accountSettingsSub: 'Persönliche Daten, Datenschutz und Sicherheit',
-    logout: 'Abmelden',
-    bonusesTitle: 'Deine Boni',
-    bonusesSubtitle: 'Lade Freunde ein, sammle Belohnungen und kostenlose Buchungen',
-    welcomeBonus: 'Willkommensbonus',
-    referralBookings: 'Kostenlose Buchungen',
-    referralProgress: 'Freunde bezahlt',
-    inviteButton: 'Einladen',
-    verified: 'Konto bestätigt',
-    availableNow: 'Jetzt verfügbar',
-    quickAccess: 'Schnellzugriff',
-    profileCardTitle: 'Dein Profil',
-    memberSince: 'MapBook Mitglied',
-    walletAvailable: 'Verfügbares Guthaben',
-    accountLevel: 'Kontostufe',
-    premiumUser: 'Premium Profil',
-    viewAll: 'Alles ansehen',
+    helpSub: 'Antworten, Support und nützliche Guides',
+    legal: 'Rechtliche Informationen',
+    legalSub: 'Richtlinien, Regeln und Zahlungsbedingungen',
+    settings: 'Kontoeinstellungen',
+    settingsSub: 'Datenschutz, Sicherheit und Kontoaktionen',
+    languageRegion: 'Sprache & Region',
+    languageRegionSub: 'Sprache, Land, Währung und Standort',
+    overview: 'Übersicht',
+    bookingsCount: 'Buchungen',
+    savedCount: 'Gespeichert',
+    walletReady: 'Wallet bereit',
+    open: 'Öffnen',
   },
   PL: {
     title: 'Profil',
-    subtitle: 'Zarządzaj kontem, rezerwacjami, bonusami i ustawieniami',
+    subtitle: 'Twoje konto, aktywność i szybkie działania',
+    verified: 'Zweryfikowano',
+    secure: 'Bezpieczne konto',
     editProfile: 'Edytuj profil',
-    upcomingBookings: 'Nadchodzące rezerwacje',
-    savedMasters: 'Zapisani specjaliści',
+    editProfileSub: 'Zdjęcie, bio, kontakty i dane osobowe',
     myBookings: 'Moje rezerwacje',
-    myBookingsSub: 'Nadchodzące, zakończone i anulowane',
-    savedMastersSub: 'Specjaliści, którzy Ci się spodobali',
+    myBookingsSub: 'Nadchodzące, zakończone i anulowane rezerwacje',
+    savedMasters: 'Zapisani specjaliści',
+    savedMastersSub: 'Specjaliści, których polubiłeś i zapisałeś',
     savedPlaces: 'Zapisane miejsca',
-    savedPlacesSub: 'Ulubione lokalizacje na mapie',
-    messages: 'Wiadomości',
-    messagesSub: 'Twoje czaty ze specjalistami',
-    balance: 'Saldo MapBook',
-    balanceSub: 'Doładowanie, wypłata i historia',
-    inviteFriends: 'Zaproś znajomych',
-    inviteFriendsSub: '1 znajomy = 1 darmowa rezerwacja',
-    paymentMethods: 'Metody płatności',
-    paymentMethodsSub: 'Karty, PayPal, Google Pay i krypto',
+    savedPlacesSub: 'Ulubione miejsca na mapie i trasy',
+    balance: 'Saldo',
+    balanceSub: 'Portfel, zwroty i transakcje',
+    payments: 'Metody płatności',
+    paymentsSub: 'Karty, PayPal, portfele i wypłaty',
     notifications: 'Powiadomienia',
-    notificationsSub: 'Push, wiadomości i rezerwacje',
-    languageRegion: 'Język i region',
+    notificationsSub: 'Wiadomości, rezerwacje i przypomnienia',
     help: 'Centrum pomocy',
-    helpSub: 'FAQ, wsparcie i przydatne artykuły',
-    accountSettings: 'Ustawienia konta',
-    accountSettingsSub: 'Dane osobowe, prywatność i bezpieczeństwo',
-    logout: 'Wyloguj się',
-    bonusesTitle: 'Twoje bonusy',
-    bonusesSubtitle: 'Zapraszaj znajomych, odbieraj bonusy i darmowe rezerwacje',
-    welcomeBonus: 'Bonus powitalny',
-    referralBookings: 'Darmowe rezerwacje',
-    referralProgress: 'Znajomi zapłacili',
-    inviteButton: 'Zaproś',
-    verified: 'Konto potwierdzone',
-    availableNow: 'Dostępne teraz',
-    quickAccess: 'Szybki dostęp',
-    profileCardTitle: 'Twój profil',
-    memberSince: 'Użytkownik MapBook',
-    walletAvailable: 'Dostępne saldo',
-    accountLevel: 'Poziom konta',
-    premiumUser: 'Profil premium',
-    viewAll: 'Zobacz wszystko',
+    helpSub: 'Odpowiedzi, wsparcie i przydatne poradniki',
+    legal: 'Informacje prawne',
+    legalSub: 'Polityki, zasady i warunki płatności',
+    settings: 'Ustawienia konta',
+    settingsSub: 'Prywatność, bezpieczeństwo i działania konta',
+    languageRegion: 'Język i region',
+    languageRegionSub: 'Język, kraj, waluta i lokalizacja',
+    overview: 'Przegląd',
+    bookingsCount: 'Rezerwacje',
+    savedCount: 'Zapisane',
+    walletReady: 'Portfel gotowy',
+    open: 'Otwórz',
   },
 } as const;
 
-type MenuItem = {
+type ProfileCardItem = {
   id: string;
   title: string;
-  subtitle?: string;
-  href?: string;
-  rightLabel?: string;
-  danger?: boolean;
+  subtitle: string;
   icon: string;
-  accent?: 'pink' | 'green' | 'blue' | 'violet' | 'orange' | 'neutral' | 'danger';
+  accent: 'pink' | 'green' | 'blue' | 'violet' | 'orange';
+  onClick: () => void;
 };
 
-function getAccentStyles(
-  accent: MenuItem['accent'] = 'neutral',
-  filled = false
-): CSSProperties {
-  if (accent === 'pink') {
-    return filled
-      ? { background: '#ff4fa0', color: '#fff' }
-      : { background: '#fff1f7', color: '#ff4fa0' };
-  }
-
-  if (accent === 'green') {
-    return filled
-      ? { background: '#2fa35a', color: '#fff' }
-      : { background: '#eef9f1', color: '#2fa35a' };
-  }
-
-  if (accent === 'blue') {
-    return filled
-      ? { background: '#2f7cf6', color: '#fff' }
-      : { background: '#eef4ff', color: '#2f7cf6' };
-  }
-
-  if (accent === 'violet') {
-    return filled
-      ? { background: '#7a5af8', color: '#fff' }
-      : { background: '#f3efff', color: '#7a5af8' };
-  }
-
-  if (accent === 'orange') {
-    return filled
-      ? { background: '#f59e0b', color: '#fff' }
-      : { background: '#fff6e8', color: '#d97706' };
-  }
-
-  if (accent === 'danger') {
-    return filled
-      ? { background: '#ef4444', color: '#fff' }
-      : { background: '#fff1f1', color: '#ef4444' };
-  }
-
-  return filled
-    ? { background: '#2f241c', color: '#fff' }
-    : { background: '#f6efe6', color: '#5f5247' };
+function accentStyles(accent: ProfileCardItem['accent']) {
+  if (accent === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
+  if (accent === 'green') return { background: '#eef9f1', color: '#2fa35a' };
+  if (accent === 'blue') return { background: '#eef4ff', color: '#2f7cf6' };
+  if (accent === 'violet') return { background: '#f3efff', color: '#7a5af8' };
+  return { background: '#fff5e8', color: '#d68612' };
 }
 
 export default function ProfilePage() {
   const router = useRouter();
 
-  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [language, setLanguage] = useState<AppLanguage>('EN');
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
-  const [bookingsCount, setBookingsCount] = useState(0);
-  const [savedMastersCount, setSavedMastersCount] = useState(
-    getUserProfile().savedMastersCount
-  );
-  const [availableBalance, setAvailableBalance] = useState(
-    getWalletState().availableBalance
-  );
-  const [welcomeBonus, setWelcomeBonus] = useState(
-    getWalletState().welcomeBonus
-  );
-  const [referralFreeBookings, setReferralFreeBookings] = useState(
-    getReferralState().freeBookingsAvailable
-  );
-  const [paidFriendsCount, setPaidFriendsCount] = useState(
-    getReferralState().completedReferralsCount || 0
-  );
+  const [wallet, setWallet] = useState<WalletState>(getWalletState());
+  const [bookings, setBookings] = useState<BookingItem[]>(getBookings());
+  const [likedIds, setLikedIds] = useState<(string | number)[]>(getLikedMasterIds());
 
   useEffect(() => {
-    const syncLanguage = () => {
-      setLanguage(getSavedLanguage());
-    };
-
-    const syncProfile = () => {
-      const next = getUserProfile();
-      setProfile(next);
-      setSavedMastersCount(next.savedMastersCount);
-    };
-
-    const syncBookings = () => {
-      const all = getBookings();
-      const nextCount = all.filter(
-        (booking) => booking.status === 'upcoming' || booking.status === 'pending'
-      ).length;
-      setBookingsCount(nextCount);
-    };
-
-    const syncWallet = () => {
-      const wallet = getWalletState();
-      setAvailableBalance(wallet.availableBalance);
-      setWelcomeBonus(wallet.welcomeBonus);
-    };
-
-    const syncReferral = () => {
-      const referral = getReferralState();
-      setReferralFreeBookings(referral.freeBookingsAvailable);
-      setPaidFriendsCount(referral.completedReferralsCount || 0);
-    };
+    const syncLanguage = () => setLanguage(getSavedLanguage());
+    const syncProfile = () => setProfile(getUserProfile());
+    const syncWallet = () => setWallet(getWalletState());
+    const syncBookings = () => setBookings(getBookings());
+    const syncLiked = () => setLikedIds(getLikedMasterIds());
 
     syncLanguage();
     syncProfile();
-    syncBookings();
     syncWallet();
-    syncReferral();
+    syncBookings();
+    syncLiked();
 
-    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
-      setLanguage(nextLanguage);
-    });
-
+    window.addEventListener('focus', syncLanguage);
     const unsubProfile = subscribeToUserProfile(syncProfile);
-    const unsubBookings = subscribeToBookingsStore(syncBookings);
     const unsubWallet = subscribeToWalletStore(syncWallet);
-    const unsubReferral = subscribeToReferralStore(syncReferral);
+    const unsubBookings = subscribeToBookingsStore(syncBookings);
+    const unsubLiked = subscribeToLikedMasters(syncLiked);
 
     return () => {
-      unsubLanguage();
+      window.removeEventListener('focus', syncLanguage);
       unsubProfile();
-      unsubBookings();
       unsubWallet();
-      unsubReferral();
+      unsubBookings();
+      unsubLiked();
     };
   }, []);
 
-  const text = profileTexts[language as keyof typeof profileTexts] || profileTexts.EN;
-
-  const menuItems = useMemo<MenuItem[]>(
-    () => [
-      {
-        id: 'bookings',
-        title: text.myBookings,
-        subtitle: text.myBookingsSub,
-        href: '/profile/bookings',
-        icon: '📅',
-        accent: 'green',
-      },
-      {
-        id: 'saved-masters',
-        title: text.savedMasters,
-        subtitle: text.savedMastersSub,
-        href: '/profile/saved-masters',
-        rightLabel: savedMastersCount > 0 ? String(savedMastersCount) : undefined,
-        icon: '❤️',
-        accent: 'pink',
-      },
-      {
-        id: 'saved-places',
-        title: text.savedPlaces,
-        subtitle: text.savedPlacesSub,
-        href: '/profile/saved-places',
-        icon: '📍',
-        accent: 'orange',
-      },
-      {
-        id: 'messages',
-        title: text.messages,
-        subtitle: text.messagesSub,
-        href: '/messages',
-        icon: '✉️',
-        accent: 'blue',
-      },
-      {
-        id: 'balance',
-        title: text.balance,
-        subtitle: text.balanceSub,
-        href: '/profile/balance',
-        rightLabel: `£${availableBalance.toFixed(2)}`,
-        icon: '💳',
-        accent: 'violet',
-      },
-      {
-        id: 'invite',
-        title: text.inviteFriends,
-        subtitle: text.inviteFriendsSub,
-        href: '/profile/invite',
-        rightLabel: referralFreeBookings > 0 ? `${referralFreeBookings}` : undefined,
-        icon: '🎁',
-        accent: 'pink',
-      },
-      {
-        id: 'payments',
-        title: text.paymentMethods,
-        subtitle: text.paymentMethodsSub,
-        href: '/profile/payments',
-        icon: '💼',
-        accent: 'blue',
-      },
-      {
-        id: 'notifications',
-        title: text.notifications,
-        subtitle: text.notificationsSub,
-        href: '/profile/notifications',
-        icon: '🔔',
-        accent: 'orange',
-      },
-      {
-        id: 'language-region',
-        title: text.languageRegion,
-        subtitle: `${profile.language} · ${profile.region}`,
-        href: '/profile/language-region',
-        icon: '🌍',
-        accent: 'green',
-      },
-      {
-        id: 'help',
-        title: text.help,
-        subtitle: text.helpSub,
-        href: '/profile/help',
-        icon: '❓',
-        accent: 'violet',
-      },
-      {
-        id: 'settings',
-        title: text.accountSettings,
-        subtitle: text.accountSettingsSub,
-        href: '/profile/settings',
-        icon: '⚙️',
-        accent: 'neutral',
-      },
-      {
-        id: 'logout',
-        title: text.logout,
-        danger: true,
-        href: '/',
-        icon: '⎋',
-        accent: 'danger',
-      },
-    ],
-    [
-      availableBalance,
-      profile.language,
-      profile.region,
-      referralFreeBookings,
-      savedMastersCount,
-      text.accountSettings,
-      text.accountSettingsSub,
-      text.balance,
-      text.balanceSub,
-      text.help,
-      text.helpSub,
-      text.inviteFriends,
-      text.inviteFriendsSub,
-      text.languageRegion,
-      text.logout,
-      text.messages,
-      text.messagesSub,
-      text.myBookings,
-      text.myBookingsSub,
-      text.notifications,
-      text.notificationsSub,
-      text.paymentMethods,
-      text.paymentMethodsSub,
-      text.savedMasters,
-      text.savedMastersSub,
-      text.savedPlaces,
-      text.savedPlacesSub,
-    ]
+  const text = useMemo(
+    () => profileTexts[language as keyof typeof profileTexts] || profileTexts.EN,
+    [language]
   );
+
+  const upcomingCount = useMemo(
+    () => bookings.filter((item) => item.status === 'upcoming' || item.status === 'pending').length,
+    [bookings]
+  );
+
+  const cards: ProfileCardItem[] = [
+    {
+      id: 'edit',
+      title: text.editProfile,
+      subtitle: text.editProfileSub,
+      icon: '👤',
+      accent: 'blue',
+      onClick: () => router.push('/profile/edit'),
+    },
+    {
+      id: 'bookings',
+      title: text.myBookings,
+      subtitle: text.myBookingsSub,
+      icon: '📅',
+      accent: 'green',
+      onClick: () => router.push('/profile/bookings'),
+    },
+    {
+      id: 'saved-masters',
+      title: text.savedMasters,
+      subtitle: text.savedMastersSub,
+      icon: '❤️',
+      accent: 'pink',
+      onClick: () => router.push('/profile/saved-masters'),
+    },
+    {
+      id: 'saved-places',
+      title: text.savedPlaces,
+      subtitle: text.savedPlacesSub,
+      icon: '📍',
+      accent: 'orange',
+      onClick: () => router.push('/profile/saved-places'),
+    },
+    {
+      id: 'balance',
+      title: text.balance,
+      subtitle: text.balanceSub,
+      icon: '💼',
+      accent: 'violet',
+      onClick: () => router.push('/profile/balance'),
+    },
+    {
+      id: 'payments',
+      title: text.payments,
+      subtitle: text.paymentsSub,
+      icon: '💳',
+      accent: 'green',
+      onClick: () => router.push('/profile/payments'),
+    },
+    {
+      id: 'notifications',
+      title: text.notifications,
+      subtitle: text.notificationsSub,
+      icon: '🔔',
+      accent: 'pink',
+      onClick: () => router.push('/profile/notifications'),
+    },
+    {
+      id: 'help',
+      title: text.help,
+      subtitle: text.helpSub,
+      icon: '❓',
+      accent: 'orange',
+      onClick: () => router.push('/profile/help'),
+    },
+    {
+      id: 'legal',
+      title: text.legal,
+      subtitle: text.legalSub,
+      icon: '⚖️',
+      accent: 'blue',
+      onClick: () => router.push('/profile/legal'),
+    },
+    {
+      id: 'language-region',
+      title: text.languageRegion,
+      subtitle: text.languageRegionSub,
+      icon: '🌍',
+      accent: 'violet',
+      onClick: () => router.push('/profile/language-region'),
+    },
+    {
+      id: 'settings',
+      title: text.settings,
+      subtitle: text.settingsSub,
+      icon: '⚙️',
+      accent: 'green',
+      onClick: () => router.push('/profile/settings'),
+    },
+  ];
 
   return (
     <main
@@ -565,88 +385,30 @@ export default function ProfilePage() {
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            gap: 14,
-            alignItems: 'start',
-          }}
-        >
-          <div>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '7px 12px',
-                borderRadius: 999,
-                background: '#fff',
-                border: '1px solid #efe4d7',
-                boxShadow: '0 8px 20px rgba(44, 23, 10, 0.04)',
-                marginBottom: 12,
-              }}
-            >
-              <span style={{ fontSize: 14 }}>👤</span>
-              <span
-                style={{
-                  fontSize: 12,
-                  fontWeight: 900,
-                  color: '#6f6458',
-                  letterSpacing: 0.3,
-                }}
-              >
-                {text.profileCardTitle}
-              </span>
-            </div>
-
-            <h1
-              style={{
-                fontSize: 40,
-                lineHeight: 1.02,
-                fontWeight: 900,
-                color: '#17130f',
-                margin: 0,
-              }}
-            >
-              {text.title}
-            </h1>
-
-            <p
-              style={{
-                marginTop: 8,
-                fontSize: 15,
-                lineHeight: 1.55,
-                color: '#7b7268',
-                fontWeight: 700,
-              }}
-            >
-              {text.subtitle}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => router.push('/profile/settings')}
+        <div style={{ marginBottom: 18 }}>
+          <div
             style={{
-              width: 58,
-              height: 58,
-              borderRadius: 999,
-              border: '1px solid #efe4d7',
-              background: '#fff',
               fontSize: 24,
-              color: '#241c16',
-              boxShadow: '0 10px 24px rgba(44, 23, 10, 0.06)',
-              cursor: 'pointer',
+              fontWeight: 900,
+              color: '#17130f',
             }}
           >
-            ⚙️
-          </button>
+            {text.title}
+          </div>
+          <div
+            style={{
+              marginTop: 4,
+              fontSize: 13,
+              color: '#7b7268',
+              fontWeight: 700,
+            }}
+          >
+            {text.subtitle}
+          </div>
         </div>
 
         <div
           style={{
-            marginTop: 18,
             borderRadius: 32,
             border: '1px solid #efe4d7',
             background: '#fff',
@@ -657,80 +419,41 @@ export default function ProfilePage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '88px 1fr',
-              gap: 16,
+              gridTemplateColumns: '84px 1fr',
+              gap: 14,
               alignItems: 'center',
             }}
           >
-            <div style={{ position: 'relative' }}>
-              <img
-                src={profile.avatar}
-                alt={profile.fullName}
-                style={{
-                  width: 88,
-                  height: 88,
-                  borderRadius: 28,
-                  objectFit: 'cover',
-                  display: 'block',
-                  boxShadow: '0 12px 26px rgba(44, 23, 10, 0.12)',
-                }}
-              />
-
-              <div
-                style={{
-                  position: 'absolute',
-                  right: -4,
-                  bottom: -4,
-                  width: 26,
-                  height: 26,
-                  borderRadius: 999,
-                  background: '#2fa35a',
-                  border: '3px solid #fff',
-                  boxShadow: '0 6px 14px rgba(47,163,90,0.22)',
-                }}
-              />
-            </div>
+            <img
+              src={profile.avatar}
+              alt={profile.fullName}
+              style={{
+                width: 84,
+                height: 84,
+                borderRadius: 28,
+                objectFit: 'cover',
+                display: 'block',
+                boxShadow: '0 10px 22px rgba(44, 23, 10, 0.10)',
+              }}
+            />
 
             <div style={{ minWidth: 0 }}>
               <div
                 style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  gap: 8,
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: '#17130f',
+                  lineHeight: 1.1,
                 }}
               >
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: 24,
-                    fontWeight: 900,
-                    color: '#17130f',
-                    lineHeight: 1.1,
-                  }}
-                >
-                  {profile.fullName}
-                </h2>
-
-                <span
-                  style={{
-                    ...getAccentStyles('green', false),
-                    borderRadius: 999,
-                    padding: '7px 10px',
-                    fontSize: 11,
-                    fontWeight: 900,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {text.availableNow}
-                </span>
+                {profile.fullName}
               </div>
 
               <div
                 style={{
-                  marginTop: 8,
-                  fontSize: 15,
-                  color: '#73695f',
+                  marginTop: 6,
+                  fontSize: 14,
+                  color: '#7b7268',
                   fontWeight: 700,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -741,478 +464,183 @@ export default function ProfilePage() {
 
               <div
                 style={{
-                  marginTop: 4,
-                  fontSize: 15,
-                  color: '#73695f',
-                  fontWeight: 700,
-                }}
-              >
-                {profile.phone}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 4,
-                  fontSize: 15,
-                  color: '#73695f',
-                  fontWeight: 700,
-                }}
-              >
-                {profile.city}
-              </div>
-
-              <div
-                style={{
                   marginTop: 10,
                   display: 'flex',
                   flexWrap: 'wrap',
                   gap: 8,
                 }}
               >
-                {profile.isVerified && (
-                  <div
+                <span
+                  style={{
+                    borderRadius: 999,
+                    padding: '8px 12px',
+                    background: '#eef9f1',
+                    color: '#2fa35a',
+                    fontSize: 12,
+                    fontWeight: 900,
+                  }}
+                >
+                  {text.secure}
+                </span>
+
+                {profile.isVerified ? (
+                  <span
                     style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 8,
                       borderRadius: 999,
-                      padding: '9px 12px',
-                      ...getAccentStyles('green', false),
+                      padding: '8px 12px',
+                      background: '#eef4ff',
+                      color: '#2f7cf6',
                       fontSize: 12,
                       fontWeight: 900,
                     }}
                   >
-                    <span>🛡️</span>
-                    <span>{text.verified}</span>
-                  </div>
-                )}
-
-                <div
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    borderRadius: 999,
-                    padding: '9px 12px',
-                    ...getAccentStyles('blue', false),
-                    fontSize: 12,
-                    fontWeight: 900,
-                  }}
-                >
-                  <span>✨</span>
-                  <span>{text.memberSince}</span>
-                </div>
+                    {text.verified}
+                  </span>
+                ) : null}
               </div>
             </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 10,
-            }}
-          >
-            <div
-              style={{
-                borderRadius: 22,
-                padding: 14,
-                ...getAccentStyles('violet', false),
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  lineHeight: 1.3,
-                  fontWeight: 800,
-                  opacity: 0.9,
-                }}
-              >
-                {text.walletAvailable}
-              </div>
-              <div
-                style={{
-                  marginTop: 8,
-                  fontSize: 28,
-                  fontWeight: 900,
-                  lineHeight: 1,
-                }}
-              >
-                £{availableBalance.toFixed(2)}
-              </div>
-            </div>
-
-            <div
-              style={{
-                borderRadius: 22,
-                padding: 14,
-                ...getAccentStyles('pink', false),
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  lineHeight: 1.3,
-                  fontWeight: 800,
-                  opacity: 0.9,
-                }}
-              >
-                {text.accountLevel}
-              </div>
-              <div
-                style={{
-                  marginTop: 8,
-                  fontSize: 20,
-                  fontWeight: 900,
-                  lineHeight: 1.1,
-                }}
-              >
-                {text.premiumUser}
-              </div>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => router.push('/profile/edit')}
-            style={{
-              marginTop: 18,
-              width: '100%',
-              border: 'none',
-              borderRadius: 22,
-              padding: '17px 18px',
-              background: 'linear-gradient(180deg, #2b221c 0%, #1f1712 100%)',
-              color: '#fff',
-              fontSize: 17,
-              fontWeight: 900,
-              cursor: 'pointer',
-              boxShadow: '0 14px 28px rgba(31,23,18,0.20)',
-            }}
-          >
-            {text.editProfile}
-          </button>
-        </div>
-
-        {(welcomeBonus > 0 || referralFreeBookings > 0 || paidFriendsCount > 0) && (
-          <div
-            style={{
-              marginTop: 18,
-              borderRadius: 30,
-              border: '1px solid #f0e3d7',
-              background: 'linear-gradient(180deg, #ffffff 0%, #fff8f5 100%)',
-              padding: 18,
-              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 14,
-                alignItems: 'flex-start',
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    fontSize: 22,
-                    fontWeight: 900,
-                    color: '#17130f',
-                  }}
-                >
-                  {text.bonusesTitle}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 6,
-                    fontSize: 14,
-                    lineHeight: 1.45,
-                    color: '#7b7268',
-                    fontWeight: 700,
-                  }}
-                >
-                  {text.bonusesSubtitle}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => router.push('/profile/invite')}
-                style={{
-                  ...getAccentStyles('pink', true),
-                  border: 'none',
-                  borderRadius: 18,
-                  minHeight: 52,
-                  padding: '0 18px',
-                  fontSize: 15,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  boxShadow: '0 12px 24px rgba(255,79,160,0.22)',
-                }}
-              >
-                {text.inviteButton}
-              </button>
-            </div>
-
-            <div
-              style={{
-                marginTop: 16,
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                gap: 10,
-              }}
-            >
-              <div
-                style={{
-                  borderRadius: 22,
-                  padding: 14,
-                  ...getAccentStyles('orange', false),
-                }}
-              >
-                <div style={{ fontSize: 20, marginBottom: 8 }}>🎉</div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    lineHeight: 1.3,
-                    fontWeight: 800,
-                    opacity: 0.88,
-                    minHeight: 30,
-                  }}
-                >
-                  {text.welcomeBonus}
-                </div>
-                <div
-                  style={{
-                    marginTop: 8,
-                    fontSize: 26,
-                    fontWeight: 900,
-                  }}
-                >
-                  £{welcomeBonus.toFixed(2)}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  borderRadius: 22,
-                  padding: 14,
-                  ...getAccentStyles('green', false),
-                }}
-              >
-                <div style={{ fontSize: 20, marginBottom: 8 }}>✅</div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    lineHeight: 1.3,
-                    fontWeight: 800,
-                    opacity: 0.88,
-                    minHeight: 30,
-                  }}
-                >
-                  {text.referralProgress}
-                </div>
-                <div
-                  style={{
-                    marginTop: 8,
-                    fontSize: 26,
-                    fontWeight: 900,
-                  }}
-                >
-                  {paidFriendsCount}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  borderRadius: 22,
-                  padding: 14,
-                  ...getAccentStyles('pink', false),
-                }}
-              >
-                <div style={{ fontSize: 20, marginBottom: 8 }}>🎁</div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    lineHeight: 1.3,
-                    fontWeight: 800,
-                    opacity: 0.88,
-                    minHeight: 30,
-                  }}
-                >
-                  {text.referralBookings}
-                </div>
-                <div
-                  style={{
-                    marginTop: 8,
-                    fontSize: 26,
-                    fontWeight: 900,
-                  }}
-                >
-                  {referralFreeBookings}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div style={{ marginTop: 18 }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: 12,
-              alignItems: 'center',
-              marginBottom: 12,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.quickAccess}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => router.push('/profile/bookings')}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                color: '#ff4fa0',
-                fontSize: 14,
-                fontWeight: 900,
-                cursor: 'pointer',
-              }}
-            >
-              {text.viewAll}
-            </button>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 12,
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => router.push('/profile/bookings')}
-              style={{
-                border: 'none',
-                borderRadius: 28,
-                padding: 18,
-                textAlign: 'left',
-                background: 'linear-gradient(180deg, #2d241d 0%, #1f1712 100%)',
-                color: '#fff',
-                boxShadow: '0 12px 26px rgba(31,23,18,0.16)',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ fontSize: 24, marginBottom: 10 }}>📅</div>
-              <div
-                style={{
-                  fontSize: 13,
-                  lineHeight: 1.35,
-                  color: '#dbcfc1',
-                  fontWeight: 800,
-                  minHeight: 34,
-                }}
-              >
-                {text.upcomingBookings}
-              </div>
-              <div
-                style={{
-                  marginTop: 10,
-                  fontSize: 40,
-                  fontWeight: 900,
-                  lineHeight: 1,
-                }}
-              >
-                {bookingsCount}
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => router.push('/profile/saved-masters')}
-              style={{
-                border: '1px solid #efe4d7',
-                borderRadius: 28,
-                padding: 18,
-                textAlign: 'left',
-                background: '#fff',
-                color: '#17130f',
-                boxShadow: '0 12px 26px rgba(44, 23, 10, 0.05)',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ fontSize: 24, marginBottom: 10 }}>❤️</div>
-              <div
-                style={{
-                  fontSize: 13,
-                  lineHeight: 1.35,
-                  color: '#7a7167',
-                  fontWeight: 800,
-                  minHeight: 34,
-                }}
-              >
-                {text.savedMasters}
-              </div>
-              <div
-                style={{
-                  marginTop: 10,
-                  fontSize: 40,
-                  fontWeight: 900,
-                  lineHeight: 1,
-                  color: '#17130f',
-                }}
-              >
-                {savedMastersCount}
-              </div>
-            </button>
           </div>
         </div>
 
         <div
           style={{
             marginTop: 18,
-            overflow: 'hidden',
             borderRadius: 30,
             border: '1px solid #efe4d7',
-            background: '#fff',
+            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
+            padding: 16,
             boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
-          {menuItems.map((item, index) => {
-            const accentStyles = getAccentStyles(item.accent, false);
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 12,
+            }}
+          >
+            {text.overview}
+          </div>
 
-            const content = (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr',
+              gap: 10,
+            }}
+          >
+            <div
+              style={{
+                borderRadius: 22,
+                background: '#fff',
+                border: '1px solid #f1e8dc',
+                padding: 14,
+              }}
+            >
+              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800 }}>
+                {text.bookingsCount}
+              </div>
               <div
                 style={{
+                  marginTop: 8,
+                  fontSize: 24,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {upcomingCount}
+              </div>
+            </div>
+
+            <div
+              style={{
+                borderRadius: 22,
+                background: '#fff',
+                border: '1px solid #f1e8dc',
+                padding: 14,
+              }}
+            >
+              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800 }}>
+                {text.savedCount}
+              </div>
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 24,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {likedIds.length}
+              </div>
+            </div>
+
+            <div
+              style={{
+                borderRadius: 22,
+                background: '#fff',
+                border: '1px solid #f1e8dc',
+                padding: 14,
+              }}
+            >
+              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800 }}>
+                {text.walletReady}
+              </div>
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 24,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                £{wallet.availableBalance.toFixed(0)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 18,
+            display: 'grid',
+            gap: 12,
+          }}
+        >
+          {cards.map((item) => {
+            const accent = accentStyles(item.accent);
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={item.onClick}
+                style={{
+                  width: '100%',
                   display: 'grid',
-                  gridTemplateColumns: '44px 1fr auto',
+                  gridTemplateColumns: '46px 1fr auto',
                   gap: 14,
                   alignItems: 'center',
-                  padding: '16px 18px',
-                  borderTop: index !== 0 ? '1px solid #f4eadf' : 'none',
+                  border: '1px solid #efe4d7',
+                  borderRadius: 30,
+                  background: '#fff',
+                  padding: 16,
+                  textAlign: 'left',
+                  boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+                  cursor: 'pointer',
                 }}
               >
                 <div
                   style={{
-                    width: 44,
-                    height: 44,
+                    width: 46,
+                    height: 46,
                     borderRadius: 16,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 20,
-                    ...accentStyles,
+                    fontSize: 22,
+                    ...accent,
                   }}
                 >
                   {item.icon}
@@ -1221,91 +649,36 @@ export default function ProfilePage() {
                 <div style={{ minWidth: 0 }}>
                   <div
                     style={{
-                      fontSize: 15,
+                      fontSize: 16,
                       fontWeight: 900,
-                      color: item.danger ? '#ef4444' : '#17130f',
+                      color: '#17130f',
                     }}
                   >
                     {item.title}
                   </div>
-
-                  {item.subtitle ? (
-                    <div
-                      style={{
-                        marginTop: 4,
-                        fontSize: 13,
-                        lineHeight: 1.45,
-                        color: '#7b7268',
-                        fontWeight: 700,
-                      }}
-                    >
-                      {item.subtitle}
-                    </div>
-                  ) : null}
-                </div>
-
-                {!item.danger ? (
                   <div
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
+                      marginTop: 4,
+                      fontSize: 13,
+                      lineHeight: 1.45,
+                      color: '#7b7268',
+                      fontWeight: 700,
                     }}
                   >
-                    {item.rightLabel ? (
-                      <span
-                        style={{
-                          borderRadius: 999,
-                          padding: '7px 10px',
-                          ...getAccentStyles(item.accent, false),
-                          fontSize: 12,
-                          fontWeight: 900,
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {item.rightLabel}
-                      </span>
-                    ) : null}
-
-                    <span
-                      style={{
-                        fontSize: 20,
-                        color: '#938475',
-                        fontWeight: 900,
-                      }}
-                    >
-                      ›
-                    </span>
+                    {item.subtitle}
                   </div>
-                ) : (
-                  <span
-                    style={{
-                      fontSize: 20,
-                      color: '#ef4444',
-                      fontWeight: 900,
-                    }}
-                  >
-                    ›
-                  </span>
-                )}
-              </div>
-            );
+                </div>
 
-            if (!item.href) {
-              return <div key={item.id}>{content}</div>;
-            }
-
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                style={{
-                  display: 'block',
-                  textDecoration: 'none',
-                }}
-              >
-                {content}
-              </Link>
+                <span
+                  style={{
+                    fontSize: 18,
+                    color: '#938475',
+                    fontWeight: 900,
+                  }}
+                >
+                  {text.open}
+                </span>
+              </button>
             );
           })}
         </div>
