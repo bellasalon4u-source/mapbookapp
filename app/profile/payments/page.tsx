@@ -43,6 +43,12 @@ const paymentTexts = {
     bankAvailable: 'Business and manual transfer available',
     trusted: 'Trusted payments',
     trustedSub: 'Your checkout methods are ready and protected',
+    paymentOverview: 'Payment overview',
+    checkoutReady: 'Checkout ready',
+    walletReady: 'Wallet ready',
+    fastProtected: 'Fast and protected',
+    sectionActions: 'Quick actions',
+    manageAll: 'Manage all methods',
   },
   ES: {
     title: 'Métodos de pago',
@@ -76,6 +82,12 @@ const paymentTexts = {
     bankAvailable: 'Transferencia manual y pagos para empresas disponibles',
     trusted: 'Pagos seguros',
     trustedSub: 'Tus métodos de pago están listos y protegidos',
+    paymentOverview: 'Resumen de pagos',
+    checkoutReady: 'Checkout listo',
+    walletReady: 'Billetera lista',
+    fastProtected: 'Rápido y protegido',
+    sectionActions: 'Acciones rápidas',
+    manageAll: 'Gestionar todos los métodos',
   },
   RU: {
     title: 'Способы оплаты',
@@ -109,6 +121,12 @@ const paymentTexts = {
     bankAvailable: 'Доступны business и manual transfer',
     trusted: 'Надёжные платежи',
     trustedSub: 'Ваши способы оплаты готовы и защищены',
+    paymentOverview: 'Обзор платежей',
+    checkoutReady: 'Checkout готов',
+    walletReady: 'Кошелёк готов',
+    fastProtected: 'Быстро и защищённо',
+    sectionActions: 'Быстрые действия',
+    manageAll: 'Управлять всеми способами',
   },
   CZ: {
     title: 'Platební metody',
@@ -142,6 +160,12 @@ const paymentTexts = {
     bankAvailable: 'Dostupný ruční a firemní převod',
     trusted: 'Důvěryhodné platby',
     trustedSub: 'Vaše platební metody jsou připravené a chráněné',
+    paymentOverview: 'Přehled plateb',
+    checkoutReady: 'Checkout připraven',
+    walletReady: 'Peněženka připravena',
+    fastProtected: 'Rychlé a chráněné',
+    sectionActions: 'Rychlé akce',
+    manageAll: 'Spravovat všechny metody',
   },
   DE: {
     title: 'Zahlungsmethoden',
@@ -175,6 +199,12 @@ const paymentTexts = {
     bankAvailable: 'Manuelle und Business-Überweisung verfügbar',
     trusted: 'Sichere Zahlungen',
     trustedSub: 'Deine Zahlungsmethoden sind bereit und geschützt',
+    paymentOverview: 'Zahlungsübersicht',
+    checkoutReady: 'Checkout bereit',
+    walletReady: 'Wallet bereit',
+    fastProtected: 'Schnell und geschützt',
+    sectionActions: 'Schnellaktionen',
+    manageAll: 'Alle Methoden verwalten',
   },
   PL: {
     title: 'Metody płatności',
@@ -208,6 +238,12 @@ const paymentTexts = {
     bankAvailable: 'Dostępny przelew ręczny i firmowy',
     trusted: 'Bezpieczne płatności',
     trustedSub: 'Twoje metody płatności są gotowe i chronione',
+    paymentOverview: 'Przegląd płatności',
+    checkoutReady: 'Checkout gotowy',
+    walletReady: 'Portfel gotowy',
+    fastProtected: 'Szybko i bezpiecznie',
+    sectionActions: 'Szybkie akcje',
+    manageAll: 'Zarządzaj wszystkimi metodami',
   },
 } as const;
 
@@ -217,6 +253,16 @@ function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange' | 'neutral') {
   if (kind === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
   if (kind === 'orange') return { background: '#fff5e8', color: '#d68612' };
   return { background: '#f4efe8', color: '#6d6258' };
+}
+
+function sectionCardStyle(): React.CSSProperties {
+  return {
+    borderRadius: 30,
+    border: '1px solid #efe4d7',
+    background: '#fff',
+    padding: 18,
+    boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+  };
 }
 
 export default function PaymentsPage() {
@@ -250,6 +296,14 @@ export default function PaymentsPage() {
     () => paymentTexts[language as keyof typeof paymentTexts] || paymentTexts.EN,
     [language]
   );
+
+  const totalMethods =
+    (payments.savedCards?.length || 0) +
+    (payments.paypalEmail ? 1 : 0) +
+    (payments.applePayEnabled ? 1 : 0) +
+    (payments.googlePayEnabled ? 1 : 0) +
+    (payments.cryptoWallets?.length || 0) +
+    (payments.bankTransferEnabled ? 1 : 0);
 
   return (
     <main
@@ -286,15 +340,7 @@ export default function PaymentsPage() {
           </button>
 
           <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                fontSize: 22,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.title}
-            </div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: '#17130f' }}>{text.title}</div>
             <div
               style={{
                 marginTop: 4,
@@ -322,28 +368,45 @@ export default function PaymentsPage() {
         >
           <div
             style={{
-              fontSize: 20,
-              fontWeight: 900,
-              color: '#17130f',
+              display: 'grid',
+              gridTemplateColumns: '1fr auto',
+              gap: 14,
+              alignItems: 'start',
             }}
           >
-            {text.trusted}
-          </div>
-          <div
-            style={{
-              marginTop: 6,
-              fontSize: 14,
-              lineHeight: 1.55,
-              color: '#7b7268',
-              fontWeight: 700,
-            }}
-          >
-            {text.trustedSub}
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#17130f' }}>{text.trusted}</div>
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 14,
+                  lineHeight: 1.55,
+                  color: '#7b7268',
+                  fontWeight: 700,
+                }}
+              >
+                {text.trustedSub}
+              </div>
+            </div>
+
+            <div
+              style={{
+                minWidth: 82,
+                borderRadius: 20,
+                background: '#fff1f7',
+                color: '#ff4fa0',
+                padding: '14px 12px',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: 26, fontWeight: 900, lineHeight: 1 }}>{totalMethods}</div>
+              <div style={{ marginTop: 4, fontSize: 11, fontWeight: 900 }}>{text.available}</div>
+            </div>
           </div>
 
           <div
             style={{
-              marginTop: 14,
+              marginTop: 16,
               display: 'flex',
               flexWrap: 'wrap',
               gap: 10,
@@ -371,19 +434,62 @@ export default function PaymentsPage() {
             >
               {text.instantCheckout}
             </span>
+            <span
+              style={{
+                ...badgeStyle('orange'),
+                borderRadius: 999,
+                padding: '10px 12px',
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              {text.fastProtected}
+            </span>
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 10,
+            }}
+          >
+            <button
+              type="button"
+              style={{
+                height: 52,
+                borderRadius: 18,
+                border: '1px solid #f1d9e6',
+                background: '#fff1f7',
+                color: '#ff4fa0',
+                fontSize: 14,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              {text.addNew}
+            </button>
+
+            <button
+              type="button"
+              style={{
+                height: 52,
+                borderRadius: 18,
+                border: '1px solid #efe4d7',
+                background: '#fff',
+                color: '#17130f',
+                fontSize: 14,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              {text.manageAll}
+            </button>
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: 16,
-            borderRadius: 32,
-            border: '1px solid #f0e3d7',
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff9f5 100%)',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
+        <div style={{ marginTop: 16, ...sectionCardStyle() }}>
           <div
             style={{
               display: 'flex',
@@ -393,15 +499,7 @@ export default function PaymentsPage() {
             }}
           >
             <div>
-              <div
-                style={{
-                  fontSize: 20,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.cards}
-              </div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#17130f' }}>{text.cards}</div>
               <div
                 style={{
                   marginTop: 6,
@@ -609,31 +707,9 @@ export default function PaymentsPage() {
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: 16,
-            display: 'grid',
-            gap: 16,
-          }}
-        >
-          <div
-            style={{
-              borderRadius: 30,
-              border: '1px solid #efe4d7',
-              background: '#fff',
-              padding: 18,
-              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.paypal}
-            </div>
+        <div style={{ marginTop: 16, display: 'grid', gap: 16 }}>
+          <div style={sectionCardStyle()}>
+            <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>{text.paypal}</div>
             <div
               style={{
                 marginTop: 6,
@@ -664,13 +740,7 @@ export default function PaymentsPage() {
                 }}
               >
                 <div>
-                  <div
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
+                  <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
                     {payments.paypalEmail}
                   </div>
                   <div
@@ -742,27 +812,34 @@ export default function PaymentsPage() {
             </div>
           </div>
 
-          <div
-            style={{
-              borderRadius: 30,
-              border: '1px solid #efe4d7',
-              background: '#fff',
-              padding: 18,
-              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-            }}
-          >
+          <div style={sectionCardStyle()}>
             <div
               style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 12,
+                alignItems: 'center',
+                marginBottom: 8,
               }}
             >
-              {text.mobilePayments}
+              <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
+                {text.mobilePayments}
+              </div>
+              <span
+                style={{
+                  ...badgeStyle('green'),
+                  borderRadius: 999,
+                  padding: '8px 12px',
+                  fontSize: 12,
+                  fontWeight: 900,
+                }}
+              >
+                {text.instantCheckout}
+              </span>
             </div>
+
             <div
               style={{
-                marginTop: 6,
                 fontSize: 14,
                 lineHeight: 1.55,
                 color: '#7b7268',
@@ -791,13 +868,7 @@ export default function PaymentsPage() {
                   }}
                 >
                   <div>
-                    <div
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 900,
-                        color: '#17130f',
-                      }}
-                    >
+                    <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
                       {item.name}
                     </div>
                     <div
@@ -829,24 +900,8 @@ export default function PaymentsPage() {
             </div>
           </div>
 
-          <div
-            style={{
-              borderRadius: 30,
-              border: '1px solid #efe4d7',
-              background: '#fff',
-              padding: 18,
-              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.crypto}
-            </div>
+          <div style={sectionCardStyle()}>
+            <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>{text.crypto}</div>
             <div
               style={{
                 marginTop: 6,
@@ -879,13 +934,7 @@ export default function PaymentsPage() {
                     }}
                   >
                     <div style={{ minWidth: 0 }}>
-                      <div
-                        style={{
-                          fontSize: 16,
-                          fontWeight: 900,
-                          color: '#17130f',
-                        }}
-                      >
+                      <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
                         {wallet.coin} · {wallet.network}
                       </div>
                       <div
@@ -977,15 +1026,7 @@ export default function PaymentsPage() {
             </div>
           </div>
 
-          <div
-            style={{
-              borderRadius: 30,
-              border: '1px solid #efe4d7',
-              background: '#fff',
-              padding: 18,
-              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-            }}
-          >
+          <div style={sectionCardStyle()}>
             <div
               style={{
                 display: 'flex',
@@ -995,15 +1036,7 @@ export default function PaymentsPage() {
               }}
             >
               <div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 900,
-                    color: '#17130f',
-                  }}
-                >
-                  {text.bank}
-                </div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>{text.bank}</div>
                 <div
                   style={{
                     marginTop: 6,
@@ -1040,13 +1073,7 @@ export default function PaymentsPage() {
                 padding: 14,
               }}
             >
-              <div
-                style={{
-                  fontSize: 14,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
+              <div style={{ fontSize: 14, fontWeight: 900, color: '#17130f' }}>
                 {text.bankAvailable}
               </div>
               <div
