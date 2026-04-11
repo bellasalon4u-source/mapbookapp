@@ -11,14 +11,102 @@ import {
   subscribeToChatStore,
   type ChatThread,
 } from '../../../services/chatStore';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
+
+const chatTexts: Record<
+  AppLanguage,
+  {
+    notFound: string;
+    online: string;
+    offline: string;
+    seen: string;
+    readBy: string;
+    writeMessage: string;
+    send: string;
+  }
+> = {
+  EN: {
+    notFound: 'Chat not found',
+    online: 'Online',
+    offline: 'Offline',
+    seen: 'Seen',
+    readBy: 'Read by',
+    writeMessage: 'Write a message here',
+    send: 'Send',
+  },
+  RU: {
+    notFound: 'Чат не найден',
+    online: 'Онлайн',
+    offline: 'Не в сети',
+    seen: 'Прочитано',
+    readBy: 'Прочитано:',
+    writeMessage: 'Напишите сообщение здесь',
+    send: 'Отправить',
+  },
+  ES: {
+    notFound: 'Chat no encontrado',
+    online: 'En línea',
+    offline: 'Desconectado',
+    seen: 'Visto',
+    readBy: 'Leído por',
+    writeMessage: 'Escribe un mensaje aquí',
+    send: 'Enviar',
+  },
+  CZ: {
+    notFound: 'Chat nenalezen',
+    online: 'Online',
+    offline: 'Offline',
+    seen: 'Přečteno',
+    readBy: 'Přečetl/a',
+    writeMessage: 'Napište zprávu sem',
+    send: 'Odeslat',
+  },
+  DE: {
+    notFound: 'Chat nicht gefunden',
+    online: 'Online',
+    offline: 'Offline',
+    seen: 'Gesehen',
+    readBy: 'Gelesen von',
+    writeMessage: 'Nachricht hier schreiben',
+    send: 'Senden',
+  },
+  PL: {
+    notFound: 'Czat nie znaleziony',
+    online: 'Online',
+    offline: 'Offline',
+    seen: 'Przeczytano',
+    readBy: 'Przeczytał/a',
+    writeMessage: 'Napisz wiadomość tutaj',
+    send: 'Wyślij',
+  },
+};
 
 export default function ChatThreadPage() {
   const router = useRouter();
   const params = useParams();
   const threadId = String(params?.id || '');
 
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [thread, setThread] = useState<ChatThread | null>(null);
   const [messageText, setMessageText] = useState('');
+
+  useEffect(() => {
+    setLanguage(getSavedLanguage());
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    return () => {
+      unsubLanguage();
+    };
+  }, []);
+
+  const text = chatTexts[language] || chatTexts.EN;
 
   useEffect(() => {
     const load = () => {
@@ -83,6 +171,7 @@ export default function ChatThreadPage() {
               borderRadius: 999,
               fontSize: 22,
               boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              cursor: 'pointer',
             }}
           >
             ←
@@ -95,9 +184,12 @@ export default function ChatThreadPage() {
               borderRadius: 24,
               padding: 24,
               boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+              fontSize: 18,
+              fontWeight: 700,
+              color: '#253140',
             }}
           >
-            Chat not found
+            {text.notFound}
           </div>
         </div>
       </main>
@@ -105,10 +197,10 @@ export default function ChatThreadPage() {
   }
 
   const handleSend = () => {
-    const text = messageText.trim();
-    if (!text) return;
+    const value = messageText.trim();
+    if (!value) return;
 
-    sendChatMessage(thread.id, text);
+    sendChatMessage(thread.id, value);
     setMessageText('');
   };
 
@@ -152,6 +244,7 @@ export default function ChatThreadPage() {
                 borderRadius: 999,
                 fontSize: 24,
                 boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                cursor: 'pointer',
               }}
             >
               ←
@@ -183,7 +276,7 @@ export default function ChatThreadPage() {
                 <span>{thread.category}</span>
                 <span>•</span>
                 <span style={{ color: thread.online ? '#2f9c47' : '#7b848f' }}>
-                  {thread.online ? 'Online' : thread.lastSeenText || 'Offline'}
+                  {thread.online ? text.online : thread.lastSeenText || text.offline}
                 </span>
               </div>
             </div>
@@ -197,6 +290,7 @@ export default function ChatThreadPage() {
                 borderRadius: 999,
                 fontSize: 24,
                 boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                cursor: 'pointer',
               }}
             >
               ⓘ
@@ -273,6 +367,7 @@ export default function ChatThreadPage() {
                             fontSize: 12,
                             color: '#7d8792',
                             fontWeight: 700,
+                            flexWrap: 'wrap',
                           }}
                         >
                           <span>{formatChatTime(message.sentAt)}</span>
@@ -297,7 +392,9 @@ export default function ChatThreadPage() {
                           )}
 
                           {isMine && message.status === 'seen' && message.seenAt && (
-                            <span>Seen {formatChatTime(message.seenAt)}</span>
+                            <span>
+                              {text.seen} {formatChatTime(message.seenAt)}
+                            </span>
                           )}
                         </div>
 
@@ -328,7 +425,7 @@ export default function ChatThreadPage() {
                                 fontWeight: 700,
                               }}
                             >
-                              Read by {thread.providerName}
+                              {text.readBy} {thread.providerName}
                             </span>
                           </div>
                         )}
@@ -366,7 +463,7 @@ export default function ChatThreadPage() {
             <input
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
-              placeholder="Write a message here"
+              placeholder={text.writeMessage}
               style={{
                 width: '100%',
                 border: 'none',
@@ -390,9 +487,10 @@ export default function ChatThreadPage() {
                 fontSize: 16,
                 fontWeight: 800,
                 minWidth: 76,
+                cursor: 'pointer',
               }}
             >
-              Send
+              {text.send}
             </button>
           </div>
         </div>
