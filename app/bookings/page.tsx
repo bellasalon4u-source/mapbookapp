@@ -8,7 +8,6 @@ import {
   subscribeToLanguageChange,
   type AppLanguage,
 } from '../../services/i18n';
-import BottomNav from '../../components/common/BottomNav';
 
 type TabType = 'upcoming' | 'completed' | 'cancelled';
 
@@ -31,7 +30,30 @@ type BookingItem = {
   reviewStatus: 'locked' | 'available' | 'submitted';
 };
 
-const bookingsTexts = {
+const pageTexts: Record<
+  AppLanguage,
+  {
+    title: string;
+    upcoming: string;
+    completed: string;
+    cancelled: string;
+    pending: string;
+    confirmed: string;
+    reviewed: string;
+    completedStatus: string;
+    cancelledByYou: string;
+    cancelledBySeller: string;
+    noShow: string;
+    serviceDetails: string;
+    cancelBooking: string;
+    writeSeller: string;
+    callSeller: string;
+    leaveReview: string;
+    viewReview: string;
+    cancelConfirm: string;
+    noBookings: string;
+  }
+> = {
   EN: {
     title: 'My bookings',
     upcoming: 'Upcoming',
@@ -40,16 +62,39 @@ const bookingsTexts = {
     pending: 'Pending',
     confirmed: 'Confirmed',
     reviewed: 'Reviewed',
+    completedStatus: 'Completed',
     cancelledByYou: 'Cancelled by you',
     cancelledBySeller: 'Cancelled by seller',
     noShow: 'No-show',
-    openBooking: 'Open booking',
+    serviceDetails: 'Service details',
     cancelBooking: 'Cancel booking',
     writeSeller: 'Write seller',
     callSeller: 'Call seller',
     leaveReview: 'Leave review',
     viewReview: 'View review',
     cancelConfirm: 'Cancel this booking?',
+    noBookings: 'No bookings in this section yet',
+  },
+  RU: {
+    title: 'Мои бронирования',
+    upcoming: 'Предстоящие',
+    completed: 'Завершённые',
+    cancelled: 'Отменённые',
+    pending: 'Ожидает',
+    confirmed: 'Подтверждено',
+    reviewed: 'Отзыв оставлен',
+    completedStatus: 'Завершено',
+    cancelledByYou: 'Отменено вами',
+    cancelledBySeller: 'Отменено мастером',
+    noShow: 'Неявка',
+    serviceDetails: 'Подробнее об услуге',
+    cancelBooking: 'Отменить бронь',
+    writeSeller: 'Написать мастеру',
+    callSeller: 'Позвонить мастеру',
+    leaveReview: 'Оставить отзыв',
+    viewReview: 'Посмотреть отзыв',
+    cancelConfirm: 'Отменить это бронирование?',
+    noBookings: 'В этом разделе пока нет бронирований',
   },
   ES: {
     title: 'Mis reservas',
@@ -59,54 +104,39 @@ const bookingsTexts = {
     pending: 'Pendiente',
     confirmed: 'Confirmada',
     reviewed: 'Reseñada',
+    completedStatus: 'Completada',
     cancelledByYou: 'Cancelada por ti',
-    cancelledBySeller: 'Cancelada por el vendedor',
+    cancelledBySeller: 'Cancelada por el profesional',
     noShow: 'No asistió',
-    openBooking: 'Abrir reserva',
+    serviceDetails: 'Detalles del servicio',
     cancelBooking: 'Cancelar reserva',
-    writeSeller: 'Escribir al vendedor',
-    callSeller: 'Llamar al vendedor',
+    writeSeller: 'Escribir al profesional',
+    callSeller: 'Llamar al profesional',
     leaveReview: 'Dejar reseña',
     viewReview: 'Ver reseña',
     cancelConfirm: '¿Cancelar esta reserva?',
-  },
-  RU: {
-    title: 'Мои брони',
-    upcoming: 'Предстоящие',
-    completed: 'Завершённые',
-    cancelled: 'Отменённые',
-    pending: 'Ожидает',
-    confirmed: 'Подтверждена',
-    reviewed: 'С отзывом',
-    cancelledByYou: 'Отменено вами',
-    cancelledBySeller: 'Отменено мастером',
-    noShow: 'Неявка',
-    openBooking: 'Открыть бронь',
-    cancelBooking: 'Отменить бронь',
-    writeSeller: 'Написать мастеру',
-    callSeller: 'Позвонить мастеру',
-    leaveReview: 'Оставить отзыв',
-    viewReview: 'Открыть отзыв',
-    cancelConfirm: 'Отменить эту бронь?',
+    noBookings: 'Todavía no hay reservas en esta sección',
   },
   CZ: {
     title: 'Moje rezervace',
     upcoming: 'Nadcházející',
     completed: 'Dokončené',
     cancelled: 'Zrušené',
-    pending: 'Čeká',
+    pending: 'Čeká se',
     confirmed: 'Potvrzeno',
-    reviewed: 'S recenzí',
+    reviewed: 'Recenze přidána',
+    completedStatus: 'Dokončeno',
     cancelledByYou: 'Zrušeno vámi',
-    cancelledBySeller: 'Zrušeno prodejcem',
-    noShow: 'Nedostavil se',
-    openBooking: 'Otevřít rezervaci',
+    cancelledBySeller: 'Zrušeno poskytovatelem',
+    noShow: 'Nedostavení se',
+    serviceDetails: 'Detail služby',
     cancelBooking: 'Zrušit rezervaci',
-    writeSeller: 'Napsat prodejci',
-    callSeller: 'Zavolat prodejci',
-    leaveReview: 'Napsat recenzi',
+    writeSeller: 'Napsat poskytovateli',
+    callSeller: 'Zavolat poskytovateli',
+    leaveReview: 'Přidat recenzi',
     viewReview: 'Zobrazit recenzi',
     cancelConfirm: 'Zrušit tuto rezervaci?',
+    noBookings: 'V této sekci zatím nejsou žádné rezervace',
   },
   DE: {
     title: 'Meine Buchungen',
@@ -116,57 +146,58 @@ const bookingsTexts = {
     pending: 'Ausstehend',
     confirmed: 'Bestätigt',
     reviewed: 'Bewertet',
+    completedStatus: 'Abgeschlossen',
     cancelledByYou: 'Von dir storniert',
     cancelledBySeller: 'Vom Anbieter storniert',
     noShow: 'Nicht erschienen',
-    openBooking: 'Buchung öffnen',
+    serviceDetails: 'Service-Details',
     cancelBooking: 'Buchung stornieren',
     writeSeller: 'An Anbieter schreiben',
     callSeller: 'Anbieter anrufen',
-    leaveReview: 'Bewertung schreiben',
+    leaveReview: 'Bewertung abgeben',
     viewReview: 'Bewertung ansehen',
     cancelConfirm: 'Diese Buchung stornieren?',
+    noBookings: 'In diesem Bereich gibt es noch keine Buchungen',
   },
   PL: {
     title: 'Moje rezerwacje',
     upcoming: 'Nadchodzące',
     completed: 'Zakończone',
     cancelled: 'Anulowane',
-    pending: 'Oczekuje',
-    confirmed: 'Potwierdzona',
-    reviewed: 'Z opinią',
-    cancelledByYou: 'Anulowano przez Ciebie',
-    cancelledBySeller: 'Anulowano przez sprzedawcę',
+    pending: 'Oczekujące',
+    confirmed: 'Potwierdzone',
+    reviewed: 'Opinia dodana',
+    completedStatus: 'Zakończone',
+    cancelledByYou: 'Anulowane przez Ciebie',
+    cancelledBySeller: 'Anulowane przez usługodawcę',
     noShow: 'Nieobecność',
-    openBooking: 'Otwórz rezerwację',
+    serviceDetails: 'Szczegóły usługi',
     cancelBooking: 'Anuluj rezerwację',
-    writeSeller: 'Napisz do sprzedawcy',
-    callSeller: 'Zadzwoń do sprzedawcy',
+    writeSeller: 'Napisz do usługodawcy',
+    callSeller: 'Zadzwoń do usługodawcy',
     leaveReview: 'Dodaj opinię',
     viewReview: 'Zobacz opinię',
     cancelConfirm: 'Anulować tę rezerwację?',
+    noBookings: 'W tej sekcji nie ma jeszcze rezerwacji',
   },
-} as const;
+};
+
+const menuButtonStyle: React.CSSProperties = {
+  border: 'none',
+  background: '#f8f8f8',
+  borderRadius: 12,
+  padding: '12px 14px',
+  textAlign: 'left',
+  fontSize: 15,
+  fontWeight: 700,
+  color: '#1d1d1d',
+};
 
 export default function BookingsPage() {
   const router = useRouter();
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [tab, setTab] = useState<TabType>('upcoming');
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-
-  const text = bookingsTexts[language] || bookingsTexts.EN;
-
-  const menuButtonStyle: React.CSSProperties = {
-    border: 'none',
-    background: '#f8f8f8',
-    borderRadius: 12,
-    padding: '12px 14px',
-    textAlign: 'left',
-    fontSize: 15,
-    fontWeight: 700,
-    color: '#1d1d1d',
-    cursor: 'pointer',
-  };
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -180,6 +211,7 @@ export default function BookingsPage() {
     };
   }, []);
 
+  const text = pageTexts[language] || pageTexts.EN;
   const masters = getAllMasters();
 
   const m1 = masters[0];
@@ -191,39 +223,39 @@ export default function BookingsPage() {
     () => [
       {
         id: 1,
-        masterId: String(m1?.id || ''),
-        service: m1?.services?.[0]?.title || 'Brow Shape',
-        master: m1?.name || 'Camden Brows Bar',
+        masterId: m1?.id || '',
+        service: m1?.services?.[0]?.title || 'Keratin Bonds',
+        master: m1?.name || 'Bella Keratin Studio',
         date: '24 Apr 2026',
         time: '12:00',
         image:
           m1?.services?.[0]?.image ||
           m1?.cover ||
           m1?.avatar ||
-          'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=600&q=80',
+          'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=600&q=80',
         phone: '+447700123456',
         bookingStatus: 'pending',
         reviewStatus: 'locked',
       },
       {
         id: 2,
-        masterId: String(m2?.id || m1?.id || ''),
-        service: m2?.services?.[0]?.title || 'Men’s Haircut',
-        master: m2?.name || 'Soho Barber Club',
+        masterId: m2?.id || m1?.id || '',
+        service: m2?.services?.[0]?.title || 'Brow Lamination',
+        master: m2?.name || 'Camden Brows Bar',
         date: '27 Apr 2026',
         time: '15:30',
         image:
           m2?.services?.[0]?.image ||
           m2?.cover ||
           m2?.avatar ||
-          'https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=600&q=80',
+          'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=600&q=80',
         phone: '+447700222333',
         bookingStatus: 'confirmed',
         reviewStatus: 'locked',
       },
       {
         id: 3,
-        masterId: String(m3?.id || m1?.id || ''),
+        masterId: m3?.id || m1?.id || '',
         service: m3?.services?.[0]?.title || 'Hair Coloring',
         master: m3?.name || 'Olga Beauty Studio',
         date: '20 Apr 2026',
@@ -239,7 +271,7 @@ export default function BookingsPage() {
       },
       {
         id: 4,
-        masterId: String(m1?.id || ''),
+        masterId: m1?.id || '',
         service: m1?.services?.[1]?.title || m1?.services?.[0]?.title || 'Tape-In Extensions',
         master: m1?.name || 'Bella Keratin Studio',
         date: '18 Apr 2026',
@@ -256,7 +288,7 @@ export default function BookingsPage() {
       },
       {
         id: 5,
-        masterId: String(m4?.id || m1?.id || ''),
+        masterId: m4?.id || m1?.id || '',
         service: m4?.services?.[0]?.title || 'Nano Ring Extensions',
         master: m4?.name || 'Luxury Hair London',
         date: '15 Apr 2026',
@@ -272,7 +304,7 @@ export default function BookingsPage() {
       },
       {
         id: 6,
-        masterId: String(m2?.id || m1?.id || ''),
+        masterId: m2?.id || m1?.id || '',
         service: m2?.services?.[1]?.title || m2?.services?.[0]?.title || 'Hair Botox',
         master: m2?.name || 'Silk Hair Salon',
         date: '12 Apr 2026',
@@ -289,7 +321,7 @@ export default function BookingsPage() {
       },
       {
         id: 7,
-        masterId: String(m3?.id || m1?.id || ''),
+        masterId: m3?.id || m1?.id || '',
         service: m3?.services?.[1]?.title || m3?.services?.[0]?.title || 'Facial Massage',
         master: m3?.name || 'Glow Studio',
         date: '10 Apr 2026',
@@ -313,7 +345,8 @@ export default function BookingsPage() {
   const upcomingItems = useMemo(
     () =>
       bookings.filter(
-        (item) => item.bookingStatus === 'pending' || item.bookingStatus === 'confirmed'
+        (item) =>
+          item.bookingStatus === 'pending' || item.bookingStatus === 'confirmed'
       ),
     [bookings]
   );
@@ -358,7 +391,7 @@ export default function BookingsPage() {
     }
 
     if (bookingStatus === 'completed') {
-      return { text: text.completed, bg: '#dceedd', color: '#1f7d39' };
+      return { text: text.completedStatus, bg: '#dceedd', color: '#1f7d39' };
     }
 
     if (bookingStatus === 'cancelled_by_client') {
@@ -382,7 +415,6 @@ export default function BookingsPage() {
   };
 
   const callSeller = (phone: string) => {
-    if (typeof window === 'undefined') return;
     window.location.href = `tel:${phone}`;
   };
 
@@ -423,7 +455,6 @@ export default function BookingsPage() {
         fontFamily: 'Arial, sans-serif',
         color: '#151515',
         padding: 20,
-        paddingBottom: 110,
       }}
     >
       <div style={{ maxWidth: 420, margin: '0 auto' }}>
@@ -445,7 +476,6 @@ export default function BookingsPage() {
               background: '#fff',
               fontSize: 26,
               boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-              cursor: 'pointer',
             }}
           >
             ←
@@ -463,7 +493,6 @@ export default function BookingsPage() {
               background: '#fff',
               fontSize: 22,
               boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-              cursor: 'pointer',
             }}
           >
             ⌂
@@ -500,7 +529,6 @@ export default function BookingsPage() {
                 fontSize: 16,
                 background: tab === item.key ? '#fff' : 'transparent',
                 color: '#1d1d1d',
-                cursor: 'pointer',
               }}
             >
               {item.label}
@@ -509,6 +537,23 @@ export default function BookingsPage() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {currentItems.length === 0 ? (
+            <div
+              style={{
+                background: '#fff',
+                borderRadius: 24,
+                padding: 24,
+                boxShadow: '0 6px 18px rgba(0,0,0,0.06)',
+                textAlign: 'center',
+                color: '#6a6a6a',
+                fontSize: 16,
+                fontWeight: 700,
+              }}
+            >
+              {text.noBookings}
+            </div>
+          ) : null}
+
           {currentItems.map((item) => {
             const badge = getStatusBadge(item.bookingStatus, item.reviewStatus);
 
@@ -545,13 +590,14 @@ export default function BookingsPage() {
                   </div>
 
                   <button
-                    onClick={() => setOpenMenuId((prev) => (prev === item.id ? null : item.id))}
+                    onClick={() =>
+                      setOpenMenuId((prev) => (prev === item.id ? null : item.id))
+                    }
                     style={{
                       border: 'none',
                       background: 'transparent',
                       fontSize: 24,
                       color: '#666',
-                      cursor: 'pointer',
                     }}
                   >
                     ⋯
@@ -564,7 +610,7 @@ export default function BookingsPage() {
                       position: 'absolute',
                       top: 58,
                       right: 16,
-                      width: 210,
+                      width: 220,
                       background: '#fff',
                       border: '1px solid #e8e2d8',
                       borderRadius: 18,
@@ -576,11 +622,15 @@ export default function BookingsPage() {
                       gap: 6,
                     }}
                   >
-                    <button onClick={() => openBooking(item)} style={menuButtonStyle}>
-                      {text.openBooking}
+                    <button
+                      onClick={() => openBooking(item)}
+                      style={menuButtonStyle}
+                    >
+                      {text.serviceDetails}
                     </button>
 
-                    {(item.bookingStatus === 'pending' || item.bookingStatus === 'confirmed') && (
+                    {(item.bookingStatus === 'pending' ||
+                      item.bookingStatus === 'confirmed') && (
                       <button
                         onClick={() => cancelBooking(item.id)}
                         style={{ ...menuButtonStyle, color: '#c33d3d' }}
@@ -594,23 +644,34 @@ export default function BookingsPage() {
                         <button onClick={writeSeller} style={menuButtonStyle}>
                           {text.writeSeller}
                         </button>
-                        <button onClick={() => callSeller(item.phone)} style={menuButtonStyle}>
+                        <button
+                          onClick={() => callSeller(item.phone)}
+                          style={menuButtonStyle}
+                        >
                           {text.callSeller}
                         </button>
                       </>
                     )}
 
-                    {item.bookingStatus === 'completed' && item.reviewStatus === 'available' && (
-                      <button onClick={() => leaveReview(item)} style={menuButtonStyle}>
-                        {text.leaveReview}
-                      </button>
-                    )}
+                    {item.bookingStatus === 'completed' &&
+                      item.reviewStatus === 'available' && (
+                        <button
+                          onClick={() => leaveReview(item)}
+                          style={menuButtonStyle}
+                        >
+                          {text.leaveReview}
+                        </button>
+                      )}
 
-                    {item.bookingStatus === 'completed' && item.reviewStatus === 'submitted' && (
-                      <button onClick={() => viewReview(item)} style={menuButtonStyle}>
-                        {text.viewReview}
-                      </button>
-                    )}
+                    {item.bookingStatus === 'completed' &&
+                      item.reviewStatus === 'submitted' && (
+                        <button
+                          onClick={() => viewReview(item)}
+                          style={menuButtonStyle}
+                        >
+                          {text.viewReview}
+                        </button>
+                      )}
                   </div>
                 )}
 
@@ -664,10 +725,9 @@ export default function BookingsPage() {
                       border: '2px solid #16803a',
                       fontWeight: 800,
                       fontSize: 16,
-                      cursor: 'pointer',
                     }}
                   >
-                    {text.openBooking}
+                    {text.serviceDetails}
                   </button>
 
                   {item.bookingStatus === 'pending' && (
@@ -682,7 +742,6 @@ export default function BookingsPage() {
                         border: '2px solid #efcaca',
                         fontWeight: 800,
                         fontSize: 16,
-                        cursor: 'pointer',
                       }}
                     >
                       {text.cancelBooking}
@@ -702,7 +761,6 @@ export default function BookingsPage() {
                           border: 'none',
                           fontWeight: 800,
                           fontSize: 16,
-                          cursor: 'pointer',
                         }}
                       >
                         {text.writeSeller}
@@ -719,7 +777,6 @@ export default function BookingsPage() {
                           border: 'none',
                           fontWeight: 800,
                           fontSize: 16,
-                          cursor: 'pointer',
                         }}
                       >
                         {text.callSeller}
@@ -736,7 +793,6 @@ export default function BookingsPage() {
                           border: '2px solid #efcaca',
                           fontWeight: 800,
                           fontSize: 16,
-                          cursor: 'pointer',
                         }}
                       >
                         {text.cancelBooking}
@@ -744,51 +800,49 @@ export default function BookingsPage() {
                     </>
                   )}
 
-                  {item.bookingStatus === 'completed' && item.reviewStatus === 'available' && (
-                    <button
-                      onClick={() => leaveReview(item)}
-                      style={{
-                        flex: '1 1 160px',
-                        borderRadius: 16,
-                        padding: '14px 16px',
-                        background: '#0f8b3f',
-                        color: '#fff',
-                        border: 'none',
-                        fontWeight: 800,
-                        fontSize: 16,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {text.leaveReview}
-                    </button>
-                  )}
+                  {item.bookingStatus === 'completed' &&
+                    item.reviewStatus === 'available' && (
+                      <button
+                        onClick={() => leaveReview(item)}
+                        style={{
+                          flex: '1 1 160px',
+                          borderRadius: 16,
+                          padding: '14px 16px',
+                          background: '#0f8b3f',
+                          color: '#fff',
+                          border: 'none',
+                          fontWeight: 800,
+                          fontSize: 16,
+                        }}
+                      >
+                        {text.leaveReview}
+                      </button>
+                    )}
 
-                  {item.bookingStatus === 'completed' && item.reviewStatus === 'submitted' && (
-                    <button
-                      onClick={() => viewReview(item)}
-                      style={{
-                        flex: '1 1 160px',
-                        borderRadius: 16,
-                        padding: '14px 16px',
-                        background: '#eef8f0',
-                        color: '#16803a',
-                        border: 'none',
-                        fontWeight: 800,
-                        fontSize: 16,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {text.viewReview}
-                    </button>
-                  )}
+                  {item.bookingStatus === 'completed' &&
+                    item.reviewStatus === 'submitted' && (
+                      <button
+                        onClick={() => viewReview(item)}
+                        style={{
+                          flex: '1 1 160px',
+                          borderRadius: 16,
+                          padding: '14px 16px',
+                          background: '#eef8f0',
+                          color: '#16803a',
+                          border: 'none',
+                          fontWeight: 800,
+                          fontSize: 16,
+                        }}
+                      >
+                        {text.viewReview}
+                      </button>
+                    )}
                 </div>
               </div>
             );
           })}
         </div>
       </div>
-
-      <BottomNav />
     </main>
   );
 }
