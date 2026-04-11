@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../components/common/BottomNav';
 import {
@@ -30,7 +30,7 @@ import {
 const profileTexts = {
   EN: {
     title: 'Profile',
-    subtitle: 'Manage your account, bookings and settings',
+    subtitle: 'Manage your account, bookings, rewards and settings',
     editProfile: 'Edit profile',
     upcomingBookings: 'Upcoming bookings',
     savedMasters: 'Saved masters',
@@ -66,10 +66,14 @@ const profileTexts = {
     quickAccess: 'Quick access',
     profileCardTitle: 'Your profile',
     memberSince: 'MapBook member',
+    walletAvailable: 'Available balance',
+    accountLevel: 'Account level',
+    premiumUser: 'Premium profile',
+    viewAll: 'View all',
   },
   ES: {
     title: 'Perfil',
-    subtitle: 'Administra tu cuenta, reservas y ajustes',
+    subtitle: 'Administra tu cuenta, reservas, recompensas y ajustes',
     editProfile: 'Editar perfil',
     upcomingBookings: 'Próximas reservas',
     savedMasters: 'Profesionales guardados',
@@ -105,10 +109,14 @@ const profileTexts = {
     quickAccess: 'Acceso rápido',
     profileCardTitle: 'Tu perfil',
     memberSince: 'Miembro de MapBook',
+    walletAvailable: 'Saldo disponible',
+    accountLevel: 'Nivel de cuenta',
+    premiumUser: 'Perfil premium',
+    viewAll: 'Ver todo',
   },
   RU: {
     title: 'Профиль',
-    subtitle: 'Управляйте аккаунтом, бронированиями и настройками',
+    subtitle: 'Управляйте аккаунтом, бронированиями, бонусами и настройками',
     editProfile: 'Редактировать профиль',
     upcomingBookings: 'Предстоящие бронирования',
     savedMasters: 'Сохранённые мастера',
@@ -144,10 +152,14 @@ const profileTexts = {
     quickAccess: 'Быстрый доступ',
     profileCardTitle: 'Ваш профиль',
     memberSince: 'Пользователь MapBook',
+    walletAvailable: 'Доступный баланс',
+    accountLevel: 'Уровень аккаунта',
+    premiumUser: 'Премиум профиль',
+    viewAll: 'Смотреть всё',
   },
   CZ: {
     title: 'Profil',
-    subtitle: 'Spravujte svůj účet, rezervace a nastavení',
+    subtitle: 'Spravujte svůj účet, rezervace, bonusy a nastavení',
     editProfile: 'Upravit profil',
     upcomingBookings: 'Nadcházející rezervace',
     savedMasters: 'Uložení specialisté',
@@ -183,10 +195,14 @@ const profileTexts = {
     quickAccess: 'Rychlý přístup',
     profileCardTitle: 'Váš profil',
     memberSince: 'Člen MapBook',
+    walletAvailable: 'Dostupný zůstatek',
+    accountLevel: 'Úroveň účtu',
+    premiumUser: 'Premium profil',
+    viewAll: 'Zobrazit vše',
   },
   DE: {
     title: 'Profil',
-    subtitle: 'Verwalte dein Konto, Buchungen und Einstellungen',
+    subtitle: 'Verwalte dein Konto, Buchungen, Boni und Einstellungen',
     editProfile: 'Profil bearbeiten',
     upcomingBookings: 'Bevorstehende Buchungen',
     savedMasters: 'Gespeicherte Profis',
@@ -222,10 +238,14 @@ const profileTexts = {
     quickAccess: 'Schnellzugriff',
     profileCardTitle: 'Dein Profil',
     memberSince: 'MapBook Mitglied',
+    walletAvailable: 'Verfügbares Guthaben',
+    accountLevel: 'Kontostufe',
+    premiumUser: 'Premium Profil',
+    viewAll: 'Alles ansehen',
   },
   PL: {
     title: 'Profil',
-    subtitle: 'Zarządzaj kontem, rezerwacjami i ustawieniami',
+    subtitle: 'Zarządzaj kontem, rezerwacjami, bonusami i ustawieniami',
     editProfile: 'Edytuj profil',
     upcomingBookings: 'Nadchodzące rezerwacje',
     savedMasters: 'Zapisani specjaliści',
@@ -261,6 +281,10 @@ const profileTexts = {
     quickAccess: 'Szybki dostęp',
     profileCardTitle: 'Twój profil',
     memberSince: 'Użytkownik MapBook',
+    walletAvailable: 'Dostępne saldo',
+    accountLevel: 'Poziom konta',
+    premiumUser: 'Profil premium',
+    viewAll: 'Zobacz wszystko',
   },
 } as const;
 
@@ -278,7 +302,7 @@ type MenuItem = {
 function getAccentStyles(
   accent: MenuItem['accent'] = 'neutral',
   filled = false
-): React.CSSProperties {
+): CSSProperties {
   if (accent === 'pink') {
     return filled
       ? { background: '#ff4fa0', color: '#fff' }
@@ -620,6 +644,256 @@ export default function ProfilePage() {
           </button>
         </div>
 
+        <div
+          style={{
+            marginTop: 18,
+            borderRadius: 32,
+            border: '1px solid #efe4d7',
+            background: '#fff',
+            padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '88px 1fr',
+              gap: 16,
+              alignItems: 'center',
+            }}
+          >
+            <div style={{ position: 'relative' }}>
+              <img
+                src={profile.avatar}
+                alt={profile.fullName}
+                style={{
+                  width: 88,
+                  height: 88,
+                  borderRadius: 28,
+                  objectFit: 'cover',
+                  display: 'block',
+                  boxShadow: '0 12px 26px rgba(44, 23, 10, 0.12)',
+                }}
+              />
+
+              <div
+                style={{
+                  position: 'absolute',
+                  right: -4,
+                  bottom: -4,
+                  width: 26,
+                  height: 26,
+                  borderRadius: 999,
+                  background: '#2fa35a',
+                  border: '3px solid #fff',
+                  boxShadow: '0 6px 14px rgba(47,163,90,0.22)',
+                }}
+              />
+            </div>
+
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: 24,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    lineHeight: 1.1,
+                  }}
+                >
+                  {profile.fullName}
+                </h2>
+
+                <span
+                  style={{
+                    ...getAccentStyles('green', false),
+                    borderRadius: 999,
+                    padding: '7px 10px',
+                    fontSize: 11,
+                    fontWeight: 900,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {text.availableNow}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 15,
+                  color: '#73695f',
+                  fontWeight: 700,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {profile.email}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 15,
+                  color: '#73695f',
+                  fontWeight: 700,
+                }}
+              >
+                {profile.phone}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 15,
+                  color: '#73695f',
+                  fontWeight: 700,
+                }}
+              >
+                {profile.city}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 10,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 8,
+                }}
+              >
+                {profile.isVerified && (
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      borderRadius: 999,
+                      padding: '9px 12px',
+                      ...getAccentStyles('green', false),
+                      fontSize: 12,
+                      fontWeight: 900,
+                    }}
+                  >
+                    <span>🛡️</span>
+                    <span>{text.verified}</span>
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    borderRadius: 999,
+                    padding: '9px 12px',
+                    ...getAccentStyles('blue', false),
+                    fontSize: 12,
+                    fontWeight: 900,
+                  }}
+                >
+                  <span>✨</span>
+                  <span>{text.memberSince}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 10,
+            }}
+          >
+            <div
+              style={{
+                borderRadius: 22,
+                padding: 14,
+                ...getAccentStyles('violet', false),
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 12,
+                  lineHeight: 1.3,
+                  fontWeight: 800,
+                  opacity: 0.9,
+                }}
+              >
+                {text.walletAvailable}
+              </div>
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 28,
+                  fontWeight: 900,
+                  lineHeight: 1,
+                }}
+              >
+                £{availableBalance.toFixed(2)}
+              </div>
+            </div>
+
+            <div
+              style={{
+                borderRadius: 22,
+                padding: 14,
+                ...getAccentStyles('pink', false),
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 12,
+                  lineHeight: 1.3,
+                  fontWeight: 800,
+                  opacity: 0.9,
+                }}
+              >
+                {text.accountLevel}
+              </div>
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 20,
+                  fontWeight: 900,
+                  lineHeight: 1.1,
+                }}
+              >
+                {text.premiumUser}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => router.push('/profile/edit')}
+            style={{
+              marginTop: 18,
+              width: '100%',
+              border: 'none',
+              borderRadius: 22,
+              padding: '17px 18px',
+              background: 'linear-gradient(180deg, #2b221c 0%, #1f1712 100%)',
+              color: '#fff',
+              fontSize: 17,
+              fontWeight: 900,
+              cursor: 'pointer',
+              boxShadow: '0 14px 28px rgba(31,23,18,0.20)',
+            }}
+          >
+            {text.editProfile}
+          </button>
+        </div>
+
         {(welcomeBonus > 0 || referralFreeBookings > 0 || paidFriendsCount > 0) && (
           <div
             style={{
@@ -783,199 +1057,40 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 32,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '88px 1fr',
-              gap: 16,
-              alignItems: 'center',
-            }}
-          >
-            <div style={{ position: 'relative' }}>
-              <img
-                src={profile.avatar}
-                alt={profile.fullName}
-                style={{
-                  width: 88,
-                  height: 88,
-                  borderRadius: 28,
-                  objectFit: 'cover',
-                  display: 'block',
-                  boxShadow: '0 12px 26px rgba(44, 23, 10, 0.12)',
-                }}
-              />
-
-              <div
-                style={{
-                  position: 'absolute',
-                  right: -4,
-                  bottom: -4,
-                  width: 26,
-                  height: 26,
-                  borderRadius: 999,
-                  background: '#2fa35a',
-                  border: '3px solid #fff',
-                  boxShadow: '0 6px 14px rgba(47,163,90,0.22)',
-                }}
-              />
-            </div>
-
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  gap: 8,
-                }}
-              >
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: 24,
-                    fontWeight: 900,
-                    color: '#17130f',
-                    lineHeight: 1.1,
-                  }}
-                >
-                  {profile.fullName}
-                </h2>
-
-                <span
-                  style={{
-                    ...getAccentStyles('green', false),
-                    borderRadius: 999,
-                    padding: '7px 10px',
-                    fontSize: 11,
-                    fontWeight: 900,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {text.availableNow}
-                </span>
-              </div>
-
-              <div
-                style={{
-                  marginTop: 8,
-                  fontSize: 15,
-                  color: '#73695f',
-                  fontWeight: 700,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {profile.email}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 4,
-                  fontSize: 15,
-                  color: '#73695f',
-                  fontWeight: 700,
-                }}
-              >
-                {profile.phone}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 4,
-                  fontSize: 15,
-                  color: '#73695f',
-                  fontWeight: 700,
-                }}
-              >
-                {profile.city}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 10,
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 8,
-                }}
-              >
-                {profile.isVerified && (
-                  <div
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      borderRadius: 999,
-                      padding: '9px 12px',
-                      ...getAccentStyles('green', false),
-                      fontSize: 12,
-                      fontWeight: 900,
-                    }}
-                  >
-                    <span>🛡️</span>
-                    <span>{text.verified}</span>
-                  </div>
-                )}
-
-                <div
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    borderRadius: 999,
-                    padding: '9px 12px',
-                    ...getAccentStyles('blue', false),
-                    fontSize: 12,
-                    fontWeight: 900,
-                  }}
-                >
-                  <span>✨</span>
-                  <span>{text.memberSince}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => router.push('/profile/edit')}
-            style={{
-              marginTop: 18,
-              width: '100%',
-              border: 'none',
-              borderRadius: 22,
-              padding: '17px 18px',
-              background: 'linear-gradient(180deg, #2b221c 0%, #1f1712 100%)',
-              color: '#fff',
-              fontSize: 17,
-              fontWeight: 900,
-              cursor: 'pointer',
-              boxShadow: '0 14px 28px rgba(31,23,18,0.20)',
-            }}
-          >
-            {text.editProfile}
-          </button>
-        </div>
-
         <div style={{ marginTop: 18 }}>
           <div
             style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: 12,
+              alignItems: 'center',
               marginBottom: 12,
             }}
           >
-            {text.quickAccess}
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+              }}
+            >
+              {text.quickAccess}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => router.push('/profile/bookings')}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                color: '#ff4fa0',
+                fontSize: 14,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              {text.viewAll}
+            </button>
           </div>
 
           <div
@@ -1196,7 +1311,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <BottomNav />
+      <BottomNav active="profile" />
     </main>
   );
 }
