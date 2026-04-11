@@ -1,18 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   getUnreadMessagesCount,
   subscribeToChatStore,
 } from '../services/chatStore';
-import { getSavedLanguage } from '../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../services/i18n';
 
 export default function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
   const [unreadMessages, setUnreadMessages] = useState(0);
-  const [language, setLanguage] = useState(getSavedLanguage());
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [showAddMenu, setShowAddMenu] = useState(false);
 
   useEffect(() => {
@@ -21,186 +25,107 @@ export default function BottomNav() {
     };
 
     loadUnread();
-    const unsubscribe = subscribeToChatStore(loadUnread);
-    return unsubscribe;
+    return subscribeToChatStore(loadUnread);
   }, []);
 
   useEffect(() => {
-    const syncLanguage = () => {
-      setLanguage(getSavedLanguage());
-    };
-
-    syncLanguage();
-
-    window.addEventListener('focus', syncLanguage);
-    window.addEventListener('storage', syncLanguage);
-
-    const interval = window.setInterval(syncLanguage, 500);
+    setLanguage(getSavedLanguage());
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
 
     return () => {
-      window.removeEventListener('focus', syncLanguage);
-      window.removeEventListener('storage', syncLanguage);
-      window.clearInterval(interval);
+      unsubLanguage();
     };
   }, []);
 
-  const navText = {
-    home:
-      language === 'ES'
-        ? 'Inicio'
-        : language === 'RU'
-        ? 'Главная'
-        : language === 'CZ'
-        ? 'Domů'
-        : language === 'DE'
-        ? 'Start'
-        : language === 'PL'
-        ? 'Start'
-        : 'Home',
+  const navText = useMemo(() => {
+    return {
+      home:
+        language === 'ES' ? 'Inicio' :
+        language === 'RU' ? 'Главная' :
+        language === 'CZ' ? 'Domů' :
+        language === 'DE' ? 'Start' :
+        language === 'PL' ? 'Start' : 'Home',
 
-    messages:
-      language === 'ES'
-        ? 'Mensajes'
-        : language === 'RU'
-        ? 'Сообщения'
-        : language === 'CZ'
-        ? 'Zprávy'
-        : language === 'DE'
-        ? 'Nachrichten'
-        : language === 'PL'
-        ? 'Wiadomości'
-        : 'Messages',
+      messages:
+        language === 'ES' ? 'Mensajes' :
+        language === 'RU' ? 'Сообщения' :
+        language === 'CZ' ? 'Zprávy' :
+        language === 'DE' ? 'Nachrichten' :
+        language === 'PL' ? 'Wiadomości' : 'Messages',
 
-    add:
-      language === 'ES'
-        ? 'Añadir'
-        : language === 'RU'
-        ? 'Добавить'
-        : language === 'CZ'
-        ? 'Přidat'
-        : language === 'DE'
-        ? 'Hinzufügen'
-        : language === 'PL'
-        ? 'Dodaj'
-        : 'Add',
+      add:
+        language === 'ES' ? 'Añadir' :
+        language === 'RU' ? 'Добавить' :
+        language === 'CZ' ? 'Přidat' :
+        language === 'DE' ? 'Hinzufügen' :
+        language === 'PL' ? 'Dodaj' : 'Add',
 
-    bookings:
-      language === 'ES'
-        ? 'Reservas'
-        : language === 'RU'
-        ? 'Брони'
-        : language === 'CZ'
-        ? 'Rezervace'
-        : language === 'DE'
-        ? 'Buchungen'
-        : language === 'PL'
-        ? 'Rezerwacje'
-        : 'Bookings',
+      bookings:
+        language === 'ES' ? 'Reservas' :
+        language === 'RU' ? 'Брони' :
+        language === 'CZ' ? 'Rezervace' :
+        language === 'DE' ? 'Buchungen' :
+        language === 'PL' ? 'Rezerwacje' : 'Bookings',
 
-    profile:
-      language === 'ES'
-        ? 'Perfil'
-        : language === 'RU'
-        ? 'Профиль'
-        : language === 'CZ'
-        ? 'Profil'
-        : language === 'DE'
-        ? 'Profil'
-        : language === 'PL'
-        ? 'Profil'
-        : 'Profile',
+      profile:
+        language === 'ES' ? 'Perfil' :
+        language === 'RU' ? 'Профиль' :
+        language === 'CZ' ? 'Profil' :
+        language === 'DE' ? 'Profil' :
+        language === 'PL' ? 'Profil' : 'Profile',
 
-    addService:
-      language === 'ES'
-        ? 'Добавить услугу'
-        : language === 'RU'
-        ? 'Добавить услугу'
-        : language === 'CZ'
-        ? 'Přidat službu'
-        : language === 'DE'
-        ? 'Service hinzufügen'
-        : language === 'PL'
-        ? 'Dodaj usługę'
-        : 'Add service',
+      addService:
+        language === 'ES' ? 'Añadir servicio' :
+        language === 'RU' ? 'Добавить услугу' :
+        language === 'CZ' ? 'Přidat službu' :
+        language === 'DE' ? 'Service hinzufügen' :
+        language === 'PL' ? 'Dodaj usługę' : 'Add service',
 
-    addPromotion:
-      language === 'ES'
-        ? 'Добавить рекламу'
-        : language === 'RU'
-        ? 'Добавить рекламу'
-        : language === 'CZ'
-        ? 'Přidat reklamu'
-        : language === 'DE'
-        ? 'Werbung hinzufügen'
-        : language === 'PL'
-        ? 'Dodaj reklamę'
-        : 'Add promotion',
+      addPromotion:
+        language === 'ES' ? 'Añadir promoción' :
+        language === 'RU' ? 'Добавить рекламу' :
+        language === 'CZ' ? 'Přidat reklamu' :
+        language === 'DE' ? 'Werbung hinzufügen' :
+        language === 'PL' ? 'Dodaj reklamę' : 'Add promotion',
 
-    chooseAdd:
-      language === 'ES'
-        ? 'Что вы хотите добавить?'
-        : language === 'RU'
-        ? 'Что вы хотите добавить?'
-        : language === 'CZ'
-        ? 'Co chcete přidat?'
-        : language === 'DE'
-        ? 'Was möchten Sie hinzufügen?'
-        : language === 'PL'
-        ? 'Co chcesz dodać?'
-        : 'What do you want to add?',
+      chooseAdd:
+        language === 'ES' ? '¿Qué quieres añadir?' :
+        language === 'RU' ? 'Что вы хотите добавить?' :
+        language === 'CZ' ? 'Co chcete přidat?' :
+        language === 'DE' ? 'Was möchten Sie hinzufügen?' :
+        language === 'PL' ? 'Co chcesz dodać?' : 'What do you want to add?',
 
-    chooseAddSubtitle:
-      language === 'ES'
-        ? 'Выберите, что хотите создать'
-        : language === 'RU'
-        ? 'Выберите, что хотите создать'
-        : language === 'CZ'
-        ? 'Vyberte, co chcete vytvořit'
-        : language === 'DE'
-        ? 'Wählen Sie aus, was Sie erstellen möchten'
-        : language === 'PL'
-        ? 'Wybierz, co chcesz utworzyć'
-        : 'Choose what you want to create',
+      chooseAddSubtitle:
+        language === 'ES' ? 'Elige lo que quieres crear' :
+        language === 'RU' ? 'Выберите, что хотите создать' :
+        language === 'CZ' ? 'Vyberte, co chcete vytvořit' :
+        language === 'DE' ? 'Wählen Sie aus, was Sie erstellen möchten' :
+        language === 'PL' ? 'Wybierz, co chcesz utworzyć' : 'Choose what you want to create',
 
-    serviceDescription:
-      language === 'ES'
-        ? 'Разместите новую услугу для клиентов'
-        : language === 'RU'
-        ? 'Разместите новую услугу для клиентов'
-        : language === 'CZ'
-        ? 'Přidejte novou službu pro klienty'
-        : language === 'DE'
-        ? 'Neue Dienstleistung für Kunden hinzufügen'
-        : language === 'PL'
-        ? 'Dodaj nową usługę dla klientów'
-        : 'Add a new service for clients',
+      serviceDescription:
+        language === 'ES' ? 'Publica un nuevo servicio para clientes' :
+        language === 'RU' ? 'Разместите новую услугу для клиентов' :
+        language === 'CZ' ? 'Přidejte novou službu pro klienty' :
+        language === 'DE' ? 'Neue Dienstleistung für Kunden hinzufügen' :
+        language === 'PL' ? 'Dodaj nową usługę dla klientów' : 'Add a new service for clients',
 
-    promotionDescription:
-      language === 'ES'
-        ? 'Продвигайте услугу и получайте больше просмотров'
-        : language === 'RU'
-        ? 'Продвигайте услугу и получайте больше просмотров'
-        : language === 'CZ'
-        ? 'Propagujte službu a získejte více zobrazení'
-        : language === 'DE'
-        ? 'Bewerben Sie Ihre Dienstleistung und erhalten Sie mehr Aufrufe'
-        : language === 'PL'
-        ? 'Promuj usługę i zdobądź więcej wyświetleń'
-        : 'Promote your service and get more views',
+      promotionDescription:
+        language === 'ES' ? 'Promociona tu servicio y consigue más visitas' :
+        language === 'RU' ? 'Продвигайте услугу и получайте больше просмотров' :
+        language === 'CZ' ? 'Propagujte službu a získejte více zobrazení' :
+        language === 'DE' ? 'Bewerben Sie Ihre Dienstleistung und erhalten Sie mehr Aufrufe' :
+        language === 'PL' ? 'Promuj usługę i zdobądź więcej wyświetleń' : 'Promote your service and get more views',
 
-    cancel:
-      language === 'ES'
-        ? 'Отмена'
-        : language === 'RU'
-        ? 'Отмена'
-        : language === 'CZ'
-        ? 'Zrušit'
-        : language === 'DE'
-        ? 'Abbrechen'
-        : language === 'PL'
-        ? 'Anuluj'
-        : 'Cancel',
-  };
+      cancel:
+        language === 'ES' ? 'Cancelar' :
+        language === 'RU' ? 'Отмена' :
+        language === 'CZ' ? 'Zrušit' :
+        language === 'DE' ? 'Abbrechen' :
+        language === 'PL' ? 'Anuluj' : 'Cancel',
+    };
+  }, [language]);
 
   const isHome = pathname === '/';
   const isMessages = pathname.startsWith('/messages');
@@ -208,13 +133,8 @@ export default function BottomNav() {
   const isProfile = pathname.startsWith('/profile');
   const isAdd = pathname.startsWith('/add') || pathname.startsWith('/profile/promotions');
 
-  const handleOpenAddMenu = () => {
-    setShowAddMenu(true);
-  };
-
-  const handleCloseAddMenu = () => {
-    setShowAddMenu(false);
-  };
+  const handleOpenAddMenu = () => setShowAddMenu(true);
+  const handleCloseAddMenu = () => setShowAddMenu(false);
 
   const handleGoToService = () => {
     setShowAddMenu(false);
