@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
 import {
@@ -389,7 +389,7 @@ function Radio({ checked }: { checked: boolean }) {
   );
 }
 
-function SectionTitle({ children }: { children: ReactNode }) {
+function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
@@ -457,6 +457,7 @@ export default function LanguageRegionPage() {
   }, []);
 
   useEffect(() => {
+    saveLanguage(selectedLanguage);
     setLanguage(selectedLanguage);
   }, [selectedLanguage]);
 
