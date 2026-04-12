@@ -248,6 +248,43 @@ const pageTexts = {
   },
 } as const;
 
+type PageText = {
+  title: string;
+  subtitle: string;
+  save: string;
+  languageSection: string;
+  regionSection: string;
+  currencySection: string;
+  locationSection: string;
+  useCurrentLocation: string;
+  currentLocationHint: string;
+  useRegionLocation: string;
+  regionLocationHint: string;
+  locationLoading: string;
+  locationSuccess: string;
+  locationError: string;
+  saved: string;
+  selected: string;
+  languageApp: string;
+  overview: string;
+  livePreview: string;
+  britishPound: string;
+  euro: string;
+  usDollar: string;
+  polishZloty: string;
+  czechKoruna: string;
+  ukrainianHryvnia: string;
+  uaeDirham: string;
+  londonEurope: string;
+  madridEurope: string;
+  pragueEurope: string;
+  berlinEurope: string;
+  warsawEurope: string;
+  kyivEurope: string;
+  newYorkNA: string;
+  dubaiME: string;
+};
+
 const languageOptions: { value: AppLanguage; label: string; flag: string }[] = [
   { value: 'EN', label: 'English', flag: '🇬🇧' },
   { value: 'ES', label: 'Español', flag: '🇪🇸' },
@@ -257,7 +294,7 @@ const languageOptions: { value: AppLanguage; label: string; flag: string }[] = [
   { value: 'PL', label: 'Polski', flag: '🇵🇱' },
 ];
 
-function getRegionOptions(text: (typeof pageTexts)['EN']) {
+function getRegionOptions(text: PageText) {
   return [
     {
       value: 'United Kingdom',
@@ -334,7 +371,7 @@ function getRegionOptions(text: (typeof pageTexts)['EN']) {
   ] as const;
 }
 
-function getCurrencyOptions(text: (typeof pageTexts)['EN']) {
+function getCurrencyOptions(text: PageText) {
   return [
     { value: 'GBP', symbol: '£', title: 'GBP', subtitle: text.britishPound },
     { value: 'EUR', symbol: '€', title: 'EUR', subtitle: text.euro },
@@ -461,8 +498,8 @@ export default function LanguageRegionPage() {
     setLanguage(selectedLanguage);
   }, [selectedLanguage]);
 
-  const text = useMemo(
-    () => pageTexts[language as keyof typeof pageTexts] || pageTexts.EN,
+  const text: PageText = useMemo(
+    () => (pageTexts[language as keyof typeof pageTexts] || pageTexts.EN) as PageText,
     [language]
   );
 
