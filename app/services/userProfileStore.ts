@@ -53,6 +53,81 @@ function isBrowser() {
   return typeof window !== 'undefined';
 }
 
+function normalizeNotificationSettings(
+  value?: Partial<NotificationSettings> | null
+): NotificationSettings {
+  return {
+    messages:
+      typeof value?.messages === 'boolean'
+        ? value.messages
+        : defaultUserProfile.notificationSettings.messages,
+    bookings:
+      typeof value?.bookings === 'boolean'
+        ? value.bookings
+        : defaultUserProfile.notificationSettings.bookings,
+    reminders:
+      typeof value?.reminders === 'boolean'
+        ? value.reminders
+        : defaultUserProfile.notificationSettings.reminders,
+    promotions:
+      typeof value?.promotions === 'boolean'
+        ? value.promotions
+        : defaultUserProfile.notificationSettings.promotions,
+    system:
+      typeof value?.system === 'boolean'
+        ? value.system
+        : defaultUserProfile.notificationSettings.system,
+  };
+}
+
+function normalizeUserProfile(value?: Partial<UserProfile> | null): UserProfile {
+  return {
+    id: typeof value?.id === 'string' && value.id.trim() ? value.id : defaultUserProfile.id,
+    fullName:
+      typeof value?.fullName === 'string' && value.fullName.trim()
+        ? value.fullName.trim()
+        : defaultUserProfile.fullName,
+    email:
+      typeof value?.email === 'string' && value.email.trim()
+        ? value.email.trim()
+        : defaultUserProfile.email,
+    phone:
+      typeof value?.phone === 'string' && value.phone.trim()
+        ? value.phone.trim()
+        : defaultUserProfile.phone,
+    avatar:
+      typeof value?.avatar === 'string' && value.avatar.trim()
+        ? value.avatar.trim()
+        : defaultUserProfile.avatar,
+    city:
+      typeof value?.city === 'string' && value.city.trim()
+        ? value.city.trim()
+        : defaultUserProfile.city,
+    bio: typeof value?.bio === 'string' ? value.bio : defaultUserProfile.bio,
+    language:
+      typeof value?.language === 'string' && value.language.trim()
+        ? value.language.trim()
+        : defaultUserProfile.language,
+    region:
+      typeof value?.region === 'string' && value.region.trim()
+        ? value.region.trim()
+        : defaultUserProfile.region,
+    isVerified:
+      typeof value?.isVerified === 'boolean'
+        ? value.isVerified
+        : defaultUserProfile.isVerified,
+    upcomingBookingsCount:
+      typeof value?.upcomingBookingsCount === 'number'
+        ? value.upcomingBookingsCount
+        : defaultUserProfile.upcomingBookingsCount,
+    savedMastersCount:
+      typeof value?.savedMastersCount === 'number'
+        ? value.savedMastersCount
+        : defaultUserProfile.savedMastersCount,
+    notificationSettings: normalizeNotificationSettings(value?.notificationSettings),
+  };
+}
+
 function loadUserProfile(): UserProfile {
   if (!isBrowser()) return defaultUserProfile;
 
@@ -60,73 +135,15 @@ function loadUserProfile(): UserProfile {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultUserProfile;
 
-    const parsed = JSON.parse(raw) as UserProfile;
-
-    return {
-      id: typeof parsed.id === 'string' ? parsed.id : defaultUserProfile.id,
-      fullName:
-        typeof parsed.fullName === 'string'
-          ? parsed.fullName
-          : defaultUserProfile.fullName,
-      email:
-        typeof parsed.email === 'string' ? parsed.email : defaultUserProfile.email,
-      phone:
-        typeof parsed.phone === 'string' ? parsed.phone : defaultUserProfile.phone,
-      avatar:
-        typeof parsed.avatar === 'string'
-          ? parsed.avatar
-          : defaultUserProfile.avatar,
-      city: typeof parsed.city === 'string' ? parsed.city : defaultUserProfile.city,
-      bio: typeof parsed.bio === 'string' ? parsed.bio : defaultUserProfile.bio,
-      language:
-        typeof parsed.language === 'string'
-          ? parsed.language
-          : defaultUserProfile.language,
-      region:
-        typeof parsed.region === 'string'
-          ? parsed.region
-          : defaultUserProfile.region,
-      isVerified:
-        typeof parsed.isVerified === 'boolean'
-          ? parsed.isVerified
-          : defaultUserProfile.isVerified,
-      upcomingBookingsCount:
-        typeof parsed.upcomingBookingsCount === 'number'
-          ? parsed.upcomingBookingsCount
-          : defaultUserProfile.upcomingBookingsCount,
-      savedMastersCount:
-        typeof parsed.savedMastersCount === 'number'
-          ? parsed.savedMastersCount
-          : defaultUserProfile.savedMastersCount,
-      notificationSettings: {
-        messages:
-          typeof parsed.notificationSettings?.messages === 'boolean'
-            ? parsed.notificationSettings.messages
-            : defaultUserProfile.notificationSettings.messages,
-        bookings:
-          typeof parsed.notificationSettings?.bookings === 'boolean'
-            ? parsed.notificationSettings.bookings
-            : defaultUserProfile.notificationSettings.bookings,
-        reminders:
-          typeof parsed.notificationSettings?.reminders === 'boolean'
-            ? parsed.notificationSettings.reminders
-            : defaultUserProfile.notificationSettings.reminders,
-        promotions:
-          typeof parsed.notificationSettings?.promotions === 'boolean'
-            ? parsed.notificationSettings.promotions
-            : defaultUserProfile.notificationSettings.promotions,
-        system:
-          typeof parsed.notificationSettings?.system === 'boolean'
-            ? parsed.notificationSettings.system
-            : defaultUserProfile.notificationSettings.system,
-      },
-    };
+    const parsed = JSON.parse(raw) as Partial<UserProfile>;
+    return normalizeUserProfile(parsed);
   } catch {
     return defaultUserProfile;
   }
 }
 
 let userProfileState: UserProfile = defaultUserProfile;
+let storageSyncInitialized = false;
 
 if (isBrowser()) {
   userProfileState = loadUserProfile();
@@ -138,26 +155,59 @@ function saveUserProfile() {
 }
 
 function emitChange() {
-  saveUserProfile();
   listeners.forEach((listener) => listener());
 }
 
+function syncFromStorage() {
+  if (!isBrowser()) return;
+  userProfileState = loadUserProfile();
+  emitChange();
+}
+
+function setupStorageSync() {
+  if (!isBrowser()) return;
+  if (storageSyncInitialized) return;
+
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key !== STORAGE_KEY) return;
+    syncFromStorage();
+  };
+
+  const handleFocus = () => {
+    syncFromStorage();
+  };
+
+  window.addEventListener('storage', handleStorage);
+  window.addEventListener('focus', handleFocus);
+  window.addEventListener('pageshow', handleFocus);
+
+  storageSyncInitialized = true;
+}
+
+setupStorageSync();
+
 export function getUserProfile(): UserProfile {
+  if (isBrowser()) {
+    userProfileState = loadUserProfile();
+  }
+
   return userProfileState;
 }
 
 export function subscribeToUserProfile(listener: () => void) {
+  setupStorageSync();
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
 
 export function setUserProfile(nextProfile: UserProfile) {
-  userProfileState = nextProfile;
+  userProfileState = normalizeUserProfile(nextProfile);
+  saveUserProfile();
   emitChange();
 }
 
 export function updateUserProfile(patch: Partial<UserProfile>) {
-  userProfileState = {
+  userProfileState = normalizeUserProfile({
     ...userProfileState,
     ...patch,
     notificationSettings: patch.notificationSettings
@@ -166,12 +216,14 @@ export function updateUserProfile(patch: Partial<UserProfile>) {
           ...patch.notificationSettings,
         }
       : userProfileState.notificationSettings,
-  };
+  });
 
+  saveUserProfile();
   emitChange();
 }
 
 export function resetUserProfile() {
-  userProfileState = defaultUserProfile;
+  userProfileState = normalizeUserProfile(defaultUserProfile);
+  saveUserProfile();
   emitChange();
 }
