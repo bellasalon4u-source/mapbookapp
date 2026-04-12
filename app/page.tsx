@@ -34,6 +34,11 @@ import {
 import { refreshLiveCurrencyRates } from '../services/currencyDisplay';
 import BottomNav from '../components/BottomNav';
 import TopCategoriesBar from '../components/TopCategoriesBar';
+import {
+  getUserProfile,
+  subscribeToUserProfile,
+  type UserProfile,
+} from './services/userProfileStore';
 
 const RealMap = dynamic(() => import('../components/RealMap'), {
   ssr: false,
@@ -498,6 +503,7 @@ export default function HomePage() {
   const [locationLabel, setLocationLabel] = useState(getEffectiveSearchLocation().label);
   const [regionVersion, setRegionVersion] = useState(0);
   const [currencyVersion, setCurrencyVersion] = useState(0);
+  const [userProfile, setUserProfile] = useState<UserProfile>(getUserProfile());
 
   const tr = t(language);
   const popularSearches = getPopularSearches(tr);
@@ -546,6 +552,19 @@ export default function HomePage() {
       document.removeEventListener('visibilitychange', handleVisibility);
       unsubscribeRegion();
       unsubscribeLanguage();
+    };
+  }, []);
+
+  useEffect(() => {
+    const syncProfile = () => {
+      setUserProfile(getUserProfile());
+    };
+
+    syncProfile();
+    const unsubscribe = subscribeToUserProfile(syncProfile);
+
+    return () => {
+      unsubscribe();
     };
   }, []);
 
@@ -1021,8 +1040,8 @@ export default function HomePage() {
                     }}
                   >
                     <img
-                      src={baseMasters[0]?.avatar}
-                      alt="Profile"
+                      src={userProfile.avatar}
+                      alt={userProfile.fullName || 'Profile'}
                       style={{
                         width: '100%',
                         height: '100%',
