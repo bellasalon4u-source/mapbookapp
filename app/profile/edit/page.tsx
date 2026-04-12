@@ -1,6 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type CSSProperties } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type CSSProperties,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
 import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
@@ -27,6 +34,12 @@ type ContactKey =
   | 'website'
   | 'email';
 
+type PhoneContactKey =
+  | 'whatsapp'
+  | 'businessWhatsapp'
+  | 'telegram'
+  | 'viber';
+
 type ContactItem = {
   key: ContactKey;
   iconKey:
@@ -40,6 +53,12 @@ type ContactItem = {
   title: Record<AppLanguage, string>;
   placeholder: Record<AppLanguage, string>;
   accent: 'pink' | 'green' | 'blue' | 'violet' | 'orange';
+  type: 'phone' | 'text';
+};
+
+type PhoneContactValue = {
+  countryCode: string;
+  number: string;
 };
 
 type ExtraProfileData = {
@@ -47,9 +66,10 @@ type ExtraProfileData = {
   address: string;
   contacts: Record<ContactKey, string>;
   avatarHistory: string[];
+  contactPhoneMeta?: Partial<Record<PhoneContactKey, PhoneContactValue>>;
 };
 
-const EXTRA_PROFILE_STORAGE_KEY = 'mapbook_profile_extra_v1';
+const EXTRA_PROFILE_STORAGE_KEY = 'mapbook_profile_extra_v2';
 
 const COUNTRIES: CountryOption[] = [
   { code: 'GB', dial: '+44', flag: '🇬🇧', label: 'United Kingdom' },
@@ -60,6 +80,10 @@ const COUNTRIES: CountryOption[] = [
   { code: 'ES', dial: '+34', flag: '🇪🇸', label: 'Spain' },
   { code: 'US', dial: '+1', flag: '🇺🇸', label: 'United States' },
   { code: 'AE', dial: '+971', flag: '🇦🇪', label: 'United Arab Emirates' },
+  { code: 'FR', dial: '+33', flag: '🇫🇷', label: 'France' },
+  { code: 'IT', dial: '+39', flag: '🇮🇹', label: 'Italy' },
+  { code: 'NL', dial: '+31', flag: '🇳🇱', label: 'Netherlands' },
+  { code: 'BE', dial: '+32', flag: '🇧🇪', label: 'Belgium' },
 ];
 
 const CONTACT_ITEMS: ContactItem[] = [
@@ -67,6 +91,7 @@ const CONTACT_ITEMS: ContactItem[] = [
     key: 'whatsapp',
     iconKey: 'whatsapp',
     accent: 'green',
+    type: 'phone',
     title: {
       EN: 'WhatsApp',
       ES: 'WhatsApp',
@@ -76,18 +101,19 @@ const CONTACT_ITEMS: ContactItem[] = [
       PL: 'WhatsApp',
     },
     placeholder: {
-      EN: 'WhatsApp number',
-      ES: 'Número de WhatsApp',
-      RU: 'Номер WhatsApp',
-      CZ: 'WhatsApp číslo',
-      DE: 'WhatsApp-Nummer',
-      PL: 'Numer WhatsApp',
+      EN: 'Phone number',
+      ES: 'Número de teléfono',
+      RU: 'Номер телефона',
+      CZ: 'Telefonní číslo',
+      DE: 'Telefonnummer',
+      PL: 'Numer telefonu',
     },
   },
   {
     key: 'businessWhatsapp',
     iconKey: 'businessWhatsapp',
     accent: 'green',
+    type: 'phone',
     title: {
       EN: 'Business WhatsApp',
       ES: 'WhatsApp Business',
@@ -97,18 +123,19 @@ const CONTACT_ITEMS: ContactItem[] = [
       PL: 'Business WhatsApp',
     },
     placeholder: {
-      EN: 'Business WhatsApp number',
-      ES: 'Número de WhatsApp Business',
-      RU: 'Номер Business WhatsApp',
-      CZ: 'Číslo Business WhatsApp',
-      DE: 'Business-WhatsApp-Nummer',
-      PL: 'Numer Business WhatsApp',
+      EN: 'Business number',
+      ES: 'Número de negocio',
+      RU: 'Рабочий номер',
+      CZ: 'Firemní číslo',
+      DE: 'Business-Nummer',
+      PL: 'Numer firmowy',
     },
   },
   {
     key: 'telegram',
     iconKey: 'telegram',
     accent: 'blue',
+    type: 'phone',
     title: {
       EN: 'Telegram',
       ES: 'Telegram',
@@ -118,18 +145,19 @@ const CONTACT_ITEMS: ContactItem[] = [
       PL: 'Telegram',
     },
     placeholder: {
-      EN: 'Telegram username or phone',
-      ES: 'Usuario o teléfono de Telegram',
-      RU: 'Username или телефон Telegram',
-      CZ: 'Telegram uživatel nebo telefon',
-      DE: 'Telegram-Name oder Telefon',
-      PL: 'Nazwa użytkownika lub telefon Telegram',
+      EN: 'Phone number',
+      ES: 'Número de teléfono',
+      RU: 'Номер телефона',
+      CZ: 'Telefonní číslo',
+      DE: 'Telefonnummer',
+      PL: 'Numer telefonu',
     },
   },
   {
     key: 'viber',
     iconKey: 'viber',
     accent: 'violet',
+    type: 'phone',
     title: {
       EN: 'Viber',
       ES: 'Viber',
@@ -139,18 +167,19 @@ const CONTACT_ITEMS: ContactItem[] = [
       PL: 'Viber',
     },
     placeholder: {
-      EN: 'Viber number',
-      ES: 'Número de Viber',
-      RU: 'Номер Viber',
-      CZ: 'Viber číslo',
-      DE: 'Viber-Nummer',
-      PL: 'Numer Viber',
+      EN: 'Phone number',
+      ES: 'Número de teléfono',
+      RU: 'Номер телефона',
+      CZ: 'Telefonní číslo',
+      DE: 'Telefonnummer',
+      PL: 'Numer telefonu',
     },
   },
   {
     key: 'instagram',
     iconKey: 'instagram',
     accent: 'pink',
+    type: 'text',
     title: {
       EN: 'Instagram',
       ES: 'Instagram',
@@ -172,6 +201,7 @@ const CONTACT_ITEMS: ContactItem[] = [
     key: 'website',
     iconKey: 'website',
     accent: 'orange',
+    type: 'text',
     title: {
       EN: 'Website',
       ES: 'Sitio web',
@@ -193,6 +223,7 @@ const CONTACT_ITEMS: ContactItem[] = [
     key: 'email',
     iconKey: 'email',
     accent: 'blue',
+    type: 'text',
     title: {
       EN: 'Email',
       ES: 'Email',
@@ -210,6 +241,13 @@ const CONTACT_ITEMS: ContactItem[] = [
       PL: 'name@przyklad.pl',
     },
   },
+];
+
+const PHONE_CONTACT_KEYS: PhoneContactKey[] = [
+  'whatsapp',
+  'businessWhatsapp',
+  'telegram',
+  'viber',
 ];
 
 const editProfileTexts = {
@@ -231,18 +269,21 @@ const editProfileTexts = {
     bio: 'About me',
     bioPlaceholder: 'Tell us a little about yourself',
     contacts: 'Contacts',
-    contactsHint: 'Each contact can be different. Fill only what you want to show.',
+    contactsHint: 'Fill only the contacts you want to show on your profile.',
     cityPlaceholder: 'Select city',
     districtPlaceholder: 'Select area / district',
     addressPlaceholder: 'Street, house, flat, notes',
     phonePlaceholder: 'Phone number',
     countrySearch: 'Search country or code',
+    chooseCountry: 'Choose a country',
     emailSmartHint: 'Use a real email for bookings and notifications',
     saved: 'Profile saved',
     basicInfo: 'Basic information',
     locationInfo: 'Location',
     required: 'Required',
     optional: 'Optional',
+    country: 'Country',
+    clearHistory: 'Clear history',
   },
   ES: {
     title: 'Editar perfil',
@@ -262,18 +303,21 @@ const editProfileTexts = {
     bio: 'Sobre mí',
     bioPlaceholder: 'Cuéntanos un poco sobre ti',
     contacts: 'Contactos',
-    contactsHint: 'Cada contacto puede ser diferente. Completa solo lo que quieras mostrar.',
+    contactsHint: 'Completa solo los contactos que quieras mostrar en tu perfil.',
     cityPlaceholder: 'Selecciona ciudad',
     districtPlaceholder: 'Selecciona zona / distrito',
     addressPlaceholder: 'Calle, casa, piso, notas',
     phonePlaceholder: 'Número de teléfono',
     countrySearch: 'Buscar país o código',
+    chooseCountry: 'Elegir país',
     emailSmartHint: 'Usa un email real para reservas y notificaciones',
     saved: 'Perfil guardado',
     basicInfo: 'Información básica',
     locationInfo: 'Ubicación',
     required: 'Obligatorio',
     optional: 'Opcional',
+    country: 'País',
+    clearHistory: 'Borrar historial',
   },
   RU: {
     title: 'Редактировать профиль',
@@ -293,18 +337,21 @@ const editProfileTexts = {
     bio: 'О себе',
     bioPlaceholder: 'Расскажите немного о себе',
     contacts: 'Контакты',
-    contactsHint: 'Каждый контакт может быть отдельным. Заполняйте только то, что хотите показывать.',
+    contactsHint: 'Заполняйте только те контакты, которые хотите показывать в профиле.',
     cityPlaceholder: 'Выберите город',
     districtPlaceholder: 'Выберите район / локацию',
     addressPlaceholder: 'Улица, дом, квартира, заметки',
     phonePlaceholder: 'Номер телефона',
     countrySearch: 'Поиск страны или кода',
+    chooseCountry: 'Выберите страну',
     emailSmartHint: 'Используйте реальный email для бронирований и уведомлений',
     saved: 'Профиль сохранён',
     basicInfo: 'Основная информация',
     locationInfo: 'Локация',
     required: 'Обязательно',
     optional: 'Необязательно',
+    country: 'Страна',
+    clearHistory: 'Очистить историю',
   },
   CZ: {
     title: 'Upravit profil',
@@ -324,18 +371,21 @@ const editProfileTexts = {
     bio: 'O mně',
     bioPlaceholder: 'Řekněte něco o sobě',
     contacts: 'Kontakty',
-    contactsHint: 'Každý kontakt může být jiný. Vyplňte jen to, co chcete zobrazit.',
+    contactsHint: 'Vyplňte jen kontakty, které chcete zobrazit v profilu.',
     cityPlaceholder: 'Vyberte město',
     districtPlaceholder: 'Vyberte oblast / lokalitu',
     addressPlaceholder: 'Ulice, dům, byt, poznámky',
     phonePlaceholder: 'Telefonní číslo',
     countrySearch: 'Hledat stát nebo kód',
+    chooseCountry: 'Vyberte stát',
     emailSmartHint: 'Použijte skutečný email pro rezervace a oznámení',
     saved: 'Profil uložen',
     basicInfo: 'Základní informace',
     locationInfo: 'Poloha',
     required: 'Povinné',
     optional: 'Volitelné',
+    country: 'Stát',
+    clearHistory: 'Vymazat historii',
   },
   DE: {
     title: 'Profil bearbeiten',
@@ -355,18 +405,21 @@ const editProfileTexts = {
     bio: 'Über mich',
     bioPlaceholder: 'Erzähl etwas über dich',
     contacts: 'Kontakte',
-    contactsHint: 'Jeder Kontakt kann unterschiedlich sein. Fülle nur aus, was du zeigen möchtest.',
+    contactsHint: 'Fülle nur die Kontakte aus, die du im Profil zeigen willst.',
     cityPlaceholder: 'Stadt auswählen',
     districtPlaceholder: 'Bereich / Standort auswählen',
     addressPlaceholder: 'Straße, Haus, Wohnung, Hinweise',
     phonePlaceholder: 'Telefonnummer',
     countrySearch: 'Land oder Vorwahl suchen',
+    chooseCountry: 'Land wählen',
     emailSmartHint: 'Nutze eine echte E-Mail für Buchungen und Benachrichtigungen',
     saved: 'Profil gespeichert',
     basicInfo: 'Grundinformationen',
     locationInfo: 'Standort',
     required: 'Pflicht',
     optional: 'Optional',
+    country: 'Land',
+    clearHistory: 'Verlauf löschen',
   },
   PL: {
     title: 'Edytuj profil',
@@ -386,18 +439,21 @@ const editProfileTexts = {
     bio: 'O mnie',
     bioPlaceholder: 'Napisz coś o sobie',
     contacts: 'Kontakty',
-    contactsHint: 'Każdy kontakt może być inny. Uzupełnij tylko to, co chcesz pokazać.',
+    contactsHint: 'Uzupełnij tylko te kontakty, które chcesz pokazać w profilu.',
     cityPlaceholder: 'Wybierz miasto',
     districtPlaceholder: 'Wybierz obszar / lokalizację',
     addressPlaceholder: 'Ulica, dom, mieszkanie, notatki',
     phonePlaceholder: 'Numer telefonu',
     countrySearch: 'Szukaj kraju lub kodu',
+    chooseCountry: 'Wybierz kraj',
     emailSmartHint: 'Użyj prawdziwego emaila do rezerwacji i powiadomień',
     saved: 'Profil zapisany',
     basicInfo: 'Podstawowe informacje',
     locationInfo: 'Lokalizacja',
     required: 'Wymagane',
     optional: 'Opcjonalne',
+    country: 'Kraj',
+    clearHistory: 'Wyczyść historię',
   },
 } as const;
 
@@ -429,21 +485,65 @@ function stripDialCode(phone: string, dial: string) {
   return trimmed.replace(/[^\d]/g, '');
 }
 
+function normalizePhoneNumber(value: string) {
+  return value.replace(/[^\d\s()-]/g, '');
+}
+
+function combinePhone(country: CountryOption, number: string) {
+  const clean = number.trim();
+  if (!clean) return '';
+  return `${country.dial} ${clean}`.trim();
+}
+
+function parseStoredPhoneContact(value: string): PhoneContactValue {
+  const fallbackCountry = COUNTRIES[0];
+  const trimmed = String(value || '').trim();
+
+  if (!trimmed) {
+    return {
+      countryCode: fallbackCountry.code,
+      number: '',
+    };
+  }
+
+  const matchedCountry =
+    COUNTRIES.find((country) => trimmed.startsWith(country.dial)) || fallbackCountry;
+
+  return {
+    countryCode: matchedCountry.code,
+    number: stripDialCode(trimmed, matchedCountry.dial),
+  };
+}
+
+function emptyContacts(): Record<ContactKey, string> {
+  return {
+    whatsapp: '',
+    businessWhatsapp: '',
+    telegram: '',
+    viber: '',
+    instagram: '',
+    website: '',
+    email: '',
+  };
+}
+
+function emptyPhoneMeta(): Record<PhoneContactKey, PhoneContactValue> {
+  return {
+    whatsapp: { countryCode: 'GB', number: '' },
+    businessWhatsapp: { countryCode: 'GB', number: '' },
+    telegram: { countryCode: 'GB', number: '' },
+    viber: { countryCode: 'GB', number: '' },
+  };
+}
+
 function readExtraProfileData(): ExtraProfileData {
   if (typeof window === 'undefined') {
     return {
       district: '',
       address: '',
-      contacts: {
-        whatsapp: '',
-        businessWhatsapp: '',
-        telegram: '',
-        viber: '',
-        instagram: '',
-        website: '',
-        email: '',
-      },
+      contacts: emptyContacts(),
       avatarHistory: [],
+      contactPhoneMeta: emptyPhoneMeta(),
     };
   }
 
@@ -453,48 +553,50 @@ function readExtraProfileData(): ExtraProfileData {
       return {
         district: '',
         address: '',
-        contacts: {
-          whatsapp: '',
-          businessWhatsapp: '',
-          telegram: '',
-          viber: '',
-          instagram: '',
-          website: '',
-          email: '',
-        },
+        contacts: emptyContacts(),
         avatarHistory: [],
+        contactPhoneMeta: emptyPhoneMeta(),
       };
     }
 
     const parsed = JSON.parse(raw) as Partial<ExtraProfileData>;
+    const contacts = {
+      whatsapp: parsed.contacts?.whatsapp || '',
+      businessWhatsapp: parsed.contacts?.businessWhatsapp || '',
+      telegram: parsed.contacts?.telegram || '',
+      viber: parsed.contacts?.viber || '',
+      instagram: parsed.contacts?.instagram || '',
+      website: parsed.contacts?.website || '',
+      email: parsed.contacts?.email || '',
+    };
+
+    const fallbackPhoneMeta = emptyPhoneMeta();
+
     return {
       district: parsed.district || '',
       address: parsed.address || '',
-      contacts: {
-        whatsapp: parsed.contacts?.whatsapp || '',
-        businessWhatsapp: parsed.contacts?.businessWhatsapp || '',
-        telegram: parsed.contacts?.telegram || '',
-        viber: parsed.contacts?.viber || '',
-        instagram: parsed.contacts?.instagram || '',
-        website: parsed.contacts?.website || '',
-        email: parsed.contacts?.email || '',
-      },
+      contacts,
       avatarHistory: Array.isArray(parsed.avatarHistory) ? parsed.avatarHistory : [],
+      contactPhoneMeta: {
+        whatsapp:
+          parsed.contactPhoneMeta?.whatsapp || parseStoredPhoneContact(contacts.whatsapp),
+        businessWhatsapp:
+          parsed.contactPhoneMeta?.businessWhatsapp ||
+          parseStoredPhoneContact(contacts.businessWhatsapp),
+        telegram:
+          parsed.contactPhoneMeta?.telegram || parseStoredPhoneContact(contacts.telegram),
+        viber: parsed.contactPhoneMeta?.viber || parseStoredPhoneContact(contacts.viber),
+        ...fallbackPhoneMeta,
+        ...parsed.contactPhoneMeta,
+      },
     };
   } catch {
     return {
       district: '',
       address: '',
-      contacts: {
-        whatsapp: '',
-        businessWhatsapp: '',
-        telegram: '',
-        viber: '',
-        instagram: '',
-        website: '',
-        email: '',
-      },
+      contacts: emptyContacts(),
       avatarHistory: [],
+      contactPhoneMeta: emptyPhoneMeta(),
     };
   }
 }
@@ -505,11 +607,11 @@ function saveExtraProfileData(data: ExtraProfileData) {
 }
 
 function getAccentColors(accent: ContactItem['accent']) {
-  if (accent === 'green') return { bg: '#eef9f1', color: '#25D366', border: '#d8f0df' };
-  if (accent === 'blue') return { bg: '#eef4ff', color: '#229ED9', border: '#d9e6ff' };
-  if (accent === 'violet') return { bg: '#f3efff', color: '#7360f2', border: '#e4dcff' };
-  if (accent === 'orange') return { bg: '#fff5e8', color: '#d68612', border: '#f6e4c9' };
-  return { bg: '#fff1f7', color: '#ff4fa0', border: '#f7d9e8' };
+  if (accent === 'green') return { bg: '#eef9f1', border: '#d8f0df' };
+  if (accent === 'blue') return { bg: '#eef4ff', border: '#d9e6ff' };
+  if (accent === 'violet') return { bg: '#f3efff', border: '#e4dcff' };
+  if (accent === 'orange') return { bg: '#fff5e8', border: '#f6e4c9' };
+  return { bg: '#fff1f7', border: '#f7d9e8' };
 }
 
 function fieldLabel(title: string, helper: string) {
@@ -596,10 +698,6 @@ function ContactBrandIcon({
           fill="#fff"
           d="M8.64 8.18c-.22.07-.43.23-.54.49-.11.27-.18.68-.09 1.16.15.85.68 1.95 1.55 2.92.87.98 1.87 1.64 2.69 1.89.46.14.87.14 1.15.07.27-.07.46-.24.58-.45l.32-.56c.1-.18.04-.41-.14-.52l-.95-.6a.42.42 0 0 0-.52.05l-.44.36a.25.25 0 0 1-.22.05c-.36-.1-1-.5-1.56-1.13-.57-.63-.92-1.33-.99-1.71a.25.25 0 0 1 .08-.22l.39-.39a.42.42 0 0 0 .08-.51l-.53-1.01a.41.41 0 0 0-.49-.19l-.57.2Z"
         />
-        <path
-          fill="#fff"
-          d="M13.46 7.03a.8.8 0 1 0 0 1.6c1.06 0 1.92.86 1.92 1.92a.8.8 0 1 0 1.6 0 3.52 3.52 0 0 0-3.52-3.52Zm-.02 2.2a.58.58 0 1 0 0 1.16.78.78 0 0 1 .78.78.58.58 0 1 0 1.16 0 1.94 1.94 0 0 0-1.94-1.94Z"
-        />
       </svg>
     );
   }
@@ -608,7 +706,7 @@ function ContactBrandIcon({
     return (
       <svg viewBox="0 0 24 24" style={commonSvgStyle} aria-hidden="true">
         <defs>
-          <linearGradient id="instagramGradientMapbook" x1="0%" y1="100%" x2="100%" y2="0%">
+          <linearGradient id="instagramGradientMapbookContact" x1="0%" y1="100%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#feda75" />
             <stop offset="30%" stopColor="#fa7e1e" />
             <stop offset="60%" stopColor="#d62976" />
@@ -616,7 +714,7 @@ function ContactBrandIcon({
             <stop offset="100%" stopColor="#4f5bd5" />
           </linearGradient>
         </defs>
-        <rect x="3" y="3" width="18" height="18" rx="5" fill="url(#instagramGradientMapbook)" />
+        <rect x="3" y="3" width="18" height="18" rx="5" fill="url(#instagramGradientMapbookContact)" />
         <circle cx="12" cy="12" r="4" fill="none" stroke="#fff" strokeWidth="2" />
         <circle cx="17.2" cy="6.8" r="1.2" fill="#fff" />
       </svg>
@@ -640,6 +738,167 @@ function ContactBrandIcon({
       <rect x="3" y="5" width="18" height="14" rx="3" fill="#2f7cf6" />
       <path fill="#fff" d="M6 8.2 12 13l6-4.8v1.6L12 14.6 6 9.8V8.2Z" />
     </svg>
+  );
+}
+
+function CountryPickerModal({
+  open,
+  title,
+  searchLabel,
+  countries,
+  search,
+  onSearchChange,
+  selectedCountryCode,
+  onClose,
+  onSelect,
+}: {
+  open: boolean;
+  title: string;
+  searchLabel: string;
+  countries: CountryOption[];
+  search: string;
+  onSearchChange: (value: string) => void;
+  selectedCountryCode: string;
+  onClose: () => void;
+  onSelect: (country: CountryOption) => void;
+}) {
+  if (!open) return null;
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(20,16,12,0.42)',
+        zIndex: 3000,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+      }}
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: 460,
+          maxHeight: '82vh',
+          overflow: 'hidden',
+          background: '#fff',
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
+          boxShadow: '0 -10px 30px rgba(0,0,0,0.12)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <div
+          style={{
+            padding: '14px 16px 10px',
+            borderBottom: '1px solid #efe4d7',
+            display: 'grid',
+            gridTemplateColumns: '42px 1fr',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 999,
+              border: '1px solid #efe4d7',
+              background: '#fff',
+              fontSize: 22,
+              cursor: 'pointer',
+            }}
+          >
+            ←
+          </button>
+
+          <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
+            {title}
+          </div>
+        </div>
+
+        <div style={{ padding: 16, borderBottom: '1px solid #f3ece2' }}>
+          <input
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder={searchLabel}
+            style={{
+              width: '100%',
+              height: 52,
+              borderRadius: 16,
+              border: '1px solid #efe4d7',
+              background: '#fcfaf6',
+              padding: '0 14px',
+              fontSize: 15,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+
+        <div style={{ overflowY: 'auto', padding: '4px 0 18px' }}>
+          {countries.map((country) => {
+            const active = selectedCountryCode === country.code;
+
+            return (
+              <button
+                key={country.code}
+                type="button"
+                onClick={() => onSelect(country)}
+                style={{
+                  width: '100%',
+                  border: 'none',
+                  borderBottom: '1px solid #f4eee5',
+                  background: active ? '#f4fbf6' : '#fff',
+                  padding: '14px 16px',
+                  display: 'grid',
+                  gridTemplateColumns: '30px 1fr auto auto',
+                  alignItems: 'center',
+                  gap: 12,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <span style={{ fontSize: 22 }}>{country.flag}</span>
+                <span
+                  style={{
+                    fontSize: 17,
+                    fontWeight: active ? 900 : 800,
+                    color: active ? '#1f8f49' : '#17130f',
+                  }}
+                >
+                  {country.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 900,
+                    color: '#5f6771',
+                  }}
+                >
+                  {country.dial}
+                </span>
+                <span
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 900,
+                    color: active ? '#17130f' : 'transparent',
+                  }}
+                >
+                  ✓
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -676,7 +935,13 @@ export default function EditProfilePage() {
     'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80',
     'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
   ]);
-  const [countrySearch, setCountrySearch] = useState('');
+
+  const [phoneCountrySearch, setPhoneCountrySearch] = useState('');
+  const [countryPickerOpen, setCountryPickerOpen] = useState(false);
+  const [activeContactCountryPicker, setActiveContactCountryPicker] =
+    useState<PhoneContactKey | null>(null);
+  const [contactCountrySearch, setContactCountrySearch] = useState('');
+
   const [contacts, setContacts] = useState<Record<ContactKey, string>>({
     whatsapp: initialExtra.contacts.whatsapp,
     businessWhatsapp: initialExtra.contacts.businessWhatsapp,
@@ -685,6 +950,24 @@ export default function EditProfilePage() {
     instagram: initialExtra.contacts.instagram,
     website: initialExtra.contacts.website,
     email: initialExtra.contacts.email || getUserProfile().email,
+  });
+
+  const [contactPhoneMeta, setContactPhoneMeta] = useState<Record<
+    PhoneContactKey,
+    PhoneContactValue
+  >>({
+    whatsapp:
+      initialExtra.contactPhoneMeta?.whatsapp ||
+      parseStoredPhoneContact(initialExtra.contacts.whatsapp),
+    businessWhatsapp:
+      initialExtra.contactPhoneMeta?.businessWhatsapp ||
+      parseStoredPhoneContact(initialExtra.contacts.businessWhatsapp),
+    telegram:
+      initialExtra.contactPhoneMeta?.telegram ||
+      parseStoredPhoneContact(initialExtra.contacts.telegram),
+    viber:
+      initialExtra.contactPhoneMeta?.viber ||
+      parseStoredPhoneContact(initialExtra.contacts.viber),
   });
 
   useEffect(() => {
@@ -710,9 +993,10 @@ export default function EditProfilePage() {
       setBio(next.bio);
       setAvatar(next.avatar);
       setAvatarHistory((prev) =>
-        Array.from(
-          new Set([next.avatar, ...extra.avatarHistory, ...prev].filter(Boolean))
-        ).slice(0, 12)
+        Array.from(new Set([next.avatar, ...extra.avatarHistory, ...prev].filter(Boolean))).slice(
+          0,
+          12
+        )
       );
       setContacts({
         whatsapp: extra.contacts.whatsapp || '',
@@ -722,6 +1006,16 @@ export default function EditProfilePage() {
         instagram: extra.contacts.instagram || '',
         website: extra.contacts.website || '',
         email: extra.contacts.email || next.email,
+      });
+      setContactPhoneMeta({
+        whatsapp:
+          extra.contactPhoneMeta?.whatsapp || parseStoredPhoneContact(extra.contacts.whatsapp),
+        businessWhatsapp:
+          extra.contactPhoneMeta?.businessWhatsapp ||
+          parseStoredPhoneContact(extra.contacts.businessWhatsapp),
+        telegram:
+          extra.contactPhoneMeta?.telegram || parseStoredPhoneContact(extra.contacts.telegram),
+        viber: extra.contactPhoneMeta?.viber || parseStoredPhoneContact(extra.contacts.viber),
       });
     };
 
@@ -742,8 +1036,8 @@ export default function EditProfilePage() {
     [language]
   );
 
-  const filteredCountries = useMemo(() => {
-    const q = countrySearch.trim().toLowerCase();
+  const filteredMainCountries = useMemo(() => {
+    const q = phoneCountrySearch.trim().toLowerCase();
     if (!q) return COUNTRIES;
 
     return COUNTRIES.filter(
@@ -752,7 +1046,19 @@ export default function EditProfilePage() {
         country.dial.toLowerCase().includes(q) ||
         country.code.toLowerCase().includes(q)
     );
-  }, [countrySearch]);
+  }, [phoneCountrySearch]);
+
+  const filteredContactCountries = useMemo(() => {
+    const q = contactCountrySearch.trim().toLowerCase();
+    if (!q) return COUNTRIES;
+
+    return COUNTRIES.filter(
+      (country) =>
+        country.label.toLowerCase().includes(q) ||
+        country.dial.toLowerCase().includes(q) ||
+        country.code.toLowerCase().includes(q)
+    );
+  }, [contactCountrySearch]);
 
   const handlePhotoFile = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -770,9 +1076,63 @@ export default function EditProfilePage() {
     event.target.value = '';
   };
 
+  const removeAvatarFromHistory = (avatarUrl: string) => {
+    setAvatarHistory((prev) => prev.filter((item) => item !== avatarUrl));
+
+    if (avatar === avatarUrl) {
+      const fallback =
+        avatarHistory.find((item) => item !== avatarUrl) || getUserProfile().avatar;
+      setAvatar(fallback);
+    }
+  };
+
+  const clearAvatarHistory = () => {
+    setAvatarHistory([avatar]);
+  };
+
+  const openContactCountryPicker = (key: PhoneContactKey) => {
+    setActiveContactCountryPicker(key);
+    setContactCountrySearch('');
+  };
+
+  const handlePhoneContactCountrySelect = (country: CountryOption) => {
+    if (!activeContactCountryPicker) return;
+
+    setContactPhoneMeta((prev) => ({
+      ...prev,
+      [activeContactCountryPicker]: {
+        ...prev[activeContactCountryPicker],
+        countryCode: country.code,
+      },
+    }));
+
+    setActiveContactCountryPicker(null);
+  };
+
   const handleSave = () => {
     const combinedFullName = `${firstName} ${lastName}`.trim();
-    const finalPhone = `${phoneCountry.dial} ${phoneNumber}`.trim();
+    const finalPhone = combinePhone(phoneCountry, phoneNumber);
+
+    const nextContacts: Record<ContactKey, string> = {
+      ...contacts,
+      email,
+      whatsapp: combinePhone(
+        COUNTRIES.find((item) => item.code === contactPhoneMeta.whatsapp.countryCode) || COUNTRIES[0],
+        contactPhoneMeta.whatsapp.number
+      ),
+      businessWhatsapp: combinePhone(
+        COUNTRIES.find((item) => item.code === contactPhoneMeta.businessWhatsapp.countryCode) || COUNTRIES[0],
+        contactPhoneMeta.businessWhatsapp.number
+      ),
+      telegram: combinePhone(
+        COUNTRIES.find((item) => item.code === contactPhoneMeta.telegram.countryCode) || COUNTRIES[0],
+        contactPhoneMeta.telegram.number
+      ),
+      viber: combinePhone(
+        COUNTRIES.find((item) => item.code === contactPhoneMeta.viber.countryCode) || COUNTRIES[0],
+        contactPhoneMeta.viber.number
+      ),
+    };
 
     updateUserProfile({
       fullName: combinedFullName,
@@ -786,11 +1146,9 @@ export default function EditProfilePage() {
     saveExtraProfileData({
       district,
       address,
-      contacts: {
-        ...contacts,
-        email,
-      },
+      contacts: nextContacts,
       avatarHistory,
+      contactPhoneMeta,
     });
 
     alert(text.saved);
@@ -805,6 +1163,37 @@ export default function EditProfilePage() {
         padding: '20px 16px 110px',
       }}
     >
+      <CountryPickerModal
+        open={countryPickerOpen}
+        title={text.chooseCountry}
+        searchLabel={text.countrySearch}
+        countries={filteredMainCountries}
+        search={phoneCountrySearch}
+        onSearchChange={setPhoneCountrySearch}
+        selectedCountryCode={phoneCountry.code}
+        onClose={() => setCountryPickerOpen(false)}
+        onSelect={(country) => {
+          setPhoneCountry(country);
+          setCountryPickerOpen(false);
+        }}
+      />
+
+      <CountryPickerModal
+        open={Boolean(activeContactCountryPicker)}
+        title={text.chooseCountry}
+        searchLabel={text.countrySearch}
+        countries={filteredContactCountries}
+        search={contactCountrySearch}
+        onSearchChange={setContactCountrySearch}
+        selectedCountryCode={
+          activeContactCountryPicker
+            ? contactPhoneMeta[activeContactCountryPicker].countryCode
+            : 'GB'
+        }
+        onClose={() => setActiveContactCountryPicker(null)}
+        onSelect={handlePhoneContactCountrySelect}
+      />
+
       <input
         ref={cameraInputRef}
         type="file"
@@ -995,13 +1384,37 @@ export default function EditProfilePage() {
           <div
             style={{
               marginTop: 18,
-              fontSize: 14,
-              fontWeight: 900,
-              color: '#17130f',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 12,
               marginBottom: 10,
             }}
           >
-            {text.recentPhotos}
+            <div
+              style={{
+                fontSize: 14,
+                fontWeight: 900,
+                color: '#17130f',
+              }}
+            >
+              {text.recentPhotos}
+            </div>
+
+            <button
+              type="button"
+              onClick={clearAvatarHistory}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                color: '#8a7f74',
+                fontSize: 13,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              {text.clearHistory}
+            </button>
           </div>
 
           <div
@@ -1016,11 +1429,10 @@ export default function EditProfilePage() {
               const selected = avatarUrl === avatar;
 
               return (
-                <button
+                <div
                   key={avatarUrl}
-                  type="button"
-                  onClick={() => setAvatar(avatarUrl)}
                   style={{
+                    position: 'relative',
                     flex: '0 0 auto',
                     width: 82,
                     height: 82,
@@ -1028,22 +1440,58 @@ export default function EditProfilePage() {
                     overflow: 'hidden',
                     border: selected ? '3px solid #ff4fa0' : '1px solid #efe4d7',
                     background: '#fff',
-                    padding: 0,
-                    cursor: 'pointer',
                     boxShadow: selected ? '0 10px 22px rgba(255,79,160,0.16)' : 'none',
                   }}
                 >
-                  <img
-                    src={avatarUrl}
-                    alt="Avatar option"
+                  <button
+                    type="button"
+                    onClick={() => setAvatar(avatarUrl)}
                     style={{
                       width: '100%',
                       height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
+                      border: 'none',
+                      background: 'transparent',
+                      padding: 0,
+                      cursor: 'pointer',
                     }}
-                  />
-                </button>
+                  >
+                    <img
+                      src={avatarUrl}
+                      alt="Avatar option"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                    />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => removeAvatarFromHistory(avatarUrl)}
+                    style={{
+                      position: 'absolute',
+                      top: 5,
+                      right: 5,
+                      width: 22,
+                      height: 22,
+                      borderRadius: 999,
+                      border: 'none',
+                      background: 'rgba(23,19,15,0.75)',
+                      color: '#fff',
+                      fontSize: 13,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      lineHeight: 1,
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
               );
             })}
           </div>
@@ -1113,93 +1561,61 @@ export default function EditProfilePage() {
           <div style={{ marginTop: 14 }}>
             {fieldLabel(text.phone, text.required)}
 
-            <input
-              value={countrySearch}
-              onChange={(e) => setCountrySearch(e.target.value)}
-              placeholder={text.countrySearch}
-              style={{
-                width: '100%',
-                height: 50,
-                borderRadius: 16,
-                border: '1px solid #efe4d7',
-                background: '#fcfaf6',
-                padding: '0 14px',
-                fontSize: 14,
-                outline: 'none',
-                marginBottom: 10,
-                boxSizing: 'border-box',
-              }}
-            />
-
-            <div
-              style={{
-                display: 'flex',
-                gap: 8,
-                overflowX: 'auto',
-                paddingBottom: 4,
-                marginBottom: 10,
-              }}
-            >
-              {filteredCountries.map((country) => {
-                const active = phoneCountry.code === country.code;
-
-                return (
-                  <button
-                    key={country.code}
-                    type="button"
-                    onClick={() => setPhoneCountry(country)}
-                    style={{
-                      flex: '0 0 auto',
-                      minWidth: 122,
-                      height: 48,
-                      borderRadius: 16,
-                      border: active ? '2px solid #ff4fa0' : '1px solid #efe4d7',
-                      background: active ? '#fff1f7' : '#fff',
-                      color: '#17130f',
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      padding: '0 12px',
-                    }}
-                  >
-                    {country.flag} {country.dial}
-                  </button>
-                );
-              })}
-            </div>
-
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '104px 1fr',
+                gridTemplateColumns: '132px 1fr',
                 gap: 10,
               }}
             >
-              <div
+              <button
+                type="button"
+                onClick={() => {
+                  setPhoneCountrySearch('');
+                  setCountryPickerOpen(true);
+                }}
                 style={{
-                  height: 54,
+                  height: 58,
                   borderRadius: 18,
                   border: '1px solid #efe4d7',
-                  background: '#fcfaf6',
+                  background: '#fff',
+                  padding: '0 14px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  fontSize: 16,
-                  fontWeight: 900,
-                  color: '#17130f',
+                  justifyContent: 'space-between',
+                  gap: 10,
+                  cursor: 'pointer',
                 }}
               >
-                <span>{phoneCountry.flag}</span>
-                <span>{phoneCountry.dial}</span>
-              </div>
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    minWidth: 0,
+                  }}
+                >
+                  <span style={{ fontSize: 19 }}>{phoneCountry.flag}</span>
+                  <span
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
+                    {phoneCountry.dial}
+                  </span>
+                </span>
+                <span style={{ fontSize: 12, color: '#8a7f74', fontWeight: 900 }}>▼</span>
+              </button>
 
               <input
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value.replace(/[^\d\s()-]/g, ''))}
+                onChange={(e) => setPhoneNumber(normalizePhoneNumber(e.target.value))}
                 placeholder={text.phonePlaceholder}
                 style={{
                   width: '100%',
-                  height: 54,
+                  height: 58,
                   borderRadius: 18,
                   border: '1px solid #efe4d7',
                   background: '#fffdf9',
@@ -1216,235 +1632,3 @@ export default function EditProfilePage() {
             {fieldLabel(text.bio, text.optional)}
             <textarea
               value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder={text.bioPlaceholder}
-              rows={4}
-              style={{
-                width: '100%',
-                resize: 'none',
-                borderRadius: 18,
-                border: '1px solid #efe4d7',
-                background: '#fffdf9',
-                padding: '14px 16px',
-                fontSize: 16,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 32,
-            background: '#fff',
-            border: '1px solid #efe4d7',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 14,
-            }}
-          >
-            {text.locationInfo}
-          </div>
-
-          <div style={{ marginTop: 2 }}>
-            {fieldLabel(text.city, text.required)}
-            <input
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder={text.cityPlaceholder}
-              style={{
-                width: '100%',
-                height: 54,
-                borderRadius: 18,
-                border: '1px solid #efe4d7',
-                background: '#fffdf9',
-                padding: '0 16px',
-                fontSize: 16,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
-
-          <div style={{ marginTop: 14 }}>
-            {fieldLabel(text.district, text.optional)}
-            <input
-              value={district}
-              onChange={(e) => setDistrict(e.target.value)}
-              placeholder={text.districtPlaceholder}
-              style={{
-                width: '100%',
-                height: 54,
-                borderRadius: 18,
-                border: '1px solid #efe4d7',
-                background: '#fffdf9',
-                padding: '0 16px',
-                fontSize: 16,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
-
-          <div style={{ marginTop: 14 }}>
-            {fieldLabel(text.address, text.optional)}
-            <input
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder={text.addressPlaceholder}
-              style={{
-                width: '100%',
-                height: 54,
-                borderRadius: 18,
-                border: '1px solid #efe4d7',
-                background: '#fffdf9',
-                padding: '0 16px',
-                fontSize: 16,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
-            />
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 32,
-            background: '#fff',
-            border: '1px solid #efe4d7',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
-            }}
-          >
-            {text.contacts}
-          </div>
-
-          <div
-            style={{
-              marginTop: 6,
-              fontSize: 14,
-              lineHeight: 1.55,
-              color: '#7b7268',
-              fontWeight: 700,
-            }}
-          >
-            {text.contactsHint}
-          </div>
-
-          <div style={{ marginTop: 14, display: 'grid', gap: 14 }}>
-            {CONTACT_ITEMS.map((item) => {
-              const accent = getAccentColors(item.accent);
-
-              return (
-                <div
-                  key={item.key}
-                  style={{
-                    borderRadius: 22,
-                    border: '1px solid #efe4d7',
-                    background: '#fcfaf6',
-                    padding: 14,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      marginBottom: 10,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 42,
-                        height: 42,
-                        borderRadius: 14,
-                        background: accent.bg,
-                        border: `1px solid ${accent.border}`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}
-                    >
-                      <ContactBrandIcon iconKey={item.iconKey} size={20} />
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: 15,
-                        fontWeight: 900,
-                        color: '#17130f',
-                      }}
-                    >
-                      {item.title[language]}
-                    </div>
-                  </div>
-
-                  <input
-                    value={item.key === 'email' ? email : contacts[item.key]}
-                    onChange={(e) => {
-                      if (item.key === 'email') {
-                        setEmail(e.target.value);
-                        setContacts((prev) => ({ ...prev, email: e.target.value }));
-                        return;
-                      }
-
-                      setContacts((prev) => ({
-                        ...prev,
-                        [item.key]: e.target.value,
-                      }));
-                    }}
-                    placeholder={item.placeholder[language]}
-                    style={{
-                      width: '100%',
-                      height: 52,
-                      borderRadius: 16,
-                      border: '1px solid #efe4d7',
-                      background: '#fff',
-                      padding: '0 14px',
-                      fontSize: 15,
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                    }}
-                  />
-
-                  {item.key === 'email' ? (
-                    <div
-                      style={{
-                        marginTop: 8,
-                        fontSize: 12,
-                        color: '#8a7f74',
-                        fontWeight: 700,
-                      }}
-                    >
-                      {text.emailSmartHint}
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      <BottomNav active="profile" />
-    </main>
-  );
-}
