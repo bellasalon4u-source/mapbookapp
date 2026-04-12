@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type PointerEvent as ReactPointerEvent,
-} from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
 import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
@@ -36,7 +29,14 @@ type ContactKey =
 
 type ContactItem = {
   key: ContactKey;
-  icon: string;
+  iconKey:
+    | 'whatsapp'
+    | 'businessWhatsapp'
+    | 'telegram'
+    | 'viber'
+    | 'instagram'
+    | 'website'
+    | 'email';
   title: Record<AppLanguage, string>;
   placeholder: Record<AppLanguage, string>;
   accent: 'pink' | 'green' | 'blue' | 'violet' | 'orange';
@@ -47,12 +47,6 @@ type ExtraProfileData = {
   address: string;
   contacts: Record<ContactKey, string>;
   avatarHistory: string[];
-};
-
-type CropState = {
-  scale: number;
-  x: number;
-  y: number;
 };
 
 const EXTRA_PROFILE_STORAGE_KEY = 'mapbook_profile_extra_v1';
@@ -71,7 +65,7 @@ const COUNTRIES: CountryOption[] = [
 const CONTACT_ITEMS: ContactItem[] = [
   {
     key: 'whatsapp',
-    icon: '💬',
+    iconKey: 'whatsapp',
     accent: 'green',
     title: {
       EN: 'WhatsApp',
@@ -92,8 +86,8 @@ const CONTACT_ITEMS: ContactItem[] = [
   },
   {
     key: 'businessWhatsapp',
-    icon: '🏢',
-    accent: 'blue',
+    iconKey: 'businessWhatsapp',
+    accent: 'green',
     title: {
       EN: 'Business WhatsApp',
       ES: 'WhatsApp Business',
@@ -113,8 +107,8 @@ const CONTACT_ITEMS: ContactItem[] = [
   },
   {
     key: 'telegram',
-    icon: '✈️',
-    accent: 'violet',
+    iconKey: 'telegram',
+    accent: 'blue',
     title: {
       EN: 'Telegram',
       ES: 'Telegram',
@@ -134,8 +128,8 @@ const CONTACT_ITEMS: ContactItem[] = [
   },
   {
     key: 'viber',
-    icon: '📞',
-    accent: 'pink',
+    iconKey: 'viber',
+    accent: 'violet',
     title: {
       EN: 'Viber',
       ES: 'Viber',
@@ -155,7 +149,7 @@ const CONTACT_ITEMS: ContactItem[] = [
   },
   {
     key: 'instagram',
-    icon: '📸',
+    iconKey: 'instagram',
     accent: 'pink',
     title: {
       EN: 'Instagram',
@@ -176,7 +170,7 @@ const CONTACT_ITEMS: ContactItem[] = [
   },
   {
     key: 'website',
-    icon: '🌐',
+    iconKey: 'website',
     accent: 'orange',
     title: {
       EN: 'Website',
@@ -197,7 +191,7 @@ const CONTACT_ITEMS: ContactItem[] = [
   },
   {
     key: 'email',
-    icon: '✉️',
+    iconKey: 'email',
     accent: 'blue',
     title: {
       EN: 'Email',
@@ -228,12 +222,6 @@ const editProfileTexts = {
     uploadFromGallery: 'Gallery',
     uploadFromFiles: 'Files',
     recentPhotos: 'Photo history',
-    clearHistory: 'Clear history',
-    cropTitle: 'Adjust avatar',
-    cropSub: 'Move and zoom the image with your fingers',
-    applyPhoto: 'Use this photo',
-    cancel: 'Cancel',
-    removePhoto: 'Remove',
     firstName: 'First name',
     lastName: 'Last name',
     phone: 'Phone',
@@ -265,12 +253,6 @@ const editProfileTexts = {
     uploadFromGallery: 'Galería',
     uploadFromFiles: 'Archivos',
     recentPhotos: 'Historial de fotos',
-    clearHistory: 'Borrar historial',
-    cropTitle: 'Ajustar avatar',
-    cropSub: 'Mueve y amplía la imagen con los dedos',
-    applyPhoto: 'Usar esta foto',
-    cancel: 'Cancelar',
-    removePhoto: 'Eliminar',
     firstName: 'Nombre',
     lastName: 'Apellido',
     phone: 'Teléfono',
@@ -302,12 +284,6 @@ const editProfileTexts = {
     uploadFromGallery: 'Галерея',
     uploadFromFiles: 'Файлы',
     recentPhotos: 'История фото',
-    clearHistory: 'Очистить историю',
-    cropTitle: 'Настроить аватар',
-    cropSub: 'Двигайте и увеличивайте фото пальцами',
-    applyPhoto: 'Использовать это фото',
-    cancel: 'Отмена',
-    removePhoto: 'Удалить',
     firstName: 'Имя',
     lastName: 'Фамилия',
     phone: 'Телефон',
@@ -339,12 +315,6 @@ const editProfileTexts = {
     uploadFromGallery: 'Galerie',
     uploadFromFiles: 'Soubory',
     recentPhotos: 'Historie fotek',
-    clearHistory: 'Vymazat historii',
-    cropTitle: 'Upravit avatar',
-    cropSub: 'Posouvejte a přibližujte fotku prsty',
-    applyPhoto: 'Použít tuto fotku',
-    cancel: 'Zrušit',
-    removePhoto: 'Smazat',
     firstName: 'Jméno',
     lastName: 'Příjmení',
     phone: 'Telefon',
@@ -376,12 +346,6 @@ const editProfileTexts = {
     uploadFromGallery: 'Galerie',
     uploadFromFiles: 'Dateien',
     recentPhotos: 'Fotoverlauf',
-    clearHistory: 'Verlauf löschen',
-    cropTitle: 'Avatar anpassen',
-    cropSub: 'Verschiebe und zoome das Bild mit den Fingern',
-    applyPhoto: 'Dieses Foto verwenden',
-    cancel: 'Abbrechen',
-    removePhoto: 'Entfernen',
     firstName: 'Vorname',
     lastName: 'Nachname',
     phone: 'Telefon',
@@ -413,12 +377,6 @@ const editProfileTexts = {
     uploadFromGallery: 'Galeria',
     uploadFromFiles: 'Pliki',
     recentPhotos: 'Historia zdjęć',
-    clearHistory: 'Wyczyść historię',
-    cropTitle: 'Ustaw avatar',
-    cropSub: 'Przesuwaj i powiększaj zdjęcie palcami',
-    applyPhoto: 'Użyj tego zdjęcia',
-    cancel: 'Anuluj',
-    removePhoto: 'Usuń',
     firstName: 'Imię',
     lastName: 'Nazwisko',
     phone: 'Telefon',
@@ -471,34 +429,44 @@ function stripDialCode(phone: string, dial: string) {
   return trimmed.replace(/[^\d]/g, '');
 }
 
-function getEmptyExtraProfileData(): ExtraProfileData {
-  return {
-    district: '',
-    address: '',
-    contacts: {
-      whatsapp: '',
-      businessWhatsapp: '',
-      telegram: '',
-      viber: '',
-      instagram: '',
-      website: '',
-      email: '',
-    },
-    avatarHistory: [],
-  };
-}
-
 function readExtraProfileData(): ExtraProfileData {
   if (typeof window === 'undefined') {
-    return getEmptyExtraProfileData();
+    return {
+      district: '',
+      address: '',
+      contacts: {
+        whatsapp: '',
+        businessWhatsapp: '',
+        telegram: '',
+        viber: '',
+        instagram: '',
+        website: '',
+        email: '',
+      },
+      avatarHistory: [],
+    };
   }
 
   try {
     const raw = window.localStorage.getItem(EXTRA_PROFILE_STORAGE_KEY);
-    if (!raw) return getEmptyExtraProfileData();
+    if (!raw) {
+      return {
+        district: '',
+        address: '',
+        contacts: {
+          whatsapp: '',
+          businessWhatsapp: '',
+          telegram: '',
+          viber: '',
+          instagram: '',
+          website: '',
+          email: '',
+        },
+        avatarHistory: [],
+      };
+    }
 
     const parsed = JSON.parse(raw) as Partial<ExtraProfileData>;
-
     return {
       district: parsed.district || '',
       address: parsed.address || '',
@@ -514,7 +482,20 @@ function readExtraProfileData(): ExtraProfileData {
       avatarHistory: Array.isArray(parsed.avatarHistory) ? parsed.avatarHistory : [],
     };
   } catch {
-    return getEmptyExtraProfileData();
+    return {
+      district: '',
+      address: '',
+      contacts: {
+        whatsapp: '',
+        businessWhatsapp: '',
+        telegram: '',
+        viber: '',
+        instagram: '',
+        website: '',
+        email: '',
+      },
+      avatarHistory: [],
+    };
   }
 }
 
@@ -524,11 +505,11 @@ function saveExtraProfileData(data: ExtraProfileData) {
 }
 
 function getAccentColors(accent: ContactItem['accent']) {
-  if (accent === 'green') return { bg: '#eef9f1', color: '#2fa35a' };
-  if (accent === 'blue') return { bg: '#eef4ff', color: '#2f7cf6' };
-  if (accent === 'violet') return { bg: '#f3efff', color: '#7a5af8' };
-  if (accent === 'orange') return { bg: '#fff5e8', color: '#d68612' };
-  return { bg: '#fff1f7', color: '#ff4fa0' };
+  if (accent === 'green') return { bg: '#eef9f1', color: '#25D366', border: '#d8f0df' };
+  if (accent === 'blue') return { bg: '#eef4ff', color: '#229ED9', border: '#d9e6ff' };
+  if (accent === 'violet') return { bg: '#f3efff', color: '#7360f2', border: '#e4dcff' };
+  if (accent === 'orange') return { bg: '#fff5e8', color: '#d68612', border: '#f6e4c9' };
+  return { bg: '#fff1f7', color: '#ff4fa0', border: '#f7d9e8' };
 }
 
 function fieldLabel(title: string, helper: string) {
@@ -548,49 +529,118 @@ function fieldLabel(title: string, helper: string) {
   );
 }
 
-function uniqueAvatarHistory(list: string[]) {
-  return Array.from(new Set(list.filter(Boolean))).slice(0, 20);
-}
-
-async function loadImage(src: string) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = reject;
-    image.src = src;
-  });
-}
-
-async function cropImageToDataUrl(src: string, crop: CropState, size = 700) {
-  const image = await loadImage(src);
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return src;
-
-  ctx.clearRect(0, 0, size, size);
-
-  const baseScale = Math.max(size / image.width, size / image.height);
-  const finalScale = baseScale * crop.scale;
-  const drawWidth = image.width * finalScale;
-  const drawHeight = image.height * finalScale;
-  const drawX = (size - drawWidth) / 2 + crop.x;
-  const drawY = (size - drawHeight) / 2 + crop.y;
-
-  ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
-
-  return canvas.toDataURL('image/jpeg', 0.92);
-}
-
-function clampCrop(imageSrc: string | null, crop: CropState) {
-  if (!imageSrc) return crop;
-  return {
-    scale: Math.min(4, Math.max(1, crop.scale)),
-    x: crop.x,
-    y: crop.y,
+function ContactBrandIcon({
+  iconKey,
+  size = 20,
+}: {
+  iconKey: ContactItem['iconKey'];
+  size?: number;
+}) {
+  const commonSvgStyle: CSSProperties = {
+    width: size,
+    height: size,
+    display: 'block',
   };
+
+  if (iconKey === 'whatsapp') {
+    return (
+      <svg viewBox="0 0 24 24" style={commonSvgStyle} aria-hidden="true">
+        <path
+          fill="#25D366"
+          d="M12 2C6.48 2 2 6.3 2 11.62c0 1.86.55 3.6 1.51 5.07L2.4 22l5.53-1.43A10.27 10.27 0 0 0 12 21.24c5.52 0 10-4.3 10-9.62S17.52 2 12 2Z"
+        />
+        <path
+          fill="#fff"
+          d="M17.52 14.44c-.23-.11-1.36-.66-1.57-.73-.21-.08-.36-.11-.52.11-.15.22-.6.73-.73.88-.13.15-.27.17-.5.06a6.53 6.53 0 0 1-1.93-1.16 7.2 7.2 0 0 1-1.34-1.63c-.14-.22-.01-.34.1-.45.1-.1.23-.27.34-.4.11-.13.15-.22.23-.37.08-.15.04-.28-.02-.4-.06-.11-.52-1.23-.71-1.69-.19-.45-.39-.39-.52-.39h-.45c-.15 0-.4.06-.6.28-.21.22-.8.77-.8 1.88 0 1.1.83 2.18.94 2.33.11.15 1.62 2.53 3.93 3.55.55.23.98.37 1.32.47.55.17 1.04.15 1.43.09.44-.06 1.36-.55 1.55-1.08.19-.53.19-.98.13-1.08-.06-.09-.21-.15-.44-.26Z"
+        />
+      </svg>
+    );
+  }
+
+  if (iconKey === 'businessWhatsapp') {
+    return (
+      <svg viewBox="0 0 24 24" style={commonSvgStyle} aria-hidden="true">
+        <path
+          fill="#25D366"
+          d="M12 2C6.48 2 2 6.3 2 11.62c0 1.86.55 3.6 1.51 5.07L2.4 22l5.53-1.43A10.27 10.27 0 0 0 12 21.24c5.52 0 10-4.3 10-9.62S17.52 2 12 2Z"
+        />
+        <circle cx="12" cy="11.8" r="6.1" fill="#fff" />
+        <path
+          fill="#25D366"
+          d="M9.2 8.1h3.27c1.72 0 2.65.95 2.65 2.2 0 .9-.5 1.48-1.18 1.75.94.22 1.54.95 1.54 1.99 0 1.46-1.09 2.46-2.97 2.46H9.2V8.1Zm3 3.27c.79 0 1.23-.33 1.23-.94 0-.58-.42-.92-1.23-.92h-1.19v1.86h1.19Zm.19 3.69c.94 0 1.45-.37 1.45-1.06 0-.67-.51-1.03-1.45-1.03h-1.38v2.09h1.38Z"
+        />
+      </svg>
+    );
+  }
+
+  if (iconKey === 'telegram') {
+    return (
+      <svg viewBox="0 0 24 24" style={commonSvgStyle} aria-hidden="true">
+        <circle cx="12" cy="12" r="10" fill="#229ED9" />
+        <path
+          fill="#fff"
+          d="M17.64 7.62 6.9 11.76c-.73.29-.72.7-.13.88l2.76.86 1.07 3.31c.13.36.06.5.45.5.3 0 .43-.14.6-.31l1.47-1.42 3.06 2.25c.56.31.96.15 1.1-.52l1.83-8.61c.2-.82-.31-1.19-.91-.92Zm-5.61 6.32-.47 2.8-.01.01c-.07 0-.1-.03-.12-.08l-.94-2.91 6.19-3.91c.29-.18.56-.08.34.11l-4.99 4.48Z"
+        />
+      </svg>
+    );
+  }
+
+  if (iconKey === 'viber') {
+    return (
+      <svg viewBox="0 0 24 24" style={commonSvgStyle} aria-hidden="true">
+        <path
+          fill="#7360F2"
+          d="M12 2.2c-5.2 0-9.4 3.57-9.4 7.97 0 2.52 1.37 4.77 3.5 6.23V21l4.03-2.23c.6.1 1.22.15 1.87.15 5.2 0 9.4-3.57 9.4-7.97S17.2 2.2 12 2.2Z"
+        />
+        <path
+          fill="#fff"
+          d="M8.64 8.18c-.22.07-.43.23-.54.49-.11.27-.18.68-.09 1.16.15.85.68 1.95 1.55 2.92.87.98 1.87 1.64 2.69 1.89.46.14.87.14 1.15.07.27-.07.46-.24.58-.45l.32-.56c.1-.18.04-.41-.14-.52l-.95-.6a.42.42 0 0 0-.52.05l-.44.36a.25.25 0 0 1-.22.05c-.36-.1-1-.5-1.56-1.13-.57-.63-.92-1.33-.99-1.71a.25.25 0 0 1 .08-.22l.39-.39a.42.42 0 0 0 .08-.51l-.53-1.01a.41.41 0 0 0-.49-.19l-.57.2Z"
+        />
+        <path
+          fill="#fff"
+          d="M13.46 7.03a.8.8 0 1 0 0 1.6c1.06 0 1.92.86 1.92 1.92a.8.8 0 1 0 1.6 0 3.52 3.52 0 0 0-3.52-3.52Zm-.02 2.2a.58.58 0 1 0 0 1.16.78.78 0 0 1 .78.78.58.58 0 1 0 1.16 0 1.94 1.94 0 0 0-1.94-1.94Z"
+        />
+      </svg>
+    );
+  }
+
+  if (iconKey === 'instagram') {
+    return (
+      <svg viewBox="0 0 24 24" style={commonSvgStyle} aria-hidden="true">
+        <defs>
+          <linearGradient id="instagramGradientMapbook" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#feda75" />
+            <stop offset="30%" stopColor="#fa7e1e" />
+            <stop offset="60%" stopColor="#d62976" />
+            <stop offset="85%" stopColor="#962fbf" />
+            <stop offset="100%" stopColor="#4f5bd5" />
+          </linearGradient>
+        </defs>
+        <rect x="3" y="3" width="18" height="18" rx="5" fill="url(#instagramGradientMapbook)" />
+        <circle cx="12" cy="12" r="4" fill="none" stroke="#fff" strokeWidth="2" />
+        <circle cx="17.2" cy="6.8" r="1.2" fill="#fff" />
+      </svg>
+    );
+  }
+
+  if (iconKey === 'website') {
+    return (
+      <svg viewBox="0 0 24 24" style={commonSvgStyle} aria-hidden="true">
+        <circle cx="12" cy="12" r="9" fill="#d68612" />
+        <path
+          fill="#fff"
+          d="M5.8 12c0-.45.05-.89.14-1.31H9.4c-.08.42-.12.86-.12 1.31 0 .45.04.89.12 1.31H5.94A6.7 6.7 0 0 1 5.8 12Zm.73-2.81h3.28c.29-.94.7-1.8 1.22-2.49a6.24 6.24 0 0 0-4.5 2.49Zm0 5.62a6.24 6.24 0 0 0 4.5 2.49c-.52-.69-.93-1.55-1.22-2.49H6.53ZM12 6.08c-.65.58-1.2 1.72-1.53 3.11h3.06C13.2 7.8 12.65 6.66 12 6.08Zm0 11.84c.65-.58 1.2-1.72 1.53-3.11h-3.06c.33 1.39.88 2.53 1.53 3.11Zm1.81-4.61c.08-.42.12-.86.12-1.31 0-.45-.04-.89-.12-1.31h3.46c.09.42.14.86.14 1.31 0 .45-.05.89-.14 1.31h-3.46Zm-.28-4.12h3.28a6.24 6.24 0 0 0-4.5-2.49c.52.69.93 1.55 1.22 2.49Zm0 5.62c-.29.94-.7 1.8-1.22 2.49a6.24 6.24 0 0 0 4.5-2.49h-3.28Z"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" style={commonSvgStyle} aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="3" fill="#2f7cf6" />
+      <path fill="#fff" d="M6 8.2 12 13l6-4.8v1.6L12 14.6 6 9.8V8.2Z" />
+    </svg>
+  );
 }
 
 export default function EditProfilePage() {
@@ -599,9 +649,6 @@ export default function EditProfilePage() {
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const filesInputRef = useRef<HTMLInputElement | null>(null);
-
-  const cropAreaRef = useRef<HTMLDivElement | null>(null);
-  const dragStateRef = useRef<{ startX: number; startY: number; originX: number; originY: number } | null>(null);
 
   const [language, setLanguage] = useState<AppLanguage>('EN');
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
@@ -622,15 +669,13 @@ export default function EditProfilePage() {
   const [address, setAddress] = useState(initialExtra.address);
   const [bio, setBio] = useState(getUserProfile().bio);
   const [avatar, setAvatar] = useState(getUserProfile().avatar);
-  const [avatarHistory, setAvatarHistory] = useState<string[]>(
-    uniqueAvatarHistory([
-      getUserProfile().avatar,
-      ...initialExtra.avatarHistory,
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
-    ])
-  );
+  const [avatarHistory, setAvatarHistory] = useState<string[]>([
+    getUserProfile().avatar,
+    ...initialExtra.avatarHistory,
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+  ]);
   const [countrySearch, setCountrySearch] = useState('');
   const [contacts, setContacts] = useState<Record<ContactKey, string>>({
     whatsapp: initialExtra.contacts.whatsapp,
@@ -641,14 +686,6 @@ export default function EditProfilePage() {
     website: initialExtra.contacts.website,
     email: initialExtra.contacts.email || getUserProfile().email,
   });
-
-  const [cropSource, setCropSource] = useState<string | null>(null);
-  const [cropState, setCropState] = useState<CropState>({
-    scale: 1,
-    x: 0,
-    y: 0,
-  });
-  const [isApplyingCrop, setIsApplyingCrop] = useState(false);
 
   useEffect(() => {
     const syncLanguage = () => {
@@ -673,7 +710,9 @@ export default function EditProfilePage() {
       setBio(next.bio);
       setAvatar(next.avatar);
       setAvatarHistory((prev) =>
-        uniqueAvatarHistory([next.avatar, ...extra.avatarHistory, ...prev])
+        Array.from(
+          new Set([next.avatar, ...extra.avatarHistory, ...prev].filter(Boolean))
+        ).slice(0, 12)
       );
       setContacts({
         whatsapp: extra.contacts.whatsapp || '',
@@ -715,56 +754,20 @@ export default function EditProfilePage() {
     );
   }, [countrySearch]);
 
-  const openCropperForFile = (file: File) => {
+  const handlePhotoFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
     const reader = new FileReader();
     reader.onload = () => {
       const result = typeof reader.result === 'string' ? reader.result : '';
       if (!result) return;
 
-      setCropSource(result);
-      setCropState({
-        scale: 1,
-        x: 0,
-        y: 0,
-      });
+      setAvatar(result);
+      setAvatarHistory((prev) => [result, ...prev.filter((item) => item !== result)].slice(0, 12));
     };
     reader.readAsDataURL(file);
-  };
-
-  const handlePhotoFile = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    openCropperForFile(file);
     event.target.value = '';
-  };
-
-  const handleApplyCrop = async () => {
-    if (!cropSource) return;
-
-    try {
-      setIsApplyingCrop(true);
-      const result = await cropImageToDataUrl(cropSource, cropState, 700);
-      setAvatar(result);
-      setAvatarHistory((prev) => uniqueAvatarHistory([result, ...prev]));
-      setCropSource(null);
-      setCropState({
-        scale: 1,
-        x: 0,
-        y: 0,
-      });
-    } finally {
-      setIsApplyingCrop(false);
-    }
-  };
-
-  const handleRemoveAvatarFromHistory = (avatarUrl: string) => {
-    if (avatarUrl === avatar) return;
-
-    setAvatarHistory((prev) => prev.filter((item) => item !== avatarUrl));
-  };
-
-  const handleClearHistory = () => {
-    setAvatarHistory([avatar]);
   };
 
   const handleSave = () => {
@@ -787,47 +790,11 @@ export default function EditProfilePage() {
         ...contacts,
         email,
       },
-      avatarHistory: avatarHistory.filter((item) => item !== avatar),
+      avatarHistory,
     });
 
     alert(text.saved);
     router.push('/profile');
-  };
-
-  const startDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!cropSource) return;
-
-    dragStateRef.current = {
-      startX: event.clientX,
-      startY: event.clientY,
-      originX: cropState.x,
-      originY: cropState.y,
-    };
-
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-
-  const moveDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!dragStateRef.current) return;
-
-    const dx = event.clientX - dragStateRef.current.startX;
-    const dy = event.clientY - dragStateRef.current.startY;
-
-    setCropState((prev) =>
-      clampCrop(cropSource, {
-        ...prev,
-        x: dragStateRef.current!.originX + dx,
-        y: dragStateRef.current!.originY + dy,
-      })
-    );
-  };
-
-  const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!dragStateRef.current) return;
-    dragStateRef.current = null;
-    try {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    } catch {}
   };
 
   return (
@@ -860,180 +827,6 @@ export default function EditProfilePage() {
         onChange={handlePhotoFile}
         style={{ display: 'none' }}
       />
-
-      {cropSource ? (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(20, 16, 12, 0.76)',
-            zIndex: 1000,
-            padding: 18,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              borderRadius: 30,
-              background: '#fff',
-              padding: 18,
-              boxShadow: '0 24px 60px rgba(0,0,0,0.28)',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 22,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.cropTitle}
-            </div>
-
-            <div
-              style={{
-                marginTop: 6,
-                fontSize: 14,
-                lineHeight: 1.5,
-                color: '#7b7268',
-                fontWeight: 700,
-              }}
-            >
-              {text.cropSub}
-            </div>
-
-            <div
-              ref={cropAreaRef}
-              onPointerDown={startDrag}
-              onPointerMove={moveDrag}
-              onPointerUp={endDrag}
-              onPointerCancel={endDrag}
-              style={{
-                marginTop: 16,
-                width: '100%',
-                aspectRatio: '1 / 1',
-                borderRadius: 30,
-                overflow: 'hidden',
-                position: 'relative',
-                background: '#f4efe8',
-                touchAction: 'none',
-                border: '1px solid #efe4d7',
-              }}
-            >
-              <img
-                src={cropSource}
-                alt="Crop source"
-                draggable={false}
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  transform: `translate(calc(-50% + ${cropState.x}px), calc(-50% + ${cropState.y}px)) scale(${cropState.scale})`,
-                  transformOrigin: 'center center',
-                  userSelect: 'none',
-                  pointerEvents: 'none',
-                }}
-              />
-
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  boxShadow: 'inset 0 0 0 9999px rgba(0,0,0,0.24)',
-                  borderRadius: 30,
-                  pointerEvents: 'none',
-                }}
-              />
-
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 14,
-                  borderRadius: 28,
-                  border: '2px solid rgba(255,255,255,0.96)',
-                  pointerEvents: 'none',
-                }}
-              />
-            </div>
-
-            <div style={{ marginTop: 16 }}>
-              <input
-                type="range"
-                min={1}
-                max={4}
-                step={0.01}
-                value={cropState.scale}
-                onChange={(e) =>
-                  setCropState((prev) => ({
-                    ...prev,
-                    scale: Number(e.target.value),
-                  }))
-                }
-                style={{ width: '100%' }}
-              />
-            </div>
-
-            <div
-              style={{
-                marginTop: 16,
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  setCropSource(null);
-                  setCropState({
-                    scale: 1,
-                    x: 0,
-                    y: 0,
-                  });
-                }}
-                style={{
-                  minHeight: 52,
-                  borderRadius: 18,
-                  border: '1px solid #ddd6cb',
-                  background: '#fff',
-                  color: '#17130f',
-                  fontSize: 15,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.cancel}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleApplyCrop}
-                disabled={isApplyingCrop}
-                style={{
-                  minHeight: 52,
-                  borderRadius: 18,
-                  border: 'none',
-                  background: '#2f241c',
-                  color: '#fff',
-                  fontSize: 15,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  opacity: isApplyingCrop ? 0.7 : 1,
-                }}
-              >
-                {text.applyPhoto}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
 
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
         <div
@@ -1202,37 +995,13 @@ export default function EditProfilePage() {
           <div
             style={{
               marginTop: 18,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
+              fontSize: 14,
+              fontWeight: 900,
+              color: '#17130f',
               marginBottom: 10,
             }}
           >
-            <div
-              style={{
-                fontSize: 14,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.recentPhotos}
-            </div>
-
-            <button
-              type="button"
-              onClick={handleClearHistory}
-              style={{
-                border: 'none',
-                background: 'transparent',
-                color: '#8a7f74',
-                fontSize: 13,
-                fontWeight: 900,
-                cursor: 'pointer',
-              }}
-            >
-              {text.clearHistory}
-            </button>
+            {text.recentPhotos}
           </div>
 
           <div
@@ -1245,73 +1014,36 @@ export default function EditProfilePage() {
           >
             {avatarHistory.map((avatarUrl) => {
               const selected = avatarUrl === avatar;
-              const canRemove = avatarUrl !== avatar;
 
               return (
-                <div
+                <button
                   key={avatarUrl}
+                  type="button"
+                  onClick={() => setAvatar(avatarUrl)}
                   style={{
-                    position: 'relative',
                     flex: '0 0 auto',
                     width: 82,
                     height: 82,
+                    borderRadius: 22,
+                    overflow: 'hidden',
+                    border: selected ? '3px solid #ff4fa0' : '1px solid #efe4d7',
+                    background: '#fff',
+                    padding: 0,
+                    cursor: 'pointer',
+                    boxShadow: selected ? '0 10px 22px rgba(255,79,160,0.16)' : 'none',
                   }}
                 >
-                  <button
-                    type="button"
-                    onClick={() => setAvatar(avatarUrl)}
+                  <img
+                    src={avatarUrl}
+                    alt="Avatar option"
                     style={{
                       width: '100%',
                       height: '100%',
-                      borderRadius: 22,
-                      overflow: 'hidden',
-                      border: selected ? '3px solid #ff4fa0' : '1px solid #efe4d7',
-                      background: '#fff',
-                      padding: 0,
-                      cursor: 'pointer',
-                      boxShadow: selected ? '0 10px 22px rgba(255,79,160,0.16)' : 'none',
+                      objectFit: 'cover',
+                      display: 'block',
                     }}
-                  >
-                    <img
-                      src={avatarUrl}
-                      alt="Avatar option"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        display: 'block',
-                      }}
-                    />
-                  </button>
-
-                  {canRemove ? (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveAvatarFromHistory(avatarUrl)}
-                      style={{
-                        position: 'absolute',
-                        top: -6,
-                        right: -6,
-                        width: 24,
-                        height: 24,
-                        borderRadius: 999,
-                        border: '2px solid #fff',
-                        background: '#2f241c',
-                        color: '#fff',
-                        fontSize: 12,
-                        fontWeight: 900,
-                        lineHeight: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        boxShadow: '0 8px 16px rgba(47,36,28,0.18)',
-                      }}
-                    >
-                      ×
-                    </button>
-                  ) : null}
-                </div>
+                  />
+                </button>
               );
             })}
           </div>
@@ -1640,18 +1372,18 @@ export default function EditProfilePage() {
                   >
                     <div
                       style={{
-                        width: 38,
-                        height: 38,
+                        width: 42,
+                        height: 42,
                         borderRadius: 14,
                         background: accent.bg,
-                        color: accent.color,
+                        border: `1px solid ${accent.border}`,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 18,
+                        flexShrink: 0,
                       }}
                     >
-                      {item.icon}
+                      <ContactBrandIcon iconKey={item.iconKey} size={20} />
                     </div>
 
                     <div
