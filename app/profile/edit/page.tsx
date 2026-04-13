@@ -34,11 +34,7 @@ type ContactKey =
   | 'website'
   | 'email';
 
-type PhoneContactKey =
-  | 'whatsapp'
-  | 'businessWhatsapp'
-  | 'telegram'
-  | 'viber';
+type PhoneContactKey = 'whatsapp' | 'businessWhatsapp' | 'telegram' | 'viber';
 
 type ContactItem = {
   key: ContactKey;
@@ -96,16 +92,24 @@ const CONTACT_ITEMS: ContactItem[] = [
       EN: 'WhatsApp',
       ES: 'WhatsApp',
       RU: 'WhatsApp',
+      UA: 'WhatsApp',
       CZ: 'WhatsApp',
       DE: 'WhatsApp',
+      IT: 'WhatsApp',
+      FR: 'WhatsApp',
+      AR: 'واتساب',
       PL: 'WhatsApp',
     },
     placeholder: {
       EN: 'Phone number',
       ES: 'Número de teléfono',
       RU: 'Номер телефона',
+      UA: 'Номер телефону',
       CZ: 'Telefonní číslo',
       DE: 'Telefonnummer',
+      IT: 'Numero di telefono',
+      FR: 'Numéro de téléphone',
+      AR: 'رقم الهاتف',
       PL: 'Numer telefonu',
     },
   },
@@ -118,16 +122,24 @@ const CONTACT_ITEMS: ContactItem[] = [
       EN: 'Business WhatsApp',
       ES: 'WhatsApp Business',
       RU: 'Business WhatsApp',
+      UA: 'Business WhatsApp',
       CZ: 'Business WhatsApp',
       DE: 'Business WhatsApp',
+      IT: 'WhatsApp Business',
+      FR: 'WhatsApp Business',
+      AR: 'واتساب للأعمال',
       PL: 'Business WhatsApp',
     },
     placeholder: {
       EN: 'Business number',
       ES: 'Número de negocio',
       RU: 'Рабочий номер',
+      UA: 'Робочий номер',
       CZ: 'Firemní číslo',
       DE: 'Business-Nummer',
+      IT: 'Numero business',
+      FR: 'Numéro professionnel',
+      AR: 'رقم العمل',
       PL: 'Numer firmowy',
     },
   },
@@ -140,16 +152,24 @@ const CONTACT_ITEMS: ContactItem[] = [
       EN: 'Telegram',
       ES: 'Telegram',
       RU: 'Telegram',
+      UA: 'Telegram',
       CZ: 'Telegram',
       DE: 'Telegram',
+      IT: 'Telegram',
+      FR: 'Telegram',
+      AR: 'تيليجرام',
       PL: 'Telegram',
     },
     placeholder: {
       EN: 'Phone number',
       ES: 'Número de teléfono',
       RU: 'Номер телефона',
+      UA: 'Номер телефону',
       CZ: 'Telefonní číslo',
       DE: 'Telefonnummer',
+      IT: 'Numero di telefono',
+      FR: 'Numéro de téléphone',
+      AR: 'رقم الهاتف',
       PL: 'Numer telefonu',
     },
   },
@@ -162,16 +182,24 @@ const CONTACT_ITEMS: ContactItem[] = [
       EN: 'Viber',
       ES: 'Viber',
       RU: 'Viber',
+      UA: 'Viber',
       CZ: 'Viber',
       DE: 'Viber',
+      IT: 'Viber',
+      FR: 'Viber',
+      AR: 'فايبر',
       PL: 'Viber',
     },
     placeholder: {
       EN: 'Phone number',
       ES: 'Número de teléfono',
       RU: 'Номер телефона',
+      UA: 'Номер телефону',
       CZ: 'Telefonní číslo',
       DE: 'Telefonnummer',
+      IT: 'Numero di telefono',
+      FR: 'Numéro de téléphone',
+      AR: 'رقم الهاتف',
       PL: 'Numer telefonu',
     },
   },
@@ -184,16 +212,24 @@ const CONTACT_ITEMS: ContactItem[] = [
       EN: 'Instagram',
       ES: 'Instagram',
       RU: 'Instagram',
+      UA: 'Instagram',
       CZ: 'Instagram',
       DE: 'Instagram',
+      IT: 'Instagram',
+      FR: 'Instagram',
+      AR: 'إنستغرام',
       PL: 'Instagram',
     },
     placeholder: {
       EN: '@username',
       ES: '@usuario',
       RU: '@username',
+      UA: '@username',
       CZ: '@uživatel',
       DE: '@benutzername',
+      IT: '@username',
+      FR: '@nom',
+      AR: '@اسم_المستخدم',
       PL: '@nazwa',
     },
   },
@@ -206,16 +242,24 @@ const CONTACT_ITEMS: ContactItem[] = [
       EN: 'Website',
       ES: 'Sitio web',
       RU: 'Сайт',
+      UA: 'Сайт',
       CZ: 'Web',
       DE: 'Website',
+      IT: 'Sito web',
+      FR: 'Site web',
+      AR: 'الموقع',
       PL: 'Strona',
     },
     placeholder: {
       EN: 'https://your-site.com',
       ES: 'https://tu-sitio.com',
       RU: 'https://ваш-сайт.com',
+      UA: 'https://ваш-сайт.com',
       CZ: 'https://vas-web.cz',
       DE: 'https://deine-seite.de',
+      IT: 'https://tuo-sito.it',
+      FR: 'https://votre-site.fr',
+      AR: 'https://your-site.com',
       PL: 'https://twoja-strona.pl',
     },
   },
@@ -228,29 +272,66 @@ const CONTACT_ITEMS: ContactItem[] = [
       EN: 'Email',
       ES: 'Email',
       RU: 'Email',
+      UA: 'Email',
       CZ: 'Email',
       DE: 'E-Mail',
+      IT: 'Email',
+      FR: 'Email',
+      AR: 'البريد الإلكتروني',
       PL: 'Email',
     },
     placeholder: {
       EN: 'name@example.com',
       ES: 'nombre@ejemplo.com',
       RU: 'name@example.com',
+      UA: 'name@example.com',
       CZ: 'jmeno@priklad.cz',
       DE: 'name@beispiel.de',
+      IT: 'nome@esempio.it',
+      FR: 'nom@exemple.fr',
+      AR: 'name@example.com',
       PL: 'name@przyklad.pl',
     },
   },
 ];
 
-const PHONE_CONTACT_KEYS: PhoneContactKey[] = [
-  'whatsapp',
-  'businessWhatsapp',
-  'telegram',
-  'viber',
-];
-
-const editProfileTexts = {
+const editProfileTexts: Record<
+  AppLanguage,
+  {
+    title: string;
+    save: string;
+    subtitle: string;
+    profilePhoto: string;
+    uploadFromCamera: string;
+    uploadFromGallery: string;
+    uploadFromFiles: string;
+    recentPhotos: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    city: string;
+    district: string;
+    address: string;
+    bio: string;
+    bioPlaceholder: string;
+    contacts: string;
+    contactsHint: string;
+    cityPlaceholder: string;
+    districtPlaceholder: string;
+    addressPlaceholder: string;
+    phonePlaceholder: string;
+    countrySearch: string;
+    chooseCountry: string;
+    emailSmartHint: string;
+    saved: string;
+    basicInfo: string;
+    locationInfo: string;
+    required: string;
+    optional: string;
+    country: string;
+    clearHistory: string;
+  }
+> = {
   EN: {
     title: 'Edit profile',
     save: 'Save',
@@ -353,6 +434,40 @@ const editProfileTexts = {
     country: 'Страна',
     clearHistory: 'Очистить историю',
   },
+  UA: {
+    title: 'Редагувати профіль',
+    save: 'Зберегти',
+    subtitle: 'Профіль, контакти та локація',
+    profilePhoto: 'Фото профілю',
+    uploadFromCamera: 'Камера',
+    uploadFromGallery: 'Галерея',
+    uploadFromFiles: 'Файли',
+    recentPhotos: 'Історія фото',
+    firstName: "Ім'я",
+    lastName: 'Прізвище',
+    phone: 'Телефон',
+    city: 'Місто',
+    district: 'Район / локація',
+    address: 'Детальна адреса',
+    bio: 'Про себе',
+    bioPlaceholder: 'Розкажіть трохи про себе',
+    contacts: 'Контакти',
+    contactsHint: 'Заповнюйте лише ті контакти, які хочете показувати у профілі.',
+    cityPlaceholder: 'Оберіть місто',
+    districtPlaceholder: 'Оберіть район / локацію',
+    addressPlaceholder: 'Вулиця, будинок, квартира, нотатки',
+    phonePlaceholder: 'Номер телефону',
+    countrySearch: 'Пошук країни або коду',
+    chooseCountry: 'Оберіть країну',
+    emailSmartHint: 'Використовуйте реальний email для бронювань і сповіщень',
+    saved: 'Профіль збережено',
+    basicInfo: 'Основна інформація',
+    locationInfo: 'Локація',
+    required: "Обов'язково",
+    optional: 'Необовʼязково',
+    country: 'Країна',
+    clearHistory: 'Очистити історію',
+  },
   CZ: {
     title: 'Upravit profil',
     save: 'Uložit',
@@ -421,6 +536,108 @@ const editProfileTexts = {
     country: 'Land',
     clearHistory: 'Verlauf löschen',
   },
+  IT: {
+    title: 'Modifica profilo',
+    save: 'Salva',
+    subtitle: 'Profilo, contatti e posizione',
+    profilePhoto: 'Foto profilo',
+    uploadFromCamera: 'Fotocamera',
+    uploadFromGallery: 'Galleria',
+    uploadFromFiles: 'File',
+    recentPhotos: 'Cronologia foto',
+    firstName: 'Nome',
+    lastName: 'Cognome',
+    phone: 'Telefono',
+    city: 'Città',
+    district: 'Zona / area',
+    address: 'Indirizzo dettagliato',
+    bio: 'Su di me',
+    bioPlaceholder: 'Raccontaci qualcosa di te',
+    contacts: 'Contatti',
+    contactsHint: 'Compila solo i contatti che vuoi mostrare nel profilo.',
+    cityPlaceholder: 'Seleziona città',
+    districtPlaceholder: 'Seleziona zona / area',
+    addressPlaceholder: 'Via, numero, appartamento, note',
+    phonePlaceholder: 'Numero di telefono',
+    countrySearch: 'Cerca paese o prefisso',
+    chooseCountry: 'Scegli un paese',
+    emailSmartHint: 'Usa un’email reale per prenotazioni e notifiche',
+    saved: 'Profilo salvato',
+    basicInfo: 'Informazioni di base',
+    locationInfo: 'Posizione',
+    required: 'Obbligatorio',
+    optional: 'Opzionale',
+    country: 'Paese',
+    clearHistory: 'Cancella cronologia',
+  },
+  FR: {
+    title: 'Modifier le profil',
+    save: 'Enregistrer',
+    subtitle: 'Profil, contacts et localisation',
+    profilePhoto: 'Photo de profil',
+    uploadFromCamera: 'Caméra',
+    uploadFromGallery: 'Galerie',
+    uploadFromFiles: 'Fichiers',
+    recentPhotos: 'Historique des photos',
+    firstName: 'Prénom',
+    lastName: 'Nom',
+    phone: 'Téléphone',
+    city: 'Ville',
+    district: 'Zone / quartier',
+    address: 'Adresse détaillée',
+    bio: 'À propos de moi',
+    bioPlaceholder: 'Parlez un peu de vous',
+    contacts: 'Contacts',
+    contactsHint: 'Remplissez uniquement les contacts que vous souhaitez afficher.',
+    cityPlaceholder: 'Sélectionnez une ville',
+    districtPlaceholder: 'Sélectionnez une zone / un quartier',
+    addressPlaceholder: 'Rue, maison, appartement, notes',
+    phonePlaceholder: 'Numéro de téléphone',
+    countrySearch: 'Rechercher un pays ou un code',
+    chooseCountry: 'Choisir un pays',
+    emailSmartHint: 'Utilisez un vrai email pour les réservations et notifications',
+    saved: 'Profil enregistré',
+    basicInfo: 'Informations de base',
+    locationInfo: 'Localisation',
+    required: 'Obligatoire',
+    optional: 'Optionnel',
+    country: 'Pays',
+    clearHistory: 'Effacer l’historique',
+  },
+  AR: {
+    title: 'تعديل الملف الشخصي',
+    save: 'حفظ',
+    subtitle: 'الملف الشخصي وجهات الاتصال والموقع',
+    profilePhoto: 'صورة الملف الشخصي',
+    uploadFromCamera: 'الكاميرا',
+    uploadFromGallery: 'المعرض',
+    uploadFromFiles: 'الملفات',
+    recentPhotos: 'سجل الصور',
+    firstName: 'الاسم',
+    lastName: 'اللقب',
+    phone: 'الهاتف',
+    city: 'المدينة',
+    district: 'المنطقة / الحي',
+    address: 'العنوان التفصيلي',
+    bio: 'نبذة عني',
+    bioPlaceholder: 'اكتب قليلاً عن نفسك',
+    contacts: 'جهات الاتصال',
+    contactsHint: 'املأ فقط وسائل الاتصال التي تريد إظهارها في الملف.',
+    cityPlaceholder: 'اختر المدينة',
+    districtPlaceholder: 'اختر المنطقة / الحي',
+    addressPlaceholder: 'الشارع، المنزل، الشقة، ملاحظات',
+    phonePlaceholder: 'رقم الهاتف',
+    countrySearch: 'ابحث عن دولة أو رمز',
+    chooseCountry: 'اختر دولة',
+    emailSmartHint: 'استخدم بريداً حقيقياً للحجوزات والإشعارات',
+    saved: 'تم حفظ الملف الشخصي',
+    basicInfo: 'المعلومات الأساسية',
+    locationInfo: 'الموقع',
+    required: 'مطلوب',
+    optional: 'اختياري',
+    country: 'الدولة',
+    clearHistory: 'مسح السجل',
+  },
   PL: {
     title: 'Edytuj profil',
     save: 'Zapisz',
@@ -455,7 +672,7 @@ const editProfileTexts = {
     country: 'Kraj',
     clearHistory: 'Wyczyść historię',
   },
-} as const;
+};
 
 function splitFullName(fullName: string) {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -706,7 +923,7 @@ function ContactBrandIcon({
     return (
       <svg viewBox="0 0 24 24" style={commonSvgStyle} aria-hidden="true">
         <defs>
-          <linearGradient id="instagramGradientMapbookContact" x1="0%" y1="100%" x2="100%" y2="0%">
+          <linearGradient id="instagramGradientMapbookContactFull" x1="0%" y1="100%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#feda75" />
             <stop offset="30%" stopColor="#fa7e1e" />
             <stop offset="60%" stopColor="#d62976" />
@@ -714,7 +931,7 @@ function ContactBrandIcon({
             <stop offset="100%" stopColor="#4f5bd5" />
           </linearGradient>
         </defs>
-        <rect x="3" y="3" width="18" height="18" rx="5" fill="url(#instagramGradientMapbookContact)" />
+        <rect x="3" y="3" width="18" height="18" rx="5" fill="url(#instagramGradientMapbookContactFull)" />
         <circle cx="12" cy="12" r="4" fill="none" stroke="#fff" strokeWidth="2" />
         <circle cx="17.2" cy="6.8" r="1.2" fill="#fff" />
       </svg>
@@ -902,6 +1119,155 @@ function CountryPickerModal({
   );
 }
 
+function ContactRow({
+  item,
+  language,
+  textValue,
+  phoneValue,
+  onTextChange,
+  onPhoneChange,
+  onOpenCountryPicker,
+}: {
+  item: ContactItem;
+  language: AppLanguage;
+  textValue: string;
+  phoneValue?: PhoneContactValue;
+  onTextChange: (value: string) => void;
+  onPhoneChange?: (value: PhoneContactValue) => void;
+  onOpenCountryPicker?: () => void;
+}) {
+  const colors = getAccentColors(item.accent);
+
+  if (item.type === 'phone' && phoneValue && onPhoneChange && onOpenCountryPicker) {
+    const country =
+      COUNTRIES.find((entry) => entry.code === phoneValue.countryCode) || COUNTRIES[0];
+
+    return (
+      <div
+        style={{
+          border: `1px solid ${colors.border}`,
+          background: colors.bg,
+          borderRadius: 22,
+          padding: 14,
+        }}
+      >
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '28px 1fr',
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: 10,
+          }}
+        >
+          <ContactBrandIcon iconKey={item.iconKey} size={22} />
+          <div style={{ fontSize: 15, fontWeight: 900, color: '#17130f' }}>
+            {item.title[language]}
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '132px 1fr',
+            gap: 10,
+          }}
+        >
+          <button
+            type="button"
+            onClick={onOpenCountryPicker}
+            style={{
+              height: 54,
+              borderRadius: 16,
+              border: '1px solid #e7dccf',
+              background: '#fff',
+              padding: '0 12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 8,
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 18 }}>{country.flag}</span>
+              <span style={{ fontSize: 15, fontWeight: 900, color: '#17130f' }}>
+                {country.dial}
+              </span>
+            </span>
+            <span style={{ fontSize: 12, color: '#8a7f74', fontWeight: 900 }}>▼</span>
+          </button>
+
+          <input
+            value={phoneValue.number}
+            onChange={(e) =>
+              onPhoneChange({
+                ...phoneValue,
+                number: normalizePhoneNumber(e.target.value),
+              })
+            }
+            placeholder={item.placeholder[language]}
+            style={{
+              width: '100%',
+              height: 54,
+              borderRadius: 16,
+              border: '1px solid #e7dccf',
+              background: '#fff',
+              padding: '0 14px',
+              fontSize: 15,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        border: `1px solid ${colors.border}`,
+        background: colors.bg,
+        borderRadius: 22,
+        padding: 14,
+      }}
+    >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '28px 1fr',
+          alignItems: 'center',
+          gap: 10,
+          marginBottom: 10,
+        }}
+      >
+        <ContactBrandIcon iconKey={item.iconKey} size={22} />
+        <div style={{ fontSize: 15, fontWeight: 900, color: '#17130f' }}>
+          {item.title[language]}
+        </div>
+      </div>
+
+      <input
+        value={textValue}
+        onChange={(e) => onTextChange(e.target.value)}
+        placeholder={item.placeholder[language]}
+        style={{
+          width: '100%',
+          height: 54,
+          borderRadius: 16,
+          border: '1px solid #e7dccf',
+          background: '#fff',
+          padding: '0 14px',
+          fontSize: 15,
+          outline: 'none',
+          boxSizing: 'border-box',
+        }}
+      />
+    </div>
+  );
+}
+
 export default function EditProfilePage() {
   const router = useRouter();
 
@@ -1031,10 +1397,7 @@ export default function EditProfilePage() {
     };
   }, []);
 
-  const text = useMemo(
-    () => editProfileTexts[language as keyof typeof editProfileTexts] || editProfileTexts.EN,
-    [language]
-  );
+  const text = useMemo(() => editProfileTexts[language] || editProfileTexts.EN, [language]);
 
   const filteredMainCountries = useMemo(() => {
     const q = phoneCountrySearch.trim().toLowerCase();
@@ -1077,22 +1440,17 @@ export default function EditProfilePage() {
   };
 
   const removeAvatarFromHistory = (avatarUrl: string) => {
-    setAvatarHistory((prev) => prev.filter((item) => item !== avatarUrl));
+    const nextHistory = avatarHistory.filter((item) => item !== avatarUrl);
+    setAvatarHistory(nextHistory);
 
     if (avatar === avatarUrl) {
-      const fallback =
-        avatarHistory.find((item) => item !== avatarUrl) || getUserProfile().avatar;
+      const fallback = nextHistory[0] || getUserProfile().avatar;
       setAvatar(fallback);
     }
   };
 
   const clearAvatarHistory = () => {
     setAvatarHistory([avatar]);
-  };
-
-  const openContactCountryPicker = (key: PhoneContactKey) => {
-    setActiveContactCountryPicker(key);
-    setContactCountrySearch('');
   };
 
   const handlePhoneContactCountrySelect = (country: CountryOption) => {
@@ -1117,19 +1475,24 @@ export default function EditProfilePage() {
       ...contacts,
       email,
       whatsapp: combinePhone(
-        COUNTRIES.find((item) => item.code === contactPhoneMeta.whatsapp.countryCode) || COUNTRIES[0],
+        COUNTRIES.find((item) => item.code === contactPhoneMeta.whatsapp.countryCode) ||
+          COUNTRIES[0],
         contactPhoneMeta.whatsapp.number
       ),
       businessWhatsapp: combinePhone(
-        COUNTRIES.find((item) => item.code === contactPhoneMeta.businessWhatsapp.countryCode) || COUNTRIES[0],
+        COUNTRIES.find(
+          (item) => item.code === contactPhoneMeta.businessWhatsapp.countryCode
+        ) || COUNTRIES[0],
         contactPhoneMeta.businessWhatsapp.number
       ),
       telegram: combinePhone(
-        COUNTRIES.find((item) => item.code === contactPhoneMeta.telegram.countryCode) || COUNTRIES[0],
+        COUNTRIES.find((item) => item.code === contactPhoneMeta.telegram.countryCode) ||
+          COUNTRIES[0],
         contactPhoneMeta.telegram.number
       ),
       viber: combinePhone(
-        COUNTRIES.find((item) => item.code === contactPhoneMeta.viber.countryCode) || COUNTRIES[0],
+        COUNTRIES.find((item) => item.code === contactPhoneMeta.viber.countryCode) ||
+          COUNTRIES[0],
         contactPhoneMeta.viber.number
       ),
     };
@@ -1587,22 +1950,9 @@ export default function EditProfilePage() {
                   cursor: 'pointer',
                 }}
               >
-                <span
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    minWidth: 0,
-                  }}
-                >
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
                   <span style={{ fontSize: 19 }}>{phoneCountry.flag}</span>
-                  <span
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
+                  <span style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
                     {phoneCountry.dial}
                   </span>
                 </span>
@@ -1632,3 +1982,211 @@ export default function EditProfilePage() {
             {fieldLabel(text.bio, text.optional)}
             <textarea
               value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder={text.bioPlaceholder}
+              rows={5}
+              style={{
+                width: '100%',
+                borderRadius: 20,
+                border: '1px solid #efe4d7',
+                background: '#fffdf9',
+                padding: '14px 16px',
+                fontSize: 16,
+                outline: 'none',
+                resize: 'vertical',
+                boxSizing: 'border-box',
+                fontFamily: 'inherit',
+              }}
+            />
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 18,
+            borderRadius: 32,
+            background: '#fff',
+            border: '1px solid #efe4d7',
+            padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 14,
+            }}
+          >
+            {text.locationInfo}
+          </div>
+
+          <div style={{ display: 'grid', gap: 14 }}>
+            <label>
+              {fieldLabel(text.city, text.required)}
+              <input
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder={text.cityPlaceholder}
+                style={{
+                  width: '100%',
+                  height: 54,
+                  borderRadius: 18,
+                  border: '1px solid #efe4d7',
+                  background: '#fffdf9',
+                  padding: '0 16px',
+                  fontSize: 16,
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </label>
+
+            <label>
+              {fieldLabel(text.district, text.optional)}
+              <input
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                placeholder={text.districtPlaceholder}
+                style={{
+                  width: '100%',
+                  height: 54,
+                  borderRadius: 18,
+                  border: '1px solid #efe4d7',
+                  background: '#fffdf9',
+                  padding: '0 16px',
+                  fontSize: 16,
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </label>
+
+            <label>
+              {fieldLabel(text.address, text.optional)}
+              <textarea
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder={text.addressPlaceholder}
+                rows={3}
+                style={{
+                  width: '100%',
+                  borderRadius: 20,
+                  border: '1px solid #efe4d7',
+                  background: '#fffdf9',
+                  padding: '14px 16px',
+                  fontSize: 16,
+                  outline: 'none',
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                  fontFamily: 'inherit',
+                }}
+              />
+            </label>
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 18,
+            borderRadius: 32,
+            background: '#fff',
+            border: '1px solid #efe4d7',
+            padding: 18,
+            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+              marginBottom: 6,
+            }}
+          >
+            {text.contacts}
+          </div>
+
+          <div
+            style={{
+              fontSize: 13,
+              lineHeight: 1.5,
+              color: '#7b7268',
+              fontWeight: 700,
+              marginBottom: 16,
+            }}
+          >
+            {text.contactsHint}
+          </div>
+
+          <div style={{ display: 'grid', gap: 12 }}>
+            {CONTACT_ITEMS.map((item) => {
+              if (item.type === 'phone') {
+                const key = item.key as PhoneContactKey;
+
+                return (
+                  <ContactRow
+                    key={item.key}
+                    item={item}
+                    language={language}
+                    textValue=""
+                    phoneValue={contactPhoneMeta[key]}
+                    onTextChange={() => {}}
+                    onPhoneChange={(value) =>
+                      setContactPhoneMeta((prev) => ({
+                        ...prev,
+                        [key]: value,
+                      }))
+                    }
+                    onOpenCountryPicker={() => {
+                      setContactCountrySearch('');
+                      setActiveContactCountryPicker(key);
+                    }}
+                  />
+                );
+              }
+
+              return (
+                <ContactRow
+                  key={item.key}
+                  item={item}
+                  language={language}
+                  textValue={item.key === 'email' ? email : contacts[item.key]}
+                  onTextChange={(value) => {
+                    if (item.key === 'email') {
+                      setEmail(value);
+                      setContacts((prev) => ({
+                        ...prev,
+                        email: value,
+                      }));
+                      return;
+                    }
+
+                    setContacts((prev) => ({
+                      ...prev,
+                      [item.key]: value,
+                    }));
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          <div
+            style={{
+              marginTop: 12,
+              fontSize: 12,
+              fontWeight: 800,
+              color: '#8a7f74',
+            }}
+          >
+            {text.emailSmartHint}
+          </div>
+        </div>
+      </div>
+
+      <BottomNav active="profile" />
+    </main>
+  );
+}
