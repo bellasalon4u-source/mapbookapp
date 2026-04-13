@@ -1,4 +1,14 @@
-import { isAppLanguage, type AppLanguage } from './i18n';
+export type AppLanguage =
+  | 'EN'
+  | 'ES'
+  | 'RU'
+  | 'UA'
+  | 'CZ'
+  | 'DE'
+  | 'IT'
+  | 'FR'
+  | 'AR'
+  | 'PL';
 
 export type AppCurrency =
   | 'GBP'
@@ -108,14 +118,31 @@ function emitChange() {
   listeners.forEach((listener) => listener());
 }
 
+function isSupportedLanguage(value: unknown): value is AppLanguage {
+  return (
+    value === 'EN' ||
+    value === 'ES' ||
+    value === 'RU' ||
+    value === 'UA' ||
+    value === 'CZ' ||
+    value === 'DE' ||
+    value === 'IT' ||
+    value === 'FR' ||
+    value === 'AR' ||
+    value === 'PL'
+  );
+}
+
 function normalizeSettings(
   value: Partial<AppRegionSettings> | null | undefined
 ): AppRegionSettings {
-  const language = isAppLanguage(value?.language) ? value!.language : defaultSettings.language;
+  const language = isSupportedLanguage(value?.language)
+    ? value!.language
+    : defaultSettings.language;
 
   const currency =
-    value?.currency && currencyOptions.includes(value.currency as AppCurrency)
-      ? (value.currency as AppCurrency)
+    value?.currency && currencyOptions.includes(value.currency)
+      ? value.currency
       : defaultSettings.currency;
 
   const locationMode =
@@ -188,7 +215,9 @@ export function getAppRegionSettings() {
   return readStore();
 }
 
-export function updateAppRegionSettings(updates: Partial<AppRegionSettings>) {
+export function updateAppRegionSettings(
+  updates: Partial<AppRegionSettings>
+) {
   const current = readStore();
 
   const next = normalizeSettings({
@@ -279,7 +308,10 @@ export function getEffectiveSearchLocation() {
   };
 }
 
-export function formatCurrencyAmount(amount: number, currency: AppCurrency) {
+export function formatCurrencyAmount(
+  amount: number,
+  currency: AppCurrency
+) {
   const meta = currencyMeta[currency] || currencyMeta.GBP;
 
   if (!Number.isFinite(amount)) {
