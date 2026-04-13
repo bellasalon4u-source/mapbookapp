@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../services/i18n';
 import {
   getUserProfile,
   subscribeToUserProfile,
@@ -15,14 +19,40 @@ import {
   type WalletState,
 } from '../services/walletStore';
 
-const profileTexts = {
+type ProfileTextShape = {
+  title: string;
+  subtitle: string;
+  verified: string;
+  active: string;
+  editProfile: string;
+  balanceAvailable: string;
+  quickActions: string;
+  activity: string;
+  preferences: string;
+  wallet: string;
+  bookings: string;
+  savedMasters: string;
+  savedPlaces: string;
+  promotions: string;
+  invite: string;
+  payments: string;
+  notifications: string;
+  languageRegion: string;
+  settings: string;
+  legal: string;
+  help: string;
+  open: string;
+};
+
+const profileTexts: Record<string, ProfileTextShape> = {
   EN: {
     title: 'Profile',
     subtitle: 'Your account, bookings, wallet and settings',
     verified: 'Verified',
-    availableNow: 'Profile active',
+    active: 'Profile active',
+    editProfile: 'Edit profile',
+    balanceAvailable: 'Available balance',
     quickActions: 'Quick actions',
-    account: 'Account',
     activity: 'Activity',
     preferences: 'Preferences',
     wallet: 'Wallet',
@@ -37,20 +67,19 @@ const profileTexts = {
     settings: 'Account settings',
     legal: 'Legal information',
     help: 'Help Centre',
-    editProfile: 'Edit profile',
     open: 'Open',
-    balanceAvailable: 'Available balance',
   },
   ES: {
     title: 'Perfil',
     subtitle: 'Tu cuenta, reservas, saldo y ajustes',
     verified: 'Verificado',
-    availableNow: 'Perfil activo',
+    active: 'Perfil activo',
+    editProfile: 'Editar perfil',
+    balanceAvailable: 'Saldo disponible',
     quickActions: 'Acciones rápidas',
-    account: 'Cuenta',
     activity: 'Actividad',
     preferences: 'Preferencias',
-    wallet: 'Saldo',
+    wallet: 'Billetera',
     bookings: 'Mis reservas',
     savedMasters: 'Profesionales guardados',
     savedPlaces: 'Lugares guardados',
@@ -62,20 +91,19 @@ const profileTexts = {
     settings: 'Ajustes de cuenta',
     legal: 'Información legal',
     help: 'Centro de ayuda',
-    editProfile: 'Editar perfil',
     open: 'Abrir',
-    balanceAvailable: 'Saldo disponible',
   },
   RU: {
     title: 'Профиль',
     subtitle: 'Ваш аккаунт, бронирования, баланс и настройки',
     verified: 'Проверено',
-    availableNow: 'Профиль активен',
+    active: 'Профиль активен',
+    editProfile: 'Редактировать профиль',
+    balanceAvailable: 'Доступный баланс',
     quickActions: 'Быстрые действия',
-    account: 'Аккаунт',
     activity: 'Активность',
     preferences: 'Предпочтения',
-    wallet: 'Баланс',
+    wallet: 'Кошелёк',
     bookings: 'Мои бронирования',
     savedMasters: 'Сохранённые мастера',
     savedPlaces: 'Сохранённые места',
@@ -87,20 +115,19 @@ const profileTexts = {
     settings: 'Настройки аккаунта',
     legal: 'Юридическая информация',
     help: 'Центр помощи',
-    editProfile: 'Редактировать профиль',
     open: 'Открыть',
-    balanceAvailable: 'Доступный баланс',
   },
   CZ: {
     title: 'Profil',
     subtitle: 'Váš účet, rezervace, zůstatek a nastavení',
     verified: 'Ověřeno',
-    availableNow: 'Profil aktivní',
+    active: 'Profil aktivní',
+    editProfile: 'Upravit profil',
+    balanceAvailable: 'Dostupný zůstatek',
     quickActions: 'Rychlé akce',
-    account: 'Účet',
     activity: 'Aktivita',
     preferences: 'Předvolby',
-    wallet: 'Zůstatek',
+    wallet: 'Peněženka',
     bookings: 'Moje rezervace',
     savedMasters: 'Uložení specialisté',
     savedPlaces: 'Uložená místa',
@@ -112,20 +139,19 @@ const profileTexts = {
     settings: 'Nastavení účtu',
     legal: 'Právní informace',
     help: 'Centrum pomoci',
-    editProfile: 'Upravit profil',
     open: 'Otevřít',
-    balanceAvailable: 'Dostupný zůstatek',
   },
   DE: {
     title: 'Profil',
     subtitle: 'Dein Konto, Buchungen, Guthaben und Einstellungen',
     verified: 'Verifiziert',
-    availableNow: 'Profil aktiv',
+    active: 'Profil aktiv',
+    editProfile: 'Profil bearbeiten',
+    balanceAvailable: 'Verfügbares Guthaben',
     quickActions: 'Schnellzugriff',
-    account: 'Konto',
     activity: 'Aktivität',
     preferences: 'Einstellungen',
-    wallet: 'Guthaben',
+    wallet: 'Wallet',
     bookings: 'Meine Buchungen',
     savedMasters: 'Gespeicherte Profis',
     savedPlaces: 'Gespeicherte Orte',
@@ -137,20 +163,19 @@ const profileTexts = {
     settings: 'Kontoeinstellungen',
     legal: 'Rechtliche Informationen',
     help: 'Hilfezentrum',
-    editProfile: 'Profil bearbeiten',
     open: 'Öffnen',
-    balanceAvailable: 'Verfügbares Guthaben',
   },
   PL: {
     title: 'Profil',
     subtitle: 'Twoje konto, rezerwacje, saldo i ustawienia',
     verified: 'Zweryfikowano',
-    availableNow: 'Profil aktywny',
+    active: 'Profil aktywny',
+    editProfile: 'Edytuj profil',
+    balanceAvailable: 'Dostępne saldo',
     quickActions: 'Szybkie akcje',
-    account: 'Konto',
     activity: 'Aktywność',
     preferences: 'Preferencje',
-    wallet: 'Saldo',
+    wallet: 'Portfel',
     bookings: 'Moje rezerwacje',
     savedMasters: 'Zapisani specjaliści',
     savedPlaces: 'Zapisane miejsca',
@@ -162,11 +187,105 @@ const profileTexts = {
     settings: 'Ustawienia konta',
     legal: 'Informacje prawne',
     help: 'Centrum pomocy',
-    editProfile: 'Edytuj profil',
     open: 'Otwórz',
-    balanceAvailable: 'Dostępne saldo',
   },
-} as const;
+  UA: {
+    title: 'Профіль',
+    subtitle: 'Ваш акаунт, бронювання, баланс і налаштування',
+    verified: 'Перевірено',
+    active: 'Профіль активний',
+    editProfile: 'Редагувати профіль',
+    balanceAvailable: 'Доступний баланс',
+    quickActions: 'Швидкі дії',
+    activity: 'Активність',
+    preferences: 'Налаштування',
+    wallet: 'Гаманець',
+    bookings: 'Мої бронювання',
+    savedMasters: 'Збережені майстри',
+    savedPlaces: 'Збережені місця',
+    promotions: 'Промоакції',
+    invite: 'Запросити друзів',
+    payments: 'Способи оплати',
+    notifications: 'Сповіщення',
+    languageRegion: 'Мова та регіон',
+    settings: 'Налаштування акаунта',
+    legal: 'Юридична інформація',
+    help: 'Центр допомоги',
+    open: 'Відкрити',
+  },
+  IT: {
+    title: 'Profilo',
+    subtitle: 'Il tuo account, prenotazioni, saldo e impostazioni',
+    verified: 'Verificato',
+    active: 'Profilo attivo',
+    editProfile: 'Modifica profilo',
+    balanceAvailable: 'Saldo disponibile',
+    quickActions: 'Azioni rapide',
+    activity: 'Attività',
+    preferences: 'Preferenze',
+    wallet: 'Wallet',
+    bookings: 'Le mie prenotazioni',
+    savedMasters: 'Professionisti salvati',
+    savedPlaces: 'Luoghi salvati',
+    promotions: 'Promozioni',
+    invite: 'Invita amici',
+    payments: 'Metodi di pagamento',
+    notifications: 'Notifiche',
+    languageRegion: 'Lingua e regione',
+    settings: 'Impostazioni account',
+    legal: 'Informazioni legali',
+    help: 'Centro assistenza',
+    open: 'Apri',
+  },
+  FR: {
+    title: 'Profil',
+    subtitle: 'Votre compte, réservations, solde et paramètres',
+    verified: 'Vérifié',
+    active: 'Profil actif',
+    editProfile: 'Modifier le profil',
+    balanceAvailable: 'Solde disponible',
+    quickActions: 'Actions rapides',
+    activity: 'Activité',
+    preferences: 'Préférences',
+    wallet: 'Portefeuille',
+    bookings: 'Mes réservations',
+    savedMasters: 'Professionnels enregistrés',
+    savedPlaces: 'Lieux enregistrés',
+    promotions: 'Promotions',
+    invite: 'Inviter des amis',
+    payments: 'Moyens de paiement',
+    notifications: 'Notifications',
+    languageRegion: 'Langue et région',
+    settings: 'Paramètres du compte',
+    legal: 'Informations légales',
+    help: 'Centre d’aide',
+    open: 'Ouvrir',
+  },
+  AR: {
+    title: 'الملف الشخصي',
+    subtitle: 'حسابك والحجوزات والرصيد والإعدادات',
+    verified: 'موثّق',
+    active: 'الملف نشط',
+    editProfile: 'تعديل الملف',
+    balanceAvailable: 'الرصيد المتاح',
+    quickActions: 'إجراءات سريعة',
+    activity: 'النشاط',
+    preferences: 'التفضيلات',
+    wallet: 'المحفظة',
+    bookings: 'حجوزاتي',
+    savedMasters: 'المختصون المحفوظون',
+    savedPlaces: 'الأماكن المحفوظة',
+    promotions: 'العروض',
+    invite: 'دعوة الأصدقاء',
+    payments: 'طرق الدفع',
+    notifications: 'الإشعارات',
+    languageRegion: 'اللغة والمنطقة',
+    settings: 'إعدادات الحساب',
+    legal: 'معلومات قانونية',
+    help: 'مركز المساعدة',
+    open: 'فتح',
+  },
+};
 
 type ProfileCard = {
   id: string;
@@ -176,6 +295,10 @@ type ProfileCard = {
   subtitle?: string;
   accent: 'pink' | 'green' | 'blue' | 'violet' | 'orange' | 'neutral';
 };
+
+function getText(language: AppLanguage): ProfileTextShape {
+  return profileTexts[language] || profileTexts.EN;
+}
 
 function accentStyles(accent: ProfileCard['accent']) {
   if (accent === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
@@ -189,34 +312,41 @@ function accentStyles(accent: ProfileCard['accent']) {
 export default function ProfilePage() {
   const router = useRouter();
 
-  const [language, setLanguage] = useState<AppLanguage>('EN');
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
   const [wallet, setWallet] = useState<WalletState>(getWalletState());
 
   useEffect(() => {
-    const syncLanguage = () => setLanguage(getSavedLanguage());
-    const syncProfile = () => setProfile(getUserProfile());
-    const syncWallet = () => setWallet(getWalletState());
+    const syncLanguage = () => {
+      setLanguage(getSavedLanguage());
+    };
+
+    const syncProfile = () => {
+      setProfile(getUserProfile());
+    };
+
+    const syncWallet = () => {
+      setWallet(getWalletState());
+    };
 
     syncLanguage();
     syncProfile();
     syncWallet();
 
-    window.addEventListener('focus', syncLanguage);
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
     const unsubProfile = subscribeToUserProfile(syncProfile);
     const unsubWallet = subscribeToWalletStore(syncWallet);
 
     return () => {
-      window.removeEventListener('focus', syncLanguage);
+      unsubLanguage();
       unsubProfile();
       unsubWallet();
     };
   }, []);
 
-  const text = useMemo(
-    () => profileTexts[language as keyof typeof profileTexts] || profileTexts.EN,
-    [language]
-  );
+  const text = useMemo(() => getText(language), [language]);
 
   const quickCards: ProfileCard[] = [
     {
@@ -324,20 +454,31 @@ export default function ProfilePage() {
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'space-between',
             gap: 12,
             marginBottom: 18,
           }}
         >
           <div>
-            <div style={{ fontSize: 24, fontWeight: 900, color: '#17130f' }}>{text.title}</div>
             <div
               style={{
-                marginTop: 4,
+                fontSize: 24,
+                fontWeight: 900,
+                color: '#17130f',
+                lineHeight: 1.1,
+              }}
+            >
+              {text.title}
+            </div>
+
+            <div
+              style={{
+                marginTop: 6,
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
               {text.subtitle}
@@ -357,6 +498,7 @@ export default function ProfilePage() {
               fontWeight: 900,
               cursor: 'pointer',
               boxShadow: '0 10px 20px rgba(23,19,15,0.18)',
+              flexShrink: 0,
             }}
           >
             {text.editProfile}
@@ -400,6 +542,7 @@ export default function ProfilePage() {
                   fontWeight: 900,
                   color: '#17130f',
                   lineHeight: 1.1,
+                  wordBreak: 'break-word',
                 }}
               >
                 {profile.fullName}
@@ -411,6 +554,7 @@ export default function ProfilePage() {
                   fontSize: 14,
                   color: '#7b7268',
                   fontWeight: 700,
+                  wordBreak: 'break-word',
                 }}
               >
                 {profile.email}
@@ -434,7 +578,7 @@ export default function ProfilePage() {
                     fontWeight: 900,
                   }}
                 >
-                  {text.availableNow}
+                  {text.active}
                 </span>
 
                 {profile.isVerified ? (
@@ -474,6 +618,7 @@ export default function ProfilePage() {
             >
               {text.balanceAvailable}
             </div>
+
             <div
               style={{
                 marginTop: 8,
