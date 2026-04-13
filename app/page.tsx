@@ -32,13 +32,9 @@ import {
   subscribeToAppRegionSettings,
 } from '../services/appRegionStore';
 import { refreshLiveCurrencyRates } from '../services/currencyDisplay';
+import { getUserProfile, subscribeToUserProfile } from './services/userProfileStore';
 import BottomNav from '../components/BottomNav';
 import TopCategoriesBar from '../components/TopCategoriesBar';
-import {
-  getUserProfile,
-  subscribeToUserProfile,
-  type UserProfile,
-} from './services/userProfileStore';
 
 const RealMap = dynamic(() => import('../components/RealMap'), {
   ssr: false,
@@ -99,6 +95,7 @@ const searchAliases = [
       'hotel para perros',
       'perro hotel',
       'отель для собак',
+      'готель для собак',
       'psí hotel',
       'hundehotel',
       'hotel dla psów',
@@ -115,6 +112,7 @@ const searchAliases = [
       'limpiar alfombra',
       'alfombra limpieza',
       'почистить ковёр',
+      'почистити килим',
       'čištění koberce',
       'teppichreinigung',
       'czyszczenie dywanu',
@@ -129,6 +127,7 @@ const searchAliases = [
       'fix phone',
       'reparar telefono',
       'ремонт телефона',
+      'ремонт телефону',
       'oprava telefonu',
       'handy reparatur',
       'naprawa telefonu',
@@ -143,6 +142,7 @@ const searchAliases = [
       'hairextensions',
       'extensiones de cabello',
       'наращивание волос',
+      'нарощення волосся',
       'prodloužení vlasů',
       'haarverlängerung',
       'przedłużanie włosów',
@@ -152,7 +152,7 @@ const searchAliases = [
     label: 'Massage',
     categoryId: 'wellness',
     subcategory: 'Massage',
-    keywords: ['massage', 'masaje', 'массаж', 'masáž', 'massage de', 'masaż'],
+    keywords: ['massage', 'masaje', 'массаж', 'масаж', 'masáž', 'massage de', 'masaż'],
   },
   {
     label: 'Moving',
@@ -163,6 +163,7 @@ const searchAliases = [
       'move house',
       'mudanza',
       'переезд',
+      'переїзд',
       'stěhování',
       'umzug',
       'przeprowadzka',
@@ -229,12 +230,28 @@ function getLanguageBorder(language: AppLanguage) {
     return 'linear-gradient(90deg, #ffffff 0%, #ffffff 33%, #2f6fff 33%, #2f6fff 66%, #ff5252 66%, #ff5252 100%)';
   }
 
+  if (language === 'UA') {
+    return 'linear-gradient(90deg, #0057b7 0%, #0057b7 50%, #ffd700 50%, #ffd700 100%)';
+  }
+
   if (language === 'CZ') {
     return 'linear-gradient(90deg, #ffffff 0%, #ffffff 50%, #11457e 50%, #11457e 75%, #d7141a 75%, #d7141a 100%)';
   }
 
   if (language === 'DE') {
     return 'linear-gradient(90deg, #000000 0%, #000000 33%, #dd0000 33%, #dd0000 66%, #ffce00 66%, #ffce00 100%)';
+  }
+
+  if (language === 'IT') {
+    return 'linear-gradient(90deg, #009246 0%, #009246 33%, #ffffff 33%, #ffffff 66%, #ce2b37 66%, #ce2b37 100%)';
+  }
+
+  if (language === 'FR') {
+    return 'linear-gradient(90deg, #0055a4 0%, #0055a4 33%, #ffffff 33%, #ffffff 66%, #ef4135 66%, #ef4135 100%)';
+  }
+
+  if (language === 'AR') {
+    return 'linear-gradient(90deg, #007a3d 0%, #007a3d 100%)';
   }
 
   if (language === 'PL') {
@@ -253,10 +270,18 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       ? 'Servicio'
       : language === 'RU'
       ? 'Услуга'
+      : language === 'UA'
+      ? 'Послуга'
       : language === 'CZ'
       ? 'Služba'
       : language === 'DE'
       ? 'Service'
+      : language === 'IT'
+      ? 'Servizio'
+      : language === 'FR'
+      ? 'Service'
+      : language === 'AR'
+      ? 'خدمة'
       : language === 'PL'
       ? 'Usługa'
       : 'Service';
@@ -267,120 +292,180 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       EN: 'Beauty',
       ES: 'Belleza',
       RU: 'Красота',
+      UA: 'Краса',
       CZ: 'Krása',
       DE: 'Beauty',
+      IT: 'Beauty',
+      FR: 'Beauté',
+      AR: 'الجمال',
       PL: 'Uroda',
     },
     barber: {
       EN: 'Barber',
       ES: 'Barbero',
       RU: 'Барбер',
+      UA: 'Барбер',
       CZ: 'Barber',
       DE: 'Barber',
+      IT: 'Barber',
+      FR: 'Barbier',
+      AR: 'حلاقة',
       PL: 'Barber',
     },
     wellness: {
       EN: 'Wellness',
       ES: 'Bienestar',
       RU: 'Велнес',
+      UA: 'Велнес',
       CZ: 'Wellness',
       DE: 'Wellness',
+      IT: 'Benessere',
+      FR: 'Bien-être',
+      AR: 'عافية',
       PL: 'Wellness',
     },
     home: {
       EN: 'Home',
       ES: 'Hogar',
       RU: 'Дом',
+      UA: 'Дім',
       CZ: 'Domov',
       DE: 'Zuhause',
+      IT: 'Casa',
+      FR: 'Maison',
+      AR: 'المنزل',
       PL: 'Dom',
     },
     repairs: {
       EN: 'Repairs',
       ES: 'Reparaciones',
       RU: 'Ремонт',
+      UA: 'Ремонт',
       CZ: 'Opravy',
       DE: 'Reparaturen',
+      IT: 'Riparazioni',
+      FR: 'Réparations',
+      AR: 'إصلاحات',
       PL: 'Naprawy',
     },
     tech: {
       EN: 'Tech',
       ES: 'Tecnología',
       RU: 'Техника',
+      UA: 'Техніка',
       CZ: 'Technika',
       DE: 'Technik',
+      IT: 'Tech',
+      FR: 'Tech',
+      AR: 'تقنية',
       PL: 'Technika',
     },
     pets: {
       EN: 'Pets',
       ES: 'Mascotas',
       RU: 'Питомцы',
+      UA: 'Тварини',
       CZ: 'Mazlíčci',
       DE: 'Haustiere',
+      IT: 'Animali',
+      FR: 'Animaux',
+      AR: 'حيوانات',
       PL: 'Zwierzęta',
     },
     fashion: {
       EN: 'Fashion',
       ES: 'Moda',
       RU: 'Мода',
+      UA: 'Мода',
       CZ: 'Móda',
       DE: 'Mode',
+      IT: 'Moda',
+      FR: 'Mode',
+      AR: 'موضة',
       PL: 'Moda',
     },
     auto: {
       EN: 'Auto',
       ES: 'Auto',
       RU: 'Авто',
+      UA: 'Авто',
       CZ: 'Auto',
       DE: 'Auto',
+      IT: 'Auto',
+      FR: 'Auto',
+      AR: 'سيارات',
       PL: 'Auto',
     },
     moving: {
       EN: 'Moving',
       ES: 'Mudanza',
       RU: 'Переезд',
+      UA: 'Переїзд',
       CZ: 'Stěhování',
       DE: 'Umzug',
+      IT: 'Trasloco',
+      FR: 'Déménagement',
+      AR: 'نقل',
       PL: 'Przeprowadzka',
     },
     fitness: {
       EN: 'Fitness',
       ES: 'Fitness',
       RU: 'Фитнес',
+      UA: 'Фітнес',
       CZ: 'Fitness',
       DE: 'Fitness',
+      IT: 'Fitness',
+      FR: 'Fitness',
+      AR: 'لياقة',
       PL: 'Fitness',
     },
     education: {
       EN: 'Education',
       ES: 'Educación',
       RU: 'Обучение',
+      UA: 'Навчання',
       CZ: 'Vzdělání',
       DE: 'Bildung',
+      IT: 'Formazione',
+      FR: 'Éducation',
+      AR: 'تعليم',
       PL: 'Edukacja',
     },
     events: {
       EN: 'Events',
       ES: 'Eventos',
       RU: 'События',
+      UA: 'Події',
       CZ: 'Události',
       DE: 'Events',
+      IT: 'Eventi',
+      FR: 'Événements',
+      AR: 'فعاليات',
       PL: 'Wydarzenia',
     },
     activities: {
       EN: 'Activities',
       ES: 'Actividades',
       RU: 'Активности',
+      UA: 'Активності',
       CZ: 'Aktivity',
       DE: 'Aktivitäten',
+      IT: 'Attività',
+      FR: 'Activités',
+      AR: 'أنشطة',
       PL: 'Aktywności',
     },
     creative: {
       EN: 'Creative',
       ES: 'Creativo',
       RU: 'Креатив',
+      UA: 'Креатив',
       CZ: 'Kreativa',
       DE: 'Kreativ',
+      IT: 'Creativo',
+      FR: 'Créatif',
+      AR: 'إبداعي',
       PL: 'Kreatywne',
     },
   };
@@ -423,10 +508,19 @@ function readRecentSearches() {
 function languageFlag(language: AppLanguage) {
   if (language === 'ES') return '🇪🇸';
   if (language === 'RU') return '🇷🇺';
+  if (language === 'UA') return '🇺🇦';
   if (language === 'CZ') return '🇨🇿';
   if (language === 'DE') return '🇩🇪';
+  if (language === 'IT') return '🇮🇹';
+  if (language === 'FR') return '🇫🇷';
+  if (language === 'AR') return '🇸🇦';
   if (language === 'PL') return '🇵🇱';
   return '🇬🇧';
+}
+
+function languageCode(language: AppLanguage) {
+  if (language === 'UA') return 'UA';
+  return language;
 }
 
 function formatAdTime(totalSeconds: number) {
@@ -479,6 +573,8 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
   return sameCategory[0] || null;
 }
 
+type HomeFilterMode = 'none' | 'liked-category' | 'liked-all' | 'deals-category' | 'deals-all';
+
 export default function HomePage() {
   const router = useRouter();
   const baseMasters = getAllMasters();
@@ -495,7 +591,7 @@ export default function HomePage() {
   const [mapMode] = useState<'map' | 'satellite'>('map');
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
   const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
-  const [likedFilterMode, setLikedFilterMode] = useState<'none' | 'category' | 'all'>('none');
+  const [homeFilterMode, setHomeFilterMode] = useState<HomeFilterMode>('none');
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [promotions, setPromotions] = useState<PromotionItem[]>([]);
   const [recenterToUserTrigger] = useState(0);
@@ -503,7 +599,7 @@ export default function HomePage() {
   const [locationLabel, setLocationLabel] = useState(getEffectiveSearchLocation().label);
   const [regionVersion, setRegionVersion] = useState(0);
   const [currencyVersion, setCurrencyVersion] = useState(0);
-  const [userProfile, setUserProfile] = useState<UserProfile>(getUserProfile());
+  const [userAvatar, setUserAvatar] = useState(getUserProfile().avatar);
 
   const tr = t(language);
   const popularSearches = getPopularSearches(tr);
@@ -557,15 +653,11 @@ export default function HomePage() {
 
   useEffect(() => {
     const syncProfile = () => {
-      setUserProfile(getUserProfile());
+      setUserAvatar(getUserProfile().avatar);
     };
 
     syncProfile();
-    const unsubscribe = subscribeToUserProfile(syncProfile);
-
-    return () => {
-      unsubscribe();
-    };
+    return subscribeToUserProfile(syncProfile);
   }, []);
 
   useEffect(() => {
@@ -767,6 +859,12 @@ export default function HomePage() {
       }));
   }, [search, allMasters]);
 
+  const promotionsInCategory = useMemo(() => {
+    return promotions.filter(
+      (promo) => String(promo.categoryId || '').toLowerCase().trim() === activeCategory
+    );
+  }, [promotions, activeCategory]);
+
   const filteredMasters = useMemo(() => {
     const q = search.trim().toLowerCase();
 
@@ -774,10 +872,13 @@ export default function HomePage() {
       const masterCategory = String(master.category || '').toLowerCase().trim();
       const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
 
-      const categoryMatch = likedFilterMode === 'all' ? true : masterCategory === activeCategory;
+      const categoryMatch =
+        homeFilterMode === 'liked-all' || homeFilterMode === 'deals-all'
+          ? true
+          : masterCategory === activeCategory;
 
       const subcategoryMatch =
-        likedFilterMode === 'all'
+        homeFilterMode === 'liked-all' || homeFilterMode === 'deals-all'
           ? true
           : !activeSubcategory || masterSubcategory === activeSubcategory.toLowerCase().trim();
 
@@ -791,15 +892,43 @@ export default function HomePage() {
         String(master.category || '').toLowerCase().includes(q);
 
       const likedMatch =
-        likedFilterMode === 'none' ? true : likedMasterIds.includes(String(master.id));
+        homeFilterMode === 'liked-category' || homeFilterMode === 'liked-all'
+          ? likedMasterIds.includes(String(master.id))
+          : true;
 
-      return categoryMatch && subcategoryMatch && searchMatch && likedMatch;
+      const categoryDealsMatch =
+        homeFilterMode === 'deals-category'
+          ? promotionsInCategory.some((promo) => String(promo.masterId) === String(master.id))
+          : true;
+
+      const allDealsMatch =
+        homeFilterMode === 'deals-all'
+          ? promotions.some((promo) => String(promo.masterId) === String(master.id))
+          : true;
+
+      return (
+        categoryMatch &&
+        subcategoryMatch &&
+        searchMatch &&
+        likedMatch &&
+        categoryDealsMatch &&
+        allDealsMatch
+      );
     });
-  }, [allMasters, activeCategory, activeSubcategory, search, likedMasterIds, likedFilterMode]);
+  }, [
+    allMasters,
+    activeCategory,
+    activeSubcategory,
+    search,
+    likedMasterIds,
+    homeFilterMode,
+    promotionsInCategory,
+    promotions,
+  ]);
 
   useEffect(() => {
     setSelectedMaster(null);
-  }, [activeCategory, activeSubcategory, search, likedFilterMode]);
+  }, [activeCategory, activeSubcategory, search, homeFilterMode]);
 
   const borderGradient = getLanguageBorder(language);
   const currentCategoryLabel = getCategoryLabel(activeCategory, language);
@@ -811,6 +940,8 @@ export default function HomePage() {
   ).length;
 
   const likedAllCount = likedMasterIds.length;
+  const dealsInCategoryCount = promotionsInCategory.length;
+  const dealsAllCount = promotions.length;
 
   const hasAnyResults =
     smartResults.length > 0 ||
@@ -822,7 +953,7 @@ export default function HomePage() {
     if (result.type === 'smart') {
       setActiveCategory(result.categoryId);
       setActiveSubcategory(result.subcategory);
-      setLikedFilterMode('none');
+      setHomeFilterMode('none');
       setSearch(result.label);
       setSearchOpen(false);
       saveRecentSearch(result.label);
@@ -833,7 +964,7 @@ export default function HomePage() {
     if (result.type === 'category') {
       setActiveCategory(result.categoryId);
       setActiveSubcategory('');
-      setLikedFilterMode('none');
+      setHomeFilterMode('none');
       setSearch(result.label);
       setSearchOpen(false);
       saveRecentSearch(result.label);
@@ -844,7 +975,7 @@ export default function HomePage() {
     if (result.type === 'subcategory') {
       setActiveCategory(result.categoryId);
       setActiveSubcategory(result.label);
-      setLikedFilterMode('none');
+      setHomeFilterMode('none');
       setSearch(result.label);
       setSearchOpen(false);
       saveRecentSearch(result.label);
@@ -854,7 +985,7 @@ export default function HomePage() {
 
     setActiveCategory(String(result.master.category || 'beauty'));
     setActiveSubcategory(result.master.subcategory || '');
-    setLikedFilterMode('none');
+    setHomeFilterMode('none');
     setSelectedMaster(result.master);
     setSearch(result.label);
     setSearchOpen(false);
@@ -886,7 +1017,7 @@ export default function HomePage() {
 
     setActiveCategory(String(promo.categoryId || 'beauty'));
     setActiveSubcategory('');
-    setLikedFilterMode('none');
+    setHomeFilterMode('deals-category');
     setSearch(promo.title);
     setSearchOpen(false);
     saveRecentSearch(promo.title);
@@ -921,13 +1052,13 @@ export default function HomePage() {
                 borderRadius: 24,
                 padding: 10,
                 boxShadow: '0 6px 18px rgba(0,0,0,0.07)',
-                border: '1px solid #ece7df',
+                border: '1px solid #111111',
               }}
             >
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr auto auto',
+                  gridTemplateColumns: '1fr auto',
                   gap: 8,
                   alignItems: 'center',
                 }}
@@ -940,9 +1071,12 @@ export default function HomePage() {
                     minWidth: 0,
                     height: 46,
                     padding: '0 4px 0 2px',
+                    border: '1px solid #111111',
+                    borderRadius: 18,
+                    background: '#fff',
                   }}
                 >
-                  <span style={{ fontSize: 20, color: '#111111' }}>🔎</span>
+                  <span style={{ fontSize: 20, color: '#111111', paddingLeft: 8 }}>🔎</span>
                   <input
                     value={search}
                     onFocus={() => setSearchOpen(true)}
@@ -1002,82 +1136,36 @@ export default function HomePage() {
                 <button
                   onClick={() => router.push('/profile/language-region')}
                   style={{
-                    border: 'none',
+                    border: '1px solid #111111',
                     background: '#fff',
                     color: '#1f2430',
                     borderRadius: 999,
-                    minWidth: 82,
+                    minWidth: 74,
                     height: 46,
-                    padding: '0 12px',
-                    fontSize: 15,
-                    fontWeight: 800,
+                    padding: '0 10px',
+                    fontSize: 14,
+                    fontWeight: 900,
                     boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 6,
+                    gap: 5,
                     cursor: 'pointer',
                   }}
                 >
-                  <span style={{ fontSize: 20 }}>{languageFlag(language)}</span>
-                  <span>{language}</span>
+                  <span style={{ fontSize: 18 }}>{languageFlag(language)}</span>
+                  <span>{languageCode(language)}</span>
                 </button>
-
-                <div style={{ position: 'relative' }}>
-                  <button
-                    onClick={() => router.push('/profile')}
-                    style={{
-                      border: '2px solid #fff',
-                      background: '#f4efe7',
-                      borderRadius: 999,
-                      width: 46,
-                      height: 46,
-                      padding: 0,
-                      overflow: 'hidden',
-                      boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
-                      cursor: 'pointer',
-                      display: 'block',
-                    }}
-                  >
-                    <img
-                      src={userProfile.avatar}
-                      alt={userProfile.fullName || 'Profile'}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        display: 'block',
-                      }}
-                    />
-                  </button>
-
-                  {hasUnreadProfileUpdates ? (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: 2,
-                        right: 2,
-                        width: 11,
-                        height: 11,
-                        borderRadius: '50%',
-                        background: '#ff3b30',
-                        border: '2px solid #ffffff',
-                        boxShadow: '0 2px 6px rgba(255,59,48,0.35)',
-                      }}
-                    />
-                  ) : null}
-                </div>
               </div>
 
               <div
                 style={{
                   marginTop: 8,
                   padding: '4px 2px 0',
-                  display: 'flex',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto auto auto',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
                   gap: 12,
-                  flexWrap: 'wrap',
                 }}
               >
                 <div
@@ -1088,51 +1176,100 @@ export default function HomePage() {
                     fontSize: 13,
                     fontWeight: 900,
                     color: '#4f5b68',
+                    minWidth: 0,
                   }}
                 >
-                  <span style={{ color: '#2f63d8' }}>📍</span>
-                  <span>{locationLabel}</span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <button
-                    onClick={() => router.push('/profile')}
+                  <span style={{ color: '#19b44a' }}>📍</span>
+                  <span
                     style={{
-                      border: 'none',
-                      background: 'transparent',
-                      padding: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      cursor: 'pointer',
-                      fontWeight: 900,
-                      fontSize: 16,
-                      lineHeight: 1,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
                   >
-                    <span style={{ color: '#ff3b30', fontSize: 14 }}>⏱</span>
-                    <span style={{ color: '#ff3b30' }}>{formatAdTime(adSecondsLeft)}</span>
-                  </button>
-
-                  <button
-                    onClick={() => router.push('/profile')}
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      padding: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      cursor: 'pointer',
-                      fontWeight: 900,
-                      fontSize: 16,
-                      lineHeight: 1,
-                    }}
-                  >
-                    <span style={{ color: '#19b44a', fontSize: 16 }}>👁</span>
-                    <span style={{ color: '#ff3b30' }}>{adViews}</span>
-                  </button>
+                    {locationLabel}
+                  </span>
                 </div>
+
+                <button
+                  onClick={() => router.push('/profile')}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    cursor: 'pointer',
+                    fontWeight: 900,
+                    fontSize: 15,
+                    lineHeight: 1,
+                  }}
+                >
+                  <span style={{ color: '#ff3b30', fontSize: 14 }}>⏱</span>
+                  <span style={{ color: '#ff3b30' }}>{formatAdTime(adSecondsLeft)}</span>
+                </button>
+
+                <button
+                  onClick={() => router.push('/profile')}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    cursor: 'pointer',
+                    fontWeight: 900,
+                    fontSize: 15,
+                    lineHeight: 1,
+                  }}
+                >
+                  <span style={{ color: '#19b44a', fontSize: 15 }}>👁</span>
+                  <span style={{ color: '#ff3b30' }}>{adViews}</span>
+                </button>
+
+                <button
+                  onClick={() => router.push('/profile')}
+                  style={{
+                    border: '1px solid #111111',
+                    background: '#fff',
+                    borderRadius: 999,
+                    width: 28,
+                    height: 28,
+                    padding: 0,
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    display: 'block',
+                    position: 'relative',
+                    justifySelf: 'end',
+                  }}
+                >
+                  <img
+                    src={userAvatar}
+                    alt="Profile"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
+                  />
+                  {hasUnreadProfileUpdates ? (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        background: '#ff3b30',
+                        border: '1.5px solid #ffffff',
+                      }}
+                    />
+                  ) : null}
+                </button>
               </div>
             </div>
 
@@ -1144,7 +1281,7 @@ export default function HomePage() {
                   right: 0,
                   top: 'calc(100% + 8px)',
                   background: 'rgba(255,255,255,0.98)',
-                  border: '1px solid #ece4d8',
+                  border: '1px solid #111111',
                   borderRadius: 20,
                   boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
                   padding: 12,
@@ -1165,7 +1302,7 @@ export default function HomePage() {
                               key={item}
                               onClick={() => runQuickSearch(item)}
                               style={{
-                                border: '1px solid #e7ddd0',
+                                border: '1px solid #111111',
                                 background: '#fff',
                                 borderRadius: 999,
                                 padding: '8px 12px',
@@ -1192,7 +1329,7 @@ export default function HomePage() {
                             key={item}
                             onClick={() => runQuickSearch(item)}
                             style={{
-                              border: '1px solid #e7ddd0',
+                              border: '1px solid #111111',
                               background: '#fff8f8',
                               borderRadius: 999,
                               padding: '8px 12px',
@@ -1225,7 +1362,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: 'none',
+                                border: '1px solid #111111',
                                 background: '#fff6f9',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1260,7 +1397,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: 'none',
+                                border: '1px solid #111111',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1292,7 +1429,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: 'none',
+                                border: '1px solid #111111',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1327,7 +1464,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: 'none',
+                                border: '1px solid #111111',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1364,7 +1501,7 @@ export default function HomePage() {
             activeSubcategory={activeSubcategory}
             onSelectCategory={(category) => {
               setActiveCategory(category);
-              setLikedFilterMode('none');
+              setHomeFilterMode('none');
             }}
             onSelectSubcategory={(subcategory) => {
               setActiveSubcategory(subcategory);
@@ -1376,98 +1513,234 @@ export default function HomePage() {
         </section>
 
         <section style={{ padding: '8px 14px 0' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
-            <button
-              onClick={() => setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))}
-              style={{
-                border: likedFilterMode === 'category' ? '3px solid #ff2020' : '1px solid #dadada',
-                background: '#fff',
-                color: '#1f2430',
-                borderRadius: 999,
-                padding: likedFilterMode === 'category' ? '12px 16px' : '10px 14px',
-                fontSize: likedFilterMode === 'category' ? 16 : 15,
-                fontWeight: likedFilterMode === 'category' ? 900 : 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-              }}
-            >
-              <span style={{ color: '#ff2020', fontSize: 18 }}>♥</span>
-              <span>{currentCategoryLabel}</span>
-              <span
-                style={{
-                  minWidth: 28,
-                  height: 28,
-                  borderRadius: 999,
-                  border: '1px solid #e4e4e4',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  background: '#fff',
-                }}
-              >
-                {likedInCategoryCount}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
-              style={{
-                border: likedFilterMode === 'all' ? '3px solid #ff2020' : '1px solid #dadada',
-                background: '#fff',
-                color: '#1f2430',
-                borderRadius: 999,
-                padding: likedFilterMode === 'all' ? '12px 16px' : '10px 14px',
-                fontSize: likedFilterMode === 'all' ? 16 : 15,
-                fontWeight: likedFilterMode === 'all' ? 900 : 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-              }}
-            >
-              <span style={{ color: '#ff2020', fontSize: 18 }}>♥</span>
-              <span>{tr.allLiked}</span>
-              <span
-                style={{
-                  minWidth: 28,
-                  height: 28,
-                  borderRadius: 999,
-                  border: '1px solid #e4e4e4',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  background: '#fff',
-                }}
-              >
-                {likedAllCount}
-              </span>
-            </button>
-
+          <div
+            style={{
+              border: '1px solid #111111',
+              borderRadius: 24,
+              background: '#fff',
+              padding: 10,
+            }}
+          >
             <div
               style={{
-                marginLeft: 'auto',
-                border: '1px solid #d9ecd7',
-                background: '#eefbe9',
-                color: '#2f9c47',
-                borderRadius: 999,
-                padding: '9px 13px',
-                fontSize: 13,
-                fontWeight: 900,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
               }}
             >
-              {filteredMasters.filter((item: any) => item.availableNow).length} {tr.prosAvailableNow}
+              <button
+                onClick={() =>
+                  setHomeFilterMode((prev) => (prev === 'liked-category' ? 'none' : 'liked-category'))
+                }
+                style={{
+                  border: '1px solid #111111',
+                  background: homeFilterMode === 'liked-category' ? '#ffe7ef' : '#fff3f7',
+                  color: '#1f2430',
+                  borderRadius: 18,
+                  minHeight: 56,
+                  padding: '10px 12px',
+                  fontSize: 14,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                  <span style={{ color: '#ff1f4b', fontSize: 18 }}>♥</span>
+                  <span
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {currentCategoryLabel}
+                  </span>
+                </span>
+
+                <span
+                  style={{
+                    minWidth: 28,
+                    height: 28,
+                    borderRadius: 999,
+                    border: '1px solid #111111',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 14,
+                    fontWeight: 900,
+                    background: '#fff',
+                    color: '#111111',
+                  }}
+                >
+                  {likedInCategoryCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() =>
+                  setHomeFilterMode((prev) => (prev === 'deals-category' ? 'none' : 'deals-category'))
+                }
+                style={{
+                  border: '1px solid #111111',
+                  background: homeFilterMode === 'deals-category' ? '#fff4cc' : '#fff8dd',
+                  color: '#1f2430',
+                  borderRadius: 18,
+                  minHeight: 56,
+                  padding: '10px 12px',
+                  fontSize: 14,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                  <span style={{ color: '#f0b000', fontSize: 18 }}>🪙</span>
+                  <span
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {tr.dealsToday}
+                  </span>
+                </span>
+
+                <span
+                  style={{
+                    minWidth: 28,
+                    height: 28,
+                    borderRadius: 999,
+                    border: '1px solid #111111',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 14,
+                    fontWeight: 900,
+                    background: '#fff',
+                    color: '#111111',
+                  }}
+                >
+                  {dealsInCategoryCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() =>
+                  setHomeFilterMode((prev) => (prev === 'liked-all' ? 'none' : 'liked-all'))
+                }
+                style={{
+                  border: '1px solid #111111',
+                  background: homeFilterMode === 'liked-all' ? '#ffe7ef' : '#fff3f7',
+                  color: '#1f2430',
+                  borderRadius: 18,
+                  minHeight: 56,
+                  padding: '10px 12px',
+                  fontSize: 14,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                  <span style={{ color: '#ff1f4b', fontSize: 18 }}>♥</span>
+                  <span
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {tr.allLiked}
+                  </span>
+                </span>
+
+                <span
+                  style={{
+                    minWidth: 28,
+                    height: 28,
+                    borderRadius: 999,
+                    border: '1px solid #111111',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 14,
+                    fontWeight: 900,
+                    background: '#fff',
+                    color: '#111111',
+                  }}
+                >
+                  {likedAllCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() =>
+                  setHomeFilterMode((prev) => (prev === 'deals-all' ? 'none' : 'deals-all'))
+                }
+                style={{
+                  border: '1px solid #111111',
+                  background: homeFilterMode === 'deals-all' ? '#fff4cc' : '#fff8dd',
+                  color: '#1f2430',
+                  borderRadius: 18,
+                  minHeight: 56,
+                  padding: '10px 12px',
+                  fontSize: 14,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                  <span style={{ color: '#f0b000', fontSize: 18 }}>🪙</span>
+                  <span
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {tr.allDealsToday}
+                  </span>
+                </span>
+
+                <span
+                  style={{
+                    minWidth: 28,
+                    height: 28,
+                    borderRadius: 999,
+                    border: '1px solid #111111',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 14,
+                    fontWeight: 900,
+                    background: '#fff',
+                    color: '#111111',
+                  }}
+                >
+                  {dealsAllCount}
+                </span>
+              </button>
             </div>
           </div>
         </section>
 
-        <section style={{ padding: '8px 0 0' }}>
-          <div style={{ background: '#ffffff', borderTop: '1px solid #e7e1d8', borderBottom: '1px solid #e7e1d8' }}>
+        <section style={{ padding: '2px 0 0' }}>
+          <div style={{ background: '#ffffff', borderTop: '1px solid #111111', borderBottom: '1px solid #111111' }}>
             <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={filteredMasters}
@@ -1560,6 +1833,7 @@ export default function HomePage() {
                       maxWidth: 250,
                       boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
                       flexShrink: 0,
+                      border: '1px solid #111111',
                     }}
                   >
                     <button
@@ -1585,23 +1859,6 @@ export default function HomePage() {
                             display: 'block',
                           }}
                         />
-
-                        <div
-                          style={{
-                            position: 'absolute',
-                            top: 12,
-                            left: 12,
-                            background: '#ffffff',
-                            color: '#ff4f93',
-                            borderRadius: 999,
-                            padding: '8px 14px',
-                            fontSize: 12,
-                            fontWeight: 900,
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
-                          }}
-                        >
-                          {tr.sponsored}
-                        </div>
                       </div>
 
                       <div style={{ padding: '14px 16px 8px' }}>
@@ -1626,17 +1883,6 @@ export default function HomePage() {
                         >
                           {promo.subtitle || tr.specialOfferNearYou}
                         </div>
-
-                        <div
-                          style={{
-                            marginTop: 10,
-                            fontSize: 12,
-                            fontWeight: 800,
-                            color: '#ff4f93',
-                          }}
-                        >
-                          {`${tr.viewsLabel}: ${promo.views}`}
-                        </div>
                       </div>
                     </button>
 
@@ -1653,9 +1899,9 @@ export default function HomePage() {
                         style={{
                           height: 42,
                           borderRadius: 14,
-                          border: '1px solid #e6ded2',
-                          background: '#fff',
-                          color: '#223145',
+                          border: '1px solid #111111',
+                          background: '#133e8a',
+                          color: '#fff',
                           fontSize: 14,
                           fontWeight: 900,
                           cursor: 'pointer',
@@ -1668,14 +1914,13 @@ export default function HomePage() {
                         onClick={() => openPromotionBooking(promo)}
                         style={{
                           height: 42,
-                          border: 'none',
+                          border: '1px solid #111111',
                           borderRadius: 14,
-                          background: '#ff4f93',
+                          background: '#ff4f4f',
                           color: '#fff',
                           fontSize: 14,
                           fontWeight: 900,
                           cursor: 'pointer',
-                          boxShadow: '0 6px 14px rgba(255,79,147,0.25)',
                         }}
                       >
                         {tr.bookAction}
