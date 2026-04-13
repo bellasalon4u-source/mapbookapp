@@ -121,4 +121,9 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     kyivEurope: 'Kyiv · Europe',
     newYorkNA: 'New York · North America',
     dubaiME: 'Dubai · Middle East',
-    rom
+    kyivEurope: 'Kyiv · Europe',
+    newYorkNA: 'New York · North America',
+    dubaiME: 'Dubai · Middle East',
+    romeEurope: 'Rome · Europe',
+    parisEurope: 'Paris · Europe',
+  },
