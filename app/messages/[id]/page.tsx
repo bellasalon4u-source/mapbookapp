@@ -3,96 +3,161 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  formatChatDayLabel,
-  formatChatTime,
-  getChatThreadById,
-  markThreadAsRead,
-  sendChatMessage,
-  subscribeToChatStore,
-  type ChatThread,
-} from '../../../services/chatStore';
-import {
   getSavedLanguage,
   subscribeToLanguageChange,
   type AppLanguage,
 } from '../../../services/i18n';
 
-const chatTexts: Record<
-  AppLanguage,
-  {
-    notFound: string;
-    online: string;
-    offline: string;
-    seen: string;
-    readBy: string;
-    writeMessage: string;
-    send: string;
-  }
-> = {
+type MessageItem = {
+  id: string;
+  text: string;
+  fromMe: boolean;
+  time: string;
+};
+
+type ChatItem = {
+  id: string;
+  name: string;
+  avatar: string;
+  online: boolean;
+  messages: MessageItem[];
+};
+
+const chatTexts = {
   EN: {
     notFound: 'Chat not found',
     online: 'Online',
     offline: 'Offline',
-    seen: 'Seen',
-    readBy: 'Read by',
-    writeMessage: 'Write a message here',
+    placeholder: 'Write a message...',
     send: 'Send',
-  },
-  RU: {
-    notFound: 'Чат не найден',
-    online: 'Онлайн',
-    offline: 'Не в сети',
-    seen: 'Прочитано',
-    readBy: 'Прочитано:',
-    writeMessage: 'Напишите сообщение здесь',
-    send: 'Отправить',
+    back: 'Back',
   },
   ES: {
     notFound: 'Chat no encontrado',
     online: 'En línea',
     offline: 'Desconectado',
-    seen: 'Visto',
-    readBy: 'Leído por',
-    writeMessage: 'Escribe un mensaje aquí',
+    placeholder: 'Escribe un mensaje...',
     send: 'Enviar',
+    back: 'Volver',
+  },
+  RU: {
+    notFound: 'Чат не найден',
+    online: 'Онлайн',
+    offline: 'Не в сети',
+    placeholder: 'Напишите сообщение...',
+    send: 'Отправить',
+    back: 'Назад',
   },
   CZ: {
     notFound: 'Chat nenalezen',
     online: 'Online',
     offline: 'Offline',
-    seen: 'Přečteno',
-    readBy: 'Přečetl/a',
-    writeMessage: 'Napište zprávu sem',
+    placeholder: 'Napište zprávu...',
     send: 'Odeslat',
+    back: 'Zpět',
   },
   DE: {
     notFound: 'Chat nicht gefunden',
     online: 'Online',
     offline: 'Offline',
-    seen: 'Gesehen',
-    readBy: 'Gelesen von',
-    writeMessage: 'Nachricht hier schreiben',
+    placeholder: 'Nachricht schreiben...',
     send: 'Senden',
+    back: 'Zurück',
   },
   PL: {
     notFound: 'Czat nie znaleziony',
     online: 'Online',
     offline: 'Offline',
-    seen: 'Przeczytano',
-    readBy: 'Przeczytał/a',
-    writeMessage: 'Napisz wiadomość tutaj',
+    placeholder: 'Napisz wiadomość...',
     send: 'Wyślij',
+    back: 'Wróć',
   },
-};
+  UA: {
+    notFound: 'Чат не знайдено',
+    online: 'Онлайн',
+    offline: 'Не в мережі',
+    placeholder: 'Напишіть повідомлення...',
+    send: 'Надіслати',
+    back: 'Назад',
+  },
+  IT: {
+    notFound: 'Chat non trovata',
+    online: 'Online',
+    offline: 'Offline',
+    placeholder: 'Scrivi un messaggio...',
+    send: 'Invia',
+    back: 'Indietro',
+  },
+  FR: {
+    notFound: 'Chat introuvable',
+    online: 'En ligne',
+    offline: 'Hors ligne',
+    placeholder: 'Écrivez un message...',
+    send: 'Envoyer',
+    back: 'Retour',
+  },
+  AR: {
+    notFound: 'الدردشة غير موجودة',
+    online: 'متصل',
+    offline: 'غير متصل',
+    placeholder: 'اكتب رسالة...',
+    send: 'إرسال',
+    back: 'رجوع',
+  },
+} satisfies Record<
+  AppLanguage,
+  {
+    notFound: string;
+    online: string;
+    offline: string;
+    placeholder: string;
+    send: string;
+    back: string;
+  }
+>;
 
-export default function ChatThreadPage() {
-  const router = useRouter();
+const mockChats: ChatItem[] = [
+  {
+    id: 'bella-keratin-studio',
+    name: 'Bella Keratin Studio',
+    avatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
+    online: true,
+    messages: [
+      { id: '1', text: 'Hi! Your booking is confirmed.', fromMe: false, time: '10:12' },
+      { id: '2', text: 'Perfect, thank you.', fromMe: true, time: '10:13' },
+      { id: '3', text: 'Please come 5 minutes earlier if possible.', fromMe: false, time: '10:15' },
+    ],
+  },
+  {
+    id: 'mila-wellness',
+    name: 'Mila Wellness',
+    avatar:
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
+    online: false,
+    messages: [
+      { id: '1', text: 'Hello! We still have one free slot today.', fromMe: false, time: '09:20' },
+      { id: '2', text: 'What time is available?', fromMe: true, time: '09:21' },
+    ],
+  },
+  {
+    id: 'nadia-beauty',
+    name: 'Nadia Beauty',
+    avatar:
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80',
+    online: true,
+    messages: [
+      { id: '1', text: 'I have one more slot tomorrow if you want.', fromMe: false, time: '13:00' },
+    ],
+  },
+];
+
+export default function ChatPage() {
   const params = useParams();
-  const threadId = String(params?.id || '');
-
+  const router = useRouter();
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
-  const [thread, setThread] = useState<ChatThread | null>(null);
-  const [messageText, setMessageText] = useState('');
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<MessageItem[]>([]);
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -108,70 +173,96 @@ export default function ChatThreadPage() {
 
   const text = chatTexts[language] || chatTexts.EN;
 
+  const chat = useMemo(() => {
+    return mockChats.find((item) => item.id === String(params.id));
+  }, [params.id]);
+
   useEffect(() => {
-    const load = () => {
-      const current = getChatThreadById(threadId);
-      setThread(current);
-    };
+    if (chat) {
+      setMessages(chat.messages);
+    }
+  }, [chat]);
 
-    load();
-    markThreadAsRead(threadId);
-    load();
-
-    const unsubscribe = subscribeToChatStore(() => {
-      load();
-    });
-
-    return unsubscribe;
-  }, [threadId]);
-
-  const groupedMessages = useMemo(() => {
-    if (!thread) return [];
-
-    const groups: Array<{
-      dayLabel: string;
-      items: typeof thread.messages;
-    }> = [];
-
-    thread.messages.forEach((message) => {
-      const dayLabel = formatChatDayLabel(message.sentAt);
-      const lastGroup = groups[groups.length - 1];
-
-      if (!lastGroup || lastGroup.dayLabel !== dayLabel) {
-        groups.push({
-          dayLabel,
-          items: [message],
-        });
-      } else {
-        lastGroup.items.push(message);
-      }
-    });
-
-    return groups;
-  }, [thread]);
-
-  if (!thread) {
+  if (!chat) {
     return (
       <main
         style={{
           minHeight: '100vh',
-          background: '#f5f3ef',
-          fontFamily: 'Arial, sans-serif',
+          background: '#f7f5f1',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           padding: 24,
+          fontFamily: 'Arial, sans-serif',
+          color: '#1f2430',
+          fontSize: 18,
+          fontWeight: 800,
         }}
       >
-        <div style={{ maxWidth: 430, margin: '0 auto' }}>
+        {text.notFound}
+      </main>
+    );
+  }
+
+  const handleSend = () => {
+    const trimmed = input.trim();
+    if (!trimmed) return;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}`,
+        text: trimmed,
+        fromMe: true,
+        time: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      },
+    ]);
+    setInput('');
+  };
+
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#f7f5f1',
+        fontFamily: 'Arial, sans-serif',
+        color: '#1f2430',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <div style={{ maxWidth: 430, width: '100%', margin: '0 auto', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <header
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 20,
+            background: 'rgba(247,245,241,0.96)',
+            backdropFilter: 'blur(10px)',
+            borderBottom: '1px solid #e6dfd5',
+            padding: '16px',
+            display: 'grid',
+            gridTemplateColumns: '52px 1fr 52px',
+            gap: 12,
+            alignItems: 'center',
+          }}
+        >
           <button
-            onClick={() => router.push('/messages')}
+            type="button"
+            onClick={() => router.back()}
             style={{
-              border: 'none',
-              background: '#fff',
               width: 52,
               height: 52,
               borderRadius: 999,
-              fontSize: 22,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-              cursor: 'pointer',
+              border: '1px solid #e5ddd1',
+              background: '#fff',
+              fontSize: 24,
+              color: '#1f2430',
+              lineHeight: 1,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
             }}
           >
             ←
@@ -179,279 +270,129 @@ export default function ChatThreadPage() {
 
           <div
             style={{
-              marginTop: 20,
-              background: '#fff',
-              borderRadius: 24,
-              padding: 24,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
-              fontSize: 18,
-              fontWeight: 700,
-              color: '#253140',
-            }}
-          >
-            {text.notFound}
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  const handleSend = () => {
-    const value = messageText.trim();
-    if (!value) return;
-
-    sendChatMessage(thread.id, value);
-    setMessageText('');
-  };
-
-  return (
-    <main
-      style={{
-        minHeight: '100vh',
-        background: '#f5f3ef',
-        fontFamily: 'Arial, sans-serif',
-        color: '#1f2430',
-        paddingBottom: 96,
-      }}
-    >
-      <div style={{ maxWidth: 430, margin: '0 auto' }}>
-        <header
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 20,
-            background: 'rgba(245,243,239,0.96)',
-            backdropFilter: 'blur(10px)',
-            borderBottom: '1px solid #e5ddd2',
-            padding: '14px 16px',
-          }}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '52px 1fr 52px',
+              display: 'flex',
               alignItems: 'center',
               gap: 12,
+              minWidth: 0,
             }}
           >
-            <button
-              onClick={() => router.push('/messages')}
+            <img
+              src={chat.avatar}
+              alt={chat.name}
               style={{
-                border: 'none',
-                background: '#fff',
                 width: 52,
                 height: 52,
-                borderRadius: 999,
-                fontSize: 24,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                cursor: 'pointer',
+                borderRadius: 16,
+                objectFit: 'cover',
+                flexShrink: 0,
               }}
-            >
-              ←
-            </button>
+            />
 
             <div style={{ minWidth: 0 }}>
               <div
                 style={{
                   fontSize: 18,
-                  fontWeight: 800,
-                  color: '#253140',
-                  lineHeight: 1.2,
+                  fontWeight: 900,
+                  color: '#1f2430',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
-                {thread.providerName}
+                {chat.name}
               </div>
 
               <div
                 style={{
                   marginTop: 4,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 14,
-                  color: '#6d7887',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: chat.online ? '#2d9b47' : '#7a8490',
+                }}
+              >
+                {chat.online ? text.online : text.offline}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => router.push('/')}
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: 999,
+              border: '1px solid #e5ddd1',
+              background: '#fff',
+              fontSize: 22,
+              color: '#1f2430',
+              lineHeight: 1,
+              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
+            }}
+          >
+            ⌂
+          </button>
+        </header>
+
+        <section
+          style={{
+            flex: 1,
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+          }}
+        >
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              style={{
+                alignSelf: message.fromMe ? 'flex-end' : 'flex-start',
+                maxWidth: '82%',
+                background: message.fromMe ? '#2f8cff' : '#fff',
+                color: message.fromMe ? '#fff' : '#1f2430',
+                border: message.fromMe ? 'none' : '1px solid #e7e0d6',
+                borderRadius: 22,
+                padding: '12px 14px',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.04)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 16,
+                  lineHeight: 1.45,
+                  fontWeight: 700,
+                  wordBreak: 'break-word',
+                }}
+              >
+                {message.text}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 12,
+                  opacity: 0.72,
+                  textAlign: 'right',
                   fontWeight: 700,
                 }}
               >
-                <span>{thread.category}</span>
-                <span>•</span>
-                <span style={{ color: thread.online ? '#2f9c47' : '#7b848f' }}>
-                  {thread.online ? text.online : thread.lastSeenText || text.offline}
-                </span>
-              </div>
-            </div>
-
-            <button
-              style={{
-                border: 'none',
-                background: '#fff',
-                width: 52,
-                height: 52,
-                borderRadius: 999,
-                fontSize: 24,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                cursor: 'pointer',
-              }}
-            >
-              ⓘ
-            </button>
-          </div>
-        </header>
-
-        <section style={{ padding: '16px 14px 0' }}>
-          {groupedMessages.map((group) => (
-            <div key={group.dayLabel} style={{ marginBottom: 18 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  marginBottom: 12,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 14,
-                    color: '#7f8791',
-                    fontWeight: 700,
-                    background: 'rgba(255,255,255,0.72)',
-                    padding: '6px 12px',
-                    borderRadius: 999,
-                  }}
-                >
-                  {group.dayLabel}
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {group.items.map((message, index) => {
-                  const isMine = message.sender === 'me';
-                  const isLastInGroup = index === group.items.length - 1;
-
-                  return (
-                    <div
-                      key={message.id}
-                      style={{
-                        display: 'flex',
-                        justifyContent: isMine ? 'flex-end' : 'flex-start',
-                      }}
-                    >
-                      <div
-                        style={{
-                          maxWidth: '78%',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: isMine ? 'flex-end' : 'flex-start',
-                        }}
-                      >
-                        <div
-                          style={{
-                            background: isMine ? '#e9f2f1' : '#ffffff',
-                            color: '#2b3138',
-                            borderRadius: 18,
-                            padding: '14px 14px 12px',
-                            boxShadow: '0 3px 10px rgba(0,0,0,0.05)',
-                            border: isMine ? '1px solid #d9e8e6' : '1px solid #ece4d9',
-                            fontSize: 16,
-                            lineHeight: 1.4,
-                          }}
-                        >
-                          {message.text}
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: 6,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            fontSize: 12,
-                            color: '#7d8792',
-                            fontWeight: 700,
-                            flexWrap: 'wrap',
-                          }}
-                        >
-                          <span>{formatChatTime(message.sentAt)}</span>
-
-                          {isMine && (
-                            <span
-                              style={{
-                                color:
-                                  message.status === 'seen'
-                                    ? '#41a3bf'
-                                    : '#93a0ab',
-                                letterSpacing: '-1px',
-                                fontSize: 13,
-                              }}
-                            >
-                              {message.status === 'sent'
-                                ? '✓'
-                                : message.status === 'delivered'
-                                ? '✓✓'
-                                : '✓✓'}
-                            </span>
-                          )}
-
-                          {isMine && message.status === 'seen' && message.seenAt && (
-                            <span>
-                              {text.seen} {formatChatTime(message.seenAt)}
-                            </span>
-                          )}
-                        </div>
-
-                        {isMine && message.status === 'seen' && isLastInGroup && (
-                          <div
-                            style={{
-                              marginTop: 6,
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 6,
-                            }}
-                          >
-                            <img
-                              src={thread.providerAvatar}
-                              alt={thread.providerName}
-                              style={{
-                                width: 18,
-                                height: 18,
-                                borderRadius: 999,
-                                objectFit: 'cover',
-                                display: 'block',
-                              }}
-                            />
-                            <span
-                              style={{
-                                fontSize: 12,
-                                color: '#7d8792',
-                                fontWeight: 700,
-                              }}
-                            >
-                              {text.readBy} {thread.providerName}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                {message.time}
               </div>
             </div>
           ))}
         </section>
-      </div>
 
-      <div
-        style={{
-          position: 'fixed',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(245,243,239,0.98)',
-          borderTop: '1px solid #e4ddd3',
-          backdropFilter: 'blur(12px)',
-          padding: '12px 12px calc(12px + env(safe-area-inset-bottom))',
-        }}
-      >
-        <div style={{ maxWidth: 430, margin: '0 auto' }}>
+        <div
+          style={{
+            position: 'sticky',
+            bottom: 0,
+            background: 'rgba(247,245,241,0.96)',
+            backdropFilter: 'blur(10px)',
+            borderTop: '1px solid #e6dfd5',
+            padding: '12px 16px calc(12px + env(safe-area-inset-bottom))',
+          }}
+        >
           <div
             style={{
               display: 'grid',
@@ -461,33 +402,41 @@ export default function ChatThreadPage() {
             }}
           >
             <input
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              placeholder={text.writeMessage}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder={text.placeholder}
               style={{
                 width: '100%',
-                border: 'none',
-                outline: 'none',
-                background: '#eaf0ef',
-                borderRadius: 16,
-                padding: '16px 16px',
+                height: 54,
+                borderRadius: 18,
+                border: '1px solid #e7e0d6',
+                background: '#fff',
+                padding: '0 16px',
                 fontSize: 16,
-                color: '#2b3138',
+                outline: 'none',
+                boxSizing: 'border-box',
               }}
             />
 
             <button
+              type="button"
               onClick={handleSend}
               style={{
+                height: 54,
                 border: 'none',
-                background: messageText.trim() ? '#2f8f43' : '#cfd8d6',
+                borderRadius: 18,
+                background: '#2f8cff',
                 color: '#fff',
-                borderRadius: 14,
-                padding: '14px 18px',
-                fontSize: 16,
-                fontWeight: 800,
-                minWidth: 76,
-                cursor: 'pointer',
+                padding: '0 18px',
+                fontSize: 15,
+                fontWeight: 900,
+                boxShadow: '0 8px 18px rgba(47,140,255,0.22)',
               }}
             >
               {text.send}
