@@ -184,20 +184,34 @@ function mapCategoryToId(category: string) {
   return found?.id || normalized || 'beauty';
 }
 
-function listingToMaster(listing: ListingItem, index: number) {
-  const fallbackCoords: [number, number][] = [
-    [51.5074, -0.1278],
-    [51.5134, -0.0915],
-    [51.5007, -0.1246],
-    [51.5202, -0.1028],
-    [51.4955, -0.1722],
-    [51.5308, -0.1238],
-    [51.5098, -0.118],
-    [51.5159, -0.1426],
+function listingToMaster(
+  listing: ListingItem,
+  index: number,
+  baseLocation: { lat: number; lng: number }
+) {
+  const offsets: [number, number][] = [
+    [0.012, -0.01],
+    [0.018, 0.014],
+    [-0.016, 0.011],
+    [0.021, -0.018],
+    [-0.013, -0.015],
+    [0.009, 0.022],
+    [-0.02, 0.006],
+    [0.015, -0.024],
   ];
 
-  const coords = fallbackCoords[index % fallbackCoords.length];
+  const [latOffset, lngOffset] = offsets[index % offsets.length];
   const categoryId = mapCategoryToId(listing.category);
+
+  const lat =
+    typeof (listing as any).lat === 'number'
+      ? (listing as any).lat
+      : Number(baseLocation.lat || 51.5074) + latOffset;
+
+  const lng =
+    typeof (listing as any).lng === 'number'
+      ? (listing as any).lng
+      : Number(baseLocation.lng || -0.1278) + lngOffset;
 
   return {
     id: listing.id,
@@ -205,12 +219,12 @@ function listingToMaster(listing: ListingItem, index: number) {
     title: listing.title,
     category: categoryId,
     subcategory: listing.subcategory || '',
-    city: listing.location || 'London',
+    city: listing.location || 'Selected region',
     rating: 4.8,
     availableToday: listing.availableToday,
     availableNow: listing.availableToday,
-    lat: coords[0],
-    lng: coords[1],
+    lat,
+    lng,
     avatar:
       listing.photos?.[0] ||
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
@@ -764,8 +778,13 @@ export default function HomePage() {
   }, [promotions]);
 
   const listingMasters = useMemo(() => {
-    return listings.map((item, index) => listingToMaster(item, index));
-  }, [listings]);
+    return listings.map((item, index) =>
+      listingToMaster(item, index, {
+        lat: searchLocation.lat,
+        lng: searchLocation.lng,
+      })
+    );
+  }, [listings, searchLocation.lat, searchLocation.lng]);
 
   const allMasters = useMemo(() => {
     return [...listingMasters, ...baseMasters];
