@@ -1,3 +1,5 @@
+import type { AppLanguage } from './i18n';
+
 export type AppCurrency =
   | 'GBP'
   | 'EUR'
@@ -13,7 +15,7 @@ export type AppCurrency =
 export type SearchLocationMode = 'current' | 'custom';
 
 export type AppRegionSettings = {
-  language: 'EN' | 'ES' | 'RU' | 'CZ' | 'DE' | 'PL';
+  language: AppLanguage;
   region: string;
   currency: AppCurrency;
   locationMode: SearchLocationMode;
@@ -81,6 +83,8 @@ export const regionOptions = [
   'Ukraine',
   'United States',
   'United Arab Emirates',
+  'Italy',
+  'France',
 ] as const;
 
 export const currencyOptions: AppCurrency[] = [
@@ -104,18 +108,27 @@ function emitChange() {
   listeners.forEach((listener) => listener());
 }
 
+function isValidLanguage(value: unknown): value is AppLanguage {
+  return (
+    value === 'EN' ||
+    value === 'ES' ||
+    value === 'RU' ||
+    value === 'UA' ||
+    value === 'CZ' ||
+    value === 'DE' ||
+    value === 'IT' ||
+    value === 'FR' ||
+    value === 'AR' ||
+    value === 'PL'
+  );
+}
+
 function normalizeSettings(
   value: Partial<AppRegionSettings> | null | undefined
 ): AppRegionSettings {
-  const language =
-    value?.language === 'EN' ||
-    value?.language === 'ES' ||
-    value?.language === 'RU' ||
-    value?.language === 'CZ' ||
-    value?.language === 'DE' ||
-    value?.language === 'PL'
-      ? value.language
-      : defaultSettings.language;
+  const language = isValidLanguage(value?.language)
+    ? value!.language
+    : defaultSettings.language;
 
   const currency =
     value?.currency && currencyOptions.includes(value.currency)
@@ -192,9 +205,7 @@ export function getAppRegionSettings() {
   return readStore();
 }
 
-export function updateAppRegionSettings(
-  updates: Partial<AppRegionSettings>
-) {
+export function updateAppRegionSettings(updates: Partial<AppRegionSettings>) {
   const current = readStore();
 
   const next = normalizeSettings({
@@ -285,10 +296,7 @@ export function getEffectiveSearchLocation() {
   };
 }
 
-export function formatCurrencyAmount(
-  amount: number,
-  currency: AppCurrency
-) {
+export function formatCurrencyAmount(amount: number, currency: AppCurrency) {
   const meta = currencyMeta[currency] || currencyMeta.GBP;
 
   if (!Number.isFinite(amount)) {
