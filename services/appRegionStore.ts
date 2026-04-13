@@ -1,4 +1,4 @@
-import type { AppLanguage } from './i18n';
+import { isAppLanguage, type AppLanguage } from './i18n';
 
 export type AppCurrency =
   | 'GBP'
@@ -108,31 +108,14 @@ function emitChange() {
   listeners.forEach((listener) => listener());
 }
 
-function isValidLanguage(value: unknown): value is AppLanguage {
-  return (
-    value === 'EN' ||
-    value === 'ES' ||
-    value === 'RU' ||
-    value === 'UA' ||
-    value === 'CZ' ||
-    value === 'DE' ||
-    value === 'IT' ||
-    value === 'FR' ||
-    value === 'AR' ||
-    value === 'PL'
-  );
-}
-
 function normalizeSettings(
   value: Partial<AppRegionSettings> | null | undefined
 ): AppRegionSettings {
-  const language = isValidLanguage(value?.language)
-    ? value!.language
-    : defaultSettings.language;
+  const language = isAppLanguage(value?.language) ? value!.language : defaultSettings.language;
 
   const currency =
-    value?.currency && currencyOptions.includes(value.currency)
-      ? value.currency
+    value?.currency && currencyOptions.includes(value.currency as AppCurrency)
+      ? (value.currency as AppCurrency)
       : defaultSettings.currency;
 
   const locationMode =
