@@ -9,26 +9,24 @@ import {
   type AppLanguage,
 } from '../../../services/i18n';
 
-const pageTexts: Record<
-  AppLanguage,
-  {
-    notFound: string;
-    gallery: string;
-    bookNow: string;
-    availableNow: string;
-    offlineNow: string;
-    from: string;
-    trustedByClients: string;
-    verifiedReviews: string;
-    startingPrice: string;
-    priceList: string;
-    premiumService: string;
-    book: string;
-    close: string;
-  }
-> = {
+const pageTexts = {
   EN: {
     notFound: 'Master not found',
+    gallery: 'Gallery',
+    bookNow: 'Book now',
+    availableNow: 'Available now',
+    offlineNow: 'Offline now',
+    from: 'from',
+    trustedByClients: 'Trusted by clients',
+    verifiedReviews: 'verified reviews',
+    startingPrice: 'Starting price',
+    priceList: 'Price list',
+    premiumService: 'Premium service with professional result',
+    book: 'Book',
+    close: 'Close',
+  },
+  ES: {
+    notFound: 'Professional not found',
     gallery: 'Gallery',
     bookNow: 'Book now',
     availableNow: 'Available now',
@@ -56,21 +54,6 @@ const pageTexts: Record<
     premiumService: 'Премиум услуга с профессиональным результатом',
     book: 'Бронь',
     close: 'Закрыть',
-  },
-  ES: {
-    notFound: 'Profesional no encontrado',
-    gallery: 'Galería',
-    bookNow: 'Reservar',
-    availableNow: 'Disponible ahora',
-    offlineNow: 'Ahora no disponible',
-    from: 'desde',
-    trustedByClients: 'Clientes confían',
-    verifiedReviews: 'reseñas verificadas',
-    startingPrice: 'Precio inicial',
-    priceList: 'Lista de precios',
-    premiumService: 'Servicio premium con resultado profesional',
-    book: 'Reservar',
-    close: 'Cerrar',
   },
   CZ: {
     notFound: 'Specialista nenalezen',
@@ -117,36 +100,51 @@ const pageTexts: Record<
     book: 'Rezerwuj',
     close: 'Zamknij',
   },
-};
+} as const;
+
+function getTexts(language: AppLanguage) {
+  return pageTexts[language as keyof typeof pageTexts] || pageTexts.EN;
+}
 
 export default function MasterPage() {
   const params = useParams();
   const router = useRouter();
-  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
 
-  useEffect(() => {
-    setLanguage(getSavedLanguage());
-
-    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
-      setLanguage(nextLanguage);
-    });
-
-    return () => {
-      unsubLanguage();
-    };
-  }, []);
-
-  const text = pageTexts[language] || pageTexts.EN;
-  const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
-
+  const [language, setLanguage] = useState<AppLanguage>('EN');
   const [liked, setLiked] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+  useEffect(() => {
+    setLanguage(getSavedLanguage());
+
+    const unsubscribe = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const text = useMemo(() => getTexts(language), [language]);
+  const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
+
   if (!master) {
-    return <main style={{ padding: 24 }}>{text.notFound}</main>;
+    return (
+      <main
+        style={{
+          minHeight: '100vh',
+          background: '#f7f4ee',
+          padding: 24,
+          color: '#17130f',
+          fontSize: 18,
+          fontWeight: 800,
+        }}
+      >
+        {text.notFound}
+      </main>
+    );
   }
 
   const previewImages = master.gallery.slice(0, 3);
@@ -179,65 +177,57 @@ export default function MasterPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fcf8f2',
-        fontFamily: 'Arial, sans-serif',
-        color: '#1d1712',
+        background: '#f7f4ee',
+        color: '#17130f',
         paddingBottom: 110,
       }}
     >
-      <div style={{ maxWidth: 420, margin: '0 auto' }}>
+      <div style={{ maxWidth: 430, margin: '0 auto' }}>
         <div style={{ position: 'relative' }}>
           <img
             src={master.cover}
             alt={master.name}
             style={{
               width: '100%',
-              height: 405,
+              height: 420,
               objectFit: 'cover',
               display: 'block',
             }}
           />
 
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'rgba(255,255,255,0.16)',
-              pointerEvents: 'none',
-            }}
-          />
-
           <button
+            type="button"
             onClick={() => router.back()}
             style={{
               position: 'absolute',
-              top: 20,
+              top: 18,
               left: 16,
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid rgba(239,230,218,0.95)',
+              border: '1.5px solid #1d1d1d',
               background: 'rgba(255,255,255,0.96)',
-              fontSize: 24,
-              zIndex: 5,
+              fontSize: 26,
+              cursor: 'pointer',
             }}
           >
             ←
           </button>
 
           <button
+            type="button"
             onClick={() => router.push('/')}
             style={{
               position: 'absolute',
-              top: 20,
+              top: 18,
               right: 16,
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid rgba(239,230,218,0.95)',
+              border: '1.5px solid #1d1d1d',
               background: 'rgba(255,255,255,0.96)',
-              fontSize: 22,
-              zIndex: 5,
+              fontSize: 24,
+              cursor: 'pointer',
             }}
           >
             ⌂
@@ -246,12 +236,11 @@ export default function MasterPage() {
           <div
             style={{
               position: 'absolute',
+              top: 110,
               left: 16,
-              top: 112,
               display: 'flex',
               flexDirection: 'column',
               gap: 10,
-              zIndex: 4,
             }}
           >
             {previewImages.map((image, index) => {
@@ -259,23 +248,25 @@ export default function MasterPage() {
 
               return (
                 <button
-                  key={index}
+                  key={`${image}-${index}`}
+                  type="button"
                   onClick={() => openViewer(index)}
                   style={{
-                    width: 78,
-                    height: 78,
+                    width: 80,
+                    height: 80,
                     padding: 0,
-                    border: '2px solid rgba(255,255,255,0.9)',
-                    borderRadius: 16,
+                    border: '2px solid #ffffff',
+                    borderRadius: 18,
                     overflow: 'hidden',
                     background: '#fff',
                     position: 'relative',
                     boxShadow: '0 10px 24px rgba(0,0,0,0.16)',
+                    cursor: 'pointer',
                   }}
                 >
                   <img
                     src={image}
-                    alt={`${master.name} ${index + 1}`}
+                    alt={`${master.name}-${index + 1}`}
                     style={{
                       width: '100%',
                       height: '100%',
@@ -284,12 +275,12 @@ export default function MasterPage() {
                     }}
                   />
 
-                  {isLast && (
+                  {isLast ? (
                     <div
                       style={{
                         position: 'absolute',
                         inset: 0,
-                        background: 'rgba(0,0,0,0.32)',
+                        background: 'rgba(0,0,0,0.34)',
                         display: 'flex',
                         alignItems: 'flex-end',
                         justifyContent: 'flex-end',
@@ -301,29 +292,31 @@ export default function MasterPage() {
                     >
                       +{extraCount}
                     </div>
-                  )}
+                  ) : null}
                 </button>
               );
             })}
 
             <button
+              type="button"
               onClick={() => setGalleryOpen(true)}
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: 10,
-                border: 'none',
-                background: 'rgba(255,255,255,0.96)',
-                color: '#1d1712',
+                width: 'fit-content',
+                border: '1.5px solid #1d1d1d',
+                background: '#fff',
+                color: '#17130f',
                 borderRadius: 18,
                 padding: '12px 16px',
-                fontWeight: 800,
+                fontWeight: 900,
                 fontSize: 17,
-                boxShadow: '0 10px 24px rgba(0,0,0,0.16)',
-                width: 'fit-content',
+                boxShadow: '0 10px 24px rgba(0,0,0,0.12)',
+                cursor: 'pointer',
               }}
             >
-              <span style={{ fontSize: 24, lineHeight: 1 }}>📷</span>
+              <span style={{ fontSize: 22 }}>📷</span>
               <span>{text.gallery}</span>
             </button>
           </div>
@@ -331,16 +324,16 @@ export default function MasterPage() {
           <div
             style={{
               position: 'absolute',
-              top: 86,
+              top: 92,
               right: 16,
               display: 'flex',
               flexDirection: 'column',
-              gap: 10,
               alignItems: 'center',
-              zIndex: 4,
+              gap: 10,
             }}
           >
             <button
+              type="button"
               onClick={() => setAvatarOpen(true)}
               style={{
                 position: 'relative',
@@ -348,6 +341,7 @@ export default function MasterPage() {
                 border: 'none',
                 background: 'transparent',
                 borderRadius: 999,
+                cursor: 'pointer',
               }}
             >
               <img
@@ -373,17 +367,17 @@ export default function MasterPage() {
                   position: 'absolute',
                   right: -4,
                   bottom: -2,
-                  width: 28,
-                  height: 28,
+                  width: 30,
+                  height: 30,
                   borderRadius: 999,
                   background: '#fff',
-                  border: '1px solid #e7ddd0',
+                  border: '1.5px solid #1d1d1d',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: '0 6px 14px rgba(0,0,0,0.12)',
                   color: liked ? '#d73737' : '#333',
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: 700,
                   cursor: 'pointer',
                 }}
@@ -396,10 +390,11 @@ export default function MasterPage() {
               style={{
                 background: '#efe3cf',
                 color: '#5c4a34',
+                border: '1.5px solid #1d1d1d',
                 borderRadius: 16,
                 padding: '10px 14px',
-                fontWeight: 800,
-                minWidth: 72,
+                fontWeight: 900,
+                minWidth: 76,
                 textAlign: 'center',
                 fontSize: 16,
                 boxShadow: '0 8px 18px rgba(0,0,0,0.10)',
@@ -410,19 +405,20 @@ export default function MasterPage() {
           </div>
 
           <button
+            type="button"
             onClick={() => router.push(`/booking/${master.id}`)}
             style={{
               position: 'absolute',
               right: 16,
-              bottom: 28,
-              border: 'none',
+              bottom: 26,
+              border: '1.5px solid #1d1d1d',
               background: '#2e9746',
               color: '#fff',
               borderRadius: 22,
               padding: '18px 28px',
-              fontWeight: 800,
+              fontWeight: 900,
               fontSize: 18,
-              zIndex: 4,
+              cursor: 'pointer',
               boxShadow: '0 12px 26px rgba(46,151,70,0.25)',
             }}
           >
@@ -431,9 +427,24 @@ export default function MasterPage() {
         </div>
 
         <section style={{ padding: 24 }}>
-          <div style={{ fontSize: 34, fontWeight: 800 }}>{master.name}</div>
+          <div
+            style={{
+              fontSize: 34,
+              fontWeight: 900,
+              lineHeight: 1.1,
+            }}
+          >
+            {master.name}
+          </div>
 
-          <div style={{ marginTop: 10, fontSize: 18, color: '#7a7066' }}>
+          <div
+            style={{
+              marginTop: 10,
+              fontSize: 18,
+              color: '#7a7066',
+              fontWeight: 700,
+            }}
+          >
             {master.title} • {master.city}
           </div>
 
@@ -441,18 +452,20 @@ export default function MasterPage() {
             style={{
               display: 'flex',
               justifyContent: 'space-between',
-              marginTop: 18,
-              gap: 12,
               alignItems: 'center',
+              gap: 12,
+              marginTop: 18,
             }}
           >
             <div
               style={{
-                background: '#f2ebe1',
-                color: '#7d756c',
+                background: master.availableNow ? '#dff2e3' : '#f2ebe1',
+                color: master.availableNow ? '#1d7a38' : '#7d756c',
+                border: '1.5px solid #1d1d1d',
                 borderRadius: 999,
                 padding: '12px 18px',
-                fontWeight: 700,
+                fontWeight: 900,
+                fontSize: 15,
               }}
             >
               {master.availableNow ? text.availableNow : text.offlineNow}
@@ -462,9 +475,11 @@ export default function MasterPage() {
               style={{
                 background: '#3a2b20',
                 color: '#fff',
+                border: '1.5px solid #1d1d1d',
                 borderRadius: 999,
                 padding: '12px 20px',
-                fontWeight: 800,
+                fontWeight: 900,
+                fontSize: 17,
               }}
             >
               {text.from} £{master.priceFrom}
@@ -477,29 +492,32 @@ export default function MasterPage() {
               fontSize: 18,
               color: '#5d554d',
               lineHeight: 1.5,
+              fontWeight: 600,
             }}
           >
             {master.description}
           </p>
 
           <button
+            type="button"
             onClick={() => router.push(`/master/${master.id}/reviews`)}
             style={{
               width: '100%',
               marginTop: 22,
-              border: '1px solid #e6dacb',
+              border: '1.5px solid #1d1d1d',
               background: '#fffdf9',
               borderRadius: 24,
               padding: '18px 18px 20px',
               boxShadow: '0 8px 22px rgba(0,0,0,0.04)',
               textAlign: 'left',
+              cursor: 'pointer',
             }}
           >
             <div
               style={{
                 fontSize: 15,
                 color: '#7a7066',
-                fontWeight: 700,
+                fontWeight: 800,
                 marginBottom: 14,
               }}
             >
@@ -582,7 +600,7 @@ export default function MasterPage() {
                 <div
                   style={{
                     color: '#2d9b47',
-                    fontWeight: 800,
+                    fontWeight: 900,
                     fontSize: 16,
                     lineHeight: 1.2,
                   }}
@@ -605,7 +623,7 @@ export default function MasterPage() {
                   style={{
                     fontSize: 15,
                     color: '#7a7066',
-                    fontWeight: 700,
+                    fontWeight: 800,
                   }}
                 >
                   {text.startingPrice}
@@ -625,7 +643,16 @@ export default function MasterPage() {
             </div>
           </button>
 
-          <h2 style={{ marginTop: 28, fontSize: 30 }}>{text.priceList}</h2>
+          <h2
+            style={{
+              marginTop: 28,
+              fontSize: 30,
+              fontWeight: 900,
+              lineHeight: 1.15,
+            }}
+          >
+            {text.priceList}
+          </h2>
 
           <div
             style={{
@@ -640,7 +667,7 @@ export default function MasterPage() {
                 key={service.slug}
                 style={{
                   background: '#fff',
-                  border: '1px solid #e7ddd0',
+                  border: '1.5px solid #1d1d1d',
                   borderRadius: 26,
                   padding: 14,
                   boxShadow: '0 8px 22px rgba(0,0,0,0.04)',
@@ -670,7 +697,7 @@ export default function MasterPage() {
                     <div
                       style={{
                         fontSize: 22,
-                        fontWeight: 800,
+                        fontWeight: 900,
                         lineHeight: 1.2,
                       }}
                     >
@@ -682,7 +709,7 @@ export default function MasterPage() {
                         marginTop: 8,
                         color: '#7b7168',
                         fontSize: 16,
-                        fontWeight: 600,
+                        fontWeight: 700,
                       }}
                     >
                       {service.duration}
@@ -696,13 +723,14 @@ export default function MasterPage() {
                         gap: 8,
                         background: '#f7f1e7',
                         color: '#231b15',
+                        border: '1.5px solid #1d1d1d',
                         borderRadius: 999,
                         padding: '8px 12px',
                         fontSize: 16,
-                        fontWeight: 800,
+                        fontWeight: 900,
                       }}
                     >
-                      <span style={{ color: '#7a7066', fontWeight: 700 }}>
+                      <span style={{ color: '#7a7066', fontWeight: 800 }}>
                         {text.from}
                       </span>
                       <span>£{service.price}</span>
@@ -724,25 +752,28 @@ export default function MasterPage() {
                       color: '#7b7168',
                       fontSize: 15,
                       lineHeight: 1.35,
+                      fontWeight: 700,
                     }}
                   >
                     {text.premiumService}
                   </div>
 
                   <button
+                    type="button"
                     onClick={() =>
                       router.push(`/booking/${master.id}?service=${service.slug}`)
                     }
                     style={{
-                      border: 'none',
+                      border: '1.5px solid #1d1d1d',
                       background: '#2e9746',
                       color: '#fff',
                       borderRadius: 18,
                       padding: '14px 20px',
-                      fontWeight: 800,
+                      fontWeight: 900,
                       fontSize: 16,
                       minWidth: 96,
                       boxShadow: '0 10px 22px rgba(46,151,70,0.18)',
+                      cursor: 'pointer',
                     }}
                   >
                     {text.book}
@@ -754,7 +785,7 @@ export default function MasterPage() {
         </section>
       </div>
 
-      {galleryOpen && (
+      {galleryOpen ? (
         <div
           onClick={() => setGalleryOpen(false)}
           style={{
@@ -784,22 +815,25 @@ export default function MasterPage() {
               }}
             >
               <button
+                type="button"
                 onClick={() => setGalleryOpen(false)}
                 style={{
                   width: 46,
                   height: 46,
                   borderRadius: 999,
-                  border: '1px solid #e3d9cc',
+                  border: '1.5px solid #1d1d1d',
                   background: '#fff',
                   fontSize: 24,
+                  cursor: 'pointer',
                 }}
               >
                 ✕
               </button>
 
-              <div style={{ fontSize: 22, fontWeight: 800 }}>{text.gallery}</div>
+              <div style={{ fontSize: 22, fontWeight: 900 }}>{text.gallery}</div>
 
               <button
+                type="button"
                 onClick={() => {
                   closeEverything();
                   router.push('/');
@@ -808,9 +842,10 @@ export default function MasterPage() {
                   width: 46,
                   height: 46,
                   borderRadius: 999,
-                  border: '1px solid #e3d9cc',
+                  border: '1.5px solid #1d1d1d',
                   background: '#fff',
                   fontSize: 22,
+                  cursor: 'pointer',
                 }}
               >
                 ⌂
@@ -827,17 +862,19 @@ export default function MasterPage() {
             >
               {master.gallery.map((image, index) => (
                 <button
-                  key={index}
+                  key={`${image}-${index}`}
+                  type="button"
                   onClick={() => openViewer(index)}
                   style={{
                     padding: 0,
                     border: 'none',
                     background: 'transparent',
+                    cursor: 'pointer',
                   }}
                 >
                   <img
                     src={image}
-                    alt={`${master.name} ${index + 1}`}
+                    alt={`${master.name}-${index + 1}`}
                     style={{
                       width: '100%',
                       aspectRatio: '1 / 1',
@@ -851,9 +888,9 @@ export default function MasterPage() {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
-      {viewerOpen && (
+      {viewerOpen ? (
         <div
           onClick={() => setViewerOpen(false)}
           style={{
@@ -888,6 +925,7 @@ export default function MasterPage() {
               }}
             >
               <button
+                type="button"
                 onClick={() => setViewerOpen(false)}
                 style={{
                   width: 52,
@@ -897,12 +935,14 @@ export default function MasterPage() {
                   background: 'rgba(255,255,255,0.14)',
                   color: '#fff',
                   fontSize: 28,
+                  cursor: 'pointer',
                 }}
               >
                 ✕
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   closeEverything();
                   router.push('/');
@@ -915,6 +955,7 @@ export default function MasterPage() {
                   background: 'rgba(255,255,255,0.14)',
                   color: '#fff',
                   fontSize: 22,
+                  cursor: 'pointer',
                 }}
               >
                 ⌂
@@ -932,7 +973,7 @@ export default function MasterPage() {
             >
               <img
                 src={master.gallery[selectedImageIndex]}
-                alt={`${master.name} ${selectedImageIndex + 1}`}
+                alt={`${master.name}-${selectedImageIndex + 1}`}
                 style={{
                   width: '100%',
                   maxWidth: 380,
@@ -946,9 +987,10 @@ export default function MasterPage() {
                 }}
               />
 
-              {master.gallery.length > 1 && (
+              {master.gallery.length > 1 ? (
                 <>
                   <button
+                    type="button"
                     onClick={prevImage}
                     style={{
                       position: 'absolute',
@@ -962,12 +1004,14 @@ export default function MasterPage() {
                       background: 'rgba(0,0,0,0.42)',
                       color: '#fff',
                       fontSize: 28,
+                      cursor: 'pointer',
                     }}
                   >
                     ‹
                   </button>
 
                   <button
+                    type="button"
                     onClick={nextImage}
                     style={{
                       position: 'absolute',
@@ -981,12 +1025,13 @@ export default function MasterPage() {
                       background: 'rgba(0,0,0,0.42)',
                       color: '#fff',
                       fontSize: 28,
+                      cursor: 'pointer',
                     }}
                   >
                     ›
                   </button>
                 </>
-              )}
+              ) : null}
             </div>
 
             <div
@@ -994,7 +1039,7 @@ export default function MasterPage() {
                 marginTop: 14,
                 textAlign: 'center',
                 color: '#fff',
-                fontWeight: 700,
+                fontWeight: 800,
                 fontSize: 16,
               }}
             >
@@ -1002,9 +1047,9 @@ export default function MasterPage() {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
-      {avatarOpen && (
+      {avatarOpen ? (
         <div
           onClick={() => setAvatarOpen(false)}
           style={{
@@ -1039,6 +1084,7 @@ export default function MasterPage() {
               }}
             >
               <button
+                type="button"
                 onClick={() => setAvatarOpen(false)}
                 style={{
                   width: 52,
@@ -1048,12 +1094,14 @@ export default function MasterPage() {
                   background: 'rgba(255,255,255,0.14)',
                   color: '#fff',
                   fontSize: 28,
+                  cursor: 'pointer',
                 }}
               >
                 ✕
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   closeEverything();
                   router.push('/');
@@ -1066,6 +1114,7 @@ export default function MasterPage() {
                   background: 'rgba(255,255,255,0.14)',
                   color: '#fff',
                   fontSize: 22,
+                  cursor: 'pointer',
                 }}
               >
                 ⌂
@@ -1098,7 +1147,7 @@ export default function MasterPage() {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </main>
   );
 }
