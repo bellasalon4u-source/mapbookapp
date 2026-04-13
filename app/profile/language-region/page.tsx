@@ -65,6 +65,8 @@ const pageTexts = {
     kyivEurope: 'Kyiv · Europe',
     newYorkNA: 'New York · North America',
     dubaiME: 'Dubai · Middle East',
+    romeEurope: 'Rome · Europe',
+    parisEurope: 'Paris · Europe',
   },
   ES: {
     title: 'Idioma y región',
@@ -101,6 +103,8 @@ const pageTexts = {
     kyivEurope: 'Kyiv · Europa',
     newYorkNA: 'Nueva York · Norteamérica',
     dubaiME: 'Dubái · Oriente Medio',
+    romeEurope: 'Roma · Europa',
+    parisEurope: 'París · Europa',
   },
   RU: {
     title: 'Язык и регион',
@@ -137,6 +141,46 @@ const pageTexts = {
     kyivEurope: 'Киев · Европа',
     newYorkNA: 'Нью-Йорк · Северная Америка',
     dubaiME: 'Дубай · Ближний Восток',
+    romeEurope: 'Рим · Европа',
+    parisEurope: 'Париж · Европа',
+  },
+  UA: {
+    title: 'Мова і регіон',
+    subtitle: 'Мова застосунку, країна, валюта та режим локації',
+    save: 'Зберегти',
+    languageSection: 'Мови застосунку',
+    regionSection: 'Країни / регіони',
+    currencySection: 'Валюта',
+    locationSection: 'Локація',
+    useCurrentLocation: 'Використовувати поточну локацію',
+    currentLocationHint: 'Використовувати GPS телефону для пошуку та карти',
+    useRegionLocation: 'Використовувати вибраний регіон',
+    regionLocationHint: 'Шукати поруч із центром вибраної країни або регіону',
+    locationLoading: 'Визначаємо поточну локацію...',
+    locationSuccess: 'Поточну локацію вибрано',
+    locationError: 'Не вдалося визначити локацію',
+    saved: 'Налаштування збережено',
+    selected: 'Вибрано',
+    languageApp: 'Мова застосунку',
+    overview: 'Поточна конфігурація',
+    livePreview: 'Попередній перегляд',
+    britishPound: 'Британський фунт',
+    euro: 'Євро',
+    usDollar: 'Долар США',
+    polishZloty: 'Польський злотий',
+    czechKoruna: 'Чеська крона',
+    ukrainianHryvnia: 'Українська гривня',
+    uaeDirham: 'Дирхам ОАЕ',
+    londonEurope: 'Лондон · Європа',
+    madridEurope: 'Мадрид · Європа',
+    pragueEurope: 'Прага · Європа',
+    berlinEurope: 'Берлін · Європа',
+    warsawEurope: 'Варшава · Європа',
+    kyivEurope: 'Київ · Європа',
+    newYorkNA: 'Нью-Йорк · Північна Америка',
+    dubaiME: 'Дубай · Близький Схід',
+    romeEurope: 'Рим · Європа',
+    parisEurope: 'Париж · Європа',
   },
   CZ: {
     title: 'Jazyk a region',
@@ -173,6 +217,8 @@ const pageTexts = {
     kyivEurope: 'Kyjev · Evropa',
     newYorkNA: 'New York · Severní Amerika',
     dubaiME: 'Dubaj · Blízký východ',
+    romeEurope: 'Řím · Evropa',
+    parisEurope: 'Paříž · Evropa',
   },
   DE: {
     title: 'Sprache & Region',
@@ -209,6 +255,122 @@ const pageTexts = {
     kyivEurope: 'Kyjiw · Europa',
     newYorkNA: 'New York · Nordamerika',
     dubaiME: 'Dubai · Naher Osten',
+    romeEurope: 'Rom · Europa',
+    parisEurope: 'Paris · Europa',
+  },
+  IT: {
+    title: 'Lingua e regione',
+    subtitle: 'Lingua app, paese, valuta e modalità posizione',
+    save: 'Salva',
+    languageSection: 'Lingue disponibili nell’app',
+    regionSection: 'Paesi / regioni',
+    currencySection: 'Valuta',
+    locationSection: 'Posizione',
+    useCurrentLocation: 'Usa posizione attuale',
+    currentLocationHint: 'Usa il GPS del dispositivo per ricerca e mappa',
+    useRegionLocation: 'Usa regione selezionata',
+    regionLocationHint: 'Cerca vicino al centro del paese o regione selezionati',
+    locationLoading: 'Recupero posizione attuale...',
+    locationSuccess: 'Posizione attuale selezionata',
+    locationError: 'Impossibile ottenere la posizione',
+    saved: 'Impostazioni salvate',
+    selected: 'Selezionato',
+    languageApp: 'Lingua app',
+    overview: 'Configurazione attuale',
+    livePreview: 'Anteprima',
+    britishPound: 'Sterlina britannica',
+    euro: 'Euro',
+    usDollar: 'Dollaro USA',
+    polishZloty: 'Zloty polacco',
+    czechKoruna: 'Corona ceca',
+    ukrainianHryvnia: 'Grivnia ucraina',
+    uaeDirham: 'Dirham EAU',
+    londonEurope: 'Londra · Europa',
+    madridEurope: 'Madrid · Europa',
+    pragueEurope: 'Praga · Europa',
+    berlinEurope: 'Berlino · Europa',
+    warsawEurope: 'Varsavia · Europa',
+    kyivEurope: 'Kyiv · Europa',
+    newYorkNA: 'New York · Nord America',
+    dubaiME: 'Dubai · Medio Oriente',
+    romeEurope: 'Roma · Europa',
+    parisEurope: 'Parigi · Europa',
+  },
+  FR: {
+    title: 'Langue et région',
+    subtitle: 'Langue de l’app, pays, devise et mode de localisation',
+    save: 'Enregistrer',
+    languageSection: 'Langues disponibles dans l’app',
+    regionSection: 'Pays / régions',
+    currencySection: 'Devise',
+    locationSection: 'Localisation',
+    useCurrentLocation: 'Utiliser la position actuelle',
+    currentLocationHint: 'Utiliser le GPS de votre appareil pour la recherche et la carte',
+    useRegionLocation: 'Utiliser la région sélectionnée',
+    regionLocationHint: 'Rechercher près du centre du pays ou de la région sélectionnée',
+    locationLoading: 'Récupération de la position actuelle...',
+    locationSuccess: 'Position actuelle sélectionnée',
+    locationError: 'Impossible d’obtenir la position',
+    saved: 'Paramètres enregistrés',
+    selected: 'Sélectionné',
+    languageApp: 'Langue de l’app',
+    overview: 'Configuration actuelle',
+    livePreview: 'Aperçu',
+    britishPound: 'Livre sterling',
+    euro: 'Euro',
+    usDollar: 'Dollar américain',
+    polishZloty: 'Zloty polonais',
+    czechKoruna: 'Couronne tchèque',
+    ukrainianHryvnia: 'Hryvnia ukrainienne',
+    uaeDirham: 'Dirham EAU',
+    londonEurope: 'Londres · Europe',
+    madridEurope: 'Madrid · Europe',
+    pragueEurope: 'Prague · Europe',
+    berlinEurope: 'Berlin · Europe',
+    warsawEurope: 'Varsovie · Europe',
+    kyivEurope: 'Kyiv · Europe',
+    newYorkNA: 'New York · Amérique du Nord',
+    dubaiME: 'Dubaï · Moyen-Orient',
+    romeEurope: 'Rome · Europe',
+    parisEurope: 'Paris · Europe',
+  },
+  AR: {
+    title: 'اللغة والمنطقة',
+    subtitle: 'لغة التطبيق والدولة والعملة ووضع الموقع',
+    save: 'حفظ',
+    languageSection: 'اللغات المتاحة في التطبيق',
+    regionSection: 'الدول / المناطق',
+    currencySection: 'العملة',
+    locationSection: 'الموقع',
+    useCurrentLocation: 'استخدام الموقع الحالي',
+    currentLocationHint: 'استخدام GPS الجهاز للبحث والخريطة',
+    useRegionLocation: 'استخدام المنطقة المحددة',
+    regionLocationHint: 'البحث بالقرب من مركز الدولة أو المنطقة المحددة',
+    locationLoading: 'جارٍ تحديد الموقع الحالي...',
+    locationSuccess: 'تم اختيار الموقع الحالي',
+    locationError: 'تعذر تحديد الموقع',
+    saved: 'تم حفظ الإعدادات',
+    selected: 'تم الاختيار',
+    languageApp: 'لغة التطبيق',
+    overview: 'الإعداد الحالي',
+    livePreview: 'معاينة',
+    britishPound: 'الجنيه البريطاني',
+    euro: 'اليورو',
+    usDollar: 'الدولار الأمريكي',
+    polishZloty: 'الزلوتي البولندي',
+    czechKoruna: 'الكرونة التشيكية',
+    ukrainianHryvnia: 'الهريفنيا الأوكرانية',
+    uaeDirham: 'الدرهم الإماراتي',
+    londonEurope: 'لندن · أوروبا',
+    madridEurope: 'مدريد · أوروبا',
+    pragueEurope: 'براغ · أوروبا',
+    berlinEurope: 'برلين · أوروبا',
+    warsawEurope: 'وارسو · أوروبا',
+    kyivEurope: 'كييف · أوروبا',
+    newYorkNA: 'نيويورك · أمريكا الشمالية',
+    dubaiME: 'دبي · الشرق الأوسط',
+    romeEurope: 'روما · أوروبا',
+    parisEurope: 'باريس · أوروبا',
   },
   PL: {
     title: 'Język i region',
@@ -245,56 +407,25 @@ const pageTexts = {
     kyivEurope: 'Kijów · Europa',
     newYorkNA: 'Nowy Jork · Ameryka Północna',
     dubaiME: 'Dubaj · Bliski Wschód',
+    romeEurope: 'Rzym · Europa',
+    parisEurope: 'Paryż · Europa',
   },
 } as const;
 
-type PageText = {
-  title: string;
-  subtitle: string;
-  save: string;
-  languageSection: string;
-  regionSection: string;
-  currencySection: string;
-  locationSection: string;
-  useCurrentLocation: string;
-  currentLocationHint: string;
-  useRegionLocation: string;
-  regionLocationHint: string;
-  locationLoading: string;
-  locationSuccess: string;
-  locationError: string;
-  saved: string;
-  selected: string;
-  languageApp: string;
-  overview: string;
-  livePreview: string;
-  britishPound: string;
-  euro: string;
-  usDollar: string;
-  polishZloty: string;
-  czechKoruna: string;
-  ukrainianHryvnia: string;
-  uaeDirham: string;
-  londonEurope: string;
-  madridEurope: string;
-  pragueEurope: string;
-  berlinEurope: string;
-  warsawEurope: string;
-  kyivEurope: string;
-  newYorkNA: string;
-  dubaiME: string;
-};
-
 const languageOptions: { value: AppLanguage; label: string; flag: string }[] = [
   { value: 'EN', label: 'English', flag: '🇬🇧' },
-  { value: 'ES', label: 'Español', flag: '🇪🇸' },
   { value: 'RU', label: 'Русский', flag: '🇷🇺' },
+  { value: 'UA', label: 'Українська', flag: '🇺🇦' },
+  { value: 'ES', label: 'Español', flag: '🇪🇸' },
   { value: 'CZ', label: 'Čeština', flag: '🇨🇿' },
   { value: 'DE', label: 'Deutsch', flag: '🇩🇪' },
+  { value: 'IT', label: 'Italiano', flag: '🇮🇹' },
+  { value: 'FR', label: 'Français', flag: '🇫🇷' },
+  { value: 'AR', label: 'العربية', flag: '🇸🇦' },
   { value: 'PL', label: 'Polski', flag: '🇵🇱' },
 ];
 
-function getRegionOptions(text: PageText) {
+function getRegionOptions(text: (typeof pageTexts)['EN']) {
   return [
     {
       value: 'United Kingdom',
@@ -368,10 +499,28 @@ function getRegionOptions(text: PageText) {
       lng: 55.2708,
       currency: 'AED' as CurrencyCode,
     },
+    {
+      value: 'Italy',
+      label: 'Italy',
+      subtitle: text.romeEurope,
+      flag: '🇮🇹',
+      lat: 41.9028,
+      lng: 12.4964,
+      currency: 'EUR' as CurrencyCode,
+    },
+    {
+      value: 'France',
+      label: 'France',
+      subtitle: text.parisEurope,
+      flag: '🇫🇷',
+      lat: 48.8566,
+      lng: 2.3522,
+      currency: 'EUR' as CurrencyCode,
+    },
   ] as const;
 }
 
-function getCurrencyOptions(text: PageText) {
+function getCurrencyOptions(text: (typeof pageTexts)['EN']) {
   return [
     { value: 'GBP', symbol: '£', title: 'GBP', subtitle: text.britishPound },
     { value: 'EUR', symbol: '€', title: 'EUR', subtitle: text.euro },
@@ -386,8 +535,12 @@ function getCurrencyOptions(text: PageText) {
 function getCurrentLocationLabel(language: AppLanguage) {
   if (language === 'ES') return 'Ubicación actual';
   if (language === 'RU') return 'Текущее местоположение';
+  if (language === 'UA') return 'Поточна локація';
   if (language === 'CZ') return 'Aktuální poloha';
   if (language === 'DE') return 'Aktueller Standort';
+  if (language === 'IT') return 'Posizione attuale';
+  if (language === 'FR') return 'Position actuelle';
+  if (language === 'AR') return 'الموقع الحالي';
   if (language === 'PL') return 'Bieżąca lokalizacja';
   return 'Current location';
 }
@@ -498,8 +651,8 @@ export default function LanguageRegionPage() {
     setLanguage(selectedLanguage);
   }, [selectedLanguage]);
 
-  const text: PageText = useMemo(
-    () => (pageTexts[language as keyof typeof pageTexts] || pageTexts.EN) as PageText,
+  const text = useMemo(
+    () => pageTexts[language as keyof typeof pageTexts] || pageTexts.EN,
     [language]
   );
 
