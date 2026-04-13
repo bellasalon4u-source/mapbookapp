@@ -40,13 +40,13 @@ const RealMap = dynamic(() => import('../components/RealMap'), {
   ssr: false,
 });
 
-const getPopularSearches = (tr: ReturnType<typeof t>) => [
-  tr.popularSearchDogHotel,
-  tr.popularSearchCarpetCleaning,
-  tr.popularSearchPhoneRepair,
-  tr.popularSearchHairExtensions,
-  tr.popularSearchMassage,
-  tr.popularSearchMovingHelp,
+const getPopularSearches = (tr: any) => [
+  tr.popularSearchDogHotel || 'Dog hotel',
+  tr.popularSearchCarpetCleaning || 'Carpet cleaning',
+  tr.popularSearchPhoneRepair || 'Phone repair',
+  tr.popularSearchHairExtensions || 'Hair extensions',
+  tr.popularSearchMassage || 'Massage',
+  tr.popularSearchMovingHelp || 'Moving help',
 ];
 
 type SearchResult =
@@ -93,7 +93,6 @@ const searchAliases = [
       'pet hotel',
       'dog boarding',
       'hotel para perros',
-      'perro hotel',
       'отель для собак',
       'готель для собак',
       'psí hotel',
@@ -110,7 +109,6 @@ const searchAliases = [
       'clean carpet',
       'wash carpet',
       'limpiar alfombra',
-      'alfombra limpieza',
       'почистить ковёр',
       'почистити килим',
       'čištění koberce',
@@ -152,7 +150,7 @@ const searchAliases = [
     label: 'Massage',
     categoryId: 'wellness',
     subcategory: 'Massage',
-    keywords: ['massage', 'masaje', 'массаж', 'масаж', 'masáž', 'massage de', 'masaż'],
+    keywords: ['massage', 'masaje', 'массаж', 'масаж', 'masáž', 'masaż'],
   },
   {
     label: 'Moving',
@@ -170,6 +168,47 @@ const searchAliases = [
     ],
   },
 ];
+
+function getHomeExtraTexts(language: AppLanguage) {
+  switch (language) {
+    case 'ES':
+      return {
+        dealsToday: 'Ofertas del día',
+        allDealsToday: 'Todas las ofertas',
+        currentLocation: 'Ubicación actual',
+      };
+    case 'RU':
+      return {
+        dealsToday: 'Скидки дня',
+        allDealsToday: 'Все скидки',
+        currentLocation: 'Текущая локация',
+      };
+    case 'CZ':
+      return {
+        dealsToday: 'Dnešní slevy',
+        allDealsToday: 'Všechny slevy',
+        currentLocation: 'Aktuální poloha',
+      };
+    case 'DE':
+      return {
+        dealsToday: 'Angebote des Tages',
+        allDealsToday: 'Alle Angebote',
+        currentLocation: 'Aktueller Standort',
+      };
+    case 'PL':
+      return {
+        dealsToday: 'Oferty dnia',
+        allDealsToday: 'Wszystkie oferty',
+        currentLocation: 'Bieżąca lokalizacja',
+      };
+    default:
+      return {
+        dealsToday: 'Deals today',
+        allDealsToday: 'All deals',
+        currentLocation: 'Current location',
+      };
+  }
+}
 
 function mapCategoryToId(category: string) {
   const normalized = (category || '').toLowerCase().trim();
@@ -230,28 +269,12 @@ function getLanguageBorder(language: AppLanguage) {
     return 'linear-gradient(90deg, #ffffff 0%, #ffffff 33%, #2f6fff 33%, #2f6fff 66%, #ff5252 66%, #ff5252 100%)';
   }
 
-  if (language === 'UA') {
-    return 'linear-gradient(90deg, #0057b7 0%, #0057b7 50%, #ffd700 50%, #ffd700 100%)';
-  }
-
   if (language === 'CZ') {
     return 'linear-gradient(90deg, #ffffff 0%, #ffffff 50%, #11457e 50%, #11457e 75%, #d7141a 75%, #d7141a 100%)';
   }
 
   if (language === 'DE') {
     return 'linear-gradient(90deg, #000000 0%, #000000 33%, #dd0000 33%, #dd0000 66%, #ffce00 66%, #ffce00 100%)';
-  }
-
-  if (language === 'IT') {
-    return 'linear-gradient(90deg, #009246 0%, #009246 33%, #ffffff 33%, #ffffff 66%, #ce2b37 66%, #ce2b37 100%)';
-  }
-
-  if (language === 'FR') {
-    return 'linear-gradient(90deg, #0055a4 0%, #0055a4 33%, #ffffff 33%, #ffffff 66%, #ef4135 66%, #ef4135 100%)';
-  }
-
-  if (language === 'AR') {
-    return 'linear-gradient(90deg, #007a3d 0%, #007a3d 100%)';
   }
 
   if (language === 'PL') {
@@ -270,202 +293,110 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       ? 'Servicio'
       : language === 'RU'
       ? 'Услуга'
-      : language === 'UA'
-      ? 'Послуга'
       : language === 'CZ'
       ? 'Služba'
       : language === 'DE'
       ? 'Service'
-      : language === 'IT'
-      ? 'Servizio'
-      : language === 'FR'
-      ? 'Service'
-      : language === 'AR'
-      ? 'خدمة'
       : language === 'PL'
       ? 'Usługa'
       : 'Service';
   }
 
-  const map: Record<string, Record<AppLanguage, string>> = {
+  const map: Record<string, Partial<Record<AppLanguage, string>>> = {
     beauty: {
       EN: 'Beauty',
       ES: 'Belleza',
       RU: 'Красота',
-      UA: 'Краса',
       CZ: 'Krása',
       DE: 'Beauty',
-      IT: 'Beauty',
-      FR: 'Beauté',
-      AR: 'الجمال',
       PL: 'Uroda',
     },
     barber: {
       EN: 'Barber',
       ES: 'Barbero',
       RU: 'Барбер',
-      UA: 'Барбер',
       CZ: 'Barber',
       DE: 'Barber',
-      IT: 'Barber',
-      FR: 'Barbier',
-      AR: 'حلاقة',
       PL: 'Barber',
     },
     wellness: {
       EN: 'Wellness',
       ES: 'Bienestar',
       RU: 'Велнес',
-      UA: 'Велнес',
       CZ: 'Wellness',
       DE: 'Wellness',
-      IT: 'Benessere',
-      FR: 'Bien-être',
-      AR: 'عافية',
       PL: 'Wellness',
     },
     home: {
       EN: 'Home',
       ES: 'Hogar',
       RU: 'Дом',
-      UA: 'Дім',
       CZ: 'Domov',
       DE: 'Zuhause',
-      IT: 'Casa',
-      FR: 'Maison',
-      AR: 'المنزل',
       PL: 'Dom',
     },
     repairs: {
       EN: 'Repairs',
       ES: 'Reparaciones',
       RU: 'Ремонт',
-      UA: 'Ремонт',
       CZ: 'Opravy',
       DE: 'Reparaturen',
-      IT: 'Riparazioni',
-      FR: 'Réparations',
-      AR: 'إصلاحات',
       PL: 'Naprawy',
     },
     tech: {
       EN: 'Tech',
       ES: 'Tecnología',
       RU: 'Техника',
-      UA: 'Техніка',
       CZ: 'Technika',
       DE: 'Technik',
-      IT: 'Tech',
-      FR: 'Tech',
-      AR: 'تقنية',
       PL: 'Technika',
     },
     pets: {
       EN: 'Pets',
       ES: 'Mascotas',
       RU: 'Питомцы',
-      UA: 'Тварини',
       CZ: 'Mazlíčci',
       DE: 'Haustiere',
-      IT: 'Animali',
-      FR: 'Animaux',
-      AR: 'حيوانات',
       PL: 'Zwierzęta',
-    },
-    fashion: {
-      EN: 'Fashion',
-      ES: 'Moda',
-      RU: 'Мода',
-      UA: 'Мода',
-      CZ: 'Móda',
-      DE: 'Mode',
-      IT: 'Moda',
-      FR: 'Mode',
-      AR: 'موضة',
-      PL: 'Moda',
     },
     auto: {
       EN: 'Auto',
       ES: 'Auto',
       RU: 'Авто',
-      UA: 'Авто',
       CZ: 'Auto',
       DE: 'Auto',
-      IT: 'Auto',
-      FR: 'Auto',
-      AR: 'سيارات',
       PL: 'Auto',
     },
     moving: {
       EN: 'Moving',
       ES: 'Mudanza',
       RU: 'Переезд',
-      UA: 'Переїзд',
       CZ: 'Stěhování',
       DE: 'Umzug',
-      IT: 'Trasloco',
-      FR: 'Déménagement',
-      AR: 'نقل',
       PL: 'Przeprowadzka',
-    },
-    fitness: {
-      EN: 'Fitness',
-      ES: 'Fitness',
-      RU: 'Фитнес',
-      UA: 'Фітнес',
-      CZ: 'Fitness',
-      DE: 'Fitness',
-      IT: 'Fitness',
-      FR: 'Fitness',
-      AR: 'لياقة',
-      PL: 'Fitness',
-    },
-    education: {
-      EN: 'Education',
-      ES: 'Educación',
-      RU: 'Обучение',
-      UA: 'Навчання',
-      CZ: 'Vzdělání',
-      DE: 'Bildung',
-      IT: 'Formazione',
-      FR: 'Éducation',
-      AR: 'تعليم',
-      PL: 'Edukacja',
-    },
-    events: {
-      EN: 'Events',
-      ES: 'Eventos',
-      RU: 'События',
-      UA: 'Події',
-      CZ: 'Události',
-      DE: 'Events',
-      IT: 'Eventi',
-      FR: 'Événements',
-      AR: 'فعاليات',
-      PL: 'Wydarzenia',
     },
     activities: {
       EN: 'Activities',
       ES: 'Actividades',
       RU: 'Активности',
-      UA: 'Активності',
       CZ: 'Aktivity',
       DE: 'Aktivitäten',
-      IT: 'Attività',
-      FR: 'Activités',
-      AR: 'أنشطة',
       PL: 'Aktywności',
+    },
+    events: {
+      EN: 'Events',
+      ES: 'Eventos',
+      RU: 'События',
+      CZ: 'Události',
+      DE: 'Events',
+      PL: 'Wydarzenia',
     },
     creative: {
       EN: 'Creative',
       ES: 'Creativo',
       RU: 'Креатив',
-      UA: 'Креатив',
       CZ: 'Kreativa',
       DE: 'Kreativ',
-      IT: 'Creativo',
-      FR: 'Créatif',
-      AR: 'إبداعي',
       PL: 'Kreatywne',
     },
   };
@@ -479,12 +410,12 @@ function normalizeText(value: string) {
 
 function scoreTextMatch(query: string, target: string) {
   const q = normalizeText(query);
-  const tValue = normalizeText(target);
+  const tv = normalizeText(target);
 
-  if (!q || !tValue) return 0;
-  if (tValue === q) return 120;
-  if (tValue.startsWith(q)) return 90;
-  if (tValue.includes(q)) return 70;
+  if (!q || !tv) return 0;
+  if (tv === q) return 120;
+  if (tv.startsWith(q)) return 90;
+  if (tv.includes(q)) return 70;
 
   return 0;
 }
@@ -508,18 +439,13 @@ function readRecentSearches() {
 function languageFlag(language: AppLanguage) {
   if (language === 'ES') return '🇪🇸';
   if (language === 'RU') return '🇷🇺';
-  if (language === 'UA') return '🇺🇦';
   if (language === 'CZ') return '🇨🇿';
   if (language === 'DE') return '🇩🇪';
-  if (language === 'IT') return '🇮🇹';
-  if (language === 'FR') return '🇫🇷';
-  if (language === 'AR') return '🇸🇦';
   if (language === 'PL') return '🇵🇱';
   return '🇬🇧';
 }
 
 function languageCode(language: AppLanguage) {
-  if (language === 'UA') return 'UA';
   return language;
 }
 
@@ -573,7 +499,12 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
   return sameCategory[0] || null;
 }
 
-type HomeFilterMode = 'none' | 'liked-category' | 'liked-all' | 'deals-category' | 'deals-all';
+type HomeFilterMode =
+  | 'none'
+  | 'liked-category'
+  | 'liked-all'
+  | 'deals-category'
+  | 'deals-all';
 
 export default function HomePage() {
   const router = useRouter();
@@ -601,7 +532,10 @@ export default function HomePage() {
   const [currencyVersion, setCurrencyVersion] = useState(0);
   const [userAvatar, setUserAvatar] = useState(getUserProfile().avatar);
 
-  const tr = t(language);
+  const trBase = t(language) as any;
+  const extraTexts = getHomeExtraTexts(language);
+  const tr = { ...trBase, ...extraTexts };
+
   const popularSearches = getPopularSearches(tr);
 
   const [adSecondsLeft, setAdSecondsLeft] = useState(12 * 3600 + 24 * 60);
@@ -1052,13 +986,13 @@ export default function HomePage() {
                 borderRadius: 24,
                 padding: 10,
                 boxShadow: '0 6px 18px rgba(0,0,0,0.07)',
-                border: '1px solid #111111',
+                border: '1px solid rgba(17,17,17,0.08)',
               }}
             >
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr auto',
+                  gridTemplateColumns: '1fr auto auto',
                   gap: 8,
                   alignItems: 'center',
                 }}
@@ -1071,7 +1005,7 @@ export default function HomePage() {
                     minWidth: 0,
                     height: 46,
                     padding: '0 4px 0 2px',
-                    border: '1px solid #111111',
+                    border: '1px solid rgba(17,17,17,0.08)',
                     borderRadius: 18,
                     background: '#fff',
                   }}
@@ -1136,7 +1070,7 @@ export default function HomePage() {
                 <button
                   onClick={() => router.push('/profile/language-region')}
                   style={{
-                    border: '1px solid #111111',
+                    border: '1px solid rgba(17,17,17,0.08)',
                     background: '#fff',
                     color: '#1f2430',
                     borderRadius: 999,
@@ -1156,6 +1090,47 @@ export default function HomePage() {
                   <span style={{ fontSize: 18 }}>{languageFlag(language)}</span>
                   <span>{languageCode(language)}</span>
                 </button>
+
+                <button
+                  onClick={() => router.push('/profile')}
+                  style={{
+                    border: '1px solid rgba(17,17,17,0.08)',
+                    background: '#fff',
+                    borderRadius: 999,
+                    width: 46,
+                    height: 46,
+                    padding: 0,
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    display: 'block',
+                    position: 'relative',
+                  }}
+                >
+                  <img
+                    src={userAvatar}
+                    alt="Profile"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
+                  />
+                  {hasUnreadProfileUpdates ? (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: 2,
+                        right: 2,
+                        width: 10,
+                        height: 10,
+                        borderRadius: '50%',
+                        background: '#ff3b30',
+                        border: '2px solid #ffffff',
+                      }}
+                    />
+                  ) : null}
+                </button>
               </div>
 
               <div
@@ -1163,7 +1138,7 @@ export default function HomePage() {
                   marginTop: 8,
                   padding: '4px 2px 0',
                   display: 'grid',
-                  gridTemplateColumns: '1fr auto auto auto',
+                  gridTemplateColumns: '1fr auto auto',
                   alignItems: 'center',
                   gap: 12,
                 }}
@@ -1187,7 +1162,7 @@ export default function HomePage() {
                       textOverflow: 'ellipsis',
                     }}
                   >
-                    {locationLabel}
+                    {locationLabel || tr.currentLocation}
                   </span>
                 </div>
 
@@ -1228,48 +1203,6 @@ export default function HomePage() {
                   <span style={{ color: '#19b44a', fontSize: 15 }}>👁</span>
                   <span style={{ color: '#ff3b30' }}>{adViews}</span>
                 </button>
-
-                <button
-                  onClick={() => router.push('/profile')}
-                  style={{
-                    border: '1px solid #111111',
-                    background: '#fff',
-                    borderRadius: 999,
-                    width: 28,
-                    height: 28,
-                    padding: 0,
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    display: 'block',
-                    position: 'relative',
-                    justifySelf: 'end',
-                  }}
-                >
-                  <img
-                    src={userAvatar}
-                    alt="Profile"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
-                    }}
-                  />
-                  {hasUnreadProfileUpdates ? (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        background: '#ff3b30',
-                        border: '1.5px solid #ffffff',
-                      }}
-                    />
-                  ) : null}
-                </button>
               </div>
             </div>
 
@@ -1281,7 +1214,7 @@ export default function HomePage() {
                   right: 0,
                   top: 'calc(100% + 8px)',
                   background: 'rgba(255,255,255,0.98)',
-                  border: '1px solid #111111',
+                  border: '1px solid rgba(17,17,17,0.08)',
                   borderRadius: 20,
                   boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
                   padding: 12,
@@ -1302,7 +1235,7 @@ export default function HomePage() {
                               key={item}
                               onClick={() => runQuickSearch(item)}
                               style={{
-                                border: '1px solid #111111',
+                                border: '1px solid rgba(17,17,17,0.08)',
                                 background: '#fff',
                                 borderRadius: 999,
                                 padding: '8px 12px',
@@ -1329,7 +1262,7 @@ export default function HomePage() {
                             key={item}
                             onClick={() => runQuickSearch(item)}
                             style={{
-                              border: '1px solid #111111',
+                              border: '1px solid rgba(17,17,17,0.08)',
                               background: '#fff8f8',
                               borderRadius: 999,
                               padding: '8px 12px',
@@ -1362,7 +1295,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1px solid #111111',
+                                border: '1px solid rgba(17,17,17,0.08)',
                                 background: '#fff6f9',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1397,7 +1330,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1px solid #111111',
+                                border: '1px solid rgba(17,17,17,0.08)',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1429,7 +1362,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1px solid #111111',
+                                border: '1px solid rgba(17,17,17,0.08)',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1464,7 +1397,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1px solid #111111',
+                                border: '1px solid rgba(17,17,17,0.08)',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1515,7 +1448,7 @@ export default function HomePage() {
         <section style={{ padding: '8px 14px 0' }}>
           <div
             style={{
-              border: '1px solid #111111',
+              border: '1px solid rgba(17,17,17,0.08)',
               borderRadius: 24,
               background: '#fff',
               padding: 10,
@@ -1533,7 +1466,7 @@ export default function HomePage() {
                   setHomeFilterMode((prev) => (prev === 'liked-category' ? 'none' : 'liked-category'))
                 }
                 style={{
-                  border: '1px solid #111111',
+                  border: '1px solid rgba(17,17,17,0.08)',
                   background: homeFilterMode === 'liked-category' ? '#ffe7ef' : '#fff3f7',
                   color: '#1f2430',
                   borderRadius: 18,
@@ -1566,7 +1499,7 @@ export default function HomePage() {
                     minWidth: 28,
                     height: 28,
                     borderRadius: 999,
-                    border: '1px solid #111111',
+                    border: '1px solid rgba(17,17,17,0.08)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1585,7 +1518,7 @@ export default function HomePage() {
                   setHomeFilterMode((prev) => (prev === 'deals-category' ? 'none' : 'deals-category'))
                 }
                 style={{
-                  border: '1px solid #111111',
+                  border: '1px solid rgba(17,17,17,0.08)',
                   background: homeFilterMode === 'deals-category' ? '#fff4cc' : '#fff8dd',
                   color: '#1f2430',
                   borderRadius: 18,
@@ -1618,7 +1551,7 @@ export default function HomePage() {
                     minWidth: 28,
                     height: 28,
                     borderRadius: 999,
-                    border: '1px solid #111111',
+                    border: '1px solid rgba(17,17,17,0.08)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1637,7 +1570,7 @@ export default function HomePage() {
                   setHomeFilterMode((prev) => (prev === 'liked-all' ? 'none' : 'liked-all'))
                 }
                 style={{
-                  border: '1px solid #111111',
+                  border: '1px solid rgba(17,17,17,0.08)',
                   background: homeFilterMode === 'liked-all' ? '#ffe7ef' : '#fff3f7',
                   color: '#1f2430',
                   borderRadius: 18,
@@ -1670,7 +1603,7 @@ export default function HomePage() {
                     minWidth: 28,
                     height: 28,
                     borderRadius: 999,
-                    border: '1px solid #111111',
+                    border: '1px solid rgba(17,17,17,0.08)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1689,7 +1622,7 @@ export default function HomePage() {
                   setHomeFilterMode((prev) => (prev === 'deals-all' ? 'none' : 'deals-all'))
                 }
                 style={{
-                  border: '1px solid #111111',
+                  border: '1px solid rgba(17,17,17,0.08)',
                   background: homeFilterMode === 'deals-all' ? '#fff4cc' : '#fff8dd',
                   color: '#1f2430',
                   borderRadius: 18,
@@ -1722,7 +1655,7 @@ export default function HomePage() {
                     minWidth: 28,
                     height: 28,
                     borderRadius: 999,
-                    border: '1px solid #111111',
+                    border: '1px solid rgba(17,17,17,0.08)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1739,8 +1672,14 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '2px 0 0' }}>
-          <div style={{ background: '#ffffff', borderTop: '1px solid #111111', borderBottom: '1px solid #111111' }}>
+        <section style={{ padding: '8px 0 0' }}>
+          <div
+            style={{
+              background: '#ffffff',
+              borderTop: '1px solid rgba(17,17,17,0.08)',
+              borderBottom: '1px solid rgba(17,17,17,0.08)',
+            }}
+          >
             <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={filteredMasters}
@@ -1833,7 +1772,7 @@ export default function HomePage() {
                       maxWidth: 250,
                       boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
                       flexShrink: 0,
-                      border: '1px solid #111111',
+                      border: '1px solid rgba(17,17,17,0.08)',
                     }}
                   >
                     <button
@@ -1899,7 +1838,7 @@ export default function HomePage() {
                         style={{
                           height: 42,
                           borderRadius: 14,
-                          border: '1px solid #111111',
+                          border: '1px solid rgba(17,17,17,0.08)',
                           background: '#133e8a',
                           color: '#fff',
                           fontSize: 14,
@@ -1914,7 +1853,7 @@ export default function HomePage() {
                         onClick={() => openPromotionBooking(promo)}
                         style={{
                           height: 42,
-                          border: '1px solid #111111',
+                          border: '1px solid rgba(17,17,17,0.08)',
                           borderRadius: 14,
                           background: '#ff4f4f',
                           color: '#fff',
