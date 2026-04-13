@@ -29,7 +29,63 @@ type StoredLocation = {
   lng: number | null;
 };
 
-const pageTexts = {
+type PageTextShape = {
+  title: string;
+  subtitle: string;
+  save: string;
+  languageSection: string;
+  regionSection: string;
+  currencySection: string;
+  locationSection: string;
+  useCurrentLocation: string;
+  currentLocationHint: string;
+  useRegionLocation: string;
+  regionLocationHint: string;
+  locationLoading: string;
+  locationSuccess: string;
+  locationError: string;
+  saved: string;
+  selected: string;
+  languageApp: string;
+  overview: string;
+  livePreview: string;
+  britishPound: string;
+  euro: string;
+  usDollar: string;
+  polishZloty: string;
+  czechKoruna: string;
+  ukrainianHryvnia: string;
+  uaeDirham: string;
+  londonEurope: string;
+  madridEurope: string;
+  pragueEurope: string;
+  berlinEurope: string;
+  warsawEurope: string;
+  kyivEurope: string;
+  newYorkNA: string;
+  dubaiME: string;
+  romeEurope: string;
+  parisEurope: string;
+};
+
+type RegionOption = {
+  value: string;
+  label: string;
+  subtitle: string;
+  flag: string;
+  lat: number;
+  lng: number;
+  currency: CurrencyCode;
+};
+
+type CurrencyOption = {
+  value: CurrencyCode;
+  symbol: string;
+  title: string;
+  subtitle: string;
+};
+
+const pageTexts: Record<AppLanguage, PageTextShape> = {
   EN: {
     title: 'Language & region',
     subtitle: 'App language, country, currency and location mode',
@@ -410,7 +466,7 @@ const pageTexts = {
     romeEurope: 'Rzym · Europa',
     parisEurope: 'Paryż · Europa',
   },
-} as const;
+};
 
 const languageOptions: { value: AppLanguage; label: string; flag: string }[] = [
   { value: 'EN', label: 'English', flag: '🇬🇧' },
@@ -425,7 +481,7 @@ const languageOptions: { value: AppLanguage; label: string; flag: string }[] = [
   { value: 'PL', label: 'Polski', flag: '🇵🇱' },
 ];
 
-function getRegionOptions(text: (typeof pageTexts)['EN']) {
+function getRegionOptions(text: PageTextShape): RegionOption[] {
   return [
     {
       value: 'United Kingdom',
@@ -434,7 +490,7 @@ function getRegionOptions(text: (typeof pageTexts)['EN']) {
       flag: '🇬🇧',
       lat: 51.5074,
       lng: -0.1278,
-      currency: 'GBP' as CurrencyCode,
+      currency: 'GBP',
     },
     {
       value: 'Spain',
@@ -443,7 +499,7 @@ function getRegionOptions(text: (typeof pageTexts)['EN']) {
       flag: '🇪🇸',
       lat: 40.4168,
       lng: -3.7038,
-      currency: 'EUR' as CurrencyCode,
+      currency: 'EUR',
     },
     {
       value: 'Czech Republic',
@@ -452,7 +508,7 @@ function getRegionOptions(text: (typeof pageTexts)['EN']) {
       flag: '🇨🇿',
       lat: 50.0755,
       lng: 14.4378,
-      currency: 'CZK' as CurrencyCode,
+      currency: 'CZK',
     },
     {
       value: 'Germany',
@@ -461,7 +517,7 @@ function getRegionOptions(text: (typeof pageTexts)['EN']) {
       flag: '🇩🇪',
       lat: 52.52,
       lng: 13.405,
-      currency: 'EUR' as CurrencyCode,
+      currency: 'EUR',
     },
     {
       value: 'Poland',
@@ -470,7 +526,7 @@ function getRegionOptions(text: (typeof pageTexts)['EN']) {
       flag: '🇵🇱',
       lat: 52.2297,
       lng: 21.0122,
-      currency: 'PLN' as CurrencyCode,
+      currency: 'PLN',
     },
     {
       value: 'Ukraine',
@@ -479,7 +535,7 @@ function getRegionOptions(text: (typeof pageTexts)['EN']) {
       flag: '🇺🇦',
       lat: 50.4501,
       lng: 30.5234,
-      currency: 'UAH' as CurrencyCode,
+      currency: 'UAH',
     },
     {
       value: 'United States',
@@ -488,7 +544,7 @@ function getRegionOptions(text: (typeof pageTexts)['EN']) {
       flag: '🇺🇸',
       lat: 40.7128,
       lng: -74.006,
-      currency: 'USD' as CurrencyCode,
+      currency: 'USD',
     },
     {
       value: 'United Arab Emirates',
@@ -497,7 +553,7 @@ function getRegionOptions(text: (typeof pageTexts)['EN']) {
       flag: '🇦🇪',
       lat: 25.2048,
       lng: 55.2708,
-      currency: 'AED' as CurrencyCode,
+      currency: 'AED',
     },
     {
       value: 'Italy',
@@ -506,7 +562,7 @@ function getRegionOptions(text: (typeof pageTexts)['EN']) {
       flag: '🇮🇹',
       lat: 41.9028,
       lng: 12.4964,
-      currency: 'EUR' as CurrencyCode,
+      currency: 'EUR',
     },
     {
       value: 'France',
@@ -515,12 +571,12 @@ function getRegionOptions(text: (typeof pageTexts)['EN']) {
       flag: '🇫🇷',
       lat: 48.8566,
       lng: 2.3522,
-      currency: 'EUR' as CurrencyCode,
+      currency: 'EUR',
     },
-  ] as const;
+  ];
 }
 
-function getCurrencyOptions(text: (typeof pageTexts)['EN']) {
+function getCurrencyOptions(text: PageTextShape): CurrencyOption[] {
   return [
     { value: 'GBP', symbol: '£', title: 'GBP', subtitle: text.britishPound },
     { value: 'EUR', symbol: '€', title: 'EUR', subtitle: text.euro },
@@ -529,7 +585,7 @@ function getCurrencyOptions(text: (typeof pageTexts)['EN']) {
     { value: 'CZK', symbol: 'Kč', title: 'CZK', subtitle: text.czechKoruna },
     { value: 'UAH', symbol: '₴', title: 'UAH', subtitle: text.ukrainianHryvnia },
     { value: 'AED', symbol: 'AED', title: 'AED', subtitle: text.uaeDirham },
-  ] as const;
+  ];
 }
 
 function getCurrentLocationLabel(language: AppLanguage) {
@@ -651,13 +707,10 @@ export default function LanguageRegionPage() {
     setLanguage(selectedLanguage);
   }, [selectedLanguage]);
 
-  const text = useMemo(
-    () => pageTexts[language as keyof typeof pageTexts] || pageTexts.EN,
-    [language]
-  );
+  const text: PageTextShape = pageTexts[language] || pageTexts.EN;
 
-  const regionOptions = useMemo(() => getRegionOptions(text), [text]);
-  const currencyOptions = useMemo(() => getCurrencyOptions(text), [text]);
+  const regionOptions = useMemo<RegionOption[]>(() => getRegionOptions(text), [text]);
+  const currencyOptions = useMemo<CurrencyOption[]>(() => getCurrencyOptions(text), [text]);
 
   const selectedRegionMeta =
     regionOptions.find((item) => item.value === selectedRegion) || regionOptions[0];
@@ -755,7 +808,7 @@ export default function LanguageRegionPage() {
       region: selectedRegion,
     });
 
-    alert((pageTexts[selectedLanguage as keyof typeof pageTexts] || pageTexts.EN).saved);
+    alert((pageTexts[selectedLanguage] || pageTexts.EN).saved);
   };
 
   return (
