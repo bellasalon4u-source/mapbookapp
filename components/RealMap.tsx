@@ -72,8 +72,12 @@ function getCategoryAccent(category?: string) {
 function getFallbackServiceLabel(language: AppLanguage) {
   if (language === 'ES') return 'Servicio';
   if (language === 'RU') return 'Услуга';
+  if (language === 'UA') return 'Послуга';
   if (language === 'CZ') return 'Služba';
   if (language === 'DE') return 'Service';
+  if (language === 'IT') return 'Servizio';
+  if (language === 'FR') return 'Service';
+  if (language === 'AR') return 'خدمة';
   if (language === 'PL') return 'Usługa';
   return 'Service';
 }
@@ -81,8 +85,12 @@ function getFallbackServiceLabel(language: AppLanguage) {
 function getFallbackProLabel(language: AppLanguage) {
   if (language === 'ES') return 'Profesional';
   if (language === 'RU') return 'Специалист';
+  if (language === 'UA') return 'Спеціаліст';
   if (language === 'CZ') return 'Profesionál';
   if (language === 'DE') return 'Profi';
+  if (language === 'IT') return 'Professionista';
+  if (language === 'FR') return 'Professionnel';
+  if (language === 'AR') return 'محترف';
   if (language === 'PL') return 'Specjalista';
   return 'Pro';
 }
@@ -90,8 +98,12 @@ function getFallbackProLabel(language: AppLanguage) {
 function getCurrentLocationLabel(language: AppLanguage) {
   if (language === 'ES') return 'Ubicación actual';
   if (language === 'RU') return 'Текущее местоположение';
+  if (language === 'UA') return 'Поточна локація';
   if (language === 'CZ') return 'Aktuální poloha';
   if (language === 'DE') return 'Aktueller Standort';
+  if (language === 'IT') return 'Posizione attuale';
+  if (language === 'FR') return 'Position actuelle';
+  if (language === 'AR') return 'الموقع الحالي';
   if (language === 'PL') return 'Bieżąca lokalizacja';
   return 'Current location';
 }
@@ -104,56 +116,84 @@ function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') 
       EN: 'Beauty',
       ES: 'Belleza',
       RU: 'Красота',
+      UA: 'Краса',
       CZ: 'Krása',
       DE: 'Beauty',
+      IT: 'Beauty',
+      FR: 'Beauté',
+      AR: 'الجمال',
       PL: 'Uroda',
     },
     barber: {
       EN: 'Barber',
       ES: 'Barbero',
       RU: 'Барбер',
+      UA: 'Барбер',
       CZ: 'Barber',
       DE: 'Barber',
+      IT: 'Barber',
+      FR: 'Barbier',
+      AR: 'حلاقة',
       PL: 'Barber',
     },
     wellness: {
       EN: 'Wellness',
       ES: 'Bienestar',
       RU: 'Велнес',
+      UA: 'Велнес',
       CZ: 'Wellness',
       DE: 'Wellness',
+      IT: 'Benessere',
+      FR: 'Bien-être',
+      AR: 'عافية',
       PL: 'Wellness',
     },
     home: {
       EN: 'Home',
       ES: 'Hogar',
       RU: 'Дом',
+      UA: 'Дім',
       CZ: 'Domov',
       DE: 'Zuhause',
+      IT: 'Casa',
+      FR: 'Maison',
+      AR: 'المنزل',
       PL: 'Dom',
     },
     repairs: {
       EN: 'Repairs',
       ES: 'Reparaciones',
       RU: 'Ремонт',
+      UA: 'Ремонт',
       CZ: 'Opravy',
       DE: 'Reparaturen',
+      IT: 'Riparazioni',
+      FR: 'Réparations',
+      AR: 'إصلاحات',
       PL: 'Naprawy',
     },
     tech: {
       EN: 'Tech',
       ES: 'Tecnología',
       RU: 'Техника',
+      UA: 'Техніка',
       CZ: 'Technika',
       DE: 'Technik',
+      IT: 'Tech',
+      FR: 'Tech',
+      AR: 'تقنية',
       PL: 'Technika',
     },
     pets: {
       EN: 'Pets',
       ES: 'Mascotas',
       RU: 'Питомцы',
+      UA: 'Тварини',
       CZ: 'Mazlíčci',
       DE: 'Haustiere',
+      IT: 'Animali',
+      FR: 'Animaux',
+      AR: 'حيوانات',
       PL: 'Zwierzęta',
     },
   };
@@ -479,9 +519,7 @@ export default function RealMap({
 
   const selectedMaster = useMemo(() => {
     if (selectedMasterId === null || selectedMasterId === undefined) return null;
-    return (
-      safeMasters.find((item) => String(item.id) === String(selectedMasterId)) || null
-    );
+    return safeMasters.find((item) => String(item.id) === String(selectedMasterId)) || null;
   }, [safeMasters, selectedMasterId]);
 
   const openRoute = (master: MasterItem) => {
@@ -527,10 +565,7 @@ export default function RealMap({
         }}
         zoomControl={true}
       >
-        <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url={getTileUrl(mapMode)}
-        />
+        <TileLayer attribution="&copy; OpenStreetMap contributors" url={getTileUrl(mapMode)} />
 
         <UserLocationLayer language={language} onLocationFound={setCurrentDetectedLocation} />
         <FitBoundsLayer masters={safeMasters} focusLocation={focusLocation} />
