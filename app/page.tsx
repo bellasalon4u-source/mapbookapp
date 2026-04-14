@@ -1799,35 +1799,63 @@ export default function HomePage() {
         </section>
 
         {promotions.length > 0 && (
-          <section style={{ padding: '12px 12px 0' }}>
-            <div style={{ marginBottom: 18 }}>
+          <section style={{ padding: '14px 12px 0' }}>
+            <div
+              style={{
+                background: '#fbf7ef',
+                border: '1px solid #ddd4c8',
+                borderRadius: 28,
+                padding: '14px 12px 16px',
+                boxShadow: '0 10px 24px rgba(0,0,0,0.05)',
+                marginBottom: 18,
+              }}
+            >
               <div
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
+                  gap: 10,
                   marginBottom: 12,
+                  padding: '0 4px',
                 }}
               >
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: 17,
-                    fontWeight: 900,
-                    color: '#223145',
-                  }}
-                >
-                  {`${tr.hotOffersNear} ${locationLabel}`}
-                </h2>
+                <div>
+                  <h2
+                    style={{
+                      margin: 0,
+                      fontSize: 17,
+                      fontWeight: 900,
+                      color: '#223145',
+                      lineHeight: 1.15,
+                    }}
+                  >
+                    {`${tr.hotOffersNear} ${locationLabel}`}
+                  </h2>
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: '#7b828d',
+                    }}
+                  >
+                    {tr.specialOfferNearYou}
+                  </div>
+                </div>
 
                 <button
                   style={{
-                    border: 'none',
-                    background: 'transparent',
-                    fontSize: 24,
-                    color: '#9aa0a8',
+                    width: 36,
+                    height: 36,
+                    borderRadius: 999,
+                    border: '1px solid #d7cec1',
+                    background: '#fff',
+                    fontSize: 22,
+                    color: '#8d97a3',
                     lineHeight: 1,
                     cursor: 'pointer',
+                    flexShrink: 0,
                   }}
                 >
                   ›
@@ -1840,7 +1868,7 @@ export default function HomePage() {
                   gap: 12,
                   overflowX: 'auto',
                   overflowY: 'hidden',
-                  paddingBottom: 6,
+                  paddingBottom: 4,
                   WebkitOverflowScrolling: 'touch',
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none',
@@ -1855,11 +1883,11 @@ export default function HomePage() {
                     data-promo-id={promo.id}
                     style={{
                       background: '#fff',
-                      borderRadius: 24,
+                      borderRadius: 28,
                       overflow: 'hidden',
-                      minWidth: 240,
-                      maxWidth: 240,
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                      minWidth: 262,
+                      maxWidth: 262,
+                      boxShadow: '0 10px 24px rgba(0,0,0,0.08)',
                       flexShrink: 0,
                       border: '1px solid #ddd4c8',
                     }}
@@ -1882,20 +1910,37 @@ export default function HomePage() {
                           alt={promo.title}
                           style={{
                             width: '100%',
-                            height: 170,
+                            height: 178,
                             objectFit: 'cover',
                             display: 'block',
                           }}
                         />
-                      </div>
 
-                      <div style={{ padding: '14px 16px 8px' }}>
                         <div
                           style={{
-                            fontSize: 16,
+                            position: 'absolute',
+                            top: 12,
+                            left: 12,
+                            background: 'rgba(255,255,255,0.96)',
+                            color: '#ff4f93',
+                            borderRadius: 999,
+                            padding: '7px 12px',
+                            fontWeight: 900,
+                            fontSize: 11,
+                            letterSpacing: 0.2,
+                          }}
+                        >
+                          {tr.sponsored}
+                        </div>
+                      </div>
+
+                      <div style={{ padding: '14px 16px 10px' }}>
+                        <div
+                          style={{
+                            fontSize: 17,
                             fontWeight: 900,
                             color: '#1f2430',
-                            lineHeight: 1.2,
+                            lineHeight: 1.18,
                           }}
                         >
                           {promo.title}
@@ -1906,7 +1951,8 @@ export default function HomePage() {
                             marginTop: 8,
                             fontSize: 13,
                             fontWeight: 700,
-                            color: '#6b7280',
+                            color: '#6f7782',
+                            lineHeight: 1.35,
                           }}
                         >
                           {promo.subtitle || tr.specialOfferNearYou}
@@ -1925,14 +1971,15 @@ export default function HomePage() {
                       <button
                         onClick={() => openPromotionView(promo)}
                         style={{
-                          height: 42,
-                          borderRadius: 14,
+                          height: 44,
+                          borderRadius: 16,
                           border: '1px solid #111111',
-                          background: '#133e8a',
+                          background: '#163f86',
                           color: '#fff',
                           fontSize: 14,
                           fontWeight: 900,
                           cursor: 'pointer',
+                          boxShadow: '0 6px 14px rgba(22,63,134,0.18)',
                         }}
                       >
                         {tr.viewAction}
@@ -1941,14 +1988,15 @@ export default function HomePage() {
                       <button
                         onClick={() => openPromotionBooking(promo)}
                         style={{
-                          height: 42,
+                          height: 44,
                           border: '1px solid #111111',
-                          borderRadius: 14,
-                          background: '#ff4f4f',
+                          borderRadius: 16,
+                          background: '#ff5a53',
                           color: '#fff',
                           fontSize: 14,
                           fontWeight: 900,
                           cursor: 'pointer',
+                          boxShadow: '0 6px 14px rgba(255,90,83,0.18)',
                         }}
                       >
                         {tr.bookAction}
