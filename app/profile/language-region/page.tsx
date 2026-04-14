@@ -287,7 +287,8 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     useCurrentLocation: 'Aktuellen Standort verwenden',
     currentLocationHint: 'GPS des Geräts für Suche und Karte verwenden',
     useRegionLocation: 'Ausgewählte Region verwenden',
-    regionLocationHint: 'In der Nähe des Zentrums des gewählten Landes oder der Region suchen',
+    regionLocationHint:
+      'In der Nähe des Zentrums des gewählten Landes oder der Region suchen',
     locationLoading: 'Aktueller Standort wird ermittelt...',
     locationSuccess: 'Aktueller Standort ausgewählt',
     locationError: 'Standort konnte nicht ermittelt werden',
@@ -361,9 +362,11 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     currencySection: 'Devise',
     locationSection: 'Localisation',
     useCurrentLocation: 'Utiliser la position actuelle',
-    currentLocationHint: 'Utiliser le GPS de votre appareil pour la recherche et la carte',
+    currentLocationHint:
+      'Utiliser le GPS de votre appareil pour la recherche et la carte',
     useRegionLocation: 'Utiliser la région sélectionnée',
-    regionLocationHint: 'Rechercher près du centre du pays ou de la région sélectionnée',
+    regionLocationHint:
+      'Rechercher près du centre du pays ou de la région sélectionnée',
     locationLoading: 'Récupération de la position actuelle...',
     locationSuccess: 'Position actuelle sélectionnée',
     locationError: 'Impossible d’obtenir la position',
@@ -470,9 +473,9 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
 
 const languageOptions: { value: AppLanguage; label: string; flag: string }[] = [
   { value: 'EN', label: 'English', flag: '🇬🇧' },
+  { value: 'ES', label: 'Español', flag: '🇪🇸' },
   { value: 'RU', label: 'Русский', flag: '🇷🇺' },
   { value: 'UA', label: 'Українська', flag: '🇺🇦' },
-  { value: 'ES', label: 'Español', flag: '🇪🇸' },
   { value: 'CZ', label: 'Čeština', flag: '🇨🇿' },
   { value: 'DE', label: 'Deutsch', flag: '🇩🇪' },
   { value: 'IT', label: 'Italiano', flag: '🇮🇹' },
@@ -663,7 +666,7 @@ export default function LanguageRegionPage() {
   const [selectedCurrency, setSelectedCurrency] = useState<AppCurrency>(
     initialRegionSettings.currency
   );
-  const [selectedLocationMode, setSelectedLocationMode] = useState<'current' | 'custom'>(
+  const [selectedLocationMode, setSelectedLocationMode] = useState<SearchLocationMode>(
     initialRegionSettings.locationMode
   );
   const [selectedLocation, setSelectedLocation] = useState<StoredLocation>({
@@ -795,10 +798,10 @@ export default function LanguageRegionPage() {
           };
 
     updateAppRegionSettings({
-      language: selectedLanguage as AppLanguage & ('EN' | 'ES' | 'RU' | 'CZ' | 'DE' | 'PL'),
+      language: selectedLanguage,
       region: selectedRegion,
       currency: selectedCurrency,
-      locationMode: selectedLocationMode as SearchLocationMode,
+      locationMode: selectedLocationMode,
       currentLocation,
       customLocation: regionLocation,
     });
