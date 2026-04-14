@@ -587,6 +587,20 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
   return sameCategory[0] || null;
 }
 
+function getPromotionBadgeText(promo: PromotionItem) {
+  const percent = Number((promo as any).discountPercent);
+
+  if (Number.isFinite(percent) && percent > 0) {
+    return `-${percent}%`;
+  }
+
+  const title = String((promo as any).badgeText || (promo as any).discountLabel || '').trim();
+
+  if (title) return title;
+
+  return '-30%';
+}
+
 type HomeFilterMode = 'none' | 'liked-category' | 'liked-all' | 'deals-category' | 'deals-all';
 
 export default function HomePage() {
@@ -790,6 +804,21 @@ export default function HomePage() {
     return [...listingMasters, ...baseMasters];
   }, [listingMasters, baseMasters]);
 
+  const promotionMatches = useMemo(() => {
+    return promotions
+      .map((promo) => {
+        const matchedMaster = findPromotionMaster(promo, allMasters);
+
+        return {
+          promo,
+          masterId: matchedMaster ? String(matchedMaster.id) : String(promo.masterId || ''),
+          categoryId: String(promo.categoryId || '').toLowerCase().trim(),
+          badgeText: getPromotionBadgeText(promo),
+        };
+      })
+      .filter((item) => item.masterId);
+  }, [promotions, allMasters]);
+
   const smartResults = useMemo(() => {
     const q = search.trim();
     if (!q) return [] as SmartSearchResult[];
@@ -885,35 +914,17 @@ export default function HomePage() {
       }));
   }, [search, allMasters]);
 
-  const promotionMasters = useMemo(() => {
-    return promotions
-      .map((promo) => {
-        const matchedMaster = findPromotionMaster(promo, allMasters);
-        return matchedMaster ? { promo, master: matchedMaster } : null;
-      })
-      .filter(Boolean) as { promo: PromotionItem; master: any }[];
-  }, [promotions, allMasters]);
-
   const promotionsInCategory = useMemo(() => {
-    return promotionMasters.filter(
-      ({ promo, master }) =>
-        String(promo.categoryId || '').toLowerCase().trim() === activeCategory ||
-        String(master.category || '').toLowerCase().trim() === activeCategory
+    return promotionMatches.filter(
+      (item) => item.categoryId === activeCategory
     );
-  }, [promotionMasters, activeCategory]);
+  }, [promotionMatches, activeCategory]);
 
   const filteredMasters = useMemo(() => {
     const q = search.trim().toLowerCase();
 
-    const promotionMasterIdsInCategory = new Set(
-      promotionsInCategory.map(({ master }) => String(master.id))
-    );
-
-    const promotionMasterIdsAll = new Set(
-      promotionMasters.map(({ master }) => String(master.id))
-    );
-
     return allMasters.filter((master: any) => {
+      const masterId = String(master.id);
       const masterCategory = String(master.category || '').toLowerCase().trim();
       const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
 
@@ -938,17 +949,17 @@ export default function HomePage() {
 
       const likedMatch =
         homeFilterMode === 'liked-category' || homeFilterMode === 'liked-all'
-          ? likedMasterIds.includes(String(master.id))
+          ? likedMasterIds.includes(masterId)
           : true;
 
       const categoryDealsMatch =
         homeFilterMode === 'deals-category'
-          ? promotionMasterIdsInCategory.has(String(master.id))
+          ? promotionsInCategory.some((promo) => promo.masterId === masterId)
           : true;
 
       const allDealsMatch =
         homeFilterMode === 'deals-all'
-          ? promotionMasterIdsAll.has(String(master.id))
+          ? promotionMatches.some((promo) => promo.masterId === masterId)
           : true;
 
       return (
@@ -968,8 +979,35 @@ export default function HomePage() {
     likedMasterIds,
     homeFilterMode,
     promotionsInCategory,
-    promotionMasters,
+    promotionMatches,
   ]);
+
+  const mastersForMap = useMemo(() => {
+    const dealsModeActive =
+      homeFilterMode === 'deals-category' || homeFilterMode === 'deals-all';
+
+    if (!dealsModeActive) {
+      return filteredMasters;
+    }
+
+    return filteredMasters.map((master: any) => {
+      const matchedPromotion = promotionMatches.find(
+        (promo) => promo.masterId === String(master.id)
+      );
+
+      if (!matchedPromotion) return master;
+
+      return {
+        ...master,
+        hasPromotion: true,
+        promotionBadge: matchedPromotion.badgeText,
+        promotionBadgeText: matchedPromotion.badgeText,
+        promotionDiscountLabel: matchedPromotion.badgeText,
+        promotionText: matchedPromotion.badgeText,
+        promotionId: matchedPromotion.promo.id,
+      };
+    });
+  }, [filteredMasters, promotionMatches, homeFilterMode]);
 
   useEffect(() => {
     setSelectedMaster(null);
@@ -986,7 +1024,7 @@ export default function HomePage() {
 
   const likedAllCount = likedMasterIds.length;
   const dealsInCategoryCount = promotionsInCategory.length;
-  const dealsAllCount = promotionMasters.length;
+  const dealsAllCount = promotionMatches.length;
 
   const hasAnyResults =
     smartResults.length > 0 ||
@@ -1278,28 +1316,42 @@ export default function HomePage() {
                   onClick={() => router.push('/profile')}
                   style={{
                     border: '1px solid #111111',
-                    background: 'transparent',
+                    background: '#fff',
+                    borderRadius: 999,
+                    width: 28,
+                    height: 28,
                     padding: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
+                    overflow: 'hidden',
                     cursor: 'pointer',
-                    fontWeight: 900,
-                    fontSize: 15,
-                    lineHeight: 1,
+                    display: 'block',
+                    position: 'relative',
+                    justifySelf: 'end',
                   }}
                 >
                   <img
                     src={userAvatar}
                     alt="Profile"
                     style={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: '50%',
+                      width: '100%',
+                      height: '100%',
                       objectFit: 'cover',
                       display: 'block',
                     }}
                   />
+                  {hasUnreadProfileUpdates ? (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        background: '#ff3b30',
+                        border: '1.5px solid #ffffff',
+                      }}
+                    />
+                  ) : null}
                 </button>
               </div>
             </div>
@@ -1774,7 +1826,7 @@ export default function HomePage() {
           <div style={{ background: '#ffffff', borderTop: '1px solid #111111', borderBottom: '1px solid #111111' }}>
             <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
               <RealMap
-                masters={filteredMasters}
+                masters={mastersForMap}
                 mapMode={mapMode}
                 activeCategory={activeCategory}
                 selectedMasterId={selectedMaster?.id ?? null}
