@@ -545,12 +545,12 @@ function formatAdTime(totalSeconds: number) {
 }
 
 function findPromotionMaster(promo: PromotionItem, masters: any[]) {
-  const normalizedCategory = String(promo.categoryId || '').toLowerCase().trim();
-  const normalizedTitle = normalizeText(promo.title);
+  const normalizedCategory = String((promo as any).categoryId || '').toLowerCase().trim();
+  const normalizedTitle = normalizeText((promo as any).title);
   const titleWords = normalizedTitle.split(' ').filter((word) => word.length > 2);
 
   const exactByMasterId = masters.find(
-    (master: any) => String(master.id) === String(promo.masterId)
+    (master: any) => String(master.id) === String((promo as any).masterId)
   );
 
   if (exactByMasterId) return exactByMasterId;
@@ -588,17 +588,41 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
 }
 
 function getPromotionBadgeText(promo: PromotionItem) {
-  const percent = Number((promo as any).discountPercent);
+  const rawCandidates = [
+    (promo as any).discountBadgeText,
+    (promo as any).badgeText,
+    (promo as any).discountText,
+    (promo as any).discountLabel,
+    (promo as any).promoLabel,
+    (promo as any).promoText,
+    (promo as any).offerBadge,
+  ];
 
-  if (Number.isFinite(percent) && percent > 0) {
-    return `-${percent}%`;
+  for (const value of rawCandidates) {
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
   }
 
-  const title = String((promo as any).badgeText || (promo as any).discountLabel || '').trim();
+  const percentCandidates = [
+    (promo as any).discountPercent,
+    (promo as any).percent,
+    (promo as any).salePercent,
+    (promo as any).offPercent,
+  ];
 
-  if (title) return title;
+  for (const value of percentCandidates) {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return `-${value}%`;
+    }
 
-  return '-30%';
+    if (typeof value === 'string' && value.trim()) {
+      const trimmed = value.trim();
+      return trimmed.includes('%') ? trimmed : `-${trimmed}%`;
+    }
+  }
+
+  return '';
 }
 
 type HomeFilterMode = 'none' | 'liked-category' | 'liked-all' | 'deals-category' | 'deals-all';
@@ -782,7 +806,7 @@ export default function HomePage() {
     );
 
     promotions.forEach((promo) => {
-      const node = promotionCardRefs.current[promo.id];
+      const node = promotionCardRefs.current[(promo as any).id];
       if (node) observer.observe(node);
     });
 
@@ -803,21 +827,6 @@ export default function HomePage() {
   const allMasters = useMemo(() => {
     return [...listingMasters, ...baseMasters];
   }, [listingMasters, baseMasters]);
-
-  const promotionMatches = useMemo(() => {
-    return promotions
-      .map((promo) => {
-        const matchedMaster = findPromotionMaster(promo, allMasters);
-
-        return {
-          promo,
-          masterId: matchedMaster ? String(matchedMaster.id) : String(promo.masterId || ''),
-          categoryId: String(promo.categoryId || '').toLowerCase().trim(),
-          badgeText: getPromotionBadgeText(promo),
-        };
-      })
-      .filter((item) => item.masterId);
-  }, [promotions, allMasters]);
 
   const smartResults = useMemo(() => {
     const q = search.trim();
@@ -915,16 +924,15 @@ export default function HomePage() {
   }, [search, allMasters]);
 
   const promotionsInCategory = useMemo(() => {
-    return promotionMatches.filter(
-      (item) => item.categoryId === activeCategory
+    return promotions.filter(
+      (promo) => String((promo as any).categoryId || '').toLowerCase().trim() === activeCategory
     );
-  }, [promotionMatches, activeCategory]);
+  }, [promotions, activeCategory]);
 
   const filteredMasters = useMemo(() => {
     const q = search.trim().toLowerCase();
 
     return allMasters.filter((master: any) => {
-      const masterId = String(master.id);
       const masterCategory = String(master.category || '').toLowerCase().trim();
       const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
 
@@ -949,17 +957,25 @@ export default function HomePage() {
 
       const likedMatch =
         homeFilterMode === 'liked-category' || homeFilterMode === 'liked-all'
-          ? likedMasterIds.includes(masterId)
+          ? likedMasterIds.includes(String(master.id))
           : true;
 
       const categoryDealsMatch =
         homeFilterMode === 'deals-category'
-          ? promotionsInCategory.some((promo) => promo.masterId === masterId)
+          ? promotionsInCategory.some((promo) => {
+              if (String((promo as any).masterId) === String(master.id)) return true;
+              const matched = findPromotionMaster(promo, allMasters);
+              return matched ? String(matched.id) === String(master.id) : false;
+            })
           : true;
 
       const allDealsMatch =
         homeFilterMode === 'deals-all'
-          ? promotionMatches.some((promo) => promo.masterId === masterId)
+          ? promotions.some((promo) => {
+              if (String((promo as any).masterId) === String(master.id)) return true;
+              const matched = findPromotionMaster(promo, allMasters);
+              return matched ? String(matched.id) === String(master.id) : false;
+            })
           : true;
 
       return (
@@ -979,35 +995,36 @@ export default function HomePage() {
     likedMasterIds,
     homeFilterMode,
     promotionsInCategory,
-    promotionMatches,
+    promotions,
   ]);
 
-  const mastersForMap = useMemo(() => {
-    const dealsModeActive =
-      homeFilterMode === 'deals-category' || homeFilterMode === 'deals-all';
-
-    if (!dealsModeActive) {
-      return filteredMasters;
+  const promotionBadgeTextByMasterId = useMemo(() => {
+    if (homeFilterMode !== 'deals-category' && homeFilterMode !== 'deals-all') {
+      return {} as Record<string, string>;
     }
 
-    return filteredMasters.map((master: any) => {
-      const matchedPromotion = promotionMatches.find(
-        (promo) => promo.masterId === String(master.id)
-      );
+    const sourcePromotions = homeFilterMode === 'deals-category' ? promotionsInCategory : promotions;
+    const nextMap: Record<string, string> = {};
 
-      if (!matchedPromotion) return master;
+    sourcePromotions.forEach((promo) => {
+      const badgeText = getPromotionBadgeText(promo);
+      if (!badgeText) return;
 
-      return {
-        ...master,
-        hasPromotion: true,
-        promotionBadge: matchedPromotion.badgeText,
-        promotionBadgeText: matchedPromotion.badgeText,
-        promotionDiscountLabel: matchedPromotion.badgeText,
-        promotionText: matchedPromotion.badgeText,
-        promotionId: matchedPromotion.promo.id,
-      };
+      const directMasterId = String((promo as any).masterId || '').trim();
+
+      if (directMasterId) {
+        nextMap[directMasterId] = badgeText;
+        return;
+      }
+
+      const matchedMaster = findPromotionMaster(promo, allMasters);
+      if (matchedMaster) {
+        nextMap[String(matchedMaster.id)] = badgeText;
+      }
     });
-  }, [filteredMasters, promotionMatches, homeFilterMode]);
+
+    return nextMap;
+  }, [homeFilterMode, promotionsInCategory, promotions, allMasters]);
 
   useEffect(() => {
     setSelectedMaster(null);
@@ -1024,7 +1041,7 @@ export default function HomePage() {
 
   const likedAllCount = likedMasterIds.length;
   const dealsInCategoryCount = promotionsInCategory.length;
-  const dealsAllCount = promotionMatches.length;
+  const dealsAllCount = promotions.length;
 
   const hasAnyResults =
     smartResults.length > 0 ||
@@ -1084,12 +1101,12 @@ export default function HomePage() {
   };
 
   const openPromotionView = (promo: PromotionItem) => {
-    incrementPromotionViews(promo.id);
-    router.push(`/promotion/${promo.id}`);
+    incrementPromotionViews((promo as any).id);
+    router.push(`/promotion/${(promo as any).id}`);
   };
 
   const openPromotionBooking = (promo: PromotionItem) => {
-    incrementPromotionViews(promo.id);
+    incrementPromotionViews((promo as any).id);
 
     const matchedMaster = findPromotionMaster(promo, allMasters);
 
@@ -1098,12 +1115,12 @@ export default function HomePage() {
       return;
     }
 
-    setActiveCategory(String(promo.categoryId || 'beauty'));
+    setActiveCategory(String((promo as any).categoryId || 'beauty'));
     setActiveSubcategory('');
     setHomeFilterMode('deals-category');
-    setSearch(promo.title);
+    setSearch((promo as any).title);
     setSearchOpen(false);
-    saveRecentSearch(promo.title);
+    saveRecentSearch((promo as any).title);
     setRecentSearches(readRecentSearches());
   };
 
@@ -1617,8 +1634,8 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-category' ? '#ffe7ef' : '#fff3f7',
-                  color: '#1f2430',
+                  background: homeFilterMode === 'liked-category' ? '#0f3b78' : '#f9edf4',
+                  color: homeFilterMode === 'liked-category' ? '#ffffff' : '#1f2430',
                   borderRadius: 18,
                   minHeight: 56,
                   padding: '10px 12px',
@@ -1629,6 +1646,10 @@ export default function HomePage() {
                   alignItems: 'center',
                   gap: 10,
                   justifyContent: 'space-between',
+                  boxShadow:
+                    homeFilterMode === 'liked-category'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.12)'
+                      : 'none',
                 }}
               >
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
@@ -1669,7 +1690,7 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'deals-category' ? '#fff4cc' : '#fff8dd',
+                  background: homeFilterMode === 'deals-category' ? '#f3e29b' : '#fff4cc',
                   color: '#1f2430',
                   borderRadius: 18,
                   minHeight: 56,
@@ -1681,6 +1702,10 @@ export default function HomePage() {
                   alignItems: 'center',
                   gap: 10,
                   justifyContent: 'space-between',
+                  boxShadow:
+                    homeFilterMode === 'deals-category'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.18)'
+                      : 'none',
                 }}
               >
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
@@ -1721,8 +1746,8 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-all' ? '#ffe7ef' : '#fff3f7',
-                  color: '#1f2430',
+                  background: homeFilterMode === 'liked-all' ? '#0f3b78' : '#f9edf4',
+                  color: homeFilterMode === 'liked-all' ? '#ffffff' : '#1f2430',
                   borderRadius: 18,
                   minHeight: 56,
                   padding: '10px 12px',
@@ -1733,6 +1758,10 @@ export default function HomePage() {
                   alignItems: 'center',
                   gap: 10,
                   justifyContent: 'space-between',
+                  boxShadow:
+                    homeFilterMode === 'liked-all'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.12)'
+                      : 'none',
                 }}
               >
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
@@ -1773,7 +1802,7 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'deals-all' ? '#fff4cc' : '#fff8dd',
+                  background: homeFilterMode === 'deals-all' ? '#f3e29b' : '#fff4cc',
                   color: '#1f2430',
                   borderRadius: 18,
                   minHeight: 56,
@@ -1785,6 +1814,10 @@ export default function HomePage() {
                   alignItems: 'center',
                   gap: 10,
                   justifyContent: 'space-between',
+                  boxShadow:
+                    homeFilterMode === 'deals-all'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.18)'
+                      : 'none',
                 }}
               >
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
@@ -1826,13 +1859,14 @@ export default function HomePage() {
           <div style={{ background: '#ffffff', borderTop: '1px solid #111111', borderBottom: '1px solid #111111' }}>
             <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
               <RealMap
-                masters={mastersForMap}
+                masters={filteredMasters}
                 mapMode={mapMode}
                 activeCategory={activeCategory}
                 selectedMasterId={selectedMaster?.id ?? null}
                 likedMasterIds={likedMasterIds}
                 recenterToUserTrigger={recenterToUserTrigger}
                 language={language}
+                promotionBadgeTextByMasterId={promotionBadgeTextByMasterId}
                 onMasterSelect={(master) => {
                   setSelectedMaster(master);
                 }}
@@ -1903,11 +1937,11 @@ export default function HomePage() {
               >
                 {promotions.map((promo) => (
                   <div
-                    key={promo.id}
+                    key={String((promo as any).id)}
                     ref={(node) => {
-                      promotionCardRefs.current[promo.id] = node;
+                      promotionCardRefs.current[String((promo as any).id)] = node;
                     }}
-                    data-promo-id={promo.id}
+                    data-promo-id={String((promo as any).id)}
                     style={{
                       background: '#fff',
                       borderRadius: 26,
@@ -1933,8 +1967,8 @@ export default function HomePage() {
                     >
                       <div style={{ position: 'relative' }}>
                         <img
-                          src={promo.image}
-                          alt={promo.title}
+                          src={String((promo as any).image)}
+                          alt={String((promo as any).title)}
                           style={{
                             width: '100%',
                             height: 170,
@@ -1953,7 +1987,7 @@ export default function HomePage() {
                             lineHeight: 1.2,
                           }}
                         >
-                          {promo.title}
+                          {String((promo as any).title)}
                         </div>
 
                         <div
@@ -1964,7 +1998,7 @@ export default function HomePage() {
                             color: '#6b7280',
                           }}
                         >
-                          {promo.subtitle || tr.specialOfferNearYou}
+                          {(promo as any).subtitle || tr.specialOfferNearYou}
                         </div>
                       </div>
                     </button>
