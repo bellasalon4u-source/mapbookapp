@@ -787,8 +787,6 @@ function readExtraProfileData(): ExtraProfileData {
       email: parsed.contacts?.email || '',
     };
 
-    const fallbackPhoneMeta = emptyPhoneMeta();
-
     return {
       district: parsed.district || '',
       address: parsed.address || '',
@@ -803,8 +801,6 @@ function readExtraProfileData(): ExtraProfileData {
         telegram:
           parsed.contactPhoneMeta?.telegram || parseStoredPhoneContact(contacts.telegram),
         viber: parsed.contactPhoneMeta?.viber || parseStoredPhoneContact(contacts.viber),
-        ...fallbackPhoneMeta,
-        ...parsed.contactPhoneMeta,
       },
     };
   } catch {
@@ -824,14 +820,20 @@ function saveExtraProfileData(data: ExtraProfileData) {
 }
 
 function getAccentColors(accent: ContactItem['accent']) {
-  if (accent === 'green') return { bg: '#eef9f1', border: '#d8f0df' };
-  if (accent === 'blue') return { bg: '#eef4ff', border: '#d9e6ff' };
-  if (accent === 'violet') return { bg: '#f3efff', border: '#e4dcff' };
-  if (accent === 'orange') return { bg: '#fff5e8', border: '#f6e4c9' };
-  return { bg: '#fff1f7', border: '#f7d9e8' };
+  if (accent === 'green') return { bg: '#edf9ef', border: '#111111', text: '#1f8f49' };
+  if (accent === 'blue') return { bg: '#edf4ff', border: '#111111', text: '#2f7cf6' };
+  if (accent === 'violet') return { bg: '#f3efff', border: '#111111', text: '#7a5af8' };
+  if (accent === 'orange') return { bg: '#fff4e7', border: '#111111', text: '#d68612' };
+  return { bg: '#fff0f6', border: '#111111', text: '#ff4fa0' };
 }
 
-function fieldLabel(title: string, helper: string) {
+function FieldHeader({
+  title,
+  helper,
+}: {
+  title: string;
+  helper: string;
+}) {
   return (
     <div
       style={{
@@ -843,7 +845,7 @@ function fieldLabel(title: string, helper: string) {
       }}
     >
       <span style={{ fontSize: 14, fontWeight: 900, color: '#17130f' }}>{title}</span>
-      <span style={{ fontSize: 12, fontWeight: 800, color: '#8a7f74' }}>{helper}</span>
+      <span style={{ fontSize: 12, fontWeight: 900, color: '#8a7f74' }}>{helper}</span>
     </div>
   );
 }
@@ -986,7 +988,7 @@ function CountryPickerModal({
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(20,16,12,0.42)',
+        background: 'rgba(20,16,12,0.52)',
         zIndex: 3000,
         display: 'flex',
         alignItems: 'flex-end',
@@ -1001,10 +1003,11 @@ function CountryPickerModal({
           maxWidth: 460,
           maxHeight: '82vh',
           overflow: 'hidden',
-          background: '#fff',
-          borderTopLeftRadius: 28,
-          borderTopRightRadius: 28,
-          boxShadow: '0 -10px 30px rgba(0,0,0,0.12)',
+          background: '#fbf7ef',
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          border: '2px solid #111111',
+          boxShadow: '0 -8px 0 rgba(0,0,0,0.08)',
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -1012,45 +1015,45 @@ function CountryPickerModal({
         <div
           style={{
             padding: '14px 16px 10px',
-            borderBottom: '1px solid #efe4d7',
+            borderBottom: '2px solid #111111',
             display: 'grid',
-            gridTemplateColumns: '42px 1fr',
+            gridTemplateColumns: '52px 1fr',
             alignItems: 'center',
             gap: 10,
+            background: '#ffffff',
           }}
         >
           <button
             type="button"
             onClick={onClose}
             style={{
-              width: 42,
-              height: 42,
+              width: 52,
+              height: 52,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
-              fontSize: 22,
+              fontSize: 24,
               cursor: 'pointer',
+              fontWeight: 900,
             }}
           >
             ←
           </button>
 
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
-            {title}
-          </div>
+          <div style={{ fontSize: 20, fontWeight: 900, color: '#17130f' }}>{title}</div>
         </div>
 
-        <div style={{ padding: 16, borderBottom: '1px solid #f3ece2' }}>
+        <div style={{ padding: 16, borderBottom: '2px solid #111111', background: '#fbf7ef' }}>
           <input
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchLabel}
             style={{
               width: '100%',
-              height: 52,
-              borderRadius: 16,
-              border: '1px solid #efe4d7',
-              background: '#fcfaf6',
+              height: 56,
+              borderRadius: 18,
+              border: '2px solid #111111',
+              background: '#fff',
               padding: '0 14px',
               fontSize: 15,
               outline: 'none',
@@ -1059,7 +1062,7 @@ function CountryPickerModal({
           />
         </div>
 
-        <div style={{ overflowY: 'auto', padding: '4px 0 18px' }}>
+        <div style={{ overflowY: 'auto', padding: '4px 0 18px', background: '#fbf7ef' }}>
           {countries.map((country) => {
             const active = selectedCountryCode === country.code;
 
@@ -1071,8 +1074,8 @@ function CountryPickerModal({
                 style={{
                   width: '100%',
                   border: 'none',
-                  borderBottom: '1px solid #f4eee5',
-                  background: active ? '#f4fbf6' : '#fff',
+                  borderBottom: '2px solid #111111',
+                  background: active ? '#edf9ef' : '#fff',
                   padding: '14px 16px',
                   display: 'grid',
                   gridTemplateColumns: '30px 1fr auto auto',
@@ -1086,8 +1089,8 @@ function CountryPickerModal({
                 <span
                   style={{
                     fontSize: 17,
-                    fontWeight: active ? 900 : 800,
-                    color: active ? '#1f8f49' : '#17130f',
+                    fontWeight: 900,
+                    color: '#17130f',
                   }}
                 >
                   {country.label}
@@ -1105,7 +1108,7 @@ function CountryPickerModal({
                   style={{
                     fontSize: 20,
                     fontWeight: 900,
-                    color: active ? '#17130f' : 'transparent',
+                    color: active ? '#1f8f49' : 'transparent',
                   }}
                 >
                   ✓
@@ -1145,9 +1148,9 @@ function ContactRow({
     return (
       <div
         style={{
-          border: `1px solid ${colors.border}`,
+          border: `2px solid ${colors.border}`,
           background: colors.bg,
-          borderRadius: 22,
+          borderRadius: 28,
           padding: 14,
         }}
       >
@@ -1177,9 +1180,9 @@ function ContactRow({
             type="button"
             onClick={onOpenCountryPicker}
             style={{
-              height: 54,
-              borderRadius: 16,
-              border: '1px solid #e7dccf',
+              height: 56,
+              borderRadius: 18,
+              border: '2px solid #111111',
               background: '#fff',
               padding: '0 12px',
               display: 'flex',
@@ -1209,9 +1212,9 @@ function ContactRow({
             placeholder={item.placeholder[language]}
             style={{
               width: '100%',
-              height: 54,
-              borderRadius: 16,
-              border: '1px solid #e7dccf',
+              height: 56,
+              borderRadius: 18,
+              border: '2px solid #111111',
               background: '#fff',
               padding: '0 14px',
               fontSize: 15,
@@ -1227,9 +1230,9 @@ function ContactRow({
   return (
     <div
       style={{
-        border: `1px solid ${colors.border}`,
+        border: `2px solid ${colors.border}`,
         background: colors.bg,
-        borderRadius: 22,
+        borderRadius: 28,
         padding: 14,
       }}
     >
@@ -1254,9 +1257,9 @@ function ContactRow({
         placeholder={item.placeholder[language]}
         style={{
           width: '100%',
-          height: 54,
-          borderRadius: 16,
-          border: '1px solid #e7dccf',
+          height: 56,
+          borderRadius: 18,
+          border: '2px solid #111111',
           background: '#fff',
           padding: '0 14px',
           fontSize: 15,
@@ -1267,6 +1270,39 @@ function ContactRow({
     </div>
   );
 }
+
+const shellCardStyle: CSSProperties = {
+  marginTop: 18,
+  borderRadius: 34,
+  background: '#fff',
+  border: '2px solid #111111',
+  padding: 18,
+};
+
+const textInputStyle: CSSProperties = {
+  width: '100%',
+  height: 58,
+  borderRadius: 20,
+  border: '2px solid #111111',
+  background: '#fff',
+  padding: '0 16px',
+  fontSize: 16,
+  outline: 'none',
+  boxSizing: 'border-box',
+};
+
+const textAreaStyle: CSSProperties = {
+  width: '100%',
+  borderRadius: 22,
+  border: '2px solid #111111',
+  background: '#fff',
+  padding: '14px 16px',
+  fontSize: 16,
+  outline: 'none',
+  resize: 'vertical',
+  boxSizing: 'border-box',
+  fontFamily: 'inherit',
+};
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -1522,8 +1558,9 @@ export default function EditProfilePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
-        padding: '20px 16px 110px',
+        background: '#f7f4ee',
+        color: '#17130f',
+        paddingBottom: 110,
       }}
     >
       <CountryPickerModal
@@ -1580,7 +1617,7 @@ export default function EditProfilePage() {
         style={{ display: 'none' }}
       />
 
-      <div style={{ maxWidth: 430, margin: '0 auto' }}>
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '20px 16px 110px' }}>
         <div
           style={{
             display: 'grid',
@@ -1596,11 +1633,11 @@ export default function EditProfilePage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
               fontSize: 26,
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
               cursor: 'pointer',
+              fontWeight: 900,
             }}
           >
             ←
@@ -1633,7 +1670,7 @@ export default function EditProfilePage() {
             type="button"
             onClick={handleSave}
             style={{
-              border: 'none',
+              border: '2px solid #111111',
               borderRadius: 999,
               background: '#2f241c',
               color: '#fff',
@@ -1641,23 +1678,13 @@ export default function EditProfilePage() {
               fontSize: 14,
               fontWeight: 900,
               cursor: 'pointer',
-              boxShadow: '0 10px 20px rgba(47,36,28,0.18)',
             }}
           >
             {text.save}
           </button>
         </div>
 
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 32,
-            background: '#fff',
-            border: '1px solid #efe4d7',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
+        <div style={shellCardStyle}>
           <div
             style={{
               fontSize: 18,
@@ -1676,10 +1703,10 @@ export default function EditProfilePage() {
               style={{
                 width: 112,
                 height: 112,
-                borderRadius: 34,
+                borderRadius: 32,
                 objectFit: 'cover',
                 display: 'block',
-                boxShadow: '0 14px 28px rgba(44, 23, 10, 0.12)',
+                border: '3px solid #111111',
               }}
             />
           </div>
@@ -1696,11 +1723,11 @@ export default function EditProfilePage() {
               type="button"
               onClick={() => cameraInputRef.current?.click()}
               style={{
-                minHeight: 50,
-                borderRadius: 16,
-                border: '1px solid #d8eadb',
-                background: '#eef8f0',
-                color: '#2f8b48',
+                minHeight: 52,
+                borderRadius: 18,
+                border: '2px solid #111111',
+                background: '#edf9ef',
+                color: '#1f8f49',
                 fontWeight: 900,
                 fontSize: 14,
                 cursor: 'pointer',
@@ -1713,10 +1740,10 @@ export default function EditProfilePage() {
               type="button"
               onClick={() => galleryInputRef.current?.click()}
               style={{
-                minHeight: 50,
-                borderRadius: 16,
-                border: '1px solid #f1d9e6',
-                background: '#fff1f7',
+                minHeight: 52,
+                borderRadius: 18,
+                border: '2px solid #111111',
+                background: '#fff0f6',
                 color: '#ff4fa0',
                 fontWeight: 900,
                 fontSize: 14,
@@ -1730,10 +1757,10 @@ export default function EditProfilePage() {
               type="button"
               onClick={() => filesInputRef.current?.click()}
               style={{
-                minHeight: 50,
-                borderRadius: 16,
-                border: '1px solid #ddd6cb',
-                background: '#faf8f5',
+                minHeight: 52,
+                borderRadius: 18,
+                border: '2px solid #111111',
+                background: '#fff4e7',
                 color: '#17130f',
                 fontWeight: 900,
                 fontSize: 14,
@@ -1801,9 +1828,8 @@ export default function EditProfilePage() {
                     height: 82,
                     borderRadius: 22,
                     overflow: 'hidden',
-                    border: selected ? '3px solid #ff4fa0' : '1px solid #efe4d7',
+                    border: selected ? '3px solid #ff4fa0' : '2px solid #111111',
                     background: '#fff',
-                    boxShadow: selected ? '0 10px 22px rgba(255,79,160,0.16)' : 'none',
                   }}
                 >
                   <button
@@ -1837,11 +1863,11 @@ export default function EditProfilePage() {
                       position: 'absolute',
                       top: 5,
                       right: 5,
-                      width: 22,
-                      height: 22,
+                      width: 24,
+                      height: 24,
                       borderRadius: 999,
-                      border: 'none',
-                      background: 'rgba(23,19,15,0.75)',
+                      border: '2px solid #ffffff',
+                      background: 'rgba(23,19,15,0.82)',
                       color: '#fff',
                       fontSize: 13,
                       fontWeight: 900,
@@ -1860,16 +1886,7 @@ export default function EditProfilePage() {
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 32,
-            background: '#fff',
-            border: '1px solid #efe4d7',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
+        <div style={shellCardStyle}>
           <div
             style={{
               fontSize: 18,
@@ -1883,46 +1900,26 @@ export default function EditProfilePage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <label>
-              {fieldLabel(text.firstName, text.required)}
+              <FieldHeader title={text.firstName} helper={text.required} />
               <input
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                style={{
-                  width: '100%',
-                  height: 54,
-                  borderRadius: 18,
-                  border: '1px solid #efe4d7',
-                  background: '#fffdf9',
-                  padding: '0 16px',
-                  fontSize: 16,
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                style={textInputStyle}
               />
             </label>
 
             <label>
-              {fieldLabel(text.lastName, text.required)}
+              <FieldHeader title={text.lastName} helper={text.required} />
               <input
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                style={{
-                  width: '100%',
-                  height: 54,
-                  borderRadius: 18,
-                  border: '1px solid #efe4d7',
-                  background: '#fffdf9',
-                  padding: '0 16px',
-                  fontSize: 16,
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                style={textInputStyle}
               />
             </label>
           </div>
 
           <div style={{ marginTop: 14 }}>
-            {fieldLabel(text.phone, text.required)}
+            <FieldHeader title={text.phone} helper={text.required} />
 
             <div
               style={{
@@ -1939,8 +1936,8 @@ export default function EditProfilePage() {
                 }}
                 style={{
                   height: 58,
-                  borderRadius: 18,
-                  border: '1px solid #efe4d7',
+                  borderRadius: 20,
+                  border: '2px solid #111111',
                   background: '#fff',
                   padding: '0 14px',
                   display: 'flex',
@@ -1963,54 +1960,24 @@ export default function EditProfilePage() {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(normalizePhoneNumber(e.target.value))}
                 placeholder={text.phonePlaceholder}
-                style={{
-                  width: '100%',
-                  height: 58,
-                  borderRadius: 18,
-                  border: '1px solid #efe4d7',
-                  background: '#fffdf9',
-                  padding: '0 16px',
-                  fontSize: 16,
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                style={textInputStyle}
               />
             </div>
           </div>
 
           <div style={{ marginTop: 14 }}>
-            {fieldLabel(text.bio, text.optional)}
+            <FieldHeader title={text.bio} helper={text.optional} />
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               placeholder={text.bioPlaceholder}
               rows={5}
-              style={{
-                width: '100%',
-                borderRadius: 20,
-                border: '1px solid #efe4d7',
-                background: '#fffdf9',
-                padding: '14px 16px',
-                fontSize: 16,
-                outline: 'none',
-                resize: 'vertical',
-                boxSizing: 'border-box',
-                fontFamily: 'inherit',
-              }}
+              style={textAreaStyle}
             />
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 32,
-            background: '#fff',
-            border: '1px solid #efe4d7',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
+        <div style={shellCardStyle}>
           <div
             style={{
               fontSize: 18,
@@ -2024,79 +1991,39 @@ export default function EditProfilePage() {
 
           <div style={{ display: 'grid', gap: 14 }}>
             <label>
-              {fieldLabel(text.city, text.required)}
+              <FieldHeader title={text.city} helper={text.required} />
               <input
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder={text.cityPlaceholder}
-                style={{
-                  width: '100%',
-                  height: 54,
-                  borderRadius: 18,
-                  border: '1px solid #efe4d7',
-                  background: '#fffdf9',
-                  padding: '0 16px',
-                  fontSize: 16,
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                style={textInputStyle}
               />
             </label>
 
             <label>
-              {fieldLabel(text.district, text.optional)}
+              <FieldHeader title={text.district} helper={text.optional} />
               <input
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
                 placeholder={text.districtPlaceholder}
-                style={{
-                  width: '100%',
-                  height: 54,
-                  borderRadius: 18,
-                  border: '1px solid #efe4d7',
-                  background: '#fffdf9',
-                  padding: '0 16px',
-                  fontSize: 16,
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                style={textInputStyle}
               />
             </label>
 
             <label>
-              {fieldLabel(text.address, text.optional)}
+              <FieldHeader title={text.address} helper={text.optional} />
               <textarea
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder={text.addressPlaceholder}
                 rows={3}
-                style={{
-                  width: '100%',
-                  borderRadius: 20,
-                  border: '1px solid #efe4d7',
-                  background: '#fffdf9',
-                  padding: '14px 16px',
-                  fontSize: 16,
-                  outline: 'none',
-                  resize: 'vertical',
-                  boxSizing: 'border-box',
-                  fontFamily: 'inherit',
-                }}
+                style={textAreaStyle}
               />
             </label>
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 32,
-            background: '#fff',
-            border: '1px solid #efe4d7',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
+        <div style={shellCardStyle}>
           <div
             style={{
               fontSize: 18,
@@ -2177,7 +2104,7 @@ export default function EditProfilePage() {
             style={{
               marginTop: 12,
               fontSize: 12,
-              fontWeight: 800,
+              fontWeight: 900,
               color: '#8a7f74',
             }}
           >
