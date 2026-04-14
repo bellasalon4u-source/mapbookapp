@@ -1,190 +1,74 @@
-function translateCategoryLabel(
-  categoryId: string,
-  language: AppLanguage,
-  fallback?: string
-) {
-  const map: Record<string, Partial<Record<AppLanguage, string>>> = {
-    beauty: {
-      EN: 'Beauty',
-      ES: 'Belleza',
-      RU: 'Красота',
-      UA: 'Краса',
-      CZ: 'Krása',
-      DE: 'Beauty',
-      IT: 'Bellezza',
-      FR: 'Beauté',
-      AR: 'الجمال',
-      PL: 'Uroda',
-    },
-    barber: {
-      EN: 'Barber',
-      ES: 'Barbero',
-      RU: 'Барбер',
-      UA: 'Барбер',
-      CZ: 'Barber',
-      DE: 'Barber',
-      IT: 'Barber',
-      FR: 'Barbier',
-      AR: 'حلاق',
-      PL: 'Barber',
-    },
-    wellness: {
-      EN: 'Wellness',
-      ES: 'Bienestar',
-      RU: 'Велнес',
-      UA: 'Велнес',
-      CZ: 'Wellness',
-      DE: 'Wellness',
-      IT: 'Benessere',
-      FR: 'Bien-être',
-      AR: 'العافية',
-      PL: 'Wellness',
-    },
-    home: {
-      EN: 'Home',
-      ES: 'Hogar',
-      RU: 'Дом',
-      UA: 'Дім',
-      CZ: 'Domov',
-      DE: 'Zuhause',
-      IT: 'Casa',
-      FR: 'Maison',
-      AR: 'المنزل',
-      PL: 'Dom',
-    },
-    repairs: {
-      EN: 'Repairs',
-      ES: 'Reparaciones',
-      RU: 'Ремонт',
-      UA: 'Ремонт',
-      CZ: 'Opravy',
-      DE: 'Reparaturen',
-      IT: 'Riparazioni',
-      FR: 'Réparations',
-      AR: 'إصلاحات',
-      PL: 'Naprawy',
-    },
-    tech: {
-      EN: 'Tech',
-      ES: 'Tecnología',
-      RU: 'Техника',
-      UA: 'Техніка',
-      CZ: 'Technika',
-      DE: 'Technik',
-      IT: 'Tecnologia',
-      FR: 'Tech',
-      AR: 'تقنية',
-      PL: 'Technika',
-    },
-    pets: {
-      EN: 'Pets',
-      ES: 'Mascotas',
-      RU: 'Питомцы',
-      UA: 'Тварини',
-      CZ: 'Mazlíčci',
-      DE: 'Haustiere',
-      IT: 'Animali',
-      FR: 'Animaux',
-      AR: 'حيوانات',
-      PL: 'Zwierzęta',
-    },
-    fashion: {
-      EN: 'Fashion',
-      ES: 'Moda',
-      RU: 'Мода',
-      UA: 'Мода',
-      CZ: 'Móda',
-      DE: 'Mode',
-      IT: 'Moda',
-      FR: 'Mode',
-      AR: 'موضة',
-      PL: 'Moda',
-    },
-    auto: {
-      EN: 'Auto',
-      ES: 'Auto',
-      RU: 'Авто',
-      UA: 'Авто',
-      CZ: 'Auto',
-      DE: 'Auto',
-      IT: 'Auto',
-      FR: 'Auto',
-      AR: 'سيارات',
-      PL: 'Auto',
-    },
-    moving: {
-      EN: 'Moving',
-      ES: 'Mudanza',
-      RU: 'Переезд',
-      UA: 'Переїзд',
-      CZ: 'Stěhování',
-      DE: 'Umzug',
-      IT: 'Trasloco',
-      FR: 'Déménagement',
-      AR: 'نقل',
-      PL: 'Przeprowadzka',
-    },
-    fitness: {
-      EN: 'Fitness',
-      ES: 'Fitness',
-      RU: 'Фитнес',
-      UA: 'Фітнес',
-      CZ: 'Fitness',
-      DE: 'Fitness',
-      IT: 'Fitness',
-      FR: 'Fitness',
-      AR: 'لياقة',
-      PL: 'Fitness',
-    },
-    education: {
-      EN: 'Education',
-      ES: 'Educación',
-      RU: 'Обучение',
-      UA: 'Навчання',
-      CZ: 'Vzdělání',
-      DE: 'Bildung',
-      IT: 'Educazione',
-      FR: 'Éducation',
-      AR: 'تعليم',
-      PL: 'Edukacja',
-    },
-    events: {
-      EN: 'Events',
-      ES: 'Eventos',
-      RU: 'События',
-      UA: 'Події',
-      CZ: 'Události',
-      DE: 'Events',
-      IT: 'Eventi',
-      FR: 'Événements',
-      AR: 'فعاليات',
-      PL: 'Wydarzenia',
-    },
-    activities: {
-      EN: 'Activities',
-      ES: 'Actividades',
-      RU: 'Активности',
-      UA: 'Активності',
-      CZ: 'Aktivity',
-      DE: 'Aktivitäten',
-      IT: 'Attività',
-      FR: 'Activités',
-      AR: 'أنشطة',
-      PL: 'Aktywności',
-    },
-    creative: {
-      EN: 'Creative',
-      ES: 'Creativo',
-      RU: 'Креатив',
-      UA: 'Креатив',
-      CZ: 'Kreativa',
-      DE: 'Kreativ',
-      IT: 'Creativo',
-      FR: 'Créatif',
-      AR: 'إبداعي',
-      PL: 'Kreatywne',
-    },
-  };
+'use client';
 
-  return map[categoryId]?.[language] || fallback || categoryId;
+import { useRouter } from 'next/navigation';
+
+export default function NewPromotionPage() {
+  const router = useRouter();
+
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#fbf7ef',
+        padding: '24px 16px 120px',
+        fontFamily: 'Arial, sans-serif',
+      }}
+    >
+      <div style={{ maxWidth: 430, margin: '0 auto' }}>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          style={{
+            width: 54,
+            height: 54,
+            borderRadius: 999,
+            border: '1px solid #e8dfd2',
+            background: '#fff',
+            fontSize: 26,
+            fontWeight: 900,
+            color: '#17130f',
+            boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+            cursor: 'pointer',
+            marginBottom: 18,
+          }}
+        >
+          ←
+        </button>
+
+        <div
+          style={{
+            background: '#ffffff',
+            borderRadius: 30,
+            padding: 22,
+            border: '1px solid #eee5d9',
+            boxShadow: '0 12px 28px rgba(0,0,0,0.04)',
+          }}
+        >
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 26,
+              fontWeight: 900,
+              color: '#17130f',
+            }}
+          >
+            New promotion
+          </h1>
+
+          <p
+            style={{
+              marginTop: 10,
+              marginBottom: 0,
+              fontSize: 15,
+              lineHeight: 1.5,
+              color: '#6f675f',
+              fontWeight: 700,
+            }}
+          >
+            This page is temporarily restored as a safe placeholder so production build can pass.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
 }
