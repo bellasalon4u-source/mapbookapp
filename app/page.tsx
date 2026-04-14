@@ -232,6 +232,7 @@ function listingToMaster(
     price: listing.price,
     paymentMethods: listing.paymentMethods as ('cash' | 'card' | 'wallet')[],
     hours: listing.hours,
+    discountBadge: '',
   };
 }
 
@@ -545,12 +546,12 @@ function formatAdTime(totalSeconds: number) {
 }
 
 function findPromotionMaster(promo: PromotionItem, masters: any[]) {
-  const normalizedCategory = String((promo as any).categoryId || '').toLowerCase().trim();
-  const normalizedTitle = normalizeText((promo as any).title);
+  const normalizedCategory = String(promo.categoryId || '').toLowerCase().trim();
+  const normalizedTitle = normalizeText(promo.title);
   const titleWords = normalizedTitle.split(' ').filter((word) => word.length > 2);
 
   const exactByMasterId = masters.find(
-    (master: any) => String(master.id) === String((promo as any).masterId)
+    (master: any) => String(master.id) === String(promo.masterId)
   );
 
   if (exactByMasterId) return exactByMasterId;
@@ -587,42 +588,25 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
   return sameCategory[0] || null;
 }
 
-function getPromotionBadgeText(promo: PromotionItem) {
-  const rawCandidates = [
-    (promo as any).discountBadgeText,
-    (promo as any).badgeText,
-    (promo as any).discountText,
-    (promo as any).discountLabel,
-    (promo as any).promoLabel,
-    (promo as any).promoText,
-    (promo as any).offerBadge,
-  ];
+function getPromotionDiscountBadge(promo: PromotionItem) {
+  const raw =
+    (promo as any).discountPercent ??
+    (promo as any).discountValue ??
+    (promo as any).discount ??
+    (promo as any).badge ??
+    '';
 
-  for (const value of rawCandidates) {
-    if (typeof value === 'string' && value.trim()) {
-      return value.trim();
-    }
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    return `-${raw}%`;
   }
 
-  const percentCandidates = [
-    (promo as any).discountPercent,
-    (promo as any).percent,
-    (promo as any).salePercent,
-    (promo as any).offPercent,
-  ];
+  const text = String(raw || '').trim();
+  if (!text) return '';
 
-  for (const value of percentCandidates) {
-    if (typeof value === 'number' && Number.isFinite(value)) {
-      return `-${value}%`;
-    }
+  if (text.includes('%')) return text;
+  if (/^\d+$/.test(text)) return `-${text}%`;
 
-    if (typeof value === 'string' && value.trim()) {
-      const trimmed = value.trim();
-      return trimmed.includes('%') ? trimmed : `-${trimmed}%`;
-    }
-  }
-
-  return '';
+  return text;
 }
 
 type HomeFilterMode = 'none' | 'liked-category' | 'liked-all' | 'deals-category' | 'deals-all';
@@ -806,7 +790,7 @@ export default function HomePage() {
     );
 
     promotions.forEach((promo) => {
-      const node = promotionCardRefs.current[(promo as any).id];
+      const node = promotionCardRefs.current[promo.id];
       if (node) observer.observe(node);
     });
 
@@ -827,6 +811,29 @@ export default function HomePage() {
   const allMasters = useMemo(() => {
     return [...listingMasters, ...baseMasters];
   }, [listingMasters, baseMasters]);
+
+  const promotionsInCategory = useMemo(() => {
+    return promotions.filter(
+      (promo) => String(promo.categoryId || '').toLowerCase().trim() === activeCategory
+    );
+  }, [promotions, activeCategory]);
+
+  const decoratedMasters = useMemo(() => {
+    return allMasters.map((master: any) => {
+      const matchedPromo = promotions.find((promo) => {
+        const sameMasterId = String(promo.masterId || '') === String(master.id);
+        if (sameMasterId) return true;
+
+        const foundMaster = findPromotionMaster(promo, [master]);
+        return Boolean(foundMaster);
+      });
+
+      return {
+        ...master,
+        discountBadge: matchedPromo ? getPromotionDiscountBadge(matchedPromo) : '',
+      };
+    });
+  }, [allMasters, promotions]);
 
   const smartResults = useMemo(() => {
     const q = search.trim();
@@ -900,7 +907,7 @@ export default function HomePage() {
     const q = search.trim();
     if (!q) return [] as MasterSearchResult[];
 
-    return allMasters
+    return decoratedMasters
       .map((master: any) => {
         const score =
           scoreTextMatch(q, String(master.name || master.title || '')) * 1.5 +
@@ -921,18 +928,12 @@ export default function HomePage() {
         categoryId: String(master.category || 'beauty'),
         master,
       }));
-  }, [search, allMasters]);
-
-  const promotionsInCategory = useMemo(() => {
-    return promotions.filter(
-      (promo) => String((promo as any).categoryId || '').toLowerCase().trim() === activeCategory
-    );
-  }, [promotions, activeCategory]);
+  }, [search, decoratedMasters]);
 
   const filteredMasters = useMemo(() => {
     const q = search.trim().toLowerCase();
 
-    return allMasters.filter((master: any) => {
+    return decoratedMasters.filter((master: any) => {
       const masterCategory = String(master.category || '').toLowerCase().trim();
       const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
 
@@ -962,20 +963,13 @@ export default function HomePage() {
 
       const categoryDealsMatch =
         homeFilterMode === 'deals-category'
-          ? promotionsInCategory.some((promo) => {
-              if (String((promo as any).masterId) === String(master.id)) return true;
-              const matched = findPromotionMaster(promo, allMasters);
-              return matched ? String(matched.id) === String(master.id) : false;
-            })
+          ? Boolean(master.discountBadge) &&
+            masterCategory === activeCategory
           : true;
 
       const allDealsMatch =
         homeFilterMode === 'deals-all'
-          ? promotions.some((promo) => {
-              if (String((promo as any).masterId) === String(master.id)) return true;
-              const matched = findPromotionMaster(promo, allMasters);
-              return matched ? String(matched.id) === String(master.id) : false;
-            })
+          ? Boolean(master.discountBadge)
           : true;
 
       return (
@@ -988,43 +982,13 @@ export default function HomePage() {
       );
     });
   }, [
-    allMasters,
+    decoratedMasters,
     activeCategory,
     activeSubcategory,
     search,
     likedMasterIds,
     homeFilterMode,
-    promotionsInCategory,
-    promotions,
   ]);
-
-  const promotionBadgeTextByMasterId = useMemo(() => {
-    if (homeFilterMode !== 'deals-category' && homeFilterMode !== 'deals-all') {
-      return {} as Record<string, string>;
-    }
-
-    const sourcePromotions = homeFilterMode === 'deals-category' ? promotionsInCategory : promotions;
-    const nextMap: Record<string, string> = {};
-
-    sourcePromotions.forEach((promo) => {
-      const badgeText = getPromotionBadgeText(promo);
-      if (!badgeText) return;
-
-      const directMasterId = String((promo as any).masterId || '').trim();
-
-      if (directMasterId) {
-        nextMap[directMasterId] = badgeText;
-        return;
-      }
-
-      const matchedMaster = findPromotionMaster(promo, allMasters);
-      if (matchedMaster) {
-        nextMap[String(matchedMaster.id)] = badgeText;
-      }
-    });
-
-    return nextMap;
-  }, [homeFilterMode, promotionsInCategory, promotions, allMasters]);
 
   useEffect(() => {
     setSelectedMaster(null);
@@ -1033,15 +997,19 @@ export default function HomePage() {
   const borderGradient = getLanguageBorder(language);
   const currentCategoryLabel = getCategoryLabel(activeCategory, language);
 
-  const likedInCategoryCount = allMasters.filter(
+  const likedInCategoryCount = decoratedMasters.filter(
     (master: any) =>
       String(master.category || '').toLowerCase().trim() === activeCategory &&
       likedMasterIds.includes(String(master.id))
   ).length;
 
   const likedAllCount = likedMasterIds.length;
-  const dealsInCategoryCount = promotionsInCategory.length;
-  const dealsAllCount = promotions.length;
+  const dealsInCategoryCount = decoratedMasters.filter(
+    (master: any) =>
+      String(master.category || '').toLowerCase().trim() === activeCategory &&
+      Boolean(master.discountBadge)
+  ).length;
+  const dealsAllCount = decoratedMasters.filter((master: any) => Boolean(master.discountBadge)).length;
 
   const hasAnyResults =
     smartResults.length > 0 ||
@@ -1101,26 +1069,26 @@ export default function HomePage() {
   };
 
   const openPromotionView = (promo: PromotionItem) => {
-    incrementPromotionViews((promo as any).id);
-    router.push(`/promotion/${(promo as any).id}`);
+    incrementPromotionViews(promo.id);
+    router.push(`/promotion/${promo.id}`);
   };
 
   const openPromotionBooking = (promo: PromotionItem) => {
-    incrementPromotionViews((promo as any).id);
+    incrementPromotionViews(promo.id);
 
-    const matchedMaster = findPromotionMaster(promo, allMasters);
+    const matchedMaster = findPromotionMaster(promo, decoratedMasters);
 
     if (matchedMaster) {
       router.push(`/booking/${matchedMaster.id}`);
       return;
     }
 
-    setActiveCategory(String((promo as any).categoryId || 'beauty'));
+    setActiveCategory(String(promo.categoryId || 'beauty'));
     setActiveSubcategory('');
     setHomeFilterMode('deals-category');
-    setSearch((promo as any).title);
+    setSearch(promo.title);
     setSearchOpen(false);
-    saveRecentSearch((promo as any).title);
+    saveRecentSearch(promo.title);
     setRecentSearches(readRecentSearches());
   };
 
@@ -1634,8 +1602,8 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-category' ? '#0f3b78' : '#f9edf4',
-                  color: homeFilterMode === 'liked-category' ? '#ffffff' : '#1f2430',
+                  background: homeFilterMode === 'liked-category' ? '#f0dce8' : '#f8eef4',
+                  color: '#1f2430',
                   borderRadius: 18,
                   minHeight: 56,
                   padding: '10px 12px',
@@ -1646,19 +1614,30 @@ export default function HomePage() {
                   alignItems: 'center',
                   gap: 10,
                   justifyContent: 'space-between',
+                  minWidth: 0,
                   boxShadow:
                     homeFilterMode === 'liked-category'
-                      ? 'inset 0 0 0 2px rgba(255,255,255,0.12)'
+                      ? 'inset 0 0 0 2px rgba(255,79,147,0.18)'
                       : 'none',
                 }}
               >
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                  <span style={{ color: '#ff1f4b', fontSize: 18 }}>♥</span>
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    minWidth: 0,
+                    flex: 1,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <span style={{ color: '#ff1f4b', fontSize: 18, flexShrink: 0 }}>♥</span>
                   <span
                     style={{
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
+                      display: 'block',
                     }}
                   >
                     {currentCategoryLabel}
@@ -1678,6 +1657,7 @@ export default function HomePage() {
                     fontWeight: 900,
                     background: '#fff',
                     color: '#111111',
+                    flexShrink: 0,
                   }}
                 >
                   {likedInCategoryCount}
@@ -1690,7 +1670,7 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'deals-category' ? '#f3e29b' : '#fff4cc',
+                  background: homeFilterMode === 'deals-category' ? '#f4e3a2' : '#f8efc8',
                   color: '#1f2430',
                   borderRadius: 18,
                   minHeight: 56,
@@ -1702,19 +1682,30 @@ export default function HomePage() {
                   alignItems: 'center',
                   gap: 10,
                   justifyContent: 'space-between',
+                  minWidth: 0,
                   boxShadow:
                     homeFilterMode === 'deals-category'
-                      ? 'inset 0 0 0 2px rgba(255,255,255,0.18)'
+                      ? 'inset 0 0 0 2px rgba(212,160,44,0.18)'
                       : 'none',
                 }}
               >
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                  <span style={{ color: '#f0b000', fontSize: 18 }}>🪙</span>
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    minWidth: 0,
+                    flex: 1,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <span style={{ color: '#f0b000', fontSize: 18, flexShrink: 0 }}>🪙</span>
                   <span
                     style={{
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
+                      display: 'block',
                     }}
                   >
                     {tr.dealsToday}
@@ -1734,6 +1725,7 @@ export default function HomePage() {
                     fontWeight: 900,
                     background: '#fff',
                     color: '#111111',
+                    flexShrink: 0,
                   }}
                 >
                   {dealsInCategoryCount}
@@ -1746,8 +1738,8 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-all' ? '#0f3b78' : '#f9edf4',
-                  color: homeFilterMode === 'liked-all' ? '#ffffff' : '#1f2430',
+                  background: homeFilterMode === 'liked-all' ? '#f0dce8' : '#f8eef4',
+                  color: '#1f2430',
                   borderRadius: 18,
                   minHeight: 56,
                   padding: '10px 12px',
@@ -1758,19 +1750,30 @@ export default function HomePage() {
                   alignItems: 'center',
                   gap: 10,
                   justifyContent: 'space-between',
+                  minWidth: 0,
                   boxShadow:
                     homeFilterMode === 'liked-all'
-                      ? 'inset 0 0 0 2px rgba(255,255,255,0.12)'
+                      ? 'inset 0 0 0 2px rgba(255,79,147,0.18)'
                       : 'none',
                 }}
               >
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                  <span style={{ color: '#ff1f4b', fontSize: 18 }}>♥</span>
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    minWidth: 0,
+                    flex: 1,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <span style={{ color: '#ff1f4b', fontSize: 18, flexShrink: 0 }}>♥</span>
                   <span
                     style={{
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
+                      display: 'block',
                     }}
                   >
                     {tr.allLiked}
@@ -1790,6 +1793,7 @@ export default function HomePage() {
                     fontWeight: 900,
                     background: '#fff',
                     color: '#111111',
+                    flexShrink: 0,
                   }}
                 >
                   {likedAllCount}
@@ -1802,7 +1806,7 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'deals-all' ? '#f3e29b' : '#fff4cc',
+                  background: homeFilterMode === 'deals-all' ? '#f4e3a2' : '#f8efc8',
                   color: '#1f2430',
                   borderRadius: 18,
                   minHeight: 56,
@@ -1814,19 +1818,30 @@ export default function HomePage() {
                   alignItems: 'center',
                   gap: 10,
                   justifyContent: 'space-between',
+                  minWidth: 0,
                   boxShadow:
                     homeFilterMode === 'deals-all'
-                      ? 'inset 0 0 0 2px rgba(255,255,255,0.18)'
+                      ? 'inset 0 0 0 2px rgba(212,160,44,0.18)'
                       : 'none',
                 }}
               >
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                  <span style={{ color: '#f0b000', fontSize: 18 }}>🪙</span>
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    minWidth: 0,
+                    flex: 1,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <span style={{ color: '#f0b000', fontSize: 18, flexShrink: 0 }}>🪙</span>
                   <span
                     style={{
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
+                      display: 'block',
                     }}
                   >
                     {tr.allDealsToday}
@@ -1846,6 +1861,7 @@ export default function HomePage() {
                     fontWeight: 900,
                     background: '#fff',
                     color: '#111111',
+                    flexShrink: 0,
                   }}
                 >
                   {dealsAllCount}
@@ -1866,7 +1882,6 @@ export default function HomePage() {
                 likedMasterIds={likedMasterIds}
                 recenterToUserTrigger={recenterToUserTrigger}
                 language={language}
-                promotionBadgeTextByMasterId={promotionBadgeTextByMasterId}
                 onMasterSelect={(master) => {
                   setSelectedMaster(master);
                 }}
@@ -1937,11 +1952,11 @@ export default function HomePage() {
               >
                 {promotions.map((promo) => (
                   <div
-                    key={String((promo as any).id)}
+                    key={promo.id}
                     ref={(node) => {
-                      promotionCardRefs.current[String((promo as any).id)] = node;
+                      promotionCardRefs.current[promo.id] = node;
                     }}
-                    data-promo-id={String((promo as any).id)}
+                    data-promo-id={promo.id}
                     style={{
                       background: '#fff',
                       borderRadius: 26,
@@ -1967,8 +1982,8 @@ export default function HomePage() {
                     >
                       <div style={{ position: 'relative' }}>
                         <img
-                          src={String((promo as any).image)}
-                          alt={String((promo as any).title)}
+                          src={promo.image}
+                          alt={promo.title}
                           style={{
                             width: '100%',
                             height: 170,
@@ -1987,7 +2002,7 @@ export default function HomePage() {
                             lineHeight: 1.2,
                           }}
                         >
-                          {String((promo as any).title)}
+                          {promo.title}
                         </div>
 
                         <div
@@ -1998,7 +2013,7 @@ export default function HomePage() {
                             color: '#6b7280',
                           }}
                         >
-                          {(promo as any).subtitle || tr.specialOfferNearYou}
+                          {promo.subtitle || tr.specialOfferNearYou}
                         </div>
                       </div>
                     </button>
