@@ -562,7 +562,12 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
   const best = sameCategory
     .map((master: any) => {
       const haystack = normalizeText(
-        [master.name || '', master.title || '', master.subcategory || '', master.description || ''].join(' ')
+        [
+          master.name || '',
+          master.title || '',
+          master.subcategory || '',
+          master.description || '',
+        ].join(' ')
       );
 
       let score = 0;
@@ -880,14 +885,33 @@ export default function HomePage() {
       }));
   }, [search, allMasters]);
 
+  const promotionMasters = useMemo(() => {
+    return promotions
+      .map((promo) => {
+        const matchedMaster = findPromotionMaster(promo, allMasters);
+        return matchedMaster ? { promo, master: matchedMaster } : null;
+      })
+      .filter(Boolean) as { promo: PromotionItem; master: any }[];
+  }, [promotions, allMasters]);
+
   const promotionsInCategory = useMemo(() => {
-    return promotions.filter(
-      (promo) => String(promo.categoryId || '').toLowerCase().trim() === activeCategory
+    return promotionMasters.filter(
+      ({ promo, master }) =>
+        String(promo.categoryId || '').toLowerCase().trim() === activeCategory ||
+        String(master.category || '').toLowerCase().trim() === activeCategory
     );
-  }, [promotions, activeCategory]);
+  }, [promotionMasters, activeCategory]);
 
   const filteredMasters = useMemo(() => {
     const q = search.trim().toLowerCase();
+
+    const promotionMasterIdsInCategory = new Set(
+      promotionsInCategory.map(({ master }) => String(master.id))
+    );
+
+    const promotionMasterIdsAll = new Set(
+      promotionMasters.map(({ master }) => String(master.id))
+    );
 
     return allMasters.filter((master: any) => {
       const masterCategory = String(master.category || '').toLowerCase().trim();
@@ -919,12 +943,12 @@ export default function HomePage() {
 
       const categoryDealsMatch =
         homeFilterMode === 'deals-category'
-          ? promotionsInCategory.some((promo) => String(promo.masterId) === String(master.id))
+          ? promotionMasterIdsInCategory.has(String(master.id))
           : true;
 
       const allDealsMatch =
         homeFilterMode === 'deals-all'
-          ? promotions.some((promo) => String(promo.masterId) === String(master.id))
+          ? promotionMasterIdsAll.has(String(master.id))
           : true;
 
       return (
@@ -944,7 +968,7 @@ export default function HomePage() {
     likedMasterIds,
     homeFilterMode,
     promotionsInCategory,
-    promotions,
+    promotionMasters,
   ]);
 
   useEffect(() => {
@@ -962,7 +986,7 @@ export default function HomePage() {
 
   const likedAllCount = likedMasterIds.length;
   const dealsInCategoryCount = promotionsInCategory.length;
-  const dealsAllCount = promotions.length;
+  const dealsAllCount = promotionMasters.length;
 
   const hasAnyResults =
     smartResults.length > 0 ||
@@ -1049,7 +1073,7 @@ export default function HomePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f6f1e8',
+        background: '#f7f3eb',
         fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
         paddingBottom: 118,
@@ -1059,21 +1083,21 @@ export default function HomePage() {
         style={{
           maxWidth: 430,
           margin: '0 auto',
-          background: '#f6f1e8',
-          borderTop: '4px solid transparent',
+          background: '#f7f3eb',
+          borderTop: '5px solid transparent',
           borderImage: `${borderGradient} 1`,
-          boxShadow: '0 0 0 1px rgba(226,218,205,0.3)',
+          boxShadow: '0 0 0 1px rgba(226,218,205,0.35)',
         }}
       >
-        <section style={{ padding: '10px 12px 0' }}>
+        <section style={{ padding: '12px 14px 0' }}>
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
-                background: '#fbf7ef',
-                borderRadius: 26,
+                background: '#ffffff',
+                borderRadius: 24,
                 padding: 10,
-                border: '1px solid #d9d0c3',
-                boxShadow: '0 8px 22px rgba(0,0,0,0.05)',
+                boxShadow: '0 6px 18px rgba(0,0,0,0.07)',
+                border: '1px solid #111111',
               }}
             >
               <div
@@ -1090,14 +1114,14 @@ export default function HomePage() {
                     alignItems: 'center',
                     gap: 10,
                     minWidth: 0,
-                    height: 48,
-                    padding: '0 8px 0 4px',
+                    height: 46,
+                    padding: '0 4px 0 2px',
                     border: '1px solid #111111',
                     borderRadius: 18,
                     background: '#fff',
                   }}
                 >
-                  <span style={{ fontSize: 18, color: '#111111', paddingLeft: 8 }}>🔎</span>
+                  <span style={{ fontSize: 20, color: '#111111', paddingLeft: 8 }}>🔎</span>
                   <input
                     value={search}
                     onFocus={() => setSearchOpen(true)}
@@ -1129,7 +1153,7 @@ export default function HomePage() {
                       border: 'none',
                       outline: 'none',
                       background: 'transparent',
-                      fontSize: 14,
+                      fontSize: 15,
                       color: '#2b2f36',
                     }}
                   />
@@ -1143,7 +1167,7 @@ export default function HomePage() {
                       style={{
                         border: 'none',
                         background: 'transparent',
-                        fontSize: 17,
+                        fontSize: 18,
                         color: '#85909c',
                         cursor: 'pointer',
                         padding: 0,
@@ -1161,12 +1185,12 @@ export default function HomePage() {
                     background: '#fff',
                     color: '#1f2430',
                     borderRadius: 999,
-                    minWidth: 72,
-                    height: 48,
+                    minWidth: 74,
+                    height: 46,
                     padding: '0 10px',
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: 900,
-                    boxShadow: '0 3px 10px rgba(0,0,0,0.06)',
+                    boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1174,7 +1198,7 @@ export default function HomePage() {
                     cursor: 'pointer',
                   }}
                 >
-                  <span style={{ fontSize: 17 }}>{languageFlag(language)}</span>
+                  <span style={{ fontSize: 18 }}>{languageFlag(language)}</span>
                   <span>{languageCode(language)}</span>
                 </button>
               </div>
@@ -1182,11 +1206,11 @@ export default function HomePage() {
               <div
                 style={{
                   marginTop: 8,
-                  padding: '2px 2px 0',
+                  padding: '4px 2px 0',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto auto auto',
                   alignItems: 'center',
-                  gap: 10,
+                  gap: 12,
                 }}
               >
                 <div
@@ -1194,7 +1218,7 @@ export default function HomePage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 6,
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: 900,
                     color: '#4f5b68',
                     minWidth: 0,
@@ -1217,17 +1241,17 @@ export default function HomePage() {
                   style={{
                     border: 'none',
                     background: 'transparent',
-                    padding: '0 2px',
+                    padding: 0,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 5,
+                    gap: 6,
                     cursor: 'pointer',
                     fontWeight: 900,
-                    fontSize: 13,
+                    fontSize: 15,
                     lineHeight: 1,
                   }}
                 >
-                  <span style={{ color: '#ff3b30', fontSize: 12 }}>⏱</span>
+                  <span style={{ color: '#ff3b30', fontSize: 14 }}>⏱</span>
                   <span style={{ color: '#ff3b30' }}>{formatAdTime(adSecondsLeft)}</span>
                 </button>
 
@@ -1236,17 +1260,17 @@ export default function HomePage() {
                   style={{
                     border: 'none',
                     background: 'transparent',
-                    padding: '0 2px',
+                    padding: 0,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 5,
+                    gap: 6,
                     cursor: 'pointer',
                     fontWeight: 900,
-                    fontSize: 13,
+                    fontSize: 15,
                     lineHeight: 1,
                   }}
                 >
-                  <span style={{ color: '#19b44a', fontSize: 13 }}>👁</span>
+                  <span style={{ color: '#19b44a', fontSize: 15 }}>👁</span>
                   <span style={{ color: '#ff3b30' }}>{adViews}</span>
                 </button>
 
@@ -1254,42 +1278,28 @@ export default function HomePage() {
                   onClick={() => router.push('/profile')}
                   style={{
                     border: '1px solid #111111',
-                    background: '#fff',
-                    borderRadius: 999,
-                    width: 30,
-                    height: 30,
+                    background: 'transparent',
                     padding: 0,
-                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
                     cursor: 'pointer',
-                    display: 'block',
-                    position: 'relative',
-                    justifySelf: 'end',
+                    fontWeight: 900,
+                    fontSize: 15,
+                    lineHeight: 1,
                   }}
                 >
                   <img
                     src={userAvatar}
                     alt="Profile"
                     style={{
-                      width: '100%',
-                      height: '100%',
+                      width: 30,
+                      height: 30,
+                      borderRadius: '50%',
                       objectFit: 'cover',
                       display: 'block',
                     }}
                   />
-                  {hasUnreadProfileUpdates ? (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        background: '#ff3b30',
-                        border: '1.5px solid #ffffff',
-                      }}
-                    />
-                  ) : null}
                 </button>
               </div>
             </div>
@@ -1515,7 +1525,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '8px 0 0' }}>
+        <section style={{ padding: '10px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1533,21 +1543,20 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '8px 12px 0' }}>
+        <section style={{ padding: '8px 14px 0' }}>
           <div
             style={{
-              border: '1px solid #d9d0c3',
+              border: '1px solid #111111',
               borderRadius: 24,
-              background: '#fbf7ef',
-              padding: 8,
-              boxShadow: '0 8px 20px rgba(0,0,0,0.04)',
+              background: '#fff',
+              padding: 10,
             }}
           >
             <div
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: 8,
+                gap: 10,
               }}
             >
               <button
@@ -1556,12 +1565,12 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-category' ? '#ffe7ef' : '#fff',
+                  background: homeFilterMode === 'liked-category' ? '#ffe7ef' : '#fff3f7',
                   color: '#1f2430',
                   borderRadius: 18,
-                  minHeight: 52,
+                  minHeight: 56,
                   padding: '10px 12px',
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: 900,
                   cursor: 'pointer',
                   display: 'flex',
@@ -1585,14 +1594,14 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    minWidth: 26,
-                    height: 26,
+                    minWidth: 28,
+                    height: 28,
                     borderRadius: 999,
                     border: '1px solid #111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: 900,
                     background: '#fff',
                     color: '#111111',
@@ -1608,12 +1617,12 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'deals-category' ? '#fff1bf' : '#fff',
+                  background: homeFilterMode === 'deals-category' ? '#fff4cc' : '#fff8dd',
                   color: '#1f2430',
                   borderRadius: 18,
-                  minHeight: 52,
+                  minHeight: 56,
                   padding: '10px 12px',
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: 900,
                   cursor: 'pointer',
                   display: 'flex',
@@ -1637,14 +1646,14 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    minWidth: 26,
-                    height: 26,
+                    minWidth: 28,
+                    height: 28,
                     borderRadius: 999,
                     border: '1px solid #111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: 900,
                     background: '#fff',
                     color: '#111111',
@@ -1660,12 +1669,12 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-all' ? '#ffe7ef' : '#fff',
+                  background: homeFilterMode === 'liked-all' ? '#ffe7ef' : '#fff3f7',
                   color: '#1f2430',
                   borderRadius: 18,
-                  minHeight: 52,
+                  minHeight: 56,
                   padding: '10px 12px',
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: 900,
                   cursor: 'pointer',
                   display: 'flex',
@@ -1689,14 +1698,14 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    minWidth: 26,
-                    height: 26,
+                    minWidth: 28,
+                    height: 28,
                     borderRadius: 999,
                     border: '1px solid #111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: 900,
                     background: '#fff',
                     color: '#111111',
@@ -1712,12 +1721,12 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'deals-all' ? '#fff1bf' : '#fff',
+                  background: homeFilterMode === 'deals-all' ? '#fff4cc' : '#fff8dd',
                   color: '#1f2430',
                   borderRadius: 18,
-                  minHeight: 52,
+                  minHeight: 56,
                   padding: '10px 12px',
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: 900,
                   cursor: 'pointer',
                   display: 'flex',
@@ -1741,14 +1750,14 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    minWidth: 26,
-                    height: 26,
+                    minWidth: 28,
+                    height: 28,
                     borderRadius: 999,
                     border: '1px solid #111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: 900,
                     background: '#fff',
                     color: '#111111',
@@ -1761,15 +1770,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '8px 0 0' }}>
-          <div
-            style={{
-              background: '#ffffff',
-              borderTop: '1px solid #d8d0c4',
-              borderBottom: '1px solid #d8d0c4',
-            }}
-          >
-            <div style={{ height: 500, position: 'relative', overflow: 'hidden' }}>
+        <section style={{ padding: '2px 0 0' }}>
+          <div style={{ background: '#ffffff', borderTop: '1px solid #111111', borderBottom: '1px solid #111111' }}>
+            <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={filteredMasters}
                 mapMode={mapMode}
@@ -1799,63 +1802,35 @@ export default function HomePage() {
         </section>
 
         {promotions.length > 0 && (
-          <section style={{ padding: '14px 12px 0' }}>
-            <div
-              style={{
-                background: '#fbf7ef',
-                border: '1px solid #ddd4c8',
-                borderRadius: 28,
-                padding: '14px 12px 16px',
-                boxShadow: '0 10px 24px rgba(0,0,0,0.05)',
-                marginBottom: 18,
-              }}
-            >
+          <section style={{ padding: '12px 14px 0' }}>
+            <div style={{ marginBottom: 18 }}>
               <div
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  gap: 10,
                   marginBottom: 12,
-                  padding: '0 4px',
                 }}
               >
-                <div>
-                  <h2
-                    style={{
-                      margin: 0,
-                      fontSize: 17,
-                      fontWeight: 900,
-                      color: '#223145',
-                      lineHeight: 1.15,
-                    }}
-                  >
-                    {`${tr.hotOffersNear} ${locationLabel}`}
-                  </h2>
-                  <div
-                    style={{
-                      marginTop: 4,
-                      fontSize: 12,
-                      fontWeight: 700,
-                      color: '#7b828d',
-                    }}
-                  >
-                    {tr.specialOfferNearYou}
-                  </div>
-                </div>
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: 17,
+                    fontWeight: 900,
+                    color: '#223145',
+                  }}
+                >
+                  {`${tr.hotOffersNear} ${locationLabel}`}
+                </h2>
 
                 <button
                   style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 999,
-                    border: '1px solid #d7cec1',
-                    background: '#fff',
-                    fontSize: 22,
-                    color: '#8d97a3',
+                    border: 'none',
+                    background: 'transparent',
+                    fontSize: 24,
+                    color: '#9aa0a8',
                     lineHeight: 1,
                     cursor: 'pointer',
-                    flexShrink: 0,
                   }}
                 >
                   ›
@@ -1868,7 +1843,7 @@ export default function HomePage() {
                   gap: 12,
                   overflowX: 'auto',
                   overflowY: 'hidden',
-                  paddingBottom: 4,
+                  paddingBottom: 6,
                   WebkitOverflowScrolling: 'touch',
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none',
@@ -1883,13 +1858,13 @@ export default function HomePage() {
                     data-promo-id={promo.id}
                     style={{
                       background: '#fff',
-                      borderRadius: 28,
+                      borderRadius: 26,
                       overflow: 'hidden',
-                      minWidth: 262,
-                      maxWidth: 262,
-                      boxShadow: '0 10px 24px rgba(0,0,0,0.08)',
+                      minWidth: 250,
+                      maxWidth: 250,
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
                       flexShrink: 0,
-                      border: '1px solid #ddd4c8',
+                      border: '1px solid #111111',
                     }}
                   >
                     <button
@@ -1910,37 +1885,20 @@ export default function HomePage() {
                           alt={promo.title}
                           style={{
                             width: '100%',
-                            height: 178,
+                            height: 170,
                             objectFit: 'cover',
                             display: 'block',
                           }}
                         />
-
-                        <div
-                          style={{
-                            position: 'absolute',
-                            top: 12,
-                            left: 12,
-                            background: 'rgba(255,255,255,0.96)',
-                            color: '#ff4f93',
-                            borderRadius: 999,
-                            padding: '7px 12px',
-                            fontWeight: 900,
-                            fontSize: 11,
-                            letterSpacing: 0.2,
-                          }}
-                        >
-                          {tr.sponsored}
-                        </div>
                       </div>
 
-                      <div style={{ padding: '14px 16px 10px' }}>
+                      <div style={{ padding: '14px 16px 8px' }}>
                         <div
                           style={{
-                            fontSize: 17,
+                            fontSize: 16,
                             fontWeight: 900,
                             color: '#1f2430',
-                            lineHeight: 1.18,
+                            lineHeight: 1.2,
                           }}
                         >
                           {promo.title}
@@ -1951,8 +1909,7 @@ export default function HomePage() {
                             marginTop: 8,
                             fontSize: 13,
                             fontWeight: 700,
-                            color: '#6f7782',
-                            lineHeight: 1.35,
+                            color: '#6b7280',
                           }}
                         >
                           {promo.subtitle || tr.specialOfferNearYou}
@@ -1971,15 +1928,14 @@ export default function HomePage() {
                       <button
                         onClick={() => openPromotionView(promo)}
                         style={{
-                          height: 44,
-                          borderRadius: 16,
+                          height: 42,
+                          borderRadius: 14,
                           border: '1px solid #111111',
-                          background: '#163f86',
+                          background: '#133e8a',
                           color: '#fff',
                           fontSize: 14,
                           fontWeight: 900,
                           cursor: 'pointer',
-                          boxShadow: '0 6px 14px rgba(22,63,134,0.18)',
                         }}
                       >
                         {tr.viewAction}
@@ -1988,15 +1944,14 @@ export default function HomePage() {
                       <button
                         onClick={() => openPromotionBooking(promo)}
                         style={{
-                          height: 44,
+                          height: 42,
                           border: '1px solid #111111',
-                          borderRadius: 16,
-                          background: '#ff5a53',
+                          borderRadius: 14,
+                          background: '#ff4f4f',
                           color: '#fff',
                           fontSize: 14,
                           fontWeight: 900,
                           cursor: 'pointer',
-                          boxShadow: '0 6px 14px rgba(255,90,83,0.18)',
                         }}
                       >
                         {tr.bookAction}
