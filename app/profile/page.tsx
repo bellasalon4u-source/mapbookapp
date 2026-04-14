@@ -301,12 +301,12 @@ function getText(language: AppLanguage): ProfileTextShape {
 }
 
 function accentStyles(accent: ProfileCard['accent']) {
-  if (accent === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
-  if (accent === 'green') return { background: '#eef9f1', color: '#2fa35a' };
-  if (accent === 'blue') return { background: '#eef4ff', color: '#2f7cf6' };
-  if (accent === 'violet') return { background: '#f3efff', color: '#7a5af8' };
-  if (accent === 'orange') return { background: '#fff5e8', color: '#d68612' };
-  return { background: '#f4efe8', color: '#6d6258' };
+  if (accent === 'pink') return { background: '#fff1f7', color: '#ff4fa0', border: '#111111' };
+  if (accent === 'green') return { background: '#dff2e3', color: '#1d7a38', border: '#111111' };
+  if (accent === 'blue') return { background: '#e6efff', color: '#2559b7', border: '#111111' };
+  if (accent === 'violet') return { background: '#f3efff', color: '#7a5af8', border: '#111111' };
+  if (accent === 'orange') return { background: '#fff0da', color: '#c07a00', border: '#111111' };
+  return { background: '#f4efe8', color: '#6d6258', border: '#111111' };
 }
 
 export default function ProfilePage() {
@@ -446,16 +446,17 @@ export default function ProfilePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
-        padding: '20px 16px 110px',
+        background: '#f7f4ee',
+        color: '#17130f',
+        paddingBottom: 110,
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto' }}>
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '20px 16px 110px' }}>
         <div
           style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
+            display: 'grid',
+            gridTemplateColumns: '1fr auto',
+            alignItems: 'start',
             gap: 12,
             marginBottom: 18,
           }}
@@ -489,150 +490,152 @@ export default function ProfilePage() {
             type="button"
             onClick={() => router.push('/profile/edit')}
             style={{
-              border: 'none',
+              minHeight: 54,
               borderRadius: 999,
-              background: '#17130f',
+              border: '2px solid #111111',
+              background: '#2f241c',
               color: '#fff',
-              padding: '12px 18px',
+              padding: '0 18px',
               fontSize: 14,
               fontWeight: 900,
               cursor: 'pointer',
-              boxShadow: '0 10px 20px rgba(23,19,15,0.18)',
-              flexShrink: 0,
             }}
           >
             {text.editProfile}
           </button>
         </div>
 
-        <div
-          style={{
-            borderRadius: 32,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
+        <section>
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '84px 1fr',
-              gap: 14,
-              alignItems: 'center',
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 18,
             }}
           >
-            <img
-              src={profile.avatar}
-              alt={profile.fullName}
+            <div
               style={{
-                width: 84,
-                height: 84,
-                borderRadius: 28,
-                objectFit: 'cover',
-                display: 'block',
-                boxShadow: '0 10px 22px rgba(44, 23, 10, 0.10)',
+                display: 'grid',
+                gridTemplateColumns: '84px 1fr',
+                gap: 14,
+                alignItems: 'center',
               }}
-            />
-
-            <div style={{ minWidth: 0 }}>
-              <div
+            >
+              <img
+                src={profile.avatar}
+                alt={profile.fullName}
                 style={{
-                  fontSize: 22,
-                  fontWeight: 900,
-                  color: '#17130f',
-                  lineHeight: 1.1,
-                  wordBreak: 'break-word',
+                  width: 84,
+                  height: 84,
+                  borderRadius: 24,
+                  objectFit: 'cover',
+                  display: 'block',
+                  border: '2px solid #111111',
                 }}
-              >
-                {profile.fullName}
-              </div>
+              />
 
-              <div
-                style={{
-                  marginTop: 6,
-                  fontSize: 14,
-                  color: '#7b7268',
-                  fontWeight: 700,
-                  wordBreak: 'break-word',
-                }}
-              >
-                {profile.email}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 10,
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 8,
-                }}
-              >
-                <span
+              <div style={{ minWidth: 0 }}>
+                <div
                   style={{
-                    borderRadius: 999,
-                    padding: '8px 12px',
-                    background: '#eef9f1',
-                    color: '#2fa35a',
-                    fontSize: 12,
+                    fontSize: 22,
                     fontWeight: 900,
+                    color: '#17130f',
+                    lineHeight: 1.1,
+                    wordBreak: 'break-word',
                   }}
                 >
-                  {text.active}
-                </span>
+                  {profile.fullName}
+                </div>
 
-                {profile.isVerified ? (
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 14,
+                    color: '#7b7268',
+                    fontWeight: 700,
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {profile.email}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 10,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 8,
+                  }}
+                >
                   <span
                     style={{
                       borderRadius: 999,
                       padding: '8px 12px',
-                      background: '#eef4ff',
-                      color: '#2f7cf6',
+                      border: '2px solid #111111',
+                      background: '#dff2e3',
+                      color: '#1d7a38',
                       fontSize: 12,
                       fontWeight: 900,
                     }}
                   >
-                    {text.verified}
+                    {text.active}
                   </span>
-                ) : null}
+
+                  {profile.isVerified ? (
+                    <span
+                      style={{
+                        borderRadius: 999,
+                        padding: '8px 12px',
+                        border: '2px solid #111111',
+                        background: '#e6efff',
+                        color: '#2559b7',
+                        fontSize: 12,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {text.verified}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: 16,
+                borderRadius: 24,
+                border: '2px solid #111111',
+                background: 'linear-gradient(180deg, #2f241c 0%, #1f1712 100%)',
+                padding: 16,
+                color: '#fff',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 12,
+                  color: '#d9cdbd',
+                  fontWeight: 800,
+                }}
+              >
+                {text.balanceAvailable}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 32,
+                  fontWeight: 900,
+                  lineHeight: 1,
+                }}
+              >
+                £{wallet.availableBalance.toFixed(2)}
               </div>
             </div>
           </div>
+        </section>
 
-          <div
-            style={{
-              marginTop: 16,
-              borderRadius: 24,
-              background: 'linear-gradient(180deg, #2f241c 0%, #1f1712 100%)',
-              padding: 16,
-              color: '#fff',
-              boxShadow: '0 14px 28px rgba(31,23,18,0.18)',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 12,
-                color: '#d9cdbd',
-                fontWeight: 800,
-              }}
-            >
-              {text.balanceAvailable}
-            </div>
-
-            <div
-              style={{
-                marginTop: 8,
-                fontSize: 32,
-                fontWeight: 900,
-                lineHeight: 1,
-              }}
-            >
-              £{wallet.availableBalance.toFixed(2)}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ marginTop: 18 }}>
+        <section style={{ marginTop: 18 }}>
           <div
             style={{
               fontSize: 18,
@@ -660,25 +663,27 @@ export default function ProfilePage() {
                   type="button"
                   onClick={() => router.push(card.route)}
                   style={{
-                    border: '1px solid #efe4d7',
+                    border: '2px solid #111111',
                     borderRadius: 28,
                     background: '#fff',
                     padding: 16,
                     textAlign: 'left',
                     cursor: 'pointer',
-                    boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+                    minHeight: 150,
                   }}
                 >
                   <div
                     style={{
-                      width: 48,
-                      height: 48,
+                      width: 50,
+                      height: 50,
                       borderRadius: 18,
+                      border: `2px solid ${accent.border}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: 22,
-                      ...accent,
+                      background: accent.background,
+                      color: accent.color,
                     }}
                   >
                     {card.icon}
@@ -686,7 +691,7 @@ export default function ProfilePage() {
 
                   <div
                     style={{
-                      marginTop: 12,
+                      marginTop: 14,
                       fontSize: 15,
                       fontWeight: 900,
                       color: '#17130f',
@@ -713,9 +718,9 @@ export default function ProfilePage() {
               );
             })}
           </div>
-        </div>
+        </section>
 
-        <div style={{ marginTop: 18 }}>
+        <section style={{ marginTop: 18 }}>
           <div
             style={{
               fontSize: 18,
@@ -731,9 +736,8 @@ export default function ProfilePage() {
             style={{
               overflow: 'hidden',
               borderRadius: 30,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
-              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
             }}
           >
             {activityCards.map((card, index) => {
@@ -753,7 +757,7 @@ export default function ProfilePage() {
                     padding: '16px 18px',
                     textAlign: 'left',
                     border: 'none',
-                    borderTop: index !== 0 ? '1px solid #f4eadf' : 'none',
+                    borderTop: index !== 0 ? '2px solid #111111' : 'none',
                     background: '#fff',
                     cursor: 'pointer',
                   }}
@@ -763,11 +767,13 @@ export default function ProfilePage() {
                       width: 46,
                       height: 46,
                       borderRadius: 16,
+                      border: `2px solid ${accent.border}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: 20,
-                      ...accent,
+                      background: accent.background,
+                      color: accent.color,
                     }}
                   >
                     {card.icon}
@@ -785,7 +791,7 @@ export default function ProfilePage() {
 
                   <span
                     style={{
-                      fontSize: 18,
+                      fontSize: 16,
                       color: '#938475',
                       fontWeight: 900,
                     }}
@@ -796,9 +802,9 @@ export default function ProfilePage() {
               );
             })}
           </div>
-        </div>
+        </section>
 
-        <div style={{ marginTop: 18 }}>
+        <section style={{ marginTop: 18 }}>
           <div
             style={{
               fontSize: 18,
@@ -814,9 +820,8 @@ export default function ProfilePage() {
             style={{
               overflow: 'hidden',
               borderRadius: 30,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
-              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
             }}
           >
             {preferenceCards.map((card, index) => {
@@ -836,7 +841,7 @@ export default function ProfilePage() {
                     padding: '16px 18px',
                     textAlign: 'left',
                     border: 'none',
-                    borderTop: index !== 0 ? '1px solid #f4eadf' : 'none',
+                    borderTop: index !== 0 ? '2px solid #111111' : 'none',
                     background: '#fff',
                     cursor: 'pointer',
                   }}
@@ -846,11 +851,13 @@ export default function ProfilePage() {
                       width: 46,
                       height: 46,
                       borderRadius: 16,
+                      border: `2px solid ${accent.border}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: 20,
-                      ...accent,
+                      background: accent.background,
+                      color: accent.color,
                     }}
                   >
                     {card.icon}
@@ -868,7 +875,7 @@ export default function ProfilePage() {
 
                   <span
                     style={{
-                      fontSize: 18,
+                      fontSize: 16,
                       color: '#938475',
                       fontWeight: 900,
                     }}
@@ -879,7 +886,7 @@ export default function ProfilePage() {
               );
             })}
           </div>
-        </div>
+        </section>
       </div>
 
       <BottomNav active="profile" />
