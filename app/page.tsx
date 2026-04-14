@@ -511,7 +511,10 @@ function saveRecentSearch(value: string) {
 
   const key = 'mapbook_recent_searches';
   const current = JSON.parse(window.localStorage.getItem(key) || '[]') as string[];
-  const next = [trimmed, ...current.filter((item) => item.toLowerCase() !== trimmed.toLowerCase())].slice(0, 6);
+  const next = [
+    trimmed,
+    ...current.filter((item) => item.toLowerCase() !== trimmed.toLowerCase()),
+  ].slice(0, 6);
   window.localStorage.setItem(key, JSON.stringify(next));
 }
 
@@ -972,10 +975,7 @@ export default function HomePage() {
           ? Boolean(master.discountBadge) && masterCategory === activeCategory
           : true;
 
-      const allDealsMatch =
-        homeFilterMode === 'deals-all'
-          ? Boolean(master.discountBadge)
-          : true;
+      const allDealsMatch = homeFilterMode === 'deals-all' ? Boolean(master.discountBadge) : true;
 
       return (
         categoryMatch &&
@@ -1014,7 +1014,9 @@ export default function HomePage() {
       String(master.category || '').toLowerCase().trim() === activeCategory &&
       Boolean(master.discountBadge)
   ).length;
-  const dealsAllCount = decoratedMasters.filter((master: any) => Boolean(master.discountBadge)).length;
+  const dealsAllCount = decoratedMasters.filter(
+    (master: any) => Boolean(master.discountBadge)
+  ).length;
 
   const hasAnyResults =
     smartResults.length > 0 ||
@@ -1366,7 +1368,14 @@ export default function HomePage() {
                   <>
                     {recentSearches.length > 0 ? (
                       <div style={{ marginBottom: 14 }}>
-                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
                           {tr.recentSearches}
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -1393,7 +1402,14 @@ export default function HomePage() {
                     ) : null}
 
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 900,
+                          color: '#6c7480',
+                          marginBottom: 8,
+                        }}
+                      >
                         {tr.popularSearches}
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -1419,14 +1435,28 @@ export default function HomePage() {
                     </div>
                   </>
                 ) : !hasAnyResults ? (
-                  <div style={{ padding: '12px 6px', fontSize: 14, fontWeight: 800, color: '#74808c' }}>
+                  <div
+                    style={{
+                      padding: '12px 6px',
+                      fontSize: 14,
+                      fontWeight: 800,
+                      color: '#74808c',
+                    }}
+                  >
                     {tr.noResultsFound}
                   </div>
                 ) : (
                   <>
                     {smartResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
                           {tr.smartMatches}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1461,7 +1491,14 @@ export default function HomePage() {
 
                     {categoryResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
                           {tr.categories}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1493,7 +1530,14 @@ export default function HomePage() {
 
                     {subcategoryResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
                           {tr.services}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1528,7 +1572,14 @@ export default function HomePage() {
 
                     {proResults.length > 0 && (
                       <div>
-                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
                           {tr.pros}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1603,11 +1654,13 @@ export default function HomePage() {
             >
               <button
                 onClick={() =>
-                  setHomeFilterMode((prev) => (prev === 'liked-category' ? 'none' : 'liked-category'))
+                  setHomeFilterMode((prev) =>
+                    prev === 'liked-category' ? 'none' : 'liked-category'
+                  )
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-category' ? '#4a78c7' : '#5d8ae0',
+                  background: homeFilterMode === 'liked-category' ? '#173f88' : '#2c63c7',
                   color: '#ffffff',
                   borderRadius: 18,
                   minHeight: 56,
@@ -1622,7 +1675,7 @@ export default function HomePage() {
                   minWidth: 0,
                   boxShadow:
                     homeFilterMode === 'liked-category'
-                      ? 'inset 0 0 0 2px rgba(255,255,255,0.25)'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.22)'
                       : 'none',
                 }}
               >
@@ -1643,6 +1696,9 @@ export default function HomePage() {
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                       display: 'block',
+                      fontSize: 13,
+                      lineHeight: 1.1,
+                      color: '#ffffff',
                     }}
                   >
                     {currentCategoryLabel}
@@ -1671,7 +1727,9 @@ export default function HomePage() {
 
               <button
                 onClick={() =>
-                  setHomeFilterMode((prev) => (prev === 'deals-category' ? 'none' : 'deals-category'))
+                  setHomeFilterMode((prev) =>
+                    prev === 'deals-category' ? 'none' : 'deals-category'
+                  )
                 }
                 style={{
                   border: '1px solid #111111',
@@ -1711,6 +1769,8 @@ export default function HomePage() {
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                       display: 'block',
+                      fontSize: 13,
+                      lineHeight: 1.1,
                     }}
                   >
                     {tr.dealsToday}
@@ -1743,7 +1803,7 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-all' ? '#4a78c7' : '#5d8ae0',
+                  background: homeFilterMode === 'liked-all' ? '#173f88' : '#2c63c7',
                   color: '#ffffff',
                   borderRadius: 18,
                   minHeight: 56,
@@ -1758,7 +1818,7 @@ export default function HomePage() {
                   minWidth: 0,
                   boxShadow:
                     homeFilterMode === 'liked-all'
-                      ? 'inset 0 0 0 2px rgba(255,255,255,0.25)'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.22)'
                       : 'none',
                 }}
               >
@@ -1779,6 +1839,9 @@ export default function HomePage() {
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                       display: 'block',
+                      fontSize: 13,
+                      lineHeight: 1.1,
+                      color: '#ffffff',
                     }}
                   >
                     {tr.allLiked}
@@ -1847,6 +1910,8 @@ export default function HomePage() {
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                       display: 'block',
+                      fontSize: 13,
+                      lineHeight: 1.1,
                     }}
                   >
                     {tr.allDealsToday}
@@ -1877,7 +1942,13 @@ export default function HomePage() {
         </section>
 
         <section style={{ padding: '2px 0 0' }}>
-          <div style={{ background: '#ffffff', borderTop: '1px solid #111111', borderBottom: '1px solid #111111' }}>
+          <div
+            style={{
+              background: '#ffffff',
+              borderTop: '1px solid #111111',
+              borderBottom: '1px solid #111111',
+            }}
+          >
             <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={filteredMasters}
