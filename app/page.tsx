@@ -301,7 +301,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       : 'Service';
   }
 
-  const map: Record<string, Record<AppLanguage, string>> = {
+  const map: Record<string, Partial<Record<AppLanguage, string>>> = {
     beauty: {
       EN: 'Beauty',
       ES: 'Belleza',
@@ -309,7 +309,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       UA: 'Краса',
       CZ: 'Krása',
       DE: 'Beauty',
-      IT: 'Beauty',
+      IT: 'Bellezza',
       FR: 'Beauté',
       AR: 'الجمال',
       PL: 'Uroda',
@@ -323,7 +323,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Barber',
       IT: 'Barber',
       FR: 'Barbier',
-      AR: 'حلاقة',
+      AR: 'حلاق',
       PL: 'Barber',
     },
     wellness: {
@@ -335,7 +335,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Wellness',
       IT: 'Benessere',
       FR: 'Bien-être',
-      AR: 'عافية',
+      AR: 'العافية',
       PL: 'Wellness',
     },
     home: {
@@ -369,7 +369,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       UA: 'Техніка',
       CZ: 'Technika',
       DE: 'Technik',
-      IT: 'Tech',
+      IT: 'Tecnologia',
       FR: 'Tech',
       AR: 'تقنية',
       PL: 'Technika',
@@ -441,7 +441,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       UA: 'Навчання',
       CZ: 'Vzdělání',
       DE: 'Bildung',
-      IT: 'Formazione',
+      IT: 'Educazione',
       FR: 'Éducation',
       AR: 'تعليم',
       PL: 'Edukacja',
@@ -1054,7 +1054,7 @@ export default function HomePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f3eb',
+        background: '#f5f0e6',
         fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
         paddingBottom: 118,
@@ -1064,21 +1064,21 @@ export default function HomePage() {
         style={{
           maxWidth: 430,
           margin: '0 auto',
-          background: '#f7f3eb',
+          background: '#f5f0e6',
           borderTop: '5px solid transparent',
           borderImage: `${borderGradient} 1`,
           boxShadow: '0 0 0 1px rgba(226,218,205,0.35)',
         }}
       >
-        <section style={{ padding: '12px 14px 0' }}>
+        <section style={{ padding: '10px 12px 0' }}>
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
                 background: '#ffffff',
-                borderRadius: 24,
+                borderRadius: 28,
                 padding: 10,
-                boxShadow: '0 6px 18px rgba(0,0,0,0.07)',
-                border: '1px solid #111111',
+                boxShadow: '0 8px 20px rgba(0,0,0,0.07)',
+                border: '2px solid #1b1b1b',
               }}
             >
               <div
@@ -1095,14 +1095,14 @@ export default function HomePage() {
                     alignItems: 'center',
                     gap: 10,
                     minWidth: 0,
-                    height: 46,
-                    padding: '0 4px 0 2px',
-                    border: '1px solid #111111',
-                    borderRadius: 18,
+                    height: 52,
+                    padding: '0 8px 0 10px',
+                    border: '2px solid #1b1b1b',
+                    borderRadius: 22,
                     background: '#fff',
                   }}
                 >
-                  <span style={{ fontSize: 20, color: '#111111', paddingLeft: 8 }}>🔎</span>
+                  <span style={{ fontSize: 23, color: '#111111' }}>🔎</span>
                   <input
                     value={search}
                     onFocus={() => setSearchOpen(true)}
@@ -1136,6 +1136,7 @@ export default function HomePage() {
                       background: 'transparent',
                       fontSize: 15,
                       color: '#2b2f36',
+                      fontWeight: 700,
                     }}
                   />
 
@@ -1162,50 +1163,50 @@ export default function HomePage() {
                 <button
                   onClick={() => router.push('/profile/language-region')}
                   style={{
-                    border: '1px solid #111111',
+                    border: '2px solid #1b1b1b',
                     background: '#fff',
                     color: '#1f2430',
-                    borderRadius: 999,
-                    minWidth: 74,
-                    height: 46,
-                    padding: '0 10px',
+                    borderRadius: 20,
+                    minWidth: 92,
+                    height: 52,
+                    padding: '0 14px',
                     fontSize: 14,
                     fontWeight: 900,
-                    boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
+                    boxShadow: '0 3px 10px rgba(0,0,0,0.05)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 5,
+                    gap: 8,
                     cursor: 'pointer',
                   }}
                 >
-                  <span style={{ fontSize: 18 }}>{languageFlag(language)}</span>
+                  <span style={{ fontSize: 22 }}>{languageFlag(language)}</span>
                   <span>{languageCode(language)}</span>
                 </button>
               </div>
 
               <div
                 style={{
-                  marginTop: 8,
-                  padding: '4px 2px 0',
+                  marginTop: 10,
+                  padding: '2px 2px 0',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto auto auto',
                   alignItems: 'center',
-                  gap: 12,
+                  gap: 10,
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 7,
                     fontSize: 13,
                     fontWeight: 900,
-                    color: '#4f5b68',
+                    color: '#414d59',
                     minWidth: 0,
                   }}
                 >
-                  <span style={{ color: '#19b44a' }}>📍</span>
+                  <span style={{ color: '#26b24a', fontSize: 16 }}>📍</span>
                   <span
                     style={{
                       whiteSpace: 'nowrap',
@@ -1225,15 +1226,15 @@ export default function HomePage() {
                     padding: 0,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 5,
                     cursor: 'pointer',
                     fontWeight: 900,
-                    fontSize: 15,
+                    fontSize: 14,
                     lineHeight: 1,
                   }}
                 >
-                  <span style={{ color: '#ff3b30', fontSize: 14 }}>⏱</span>
-                  <span style={{ color: '#ff3b30' }}>{formatAdTime(adSecondsLeft)}</span>
+                  <span style={{ color: '#d5372f', fontSize: 15 }}>⏱</span>
+                  <span style={{ color: '#d5372f' }}>{formatAdTime(adSecondsLeft)}</span>
                 </button>
 
                 <button
@@ -1244,31 +1245,32 @@ export default function HomePage() {
                     padding: 0,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 5,
                     cursor: 'pointer',
                     fontWeight: 900,
-                    fontSize: 15,
+                    fontSize: 14,
                     lineHeight: 1,
                   }}
                 >
-                  <span style={{ color: '#19b44a', fontSize: 15 }}>👁</span>
-                  <span style={{ color: '#ff3b30' }}>{adViews}</span>
+                  <span style={{ color: '#5d4a35', fontSize: 15 }}>👁</span>
+                  <span style={{ color: '#d5372f' }}>{adViews}</span>
                 </button>
 
                 <button
                   onClick={() => router.push('/profile')}
                   style={{
-                    border: '1px solid #111111',
+                    border: '2px solid #ffffff',
                     background: '#fff',
                     borderRadius: 999,
-                    width: 28,
-                    height: 28,
+                    width: 40,
+                    height: 40,
                     padding: 0,
                     overflow: 'hidden',
                     cursor: 'pointer',
                     display: 'block',
                     position: 'relative',
                     justifySelf: 'end',
+                    boxShadow: '0 6px 14px rgba(0,0,0,0.10)',
                   }}
                 >
                   <img
@@ -1285,13 +1287,13 @@ export default function HomePage() {
                     <span
                       style={{
                         position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: 8,
-                        height: 8,
+                        top: 1,
+                        right: 1,
+                        width: 10,
+                        height: 10,
                         borderRadius: '50%',
                         background: '#ff3b30',
-                        border: '1.5px solid #ffffff',
+                        border: '2px solid #ffffff',
                       }}
                     />
                   ) : null}
@@ -1307,8 +1309,8 @@ export default function HomePage() {
                   right: 0,
                   top: 'calc(100% + 8px)',
                   background: 'rgba(255,255,255,0.98)',
-                  border: '1px solid #111111',
-                  borderRadius: 20,
+                  border: '2px solid #111111',
+                  borderRadius: 22,
                   boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
                   padding: 12,
                   maxHeight: 380,
@@ -1520,7 +1522,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '10px 0 0' }}>
+        <section style={{ padding: '8px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1538,236 +1540,249 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '8px 14px 0' }}>
+        <section style={{ padding: '8px 12px 0' }}>
           <div
             style={{
-              border: '1px solid #111111',
-              borderRadius: 24,
-              background: '#fff',
-              padding: 10,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 10,
             }}
           >
-            <div
+            <button
+              onClick={() =>
+                setHomeFilterMode((prev) => (prev === 'liked-category' ? 'none' : 'liked-category'))
+              }
               style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
+                border: '2px solid #1d1d1d',
+                background:
+                  homeFilterMode === 'liked-category'
+                    ? 'linear-gradient(180deg, #1f4f95 0%, #163d79 100%)'
+                    : 'linear-gradient(180deg, #2258a5 0%, #183f7d 100%)',
+                color: '#ffffff',
+                borderRadius: 22,
+                minHeight: 72,
+                padding: '12px 14px',
+                fontSize: 15,
+                fontWeight: 900,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                boxShadow: '0 6px 18px rgba(21,54,104,0.18)',
               }}
             >
-              <button
-                onClick={() =>
-                  setHomeFilterMode((prev) => (prev === 'liked-category' ? 'none' : 'liked-category'))
-                }
-                style={{
-                  border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-category' ? '#ffe7ef' : '#fff3f7',
-                  color: '#1f2430',
-                  borderRadius: 18,
-                  minHeight: 56,
-                  padding: '10px 12px',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  justifyContent: 'space-between',
-                }}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                  <span style={{ color: '#ff1f4b', fontSize: 18 }}>♥</span>
-                  <span
-                    style={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {currentCategoryLabel}
-                  </span>
-                </span>
-
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                <span style={{ color: '#ff445f', fontSize: 20 }}>♥</span>
                 <span
                   style={{
-                    minWidth: 28,
-                    height: 28,
-                    borderRadius: 999,
-                    border: '1px solid #111111',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 14,
-                    fontWeight: 900,
-                    background: '#fff',
-                    color: '#111111',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  {likedInCategoryCount}
+                  {currentCategoryLabel}
                 </span>
-              </button>
+              </span>
 
-              <button
-                onClick={() =>
-                  setHomeFilterMode((prev) => (prev === 'deals-category' ? 'none' : 'deals-category'))
-                }
+              <span
                 style={{
-                  border: '1px solid #111111',
-                  background: homeFilterMode === 'deals-category' ? '#fff4cc' : '#fff8dd',
-                  color: '#1f2430',
-                  borderRadius: 18,
-                  minHeight: 56,
-                  padding: '10px 12px',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  display: 'flex',
+                  minWidth: 42,
+                  height: 34,
+                  borderRadius: 999,
+                  border: '2px solid #1d1d1d',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 10,
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
+                  fontSize: 18,
+                  fontWeight: 900,
+                  background: '#fff',
+                  color: '#111111',
+                  boxShadow: '0 3px 10px rgba(0,0,0,0.10)',
                 }}
               >
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                  <span style={{ color: '#f0b000', fontSize: 18 }}>🪙</span>
-                  <span
-                    style={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {tr.dealsToday}
-                  </span>
-                </span>
+                {likedInCategoryCount}
+              </span>
+            </button>
 
+            <button
+              onClick={() =>
+                setHomeFilterMode((prev) => (prev === 'deals-category' ? 'none' : 'deals-category'))
+              }
+              style={{
+                border: '2px solid #1d1d1d',
+                background:
+                  homeFilterMode === 'deals-category'
+                    ? 'linear-gradient(180deg, #f7de78 0%, #e9c74b 100%)'
+                    : 'linear-gradient(180deg, #f7e59a 0%, #efd15b 100%)',
+                color: '#2b2f36',
+                borderRadius: 22,
+                minHeight: 72,
+                padding: '12px 14px',
+                fontSize: 15,
+                fontWeight: 900,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                boxShadow: '0 6px 18px rgba(160,126,25,0.12)',
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                <span style={{ color: '#e1a900', fontSize: 19 }}>🏛️</span>
                 <span
                   style={{
-                    minWidth: 28,
-                    height: 28,
-                    borderRadius: 999,
-                    border: '1px solid #111111',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 14,
-                    fontWeight: 900,
-                    background: '#fff',
-                    color: '#111111',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  {dealsInCategoryCount}
+                  {tr.dealsToday}
                 </span>
-              </button>
+              </span>
 
-              <button
-                onClick={() =>
-                  setHomeFilterMode((prev) => (prev === 'liked-all' ? 'none' : 'liked-all'))
-                }
+              <span
                 style={{
-                  border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-all' ? '#ffe7ef' : '#fff3f7',
-                  color: '#1f2430',
-                  borderRadius: 18,
-                  minHeight: 56,
-                  padding: '10px 12px',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  display: 'flex',
+                  minWidth: 42,
+                  height: 34,
+                  borderRadius: 999,
+                  border: '2px solid #1d1d1d',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 10,
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
+                  fontSize: 18,
+                  fontWeight: 900,
+                  background: '#fff',
+                  color: '#111111',
+                  boxShadow: '0 3px 10px rgba(0,0,0,0.10)',
                 }}
               >
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                  <span style={{ color: '#ff1f4b', fontSize: 18 }}>♥</span>
-                  <span
-                    style={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {tr.allLiked}
-                  </span>
-                </span>
+                {dealsInCategoryCount}
+              </span>
+            </button>
 
+            <button
+              onClick={() =>
+                setHomeFilterMode((prev) => (prev === 'liked-all' ? 'none' : 'liked-all'))
+              }
+              style={{
+                border: '2px solid #1d1d1d',
+                background:
+                  homeFilterMode === 'liked-all'
+                    ? 'linear-gradient(180deg, #1f4f95 0%, #163d79 100%)'
+                    : 'linear-gradient(180deg, #2258a5 0%, #183f7d 100%)',
+                color: '#ffffff',
+                borderRadius: 22,
+                minHeight: 72,
+                padding: '12px 14px',
+                fontSize: 15,
+                fontWeight: 900,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                boxShadow: '0 6px 18px rgba(21,54,104,0.18)',
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                <span style={{ color: '#ff445f', fontSize: 20 }}>♥</span>
                 <span
                   style={{
-                    minWidth: 28,
-                    height: 28,
-                    borderRadius: 999,
-                    border: '1px solid #111111',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 14,
-                    fontWeight: 900,
-                    background: '#fff',
-                    color: '#111111',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  {likedAllCount}
+                  {tr.allLiked}
                 </span>
-              </button>
+              </span>
 
-              <button
-                onClick={() =>
-                  setHomeFilterMode((prev) => (prev === 'deals-all' ? 'none' : 'deals-all'))
-                }
+              <span
                 style={{
-                  border: '1px solid #111111',
-                  background: homeFilterMode === 'deals-all' ? '#fff4cc' : '#fff8dd',
-                  color: '#1f2430',
-                  borderRadius: 18,
-                  minHeight: 56,
-                  padding: '10px 12px',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  display: 'flex',
+                  minWidth: 42,
+                  height: 34,
+                  borderRadius: 999,
+                  border: '2px solid #1d1d1d',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 10,
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
+                  fontSize: 18,
+                  fontWeight: 900,
+                  background: '#fff',
+                  color: '#111111',
+                  boxShadow: '0 3px 10px rgba(0,0,0,0.10)',
                 }}
               >
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                  <span style={{ color: '#f0b000', fontSize: 18 }}>🪙</span>
-                  <span
-                    style={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {tr.allDealsToday}
-                  </span>
-                </span>
+                {likedAllCount}
+              </span>
+            </button>
 
+            <button
+              onClick={() =>
+                setHomeFilterMode((prev) => (prev === 'deals-all' ? 'none' : 'deals-all'))
+              }
+              style={{
+                border: '2px solid #1d1d1d',
+                background:
+                  homeFilterMode === 'deals-all'
+                    ? 'linear-gradient(180deg, #f7de78 0%, #e9c74b 100%)'
+                    : 'linear-gradient(180deg, #f7e59a 0%, #efd15b 100%)',
+                color: '#2b2f36',
+                borderRadius: 22,
+                minHeight: 72,
+                padding: '12px 14px',
+                fontSize: 15,
+                fontWeight: 900,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                boxShadow: '0 6px 18px rgba(160,126,25,0.12)',
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                <span style={{ color: '#e1a900', fontSize: 19 }}>🏛️</span>
                 <span
                   style={{
-                    minWidth: 28,
-                    height: 28,
-                    borderRadius: 999,
-                    border: '1px solid #111111',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 14,
-                    fontWeight: 900,
-                    background: '#fff',
-                    color: '#111111',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  {dealsAllCount}
+                  {tr.allDealsToday}
                 </span>
-              </button>
-            </div>
+              </span>
+
+              <span
+                style={{
+                  minWidth: 42,
+                  height: 34,
+                  borderRadius: 999,
+                  border: '2px solid #1d1d1d',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 18,
+                  fontWeight: 900,
+                  background: '#fff',
+                  color: '#111111',
+                  boxShadow: '0 3px 10px rgba(0,0,0,0.10)',
+                }}
+              >
+                {dealsAllCount}
+              </span>
+            </button>
           </div>
         </section>
 
-        <section style={{ padding: '2px 0 0' }}>
-          <div style={{ background: '#ffffff', borderTop: '1px solid #111111', borderBottom: '1px solid #111111' }}>
-            <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
+        <section style={{ padding: '10px 0 0' }}>
+          <div
+            style={{
+              background: '#ffffff',
+              borderTop: '2px solid #111111',
+              borderBottom: '2px solid #111111',
+            }}
+          >
+            <div style={{ height: 610, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={filteredMasters}
                 mapMode={mapMode}
