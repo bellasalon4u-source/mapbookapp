@@ -34,7 +34,6 @@ type MasterItem = {
   avatar?: string;
   description?: string;
   paymentMethods?: string[] | string;
-  dealBadgeText?: string;
 };
 
 type RealMapProps = {
@@ -45,6 +44,7 @@ type RealMapProps = {
   likedMasterIds?: string[];
   recenterToUserTrigger?: number;
   language?: AppLanguage;
+  promotionBadgeTextByMasterId?: Record<string, string>;
   onMasterSelect?: (master: MasterItem) => void;
   onMapBackgroundClick?: () => void;
   onToggleLike?: (master: MasterItem) => void;
@@ -112,7 +112,7 @@ function getCurrentLocationLabel(language: AppLanguage) {
 function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') {
   const normalized = String(category || '').toLowerCase();
 
-  const labels: Record<string, Partial<Record<AppLanguage, string>>> = {
+  const categoryLabels: Record<string, Partial<Record<AppLanguage, string>>> = {
     beauty: {
       EN: 'Beauty',
       ES: 'Belleza',
@@ -197,9 +197,105 @@ function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') 
       AR: 'حيوانات',
       PL: 'Zwierzęta',
     },
+    fashion: {
+      EN: 'Fashion',
+      ES: 'Moda',
+      RU: 'Мода',
+      UA: 'Мода',
+      CZ: 'Móda',
+      DE: 'Mode',
+      IT: 'Moda',
+      FR: 'Mode',
+      AR: 'موضة',
+      PL: 'Moda',
+    },
+    auto: {
+      EN: 'Auto',
+      ES: 'Auto',
+      RU: 'Авто',
+      UA: 'Авто',
+      CZ: 'Auto',
+      DE: 'Auto',
+      IT: 'Auto',
+      FR: 'Auto',
+      AR: 'سيارات',
+      PL: 'Auto',
+    },
+    moving: {
+      EN: 'Moving',
+      ES: 'Mudanza',
+      RU: 'Переезд',
+      UA: 'Переїзд',
+      CZ: 'Stěhování',
+      DE: 'Umzug',
+      IT: 'Trasloco',
+      FR: 'Déménagement',
+      AR: 'نقل',
+      PL: 'Przeprowadzka',
+    },
+    fitness: {
+      EN: 'Fitness',
+      ES: 'Fitness',
+      RU: 'Фитнес',
+      UA: 'Фітнес',
+      CZ: 'Fitness',
+      DE: 'Fitness',
+      IT: 'Fitness',
+      FR: 'Fitness',
+      AR: 'لياقة',
+      PL: 'Fitness',
+    },
+    education: {
+      EN: 'Education',
+      ES: 'Educación',
+      RU: 'Обучение',
+      UA: 'Навчання',
+      CZ: 'Vzdělání',
+      DE: 'Bildung',
+      IT: 'Educazione',
+      FR: 'Éducation',
+      AR: 'تعليم',
+      PL: 'Edukacja',
+    },
+    events: {
+      EN: 'Events',
+      ES: 'Eventos',
+      RU: 'События',
+      UA: 'Події',
+      CZ: 'Události',
+      DE: 'Events',
+      IT: 'Eventi',
+      FR: 'Événements',
+      AR: 'فعاليات',
+      PL: 'Wydarzenia',
+    },
+    activities: {
+      EN: 'Activities',
+      ES: 'Actividades',
+      RU: 'Активности',
+      UA: 'Активності',
+      CZ: 'Aktivity',
+      DE: 'Aktivitäten',
+      IT: 'Attività',
+      FR: 'Activités',
+      AR: 'أنشطة',
+      PL: 'Aktywności',
+    },
+    creative: {
+      EN: 'Creative',
+      ES: 'Creativo',
+      RU: 'Креатив',
+      UA: 'Креатив',
+      CZ: 'Kreativa',
+      DE: 'Kreativ',
+      IT: 'Creativo',
+      FR: 'Créatif',
+      AR: 'إبداعي',
+      PL: 'Kreatywne',
+    },
   };
 
-  return labels[normalized]?.[language] || category || getFallbackServiceLabel(language);
+  return categoryLabels[normalized]?.[language] || category || getFallbackServiceLabel(language);
 }
 
 function getMarkerAlt(master: MasterItem, language: AppLanguage) {
@@ -239,20 +335,12 @@ function formatPrice(value: string | number | undefined, trObj: ReturnType<typeo
   return formatDisplayPrice(value, 45, true, trObj.from);
 }
 
-function escapeHtml(value: string) {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
 function buildMarkerIcon(
   master: MasterItem,
   language: AppLanguage,
   isSelected: boolean,
-  isLiked: boolean
+  isLiked: boolean,
+  promotionBadgeText?: string
 ): DivIcon {
   const accent = getCategoryAccent(master.category);
   const availabilityColor = master.availableNow ? '#2ed14f' : '#ff2d2d';
@@ -260,85 +348,31 @@ function buildMarkerIcon(
     master.avatar ||
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80';
 
-  const outerRing = isSelected ? 6 : 5;
-  const size = isSelected ? 78 : 72;
-  const photoSize = isSelected ? 58 : 54;
-  const statusBadgeSize = isSelected ? 20 : 18;
-  const showDealBadge = Boolean(master.dealBadgeText);
-  const discountText = escapeHtml(master.dealBadgeText || '');
-  const heartSize = isSelected ? 30 : 28;
-
-  const floatingBadgeHtml = showDealBadge
-    ? `
-      <div
-        style="
-          position:absolute;
-          right:-6px;
-          top:${size * 0.58}px;
-          min-width:64px;
-          height:34px;
-          padding:0 12px;
-          background:linear-gradient(180deg,#ffe8a8 0%, #ffd86b 100%);
-          border:3px solid #f09b5f;
-          border-radius:999px;
-          box-shadow:0 6px 14px rgba(0,0,0,0.16);
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          color:#4a3423;
-          font-size:16px;
-          font-weight:900;
-          line-height:1;
-          white-space:nowrap;
-        "
-      >
-        ${discountText}
-      </div>
-    `
-    : `
-      <div
-        class="pin-like-badge"
-        style="
-          position:absolute;
-          right:2px;
-          top:${size * 0.56}px;
-          width:${heartSize + 10}px;
-          height:${heartSize + 10}px;
-          background:#fff;
-          border:4px solid ${accent};
-          border-radius:999px;
-          box-shadow:0 4px 10px rgba(0,0,0,0.14);
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          color:#ff2020;
-          font-size:${isLiked ? 16 : 0}px;
-          font-weight:900;
-          line-height:1;
-          cursor:pointer;
-        "
-      >
-        ${isLiked ? '♥' : ''}
-      </div>
-    `;
-
-  const statusRight = showDealBadge ? 58 : heartSize + 20;
+  const size = isSelected ? 88 : 80;
+  const photoSize = isSelected ? 62 : 56;
+  const ringSize = isSelected ? 6 : 5;
+  const likeBadgeSize = isSelected ? 38 : 34;
+  const statusBadgeSize = isSelected ? 34 : 30;
+  const hasPromo = Boolean(promotionBadgeText && promotionBadgeText.trim());
+  const promoBadgeWidth = isSelected ? 84 : 76;
+  const promoBadgeHeight = isSelected ? 42 : 38;
+  const promoFont = isSelected ? 18 : 16;
 
   return L.divIcon({
     className: 'custom-master-pin',
     html: `
-      <div style="position:relative;width:${size + 28}px;height:${size + 24}px;">
+      <div style="position:relative;width:${size}px;height:${size + 26}px;">
         <div style="
           position:absolute;
           left:50%;
-          top:${size - 4}px;
+          top:${size - 1}px;
           transform:translateX(-50%);
           width:0;
           height:0;
-          border-left:14px solid transparent;
-          border-right:14px solid transparent;
-          border-top:19px solid ${accent};
-          filter:drop-shadow(0 5px 8px rgba(0,0,0,0.16));
+          border-left:15px solid transparent;
+          border-right:15px solid transparent;
+          border-top:22px solid ${accent};
+          filter:drop-shadow(0 6px 10px rgba(0,0,0,0.16));
         "></div>
 
         <div style="
@@ -349,14 +383,14 @@ function buildMarkerIcon(
           width:${size}px;
           height:${size}px;
           border-radius:999px;
-          background:#fff;
-          border:${outerRing}px solid ${accent};
-          box-shadow:0 7px 18px rgba(0,0,0,0.16);
+          background:#ffffff;
+          border:${ringSize}px solid ${accent};
+          box-shadow:0 10px 22px rgba(0,0,0,0.18);
           overflow:hidden;
         ">
           <img
             src="${avatar}"
-            alt="${escapeHtml(getMarkerAlt(master, language))}"
+            alt="${getMarkerAlt(master, language)}"
             style="
               width:${photoSize}px;
               height:${photoSize}px;
@@ -371,23 +405,80 @@ function buildMarkerIcon(
           />
         </div>
 
-        ${floatingBadgeHtml}
+        <div
+          class="pin-status-badge"
+          style="
+            position:absolute;
+            left:${isSelected ? 2 : 3}px;
+            bottom:${isSelected ? 18 : 16}px;
+            width:${statusBadgeSize}px;
+            height:${statusBadgeSize}px;
+            background:#ffffff;
+            border:5px solid ${availabilityColor};
+            border-radius:999px;
+            box-shadow:0 5px 12px rgba(0,0,0,0.14);
+          "
+        ></div>
 
-        <div style="
-          position:absolute;
-          right:${statusRight}px;
-          top:${size * 0.46}px;
-          width:${statusBadgeSize + 10}px;
-          height:${statusBadgeSize + 10}px;
-          background:#fff;
-          border:4px solid ${availabilityColor};
-          border-radius:999px;
-          box-shadow:0 4px 10px rgba(0,0,0,0.12);
-        "></div>
+        <div
+          class="pin-like-badge"
+          style="
+            position:absolute;
+            right:${hasPromo ? promoBadgeWidth - 8 : 2}px;
+            bottom:${isSelected ? 8 : 8}px;
+            width:${likeBadgeSize}px;
+            height:${likeBadgeSize}px;
+            background:#ffffff;
+            border:5px solid ${accent};
+            border-radius:999px;
+            box-shadow:0 5px 12px rgba(0,0,0,0.14);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:${isLiked ? '#ff2f70' : 'transparent'};
+            font-size:${isLiked ? (isSelected ? 20 : 18) : 0}px;
+            font-weight:900;
+            line-height:1;
+            cursor:pointer;
+          "
+        >
+          ${isLiked ? '♥' : ''}
+        </div>
+
+        ${
+          hasPromo
+            ? `
+          <div
+            style="
+              position:absolute;
+              right:-4px;
+              top:${isSelected ? 40 : 38}px;
+              min-width:${promoBadgeWidth}px;
+              height:${promoBadgeHeight}px;
+              padding:0 14px;
+              border-radius:999px;
+              background:linear-gradient(180deg, #ffeeb5 0%, #ffd979 100%);
+              border:3px solid #ef9f6f;
+              box-shadow:0 6px 14px rgba(0,0,0,0.16);
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              color:#2a2430;
+              font-size:${promoFont}px;
+              font-weight:900;
+              letter-spacing:-0.02em;
+              white-space:nowrap;
+            "
+          >
+            ${promotionBadgeText}
+          </div>
+        `
+            : ''
+        }
       </div>
     `,
-    iconSize: [size + 28, size + 24],
-    iconAnchor: [Math.round((size + 28) / 2), size + 12],
+    iconSize: [hasPromo ? size + 34 : size, size + 26],
+    iconAnchor: [size / 2, size + 16],
   });
 }
 
@@ -519,6 +610,7 @@ export default function RealMap({
   likedMasterIds = [],
   recenterToUserTrigger = 0,
   language = 'EN',
+  promotionBadgeTextByMasterId = {},
   onMasterSelect,
   onMapBackgroundClick,
   onToggleLike,
@@ -532,9 +624,7 @@ export default function RealMap({
     effectiveLocation.lng || londonCenter[1],
   ];
 
-  const [currentDetectedLocation, setCurrentDetectedLocation] = useState<[number, number] | null>(
-    null
-  );
+  const [currentDetectedLocation, setCurrentDetectedLocation] = useState<[number, number] | null>(null);
   const [focusLocation, setFocusLocation] = useState<[number, number]>(initialFocusLocation);
 
   const tr = t(language);
@@ -612,7 +702,10 @@ export default function RealMap({
         }}
         zoomControl={true}
       >
-        <TileLayer attribution="&copy; OpenStreetMap contributors" url={getTileUrl(mapMode)} />
+        <TileLayer
+          attribution="&copy; OpenStreetMap contributors"
+          url={getTileUrl(mapMode)}
+        />
 
         <UserLocationLayer language={language} onLocationFound={setCurrentDetectedLocation} />
         <FitBoundsLayer masters={safeMasters} focusLocation={focusLocation} />
@@ -652,12 +745,13 @@ export default function RealMap({
         {safeMasters.map((master) => {
           const isSelected = String(master.id) === String(selectedMasterId);
           const isLiked = likedMasterIds.includes(String(master.id));
+          const promotionBadgeText = promotionBadgeTextByMasterId[String(master.id)] || '';
 
           return (
             <Marker
               key={String(master.id)}
               position={[master.lat as number, master.lng as number]}
-              icon={buildMarkerIcon(master, language, isSelected, isLiked)}
+              icon={buildMarkerIcon(master, language, isSelected, isLiked, promotionBadgeText)}
               eventHandlers={{
                 mousedown: () => {
                   ignoreNextMapClickRef.current = true;
@@ -695,8 +789,8 @@ export default function RealMap({
             zIndex: 1200,
             background: 'rgba(255,255,255,0.98)',
             borderRadius: 28,
-            border: '2px solid #1f1f1f',
-            boxShadow: '0 16px 30px rgba(0,0,0,0.16)',
+            border: '2px solid #111111',
+            boxShadow: '0 14px 30px rgba(0,0,0,0.16)',
             padding: 14,
             pointerEvents: 'auto',
           }}
@@ -733,8 +827,8 @@ export default function RealMap({
                   position: 'absolute',
                   top: 8,
                   right: 8,
-                  width: 34,
-                  height: 34,
+                  width: 36,
+                  height: 36,
                   borderRadius: 999,
                   border: '2px solid #111111',
                   background: '#fff',
@@ -778,7 +872,7 @@ export default function RealMap({
                     padding: '8px 12px',
                     fontSize: 12,
                     fontWeight: 900,
-                    border: '1px solid #e6dacb',
+                    border: '1px solid #eadfcc',
                   }}
                 >
                   🏅 {tr.verifiedPro}
@@ -792,27 +886,11 @@ export default function RealMap({
                     padding: '8px 12px',
                     fontSize: 12,
                     fontWeight: 900,
-                    border: '1px solid #ffd2e6',
+                    border: '1px solid #ffd0e3',
                   }}
                 >
                   {getCategoryBadgeLabel(selectedMaster.category, language)}
                 </div>
-
-                {selectedMaster.dealBadgeText ? (
-                  <div
-                    style={{
-                      borderRadius: 999,
-                      background: 'linear-gradient(180deg,#ffe8a8 0%, #ffd86b 100%)',
-                      color: '#4a3423',
-                      padding: '8px 12px',
-                      fontSize: 12,
-                      fontWeight: 900,
-                      border: '2px solid #f09b5f',
-                    }}
-                  >
-                    {selectedMaster.dealBadgeText}
-                  </div>
-                ) : null}
               </div>
 
               <div
@@ -909,7 +987,7 @@ export default function RealMap({
                 <div
                   key={method}
                   style={{
-                    border: '1px solid #ebe3d7',
+                    border: '2px solid #111111',
                     background: '#fff',
                     borderRadius: 16,
                     padding: '8px 12px',
@@ -946,7 +1024,7 @@ export default function RealMap({
                 onViewMaster?.(selectedMaster);
               }}
               style={{
-                border: '2px solid #efcfe0',
+                border: '2px solid #111111',
                 background: '#fff',
                 color: '#243041',
                 borderRadius: 18,
@@ -954,6 +1032,8 @@ export default function RealMap({
                 fontSize: 15,
                 fontWeight: 900,
                 cursor: 'pointer',
+                position: 'relative',
+                zIndex: 2,
               }}
             >
               {tr.view}
@@ -975,6 +1055,8 @@ export default function RealMap({
                 fontSize: 15,
                 fontWeight: 900,
                 cursor: 'pointer',
+                position: 'relative',
+                zIndex: 2,
               }}
             >
               {tr.route}
@@ -996,6 +1078,8 @@ export default function RealMap({
                 fontSize: 15,
                 fontWeight: 900,
                 cursor: 'pointer',
+                position: 'relative',
+                zIndex: 2,
               }}
             >
               {tr.bookNow}
