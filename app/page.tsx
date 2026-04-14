@@ -551,7 +551,7 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
   const titleWords = normalizedTitle.split(' ').filter((word) => word.length > 2);
 
   const exactByMasterId = masters.find(
-    (master: any) => String(master.id) === String(promo.masterId)
+    (master: any) => String(promo.masterId) === String(master.id)
   );
 
   if (exactByMasterId) return exactByMasterId;
@@ -818,22 +818,28 @@ export default function HomePage() {
     );
   }, [promotions, activeCategory]);
 
-  const decoratedMasters = useMemo(() => {
-    return allMasters.map((master: any) => {
-      const matchedPromo = promotions.find((promo) => {
-        const sameMasterId = String(promo.masterId || '') === String(master.id);
-        if (sameMasterId) return true;
+  const promotionBadgeTextByMasterId = useMemo(() => {
+    const map: Record<string, string> = {};
 
-        const foundMaster = findPromotionMaster(promo, [master]);
-        return Boolean(foundMaster);
-      });
+    promotions.forEach((promo) => {
+      const badge = getPromotionDiscountBadge(promo);
+      if (!badge) return;
 
-      return {
-        ...master,
-        discountBadge: matchedPromo ? getPromotionDiscountBadge(matchedPromo) : '',
-      };
+      const matchedMaster = findPromotionMaster(promo, allMasters);
+      if (!matchedMaster) return;
+
+      map[String(matchedMaster.id)] = badge;
     });
-  }, [allMasters, promotions]);
+
+    return map;
+  }, [promotions, allMasters]);
+
+  const decoratedMasters = useMemo(() => {
+    return allMasters.map((master: any) => ({
+      ...master,
+      discountBadge: promotionBadgeTextByMasterId[String(master.id)] || '',
+    }));
+  }, [allMasters, promotionBadgeTextByMasterId]);
 
   const smartResults = useMemo(() => {
     const q = search.trim();
@@ -963,8 +969,7 @@ export default function HomePage() {
 
       const categoryDealsMatch =
         homeFilterMode === 'deals-category'
-          ? Boolean(master.discountBadge) &&
-            masterCategory === activeCategory
+          ? Boolean(master.discountBadge) && masterCategory === activeCategory
           : true;
 
       const allDealsMatch =
@@ -1602,8 +1607,8 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-category' ? '#f0dce8' : '#f8eef4',
-                  color: '#1f2430',
+                  background: homeFilterMode === 'liked-category' ? '#4a78c7' : '#5d8ae0',
+                  color: '#ffffff',
                   borderRadius: 18,
                   minHeight: 56,
                   padding: '10px 12px',
@@ -1617,7 +1622,7 @@ export default function HomePage() {
                   minWidth: 0,
                   boxShadow:
                     homeFilterMode === 'liked-category'
-                      ? 'inset 0 0 0 2px rgba(255,79,147,0.18)'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.25)'
                       : 'none',
                 }}
               >
@@ -1631,7 +1636,7 @@ export default function HomePage() {
                     overflow: 'hidden',
                   }}
                 >
-                  <span style={{ color: '#ff1f4b', fontSize: 18, flexShrink: 0 }}>♥</span>
+                  <span style={{ color: '#ff294f', fontSize: 18, flexShrink: 0 }}>♥</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1655,7 +1660,7 @@ export default function HomePage() {
                     justifyContent: 'center',
                     fontSize: 14,
                     fontWeight: 900,
-                    background: '#fff',
+                    background: '#ffffff',
                     color: '#111111',
                     flexShrink: 0,
                   }}
@@ -1670,7 +1675,7 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'deals-category' ? '#f4e3a2' : '#f8efc8',
+                  background: homeFilterMode === 'deals-category' ? '#f0d57a' : '#f6e3a3',
                   color: '#1f2430',
                   borderRadius: 18,
                   minHeight: 56,
@@ -1685,7 +1690,7 @@ export default function HomePage() {
                   minWidth: 0,
                   boxShadow:
                     homeFilterMode === 'deals-category'
-                      ? 'inset 0 0 0 2px rgba(212,160,44,0.18)'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.28)'
                       : 'none',
                 }}
               >
@@ -1699,7 +1704,7 @@ export default function HomePage() {
                     overflow: 'hidden',
                   }}
                 >
-                  <span style={{ color: '#f0b000', fontSize: 18, flexShrink: 0 }}>🪙</span>
+                  <span style={{ color: '#c69212', fontSize: 18, flexShrink: 0 }}>🪙</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1723,7 +1728,7 @@ export default function HomePage() {
                     justifyContent: 'center',
                     fontSize: 14,
                     fontWeight: 900,
-                    background: '#fff',
+                    background: '#ffffff',
                     color: '#111111',
                     flexShrink: 0,
                   }}
@@ -1738,8 +1743,8 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-all' ? '#f0dce8' : '#f8eef4',
-                  color: '#1f2430',
+                  background: homeFilterMode === 'liked-all' ? '#4a78c7' : '#5d8ae0',
+                  color: '#ffffff',
                   borderRadius: 18,
                   minHeight: 56,
                   padding: '10px 12px',
@@ -1753,7 +1758,7 @@ export default function HomePage() {
                   minWidth: 0,
                   boxShadow:
                     homeFilterMode === 'liked-all'
-                      ? 'inset 0 0 0 2px rgba(255,79,147,0.18)'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.25)'
                       : 'none',
                 }}
               >
@@ -1767,7 +1772,7 @@ export default function HomePage() {
                     overflow: 'hidden',
                   }}
                 >
-                  <span style={{ color: '#ff1f4b', fontSize: 18, flexShrink: 0 }}>♥</span>
+                  <span style={{ color: '#ff294f', fontSize: 18, flexShrink: 0 }}>♥</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1791,7 +1796,7 @@ export default function HomePage() {
                     justifyContent: 'center',
                     fontSize: 14,
                     fontWeight: 900,
-                    background: '#fff',
+                    background: '#ffffff',
                     color: '#111111',
                     flexShrink: 0,
                   }}
@@ -1806,7 +1811,7 @@ export default function HomePage() {
                 }
                 style={{
                   border: '1px solid #111111',
-                  background: homeFilterMode === 'deals-all' ? '#f4e3a2' : '#f8efc8',
+                  background: homeFilterMode === 'deals-all' ? '#f0d57a' : '#f6e3a3',
                   color: '#1f2430',
                   borderRadius: 18,
                   minHeight: 56,
@@ -1821,7 +1826,7 @@ export default function HomePage() {
                   minWidth: 0,
                   boxShadow:
                     homeFilterMode === 'deals-all'
-                      ? 'inset 0 0 0 2px rgba(212,160,44,0.18)'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.28)'
                       : 'none',
                 }}
               >
@@ -1835,7 +1840,7 @@ export default function HomePage() {
                     overflow: 'hidden',
                   }}
                 >
-                  <span style={{ color: '#f0b000', fontSize: 18, flexShrink: 0 }}>🪙</span>
+                  <span style={{ color: '#c69212', fontSize: 18, flexShrink: 0 }}>🪙</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1859,7 +1864,7 @@ export default function HomePage() {
                     justifyContent: 'center',
                     fontSize: 14,
                     fontWeight: 900,
-                    background: '#fff',
+                    background: '#ffffff',
                     color: '#111111',
                     flexShrink: 0,
                   }}
@@ -1882,6 +1887,7 @@ export default function HomePage() {
                 likedMasterIds={likedMasterIds}
                 recenterToUserTrigger={recenterToUserTrigger}
                 language={language}
+                promotionBadgeTextByMasterId={promotionBadgeTextByMasterId}
                 onMasterSelect={(master) => {
                   setSelectedMaster(master);
                 }}
