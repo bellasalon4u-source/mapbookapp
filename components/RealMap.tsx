@@ -111,7 +111,7 @@ function getCurrentLocationLabel(language: AppLanguage) {
 function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') {
   const normalized = String(category || '').toLowerCase();
 
-  const labels: Record<string, Record<AppLanguage, string>> = {
+  const labels: Record<string, Partial<Record<AppLanguage, string>>> = {
     beauty: {
       EN: 'Beauty',
       ES: 'Belleza',
@@ -119,7 +119,7 @@ function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') 
       UA: 'Краса',
       CZ: 'Krása',
       DE: 'Beauty',
-      IT: 'Beauty',
+      IT: 'Bellezza',
       FR: 'Beauté',
       AR: 'الجمال',
       PL: 'Uroda',
@@ -133,7 +133,7 @@ function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') 
       DE: 'Barber',
       IT: 'Barber',
       FR: 'Barbier',
-      AR: 'حلاقة',
+      AR: 'حلاق',
       PL: 'Barber',
     },
     wellness: {
@@ -145,7 +145,7 @@ function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') 
       DE: 'Wellness',
       IT: 'Benessere',
       FR: 'Bien-être',
-      AR: 'عافية',
+      AR: 'العافية',
       PL: 'Wellness',
     },
     home: {
@@ -179,7 +179,7 @@ function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') 
       UA: 'Техніка',
       CZ: 'Technika',
       DE: 'Technik',
-      IT: 'Tech',
+      IT: 'Tecnologia',
       FR: 'Tech',
       AR: 'تقنية',
       PL: 'Technika',
@@ -487,7 +487,9 @@ export default function RealMap({
     effectiveLocation.lng || londonCenter[1],
   ];
 
-  const [currentDetectedLocation, setCurrentDetectedLocation] = useState<[number, number] | null>(null);
+  const [currentDetectedLocation, setCurrentDetectedLocation] = useState<[number, number] | null>(
+    null
+  );
   const [focusLocation, setFocusLocation] = useState<[number, number]>(initialFocusLocation);
 
   const tr = t(language);
@@ -543,10 +545,7 @@ export default function RealMap({
         width: '100%',
         height: '100%',
         background: '#f3efe7',
-        touchAction: 'none',
-        overscrollBehavior: 'contain',
-        WebkitUserSelect: 'none',
-        userSelect: 'none',
+        overflow: 'hidden',
       }}
     >
       <MapContainer
@@ -561,7 +560,6 @@ export default function RealMap({
         style={{
           width: '100%',
           height: '100%',
-          touchAction: 'none',
         }}
         zoomControl={true}
       >
@@ -642,23 +640,23 @@ export default function RealMap({
         <div
           style={{
             position: 'absolute',
-            left: 12,
-            right: 12,
-            bottom: 16,
+            left: 10,
+            right: 10,
+            bottom: 10,
             zIndex: 1200,
             background: 'rgba(255,255,255,0.98)',
-            borderRadius: 28,
+            borderRadius: 24,
             border: '1px solid #e9e2d8',
             boxShadow: '0 14px 30px rgba(0,0,0,0.16)',
-            padding: 14,
+            padding: 12,
             pointerEvents: 'auto',
           }}
         >
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '96px 1fr auto',
-              gap: 14,
+              gridTemplateColumns: '82px 1fr 40px',
+              gap: 12,
               alignItems: 'start',
             }}
           >
@@ -667,9 +665,9 @@ export default function RealMap({
                 src={selectedMaster.avatar}
                 alt={getSelectedMasterName(selectedMaster, language)}
                 style={{
-                  width: 96,
-                  height: 96,
-                  borderRadius: 22,
+                  width: 82,
+                  height: 82,
+                  borderRadius: 18,
                   objectFit: 'cover',
                   display: 'block',
                   border: '1px solid #eee7de',
@@ -684,15 +682,15 @@ export default function RealMap({
                 }}
                 style={{
                   position: 'absolute',
-                  top: 8,
-                  right: 8,
-                  width: 34,
-                  height: 34,
+                  top: 6,
+                  right: 6,
+                  width: 30,
+                  height: 30,
                   borderRadius: 999,
                   border: 'none',
                   background: '#fff',
                   color: '#ff4f93',
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: 900,
                   boxShadow: '0 4px 10px rgba(0,0,0,0.12)',
                   cursor: 'pointer',
@@ -709,7 +707,7 @@ export default function RealMap({
                   fontWeight: 900,
                   color: '#1f2430',
                   lineHeight: 1.15,
-                  marginBottom: 8,
+                  marginBottom: 6,
                 }}
               >
                 {getSelectedMasterName(selectedMaster, language)}
@@ -719,8 +717,8 @@ export default function RealMap({
                 style={{
                   display: 'flex',
                   flexWrap: 'wrap',
-                  gap: 8,
-                  marginBottom: 8,
+                  gap: 6,
+                  marginBottom: 6,
                 }}
               >
                 <div
@@ -728,8 +726,8 @@ export default function RealMap({
                     borderRadius: 999,
                     background: '#f3eadf',
                     color: '#8f765f',
-                    padding: '8px 12px',
-                    fontSize: 12,
+                    padding: '6px 10px',
+                    fontSize: 11,
                     fontWeight: 900,
                   }}
                 >
@@ -741,8 +739,8 @@ export default function RealMap({
                     borderRadius: 999,
                     background: '#ffe7f2',
                     color: '#ff5aa5',
-                    padding: '8px 12px',
-                    fontSize: 12,
+                    padding: '6px 10px',
+                    fontSize: 11,
                     fontWeight: 900,
                   }}
                 >
@@ -752,26 +750,26 @@ export default function RealMap({
 
               <div
                 style={{
-                  fontSize: 14,
-                  fontWeight: 900,
-                  color: selectedMaster.availableNow ? '#2f9c47' : '#d56d83',
-                  marginBottom: 10,
-                }}
-              >
-                {selectedMaster.availableNow ? tr.availableNow : tr.unavailableToday}
-              </div>
-
-              <div
-                style={{
                   display: 'flex',
                   flexWrap: 'wrap',
                   gap: 12,
                   alignItems: 'center',
+                  marginBottom: 6,
                 }}
               >
                 <div
                   style={{
-                    fontSize: 15,
+                    fontSize: 13,
+                    fontWeight: 900,
+                    color: selectedMaster.availableNow ? '#2f9c47' : '#d56d83',
+                  }}
+                >
+                  {selectedMaster.availableNow ? tr.availableNow : tr.unavailableToday}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 14,
                     fontWeight: 900,
                     color: '#1f2430',
                   }}
@@ -781,7 +779,7 @@ export default function RealMap({
 
                 <div
                   style={{
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: 900,
                     color: '#1f2430',
                   }}
@@ -789,6 +787,23 @@ export default function RealMap({
                   {formatPrice(selectedMaster.price, tr)}
                 </div>
               </div>
+
+              {selectedMaster.description ? (
+                <div
+                  style={{
+                    fontSize: 13,
+                    lineHeight: 1.35,
+                    color: '#4d5865',
+                    fontWeight: 600,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical' as const,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {selectedMaster.description}
+                </div>
+              ) : null}
             </div>
 
             <button
@@ -802,10 +817,10 @@ export default function RealMap({
                 border: 'none',
                 background: '#f4efe8',
                 color: '#6b7480',
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 borderRadius: 999,
-                fontSize: 26,
+                fontSize: 24,
                 lineHeight: 1,
                 cursor: 'pointer',
                 flexShrink: 0,
@@ -815,62 +830,48 @@ export default function RealMap({
             </button>
           </div>
 
-          {selectedMaster.description ? (
-            <div
-              style={{
-                marginTop: 12,
-                fontSize: 14,
-                lineHeight: 1.45,
-                color: '#4d5865',
-                fontWeight: 600,
-              }}
-            >
-              {selectedMaster.description}
-            </div>
-          ) : null}
-
           <div
             style={{
-              marginTop: 12,
+              marginTop: 10,
               display: 'flex',
               flexWrap: 'wrap',
-              gap: 10,
+              gap: 8,
             }}
           >
-            {normalizePaymentMethods(selectedMaster.paymentMethods).map((method) => {
-              const badge = paymentBadge(method, language);
+            {normalizePaymentMethods(selectedMaster.paymentMethods)
+              .slice(0, 3)
+              .map((method) => {
+                const badge = paymentBadge(method, language);
 
-              return (
-                <div
-                  key={method}
-                  style={{
-                    border: '1px solid #ebe3d7',
-                    background: '#fff',
-                    borderRadius: 16,
-                    padding: '8px 12px',
-                    fontSize: 12,
-                    fontWeight: 800,
-                    color: '#2b3745',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    minWidth: 64,
-                    justifyContent: 'center',
-                  }}
-                >
-                  <span>{badge.icon}</span>
-                  <span>{badge.label}</span>
-                </div>
-              );
-            })}
+                return (
+                  <div
+                    key={method}
+                    style={{
+                      border: '1px solid #ebe3d7',
+                      background: '#fff',
+                      borderRadius: 14,
+                      padding: '7px 10px',
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: '#2b3745',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                    }}
+                  >
+                    <span>{badge.icon}</span>
+                    <span>{badge.label}</span>
+                  </div>
+                );
+              })}
           </div>
 
           <div
             style={{
-              marginTop: 16,
+              marginTop: 12,
               display: 'grid',
               gridTemplateColumns: '1fr 1fr 1fr',
-              gap: 10,
+              gap: 8,
             }}
           >
             <button
@@ -881,16 +882,14 @@ export default function RealMap({
                 onViewMaster?.(selectedMaster);
               }}
               style={{
-                border: '2px solid #efcfe0',
+                border: '1.5px solid #efcfe0',
                 background: '#fff',
                 color: '#243041',
-                borderRadius: 18,
-                padding: '14px 10px',
-                fontSize: 15,
+                borderRadius: 16,
+                padding: '12px 8px',
+                fontSize: 14,
                 fontWeight: 900,
                 cursor: 'pointer',
-                position: 'relative',
-                zIndex: 2,
               }}
             >
               {tr.view}
@@ -907,13 +906,11 @@ export default function RealMap({
                 border: 'none',
                 background: '#63b9e8',
                 color: '#fff',
-                borderRadius: 18,
-                padding: '14px 10px',
-                fontSize: 15,
+                borderRadius: 16,
+                padding: '12px 8px',
+                fontSize: 14,
                 fontWeight: 900,
                 cursor: 'pointer',
-                position: 'relative',
-                zIndex: 2,
               }}
             >
               {tr.route}
@@ -930,13 +927,11 @@ export default function RealMap({
                 border: 'none',
                 background: '#41bf4a',
                 color: '#fff',
-                borderRadius: 18,
-                padding: '14px 10px',
-                fontSize: 15,
+                borderRadius: 16,
+                padding: '12px 8px',
+                fontSize: 14,
                 fontWeight: 900,
                 cursor: 'pointer',
-                position: 'relative',
-                zIndex: 2,
               }}
             >
               {tr.bookNow}
