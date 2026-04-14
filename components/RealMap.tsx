@@ -81,8 +81,12 @@ function getCategoryAccent(category?: string) {
 function getFallbackServiceLabel(language: AppLanguage) {
   if (language === 'ES') return 'Servicio';
   if (language === 'RU') return 'Услуга';
+  if (language === 'UA') return 'Послуга';
   if (language === 'CZ') return 'Služba';
   if (language === 'DE') return 'Service';
+  if (language === 'IT') return 'Servizio';
+  if (language === 'FR') return 'Service';
+  if (language === 'AR') return 'خدمة';
   if (language === 'PL') return 'Usługa';
   return 'Service';
 }
@@ -90,8 +94,12 @@ function getFallbackServiceLabel(language: AppLanguage) {
 function getFallbackProLabel(language: AppLanguage) {
   if (language === 'ES') return 'Profesional';
   if (language === 'RU') return 'Специалист';
+  if (language === 'UA') return 'Спеціаліст';
   if (language === 'CZ') return 'Profesionál';
   if (language === 'DE') return 'Profi';
+  if (language === 'IT') return 'Professionista';
+  if (language === 'FR') return 'Spécialiste';
+  if (language === 'AR') return 'متخصص';
   if (language === 'PL') return 'Specjalista';
   return 'Pro';
 }
@@ -99,8 +107,12 @@ function getFallbackProLabel(language: AppLanguage) {
 function getCurrentLocationLabel(language: AppLanguage) {
   if (language === 'ES') return 'Ubicación actual';
   if (language === 'RU') return 'Текущее местоположение';
+  if (language === 'UA') return 'Поточне місцезнаходження';
   if (language === 'CZ') return 'Aktuální poloha';
   if (language === 'DE') return 'Aktueller Standort';
+  if (language === 'IT') return 'Posizione attuale';
+  if (language === 'FR') return 'Position actuelle';
+  if (language === 'AR') return 'الموقع الحالي';
   if (language === 'PL') return 'Bieżąca lokalizacja';
   return 'Current location';
 }
@@ -108,130 +120,195 @@ function getCurrentLocationLabel(language: AppLanguage) {
 function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') {
   const normalized = String(category || '').toLowerCase();
 
-  const labels: Record<string, Record<AppLanguage, string>> = {
+  const labels: Record<string, Partial<Record<AppLanguage, string>>> = {
     beauty: {
       EN: 'Beauty',
       ES: 'Belleza',
       RU: 'Красота',
+      UA: 'Краса',
       CZ: 'Krása',
       DE: 'Beauty',
+      IT: 'Bellezza',
+      FR: 'Beauté',
+      AR: 'الجمال',
       PL: 'Uroda',
     },
     barber: {
       EN: 'Barber',
       ES: 'Barbero',
       RU: 'Барбер',
+      UA: 'Барбер',
       CZ: 'Barber',
       DE: 'Barber',
+      IT: 'Barber',
+      FR: 'Barbier',
+      AR: 'حلاق',
       PL: 'Barber',
     },
     wellness: {
       EN: 'Wellness',
       ES: 'Bienestar',
       RU: 'Велнес',
+      UA: 'Велнес',
       CZ: 'Wellness',
       DE: 'Wellness',
+      IT: 'Benessere',
+      FR: 'Bien-être',
+      AR: 'العافية',
       PL: 'Wellness',
     },
     home: {
       EN: 'Home',
       ES: 'Hogar',
       RU: 'Дом',
+      UA: 'Дім',
       CZ: 'Domov',
       DE: 'Zuhause',
+      IT: 'Casa',
+      FR: 'Maison',
+      AR: 'المنزل',
       PL: 'Dom',
     },
     repairs: {
       EN: 'Repairs',
       ES: 'Reparaciones',
       RU: 'Ремонт',
+      UA: 'Ремонт',
       CZ: 'Opravy',
       DE: 'Reparaturen',
+      IT: 'Riparazioni',
+      FR: 'Réparations',
+      AR: 'إصلاح',
       PL: 'Naprawy',
     },
     tech: {
       EN: 'Tech',
       ES: 'Tecnología',
       RU: 'Техника',
+      UA: 'Техніка',
       CZ: 'Technika',
       DE: 'Technik',
+      IT: 'Tech',
+      FR: 'Tech',
+      AR: 'تقنية',
       PL: 'Technika',
     },
     pets: {
       EN: 'Pets',
       ES: 'Mascotas',
       RU: 'Питомцы',
+      UA: 'Тварини',
       CZ: 'Mazlíčci',
       DE: 'Haustiere',
+      IT: 'Animali',
+      FR: 'Animaux',
+      AR: 'حيوانات',
       PL: 'Zwierzęta',
     },
     fashion: {
       EN: 'Fashion',
       ES: 'Moda',
       RU: 'Мода',
+      UA: 'Мода',
       CZ: 'Móda',
       DE: 'Mode',
+      IT: 'Moda',
+      FR: 'Mode',
+      AR: 'موضة',
       PL: 'Moda',
     },
     auto: {
       EN: 'Auto',
       ES: 'Auto',
       RU: 'Авто',
+      UA: 'Авто',
       CZ: 'Auto',
       DE: 'Auto',
+      IT: 'Auto',
+      FR: 'Auto',
+      AR: 'سيارات',
       PL: 'Auto',
     },
     moving: {
       EN: 'Moving',
       ES: 'Mudanza',
       RU: 'Переезд',
+      UA: 'Переїзд',
       CZ: 'Stěhování',
       DE: 'Umzug',
+      IT: 'Trasloco',
+      FR: 'Déménagement',
+      AR: 'نقل',
       PL: 'Przeprowadzka',
     },
     fitness: {
       EN: 'Fitness',
       ES: 'Fitness',
       RU: 'Фитнес',
+      UA: 'Фітнес',
       CZ: 'Fitness',
       DE: 'Fitness',
+      IT: 'Fitness',
+      FR: 'Fitness',
+      AR: 'لياقة',
       PL: 'Fitness',
     },
     education: {
       EN: 'Education',
       ES: 'Educación',
       RU: 'Обучение',
+      UA: 'Навчання',
       CZ: 'Vzdělání',
       DE: 'Bildung',
+      IT: 'Educazione',
+      FR: 'Éducation',
+      AR: 'تعليم',
       PL: 'Edukacja',
     },
     events: {
       EN: 'Events',
       ES: 'Eventos',
       RU: 'События',
+      UA: 'Події',
       CZ: 'Události',
       DE: 'Events',
+      IT: 'Eventi',
+      FR: 'Événements',
+      AR: 'فعاليات',
       PL: 'Wydarzenia',
     },
     activities: {
       EN: 'Activities',
       ES: 'Actividades',
       RU: 'Активности',
+      UA: 'Активності',
       CZ: 'Aktivity',
       DE: 'Aktivitäten',
+      IT: 'Attività',
+      FR: 'Activités',
+      AR: 'أنشطة',
       PL: 'Aktywności',
     },
     creative: {
       EN: 'Creative',
       ES: 'Creativo',
       RU: 'Креатив',
+      UA: 'Креатив',
       CZ: 'Kreativa',
       DE: 'Kreativ',
+      IT: 'Creativo',
+      FR: 'Créatif',
+      AR: 'إبداعي',
       PL: 'Kreatywne',
     },
   };
 
-  return labels[normalized]?.[language] || category || getFallbackServiceLabel(language);
+  return (
+    labels[normalized]?.[language] ||
+    labels[normalized]?.EN ||
+    category ||
+    getFallbackServiceLabel(language)
+  );
 }
 
 function getMarkerAlt(master: MasterItem, language: AppLanguage) {
@@ -293,7 +370,7 @@ function buildMarkerIcon(
   promotionBadgeTextByMasterId?: Record<string, string>
 ): DivIcon {
   const accent = getCategoryAccent(master.category);
-  const availabilityColor = master.availableNow ? '#2ed14f' : '#ff2d2d';
+  const availabilityColor = master.availableNow ? '#39c74a' : '#ff4d4f';
   const avatar =
     master.avatar ||
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80';
@@ -301,42 +378,41 @@ function buildMarkerIcon(
   const discountText = getPromotionBadgeText(master, promotionBadgeTextByMasterId);
   const hasDiscount = Boolean(discountText);
 
-  const outerRing = isSelected ? 6 : 5;
   const size = isSelected ? 78 : 72;
   const photoSize = isSelected ? 58 : 54;
-  const likeBadgeSize = isSelected ? 30 : 28;
-  const statusBadgeSize = isSelected ? 20 : 18;
-
-  const rightBadgeOffset = hasDiscount ? 44 : 4;
+  const borderSize = isSelected ? 6 : 5;
+  const likeBubbleSize = isSelected ? 38 : 36;
+  const statusBubbleSize = isSelected ? 28 : 26;
+  const badgeWidth = hasDiscount ? 74 : 0;
+  const totalWidth = size + (hasDiscount ? badgeWidth + 14 : 0);
 
   return L.divIcon({
     className: 'custom-master-pin',
     html: `
-      <div style="position:relative;width:${hasDiscount ? size + 52 : size}px;height:${size + 22}px;">
+      <div style="position:relative;width:${totalWidth}px;height:${size + 22}px;">
         <div style="
           position:absolute;
           left:${size / 2}px;
-          top:${size - 4}px;
+          top:${size - 2}px;
           transform:translateX(-50%);
           width:0;
           height:0;
           border-left:14px solid transparent;
           border-right:14px solid transparent;
-          border-top:19px solid ${accent};
-          filter:drop-shadow(0 5px 8px rgba(0,0,0,0.16));
+          border-top:18px solid ${accent};
+          filter:drop-shadow(0 5px 8px rgba(0,0,0,0.18));
         "></div>
 
         <div style="
           position:absolute;
-          left:${size / 2}px;
+          left:0;
           top:0;
-          transform:translateX(-50%);
           width:${size}px;
           height:${size}px;
           border-radius:999px;
-          background:#fff;
-          border:${outerRing}px solid ${accent};
-          box-shadow:0 7px 18px rgba(0,0,0,0.16);
+          background:#ffffff;
+          border:${borderSize}px solid ${accent};
+          box-shadow:0 8px 18px rgba(0,0,0,0.16);
           overflow:hidden;
         ">
           <img
@@ -359,28 +435,27 @@ function buildMarkerIcon(
         ${
           hasDiscount
             ? `
-          <div style="
-            position:absolute;
-            right:0;
-            top:${size * 0.50}px;
-            min-width:58px;
-            height:34px;
-            padding:0 12px;
-            background:linear-gradient(180deg,#ffeaa6 0%,#ffd87a 100%);
-            border:3px solid #111111;
-            border-radius:999px;
-            box-shadow:0 6px 12px rgba(0,0,0,0.18);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            color:#2a2115;
-            font-size:16px;
-            font-weight:900;
-            line-height:1;
-            white-space:nowrap;
-          ">
-            ${discountText}
-          </div>
+        <div style="
+          position:absolute;
+          left:${size - 4}px;
+          top:${Math.round(size * 0.56)}px;
+          min-width:74px;
+          height:36px;
+          padding:0 12px;
+          border-radius:999px;
+          border:3px solid #111111;
+          background:linear-gradient(180deg,#ffe9a6 0%,#ffd27b 100%);
+          color:#332615;
+          font-size:17px;
+          font-weight:900;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          white-space:nowrap;
+          box-shadow:0 6px 12px rgba(0,0,0,0.18);
+        ">
+          ${discountText}
+        </div>
         `
             : ''
         }
@@ -389,19 +464,19 @@ function buildMarkerIcon(
           class="pin-like-badge"
           style="
             position:absolute;
-            right:${rightBadgeOffset}px;
-            top:${size * 0.60}px;
-            width:${likeBadgeSize + 10}px;
-            height:${likeBadgeSize + 10}px;
-            background:#ffffff;
-            border:4px solid ${accent};
+            left:${size - likeBubbleSize * 0.22}px;
+            top:${Math.round(size * 0.58)}px;
+            width:${likeBubbleSize}px;
+            height:${likeBubbleSize}px;
             border-radius:999px;
-            box-shadow:0 4px 10px rgba(0,0,0,0.14);
+            border:4px solid ${accent};
+            background:#ffffff;
+            box-shadow:0 5px 12px rgba(0,0,0,0.15);
             display:flex;
             align-items:center;
             justify-content:center;
-            color:#ff295f;
-            font-size:${isLiked ? 17 : 0}px;
+            color:#ff2b63;
+            font-size:${isLiked ? 18 : 0}px;
             font-weight:900;
             line-height:1;
             cursor:pointer;
@@ -412,18 +487,18 @@ function buildMarkerIcon(
 
         <div style="
           position:absolute;
-          right:${hasDiscount ? 94 : likeBadgeSize + 20}px;
-          top:${size * 0.52}px;
-          width:${statusBadgeSize + 10}px;
-          height:${statusBadgeSize + 10}px;
-          background:#fff;
-          border:4px solid ${availabilityColor};
+          left:${-6}px;
+          top:${Math.round(size * 0.60)}px;
+          width:${statusBubbleSize}px;
+          height:${statusBubbleSize}px;
           border-radius:999px;
-          box-shadow:0 4px 10px rgba(0,0,0,0.12);
+          border:4px solid ${availabilityColor};
+          background:#ffffff;
+          box-shadow:0 5px 12px rgba(0,0,0,0.12);
         "></div>
       </div>
     `,
-    iconSize: [hasDiscount ? size + 52 : size, size + 22],
+    iconSize: [totalWidth, size + 22],
     iconAnchor: [size / 2, size + 12],
   });
 }
@@ -630,10 +705,7 @@ export default function RealMap({
         width: '100%',
         height: '100%',
         background: '#f3efe7',
-        touchAction: 'none',
         overscrollBehavior: 'contain',
-        WebkitUserSelect: 'none',
-        userSelect: 'none',
       }}
     >
       <MapContainer
@@ -648,7 +720,6 @@ export default function RealMap({
         style={{
           width: '100%',
           height: '100%',
-          touchAction: 'none',
         }}
         zoomControl={true}
       >
@@ -669,28 +740,26 @@ export default function RealMap({
           ignoreNextMapClickRef={ignoreNextMapClickRef}
         />
 
-        <>
-          <CircleMarker
-            center={locationDot}
-            radius={16}
-            pathOptions={{
-              color: 'rgba(46,128,255,0.18)',
-              fillColor: 'rgba(46,128,255,0.18)',
-              fillOpacity: 1,
-              weight: 0,
-            }}
-          />
-          <CircleMarker
-            center={locationDot}
-            radius={8}
-            pathOptions={{
-              color: '#ffffff',
-              fillColor: '#2f8df5',
-              fillOpacity: 1,
-              weight: 3,
-            }}
-          />
-        </>
+        <CircleMarker
+          center={locationDot}
+          radius={16}
+          pathOptions={{
+            color: 'rgba(46,128,255,0.18)',
+            fillColor: 'rgba(46,128,255,0.18)',
+            fillOpacity: 1,
+            weight: 0,
+          }}
+        />
+        <CircleMarker
+          center={locationDot}
+          radius={8}
+          pathOptions={{
+            color: '#ffffff',
+            fillColor: '#2f8df5',
+            fillOpacity: 1,
+            weight: 3,
+          }}
+        />
 
         {safeMasters.map((master) => {
           const isSelected = String(master.id) === String(selectedMasterId);
@@ -837,12 +906,12 @@ export default function RealMap({
                 <div
                   style={{
                     borderRadius: 999,
-                    background: '#edf6ff',
-                    color: getCategoryAccent(selectedMaster.category),
+                    background: '#f7d9e7',
+                    color: '#d94d8b',
                     padding: '10px 14px',
                     fontSize: 12,
                     fontWeight: 900,
-                    border: `3px solid ${getCategoryAccent(selectedMaster.category)}`,
+                    border: '3px solid #e9bfd1',
                   }}
                 >
                   {getCategoryBadgeLabel(selectedMaster.category, language)}
