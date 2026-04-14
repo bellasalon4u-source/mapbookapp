@@ -33,6 +33,7 @@ type PageTextShape = {
   title: string;
   subtitle: string;
   save: string;
+  saveBottom: string;
   languageSection: string;
   regionSection: string;
   currencySection: string;
@@ -49,6 +50,7 @@ type PageTextShape = {
   languageApp: string;
   overview: string;
   livePreview: string;
+  compactSetup: string;
   britishPound: string;
   euro: string;
   usDollar: string;
@@ -90,6 +92,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     title: 'Language & region',
     subtitle: 'App language, country, currency and location mode',
     save: 'Save',
+    saveBottom: 'Save settings',
     languageSection: 'Languages available in app',
     regionSection: 'Countries / regions',
     currencySection: 'Currency',
@@ -106,6 +109,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     languageApp: 'App language',
     overview: 'Current setup',
     livePreview: 'Live preview',
+    compactSetup: 'Quick summary',
     britishPound: 'British Pound',
     euro: 'Euro',
     usDollar: 'US Dollar',
@@ -128,6 +132,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     title: 'Idioma y región',
     subtitle: 'Idioma de la app, país, moneda y modo de ubicación',
     save: 'Guardar',
+    saveBottom: 'Guardar ajustes',
     languageSection: 'Idiomas disponibles en la app',
     regionSection: 'Países / regiones',
     currencySection: 'Moneda',
@@ -144,6 +149,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     languageApp: 'Idioma de la app',
     overview: 'Configuración actual',
     livePreview: 'Vista previa',
+    compactSetup: 'Resumen rápido',
     britishPound: 'Libra esterlina',
     euro: 'Euro',
     usDollar: 'Dólar estadounidense',
@@ -166,6 +172,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     title: 'Язык и регион',
     subtitle: 'Язык приложения, страна, валюта и режим локации',
     save: 'Сохранить',
+    saveBottom: 'Сохранить настройки',
     languageSection: 'Языки приложения',
     regionSection: 'Страны / регионы',
     currencySection: 'Валюта',
@@ -182,6 +189,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     languageApp: 'Язык приложения',
     overview: 'Текущая конфигурация',
     livePreview: 'Предпросмотр',
+    compactSetup: 'Краткая сводка',
     britishPound: 'Британский фунт',
     euro: 'Евро',
     usDollar: 'Доллар США',
@@ -204,6 +212,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     title: 'Мова і регіон',
     subtitle: 'Мова застосунку, країна, валюта та режим локації',
     save: 'Зберегти',
+    saveBottom: 'Зберегти налаштування',
     languageSection: 'Мови застосунку',
     regionSection: 'Країни / регіони',
     currencySection: 'Валюта',
@@ -220,6 +229,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     languageApp: 'Мова застосунку',
     overview: 'Поточна конфігурація',
     livePreview: 'Попередній перегляд',
+    compactSetup: 'Короткий підсумок',
     britishPound: 'Британський фунт',
     euro: 'Євро',
     usDollar: 'Долар США',
@@ -242,6 +252,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     title: 'Jazyk a region',
     subtitle: 'Jazyk aplikace, země, měna a režim polohy',
     save: 'Uložit',
+    saveBottom: 'Uložit nastavení',
     languageSection: 'Jazyky aplikace',
     regionSection: 'Země / regiony',
     currencySection: 'Měna',
@@ -258,6 +269,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     languageApp: 'Jazyk aplikace',
     overview: 'Aktuální nastavení',
     livePreview: 'Náhled',
+    compactSetup: 'Rychlý přehled',
     britishPound: 'Britská libra',
     euro: 'Euro',
     usDollar: 'Americký dolar',
@@ -280,6 +292,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     title: 'Sprache & Region',
     subtitle: 'App-Sprache, Land, Währung und Standortmodus',
     save: 'Speichern',
+    saveBottom: 'Einstellungen speichern',
     languageSection: 'Verfügbare App-Sprachen',
     regionSection: 'Länder / Regionen',
     currencySection: 'Währung',
@@ -287,8 +300,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     useCurrentLocation: 'Aktuellen Standort verwenden',
     currentLocationHint: 'GPS des Geräts für Suche und Karte verwenden',
     useRegionLocation: 'Ausgewählte Region verwenden',
-    regionLocationHint:
-      'In der Nähe des Zentrums des gewählten Landes oder der Region suchen',
+    regionLocationHint: 'In der Nähe des Zentrums des gewählten Landes oder der Region suchen',
     locationLoading: 'Aktueller Standort wird ermittelt...',
     locationSuccess: 'Aktueller Standort ausgewählt',
     locationError: 'Standort konnte nicht ermittelt werden',
@@ -297,6 +309,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     languageApp: 'App-Sprache',
     overview: 'Aktuelle Konfiguration',
     livePreview: 'Vorschau',
+    compactSetup: 'Kurzübersicht',
     britishPound: 'Britisches Pfund',
     euro: 'Euro',
     usDollar: 'US-Dollar',
@@ -319,6 +332,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     title: 'Lingua e regione',
     subtitle: 'Lingua app, paese, valuta e modalità posizione',
     save: 'Salva',
+    saveBottom: 'Salva impostazioni',
     languageSection: 'Lingue disponibili nell’app',
     regionSection: 'Paesi / regioni',
     currencySection: 'Valuta',
@@ -335,6 +349,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     languageApp: 'Lingua app',
     overview: 'Configurazione attuale',
     livePreview: 'Anteprima',
+    compactSetup: 'Riepilogo rapido',
     britishPound: 'Sterlina britannica',
     euro: 'Euro',
     usDollar: 'Dollaro USA',
@@ -357,16 +372,15 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     title: 'Langue et région',
     subtitle: 'Langue de l’app, pays, devise et mode de localisation',
     save: 'Enregistrer',
+    saveBottom: 'Enregistrer les réglages',
     languageSection: 'Langues disponibles dans l’app',
     regionSection: 'Pays / régions',
     currencySection: 'Devise',
     locationSection: 'Localisation',
     useCurrentLocation: 'Utiliser la position actuelle',
-    currentLocationHint:
-      'Utiliser le GPS de votre appareil pour la recherche et la carte',
+    currentLocationHint: 'Utiliser le GPS de votre appareil pour la recherche et la carte',
     useRegionLocation: 'Utiliser la région sélectionnée',
-    regionLocationHint:
-      'Rechercher près du centre du pays ou de la région sélectionnée',
+    regionLocationHint: 'Rechercher près du centre du pays ou de la région sélectionnée',
     locationLoading: 'Récupération de la position actuelle...',
     locationSuccess: 'Position actuelle sélectionnée',
     locationError: 'Impossible d’obtenir la position',
@@ -375,6 +389,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     languageApp: 'Langue de l’app',
     overview: 'Configuration actuelle',
     livePreview: 'Aperçu',
+    compactSetup: 'Résumé rapide',
     britishPound: 'Livre sterling',
     euro: 'Euro',
     usDollar: 'Dollar américain',
@@ -397,6 +412,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     title: 'اللغة والمنطقة',
     subtitle: 'لغة التطبيق والدولة والعملة ووضع الموقع',
     save: 'حفظ',
+    saveBottom: 'حفظ الإعدادات',
     languageSection: 'اللغات المتاحة في التطبيق',
     regionSection: 'الدول / المناطق',
     currencySection: 'العملة',
@@ -413,6 +429,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     languageApp: 'لغة التطبيق',
     overview: 'الإعداد الحالي',
     livePreview: 'معاينة',
+    compactSetup: 'ملخص سريع',
     britishPound: 'الجنيه البريطاني',
     euro: 'اليورو',
     usDollar: 'الدولار الأمريكي',
@@ -435,6 +452,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     title: 'Język i region',
     subtitle: 'Język aplikacji, kraj, waluta i tryb lokalizacji',
     save: 'Zapisz',
+    saveBottom: 'Zapisz ustawienia',
     languageSection: 'Języki aplikacji',
     regionSection: 'Kraje / regiony',
     currencySection: 'Waluta',
@@ -451,6 +469,7 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     languageApp: 'Język aplikacji',
     overview: 'Aktualna konfiguracja',
     livePreview: 'Podgląd',
+    compactSetup: 'Szybkie podsumowanie',
     britishPound: 'Funt brytyjski',
     euro: 'Euro',
     usDollar: 'Dolar amerykański',
@@ -613,10 +632,10 @@ function Radio({ checked }: { checked: boolean }) {
   return (
     <div
       style={{
-        width: 24,
-        height: 24,
+        width: 26,
+        height: 26,
         borderRadius: 999,
-        border: checked ? '2px solid #111111' : '2px solid #d8d3c8',
+        border: '2px solid #111111',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -627,8 +646,8 @@ function Radio({ checked }: { checked: boolean }) {
       {checked ? (
         <div
           style={{
-            width: 10,
-            height: 10,
+            width: 12,
+            height: 12,
             borderRadius: 999,
             background: '#111111',
           }}
@@ -642,10 +661,32 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
-        fontSize: 18,
+        fontSize: 19,
         fontWeight: 900,
         color: '#17130f',
-        marginBottom: 12,
+        marginBottom: 14,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SharpCard({
+  children,
+  compact = false,
+}: {
+  children: React.ReactNode;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        background: '#fff',
+        borderRadius: compact ? 28 : 32,
+        padding: compact ? 16 : 18,
+        border: '2px solid #111111',
+        marginBottom: 16,
       }}
     >
       {children}
@@ -818,8 +859,8 @@ export default function LanguageRegionPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
-        padding: '20px 16px 110px',
+        background: '#f7f4ee',
+        padding: '20px 16px 120px',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -839,12 +880,11 @@ export default function LanguageRegionPage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #e8dfd2',
+              border: '2px solid #111111',
               background: '#fff',
               fontSize: 26,
               fontWeight: 900,
               color: '#17130f',
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
               cursor: 'pointer',
             }}
           >
@@ -858,16 +898,18 @@ export default function LanguageRegionPage() {
                 fontWeight: 900,
                 color: '#17130f',
                 margin: 0,
+                lineHeight: 1.05,
               }}
             >
               {text.title}
             </h1>
             <div
               style={{
-                marginTop: 4,
+                marginTop: 6,
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
               {text.subtitle}
@@ -878,42 +920,21 @@ export default function LanguageRegionPage() {
             type="button"
             onClick={handleSave}
             style={{
-              border: 'none',
-              background: '#17130f',
+              border: '2px solid #111111',
+              background: '#2ea44f',
               color: '#fff',
               borderRadius: 999,
               padding: '12px 18px',
               fontSize: 14,
               fontWeight: 900,
               cursor: 'pointer',
-              boxShadow: '0 10px 20px rgba(23,19,15,0.18)',
             }}
           >
             {text.save}
           </button>
         </div>
 
-        <div
-          style={{
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
-            borderRadius: 30,
-            padding: 18,
-            border: '1px solid #eee5d9',
-            boxShadow: '0 12px 28px rgba(0,0,0,0.04)',
-            marginBottom: 14,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
-            }}
-          >
-            {text.overview}
-          </div>
-
+        <SharpCard compact>
           <div
             style={{
               display: 'grid',
@@ -922,65 +943,73 @@ export default function LanguageRegionPage() {
           >
             <div
               style={{
-                borderRadius: 18,
-                background: '#fff',
-                border: '1px solid #f1e8dc',
-                padding: 14,
+                fontSize: 17,
+                fontWeight: 900,
+                color: '#17130f',
               }}
             >
-              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800, marginBottom: 4 }}>
-                {text.languageApp}
-              </div>
-              <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
-                {languageOptions.find((item) => item.value === selectedLanguage)?.flag}{' '}
-                {languageOptions.find((item) => item.value === selectedLanguage)?.label}
-              </div>
+              {text.compactSetup}
             </div>
 
             <div
               style={{
-                borderRadius: 18,
-                background: '#fff',
-                border: '1px solid #f1e8dc',
-                padding: 14,
+                display: 'grid',
+                gap: 8,
               }}
             >
-              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800, marginBottom: 4 }}>
-                {text.selected}
+              <div
+                style={{
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#f8f5ef',
+                  padding: '10px 12px',
+                }}
+              >
+                <div style={{ fontSize: 11, color: '#8b8277', fontWeight: 900, marginBottom: 4 }}>
+                  {text.languageApp}
+                </div>
+                <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
+                  {languageOptions.find((item) => item.value === selectedLanguage)?.flag}{' '}
+                  {languageOptions.find((item) => item.value === selectedLanguage)?.label}
+                </div>
               </div>
-              <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
-                {selectedRegion} · {selectedCurrency}
-              </div>
-            </div>
 
-            <div
-              style={{
-                borderRadius: 18,
-                background: '#fff',
-                border: '1px solid #f1e8dc',
-                padding: 14,
-              }}
-            >
-              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800, marginBottom: 4 }}>
-                {text.livePreview}
+              <div
+                style={{
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#f8f5ef',
+                  padding: '10px 12px',
+                }}
+              >
+                <div style={{ fontSize: 11, color: '#8b8277', fontWeight: 900, marginBottom: 4 }}>
+                  {text.selected}
+                </div>
+                <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
+                  {selectedRegion} · {selectedCurrency}
+                </div>
               </div>
-              <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
-                {locationSummary}
+
+              <div
+                style={{
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#f8f5ef',
+                  padding: '10px 12px',
+                }}
+              >
+                <div style={{ fontSize: 11, color: '#8b8277', fontWeight: 900, marginBottom: 4 }}>
+                  {text.livePreview}
+                </div>
+                <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
+                  {locationSummary}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </SharpCard>
 
-        <div
-          style={{
-            background: '#ffffff',
-            borderRadius: 30,
-            padding: 18,
-            border: '1px solid #eee5d9',
-            boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
-            marginBottom: 14,
-          }}
-        >
+        <SharpCard>
           <SectionTitle>{text.languageSection}</SectionTitle>
 
           <div>
@@ -999,10 +1028,9 @@ export default function LanguageRegionPage() {
                     alignItems: 'center',
                     gap: 12,
                     padding: '14px 4px',
-                    background: checked ? '#faf6ef' : 'transparent',
+                    background: checked ? '#f7f1e7' : 'transparent',
                     border: 'none',
-                    borderBottom:
-                      index !== languageOptions.length - 1 ? '1px solid #eee7dc' : 'none',
+                    borderBottom: index !== languageOptions.length - 1 ? '2px solid #ece2d6' : 'none',
                     textAlign: 'left',
                     borderRadius: 18,
                     cursor: 'pointer',
@@ -1024,18 +1052,9 @@ export default function LanguageRegionPage() {
               );
             })}
           </div>
-        </div>
+        </SharpCard>
 
-        <div
-          style={{
-            background: '#ffffff',
-            borderRadius: 30,
-            padding: 18,
-            border: '1px solid #eee5d9',
-            boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
-            marginBottom: 14,
-          }}
-        >
+        <SharpCard>
           <SectionTitle>{text.regionSection}</SectionTitle>
 
           <div>
@@ -1069,10 +1088,9 @@ export default function LanguageRegionPage() {
                     alignItems: 'center',
                     gap: 12,
                     padding: '14px 4px',
-                    background: checked ? '#faf6ef' : 'transparent',
+                    background: checked ? '#f7f1e7' : 'transparent',
                     border: 'none',
-                    borderBottom:
-                      index !== regionOptions.length - 1 ? '1px solid #eee7dc' : 'none',
+                    borderBottom: index !== regionOptions.length - 1 ? '2px solid #ece2d6' : 'none',
                     textAlign: 'left',
                     borderRadius: 18,
                     cursor: 'pointer',
@@ -1094,18 +1112,9 @@ export default function LanguageRegionPage() {
               );
             })}
           </div>
-        </div>
+        </SharpCard>
 
-        <div
-          style={{
-            background: '#ffffff',
-            borderRadius: 30,
-            padding: 18,
-            border: '1px solid #eee5d9',
-            boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
-            marginBottom: 14,
-          }}
-        >
+        <SharpCard>
           <SectionTitle>{text.currencySection}</SectionTitle>
 
           <div>
@@ -1124,10 +1133,9 @@ export default function LanguageRegionPage() {
                     alignItems: 'center',
                     gap: 12,
                     padding: '14px 4px',
-                    background: checked ? '#faf6ef' : 'transparent',
+                    background: checked ? '#f7f1e7' : 'transparent',
                     border: 'none',
-                    borderBottom:
-                      index !== currencyOptions.length - 1 ? '1px solid #eee7dc' : 'none',
+                    borderBottom: index !== currencyOptions.length - 1 ? '2px solid #ece2d6' : 'none',
                     textAlign: 'left',
                     borderRadius: 18,
                     cursor: 'pointer',
@@ -1157,25 +1165,15 @@ export default function LanguageRegionPage() {
               );
             })}
           </div>
-        </div>
+        </SharpCard>
 
-        <div
-          style={{
-            background: '#ffffff',
-            borderRadius: 30,
-            padding: 18,
-            border: '1px solid #eee5d9',
-            boxShadow: '0 6px 18px rgba(0,0,0,0.04)',
-            marginBottom: 14,
-          }}
-        >
+        <SharpCard>
           <SectionTitle>{text.locationSection}</SectionTitle>
 
           <div
             style={{
-              borderBottom: '1px solid #eee7dc',
-              paddingBottom: 8,
-              marginBottom: 8,
+              display: 'grid',
+              gap: 12,
             }}
           >
             <button
@@ -1187,11 +1185,11 @@ export default function LanguageRegionPage() {
                 gridTemplateColumns: '34px 1fr auto',
                 alignItems: 'center',
                 gap: 12,
-                padding: '14px 4px',
-                background: selectedLocationMode === 'current' ? '#faf6ef' : 'transparent',
-                border: 'none',
+                padding: '16px 14px',
+                background: selectedLocationMode === 'current' ? '#f1efe7' : '#fff',
+                border: '2px solid #111111',
                 textAlign: 'left',
-                borderRadius: 18,
+                borderRadius: 24,
                 cursor: 'pointer',
               }}
             >
@@ -1201,76 +1199,96 @@ export default function LanguageRegionPage() {
                 <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
                   {isLocating ? text.locationLoading : text.useCurrentLocation}
                 </div>
-                <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
+                <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700, marginTop: 4 }}>
                   {text.currentLocationHint}
                 </div>
               </div>
 
               <Radio checked={selectedLocationMode === 'current'} />
             </button>
-          </div>
 
-          <button
-            type="button"
-            onClick={handleUseRegionLocation}
-            style={{
-              width: '100%',
-              display: 'grid',
-              gridTemplateColumns: '34px 1fr auto',
-              alignItems: 'center',
-              gap: 12,
-              padding: '14px 4px',
-              background: selectedLocationMode === 'custom' ? '#faf6ef' : 'transparent',
-              border: 'none',
-              textAlign: 'left',
-              borderRadius: 18,
-              cursor: 'pointer',
-            }}
-          >
-            <div style={{ fontSize: 24 }}>🗺️</div>
+            <button
+              type="button"
+              onClick={handleUseRegionLocation}
+              style={{
+                width: '100%',
+                display: 'grid',
+                gridTemplateColumns: '34px 1fr auto',
+                alignItems: 'center',
+                gap: 12,
+                padding: '16px 14px',
+                background: selectedLocationMode === 'custom' ? '#f1efe7' : '#fff',
+                border: '2px solid #111111',
+                textAlign: 'left',
+                borderRadius: 24,
+                cursor: 'pointer',
+              }}
+            >
+              <div style={{ fontSize: 24 }}>🗺️</div>
 
-            <div>
-              <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                {text.useRegionLocation}
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                  {text.useRegionLocation}
+                </div>
+                <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700, marginTop: 4 }}>
+                  {text.regionLocationHint}
+                </div>
               </div>
-              <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
-                {text.regionLocationHint}
+
+              <Radio checked={selectedLocationMode === 'custom'} />
+            </button>
+
+            <div
+              style={{
+                marginTop: 2,
+                borderRadius: 20,
+                background: '#f8f5ef',
+                border: '2px solid #111111',
+                padding: '12px 14px',
+              }}
+            >
+              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 900, marginBottom: 4 }}>
+                {text.selected}
+              </div>
+              <div style={{ fontSize: 14, color: '#17130f', fontWeight: 900 }}>
+                {locationSummary}
               </div>
             </div>
-
-            <Radio checked={selectedLocationMode === 'custom'} />
-          </button>
-
-          <div
-            style={{
-              marginTop: 12,
-              borderRadius: 18,
-              background: '#f8f4ec',
-              padding: '12px 14px',
-            }}
-          >
-            <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800, marginBottom: 4 }}>
-              {text.selected}
-            </div>
-            <div style={{ fontSize: 14, color: '#17130f', fontWeight: 900 }}>
-              {locationSummary}
-            </div>
           </div>
-        </div>
+        </SharpCard>
 
         <div
           style={{
             background: '#fff',
             borderRadius: 24,
             padding: '14px 16px',
-            border: '1px solid #eee5d9',
+            border: '2px solid #111111',
             color: '#6d6459',
             fontSize: 14,
             fontWeight: 700,
+            marginBottom: 16,
           }}
         >
           {profile.fullName} · {selectedLanguage} · {selectedRegion} · {selectedCurrency}
         </div>
+
+        <button
+          type="button"
+          onClick={handleSave}
+          style={{
+            width: '100%',
+            minHeight: 58,
+            borderRadius: 999,
+            border: '2px solid #111111',
+            background: '#2ea44f',
+            color: '#fff',
+            fontSize: 17,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          {text.saveBottom}
+        </button>
       </div>
 
       <BottomNav active="profile" />
