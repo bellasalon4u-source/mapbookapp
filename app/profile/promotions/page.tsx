@@ -26,6 +26,7 @@ const promotionsTexts = {
     welcomeBonus: 'Welcome bonus',
     referralBonus: 'Referral reward',
     seasonalOffer: 'Seasonal offer',
+    back: 'Back',
   },
   ES: {
     title: 'Promociones',
@@ -47,6 +48,7 @@ const promotionsTexts = {
     welcomeBonus: 'Bono de bienvenida',
     referralBonus: 'Recompensa por referido',
     seasonalOffer: 'Oferta de temporada',
+    back: 'Atrás',
   },
   RU: {
     title: 'Промоакции',
@@ -68,6 +70,7 @@ const promotionsTexts = {
     welcomeBonus: 'Welcome bonus',
     referralBonus: 'Реферальный бонус',
     seasonalOffer: 'Сезонное предложение',
+    back: 'Назад',
   },
   CZ: {
     title: 'Promo akce',
@@ -89,6 +92,7 @@ const promotionsTexts = {
     welcomeBonus: 'Welcome bonus',
     referralBonus: 'Referral bonus',
     seasonalOffer: 'Sezónní nabídka',
+    back: 'Zpět',
   },
   DE: {
     title: 'Aktionen',
@@ -110,6 +114,7 @@ const promotionsTexts = {
     welcomeBonus: 'Welcome-Bonus',
     referralBonus: 'Empfehlungsbonus',
     seasonalOffer: 'Saisonales Angebot',
+    back: 'Zurück',
   },
   PL: {
     title: 'Promocje',
@@ -131,6 +136,7 @@ const promotionsTexts = {
     welcomeBonus: 'Welcome bonus',
     referralBonus: 'Bonus polecający',
     seasonalOffer: 'Oferta sezonowa',
+    back: 'Wstecz',
   },
 } as const;
 
@@ -175,9 +181,27 @@ const promoItems: PromotionItem[] = [
 ];
 
 function getStatusStyle(status: PromotionItem['status']) {
-  if (status === 'active') return { background: '#eef9f1', color: '#2fa35a' };
-  if (status === 'used') return { background: '#eef4ff', color: '#2f7cf6' };
-  return { background: '#f4efe8', color: '#6d6258' };
+  if (status === 'active') {
+    return {
+      bg: '#dff2e3',
+      color: '#1d7a38',
+      border: '#8bc59b',
+    };
+  }
+
+  if (status === 'used') {
+    return {
+      bg: '#e6efff',
+      color: '#2559b7',
+      border: '#97b3e8',
+    };
+  }
+
+  return {
+    bg: '#f4efe8',
+    color: '#6d6258',
+    border: '#cfc3b2',
+  };
 }
 
 export default function PromotionsPage() {
@@ -211,11 +235,12 @@ export default function PromotionsPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
-        padding: '20px 16px 110px',
+        background: '#f7f4ee',
+        color: '#17130f',
+        paddingBottom: 110,
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto' }}>
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '20px 16px 110px' }}>
         <div
           style={{
             display: 'grid',
@@ -227,14 +252,15 @@ export default function PromotionsPage() {
           <button
             type="button"
             onClick={() => router.back()}
+            aria-label={text.back}
             style={{
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
-              fontSize: 26,
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              fontSize: 24,
+              fontWeight: 900,
               cursor: 'pointer',
             }}
           >
@@ -242,15 +268,24 @@ export default function PromotionsPage() {
           </button>
 
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 22, fontWeight: 900, color: '#17130f' }}>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 900,
+                color: '#17130f',
+                lineHeight: 1.1,
+              }}
+            >
               {text.title}
             </div>
+
             <div
               style={{
                 marginTop: 4,
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
               {text.subtitle}
@@ -260,83 +295,94 @@ export default function PromotionsPage() {
           <div />
         </div>
 
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 32,
-            border: '1px solid #f0e3d7',
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
+        <section style={{ marginTop: 18 }}>
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '56px 1fr auto',
-              gap: 12,
-              alignItems: 'center',
+              background: '#fff',
+              border: '2px solid #111111',
+              borderRadius: 30,
+              padding: 18,
             }}
           >
             <div
               style={{
-                width: 56,
-                height: 56,
-                borderRadius: 20,
-                background: '#fff1f7',
-                color: '#ff4fa0',
-                display: 'flex',
+                display: 'grid',
+                gridTemplateColumns: '56px 1fr',
+                gap: 14,
                 alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 26,
               }}
             >
-              🎉
-            </div>
-
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: '#17130f' }}>
-                {text.heroTitle}
-              </div>
               <div
                 style={{
-                  marginTop: 4,
-                  fontSize: 14,
-                  lineHeight: 1.55,
-                  color: '#7b7268',
-                  fontWeight: 700,
+                  width: 56,
+                  height: 56,
+                  borderRadius: 20,
+                  border: '2px solid #111111',
+                  background: '#fff1f7',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 26,
                 }}
               >
-                {text.heroSub}
+                🎉
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {text.heroTitle}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    color: '#7b7268',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.heroSub}
+                </div>
               </div>
             </div>
 
             <div
               style={{
+                marginTop: 16,
+                display: 'inline-flex',
+                alignItems: 'center',
+                minHeight: 42,
+                padding: '0 16px',
                 borderRadius: 999,
-                padding: '10px 14px',
-                background: '#eef9f1',
-                color: '#2fa35a',
-                fontSize: 12,
+                border: '2px solid #8bc59b',
+                background: '#dff2e3',
+                color: '#1d7a38',
+                fontSize: 14,
                 fontWeight: 900,
-                whiteSpace: 'nowrap',
               }}
             >
               {text.availableNow}: {activeCount}
             </div>
           </div>
-        </div>
+        </section>
 
-        <div style={{ marginTop: 18, display: 'grid', gap: 14 }}>
+        <section style={{ marginTop: 18 }}>
           {promoItems.length === 0 ? (
             <div
               style={{
-                borderRadius: 30,
-                border: '1px solid #efe4d7',
                 background: '#fff',
+                border: '2px solid #111111',
+                borderRadius: 30,
                 padding: 24,
                 textAlign: 'center',
-                boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
               }}
             >
               <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>{text.empty}</div>
@@ -353,132 +399,150 @@ export default function PromotionsPage() {
               </div>
             </div>
           ) : (
-            promoItems.map((item) => {
-              const statusStyle = getStatusStyle(item.status);
+            <div style={{ display: 'grid', gap: 16 }}>
+              {promoItems.map((item) => {
+                const statusStyle = getStatusStyle(item.status);
 
-              return (
-                <div
-                  key={item.id}
-                  style={{
-                    borderRadius: 30,
-                    border: '1px solid #efe4d7',
-                    background: '#fff',
-                    padding: 16,
-                    boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-                  }}
-                >
-                  <div
+                return (
+                  <article
+                    key={item.id}
                     style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      gap: 12,
-                      alignItems: 'start',
+                      background: '#fff',
+                      border: '2px solid #111111',
+                      borderRadius: 30,
+                      padding: 18,
                     }}
                   >
-                    <div>
-                      <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
-                        {text[item.titleKey]}
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 12,
+                        alignItems: 'flex-start',
+                      }}
+                    >
+                      <div style={{ minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontSize: 20,
+                            fontWeight: 900,
+                            color: '#17130f',
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {text[item.titleKey]}
+                        </div>
+
+                        <div
+                          style={{
+                            marginTop: 8,
+                            fontSize: 15,
+                            lineHeight: 1.45,
+                            color: '#6f7882',
+                            fontWeight: 700,
+                          }}
+                        >
+                          {item.description}
+                        </div>
                       </div>
+
                       <div
                         style={{
-                          marginTop: 6,
+                          flexShrink: 0,
+                          minHeight: 46,
+                          padding: '0 14px',
+                          borderRadius: 18,
+                          border: '2px solid #111111',
+                          background: '#fff1f7',
+                          color: '#ff4fa0',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           fontSize: 14,
-                          lineHeight: 1.5,
-                          color: '#7b7268',
-                          fontWeight: 700,
+                          fontWeight: 900,
+                          whiteSpace: 'nowrap',
                         }}
                       >
-                        {item.description}
+                        {item.discountLabel}
                       </div>
                     </div>
 
                     <div
                       style={{
-                        borderRadius: 18,
-                        background: '#fff1f7',
-                        color: '#ff4fa0',
-                        padding: '10px 12px',
-                        fontSize: 13,
-                        fontWeight: 900,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {item.discountLabel}
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 14,
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: 10,
-                    }}
-                  >
-                    <div
-                      style={{
-                        borderRadius: 999,
-                        padding: '8px 12px',
-                        fontSize: 12,
-                        fontWeight: 900,
-                        ...statusStyle,
-                      }}
-                    >
-                      {getStatusLabel(item.status)}
-                    </div>
-
-                    <div
-                      style={{
-                        borderRadius: 999,
-                        padding: '8px 12px',
-                        background: '#eef4ff',
-                        color: '#2f7cf6',
-                        fontSize: 12,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {text.savedAmount}: {item.savedAmount}
-                    </div>
-
-                    <div
-                      style={{
-                        borderRadius: 999,
-                        padding: '8px 12px',
-                        background: '#f4efe8',
-                        color: '#6d6258',
-                        fontSize: 12,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {text.validUntil}: {item.validUntil}
-                    </div>
-                  </div>
-
-                  {item.status === 'active' ? (
-                    <button
-                      type="button"
-                      style={{
                         marginTop: 14,
-                        border: 'none',
-                        borderRadius: 20,
-                        background: 'linear-gradient(180deg, #2b221c 0%, #1f1712 100%)',
-                        color: '#fff',
-                        minHeight: 52,
-                        padding: '0 18px',
-                        fontSize: 14,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                        boxShadow: '0 14px 28px rgba(31,23,18,0.20)',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 10,
                       }}
                     >
-                      {text.applyToBooking}
-                    </button>
-                  ) : null}
-                </div>
-              );
-            })
+                      <div
+                        style={{
+                          borderRadius: 999,
+                          padding: '8px 12px',
+                          fontSize: 12,
+                          fontWeight: 900,
+                          border: `2px solid ${statusStyle.border}`,
+                          background: statusStyle.bg,
+                          color: statusStyle.color,
+                        }}
+                      >
+                        {getStatusLabel(item.status)}
+                      </div>
+
+                      <div
+                        style={{
+                          borderRadius: 999,
+                          padding: '8px 12px',
+                          border: '2px solid #97b3e8',
+                          background: '#e6efff',
+                          color: '#2559b7',
+                          fontSize: 12,
+                          fontWeight: 900,
+                        }}
+                      >
+                        {text.savedAmount}: {item.savedAmount}
+                      </div>
+
+                      <div
+                        style={{
+                          borderRadius: 999,
+                          padding: '8px 12px',
+                          border: '2px solid #cfc3b2',
+                          background: '#f4efe8',
+                          color: '#6d6258',
+                          fontSize: 12,
+                          fontWeight: 900,
+                        }}
+                      >
+                        {text.validUntil}: {item.validUntil}
+                      </div>
+                    </div>
+
+                    {item.status === 'active' ? (
+                      <button
+                        type="button"
+                        style={{
+                          marginTop: 16,
+                          minHeight: 56,
+                          borderRadius: 22,
+                          border: '2px solid #111111',
+                          background: '#2f241c',
+                          color: '#fff',
+                          padding: '0 18px',
+                          fontSize: 15,
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {text.applyToBooking}
+                      </button>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
           )}
-        </div>
+        </section>
       </div>
 
       <BottomNav active="profile" />
