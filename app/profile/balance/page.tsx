@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
 import {
   getWalletState,
   subscribeToWalletStore,
@@ -16,175 +20,169 @@ const balanceTexts = {
     title: 'MapBook Balance',
     subtitle: 'Wallet, rewards, refunds and transaction history',
     available: 'Available',
-    pending: 'Pending confirmation',
-    refunds: 'Refund credits',
+    pending: 'Pending',
+    refunds: 'Refunds',
     topUp: 'Top up',
-    payWithBalance: 'Pay balance',
+    payWithBalance: 'Pay',
     withdraw: 'Withdraw',
-    howItWorks: 'How it works',
     howItWorksText:
-      'Top up your balance to pay quickly for unlocks and bookings. Refunds come back to your balance.',
+      'Top up your balance to pay quickly for unlocks and bookings. Refunds return back to your balance automatically.',
     recent: 'Recent transactions',
     all: 'All',
     incoming: 'Incoming',
     outgoing: 'Outgoing',
     waiting: 'Pending',
     paymentMethods: 'Payment methods',
-    paymentMethodsSub: 'Manage cards, PayPal and crypto wallets',
+    paymentMethodsSub: 'Cards, PayPal and crypto wallets',
     instantWallet: 'Fast wallet payments',
-    secureWallet: 'Protected by secure checkout',
-    walletReady: 'Ready to use',
+    secureWallet: 'Secure checkout',
+    walletReady: 'Wallet ready',
     walletOverview: 'Wallet overview',
     rewardsReady: 'Rewards ready',
     totalActivity: 'Total activity',
     protected: 'Protected',
     quickActions: 'Quick actions',
-    useNow: 'Use now',
+    balanceCardHint: 'Available for payments and bookings',
   },
   ES: {
     title: 'Saldo MapBook',
     subtitle: 'Billetera, recompensas, reembolsos e historial',
     available: 'Disponible',
-    pending: 'Pendiente de confirmación',
-    refunds: 'Créditos de reembolso',
+    pending: 'Pendiente',
+    refunds: 'Reembolsos',
     topUp: 'Recargar',
-    payWithBalance: 'Pagar saldo',
+    payWithBalance: 'Pagar',
     withdraw: 'Retirar',
-    howItWorks: 'Cómo funciona',
     howItWorksText:
-      'Recarga tu saldo para pagar rápidamente desbloqueos y reservas. Los reembolsos vuelven a tu saldo.',
+      'Recarga tu saldo para pagar rápidamente desbloqueos y reservas. Los reembolsos vuelven automáticamente a tu saldo.',
     recent: 'Transacciones recientes',
     all: 'Todo',
     incoming: 'Entradas',
     outgoing: 'Salidas',
     waiting: 'Pendientes',
     paymentMethods: 'Métodos de pago',
-    paymentMethodsSub: 'Gestiona tarjetas, PayPal y billeteras cripto',
-    instantWallet: 'Pagos rápidos con saldo',
-    secureWallet: 'Protegido por pago seguro',
-    walletReady: 'Listo para usar',
+    paymentMethodsSub: 'Tarjetas, PayPal y billeteras cripto',
+    instantWallet: 'Pagos rápidos',
+    secureWallet: 'Pago seguro',
+    walletReady: 'Billetera lista',
     walletOverview: 'Resumen de billetera',
     rewardsReady: 'Recompensas listas',
     totalActivity: 'Actividad total',
     protected: 'Protegido',
     quickActions: 'Acciones rápidas',
-    useNow: 'Usar ahora',
+    balanceCardHint: 'Disponible para pagos y reservas',
   },
   RU: {
     title: 'Баланс MapBook',
     subtitle: 'Кошелёк, бонусы, возвраты и история операций',
     available: 'Доступно',
-    pending: 'Ожидает подтверждения',
-    refunds: 'Кредиты на возвраты',
+    pending: 'В ожидании',
+    refunds: 'Возвраты',
     topUp: 'Пополнить',
-    payWithBalance: 'Оплатить балансом',
+    payWithBalance: 'Оплатить',
     withdraw: 'Вывести',
-    howItWorks: 'Как это работает',
     howItWorksText:
-      'Пополняйте баланс, чтобы быстро оплачивать unlock и бронирования. Возвраты приходят обратно на баланс.',
+      'Пополняйте баланс для быстрой оплаты unlock и бронирований. Возвраты автоматически возвращаются обратно на баланс.',
     recent: 'Последние операции',
     all: 'Все',
     incoming: 'Поступления',
     outgoing: 'Списания',
     waiting: 'Ожидают',
     paymentMethods: 'Способы оплаты',
-    paymentMethodsSub: 'Управляйте картами, PayPal и криптокошельками',
-    instantWallet: 'Быстрые оплаты с баланса',
-    secureWallet: 'Защищено безопасной оплатой',
-    walletReady: 'Готово к использованию',
+    paymentMethodsSub: 'Карты, PayPal и криптокошельки',
+    instantWallet: 'Быстрые оплаты',
+    secureWallet: 'Безопасная оплата',
+    walletReady: 'Кошелёк готов',
     walletOverview: 'Обзор кошелька',
     rewardsReady: 'Бонусы готовы',
     totalActivity: 'Общая активность',
     protected: 'Защищено',
     quickActions: 'Быстрые действия',
-    useNow: 'Использовать',
+    balanceCardHint: 'Доступно для оплат и бронирований',
   },
   CZ: {
     title: 'Zůstatek MapBook',
     subtitle: 'Peněženka, bonusy, refundy a historie transakcí',
     available: 'Dostupné',
-    pending: 'Čeká na potvrzení',
-    refunds: 'Kredity na vrácení',
+    pending: 'Čeká',
+    refunds: 'Refundy',
     topUp: 'Dobít',
-    payWithBalance: 'Zaplatit zůstatkem',
+    payWithBalance: 'Zaplatit',
     withdraw: 'Vybrat',
-    howItWorks: 'Jak to funguje',
     howItWorksText:
-      'Dobijte si zůstatek pro rychlé placení unlocků a rezervací. Refundy se vrací zpět na zůstatek.',
+      'Dobijte si zůstatek pro rychlé placení unlocků a rezervací. Refundy se automaticky vrací zpět na zůstatek.',
     recent: 'Poslední transakce',
     all: 'Vše',
     incoming: 'Příchozí',
     outgoing: 'Odchozí',
     waiting: 'Čekající',
     paymentMethods: 'Platební metody',
-    paymentMethodsSub: 'Spravujte karty, PayPal a crypto peněženky',
-    instantWallet: 'Rychlé platby ze zůstatku',
-    secureWallet: 'Chráněno bezpečnou platbou',
-    walletReady: 'Připraveno k použití',
+    paymentMethodsSub: 'Karty, PayPal a crypto peněženky',
+    instantWallet: 'Rychlé platby',
+    secureWallet: 'Bezpečná platba',
+    walletReady: 'Peněženka připravena',
     walletOverview: 'Přehled peněženky',
     rewardsReady: 'Bonusy připraveny',
     totalActivity: 'Celková aktivita',
     protected: 'Chráněno',
     quickActions: 'Rychlé akce',
-    useNow: 'Použít',
+    balanceCardHint: 'Dostupné pro platby a rezervace',
   },
   DE: {
     title: 'MapBook Guthaben',
     subtitle: 'Wallet, Boni, Rückerstattungen und Verlauf',
     available: 'Verfügbar',
-    pending: 'Wartet auf Bestätigung',
-    refunds: 'Rückerstattungsguthaben',
+    pending: 'Ausstehend',
+    refunds: 'Rückerstattungen',
     topUp: 'Aufladen',
-    payWithBalance: 'Mit Guthaben zahlen',
+    payWithBalance: 'Bezahlen',
     withdraw: 'Auszahlen',
-    howItWorks: 'So funktioniert es',
     howItWorksText:
-      'Lade dein Guthaben auf, um Unlocks und Buchungen schnell zu bezahlen. Rückerstattungen kommen zurück auf dein Guthaben.',
+      'Lade dein Guthaben auf, um Unlocks und Buchungen schnell zu bezahlen. Rückerstattungen kommen automatisch zurück auf dein Guthaben.',
     recent: 'Letzte Transaktionen',
     all: 'Alle',
     incoming: 'Eingänge',
     outgoing: 'Ausgänge',
     waiting: 'Ausstehend',
     paymentMethods: 'Zahlungsmethoden',
-    paymentMethodsSub: 'Verwalte Karten, PayPal und Krypto-Wallets',
-    instantWallet: 'Schnelle Wallet-Zahlungen',
-    secureWallet: 'Durch sicheren Checkout geschützt',
-    walletReady: 'Bereit zur Nutzung',
+    paymentMethodsSub: 'Karten, PayPal und Krypto-Wallets',
+    instantWallet: 'Schnelle Zahlungen',
+    secureWallet: 'Sicherer Checkout',
+    walletReady: 'Wallet bereit',
     walletOverview: 'Wallet-Übersicht',
     rewardsReady: 'Boni bereit',
     totalActivity: 'Gesamtaktivität',
     protected: 'Geschützt',
     quickActions: 'Schnellaktionen',
-    useNow: 'Jetzt nutzen',
+    balanceCardHint: 'Verfügbar für Zahlungen und Buchungen',
   },
   PL: {
     title: 'Saldo MapBook',
     subtitle: 'Portfel, bonusy, zwroty i historia operacji',
     available: 'Dostępne',
-    pending: 'Oczekuje na potwierdzenie',
-    refunds: 'Kredyty zwrotne',
+    pending: 'Oczekujące',
+    refunds: 'Zwroty',
     topUp: 'Doładuj',
-    payWithBalance: 'Zapłać saldem',
+    payWithBalance: 'Zapłać',
     withdraw: 'Wypłać',
-    howItWorks: 'Jak to działa',
     howItWorksText:
-      'Doładuj saldo, aby szybko opłacać unlocki i rezerwacje. Zwroty wracają na saldo.',
+      'Doładuj saldo, aby szybko opłacać unlocki i rezerwacje. Zwroty automatycznie wracają na saldo.',
     recent: 'Ostatnie operacje',
     all: 'Wszystkie',
     incoming: 'Wpływy',
     outgoing: 'Wydatki',
     waiting: 'Oczekujące',
     paymentMethods: 'Metody płatności',
-    paymentMethodsSub: 'Zarządzaj kartami, PayPal i portfelami krypto',
-    instantWallet: 'Szybkie płatności z salda',
-    secureWallet: 'Chronione bezpieczną płatnością',
-    walletReady: 'Gotowe do użycia',
+    paymentMethodsSub: 'Karty, PayPal i portfele krypto',
+    instantWallet: 'Szybkie płatności',
+    secureWallet: 'Bezpieczna płatność',
+    walletReady: 'Portfel gotowy',
     walletOverview: 'Przegląd portfela',
     rewardsReady: 'Bonusy gotowe',
     totalActivity: 'Całkowita aktywność',
     protected: 'Chronione',
     quickActions: 'Szybkie akcje',
-    useNow: 'Użyj teraz',
+    balanceCardHint: 'Dostępne do płatności i rezerwacji',
   },
 } as const;
 
@@ -194,28 +192,40 @@ function formatMoney(value: number) {
   return `£${Math.abs(value).toFixed(2)}`;
 }
 
+function formatSignedMoney(value: number) {
+  return `${value >= 0 ? '+' : '-'} ${formatMoney(value)}`;
+}
+
 function getStatusStyle(tx: WalletTransaction) {
   if (tx.status === 'pending') {
-    return { background: '#fff5e8', color: '#d68612' };
+    return { background: '#fff4db', color: '#b7791f' };
   }
   if (tx.status === 'credited') {
-    return { background: '#eef9f1', color: '#2fa35a' };
+    return { background: '#ecfdf3', color: '#15803d' };
   }
   if (tx.status === 'failed') {
-    return { background: '#fff1f1', color: '#ef4444' };
+    return { background: '#fff1f2', color: '#dc2626' };
   }
-  return { background: '#f4efe8', color: '#5c5046' };
+  return { background: '#f3f4f6', color: '#374151' };
 }
 
 function getAmountColor(amount: number) {
-  return amount >= 0 ? '#2fa35a' : '#17130f';
+  return amount >= 0 ? '#15803d' : '#17130f';
 }
 
 function getTransactionIcon(tx: WalletTransaction) {
-  if (tx.amount > 0) return { icon: '↘', bg: '#eef9f1', color: '#2fa35a' };
-  if (tx.status === 'pending') return { icon: '⏳', bg: '#fff5e8', color: '#d68612' };
-  if (tx.status === 'failed') return { icon: '✕', bg: '#fff1f1', color: '#ef4444' };
-  return { icon: '↗', bg: '#eef4ff', color: '#2f7cf6' };
+  if (tx.amount > 0) return { icon: '↘', bg: '#ecfdf3', color: '#15803d' };
+  if (tx.status === 'pending') return { icon: '⏳', bg: '#fff4db', color: '#b7791f' };
+  if (tx.status === 'failed') return { icon: '✕', bg: '#fff1f2', color: '#dc2626' };
+  return { icon: '↗', bg: '#eef4ff', color: '#2563eb' };
+}
+
+function formatDate(value: string) {
+  try {
+    return new Date(value).toLocaleString();
+  } catch {
+    return value;
+  }
 }
 
 export default function BalancePage() {
@@ -237,11 +247,16 @@ export default function BalancePage() {
     syncLanguage();
     syncWallet();
 
-    window.addEventListener('focus', syncLanguage);
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
     const unsubWallet = subscribeToWalletStore(syncWallet);
+
+    window.addEventListener('focus', syncLanguage);
 
     return () => {
       window.removeEventListener('focus', syncLanguage);
+      unsubLanguage();
       unsubWallet();
     };
   }, []);
@@ -254,15 +269,10 @@ export default function BalancePage() {
   const filteredTransactions = useMemo(() => {
     const items = wallet.transactions || [];
 
-    if (filter === 'incoming') {
-      return items.filter((item) => item.amount > 0);
-    }
-    if (filter === 'outgoing') {
-      return items.filter((item) => item.amount < 0);
-    }
-    if (filter === 'pending') {
-      return items.filter((item) => item.status === 'pending');
-    }
+    if (filter === 'incoming') return items.filter((item) => item.amount > 0);
+    if (filter === 'outgoing') return items.filter((item) => item.amount < 0);
+    if (filter === 'pending') return items.filter((item) => item.status === 'pending);
+
     return items;
   }, [filter, wallet.transactions]);
 
@@ -270,12 +280,40 @@ export default function BalancePage() {
     return (wallet.transactions || []).reduce((sum, item) => sum + Math.abs(item.amount), 0);
   }, [wallet.transactions]);
 
+  const summaryCards = [
+    {
+      label: text.available,
+      value: `£${wallet.availableBalance.toFixed(2)}`,
+      bg: '#ffffff',
+      color: '#17130f',
+    },
+    {
+      label: text.pending,
+      value: `£${wallet.pendingBalance.toFixed(2)}`,
+      bg: '#eef4ff',
+      color: '#2563eb',
+    },
+    {
+      label: text.refunds,
+      value: `£${wallet.refundCredits.toFixed(2)}`,
+      bg: '#ecfdf3',
+      color: '#15803d',
+    },
+    {
+      label: text.totalActivity,
+      value: `£${totalActivity.toFixed(2)}`,
+      bg: '#fff4db',
+      color: '#b7791f',
+    },
+  ];
+
   return (
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
-        padding: '20px 16px 110px',
+        background: '#ffffff',
+        padding: '20px 16px 120px',
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -294,10 +332,11 @@ export default function BalancePage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
+              color: '#17130f',
               fontSize: 26,
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              fontWeight: 900,
               cursor: 'pointer',
             }}
           >
@@ -305,13 +344,24 @@ export default function BalancePage() {
           </button>
 
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 22, fontWeight: 900, color: '#17130f' }}>{text.title}</div>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 900,
+                color: '#17130f',
+                lineHeight: 1.1,
+              }}
+            >
+              {text.title}
+            </div>
+
             <div
               style={{
                 marginTop: 4,
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
               {text.subtitle}
@@ -325,10 +375,11 @@ export default function BalancePage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
+              color: '#17130f',
               fontSize: 22,
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              fontWeight: 900,
               cursor: 'pointer',
             }}
           >
@@ -336,408 +387,373 @@ export default function BalancePage() {
           </button>
         </div>
 
-        <div
-          style={{
-            marginTop: 18,
-            overflow: 'hidden',
-            borderRadius: 32,
-            background: 'linear-gradient(180deg, #2f241c 0%, #1f1712 100%)',
-            padding: 20,
-            color: '#fff',
-            boxShadow: '0 14px 28px rgba(31,23,18,0.18)',
-          }}
-        >
+        <section style={{ marginTop: 18 }}>
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto',
-              gap: 14,
-              alignItems: 'start',
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 18,
             }}
           >
-            <div>
-              <div style={{ fontSize: 14, color: '#dacdbf', fontWeight: 800 }}>{text.available}</div>
+            <div
+              style={{
+                borderRadius: 26,
+                border: '2px solid #111111',
+                background: '#2f241c',
+                color: '#fff',
+                padding: 18,
+              }}
+            >
               <div
                 style={{
-                  marginTop: 6,
-                  fontSize: 48,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: '#d9cdbd',
+                }}
+              >
+                {text.available}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 40,
                   lineHeight: 1,
                   fontWeight: 900,
+                  color: '#fff',
                 }}
               >
                 £{wallet.availableBalance.toFixed(2)}
               </div>
-            </div>
 
-            <div
-              style={{
-                borderRadius: 20,
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                padding: '14px 12px',
-                textAlign: 'center',
-                minWidth: 96,
-              }}
-            >
-              <div style={{ fontSize: 12, color: '#d9cdbd', fontWeight: 800 }}>
-                {text.totalActivity}
-              </div>
-              <div style={{ marginTop: 6, fontSize: 22, fontWeight: 900, color: '#fff' }}>
-                £{totalActivity.toFixed(2)}
-              </div>
-            </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: 12,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              borderRadius: 999,
-              background: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              padding: '10px 12px',
-              fontSize: 12,
-              fontWeight: 900,
-              color: '#f6ede4',
-            }}
-          >
-            <span>⚡</span>
-            <span>{text.walletReady}</span>
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 10,
-            }}
-          >
-            <div
-              style={{
-                borderRadius: 22,
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                padding: 14,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  lineHeight: 1.3,
-                  color: '#d9cdbd',
-                  fontWeight: 800,
-                }}
-              >
-                {text.pending}
-              </div>
               <div
                 style={{
                   marginTop: 8,
-                  fontSize: 24,
-                  fontWeight: 900,
-                  color: '#fff',
-                }}
-              >
-                £{wallet.pendingBalance.toFixed(2)}
-              </div>
-            </div>
-
-            <div
-              style={{
-                borderRadius: 22,
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                padding: 14,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  lineHeight: 1.3,
-                  color: '#d9cdbd',
-                  fontWeight: 800,
-                }}
-              >
-                {text.refunds}
-              </div>
-              <div
-                style={{
-                  marginTop: 8,
-                  fontSize: 24,
-                  fontWeight: 900,
-                  color: '#fff',
-                }}
-              >
-                £{wallet.refundCredits.toFixed(2)}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: 16,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 16,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
-            }}
-          >
-            {text.quickActions}
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-              gap: 10,
-            }}
-          >
-            <button
-              type="button"
-              style={{
-                border: '1px solid #efe4d7',
-                borderRadius: 26,
-                padding: 14,
-                background: '#fff',
-                boxShadow: '0 10px 22px rgba(44, 23, 10, 0.04)',
-                cursor: 'pointer',
-              }}
-            >
-              <div
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 18,
-                  background: '#fff1f7',
-                  color: '#ff4fa0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 24,
-                  margin: '0 auto',
-                }}
-              >
-                +
-              </div>
-              <div
-                style={{
-                  marginTop: 10,
                   fontSize: 13,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.topUp}
-              </div>
-            </button>
-
-            <button
-              type="button"
-              style={{
-                border: '1px solid #efe4d7',
-                borderRadius: 26,
-                padding: 14,
-                background: '#fff',
-                boxShadow: '0 10px 22px rgba(44, 23, 10, 0.04)',
-                cursor: 'pointer',
-              }}
-            >
-              <div
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 18,
-                  background: '#eef4ff',
-                  color: '#2f7cf6',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 22,
-                  margin: '0 auto',
-                }}
-              >
-                💳
-              </div>
-              <div
-                style={{
-                  marginTop: 10,
-                  fontSize: 13,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.payWithBalance}
-              </div>
-            </button>
-
-            <button
-              type="button"
-              style={{
-                border: '1px solid #efe4d7',
-                borderRadius: 26,
-                padding: 14,
-                background: '#fff',
-                boxShadow: '0 10px 22px rgba(44, 23, 10, 0.04)',
-                cursor: 'pointer',
-              }}
-            >
-              <div
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 18,
-                  background: '#eef9f1',
-                  color: '#2fa35a',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 22,
-                  margin: '0 auto',
-                }}
-              >
-                ↗
-              </div>
-              <div
-                style={{
-                  marginTop: 10,
-                  fontSize: 13,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.withdraw}
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: 16,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.walletOverview}
-              </div>
-              <div
-                style={{
-                  marginTop: 8,
-                  fontSize: 15,
-                  lineHeight: 1.7,
-                  color: '#756b62',
+                  lineHeight: 1.45,
+                  color: '#e7ddd1',
                   fontWeight: 700,
                 }}
               >
-                {text.howItWorksText}
+                {text.balanceCardHint}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  minHeight: 38,
+                  padding: '0 12px',
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  background: '#fff',
+                  color: '#17130f',
+                  fontSize: 12,
+                  fontWeight: 900,
+                }}
+              >
+                <span>⚡</span>
+                <span>{text.walletReady}</span>
               </div>
             </div>
 
             <div
               style={{
-                borderRadius: 18,
-                background: '#fff5e8',
-                color: '#d68612',
-                padding: '10px 12px',
-                fontSize: 12,
-                fontWeight: 900,
-                whiteSpace: 'nowrap',
+                marginTop: 12,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
               }}
             >
-              {text.rewardsReady}
+              {summaryCards.map((item) => (
+                <div
+                  key={item.label}
+                  style={{
+                    borderRadius: 22,
+                    border: '2px solid #111111',
+                    background: item.bg,
+                    padding: 14,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 800,
+                      color: '#7b7268',
+                    }}
+                  >
+                    {item.label}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 8,
+                      fontSize: 24,
+                      fontWeight: 900,
+                      color: item.color,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {item.value}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
+        </section>
 
+        <section style={{ marginTop: 16 }}>
           <div
             style={{
-              marginTop: 14,
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 10,
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 16,
             }}
           >
             <div
               style={{
-                borderRadius: 999,
-                padding: '10px 12px',
-                background: '#eef9f1',
-                color: '#2fa35a',
-                fontSize: 12,
+                fontSize: 18,
                 fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 12,
               }}
             >
-              {text.instantWallet}
+              {text.quickActions}
             </div>
 
             <div
               style={{
-                borderRadius: 999,
-                padding: '10px 12px',
-                background: '#eef4ff',
-                color: '#2f7cf6',
-                fontSize: 12,
-                fontWeight: 900,
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: 10,
               }}
             >
-              {text.secureWallet}
-            </div>
+              <button
+                type="button"
+                style={{
+                  border: '2px solid #111111',
+                  borderRadius: 24,
+                  padding: 14,
+                  background: '#fff',
+                  cursor: 'pointer',
+                }}
+              >
+                <div
+                  style={{
+                    width: 46,
+                    height: 46,
+                    borderRadius: 16,
+                    border: '2px solid #111111',
+                    background: '#fff0f6',
+                    color: '#ff4fa0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 24,
+                    margin: '0 auto',
+                  }}
+                >
+                  +
+                </div>
+                <div
+                  style={{
+                    marginTop: 10,
+                    fontSize: 13,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {text.topUp}
+                </div>
+              </button>
 
-            <div
-              style={{
-                borderRadius: 999,
-                padding: '10px 12px',
-                background: '#fff1f7',
-                color: '#ff4fa0',
-                fontSize: 12,
-                fontWeight: 900,
-              }}
-            >
-              {text.protected}
+              <button
+                type="button"
+                style={{
+                  border: '2px solid #111111',
+                  borderRadius: 24,
+                  padding: 14,
+                  background: '#fff',
+                  cursor: 'pointer',
+                }}
+              >
+                <div
+                  style={{
+                    width: 46,
+                    height: 46,
+                    borderRadius: 16,
+                    border: '2px solid #111111',
+                    background: '#eef4ff',
+                    color: '#2563eb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 22,
+                    margin: '0 auto',
+                  }}
+                >
+                  💳
+                </div>
+                <div
+                  style={{
+                    marginTop: 10,
+                    fontSize: 13,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {text.payWithBalance}
+                </div>
+              </button>
+
+              <button
+                type="button"
+                style={{
+                  border: '2px solid #111111',
+                  borderRadius: 24,
+                  padding: 14,
+                  background: '#fff',
+                  cursor: 'pointer',
+                }}
+              >
+                <div
+                  style={{
+                    width: 46,
+                    height: 46,
+                    borderRadius: 16,
+                    border: '2px solid #111111',
+                    background: '#ecfdf3',
+                    color: '#15803d',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 22,
+                    margin: '0 auto',
+                  }}
+                >
+                  ↗
+                </div>
+                <div
+                  style={{
+                    marginTop: 10,
+                    fontSize: 13,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {text.withdraw}
+                </div>
+              </button>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div
-          style={{
-            marginTop: 18,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-          }}
-        >
+        <section style={{ marginTop: 16 }}>
+          <div
+            style={{
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 18,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+              }}
+            >
+              {text.walletOverview}
+            </div>
+
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 14,
+                lineHeight: 1.6,
+                color: '#756b62',
+                fontWeight: 700,
+              }}
+            >
+              {text.howItWorksText}
+            </div>
+
+            <div
+              style={{
+                marginTop: 14,
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 10,
+              }}
+            >
+              <div
+                style={{
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  padding: '10px 12px',
+                  background: '#ecfdf3',
+                  color: '#15803d',
+                  fontSize: 12,
+                  fontWeight: 900,
+                }}
+              >
+                {text.instantWallet}
+              </div>
+
+              <div
+                style={{
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  padding: '10px 12px',
+                  background: '#eef4ff',
+                  color: '#2563eb',
+                  fontSize: 12,
+                  fontWeight: 900,
+                }}
+              >
+                {text.secureWallet}
+              </div>
+
+              <div
+                style={{
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  padding: '10px 12px',
+                  background: '#fff4db',
+                  color: '#b7791f',
+                  fontSize: 12,
+                  fontWeight: 900,
+                }}
+              >
+                {text.rewardsReady}
+              </div>
+
+              <div
+                style={{
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  padding: '10px 12px',
+                  background: '#fff0f6',
+                  color: '#ff4fa0',
+                  fontSize: 12,
+                  fontWeight: 900,
+                }}
+              >
+                {text.protected}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section style={{ marginTop: 18 }}>
           <div
             style={{
               fontSize: 20,
@@ -747,237 +763,242 @@ export default function BalancePage() {
           >
             {text.recent}
           </div>
-        </div>
 
-        <div
-          style={{
-            marginTop: 12,
-            display: 'flex',
-            gap: 8,
-            overflowX: 'auto',
-            paddingBottom: 2,
-          }}
-        >
-          {[
-            { key: 'all' as FilterKey, label: text.all },
-            { key: 'incoming' as FilterKey, label: text.incoming },
-            { key: 'outgoing' as FilterKey, label: text.outgoing },
-            { key: 'pending' as FilterKey, label: text.waiting },
-          ].map((item) => {
-            const active = filter === item.key;
+          <div
+            style={{
+              marginTop: 12,
+              display: 'flex',
+              gap: 8,
+              overflowX: 'auto',
+              paddingBottom: 2,
+            }}
+          >
+            {[
+              { key: 'all' as FilterKey, label: text.all },
+              { key: 'incoming' as FilterKey, label: text.incoming },
+              { key: 'outgoing' as FilterKey, label: text.outgoing },
+              { key: 'pending' as FilterKey, label: text.waiting },
+            ].map((item) => {
+              const active = filter === item.key;
 
-            return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => setFilter(item.key)}
-                style={{
-                  border: active ? 'none' : '1px solid #efe4d7',
-                  borderRadius: 999,
-                  padding: '12px 16px',
-                  background: active ? '#ff4fa0' : '#fff',
-                  color: active ? '#fff' : '#3a2d24',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  whiteSpace: 'nowrap',
-                  cursor: 'pointer',
-                  boxShadow: active ? '0 10px 20px rgba(255,79,160,0.18)' : 'none',
-                }}
-              >
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
-
-        <div
-          style={{
-            marginTop: 16,
-            display: 'grid',
-            gap: 12,
-          }}
-        >
-          {filteredTransactions.map((tx) => {
-            const statusStyle = getStatusStyle(tx);
-            const txIcon = getTransactionIcon(tx);
-
-            return (
-              <div
-                key={tx.id}
-                style={{
-                  borderRadius: 28,
-                  border: '1px solid #efe4d7',
-                  background: '#fff',
-                  padding: 16,
-                  boxShadow: '0 10px 24px rgba(44, 23, 10, 0.04)',
-                }}
-              >
-                <div
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setFilter(item.key)}
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: '46px 1fr auto',
-                    gap: 14,
-                    alignItems: 'start',
+                    border: '2px solid #111111',
+                    borderRadius: 999,
+                    padding: '11px 16px',
+                    background: active ? '#17130f' : '#fff',
+                    color: active ? '#fff' : '#17130f',
+                    fontSize: 14,
+                    fontWeight: 900,
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              display: 'grid',
+              gap: 12,
+            }}
+          >
+            {filteredTransactions.map((tx) => {
+              const statusStyle = getStatusStyle(tx);
+              const txIcon = getTransactionIcon(tx);
+
+              return (
+                <div
+                  key={tx.id}
+                  style={{
+                    borderRadius: 28,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    padding: 16,
                   }}
                 >
                   <div
                     style={{
-                      width: 46,
-                      height: 46,
-                      borderRadius: 16,
-                      background: txIcon.bg,
-                      color: txIcon.color,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 20,
-                      fontWeight: 900,
+                      display: 'grid',
+                      gridTemplateColumns: '46px 1fr auto',
+                      gap: 14,
+                      alignItems: 'start',
                     }}
                   >
-                    {txIcon.icon}
-                  </div>
-
-                  <div style={{ minWidth: 0 }}>
                     <div
                       style={{
-                        fontSize: 16,
+                        width: 46,
+                        height: 46,
+                        borderRadius: 16,
+                        border: '2px solid #111111',
+                        background: txIcon.bg,
+                        color: txIcon.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 20,
                         fontWeight: 900,
-                        color: '#17130f',
                       }}
                     >
-                      {tx.title}
+                      {txIcon.icon}
                     </div>
 
-                    {tx.subtitle ? (
+                    <div style={{ minWidth: 0 }}>
                       <div
                         style={{
-                          marginTop: 6,
-                          fontSize: 14,
-                          lineHeight: 1.5,
-                          color: '#756b62',
+                          fontSize: 16,
+                          fontWeight: 900,
+                          color: '#17130f',
+                          lineHeight: 1.25,
+                        }}
+                      >
+                        {tx.title}
+                      </div>
+
+                      {tx.subtitle ? (
+                        <div
+                          style={{
+                            marginTop: 6,
+                            fontSize: 14,
+                            lineHeight: 1.5,
+                            color: '#756b62',
+                            fontWeight: 700,
+                          }}
+                        >
+                          {tx.subtitle}
+                        </div>
+                      ) : null}
+
+                      <div
+                        style={{
+                          marginTop: 8,
+                          fontSize: 12,
+                          color: '#8a7d70',
                           fontWeight: 700,
                         }}
                       >
-                        {tx.subtitle}
+                        {formatDate(tx.createdAt)}
                       </div>
-                    ) : null}
-
-                    <div
-                      style={{
-                        marginTop: 8,
-                        fontSize: 12,
-                        color: '#8a7d70',
-                        fontWeight: 700,
-                      }}
-                    >
-                      {new Date(tx.createdAt).toLocaleString()}
-                    </div>
-                  </div>
-
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 18,
-                        fontWeight: 900,
-                        color: getAmountColor(tx.amount),
-                      }}
-                    >
-                      {tx.amount >= 0 ? '+' : '-'} {formatMoney(tx.amount)}
                     </div>
 
-                    <div style={{ marginTop: 10 }}>
-                      <span
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div
                         style={{
-                          borderRadius: 999,
-                          padding: '8px 12px',
-                          fontSize: 12,
+                          fontSize: 18,
                           fontWeight: 900,
-                          ...statusStyle,
+                          color: getAmountColor(tx.amount),
+                          lineHeight: 1.1,
                         }}
                       >
-                        {tx.status}
-                      </span>
+                        {formatSignedMoney(tx.amount)}
+                      </div>
+
+                      <div style={{ marginTop: 10 }}>
+                        <span
+                          style={{
+                            borderRadius: 999,
+                            border: '2px solid #111111',
+                            padding: '8px 12px',
+                            fontSize: 12,
+                            fontWeight: 900,
+                            display: 'inline-block',
+                            ...statusStyle,
+                          }}
+                        >
+                          {tx.status}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </section>
 
-        <button
-          type="button"
-          onClick={() => router.push('/profile/payments')}
-          style={{
-            marginTop: 18,
-            width: '100%',
-            border: '1px solid #efe4d7',
-            borderRadius: 30,
-            background: '#fff',
-            padding: '18px 18px',
-            textAlign: 'left',
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-            cursor: 'pointer',
-          }}
-        >
-          <div
+        <section style={{ marginTop: 18 }}>
+          <button
+            type="button"
+            onClick={() => router.push('/profile/payments')}
             style={{
-              display: 'grid',
-              gridTemplateColumns: '46px 1fr auto',
-              gap: 14,
-              alignItems: 'center',
+              width: '100%',
+              border: '2px solid #111111',
+              borderRadius: 30,
+              background: '#fff',
+              padding: '18px',
+              textAlign: 'left',
+              cursor: 'pointer',
             }}
           >
             <div
               style={{
-                width: 46,
-                height: 46,
-                borderRadius: 16,
-                background: '#eef4ff',
-                color: '#2f7cf6',
-                display: 'flex',
+                display: 'grid',
+                gridTemplateColumns: '46px 1fr auto',
+                gap: 14,
                 alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 22,
               }}
             >
-              💼
-            </div>
-
-            <div>
               <div
                 style={{
-                  fontSize: 16,
-                  fontWeight: 900,
+                  width: 46,
+                  height: 46,
+                  borderRadius: 16,
+                  border: '2px solid #111111',
+                  background: '#eef4ff',
+                  color: '#2563eb',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                }}
+              >
+                💼
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
+                  {text.paymentMethods}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 4,
+                    fontSize: 13,
+                    lineHeight: 1.45,
+                    color: '#7b7268',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.paymentMethodsSub}
+                </div>
+              </div>
+
+              <span
+                style={{
+                  fontSize: 20,
                   color: '#17130f',
+                  fontWeight: 900,
                 }}
               >
-                {text.paymentMethods}
-              </div>
-              <div
-                style={{
-                  marginTop: 4,
-                  fontSize: 13,
-                  lineHeight: 1.45,
-                  color: '#7b7268',
-                  fontWeight: 700,
-                }}
-              >
-                {text.paymentMethodsSub}
-              </div>
+                ›
+              </span>
             </div>
-
-            <span
-              style={{
-                fontSize: 20,
-                color: '#938475',
-                fontWeight: 900,
-              }}
-            >
-              ›
-            </span>
-          </div>
-        </button>
+          </button>
+        </section>
       </div>
 
       <BottomNav active="profile" />
