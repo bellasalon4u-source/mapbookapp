@@ -321,6 +321,19 @@ function getSelectedMasterName(master: MasterItem, language: AppLanguage) {
   return master.name || master.title || getFallbackProLabel(language);
 }
 
+function getVerifiedCardLabel(language: AppLanguage, trObj: ReturnType<typeof t>) {
+  if (language === 'RU') return 'Проверений специалист';
+  if (language === 'UA') return 'Перевірений спеціаліст';
+  if (language === 'ES') return 'Profesional verificado';
+  if (language === 'CZ') return 'Ověřený specialista';
+  if (language === 'DE') return 'Verifizierter Profi';
+  if (language === 'IT') return 'Specialista verificato';
+  if (language === 'FR') return 'Spécialiste vérifié';
+  if (language === 'AR') return 'متخصص موثّق';
+  if (language === 'PL') return 'Zweryfikowany specjalista';
+  return trObj.verifiedPro;
+}
+
 function getTileUrl(mode: 'map' | 'satellite' = 'map') {
   if (mode === 'satellite') {
     return 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
@@ -370,10 +383,7 @@ function getCardGallery(master: MasterItem) {
     master.image ||
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80';
 
-  const galleryPool = Array.isArray(master.images)
-    ? master.images.filter(Boolean)
-    : [];
-
+  const galleryPool = Array.isArray(master.images) ? master.images.filter(Boolean) : [];
   const filteredGallery = galleryPool.filter((image) => image !== avatar);
 
   const firstGallery =
@@ -748,9 +758,9 @@ export default function RealMap({
       <MapContainer
         center={focusLocation}
         zoom={11}
-        dragging={true}
-        touchZoom={true}
-        doubleClickZoom={true}
+        dragging
+        touchZoom
+        doubleClickZoom
         scrollWheelZoom={false}
         boxZoom={false}
         keyboard={false}
@@ -759,7 +769,7 @@ export default function RealMap({
           height: '100%',
           touchAction: 'none',
         }}
-        zoomControl={true}
+        zoomControl
       >
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
@@ -857,6 +867,7 @@ export default function RealMap({
             boxShadow: '0 16px 32px rgba(0,0,0,0.12)',
             padding: 14,
             pointerEvents: 'auto',
+            overflow: 'hidden',
           }}
         >
           <div
@@ -875,7 +886,7 @@ export default function RealMap({
                 height: 104,
                 objectFit: 'cover',
                 borderRadius: 20,
-                border: `4px solid ${getCategoryAccent(selectedMaster.category)}`,
+                border: `3px solid ${getCategoryAccent(selectedMaster.category)}`,
                 display: 'block',
               }}
             />
@@ -924,8 +935,8 @@ export default function RealMap({
                   position: 'absolute',
                   top: 6,
                   right: 6,
-                  width: 42,
-                  height: 42,
+                  width: 40,
+                  height: 40,
                   borderRadius: 999,
                   border: '3px solid #111111',
                   background: '#f6f0e8',
@@ -948,15 +959,15 @@ export default function RealMap({
                 }}
                 style={{
                   position: 'absolute',
-                  top: 56,
+                  top: 54,
                   right: 6,
-                  width: 42,
-                  height: 42,
+                  width: 40,
+                  height: 40,
                   borderRadius: 999,
                   border: '3px solid #111111',
                   background: '#ffffff',
                   color: '#ff2b63',
-                  fontSize: 22,
+                  fontSize: 21,
                   fontWeight: 900,
                   cursor: 'pointer',
                 }}
@@ -964,6 +975,27 @@ export default function RealMap({
                 ♥
               </button>
             </div>
+          </div>
+
+          <div
+            style={{
+              width: '100%',
+              marginBottom: 10,
+              borderRadius: 999,
+              border: '3px solid #111111',
+              background: '#ffe44d',
+              color: '#17130f',
+              padding: '9px 14px',
+              fontSize: 13,
+              fontWeight: 900,
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              boxSizing: 'border-box',
+            }}
+          >
+            {getVerifiedCardLabel(language, tr)}
           </div>
 
           <div
@@ -980,42 +1012,10 @@ export default function RealMap({
 
           <div
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              marginBottom: 10,
-              borderRadius: 999,
-              background: '#efe6d6',
-              color: '#6b5639',
-              padding: '6px 12px',
-              fontSize: 12,
-              fontWeight: 900,
-              border: '3px solid #111111',
-              whiteSpace: 'nowrap',
-              maxWidth: '100%',
-            }}
-          >
-            <span>🏅</span>
-            <span>{tr.verifiedPro}</span>
-          </div>
-
-          <div
-            style={{
-              marginBottom: 8,
-              fontSize: 14,
-              fontWeight: 900,
-              color: selectedMaster.availableNow ? '#23a33f' : '#d56688',
-            }}
-          >
-            {selectedMaster.availableNow ? tr.availableNow : tr.unavailableToday}
-          </div>
-
-          <div
-            style={{
               display: 'flex',
               alignItems: 'center',
               gap: 10,
-              marginBottom: 8,
+              marginBottom: 10,
               flexWrap: 'wrap',
             }}
           >
@@ -1028,17 +1028,26 @@ export default function RealMap({
             >
               ★ {selectedMaster.rating || 4.8}
             </div>
-          </div>
 
-          <div
-            style={{
-              marginBottom: 10,
-              fontSize: 15,
-              fontWeight: 900,
-              color: '#1f2430',
-            }}
-          >
-            {formatPrice(selectedMaster.price, tr)}
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 900,
+                color: selectedMaster.availableNow ? '#23a33f' : '#d56688',
+              }}
+            >
+              {selectedMaster.availableNow ? tr.availableNow : tr.unavailableToday}
+            </div>
+
+            <div
+              style={{
+                fontSize: 14,
+                fontWeight: 900,
+                color: '#1f2430',
+              }}
+            >
+              {getCategoryBadgeLabel(selectedMaster.category, language)}
+            </div>
           </div>
 
           {selectedMaster.description ? (
@@ -1054,6 +1063,17 @@ export default function RealMap({
               {selectedMaster.description}
             </div>
           ) : null}
+
+          <div
+            style={{
+              marginBottom: 10,
+              fontSize: 15,
+              fontWeight: 900,
+              color: '#1f2430',
+            }}
+          >
+            {formatPrice(selectedMaster.price, tr)}
+          </div>
 
           <div
             style={{
