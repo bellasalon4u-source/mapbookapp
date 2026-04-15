@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
 import {
@@ -259,7 +259,7 @@ function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange' | 'neutral') {
   return { background: '#f4efe8', color: '#6d6258' };
 }
 
-function sectionCardStyle(): React.CSSProperties {
+function sectionCardStyle(): CSSProperties {
   return {
     borderRadius: 32,
     border: '2px solid #111111',
@@ -305,12 +305,15 @@ export default function PaymentsPage() {
     [language]
   );
 
+  const savedCards = payments.savedCards || [];
+  const cryptoWallets = payments.cryptoWallets || [];
+
   const totalMethods =
-    (payments.savedCards?.length || 0) +
+    savedCards.length +
     (payments.paypalEmail ? 1 : 0) +
     (payments.applePayEnabled ? 1 : 0) +
     (payments.googlePayEnabled ? 1 : 0) +
-    (payments.cryptoWallets?.length || 0) +
+    cryptoWallets.length +
     (payments.bankTransferEnabled ? 1 : 0);
 
   return (
@@ -544,7 +547,7 @@ export default function PaymentsPage() {
           </div>
 
           <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
-            {(payments.savedCards || []).map((card, index) => (
+            {savedCards.map((card, index) => (
               <div
                 key={card.id}
                 style={{
@@ -743,7 +746,7 @@ export default function PaymentsPage() {
               >
                 <div>
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                    {payments.paypalEmail || text.notConnected || 'PayPal'}
+                    {payments.paypalEmail || text.notConnected}
                   </div>
                   <div
                     style={{
@@ -920,7 +923,7 @@ export default function PaymentsPage() {
             </div>
 
             <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
-              {(payments.cryptoWallets || []).map((wallet, index) => (
+              {cryptoWallets.map((wallet, index) => (
                 <div
                   key={wallet.id}
                   style={{
@@ -993,7 +996,7 @@ export default function PaymentsPage() {
                         cursor: 'pointer',
                       }}
                     >
-                      {index === 0 ? text.setPrimary : text.edit}
+                      {wallet.isDefault ? text.edit : text.setPrimary}
                     </button>
 
                     <button
