@@ -252,18 +252,18 @@ const paymentTexts = {
 } as const;
 
 function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange' | 'neutral') {
-  if (kind === 'green') return { background: '#edf9ef', color: '#2fa35a' };
-  if (kind === 'blue') return { background: '#edf4ff', color: '#2f7cf6' };
-  if (kind === 'pink') return { background: '#fff0f6', color: '#ff4fa0' };
-  if (kind === 'orange') return { background: '#fff4e7', color: '#d68612' };
+  if (kind === 'green') return { background: '#dff2e3', color: '#1d7a38' };
+  if (kind === 'blue') return { background: '#e6efff', color: '#2559b7' };
+  if (kind === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
+  if (kind === 'orange') return { background: '#fff0da', color: '#c07a00' };
   return { background: '#f4efe8', color: '#6d6258' };
 }
 
 function sectionCardStyle(): CSSProperties {
   return {
-    borderRadius: 32,
+    borderRadius: 30,
     border: '2px solid #111111',
-    background: '#fff',
+    background: '#ffffff',
     padding: 18,
   };
 }
@@ -311,8 +311,8 @@ export default function PaymentsPage() {
   const totalMethods =
     savedCards.length +
     (payments.paypalEmail ? 1 : 0) +
-    (payments.applePayEnabled ? 1 : 0) +
     (payments.googlePayEnabled ? 1 : 0) +
+    (payments.applePayEnabled ? 1 : 0) +
     cryptoWallets.length +
     (payments.bankTransferEnabled ? 1 : 0);
 
@@ -320,7 +320,7 @@ export default function PaymentsPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f4ee',
+        background: '#ffffff',
         padding: '20px 16px 110px',
       }}
     >
@@ -359,6 +359,7 @@ export default function PaymentsPage() {
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
               {text.subtitle}
@@ -371,10 +372,7 @@ export default function PaymentsPage() {
         <div
           style={{
             marginTop: 18,
-            borderRadius: 34,
-            border: '2px solid #111111',
-            background: '#ffffff',
-            padding: 18,
+            ...sectionCardStyle(),
           }}
         >
           <div
@@ -405,7 +403,7 @@ export default function PaymentsPage() {
                 minWidth: 82,
                 borderRadius: 22,
                 border: '2px solid #111111',
-                background: '#fff0f6',
+                background: '#fff1f7',
                 color: '#ff4fa0',
                 padding: '12px 12px 10px',
                 textAlign: 'center',
@@ -510,7 +508,7 @@ export default function PaymentsPage() {
               display: 'flex',
               justifyContent: 'space-between',
               gap: 14,
-              alignItems: 'flex-start',
+              alignItems: 'start',
             }}
           >
             <div>
@@ -533,7 +531,7 @@ export default function PaymentsPage() {
               style={{
                 border: '2px solid #111111',
                 borderRadius: 18,
-                background: '#fff0f6',
+                background: '#fff1f7',
                 color: '#ff4fa0',
                 minHeight: 48,
                 padding: '0 16px',
@@ -574,7 +572,7 @@ export default function PaymentsPage() {
                       style={{
                         fontSize: 15,
                         fontWeight: 900,
-                        opacity: index === 0 ? 0.9 : 1,
+                        opacity: index === 0 ? 0.95 : 1,
                       }}
                     >
                       {card.brand}
@@ -605,14 +603,13 @@ export default function PaymentsPage() {
                     {card.isDefault && (
                       <span
                         style={{
-                          ...badgeStyle(index === 0 ? 'green' : 'pink'),
+                          ...badgeStyle(index === 0 ? 'green' : 'orange'),
                           borderRadius: 999,
                           border: '2px solid #111111',
                           padding: '8px 12px',
                           fontSize: 12,
                           fontWeight: 900,
                           whiteSpace: 'nowrap',
-                          alignSelf: 'flex-end',
                         }}
                       >
                         {text.defaultLabel}
@@ -621,14 +618,13 @@ export default function PaymentsPage() {
 
                     <span
                       style={{
-                        ...badgeStyle(index === 0 ? 'blue' : 'green'),
+                        ...badgeStyle(index === 0 ? 'blue' : 'pink'),
                         borderRadius: 999,
                         border: '2px solid #111111',
                         padding: '8px 12px',
                         fontSize: 12,
                         fontWeight: 900,
                         whiteSpace: 'nowrap',
-                        alignSelf: 'flex-end',
                       }}
                     >
                       {text.verified}
@@ -650,7 +646,7 @@ export default function PaymentsPage() {
                       height: 46,
                       borderRadius: 16,
                       border: '2px solid #111111',
-                      background: index === 0 ? 'rgba(255,255,255,0.08)' : '#fcfaf6',
+                      background: index === 0 ? 'rgba(255,255,255,0.08)' : '#fff',
                       color: index === 0 ? '#fff' : '#17130f',
                       fontSize: 13,
                       fontWeight: 900,
@@ -666,7 +662,7 @@ export default function PaymentsPage() {
                       height: 46,
                       borderRadius: 16,
                       border: '2px solid #111111',
-                      background: index === 0 ? 'rgba(255,255,255,0.08)' : '#fcfaf6',
+                      background: index === 0 ? 'rgba(255,255,255,0.08)' : '#fff',
                       color: index === 0 ? '#fff' : '#17130f',
                       fontSize: 13,
                       fontWeight: 900,
@@ -731,7 +727,7 @@ export default function PaymentsPage() {
               style={{
                 marginTop: 14,
                 borderRadius: 24,
-                background: '#fcfaf6',
+                background: '#fff',
                 border: '2px solid #111111',
                 padding: 16,
               }}
@@ -866,7 +862,7 @@ export default function PaymentsPage() {
                   style={{
                     borderRadius: 22,
                     border: '2px solid #111111',
-                    background: '#fcfaf6',
+                    background: '#fff',
                     padding: 14,
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -929,7 +925,7 @@ export default function PaymentsPage() {
                   style={{
                     borderRadius: 22,
                     border: '2px solid #111111',
-                    background: '#fcfaf6',
+                    background: '#fff',
                     padding: 14,
                   }}
                 >
@@ -1079,7 +1075,7 @@ export default function PaymentsPage() {
               style={{
                 marginTop: 14,
                 borderRadius: 22,
-                background: '#fcfaf6',
+                background: '#fff',
                 border: '2px solid #111111',
                 padding: 14,
               }}
