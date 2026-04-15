@@ -1,9 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
 
 const helpTexts = {
   EN: {
@@ -196,18 +200,18 @@ const helpTexts = {
 
 function getQuestionAccent(index: number) {
   const accents = [
-    { bg: '#eef4ff', color: '#2f7cf6', icon: '📅' },
-    { bg: '#fff5e8', color: '#d68612', icon: '📍' },
-    { bg: '#fff1f7', color: '#ff4fa0', icon: '💳' },
-    { bg: '#eef9f1', color: '#2fa35a', icon: '↩️' },
+    { bg: '#eef4ff', color: '#2563eb', icon: '📅' },
+    { bg: '#fff4db', color: '#b7791f', icon: '📍' },
+    { bg: '#fff0f6', color: '#ff4fa0', icon: '💳' },
+    { bg: '#ecfdf3', color: '#15803d', icon: '↩️' },
     { bg: '#f3efff', color: '#7a5af8', icon: '🎁' },
   ];
 
   return accents[index % accents.length];
 }
 
-const shellCardStyle: React.CSSProperties = {
-  borderRadius: 32,
+const shellCardStyle: CSSProperties = {
+  borderRadius: 30,
   background: '#ffffff',
   border: '2px solid #111111',
   padding: 18,
@@ -225,10 +229,16 @@ export default function HelpPage() {
     };
 
     syncLanguage();
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
     window.addEventListener('focus', syncLanguage);
 
     return () => {
       window.removeEventListener('focus', syncLanguage);
+      unsubLanguage();
     };
   }, []);
 
@@ -255,8 +265,9 @@ export default function HelpPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f4ee',
+        background: '#ffffff',
         padding: '20px 16px 110px',
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -292,6 +303,7 @@ export default function HelpPage() {
                 fontSize: 22,
                 fontWeight: 900,
                 color: '#17130f',
+                lineHeight: 1.1,
               }}
             >
               {text.title}
@@ -302,6 +314,7 @@ export default function HelpPage() {
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
               {text.subtitle}
@@ -311,276 +324,273 @@ export default function HelpPage() {
           <div />
         </div>
 
-        <div
-          style={{
-            ...shellCardStyle,
-            marginTop: 18,
-          }}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '56px 1fr',
-              gap: 12,
-              alignItems: 'center',
-              marginBottom: 14,
-            }}
-          >
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 18,
-                background: '#fff1f7',
-                color: '#ff4fa0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 26,
-                border: '2px solid #111111',
-              }}
-            >
-              💬
-            </div>
-
-            <div>
-              <div
-                style={{
-                  fontSize: 20,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.heroTitle}
-              </div>
-              <div
-                style={{
-                  marginTop: 4,
-                  fontSize: 14,
-                  lineHeight: 1.55,
-                  color: '#7b7268',
-                  fontWeight: 700,
-                }}
-              >
-                {text.heroSub}
-              </div>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              background: '#ffffff',
-              border: '2px solid #111111',
-              borderRadius: 22,
-              padding: '14px 16px',
-            }}
-          >
-            <span
-              style={{
-                fontSize: 24,
-                lineHeight: 1,
-              }}
-            >
-              🔎
-            </span>
-
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={text.searchPlaceholder}
-              style={{
-                flex: 1,
-                border: 'none',
-                outline: 'none',
-                background: 'transparent',
-                fontSize: 16,
-                color: '#2c3440',
-              }}
-            />
-          </div>
-
-          <div
-            style={{
-              marginTop: 14,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              borderRadius: 999,
-              padding: '10px 14px',
-              background: '#eef9f1',
-              color: '#2fa35a',
-              fontSize: 12,
-              fontWeight: 900,
-              border: '2px solid #111111',
-            }}
-          >
-            <span>🛡️</span>
-            <span>{text.secure}</span>
-          </div>
-        </div>
-
-        <div
-          style={{
-            ...shellCardStyle,
-            marginTop: 18,
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: 12,
-              alignItems: 'center',
-              marginBottom: 12,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.popular}
-            </div>
-
-            <div
-              style={{
-                borderRadius: 999,
-                padding: '8px 12px',
-                background: '#f4efe8',
-                color: '#6d6258',
-                fontSize: 12,
-                fontWeight: 900,
-                whiteSpace: 'nowrap',
-                border: '2px solid #111111',
-              }}
-            >
-              {text.found}: {filteredQuestions.length} {text.results}
-            </div>
-          </div>
-
-          {filteredQuestions.length === 0 ? (
+        <section style={{ marginTop: 18 }}>
+          <div style={shellCardStyle}>
             <div
               style={{
                 borderRadius: 24,
-                background: '#fcfaf6',
                 border: '2px solid #111111',
-                padding: 22,
-                textAlign: 'center',
+                background: '#2f241c',
+                color: '#fff',
+                padding: 18,
               }}
             >
               <div
                 style={{
-                  width: 56,
-                  height: 56,
-                  margin: '0 auto 12px',
-                  borderRadius: 18,
-                  background: '#f4efe8',
-                  color: '#6d6258',
-                  display: 'flex',
+                  display: 'grid',
+                  gridTemplateColumns: '56px 1fr',
+                  gap: 12,
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 24,
-                  border: '2px solid #111111',
+                  marginBottom: 14,
                 }}
               >
-                ?
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 18,
+                    background: '#fff0f6',
+                    color: '#ff4fa0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 26,
+                    border: '2px solid #111111',
+                  }}
+                >
+                  💬
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 900,
+                      color: '#ffffff',
+                    }}
+                  >
+                    {text.heroTitle}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontSize: 14,
+                      lineHeight: 1.55,
+                      color: '#ddd2c6',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {text.heroSub}
+                  </div>
+                </div>
               </div>
 
               <div
                 style={{
-                  fontSize: 17,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  background: '#ffffff',
+                  border: '2px solid #111111',
+                  borderRadius: 22,
+                  padding: '14px 16px',
+                }}
+              >
+                <span style={{ fontSize: 24, lineHeight: 1 }}>🔎</span>
+
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={text.searchPlaceholder}
+                  style={{
+                    flex: 1,
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontSize: 16,
+                    color: '#2c3440',
+                  }}
+                />
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  borderRadius: 999,
+                  padding: '10px 14px',
+                  background: '#ecfdf3',
+                  color: '#15803d',
+                  fontSize: 12,
+                  fontWeight: 900,
+                  border: '2px solid #111111',
+                }}
+              >
+                <span>🛡️</span>
+                <span>{text.secure}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section style={{ marginTop: 18 }}>
+          <div style={shellCardStyle}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 12,
+                alignItems: 'center',
+                marginBottom: 12,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 18,
                   fontWeight: 900,
                   color: '#17130f',
                 }}
               >
-                {text.noResults}
+                {text.popular}
               </div>
 
               <div
                 style={{
-                  marginTop: 8,
-                  fontSize: 14,
-                  lineHeight: 1.55,
-                  color: '#7b7268',
-                  fontWeight: 700,
+                  borderRadius: 999,
+                  padding: '8px 12px',
+                  background: '#f3f4f6',
+                  color: '#6d6258',
+                  fontSize: 12,
+                  fontWeight: 900,
+                  whiteSpace: 'nowrap',
+                  border: '2px solid #111111',
                 }}
               >
-                {text.noResultsSub}
+                {text.found}: {filteredQuestions.length} {text.results}
               </div>
             </div>
-          ) : (
-            <div style={{ display: 'grid', gap: 12 }}>
-              {filteredQuestions.map((question, index) => {
-                const accent = getQuestionAccent(index);
 
-                return (
-                  <button
-                    key={question}
-                    type="button"
-                    style={{
-                      width: '100%',
-                      display: 'grid',
-                      gridTemplateColumns: '44px 1fr auto',
-                      gap: 14,
-                      alignItems: 'center',
-                      border: '2px solid #111111',
-                      borderRadius: 24,
-                      background: '#ffffff',
-                      padding: '14px 16px',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div
+            {filteredQuestions.length === 0 ? (
+              <div
+                style={{
+                  borderRadius: 24,
+                  background: '#ffffff',
+                  border: '2px solid #111111',
+                  padding: 22,
+                  textAlign: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    margin: '0 auto 12px',
+                    borderRadius: 18,
+                    background: '#f3f4f6',
+                    color: '#6d6258',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 24,
+                    border: '2px solid #111111',
+                  }}
+                >
+                  ?
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
+                  {text.noResults}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 14,
+                    lineHeight: 1.55,
+                    color: '#7b7268',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.noResultsSub}
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gap: 12 }}>
+                {filteredQuestions.map((question, index) => {
+                  const accent = getQuestionAccent(index);
+
+                  return (
+                    <button
+                      key={question}
+                      type="button"
                       style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 16,
-                        background: accent.bg,
-                        color: accent.color,
-                        display: 'flex',
+                        width: '100%',
+                        display: 'grid',
+                        gridTemplateColumns: '44px 1fr auto',
+                        gap: 14,
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 20,
                         border: '2px solid #111111',
+                        borderRadius: 24,
+                        background: '#ffffff',
+                        padding: '14px 16px',
+                        textAlign: 'left',
+                        cursor: 'pointer',
                       }}
                     >
-                      {accent.icon}
-                    </div>
+                      <div
+                        style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 16,
+                          background: accent.bg,
+                          color: accent.color,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 20,
+                          border: '2px solid #111111',
+                        }}
+                      >
+                        {accent.icon}
+                      </div>
 
-                    <div
-                      style={{
-                        fontSize: 15,
-                        lineHeight: 1.45,
-                        fontWeight: 900,
-                        color: '#17130f',
-                      }}
-                    >
-                      {question}
-                    </div>
+                      <div
+                        style={{
+                          fontSize: 15,
+                          lineHeight: 1.45,
+                          fontWeight: 900,
+                          color: '#17130f',
+                        }}
+                      >
+                        {question}
+                      </div>
 
-                    <span
-                      style={{
-                        fontSize: 20,
-                        color: '#17130f',
-                        fontWeight: 900,
-                      }}
-                    >
-                      ›
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                      <span
+                        style={{
+                          fontSize: 20,
+                          color: '#17130f',
+                          fontWeight: 900,
+                        }}
+                      >
+                        ›
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
 
-        <div
+        <section
           style={{
             marginTop: 18,
             display: 'grid',
@@ -609,7 +619,7 @@ export default function HelpPage() {
                   height: 46,
                   borderRadius: 16,
                   background: '#eef4ff',
-                  color: '#2f7cf6',
+                  color: '#2563eb',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -676,8 +686,8 @@ export default function HelpPage() {
                   width: 46,
                   height: 46,
                   borderRadius: 16,
-                  background: '#fff5e8',
-                  color: '#d68612',
+                  background: '#fff4db',
+                  color: '#b7791f',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -726,7 +736,7 @@ export default function HelpPage() {
           <div
             style={{
               ...shellCardStyle,
-              background: '#eef9f1',
+              background: '#ecfdf3',
             }}
           >
             <div
@@ -743,7 +753,7 @@ export default function HelpPage() {
                   height: 46,
                   borderRadius: 16,
                   background: '#ffffff',
-                  color: '#2fa35a',
+                  color: '#15803d',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -791,7 +801,7 @@ export default function HelpPage() {
                   background: '#ffffff',
                   padding: '12px 14px',
                   fontSize: 13,
-                  color: '#2fa35a',
+                  color: '#15803d',
                   fontWeight: 900,
                   border: '2px solid #111111',
                 }}
@@ -816,11 +826,7 @@ export default function HelpPage() {
             </div>
           </div>
 
-          <div
-            style={{
-              ...shellCardStyle,
-            }}
-          >
+          <div style={shellCardStyle}>
             <div
               style={{
                 display: 'grid',
@@ -881,11 +887,7 @@ export default function HelpPage() {
             </div>
           </div>
 
-          <div
-            style={{
-              ...shellCardStyle,
-            }}
-          >
+          <div style={shellCardStyle}>
             <div
               style={{
                 display: 'grid',
@@ -899,7 +901,7 @@ export default function HelpPage() {
                   width: 46,
                   height: 46,
                   borderRadius: 16,
-                  background: '#fff1f7',
+                  background: '#fff0f6',
                   color: '#ff4fa0',
                   display: 'flex',
                   alignItems: 'center',
@@ -945,7 +947,7 @@ export default function HelpPage() {
               </span>
             </div>
           </div>
-        </div>
+        </section>
       </div>
 
       <BottomNav active="profile" />
