@@ -7,25 +7,15 @@ import {
   subscribeToLanguageChange,
   type AppLanguage,
 } from '../../../services/i18n';
-
-type MessageItem = {
-  id: string;
-  text: string;
-  fromMe: boolean;
-  time: string;
-  isRead?: boolean;
-  isDelivered?: boolean;
-  isAlert?: boolean;
-};
-
-type ChatItem = {
-  id: string;
-  name: string;
-  avatar: string;
-  online: boolean;
-  category?: string;
-  messages: MessageItem[];
-};
+import {
+  formatChatTime,
+  getChatThreadById,
+  markThreadAsRead,
+  sendChatMessage,
+  subscribeToChatStore,
+  type ChatMessage,
+  type ChatThread,
+} from '../../../services/chatStore';
 
 const chatTexts = {
   EN: {
@@ -34,7 +24,6 @@ const chatTexts = {
     offline: 'Offline',
     placeholder: 'Write a message...',
     send: 'Send',
-    back: 'Back',
   },
   ES: {
     notFound: 'Chat no encontrado',
@@ -42,7 +31,6 @@ const chatTexts = {
     offline: 'Desconectado',
     placeholder: 'Escribe un mensaje...',
     send: 'Enviar',
-    back: 'Volver',
   },
   RU: {
     notFound: 'Чат не найден',
@@ -50,7 +38,6 @@ const chatTexts = {
     offline: 'Не в сети',
     placeholder: 'Напишите сообщение...',
     send: 'Отправить',
-    back: 'Назад',
   },
   CZ: {
     notFound: 'Chat nenalezen',
@@ -58,7 +45,6 @@ const chatTexts = {
     offline: 'Offline',
     placeholder: 'Napište zprávu...',
     send: 'Odeslat',
-    back: 'Zpět',
   },
   DE: {
     notFound: 'Chat nicht gefunden',
@@ -66,7 +52,6 @@ const chatTexts = {
     offline: 'Offline',
     placeholder: 'Nachricht schreiben...',
     send: 'Senden',
-    back: 'Zurück',
   },
   PL: {
     notFound: 'Czat nie znaleziony',
@@ -74,7 +59,6 @@ const chatTexts = {
     offline: 'Offline',
     placeholder: 'Napisz wiadomość...',
     send: 'Wyślij',
-    back: 'Wróć',
   },
   UA: {
     notFound: 'Чат не знайдено',
@@ -82,7 +66,6 @@ const chatTexts = {
     offline: 'Не в мережі',
     placeholder: 'Напишіть повідомлення...',
     send: 'Надіслати',
-    back: 'Назад',
   },
   IT: {
     notFound: 'Chat non trovata',
@@ -90,7 +73,6 @@ const chatTexts = {
     offline: 'Offline',
     placeholder: 'Scrivi un messaggio...',
     send: 'Invia',
-    back: 'Indietro',
   },
   FR: {
     notFound: 'Chat introuvable',
@@ -98,7 +80,6 @@ const chatTexts = {
     offline: 'Hors ligne',
     placeholder: 'Écrivez un message...',
     send: 'Envoyer',
-    back: 'Retour',
   },
   AR: {
     notFound: 'الدردشة غير موجودة',
@@ -106,7 +87,6 @@ const chatTexts = {
     offline: 'غير متصل',
     placeholder: 'اكتب رسالة...',
     send: 'إرسال',
-    back: 'رجوع',
   },
 } satisfies Record<
   AppLanguage,
@@ -116,113 +96,30 @@ const chatTexts = {
     offline: string;
     placeholder: string;
     send: string;
-    back: string;
   }
 >;
 
-const mockChats: ChatItem[] = [
-  {
-    id: 'bella-keratin-studio',
-    name: 'Bella Keratin Studio',
-    avatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-    online: true,
-    category: 'Hair Extensions',
-    messages: [
-      {
-        id: '1',
-        text: 'Hi! Your booking is confirmed.',
-        fromMe: false,
-        time: '10:12',
-      },
-      {
-        id: '2',
-        text: 'Perfect, thank you.',
-        fromMe: true,
-        time: '10:13',
-        isRead: true,
-        isDelivered: true,
-      },
-      {
-        id: '3',
-        text: 'Please come 5 minutes earlier if possible.',
-        fromMe: false,
-        time: '10:15',
-        isAlert: true,
-      },
-    ],
-  },
-  {
-    id: 'mila-wellness',
-    name: 'Mila Wellness',
-    avatar:
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
-    online: false,
-    category: 'Massage',
-    messages: [
-      {
-        id: '1',
-        text: 'Hello! We still have one free slot today.',
-        fromMe: false,
-        time: '09:20',
-      },
-      {
-        id: '2',
-        text: 'What time is available?',
-        fromMe: true,
-        time: '09:21',
-        isDelivered: true,
-      },
-    ],
-  },
-  {
-    id: 'nadia-beauty',
-    name: 'Nadia Beauty',
-    avatar:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80',
-    online: true,
-    category: 'Brows',
-    messages: [
-      {
-        id: '1',
-        text: 'I have one more slot tomorrow if you want.',
-        fromMe: false,
-        time: '13:00',
-      },
-    ],
-  },
-];
+function getStatusMeta(message: ChatMessage) {
+  if (message.sender !== 'me') return null;
 
-function getStatusMeta(message: MessageItem) {
-  if (message.fromMe) {
-    if (message.isRead) {
-      return {
-        icon: '✓✓',
-        color: '#2f8cff',
-      };
-    }
-
-    if (message.isDelivered) {
-      return {
-        icon: '✓✓',
-        color: '#8f98a3',
-      };
-    }
-
+  if (message.status === 'seen') {
     return {
-      icon: '✓',
-      color: '#e53935',
+      icon: '✓✓',
+      color: '#2f8cff',
     };
   }
 
-  if (message.isAlert) {
+  if (message.status === 'delivered') {
     return {
-      icon: '!',
-      color: '#e53935',
+      icon: '✓✓',
+      color: '#8f98a3',
     };
   }
 
-  return null;
+  return {
+    icon: '✓',
+    color: '#e53935',
+  };
 }
 
 export default function ChatPage() {
@@ -232,7 +129,10 @@ export default function ChatPage() {
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<MessageItem[]>([]);
+  const [chat, setChat] = useState<ChatThread | null>(null);
+
+  const threadId = String(params.id || '');
+  const text = chatTexts[language] || chatTexts.EN;
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -246,17 +146,25 @@ export default function ChatPage() {
     };
   }, []);
 
-  const text = chatTexts[language] || chatTexts.EN;
+  useEffect(() => {
+    const loadChat = () => {
+      const nextChat = getChatThreadById(threadId);
+      setChat(nextChat);
+    };
 
-  const chat = useMemo(() => {
-    return mockChats.find((item) => item.id === String(params.id));
-  }, [params.id]);
+    loadChat();
+
+    const unsubscribe = subscribeToChatStore(loadChat);
+
+    return () => {
+      unsubscribe();
+    };
+  }, [threadId]);
 
   useEffect(() => {
-    if (chat) {
-      setMessages(chat.messages);
-    }
-  }, [chat]);
+    if (!threadId) return;
+    markThreadAsRead(threadId);
+  }, [threadId]);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -264,7 +172,7 @@ export default function ChatPage() {
     }, 80);
 
     return () => window.clearTimeout(id);
-  }, [messages]);
+  }, [chat?.messages]);
 
   if (!chat) {
     return (
@@ -291,20 +199,7 @@ export default function ChatPage() {
     const trimmed = input.trim();
     if (!trimmed) return;
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `${Date.now()}`,
-        text: trimmed,
-        fromMe: true,
-        time: new Date().toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        isDelivered: true,
-      },
-    ]);
-
+    sendChatMessage(threadId, trimmed);
     setInput('');
   };
 
@@ -380,8 +275,8 @@ export default function ChatPage() {
             >
               <div style={{ position: 'relative' }}>
                 <img
-                  src={chat.avatar}
-                  alt={chat.name}
+                  src={chat.providerAvatar}
+                  alt={chat.providerName}
                   style={{
                     width: 56,
                     height: 56,
@@ -417,7 +312,7 @@ export default function ChatPage() {
                     lineHeight: 1.15,
                   }}
                 >
-                  {chat.name}
+                  {chat.providerName}
                 </div>
 
                 <div
@@ -428,7 +323,7 @@ export default function ChatPage() {
                     color: chat.online ? '#2fbb52' : '#8b95a1',
                   }}
                 >
-                  {chat.online ? text.online : text.offline}
+                  {chat.online ? text.online : chat.lastSeenText || text.offline}
                 </div>
               </div>
             </div>
@@ -464,7 +359,7 @@ export default function ChatPage() {
             overflowY: 'auto',
           }}
         >
-          {messages.map((message) => {
+          {chat.messages.map((message) => {
             const statusMeta = getStatusMeta(message);
 
             return (
@@ -472,13 +367,13 @@ export default function ChatPage() {
                 key={message.id}
                 style={{
                   display: 'flex',
-                  justifyContent: message.fromMe ? 'flex-end' : 'flex-start',
+                  justifyContent: message.sender === 'me' ? 'flex-end' : 'flex-start',
                 }}
               >
                 <div
                   style={{
                     maxWidth: '82%',
-                    background: message.fromMe ? '#eaf3ff' : '#ffffff',
+                    background: message.sender === 'me' ? '#eaf3ff' : '#ffffff',
                     color: '#1f2430',
                     border: '2px solid #111111',
                     borderRadius: 24,
@@ -528,7 +423,7 @@ export default function ChatPage() {
                         lineHeight: 1,
                       }}
                     >
-                      {message.time}
+                      {formatChatTime(message.sentAt)}
                     </span>
                   </div>
                 </div>
