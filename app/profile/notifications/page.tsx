@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
 import {
   getUserProfile,
   subscribeToUserProfile,
@@ -221,11 +225,16 @@ export default function NotificationsPage() {
     syncLanguage();
     syncProfile();
 
-    window.addEventListener('focus', syncLanguage);
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
     const unsubProfile = subscribeToUserProfile(syncProfile);
+
+    window.addEventListener('focus', syncLanguage);
 
     return () => {
       window.removeEventListener('focus', syncLanguage);
+      unsubLanguage();
       unsubProfile();
     };
   }, []);
@@ -308,6 +317,7 @@ export default function NotificationsPage() {
               fontSize: 26,
               fontWeight: 900,
               cursor: 'pointer',
+              color: '#17130f',
             }}
           >
             ←
