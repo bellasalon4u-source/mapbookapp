@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
 
 const legalTexts = {
   EN: {
@@ -193,6 +197,13 @@ function accentStyles(accent: LegalItem['accent']) {
   return { background: '#f4efe8', color: '#6d6258' };
 }
 
+const shellCardStyle: React.CSSProperties = {
+  borderRadius: 32,
+  border: '2px solid #111111',
+  background: '#ffffff',
+  padding: 18,
+};
+
 export default function LegalPage() {
   const router = useRouter();
   const [language, setLanguage] = useState<AppLanguage>('EN');
@@ -203,10 +214,16 @@ export default function LegalPage() {
     };
 
     syncLanguage();
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
     window.addEventListener('focus', syncLanguage);
 
     return () => {
       window.removeEventListener('focus', syncLanguage);
+      unsubLanguage();
     };
   }, []);
 
@@ -303,6 +320,7 @@ export default function LegalPage() {
               fontSize: 26,
               fontWeight: 900,
               cursor: 'pointer',
+              color: '#17130f',
             }}
           >
             ←
@@ -335,11 +353,8 @@ export default function LegalPage() {
 
         <div
           style={{
+            ...shellCardStyle,
             marginTop: 18,
-            borderRadius: 34,
-            border: '2px solid #111111',
-            background: '#ffffff',
-            padding: 18,
           }}
         >
           <div
@@ -431,11 +446,8 @@ export default function LegalPage() {
 
         <div
           style={{
+            ...shellCardStyle,
             marginTop: 18,
-            borderRadius: 32,
-            border: '2px solid #111111',
-            background: '#fff',
-            padding: 16,
           }}
         >
           <div
@@ -515,7 +527,7 @@ export default function LegalPage() {
                   <span
                     style={{
                       fontSize: 18,
-                      color: '#938475',
+                      color: '#17130f',
                       fontWeight: 900,
                     }}
                   >
