@@ -32,6 +32,8 @@ type MasterItem = {
   lat?: number;
   lng?: number;
   avatar?: string;
+  image?: string;
+  images?: string[];
   description?: string;
   paymentMethods?: string[] | string;
   discountBadge?: string;
@@ -303,7 +305,12 @@ function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') 
     },
   };
 
-  return labels[normalized]?.[language] || labels[normalized]?.EN || category || getFallbackServiceLabel(language);
+  return (
+    labels[normalized]?.[language] ||
+    labels[normalized]?.EN ||
+    category ||
+    getFallbackServiceLabel(language)
+  );
 }
 
 function getMarkerAlt(master: MasterItem, language: AppLanguage) {
@@ -323,9 +330,9 @@ function getTileUrl(mode: 'map' | 'satellite' = 'map') {
 }
 
 function normalizePaymentMethods(value: string[] | string | undefined): string[] {
-  if (Array.isArray(value)) return value;
+  if (Array.isArray(value) && value.length > 0) return value;
   if (typeof value === 'string' && value.trim()) return [value];
-  return ['cash', 'card'];
+  return ['cash', 'wallet', 'card'];
 }
 
 function paymentBadge(method: string, language: AppLanguage) {
@@ -334,7 +341,7 @@ function paymentBadge(method: string, language: AppLanguage) {
 
   if (normalized === 'cash') return { icon: '💵', label: tr.cash };
   if (normalized === 'card') return { icon: '💳', label: tr.card };
-  if (normalized === 'wallet') return { icon: '📱', label: tr.wallet };
+  if (normalized === 'wallet') return { icon: '📲', label: 'Google Wallet' };
 
   return { icon: '•', label: String(method) };
 }
@@ -355,6 +362,31 @@ function getPromotionBadgeText(
   }
 
   return '';
+}
+
+function getCardGallery(master: MasterItem) {
+  const avatar =
+    master.avatar ||
+    master.image ||
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80';
+
+  const galleryPool = Array.isArray(master.images)
+    ? master.images.filter(Boolean)
+    : [];
+
+  const filteredGallery = galleryPool.filter((image) => image !== avatar);
+
+  const firstGallery =
+    filteredGallery[0] ||
+    master.image ||
+    'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1200&q=80';
+
+  const secondGallery =
+    filteredGallery[1] ||
+    filteredGallery[0] ||
+    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80';
+
+  return [avatar, firstGallery, secondGallery];
 }
 
 function buildMarkerIcon(
@@ -681,6 +713,11 @@ export default function RealMap({
     return safeMasters.find((item) => String(item.id) === String(selectedMasterId)) || null;
   }, [safeMasters, selectedMasterId]);
 
+  const selectedGallery = useMemo(() => {
+    if (!selectedMaster) return [];
+    return getCardGallery(selectedMaster);
+  }, [selectedMaster]);
+
   const openRoute = (master: MasterItem) => {
     if (typeof window === 'undefined') return;
     const lat = typeof master.lat === 'number' ? master.lat : focusLocation[0];
@@ -818,32 +855,90 @@ export default function RealMap({
             borderRadius: 34,
             border: '3px solid #111111',
             boxShadow: '0 16px 32px rgba(0,0,0,0.12)',
-            padding: 16,
+            padding: 14,
             pointerEvents: 'auto',
           }}
         >
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '92px 1fr auto',
-              gap: 14,
-              alignItems: 'start',
+              gridTemplateColumns: '1.45fr 1fr 1fr',
+              gap: 8,
+              marginBottom: 10,
             }}
           >
-            <div style={{ position: 'relative' }}>
+            <img
+              src={selectedGallery[0]}
+              alt={`${getSelectedMasterName(selectedMaster, language)} avatar`}
+              style={{
+                width: '100%',
+                height: 104,
+                objectFit: 'cover',
+                borderRadius: 20,
+                border: `4px solid ${getCategoryAccent(selectedMaster.category)}`,
+                display: 'block',
+              }}
+            />
+
+            <img
+              src={selectedGallery[1]}
+              alt={`${getSelectedMasterName(selectedMaster, language)} gallery 1`}
+              style={{
+                width: '100%',
+                height: 104,
+                objectFit: 'cover',
+                borderRadius: 20,
+                border: '3px solid #111111',
+                display: 'block',
+              }}
+            />
+
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: 104,
+              }}
+            >
               <img
-                src={selectedMaster.avatar}
-                alt={getSelectedMasterName(selectedMaster, language)}
+                src={selectedGallery[2]}
+                alt={`${getSelectedMasterName(selectedMaster, language)} gallery 2`}
                 style={{
-                  width: 92,
-                  height: 92,
-                  borderRadius: 24,
+                  width: '100%',
+                  height: '100%',
                   objectFit: 'cover',
+                  borderRadius: 20,
+                  border: '3px solid #111111',
                   display: 'block',
-                  border: `4px solid ${getCategoryAccent(selectedMaster.category)}`,
-                  boxShadow: '0 8px 18px rgba(0,0,0,0.12)',
                 }}
               />
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onMapBackgroundClick?.();
+                }}
+                style={{
+                  position: 'absolute',
+                  top: 6,
+                  right: 6,
+                  width: 42,
+                  height: 42,
+                  borderRadius: 999,
+                  border: '3px solid #111111',
+                  background: '#f6f0e8',
+                  color: '#6b7480',
+                  fontSize: 24,
+                  lineHeight: 1,
+                  cursor: 'pointer',
+                  fontWeight: 900,
+                }}
+              >
+                ×
+              </button>
+
               <button
                 type="button"
                 onClick={(e) => {
@@ -853,144 +948,103 @@ export default function RealMap({
                 }}
                 style={{
                   position: 'absolute',
-                  top: -8,
-                  right: -10,
-                  width: 52,
-                  height: 52,
+                  top: 56,
+                  right: 6,
+                  width: 42,
+                  height: 42,
                   borderRadius: 999,
                   border: '3px solid #111111',
                   background: '#ffffff',
                   color: '#ff2b63',
-                  fontSize: 26,
+                  fontSize: 22,
                   fontWeight: 900,
-                  boxShadow: '0 8px 18px rgba(0,0,0,0.12)',
                   cursor: 'pointer',
                 }}
               >
                 ♥
               </button>
             </div>
+          </div>
 
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 16,
-                  fontWeight: 900,
-                  color: '#1a2233',
-                  lineHeight: 1.15,
-                  marginBottom: 10,
-                }}
-              >
-                {getSelectedMasterName(selectedMaster, language)}
-              </div>
+          <div
+            style={{
+              marginBottom: 8,
+              fontSize: 16,
+              fontWeight: 900,
+              color: '#1a2233',
+              lineHeight: 1.15,
+            }}
+          >
+            {getSelectedMasterName(selectedMaster, language)}
+          </div>
 
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 10,
-                  marginBottom: 10,
-                }}
-              >
-                <div
-                  style={{
-                    borderRadius: 999,
-                    background: '#efe6d6',
-                    color: '#6b5639',
-                    padding: '10px 14px',
-                    fontSize: 12,
-                    fontWeight: 900,
-                    border: '3px solid #111111',
-                  }}
-                >
-                  🏅 {tr.verifiedPro}
-                </div>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 10,
+              borderRadius: 999,
+              background: '#efe6d6',
+              color: '#6b5639',
+              padding: '6px 12px',
+              fontSize: 12,
+              fontWeight: 900,
+              border: '3px solid #111111',
+              whiteSpace: 'nowrap',
+              maxWidth: '100%',
+            }}
+          >
+            <span>🏅</span>
+            <span>{tr.verifiedPro}</span>
+          </div>
 
-                <div
-                  style={{
-                    borderRadius: 999,
-                    background: '#edf6ff',
-                    color: getCategoryAccent(selectedMaster.category),
-                    padding: '10px 14px',
-                    fontSize: 12,
-                    fontWeight: 900,
-                    border: `3px solid ${getCategoryAccent(selectedMaster.category)}`,
-                  }}
-                >
-                  {getCategoryBadgeLabel(selectedMaster.category, language)}
-                </div>
-              </div>
+          <div
+            style={{
+              marginBottom: 8,
+              fontSize: 14,
+              fontWeight: 900,
+              color: selectedMaster.availableNow ? '#23a33f' : '#d56688',
+            }}
+          >
+            {selectedMaster.availableNow ? tr.availableNow : tr.unavailableToday}
+          </div>
 
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 14,
-                  alignItems: 'center',
-                  marginBottom: 10,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 900,
-                    color: selectedMaster.availableNow ? '#23a33f' : '#d56688',
-                  }}
-                >
-                  {selectedMaster.availableNow ? tr.availableNow : tr.unavailableToday}
-                </div>
-
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 900,
-                    color: '#1f2430',
-                  }}
-                >
-                  ★ {selectedMaster.rating || 4.8}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  fontSize: 15,
-                  fontWeight: 900,
-                  color: '#1f2430',
-                }}
-              >
-                {formatPrice(selectedMaster.price, tr)}
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onMapBackgroundClick?.();
-              }}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              marginBottom: 8,
+              flexWrap: 'wrap',
+            }}
+          >
+            <div
               style={{
-                border: '3px solid #111111',
-                background: '#f6f0e8',
-                color: '#6b7480',
-                width: 56,
-                height: 56,
-                borderRadius: 999,
-                fontSize: 30,
-                lineHeight: 1,
-                cursor: 'pointer',
-                flexShrink: 0,
+                fontSize: 14,
                 fontWeight: 900,
+                color: '#1f2430',
               }}
             >
-              ×
-            </button>
+              ★ {selectedMaster.rating || 4.8}
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginBottom: 10,
+              fontSize: 15,
+              fontWeight: 900,
+              color: '#1f2430',
+            }}
+          >
+            {formatPrice(selectedMaster.price, tr)}
           </div>
 
           {selectedMaster.description ? (
             <div
               style={{
-                marginTop: 12,
+                marginBottom: 12,
                 fontSize: 14,
                 lineHeight: 1.45,
                 color: '#4d5865',
@@ -1003,46 +1057,57 @@ export default function RealMap({
 
           <div
             style={{
-              marginTop: 14,
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 12,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr',
+              gap: 8,
+              marginBottom: 10,
             }}
           >
-            {normalizePaymentMethods(selectedMaster.paymentMethods).map((method) => {
-              const badge = paymentBadge(method, language);
+            {normalizePaymentMethods(selectedMaster.paymentMethods)
+              .slice(0, 3)
+              .map((method) => {
+                const badge = paymentBadge(method, language);
 
-              return (
-                <div
-                  key={method}
-                  style={{
-                    border: '3px solid #111111',
-                    background: '#ffffff',
-                    borderRadius: 999,
-                    padding: '10px 16px',
-                    fontSize: 12,
-                    fontWeight: 900,
-                    color: '#2b3745',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    minWidth: 92,
-                    justifyContent: 'center',
-                  }}
-                >
-                  <span>{badge.icon}</span>
-                  <span>{badge.label}</span>
-                </div>
-              );
-            })}
+                return (
+                  <div
+                    key={method}
+                    style={{
+                      border: '3px solid #111111',
+                      background: '#ffffff',
+                      borderRadius: 999,
+                      padding: '10px 8px',
+                      fontSize: 11,
+                      fontWeight: 900,
+                      color: '#2b3745',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6,
+                      textAlign: 'center',
+                      minHeight: 46,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <span style={{ flexShrink: 0 }}>{badge.icon}</span>
+                    <span
+                      style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {badge.label}
+                    </span>
+                  </div>
+                );
+              })}
           </div>
 
           <div
             style={{
-              marginTop: 16,
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              gap: 12,
+              gridTemplateColumns: '1fr 1fr 1.15fr',
+              gap: 8,
             }}
           >
             <button
@@ -1056,11 +1121,12 @@ export default function RealMap({
                 border: '3px solid #111111',
                 background: '#ffffff',
                 color: '#1d2331',
-                borderRadius: 24,
-                padding: '16px 10px',
-                fontSize: 15,
+                borderRadius: 22,
+                padding: '14px 8px',
+                fontSize: 14,
                 fontWeight: 900,
                 cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
               {tr.view}
@@ -1077,11 +1143,12 @@ export default function RealMap({
                 border: '3px solid #111111',
                 background: '#69b8eb',
                 color: '#ffffff',
-                borderRadius: 24,
-                padding: '16px 10px',
-                fontSize: 15,
+                borderRadius: 22,
+                padding: '14px 8px',
+                fontSize: 14,
                 fontWeight: 900,
                 cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
               {tr.route}
@@ -1098,11 +1165,12 @@ export default function RealMap({
                 border: '3px solid #111111',
                 background: '#45c63d',
                 color: '#ffffff',
-                borderRadius: 24,
-                padding: '16px 10px',
-                fontSize: 15,
+                borderRadius: 22,
+                padding: '14px 8px',
+                fontSize: 14,
                 fontWeight: 900,
                 cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
               {tr.bookNow}
