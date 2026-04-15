@@ -42,6 +42,8 @@ type ProfileTextShape = {
   legal: string;
   help: string;
   open: string;
+  walletReady: string;
+  profileOverview: string;
 };
 
 const profileTexts: Record<string, ProfileTextShape> = {
@@ -68,6 +70,8 @@ const profileTexts: Record<string, ProfileTextShape> = {
     legal: 'Legal information',
     help: 'Help Centre',
     open: 'Open',
+    walletReady: 'Wallet ready',
+    profileOverview: 'Profile overview',
   },
   ES: {
     title: 'Perfil',
@@ -92,6 +96,8 @@ const profileTexts: Record<string, ProfileTextShape> = {
     legal: 'Información legal',
     help: 'Centro de ayuda',
     open: 'Abrir',
+    walletReady: 'Billetera lista',
+    profileOverview: 'Resumen del perfil',
   },
   RU: {
     title: 'Профиль',
@@ -116,6 +122,8 @@ const profileTexts: Record<string, ProfileTextShape> = {
     legal: 'Юридическая информация',
     help: 'Центр помощи',
     open: 'Открыть',
+    walletReady: 'Кошелёк готов',
+    profileOverview: 'Обзор профиля',
   },
   CZ: {
     title: 'Profil',
@@ -140,6 +148,8 @@ const profileTexts: Record<string, ProfileTextShape> = {
     legal: 'Právní informace',
     help: 'Centrum pomoci',
     open: 'Otevřít',
+    walletReady: 'Peněženka připravena',
+    profileOverview: 'Přehled profilu',
   },
   DE: {
     title: 'Profil',
@@ -164,6 +174,8 @@ const profileTexts: Record<string, ProfileTextShape> = {
     legal: 'Rechtliche Informationen',
     help: 'Hilfezentrum',
     open: 'Öffnen',
+    walletReady: 'Wallet bereit',
+    profileOverview: 'Profilübersicht',
   },
   PL: {
     title: 'Profil',
@@ -188,6 +200,8 @@ const profileTexts: Record<string, ProfileTextShape> = {
     legal: 'Informacje prawne',
     help: 'Centrum pomocy',
     open: 'Otwórz',
+    walletReady: 'Portfel gotowy',
+    profileOverview: 'Przegląd profilu',
   },
   UA: {
     title: 'Профіль',
@@ -212,6 +226,8 @@ const profileTexts: Record<string, ProfileTextShape> = {
     legal: 'Юридична інформація',
     help: 'Центр допомоги',
     open: 'Відкрити',
+    walletReady: 'Гаманець готовий',
+    profileOverview: 'Огляд профілю',
   },
   IT: {
     title: 'Profilo',
@@ -236,6 +252,8 @@ const profileTexts: Record<string, ProfileTextShape> = {
     legal: 'Informazioni legali',
     help: 'Centro assistenza',
     open: 'Apri',
+    walletReady: 'Wallet pronto',
+    profileOverview: 'Panoramica profilo',
   },
   FR: {
     title: 'Profil',
@@ -260,6 +278,8 @@ const profileTexts: Record<string, ProfileTextShape> = {
     legal: 'Informations légales',
     help: 'Centre d’aide',
     open: 'Ouvrir',
+    walletReady: 'Portefeuille prêt',
+    profileOverview: 'Vue du profil',
   },
   AR: {
     title: 'الملف الشخصي',
@@ -284,6 +304,8 @@ const profileTexts: Record<string, ProfileTextShape> = {
     legal: 'معلومات قانونية',
     help: 'مركز المساعدة',
     open: 'فتح',
+    walletReady: 'المحفظة جاهزة',
+    profileOverview: 'نظرة عامة',
   },
 };
 
@@ -301,12 +323,12 @@ function getText(language: AppLanguage): ProfileTextShape {
 }
 
 function accentStyles(accent: ProfileCard['accent']) {
-  if (accent === 'pink') return { background: '#fff1f7', color: '#ff4fa0', border: '#111111' };
-  if (accent === 'green') return { background: '#dff2e3', color: '#1d7a38', border: '#111111' };
-  if (accent === 'blue') return { background: '#e6efff', color: '#2559b7', border: '#111111' };
-  if (accent === 'violet') return { background: '#f3efff', color: '#7a5af8', border: '#111111' };
-  if (accent === 'orange') return { background: '#fff0da', color: '#c07a00', border: '#111111' };
-  return { background: '#f4efe8', color: '#6d6258', border: '#111111' };
+  if (accent === 'pink') return { background: '#fff0f6', color: '#ff4fa0' };
+  if (accent === 'green') return { background: '#ecfdf3', color: '#15803d' };
+  if (accent === 'blue') return { background: '#eef4ff', color: '#2563eb' };
+  if (accent === 'violet') return { background: '#f3efff', color: '#7a5af8' };
+  if (accent === 'orange') return { background: '#fff4db', color: '#b7791f' };
+  return { background: '#f3f4f6', color: '#4b5563' };
 }
 
 export default function ProfilePage() {
@@ -446,9 +468,10 @@ export default function ProfilePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f4ee',
+        background: '#ffffff',
         color: '#17130f',
         paddingBottom: 110,
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto', padding: '20px 16px 110px' }}>
@@ -516,120 +539,151 @@ export default function ProfilePage() {
           >
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: '84px 1fr',
-                gap: 14,
-                alignItems: 'center',
+                borderRadius: 24,
+                border: '2px solid #111111',
+                background: '#2f241c',
+                color: '#fff',
+                padding: 18,
               }}
             >
-              <img
-                src={profile.avatar}
-                alt={profile.fullName}
+              <div
                 style={{
-                  width: 84,
-                  height: 84,
-                  borderRadius: 24,
-                  objectFit: 'cover',
-                  display: 'block',
-                  border: '2px solid #111111',
+                  display: 'grid',
+                  gridTemplateColumns: '84px 1fr',
+                  gap: 14,
+                  alignItems: 'center',
                 }}
-              />
-
-              <div style={{ minWidth: 0 }}>
-                <div
+              >
+                <img
+                  src={profile.avatar}
+                  alt={profile.fullName}
                   style={{
-                    fontSize: 22,
-                    fontWeight: 900,
-                    color: '#17130f',
-                    lineHeight: 1.1,
-                    wordBreak: 'break-word',
+                    width: 84,
+                    height: 84,
+                    borderRadius: 24,
+                    objectFit: 'cover',
+                    display: 'block',
+                    border: '2px solid #111111',
+                    background: '#fff',
                   }}
-                >
-                  {profile.fullName}
-                </div>
+                />
 
-                <div
-                  style={{
-                    marginTop: 6,
-                    fontSize: 14,
-                    color: '#7b7268',
-                    fontWeight: 700,
-                    wordBreak: 'break-word',
-                  }}
-                >
-                  {profile.email}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 10,
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 8,
-                  }}
-                >
-                  <span
+                <div style={{ minWidth: 0 }}>
+                  <div
                     style={{
-                      borderRadius: 999,
-                      padding: '8px 12px',
-                      border: '2px solid #111111',
-                      background: '#dff2e3',
-                      color: '#1d7a38',
-                      fontSize: 12,
+                      fontSize: 22,
                       fontWeight: 900,
+                      color: '#fff',
+                      lineHeight: 1.1,
+                      wordBreak: 'break-word',
                     }}
                   >
-                    {text.active}
-                  </span>
+                    {profile.fullName}
+                  </div>
 
-                  {profile.isVerified ? (
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 14,
+                      color: '#ddd2c6',
+                      fontWeight: 700,
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {profile.email}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 10,
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 8,
+                    }}
+                  >
                     <span
                       style={{
                         borderRadius: 999,
                         padding: '8px 12px',
                         border: '2px solid #111111',
-                        background: '#e6efff',
-                        color: '#2559b7',
+                        background: '#ecfdf3',
+                        color: '#15803d',
                         fontSize: 12,
                         fontWeight: 900,
                       }}
                     >
-                      {text.verified}
+                      {text.active}
                     </span>
-                  ) : null}
+
+                    {profile.isVerified ? (
+                      <span
+                        style={{
+                          borderRadius: 999,
+                          padding: '8px 12px',
+                          border: '2px solid #111111',
+                          background: '#eef4ff',
+                          color: '#2563eb',
+                          fontSize: 12,
+                          fontWeight: 900,
+                        }}
+                      >
+                        {text.verified}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 16,
-                borderRadius: 24,
-                border: '2px solid #111111',
-                background: 'linear-gradient(180deg, #2f241c 0%, #1f1712 100%)',
-                padding: 16,
-                color: '#fff',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  color: '#d9cdbd',
-                  fontWeight: 800,
-                }}
-              >
-                {text.balanceAvailable}
-              </div>
 
               <div
                 style={{
-                  marginTop: 8,
-                  fontSize: 32,
-                  fontWeight: 900,
-                  lineHeight: 1,
+                  marginTop: 16,
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  gap: 12,
+                  alignItems: 'end',
                 }}
               >
-                £{wallet.availableBalance.toFixed(2)}
+                <div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: '#d9cdbd',
+                      fontWeight: 800,
+                    }}
+                  >
+                    {text.balanceAvailable}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 8,
+                      fontSize: 32,
+                      fontWeight: 900,
+                      lineHeight: 1,
+                      color: '#fff',
+                    }}
+                  >
+                    £{wallet.availableBalance.toFixed(2)}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    minHeight: 38,
+                    padding: '0 12px',
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#17130f',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    fontSize: 12,
+                    fontWeight: 900,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  ⚡ {text.walletReady}
+                </div>
               </div>
             </div>
           </div>
@@ -677,7 +731,7 @@ export default function ProfilePage() {
                       width: 50,
                       height: 50,
                       borderRadius: 18,
-                      border: `2px solid ${accent.border}`,
+                      border: '2px solid #111111',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -767,7 +821,7 @@ export default function ProfilePage() {
                       width: 46,
                       height: 46,
                       borderRadius: 16,
-                      border: `2px solid ${accent.border}`,
+                      border: '2px solid #111111',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -792,7 +846,7 @@ export default function ProfilePage() {
                   <span
                     style={{
                       fontSize: 16,
-                      color: '#938475',
+                      color: '#17130f',
                       fontWeight: 900,
                     }}
                   >
@@ -851,7 +905,7 @@ export default function ProfilePage() {
                       width: 46,
                       height: 46,
                       borderRadius: 16,
-                      border: `2px solid ${accent.border}`,
+                      border: '2px solid #111111',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -876,7 +930,7 @@ export default function ProfilePage() {
                   <span
                     style={{
                       fontSize: 16,
-                      color: '#938475',
+                      color: '#17130f',
                       fontWeight: 900,
                     }}
                   >
