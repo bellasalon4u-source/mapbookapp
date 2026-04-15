@@ -72,6 +72,24 @@ const messagesTexts = {
   },
 } as const;
 
+function getReadStatusIcon(unreadCount: number) {
+  if (unreadCount > 0) {
+    return {
+      bg: '#ef3e36',
+      color: '#ffffff',
+      text: '!',
+      border: '#111111',
+    };
+  }
+
+  return {
+    bg: 'transparent',
+    color: '#2f9e44',
+    text: '✓✓',
+    border: 'transparent',
+  };
+}
+
 export default function MessagesPage() {
   const router = useRouter();
 
@@ -157,32 +175,33 @@ export default function MessagesPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f5f3ef',
-        fontFamily: 'Arial, sans-serif',
-        color: '#1f2430',
-        paddingBottom: 104,
+        background: '#f7f4ee',
+        color: '#17130f',
+        paddingBottom: 110,
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto' }}>
-        <header style={{ padding: '18px 16px 0' }}>
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '20px 16px 110px' }}>
+        <header>
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '52px 1fr',
+              gridTemplateColumns: '54px 1fr',
               alignItems: 'center',
               gap: 12,
             }}
           >
             <button
+              type="button"
               onClick={() => router.push('/')}
               style={{
-                border: 'none',
-                background: '#fff',
-                width: 52,
-                height: 52,
+                width: 54,
+                height: 54,
                 borderRadius: 999,
-                fontSize: 24,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                border: '2px solid #111111',
+                background: '#ffffff',
+                fontSize: 26,
+                fontWeight: 900,
+                color: '#17130f',
                 cursor: 'pointer',
               }}
             >
@@ -192,20 +211,21 @@ export default function MessagesPage() {
             <div>
               <div
                 style={{
-                  fontSize: 22,
-                  fontWeight: 800,
-                  color: '#253140',
-                  lineHeight: 1.2,
+                  fontSize: 24,
+                  fontWeight: 900,
+                  color: '#1b2537',
+                  lineHeight: 1.1,
                 }}
               >
                 {text.title}
               </div>
+
               <div
                 style={{
-                  marginTop: 4,
+                  marginTop: 6,
                   fontSize: 14,
-                  color: '#7a8490',
-                  fontWeight: 700,
+                  color: '#6f7782',
+                  fontWeight: 800,
                 }}
               >
                 {unreadText}
@@ -215,18 +235,25 @@ export default function MessagesPage() {
 
           <div
             style={{
-              marginTop: 16,
-              background: '#fff',
-              borderRadius: 18,
-              border: '1px solid #ece7df',
-              boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
-              padding: '14px 16px',
+              marginTop: 18,
               display: 'flex',
               alignItems: 'center',
               gap: 12,
+              background: '#ffffff',
+              border: '2px solid #111111',
+              borderRadius: 22,
+              padding: '14px 16px',
             }}
           >
-            <span style={{ fontSize: 20, color: '#98a2ad' }}>🔎</span>
+            <span
+              style={{
+                fontSize: 24,
+                lineHeight: 1,
+              }}
+            >
+              🔎
+            </span>
+
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -237,184 +264,202 @@ export default function MessagesPage() {
                 outline: 'none',
                 background: 'transparent',
                 fontSize: 16,
-                color: '#2b3138',
+                color: '#2c3440',
               }}
             />
           </div>
         </header>
 
-        <section style={{ padding: '16px 16px 0' }}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 14,
-            }}
-          >
-            {filteredThreads.length === 0 ? (
+        <section style={{ marginTop: 18 }}>
+          {filteredThreads.length === 0 ? (
+            <div
+              style={{
+                background: '#ffffff',
+                border: '2px solid #111111',
+                borderRadius: 28,
+                padding: 24,
+                textAlign: 'center',
+              }}
+            >
               <div
                 style={{
-                  background: '#fff',
-                  border: '1px solid #ece4d9',
-                  borderRadius: 24,
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
-                  padding: 24,
-                  textAlign: 'center',
+                  fontSize: 20,
+                  fontWeight: 900,
+                  color: '#1b2537',
+                  marginBottom: 10,
                 }}
               >
-                <div
-                  style={{
-                    fontSize: 20,
-                    fontWeight: 800,
-                    color: '#253140',
-                    marginBottom: 8,
-                  }}
-                >
-                  {text.noChats}
-                </div>
-                <div
-                  style={{
-                    fontSize: 15,
-                    color: '#6d7784',
-                    lineHeight: 1.45,
-                    fontWeight: 600,
-                  }}
-                >
-                  {text.noChatsHint}
-                </div>
+                {text.noChats}
               </div>
-            ) : null}
 
-            {filteredThreads.map((thread) => {
-              const lastMessage = thread.messages[thread.messages.length - 1];
+              <div
+                style={{
+                  fontSize: 15,
+                  lineHeight: 1.45,
+                  color: '#6d7682',
+                  fontWeight: 700,
+                }}
+              >
+                {text.noChatsHint}
+              </div>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 14,
+              }}
+            >
+              {filteredThreads.map((thread) => {
+                const lastMessage = thread.messages[thread.messages.length - 1];
+                const statusIcon = getReadStatusIcon(thread.unreadCount);
 
-              return (
-                <button
-                  key={thread.id}
-                  onClick={() => router.push(`/messages/${thread.id}`)}
-                  style={{
-                    border: '1px solid #ece4d9',
-                    background: '#fff',
-                    borderRadius: 24,
-                    boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
-                    padding: 16,
-                    display: 'grid',
-                    gridTemplateColumns: '74px 1fr auto',
-                    gap: 14,
-                    alignItems: 'start',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <div style={{ position: 'relative' }}>
-                    <img
-                      src={thread.providerAvatar}
-                      alt={thread.providerName}
-                      style={{
-                        width: 74,
-                        height: 74,
-                        borderRadius: 18,
-                        objectFit: 'cover',
-                        display: 'block',
-                      }}
-                    />
-                    {thread.online && (
-                      <span
-                        style={{
-                          position: 'absolute',
-                          right: -2,
-                          bottom: -2,
-                          width: 18,
-                          height: 18,
-                          borderRadius: 999,
-                          background: '#2fbb52',
-                          border: '3px solid #fff',
-                        }}
-                      />
-                    )}
-                  </div>
-
-                  <div style={{ minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 18,
-                        fontWeight: 800,
-                        color: '#253140',
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {thread.providerName}
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: 6,
-                        fontSize: 15,
-                        color: '#5d6875',
-                        lineHeight: 1.45,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2 as any,
-                        WebkitBoxOrient: 'vertical' as any,
-                        overflow: 'hidden',
-                      }}
-                    >
-                      {lastMessage?.text}
-                    </div>
-                  </div>
-
-                  <div
+                return (
+                  <button
+                    key={thread.id}
+                    type="button"
+                    onClick={() => router.push(`/messages/${thread.id}`)}
                     style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-end',
-                      gap: 10,
+                      width: '100%',
+                      border: '2px solid #111111',
+                      background: '#ffffff',
+                      borderRadius: 28,
+                      padding: 16,
+                      display: 'grid',
+                      gridTemplateColumns: '82px 1fr auto',
+                      gap: 14,
+                      alignItems: 'center',
+                      textAlign: 'left',
+                      cursor: 'pointer',
                     }}
                   >
-                    <div
-                      style={{
-                        fontSize: 14,
-                        color: '#7d8792',
-                        fontWeight: 700,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {lastMessage
-                        ? new Date(lastMessage.sentAt).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
-                        : ''}
+                    <div style={{ position: 'relative' }}>
+                      <img
+                        src={thread.providerAvatar}
+                        alt={thread.providerName}
+                        style={{
+                          width: 82,
+                          height: 82,
+                          borderRadius: 22,
+                          objectFit: 'cover',
+                          display: 'block',
+                          border: '2px solid #111111',
+                        }}
+                      />
+
+                      {thread.online ? (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            right: -2,
+                            bottom: -2,
+                            width: 22,
+                            height: 22,
+                            borderRadius: 999,
+                            background: '#31b84d',
+                            border: '3px solid #ffffff',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      ) : null}
                     </div>
 
-                    {thread.unreadCount > 0 && (
+                    <div style={{ minWidth: 0 }}>
                       <div
                         style={{
-                          minWidth: 30,
-                          height: 30,
-                          borderRadius: 999,
-                          background: '#e53935',
-                          color: '#fff',
-                          fontSize: 15,
-                          fontWeight: 800,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: '0 8px',
-                          boxShadow: '0 6px 14px rgba(229,57,53,0.24)',
+                          fontSize: 18,
+                          fontWeight: 900,
+                          color: '#1b2537',
+                          lineHeight: 1.2,
                         }}
                       >
-                        {thread.unreadCount > 9 ? '9+' : thread.unreadCount}
+                        {thread.providerName}
                       </div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+
+                      <div
+                        style={{
+                          marginTop: 8,
+                          fontSize: 15,
+                          color: '#5e6875',
+                          lineHeight: 1.45,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {lastMessage?.text || ''}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        justifyContent: 'space-between',
+                        alignSelf: 'stretch',
+                        minWidth: 52,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 14,
+                          color: '#6f7782',
+                          fontWeight: 800,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {lastMessage
+                          ? new Date(lastMessage.sentAt).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })
+                          : ''}
+                      </div>
+
+                      {thread.unreadCount > 0 ? (
+                        <div
+                          style={{
+                            width: 38,
+                            height: 38,
+                            borderRadius: 999,
+                            background: statusIcon.bg,
+                            border: `2px solid ${statusIcon.border}`,
+                            color: statusIcon.color,
+                            fontSize: 24,
+                            fontWeight: 900,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            lineHeight: 1,
+                          }}
+                        >
+                          {statusIcon.text}
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            color: statusIcon.color,
+                            fontSize: 26,
+                            fontWeight: 900,
+                            lineHeight: 1,
+                          }}
+                        >
+                          {statusIcon.text}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </section>
       </div>
 
-      <BottomNav />
+      <BottomNav active="messages" />
     </main>
   );
 }
