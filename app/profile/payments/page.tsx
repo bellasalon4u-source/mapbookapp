@@ -248,20 +248,19 @@ const paymentTexts = {
 } as const;
 
 function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange' | 'neutral') {
-  if (kind === 'green') return { background: '#eef9f1', color: '#2fa35a' };
-  if (kind === 'blue') return { background: '#eef4ff', color: '#2f7cf6' };
-  if (kind === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
-  if (kind === 'orange') return { background: '#fff5e8', color: '#d68612' };
+  if (kind === 'green') return { background: '#edf9ef', color: '#2fa35a' };
+  if (kind === 'blue') return { background: '#edf4ff', color: '#2f7cf6' };
+  if (kind === 'pink') return { background: '#fff0f6', color: '#ff4fa0' };
+  if (kind === 'orange') return { background: '#fff4e7', color: '#d68612' };
   return { background: '#f4efe8', color: '#6d6258' };
 }
 
 function sectionCardStyle(): React.CSSProperties {
   return {
-    borderRadius: 30,
-    border: '1px solid #efe4d7',
+    borderRadius: 32,
+    border: '2px solid #111111',
     background: '#fff',
     padding: 18,
-    boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
   };
 }
 
@@ -309,7 +308,7 @@ export default function PaymentsPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
+        background: '#f7f4ee',
         padding: '20px 16px 110px',
       }}
     >
@@ -329,10 +328,10 @@ export default function PaymentsPage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
               fontSize: 26,
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              fontWeight: 900,
               cursor: 'pointer',
             }}
           >
@@ -359,11 +358,10 @@ export default function PaymentsPage() {
         <div
           style={{
             marginTop: 18,
-            borderRadius: 32,
-            border: '1px solid #f0e3d7',
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff9f5 100%)',
+            borderRadius: 34,
+            border: '2px solid #111111',
+            background: '#ffffff',
             padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           <div
@@ -392,10 +390,11 @@ export default function PaymentsPage() {
             <div
               style={{
                 minWidth: 82,
-                borderRadius: 20,
-                background: '#fff1f7',
+                borderRadius: 22,
+                border: '2px solid #111111',
+                background: '#fff0f6',
                 color: '#ff4fa0',
-                padding: '14px 12px',
+                padding: '12px 12px 10px',
                 textAlign: 'center',
               }}
             >
@@ -416,6 +415,7 @@ export default function PaymentsPage() {
               style={{
                 ...badgeStyle('green'),
                 borderRadius: 999,
+                border: '2px solid #111111',
                 padding: '10px 12px',
                 fontSize: 12,
                 fontWeight: 900,
@@ -427,6 +427,7 @@ export default function PaymentsPage() {
               style={{
                 ...badgeStyle('blue'),
                 borderRadius: 999,
+                border: '2px solid #111111',
                 padding: '10px 12px',
                 fontSize: 12,
                 fontWeight: 900,
@@ -438,6 +439,7 @@ export default function PaymentsPage() {
               style={{
                 ...badgeStyle('orange'),
                 borderRadius: 999,
+                border: '2px solid #111111',
                 padding: '10px 12px',
                 fontSize: 12,
                 fontWeight: 900,
@@ -460,9 +462,9 @@ export default function PaymentsPage() {
               style={{
                 height: 52,
                 borderRadius: 18,
-                border: '1px solid #f1d9e6',
-                background: '#fff1f7',
-                color: '#ff4fa0',
+                border: '2px solid #111111',
+                background: '#45c63d',
+                color: '#fff',
                 fontSize: 14,
                 fontWeight: 900,
                 cursor: 'pointer',
@@ -476,7 +478,7 @@ export default function PaymentsPage() {
               style={{
                 height: 52,
                 borderRadius: 18,
-                border: '1px solid #efe4d7',
+                border: '2px solid #111111',
                 background: '#fff',
                 color: '#17130f',
                 fontSize: 14,
@@ -516,9 +518,9 @@ export default function PaymentsPage() {
             <button
               type="button"
               style={{
-                border: 'none',
+                border: '2px solid #111111',
                 borderRadius: 18,
-                background: '#fff1f7',
+                background: '#fff0f6',
                 color: '#ff4fa0',
                 minHeight: 48,
                 padding: '0 16px',
@@ -536,18 +538,14 @@ export default function PaymentsPage() {
               <div
                 key={card.id}
                 style={{
-                  borderRadius: 26,
+                  borderRadius: 28,
                   background:
                     index === 0
                       ? 'linear-gradient(180deg, #2f241c 0%, #1f1712 100%)'
                       : '#fff',
                   color: index === 0 ? '#fff' : '#17130f',
-                  border: index === 0 ? 'none' : '1px solid #efe4d7',
+                  border: index === 0 ? '2px solid #111111' : '2px solid #111111',
                   padding: 16,
-                  boxShadow:
-                    index === 0
-                      ? '0 14px 28px rgba(31,23,18,0.18)'
-                      : '0 8px 22px rgba(44,23,10,0.04)',
                 }}
               >
                 <div
@@ -563,7 +561,7 @@ export default function PaymentsPage() {
                       style={{
                         fontSize: 15,
                         fontWeight: 900,
-                        opacity: index === 0 ? 0.86 : 1,
+                        opacity: index === 0 ? 0.9 : 1,
                       }}
                     >
                       {card.brand}
@@ -596,6 +594,7 @@ export default function PaymentsPage() {
                         style={{
                           ...badgeStyle(index === 0 ? 'green' : 'pink'),
                           borderRadius: 999,
+                          border: '2px solid #111111',
                           padding: '8px 12px',
                           fontSize: 12,
                           fontWeight: 900,
@@ -611,6 +610,7 @@ export default function PaymentsPage() {
                       style={{
                         ...badgeStyle(index === 0 ? 'blue' : 'green'),
                         borderRadius: 999,
+                        border: '2px solid #111111',
                         padding: '8px 12px',
                         fontSize: 12,
                         fontWeight: 900,
@@ -636,10 +636,7 @@ export default function PaymentsPage() {
                     style={{
                       height: 46,
                       borderRadius: 16,
-                      border:
-                        index === 0
-                          ? '1px solid rgba(255,255,255,0.12)'
-                          : '1px solid #efe4d7',
+                      border: '2px solid #111111',
                       background: index === 0 ? 'rgba(255,255,255,0.08)' : '#fcfaf6',
                       color: index === 0 ? '#fff' : '#17130f',
                       fontSize: 13,
@@ -655,10 +652,7 @@ export default function PaymentsPage() {
                     style={{
                       height: 46,
                       borderRadius: 16,
-                      border:
-                        index === 0
-                          ? '1px solid rgba(255,255,255,0.12)'
-                          : '1px solid #efe4d7',
+                      border: '2px solid #111111',
                       background: index === 0 ? 'rgba(255,255,255,0.08)' : '#fcfaf6',
                       color: index === 0 ? '#fff' : '#17130f',
                       fontSize: 13,
@@ -674,10 +668,7 @@ export default function PaymentsPage() {
                     style={{
                       height: 46,
                       borderRadius: 16,
-                      border:
-                        index === 0
-                          ? '1px solid rgba(255,255,255,0.12)'
-                          : '1px solid #f2d6d6',
+                      border: '2px solid #111111',
                       background: index === 0 ? 'rgba(255,255,255,0.08)' : '#fff5f5',
                       color: index === 0 ? '#fff' : '#ef4444',
                       fontSize: 13,
@@ -695,8 +686,9 @@ export default function PaymentsPage() {
           <div
             style={{
               marginTop: 14,
-              borderRadius: 20,
-              background: '#eef9f1',
+              borderRadius: 22,
+              border: '2px solid #111111',
+              background: '#edf9ef',
               padding: '14px 16px',
               fontSize: 14,
               color: '#2f6f46',
@@ -727,7 +719,7 @@ export default function PaymentsPage() {
                 marginTop: 14,
                 borderRadius: 24,
                 background: '#fcfaf6',
-                border: '1px solid #efe4d7',
+                border: '2px solid #111111',
                 padding: 16,
               }}
             >
@@ -759,6 +751,7 @@ export default function PaymentsPage() {
                   style={{
                     ...badgeStyle('blue'),
                     borderRadius: 999,
+                    border: '2px solid #111111',
                     padding: '8px 12px',
                     fontSize: 12,
                     fontWeight: 900,
@@ -782,7 +775,7 @@ export default function PaymentsPage() {
                   style={{
                     height: 48,
                     borderRadius: 16,
-                    border: '1px solid #efe4d7',
+                    border: '2px solid #111111',
                     background: '#fff',
                     color: '#17130f',
                     fontSize: 14,
@@ -798,7 +791,7 @@ export default function PaymentsPage() {
                   style={{
                     height: 48,
                     borderRadius: 16,
-                    border: '1px solid #efe4d7',
+                    border: '2px solid #111111',
                     background: '#fff',
                     color: '#17130f',
                     fontSize: 14,
@@ -829,6 +822,7 @@ export default function PaymentsPage() {
                 style={{
                   ...badgeStyle('green'),
                   borderRadius: 999,
+                  border: '2px solid #111111',
                   padding: '8px 12px',
                   fontSize: 12,
                   fontWeight: 900,
@@ -858,7 +852,7 @@ export default function PaymentsPage() {
                   key={item.name}
                   style={{
                     borderRadius: 22,
-                    border: '1px solid #efe4d7',
+                    border: '2px solid #111111',
                     background: '#fcfaf6',
                     padding: 14,
                     display: 'flex',
@@ -887,6 +881,7 @@ export default function PaymentsPage() {
                     style={{
                       ...badgeStyle(item.enabled ? item.accent : 'neutral'),
                       borderRadius: 999,
+                      border: '2px solid #111111',
                       padding: '8px 12px',
                       fontSize: 12,
                       fontWeight: 900,
@@ -920,7 +915,7 @@ export default function PaymentsPage() {
                   key={wallet.id}
                   style={{
                     borderRadius: 22,
-                    border: '1px solid #efe4d7',
+                    border: '2px solid #111111',
                     background: '#fcfaf6',
                     padding: 14,
                   }}
@@ -955,6 +950,7 @@ export default function PaymentsPage() {
                         style={{
                           ...badgeStyle('pink'),
                           borderRadius: 999,
+                          border: '2px solid #111111',
                           padding: '8px 12px',
                           fontSize: 12,
                           fontWeight: 900,
@@ -979,7 +975,7 @@ export default function PaymentsPage() {
                         flex: 1,
                         height: 46,
                         borderRadius: 16,
-                        border: '1px solid #efe4d7',
+                        border: '2px solid #111111',
                         background: '#fff',
                         color: '#17130f',
                         fontSize: 13,
@@ -996,7 +992,7 @@ export default function PaymentsPage() {
                         flex: 1,
                         height: 46,
                         borderRadius: 16,
-                        border: '1px solid #f2d6d6',
+                        border: '2px solid #111111',
                         background: '#fff5f5',
                         color: '#ef4444',
                         fontSize: 13,
@@ -1015,7 +1011,8 @@ export default function PaymentsPage() {
               style={{
                 marginTop: 12,
                 borderRadius: 18,
-                background: '#eef4ff',
+                border: '2px solid #111111',
+                background: '#edf4ff',
                 padding: '12px 14px',
                 fontSize: 13,
                 color: '#2f5dc4',
@@ -1054,6 +1051,7 @@ export default function PaymentsPage() {
                 style={{
                   ...badgeStyle(payments.bankTransferEnabled ? 'green' : 'neutral'),
                   borderRadius: 999,
+                  border: '2px solid #111111',
                   padding: '8px 12px',
                   fontSize: 12,
                   fontWeight: 900,
@@ -1069,7 +1067,7 @@ export default function PaymentsPage() {
                 marginTop: 14,
                 borderRadius: 22,
                 background: '#fcfaf6',
-                border: '1px solid #efe4d7',
+                border: '2px solid #111111',
                 padding: 14,
               }}
             >
