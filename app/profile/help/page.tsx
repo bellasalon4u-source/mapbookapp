@@ -206,6 +206,13 @@ function getQuestionAccent(index: number) {
   return accents[index % accents.length];
 }
 
+const shellCardStyle: React.CSSProperties = {
+  borderRadius: 32,
+  background: '#ffffff',
+  border: '2px solid #111111',
+  padding: 18,
+};
+
 export default function HelpPage() {
   const router = useRouter();
 
@@ -248,7 +255,7 @@ export default function HelpPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
+        background: '#f7f4ee',
         padding: '20px 16px 110px',
       }}
     >
@@ -268,10 +275,11 @@ export default function HelpPage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
-              background: '#fff',
+              border: '2px solid #111111',
+              background: '#ffffff',
               fontSize: 26,
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              fontWeight: 900,
+              color: '#17130f',
               cursor: 'pointer',
             }}
           >
@@ -305,12 +313,8 @@ export default function HelpPage() {
 
         <div
           style={{
+            ...shellCardStyle,
             marginTop: 18,
-            borderRadius: 32,
-            border: '1px solid #f0e3d7',
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           <div
@@ -326,13 +330,14 @@ export default function HelpPage() {
               style={{
                 width: 56,
                 height: 56,
-                borderRadius: 20,
+                borderRadius: 18,
                 background: '#fff1f7',
                 color: '#ff4fa0',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 26,
+                border: '2px solid #111111',
               }}
             >
               💬
@@ -366,50 +371,40 @@ export default function HelpPage() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 10,
-              marginBottom: 14,
+              gap: 12,
+              background: '#ffffff',
+              border: '2px solid #111111',
+              borderRadius: 22,
+              padding: '14px 16px',
             }}
           >
-            <div
+            <span
               style={{
-                width: 48,
-                height: 48,
-                borderRadius: 18,
-                background: '#fff1f7',
-                color: '#ff4fa0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 22,
-                flexShrink: 0,
+                fontSize: 24,
+                lineHeight: 1,
               }}
             >
               🔎
-            </div>
+            </span>
 
-            <div style={{ flex: 1 }}>
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={text.searchPlaceholder}
-                style={{
-                  width: '100%',
-                  height: 56,
-                  borderRadius: 20,
-                  border: '1px solid #efe4d7',
-                  background: '#fff',
-                  padding: '0 16px',
-                  fontSize: 15,
-                  color: '#17130f',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={text.searchPlaceholder}
+              style={{
+                flex: 1,
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                fontSize: 16,
+                color: '#2c3440',
+              }}
+            />
           </div>
 
           <div
             style={{
+              marginTop: 14,
               display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
@@ -419,6 +414,7 @@ export default function HelpPage() {
               color: '#2fa35a',
               fontSize: 12,
               fontWeight: 900,
+              border: '2px solid #111111',
             }}
           >
             <span>🛡️</span>
@@ -428,12 +424,8 @@ export default function HelpPage() {
 
         <div
           style={{
+            ...shellCardStyle,
             marginTop: 18,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 16,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           <div
@@ -464,6 +456,7 @@ export default function HelpPage() {
                 fontSize: 12,
                 fontWeight: 900,
                 whiteSpace: 'nowrap',
+                border: '2px solid #111111',
               }}
             >
               {text.found}: {filteredQuestions.length} {text.results}
@@ -475,7 +468,7 @@ export default function HelpPage() {
               style={{
                 borderRadius: 24,
                 background: '#fcfaf6',
-                border: '1px solid #f1e8dc',
+                border: '2px solid #111111',
                 padding: 22,
                 textAlign: 'center',
               }}
@@ -492,6 +485,7 @@ export default function HelpPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: 24,
+                  border: '2px solid #111111',
                 }}
               >
                 ?
@@ -534,9 +528,9 @@ export default function HelpPage() {
                       gridTemplateColumns: '44px 1fr auto',
                       gap: 14,
                       alignItems: 'center',
-                      border: '1px solid #f1e8dc',
+                      border: '2px solid #111111',
                       borderRadius: 24,
-                      background: '#fff',
+                      background: '#ffffff',
                       padding: '14px 16px',
                       textAlign: 'left',
                       cursor: 'pointer',
@@ -553,6 +547,7 @@ export default function HelpPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: 20,
+                        border: '2px solid #111111',
                       }}
                     >
                       {accent.icon}
@@ -571,8 +566,8 @@ export default function HelpPage() {
 
                     <span
                       style={{
-                        fontSize: 18,
-                        color: '#938475',
+                        fontSize: 20,
+                        color: '#17130f',
                         fontWeight: 900,
                       }}
                     >
@@ -595,12 +590,8 @@ export default function HelpPage() {
           <button
             type="button"
             style={{
-              border: '1px solid #efe4d7',
-              borderRadius: 30,
-              background: '#fff',
-              padding: 18,
+              ...shellCardStyle,
               textAlign: 'left',
-              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
               cursor: 'pointer',
             }}
           >
@@ -623,6 +614,7 @@ export default function HelpPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: 22,
+                  border: '2px solid #111111',
                 }}
               >
                 ✉️
@@ -654,7 +646,7 @@ export default function HelpPage() {
               <span
                 style={{
                   fontSize: 18,
-                  color: '#938475',
+                  color: '#17130f',
                   fontWeight: 900,
                 }}
               >
@@ -666,12 +658,8 @@ export default function HelpPage() {
           <button
             type="button"
             style={{
-              border: '1px solid #efe4d7',
-              borderRadius: 30,
-              background: '#fff',
-              padding: 18,
+              ...shellCardStyle,
               textAlign: 'left',
-              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
               cursor: 'pointer',
             }}
           >
@@ -694,6 +682,7 @@ export default function HelpPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: 22,
+                  border: '2px solid #111111',
                 }}
               >
                 📚
@@ -725,7 +714,7 @@ export default function HelpPage() {
               <span
                 style={{
                   fontSize: 18,
-                  color: '#938475',
+                  color: '#17130f',
                   fontWeight: 900,
                 }}
               >
@@ -736,11 +725,8 @@ export default function HelpPage() {
 
           <div
             style={{
-              border: '1px solid #dcefdc',
-              borderRadius: 30,
-              background: 'linear-gradient(180deg, #f3fbf3 0%, #eef9f1 100%)',
-              padding: 18,
-              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.04)',
+              ...shellCardStyle,
+              background: '#eef9f1',
             }}
           >
             <div
@@ -756,12 +742,13 @@ export default function HelpPage() {
                   width: 46,
                   height: 46,
                   borderRadius: 16,
-                  background: '#e3f5e6',
+                  background: '#ffffff',
                   color: '#2fa35a',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: 22,
+                  border: '2px solid #111111',
                 }}
               >
                 ⚡
@@ -795,18 +782,18 @@ export default function HelpPage() {
               style={{
                 marginTop: 12,
                 display: 'grid',
-                gridTemplateColumns: '1fr',
                 gap: 10,
               }}
             >
               <div
                 style={{
                   borderRadius: 18,
-                  background: '#fff',
+                  background: '#ffffff',
                   padding: '12px 14px',
                   fontSize: 13,
                   color: '#2fa35a',
                   fontWeight: 900,
+                  border: '2px solid #111111',
                 }}
               >
                 {text.secure}
@@ -815,12 +802,13 @@ export default function HelpPage() {
               <div
                 style={{
                   borderRadius: 18,
-                  background: '#fff',
+                  background: '#ffffff',
                   padding: '12px 14px',
                   fontSize: 13,
                   color: '#56705e',
                   fontWeight: 700,
                   lineHeight: 1.45,
+                  border: '2px solid #111111',
                 }}
               >
                 {text.secureSub}
@@ -830,11 +818,7 @@ export default function HelpPage() {
 
           <div
             style={{
-              border: '1px solid #efe4d7',
-              borderRadius: 30,
-              background: '#fff',
-              padding: 18,
-              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+              ...shellCardStyle,
             }}
           >
             <div
@@ -856,6 +840,7 @@ export default function HelpPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: 22,
+                  border: '2px solid #111111',
                 }}
               >
                 🧭
@@ -887,7 +872,7 @@ export default function HelpPage() {
               <span
                 style={{
                   fontSize: 18,
-                  color: '#938475',
+                  color: '#17130f',
                   fontWeight: 900,
                 }}
               >
@@ -898,11 +883,7 @@ export default function HelpPage() {
 
           <div
             style={{
-              border: '1px solid #efe4d7',
-              borderRadius: 30,
-              background: '#fff',
-              padding: 18,
-              boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+              ...shellCardStyle,
             }}
           >
             <div
@@ -924,6 +905,7 @@ export default function HelpPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: 22,
+                  border: '2px solid #111111',
                 }}
               >
                 📘
@@ -955,7 +937,7 @@ export default function HelpPage() {
               <span
                 style={{
                   fontSize: 18,
-                  color: '#938475',
+                  color: '#17130f',
                   fontWeight: 900,
                 }}
               >
