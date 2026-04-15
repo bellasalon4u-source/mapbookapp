@@ -8,6 +8,7 @@ import {
   type AppLanguage,
 } from '../../../services/i18n';
 import {
+  formatChatDayLabel,
   formatChatTime,
   getChatThreadById,
   markThreadAsRead,
@@ -118,8 +119,29 @@ function getStatusMeta(message: ChatMessage) {
 
   return {
     icon: '✓',
-    color: '#e53935',
+    color: '#ef3e36',
   };
+}
+
+function groupMessagesByDay(messages: ChatMessage[]) {
+  const groups: { label: string; items: ChatMessage[] }[] = [];
+
+  messages.forEach((message) => {
+    const label = formatChatDayLabel(message.sentAt);
+    const lastGroup = groups[groups.length - 1];
+
+    if (lastGroup && lastGroup.label === label) {
+      lastGroup.items.push(message);
+      return;
+    }
+
+    groups.push({
+      label,
+      items: [message],
+    });
+  });
+
+  return groups;
 }
 
 export default function ChatPage() {
@@ -127,12 +149,11 @@ export default function ChatPage() {
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
-  const [input, setInput] = useState('');
-  const [chat, setChat] = useState<ChatThread | null>(null);
-
   const threadId = String(params.id || '');
-  const text = chatTexts[language] || chatTexts.EN;
+
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [chat, setChat] = useState<ChatThread | null>(null);
+  const [input, setInput] = useState('');
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -148,8 +169,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     const loadChat = () => {
-      const nextChat = getChatThreadById(threadId);
-      setChat(nextChat);
+      setChat(getChatThreadById(threadId));
     };
 
     loadChat();
@@ -174,6 +194,12 @@ export default function ChatPage() {
     return () => window.clearTimeout(id);
   }, [chat?.messages]);
 
+  const text = chatTexts[language] || chatTexts.EN;
+
+  const groupedMessages = useMemo(() => {
+    return groupMessagesByDay(chat?.messages || []);
+  }, [chat?.messages]);
+
   if (!chat) {
     return (
       <main
@@ -184,7 +210,6 @@ export default function ChatPage() {
           alignItems: 'center',
           justifyContent: 'center',
           padding: 24,
-          fontFamily: 'Arial, sans-serif',
           color: '#1f2430',
           fontSize: 18,
           fontWeight: 900,
@@ -208,7 +233,6 @@ export default function ChatPage() {
       style={{
         minHeight: '100vh',
         background: '#f7f4ee',
-        fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
         display: 'flex',
         flexDirection: 'column',
@@ -359,77 +383,105 @@ export default function ChatPage() {
             overflowY: 'auto',
           }}
         >
-          {chat.messages.map((message) => {
-            const statusMeta = getStatusMeta(message);
-
-            return (
+          {groupedMessages.map((group) => (
+            <div
+              key={group.label}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 12,
+              }}
+            >
               <div
-                key={message.id}
                 style={{
-                  display: 'flex',
-                  justifyContent: message.sender === 'me' ? 'flex-end' : 'flex-start',
+                  alignSelf: 'center',
+                  border: '2px solid #111111',
+                  background: '#fff4e7',
+                  color: '#17130f',
+                  borderRadius: 999,
+                  padding: '8px 14px',
+                  fontSize: 12,
+                  fontWeight: 900,
+                  lineHeight: 1,
                 }}
               >
-                <div
-                  style={{
-                    maxWidth: '82%',
-                    background: message.sender === 'me' ? '#eaf3ff' : '#ffffff',
-                    color: '#1f2430',
-                    border: '2px solid #111111',
-                    borderRadius: 24,
-                    padding: '12px 14px 10px',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 16,
-                      lineHeight: 1.45,
-                      fontWeight: 800,
-                      wordBreak: 'break-word',
-                    }}
-                  >
-                    {message.text}
-                  </div>
+                {group.label}
+              </div>
 
+              {group.items.map((message) => {
+                const statusMeta = getStatusMeta(message);
+                const fromMe = message.sender === 'me';
+
+                return (
                   <div
+                    key={message.id}
                     style={{
-                      marginTop: 8,
                       display: 'flex',
-                      justifyContent: 'flex-end',
-                      alignItems: 'center',
-                      gap: 8,
+                      justifyContent: fromMe ? 'flex-end' : 'flex-start',
                     }}
                   >
-                    {statusMeta ? (
-                      <span
-                        style={{
-                          minWidth: 18,
-                          textAlign: 'center',
-                          fontSize: 12,
-                          fontWeight: 900,
-                          color: statusMeta.color,
-                          lineHeight: 1,
-                        }}
-                      >
-                        {statusMeta.icon}
-                      </span>
-                    ) : null}
-
-                    <span
+                    <div
                       style={{
-                        fontSize: 12,
-                        color: '#7b8590',
-                        fontWeight: 900,
-                        lineHeight: 1,
+                        maxWidth: '82%',
+                        background: fromMe ? '#eaf3ff' : '#ffffff',
+                        color: '#1f2430',
+                        border: '2px solid #111111',
+                        borderRadius: 24,
+                        padding: '12px 14px 10px',
                       }}
                     >
-                      {formatChatTime(message.sentAt)}
-                    </span>
+                      <div
+                        style={{
+                          fontSize: 16,
+                          lineHeight: 1.45,
+                          fontWeight: 800,
+                          wordBreak: 'break-word',
+                        }}
+                      >
+                        {message.text}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: 8,
+                          display: 'flex',
+                          justifyContent: 'flex-end',
+                          alignItems: 'center',
+                          gap: 8,
+                        }}
+                      >
+                        {statusMeta ? (
+                          <span
+                            style={{
+                              minWidth: 18,
+                              textAlign: 'center',
+                              fontSize: 12,
+                              fontWeight: 900,
+                              color: statusMeta.color,
+                              lineHeight: 1,
+                            }}
+                          >
+                            {statusMeta.icon}
+                          </span>
+                        ) : null}
+
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: '#7b8590',
+                            fontWeight: 900,
+                            lineHeight: 1,
+                          }}
+                        >
+                          {formatChatTime(message.sentAt)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          ))}
 
           <div ref={messagesEndRef} />
         </section>
