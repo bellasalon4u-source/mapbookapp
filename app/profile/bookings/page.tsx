@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
 import {
   getBookings,
   subscribeToBookingsStore,
@@ -202,15 +206,15 @@ function formatPrice(price: number) {
 
 function getStatusStyles(status: BookingStatus) {
   if (status === 'pending') {
-    return { background: '#fff5e8', color: '#d68612' };
+    return { background: '#fff4db', color: '#b7791f' };
   }
   if (status === 'completed') {
-    return { background: '#eef9f1', color: '#2fa35a' };
+    return { background: '#ecfdf3', color: '#15803d' };
   }
   if (status === 'cancelled') {
-    return { background: '#fff1f1', color: '#ef4444' };
+    return { background: '#fff1f2', color: '#dc2626' };
   }
-  return { background: '#eef4ff', color: '#2f7cf6' };
+  return { background: '#eef4ff', color: '#2563eb' };
 }
 
 function getStatusIcon(status: BookingStatus) {
@@ -239,11 +243,16 @@ export default function ProfileBookingsPage() {
     syncLanguage();
     syncBookings();
 
-    window.addEventListener('focus', syncLanguage);
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
     const unsubBookings = subscribeToBookingsStore(syncBookings);
+
+    window.addEventListener('focus', syncLanguage);
 
     return () => {
       window.removeEventListener('focus', syncLanguage);
+      unsubLanguage();
       unsubBookings();
     };
   }, []);
@@ -278,8 +287,9 @@ export default function ProfileBookingsPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
-        padding: '20px 16px 110px',
+        background: '#ffffff',
+        padding: '20px 16px 120px',
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -298,10 +308,11 @@ export default function ProfileBookingsPage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
+              color: '#17130f',
               fontSize: 26,
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              fontWeight: 900,
               cursor: 'pointer',
             }}
           >
@@ -315,6 +326,7 @@ export default function ProfileBookingsPage() {
                 fontSize: 22,
                 fontWeight: 900,
                 color: '#17130f',
+                lineHeight: 1.1,
               }}
             >
               {text.title}
@@ -325,6 +337,7 @@ export default function ProfileBookingsPage() {
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
               {text.subtitle}
@@ -334,61 +347,58 @@ export default function ProfileBookingsPage() {
           <div />
         </div>
 
-        <div
-          style={{
-            marginTop: 18,
-            display: 'flex',
-            gap: 10,
-            overflowX: 'auto',
-            paddingBottom: 2,
-          }}
-        >
-          {([
-            { key: 'upcoming', label: text.upcoming },
-            { key: 'completed', label: text.completed },
-            { key: 'cancelled', label: text.cancelled },
-          ] as const).map((item) => {
-            const active = activeTab === item.key;
+        <section style={{ marginTop: 18 }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: 10,
+              overflowX: 'auto',
+              paddingBottom: 2,
+            }}
+          >
+            {([
+              { key: 'upcoming', label: text.upcoming },
+              { key: 'completed', label: text.completed },
+              { key: 'cancelled', label: text.cancelled },
+            ] as const).map((item) => {
+              const active = activeTab === item.key;
 
-            return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => setActiveTab(item.key)}
-                style={{
-                  border: 'none',
-                  borderRadius: 999,
-                  padding: '14px 20px',
-                  fontWeight: 900,
-                  fontSize: 15,
-                  whiteSpace: 'nowrap',
-                  background: active ? '#2f241c' : '#fff',
-                  color: active ? '#fff' : '#2b231d',
-                  boxShadow: active
-                    ? '0 10px 22px rgba(47,36,28,0.18)'
-                    : 'inset 0 0 0 1px #efe4d7',
-                  cursor: 'pointer',
-                }}
-              >
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setActiveTab(item.key)}
+                  style={{
+                    border: '2px solid #111111',
+                    borderRadius: 999,
+                    padding: '12px 18px',
+                    fontWeight: 900,
+                    fontSize: 14,
+                    whiteSpace: 'nowrap',
+                    background: active ? '#17130f' : '#fff',
+                    color: active ? '#fff' : '#17130f',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+        </section>
 
-        <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <section style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 16 }}>
           {filteredBookings.length === 0 && (
             <div
               style={{
                 borderRadius: 30,
-                border: '1px solid #efe4d7',
+                border: '2px solid #111111',
                 background: '#fff',
                 padding: 24,
                 textAlign: 'center',
                 fontSize: 15,
                 fontWeight: 700,
                 color: '#7a7065',
-                boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
               }}
             >
               {text.empty}
@@ -404,10 +414,9 @@ export default function ProfileBookingsPage() {
                 key={booking.id}
                 style={{
                   borderRadius: 30,
-                  border: '1px solid #efe4d7',
+                  border: '2px solid #111111',
                   background: '#fff',
                   padding: 16,
-                  boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
                 }}
               >
                 <div
@@ -430,6 +439,7 @@ export default function ProfileBookingsPage() {
                       borderRadius: 22,
                       objectFit: 'cover',
                       display: 'block',
+                      border: '2px solid #111111',
                     }}
                   />
 
@@ -462,6 +472,7 @@ export default function ProfileBookingsPage() {
                         fontSize: 15,
                         color: '#70665d',
                         fontWeight: 700,
+                        lineHeight: 1.4,
                       }}
                     >
                       {booking.serviceName}
@@ -491,6 +502,7 @@ export default function ProfileBookingsPage() {
                   <span
                     style={{
                       borderRadius: 999,
+                      border: '2px solid #111111',
                       padding: '8px 12px',
                       fontSize: 12,
                       fontWeight: 900,
@@ -508,11 +520,12 @@ export default function ProfileBookingsPage() {
                     <span
                       style={{
                         borderRadius: 999,
+                        border: '2px solid #111111',
                         padding: '8px 12px',
                         fontSize: 12,
                         fontWeight: 900,
                         background: '#eef4ff',
-                        color: '#2f7cf6',
+                        color: '#2563eb',
                       }}
                     >
                       {text.unlockPaid}
@@ -523,11 +536,12 @@ export default function ProfileBookingsPage() {
                     <span
                       style={{
                         borderRadius: 999,
+                        border: '2px solid #111111',
                         padding: '8px 12px',
                         fontSize: 12,
                         fontWeight: 900,
-                        background: '#fff5e8',
-                        color: '#d68612',
+                        background: '#fff4db',
+                        color: '#b7791f',
                       }}
                     >
                       {text.welcomeBonus}
@@ -538,10 +552,11 @@ export default function ProfileBookingsPage() {
                     <span
                       style={{
                         borderRadius: 999,
+                        border: '2px solid #111111',
                         padding: '8px 12px',
                         fontSize: 12,
                         fontWeight: 900,
-                        background: '#fff1f7',
+                        background: '#fff0f6',
                         color: '#ff4fa0',
                       }}
                     >
@@ -554,8 +569,8 @@ export default function ProfileBookingsPage() {
                   style={{
                     marginTop: 14,
                     borderRadius: 24,
-                    background: '#fcfaf6',
-                    border: '1px solid #f1e8dc',
+                    border: '2px solid #111111',
+                    background: '#fff',
                     padding: 14,
                   }}
                 >
@@ -582,7 +597,7 @@ export default function ProfileBookingsPage() {
                         borderRadius: 18,
                         background: '#fff',
                         padding: 12,
-                        border: '1px solid #efe4d7',
+                        border: '2px solid #111111',
                       }}
                     >
                       <div
@@ -612,7 +627,7 @@ export default function ProfileBookingsPage() {
                         borderRadius: 18,
                         background: '#fff',
                         padding: 12,
-                        border: '1px solid #efe4d7',
+                        border: '2px solid #111111',
                       }}
                     >
                       <div
@@ -641,16 +656,16 @@ export default function ProfileBookingsPage() {
                     style={{
                       marginTop: 12,
                       borderRadius: 18,
-                      background: detailsUnlocked ? '#eef9f1' : '#fff6e8',
+                      background: detailsUnlocked ? '#ecfdf3' : '#fff4db',
                       padding: 12,
-                      border: detailsUnlocked ? '1px solid #dcecdf' : '1px solid #f4e3c5',
+                      border: '2px solid #111111',
                     }}
                   >
                     <div
                       style={{
                         fontSize: 13,
                         fontWeight: 900,
-                        color: detailsUnlocked ? '#2fa35a' : '#d68612',
+                        color: detailsUnlocked ? '#15803d' : '#b7791f',
                         marginBottom: 6,
                       }}
                     >
@@ -661,7 +676,7 @@ export default function ProfileBookingsPage() {
                       style={{
                         fontSize: 13,
                         lineHeight: 1.5,
-                        color: detailsUnlocked ? '#2f6f46' : '#8d6c24',
+                        color: detailsUnlocked ? '#166534' : '#8d6c24',
                         fontWeight: 700,
                       }}
                     >
@@ -676,7 +691,7 @@ export default function ProfileBookingsPage() {
                   style={{
                     marginTop: 14,
                     borderRadius: 24,
-                    border: '1px solid #f1e8dc',
+                    border: '2px solid #111111',
                     background: '#fff',
                     padding: 14,
                   }}
@@ -703,9 +718,10 @@ export default function ProfileBookingsPage() {
                     <span
                       style={{
                         borderRadius: 999,
+                        border: '2px solid #111111',
                         padding: '8px 10px',
-                        background: detailsUnlocked ? '#eef9f1' : '#fff5e8',
-                        color: detailsUnlocked ? '#2fa35a' : '#d68612',
+                        background: detailsUnlocked ? '#ecfdf3' : '#fff4db',
+                        color: detailsUnlocked ? '#15803d' : '#b7791f',
                         fontSize: 11,
                         fontWeight: 900,
                         whiteSpace: 'nowrap',
@@ -719,9 +735,9 @@ export default function ProfileBookingsPage() {
                     <div
                       style={{
                         borderRadius: 18,
-                        background: '#fcfaf6',
+                        background: '#fff',
                         padding: 12,
-                        border: '1px solid #f1e8dc',
+                        border: '2px solid #111111',
                       }}
                     >
                       <div
@@ -748,9 +764,9 @@ export default function ProfileBookingsPage() {
                     <div
                       style={{
                         borderRadius: 18,
-                        background: '#fcfaf6',
+                        background: '#fff',
                         padding: 12,
-                        border: '1px solid #f1e8dc',
+                        border: '2px solid #111111',
                       }}
                     >
                       <div
@@ -777,9 +793,9 @@ export default function ProfileBookingsPage() {
                     <div
                       style={{
                         borderRadius: 18,
-                        background: '#fcfaf6',
+                        background: '#fff',
                         padding: 12,
-                        border: '1px solid #f1e8dc',
+                        border: '2px solid #111111',
                       }}
                     >
                       <div
@@ -819,9 +835,9 @@ export default function ProfileBookingsPage() {
                       style={{
                         height: 52,
                         borderRadius: 18,
-                        border: 'none',
+                        border: '2px solid #111111',
                         background: detailsUnlocked ? '#eef4ff' : '#f2f1ef',
-                        color: detailsUnlocked ? '#2f7cf6' : '#b0a79e',
+                        color: detailsUnlocked ? '#2563eb' : '#b0a79e',
                         fontSize: 15,
                         fontWeight: 900,
                         cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
@@ -836,9 +852,9 @@ export default function ProfileBookingsPage() {
                       style={{
                         height: 52,
                         borderRadius: 18,
-                        border: 'none',
-                        background: detailsUnlocked ? '#eef9f1' : '#f2f1ef',
-                        color: detailsUnlocked ? '#2fa35a' : '#b0a79e',
+                        border: '2px solid #111111',
+                        background: detailsUnlocked ? '#ecfdf3' : '#f2f1ef',
+                        color: detailsUnlocked ? '#15803d' : '#b0a79e',
                         fontSize: 15,
                         fontWeight: 900,
                         cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
@@ -856,16 +872,11 @@ export default function ProfileBookingsPage() {
                       width: '100%',
                       height: 54,
                       borderRadius: 20,
-                      border: 'none',
-                      background: detailsUnlocked
-                        ? 'linear-gradient(180deg, #ff62aa 0%, #ff4fa0 100%)'
-                        : '#f2f1ef',
+                      border: '2px solid #111111',
+                      background: detailsUnlocked ? '#ff4fa0' : '#f2f1ef',
                       color: detailsUnlocked ? '#fff' : '#b0a79e',
                       fontSize: 16,
                       fontWeight: 900,
-                      boxShadow: detailsUnlocked
-                        ? '0 12px 24px rgba(255,79,160,0.18)'
-                        : 'none',
                       cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
                     }}
                   >
@@ -881,12 +892,11 @@ export default function ProfileBookingsPage() {
                     width: '100%',
                     height: 56,
                     borderRadius: 22,
-                    border: 'none',
-                    background: 'linear-gradient(180deg, #2b221c 0%, #1f1712 100%)',
+                    border: '2px solid #111111',
+                    background: '#2f241c',
                     color: '#fff',
                     fontSize: 16,
                     fontWeight: 900,
-                    boxShadow: '0 14px 28px rgba(31,23,18,0.20)',
                     cursor: 'pointer',
                   }}
                 >
@@ -895,7 +905,7 @@ export default function ProfileBookingsPage() {
               </div>
             );
           })}
-        </div>
+        </section>
       </div>
 
       <BottomNav active="profile" />
