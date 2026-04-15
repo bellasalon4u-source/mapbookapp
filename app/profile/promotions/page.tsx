@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
 
 const promotionsTexts = {
   EN: {
@@ -11,7 +15,7 @@ const promotionsTexts = {
     subtitle: 'Bonuses, offers and saved perks',
     heroTitle: 'Your bonuses and offers',
     heroSub: 'Track active discounts, welcome bonuses and saved promotional rewards.',
-    active: 'Active offers',
+    active: 'Active',
     used: 'Used',
     expired: 'Expired',
     availableNow: 'Available now',
@@ -27,13 +31,16 @@ const promotionsTexts = {
     referralBonus: 'Referral reward',
     seasonalOffer: 'Seasonal offer',
     back: 'Back',
+    overview: 'Overview',
+    rewardsReady: 'Rewards ready',
+    totalPromos: 'Total promos',
   },
   ES: {
     title: 'Promociones',
     subtitle: 'Bonos, ofertas y ventajas guardadas',
     heroTitle: 'Tus bonos y ofertas',
     heroSub: 'Sigue descuentos activos, bonos de bienvenida y recompensas promocionales.',
-    active: 'Ofertas activas',
+    active: 'Activas',
     used: 'Usadas',
     expired: 'Expiradas',
     availableNow: 'Disponible ahora',
@@ -49,6 +56,9 @@ const promotionsTexts = {
     referralBonus: 'Recompensa por referido',
     seasonalOffer: 'Oferta de temporada',
     back: 'Atrás',
+    overview: 'Resumen',
+    rewardsReady: 'Recompensas listas',
+    totalPromos: 'Total promos',
   },
   RU: {
     title: 'Промоакции',
@@ -71,6 +81,9 @@ const promotionsTexts = {
     referralBonus: 'Реферальный бонус',
     seasonalOffer: 'Сезонное предложение',
     back: 'Назад',
+    overview: 'Обзор',
+    rewardsReady: 'Бонусы готовы',
+    totalPromos: 'Всего промо',
   },
   CZ: {
     title: 'Promo akce',
@@ -93,13 +106,16 @@ const promotionsTexts = {
     referralBonus: 'Referral bonus',
     seasonalOffer: 'Sezónní nabídka',
     back: 'Zpět',
+    overview: 'Přehled',
+    rewardsReady: 'Bonusy připraveny',
+    totalPromos: 'Celkem promo',
   },
   DE: {
     title: 'Aktionen',
     subtitle: 'Boni, Angebote und gespeicherte Vorteile',
     heroTitle: 'Deine Boni und Angebote',
     heroSub: 'Verfolge aktive Rabatte, Welcome-Boni und gespeicherte Promo-Vorteile.',
-    active: 'Aktive Angebote',
+    active: 'Aktiv',
     used: 'Verwendet',
     expired: 'Abgelaufen',
     availableNow: 'Jetzt verfügbar',
@@ -115,6 +131,9 @@ const promotionsTexts = {
     referralBonus: 'Empfehlungsbonus',
     seasonalOffer: 'Saisonales Angebot',
     back: 'Zurück',
+    overview: 'Übersicht',
+    rewardsReady: 'Boni bereit',
+    totalPromos: 'Aktionen gesamt',
   },
   PL: {
     title: 'Promocje',
@@ -137,6 +156,9 @@ const promotionsTexts = {
     referralBonus: 'Bonus polecający',
     seasonalOffer: 'Oferta sezonowa',
     back: 'Wstecz',
+    overview: 'Przegląd',
+    rewardsReady: 'Bonusy gotowe',
+    totalPromos: 'Łącznie promo',
   },
 } as const;
 
@@ -183,24 +205,21 @@ const promoItems: PromotionItem[] = [
 function getStatusStyle(status: PromotionItem['status']) {
   if (status === 'active') {
     return {
-      bg: '#dff2e3',
-      color: '#1d7a38',
-      border: '#8bc59b',
+      bg: '#ecfdf3',
+      color: '#15803d',
     };
   }
 
   if (status === 'used') {
     return {
-      bg: '#e6efff',
-      color: '#2559b7',
-      border: '#97b3e8',
+      bg: '#eef4ff',
+      color: '#2563eb',
     };
   }
 
   return {
-    bg: '#f4efe8',
-    color: '#6d6258',
-    border: '#cfc3b2',
+    bg: '#f3f4f6',
+    color: '#4b5563',
   };
 }
 
@@ -210,11 +229,18 @@ export default function PromotionsPage() {
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
+
     syncLanguage();
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
     window.addEventListener('focus', syncLanguage);
 
     return () => {
       window.removeEventListener('focus', syncLanguage);
+      unsubLanguage();
     };
   }, []);
 
@@ -230,14 +256,16 @@ export default function PromotionsPage() {
   };
 
   const activeCount = promoItems.filter((item) => item.status === 'active').length;
+  const totalCount = promoItems.length;
 
   return (
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f4ee',
+        background: '#ffffff',
         color: '#17130f',
-        paddingBottom: 110,
+        paddingBottom: 120,
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto', padding: '20px 16px 110px' }}>
@@ -261,6 +289,7 @@ export default function PromotionsPage() {
               background: '#fff',
               fontSize: 24,
               fontWeight: 900,
+              color: '#17130f',
               cursor: 'pointer',
             }}
           >
@@ -306,70 +335,123 @@ export default function PromotionsPage() {
           >
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: '56px 1fr',
-                gap: 14,
-                alignItems: 'center',
+                borderRadius: 24,
+                border: '2px solid #111111',
+                background: '#2f241c',
+                color: '#fff',
+                padding: 18,
               }}
             >
               <div
                 style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 20,
-                  border: '2px solid #111111',
-                  background: '#fff1f7',
-                  display: 'flex',
+                  display: 'grid',
+                  gridTemplateColumns: '56px 1fr',
+                  gap: 14,
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 26,
                 }}
               >
-                🎉
-              </div>
-
-              <div>
                 <div
                   style={{
-                    fontSize: 20,
+                    width: 56,
+                    height: 56,
+                    borderRadius: 18,
+                    border: '2px solid #111111',
+                    background: '#fff0f6',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 26,
+                    color: '#ff4fa0',
+                  }}
+                >
+                  🎉
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 900,
+                      color: '#ffffff',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {text.heroTitle}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 14,
+                      lineHeight: 1.5,
+                      color: '#ddd2c6',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {text.heroSub}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 10,
+                }}
+              >
+                <div
+                  style={{
+                    minHeight: 40,
+                    padding: '0 14px',
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: '#ecfdf3',
+                    color: '#15803d',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    fontSize: 13,
                     fontWeight: 900,
-                    color: '#17130f',
-                    lineHeight: 1.2,
                   }}
                 >
-                  {text.heroTitle}
+                  {text.availableNow}: {activeCount}
                 </div>
 
                 <div
                   style={{
-                    marginTop: 6,
-                    fontSize: 14,
-                    lineHeight: 1.5,
-                    color: '#7b7268',
-                    fontWeight: 700,
+                    minHeight: 40,
+                    padding: '0 14px',
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#17130f',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    fontSize: 13,
+                    fontWeight: 900,
                   }}
                 >
-                  {text.heroSub}
+                  {text.totalPromos}: {totalCount}
+                </div>
+
+                <div
+                  style={{
+                    minHeight: 40,
+                    padding: '0 14px',
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: '#fff4db',
+                    color: '#b7791f',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    fontSize: 13,
+                    fontWeight: 900,
+                  }}
+                >
+                  {text.rewardsReady}
                 </div>
               </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 16,
-                display: 'inline-flex',
-                alignItems: 'center',
-                minHeight: 42,
-                padding: '0 16px',
-                borderRadius: 999,
-                border: '2px solid #8bc59b',
-                background: '#dff2e3',
-                color: '#1d7a38',
-                fontSize: 14,
-                fontWeight: 900,
-              }}
-            >
-              {text.availableNow}: {activeCount}
             </div>
           </div>
         </section>
@@ -453,7 +535,7 @@ export default function PromotionsPage() {
                           padding: '0 14px',
                           borderRadius: 18,
                           border: '2px solid #111111',
-                          background: '#fff1f7',
+                          background: '#fff0f6',
                           color: '#ff4fa0',
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -481,7 +563,7 @@ export default function PromotionsPage() {
                           padding: '8px 12px',
                           fontSize: 12,
                           fontWeight: 900,
-                          border: `2px solid ${statusStyle.border}`,
+                          border: '2px solid #111111',
                           background: statusStyle.bg,
                           color: statusStyle.color,
                         }}
@@ -493,8 +575,8 @@ export default function PromotionsPage() {
                         style={{
                           borderRadius: 999,
                           padding: '8px 12px',
-                          border: '2px solid #97b3e8',
-                          background: '#e6efff',
+                          border: '2px solid #111111',
+                          background: '#eef4ff',
                           color: '#2559b7',
                           fontSize: 12,
                           fontWeight: 900,
@@ -507,9 +589,9 @@ export default function PromotionsPage() {
                         style={{
                           borderRadius: 999,
                           padding: '8px 12px',
-                          border: '2px solid #cfc3b2',
-                          background: '#f4efe8',
-                          color: '#6d6258',
+                          border: '2px solid #111111',
+                          background: '#f3f4f6',
+                          color: '#4b5563',
                           fontSize: 12,
                           fontWeight: 900,
                         }}
