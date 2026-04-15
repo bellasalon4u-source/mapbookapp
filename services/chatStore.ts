@@ -131,20 +131,31 @@ function cloneThreads(threads: ChatThread[]) {
   return JSON.parse(JSON.stringify(threads)) as ChatThread[];
 }
 
+function isValidChatThreads(value: unknown): value is ChatThread[] {
+  return Array.isArray(value);
+}
+
 export function getChatThreads(): ChatThread[] {
   if (!canUseStorage()) {
     return cloneThreads(demoThreads);
   }
 
   const raw = window.localStorage.getItem(STORAGE_KEY);
+
   if (!raw) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(demoThreads));
     return cloneThreads(demoThreads);
   }
 
   try {
-    const parsed = JSON.parse(raw) as ChatThread[];
-    return parsed;
+    const parsed = JSON.parse(raw) as unknown;
+
+    if (!isValidChatThreads(parsed)) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(demoThreads));
+      return cloneThreads(demoThreads);
+    }
+
+    return cloneThreads(parsed);
   } catch {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(demoThreads));
     return cloneThreads(demoThreads);
@@ -167,8 +178,10 @@ export function getUnreadMessagesCount(): number {
 
 export function markThreadAsRead(id: string) {
   const threads = getChatThreads();
+
   const updated = threads.map((thread) => {
     if (thread.id !== id) return thread;
+
     return {
       ...thread,
       unreadCount: 0,
@@ -180,6 +193,7 @@ export function markThreadAsRead(id: string) {
             seenAt: new Date().toISOString(),
           };
         }
+
         return message;
       }),
     };
@@ -190,6 +204,9 @@ export function markThreadAsRead(id: string) {
 }
 
 export function sendChatMessage(threadId: string, text: string) {
+  const trimmed = text.trim();
+  if (!trimmed) return;
+
   const threads = getChatThreads();
   const now = new Date();
   const delivered = new Date(now.getTime() + 10 * 1000);
@@ -200,7 +217,7 @@ export function sendChatMessage(threadId: string, text: string) {
     const newMessage: ChatMessage = {
       id: `msg_${now.getTime()}`,
       sender: 'me',
-      text,
+      text: trimmed,
       sentAt: now.toISOString(),
       deliveredAt: delivered.toISOString(),
       status: 'delivered',
@@ -220,10 +237,14 @@ export function subscribeToChatStore(callback: () => void) {
   if (typeof window === 'undefined') return () => {};
 
   const onStorage = (event: StorageEvent) => {
-    if (event.key === STORAGE_KEY) callback();
+    if (event.key === STORAGE_KEY) {
+      callback();
+    }
   };
 
-  const onCustom = () => callback();
+  const onCustom = () => {
+    callback();
+  };
 
   window.addEventListener('storage', onStorage);
   window.addEventListener('mapbook-chat-store-changed', onCustom);
@@ -241,6 +262,7 @@ export function notifyChatStoreChanged() {
 
 export function formatChatTime(iso: string) {
   const date = new Date(iso);
+
   return date.toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
