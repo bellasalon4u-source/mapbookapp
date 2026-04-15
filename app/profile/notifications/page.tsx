@@ -151,40 +151,44 @@ type NotificationKey = keyof UserProfile['notificationSettings'];
 function getCardAccent(key: NotificationKey) {
   if (key === 'messages') {
     return {
-      iconBg: '#eef4ff',
+      iconBg: '#edf4ff',
       iconColor: '#2f7cf6',
-      chipBg: '#eef4ff',
+      chipBg: '#edf4ff',
       chipColor: '#2f7cf6',
+      toggleOn: '#2f7cf6',
       icon: '✉️',
     };
   }
 
   if (key === 'bookings') {
     return {
-      iconBg: '#eef9f1',
+      iconBg: '#edf9ef',
       iconColor: '#2fa35a',
-      chipBg: '#eef9f1',
+      chipBg: '#edf9ef',
       chipColor: '#2fa35a',
+      toggleOn: '#45c63d',
       icon: '📅',
     };
   }
 
   if (key === 'reminders') {
     return {
-      iconBg: '#fff5e8',
+      iconBg: '#fff4e7',
       iconColor: '#d68612',
-      chipBg: '#fff5e8',
+      chipBg: '#fff4e7',
       chipColor: '#d68612',
+      toggleOn: '#d68612',
       icon: '⏰',
     };
   }
 
   if (key === 'promotions') {
     return {
-      iconBg: '#fff1f7',
+      iconBg: '#fff0f6',
       iconColor: '#ff4fa0',
-      chipBg: '#fff1f7',
+      chipBg: '#fff0f6',
       chipColor: '#ff4fa0',
+      toggleOn: '#ff4fa0',
       icon: '🎁',
     };
   }
@@ -194,6 +198,7 @@ function getCardAccent(key: NotificationKey) {
     iconColor: '#7a5af8',
     chipBg: '#f3efff',
     chipColor: '#7a5af8',
+    toggleOn: '#7a5af8',
     icon: '🛡️',
   };
 }
@@ -278,7 +283,7 @@ export default function NotificationsPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
+        background: '#f7f4ee',
         padding: '20px 16px 110px',
       }}
     >
@@ -298,10 +303,10 @@ export default function NotificationsPage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
               fontSize: 26,
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              fontWeight: 900,
               cursor: 'pointer',
             }}
           >
@@ -336,19 +341,18 @@ export default function NotificationsPage() {
         <div
           style={{
             marginTop: 18,
-            borderRadius: 30,
-            border: '1px solid #f0e3d7',
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
+            borderRadius: 32,
+            border: '2px solid #111111',
+            background: '#ffffff',
             padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           <div
             style={{
-              display: 'flex',
-              justifyContent: 'space-between',
+              display: 'grid',
+              gridTemplateColumns: '1fr auto',
               gap: 14,
-              alignItems: 'flex-start',
+              alignItems: 'start',
             }}
           >
             <div>
@@ -365,8 +369,8 @@ export default function NotificationsPage() {
                 style={{
                   marginTop: 6,
                   fontSize: 14,
-                  lineHeight: 1.55,
-                  color: '#7b7268',
+                  lineHeight: 1.5,
+                  color: '#6f7782',
                   fontWeight: 700,
                 }}
               >
@@ -376,11 +380,12 @@ export default function NotificationsPage() {
 
             <div
               style={{
-                borderRadius: 18,
-                background: '#fff1f7',
+                minWidth: 82,
+                borderRadius: 24,
+                border: '2px solid #111111',
+                background: '#fff0f6',
                 color: '#ff4fa0',
-                minWidth: 72,
-                padding: '12px 12px',
+                padding: '12px 12px 10px',
                 textAlign: 'center',
               }}
             >
@@ -413,8 +418,9 @@ export default function NotificationsPage() {
               gap: 8,
               borderRadius: 999,
               padding: '10px 14px',
-              background: '#eef9f1',
+              background: '#edf9ef',
               color: '#2fa35a',
+              border: '2px solid #111111',
               fontSize: 12,
               fontWeight: 900,
             }}
@@ -434,31 +440,31 @@ export default function NotificationsPage() {
                 key={item.key}
                 style={{
                   borderRadius: 30,
-                  border: '1px solid #efe4d7',
+                  border: '2px solid #111111',
                   background: '#fff',
                   padding: 16,
-                  boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
                 }}
               >
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '48px 1fr auto',
+                    gridTemplateColumns: '52px 1fr auto',
                     alignItems: 'center',
                     gap: 14,
                   }}
                 >
                   <div
                     style={{
-                      width: 48,
-                      height: 48,
+                      width: 52,
+                      height: 52,
                       borderRadius: 18,
                       background: accent.iconBg,
                       color: accent.iconColor,
+                      border: '2px solid #111111',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 22,
+                      fontSize: 24,
                     }}
                   >
                     {accent.icon}
@@ -489,6 +495,7 @@ export default function NotificationsPage() {
                           padding: '6px 10px',
                           background: accent.chipBg,
                           color: accent.chipColor,
+                          border: '2px solid #111111',
                           fontSize: 11,
                           fontWeight: 900,
                           whiteSpace: 'nowrap',
@@ -502,8 +509,8 @@ export default function NotificationsPage() {
                       style={{
                         marginTop: 6,
                         fontSize: 13,
-                        lineHeight: 1.5,
-                        color: '#7b7268',
+                        lineHeight: 1.45,
+                        color: '#6f7782',
                         fontWeight: 700,
                       }}
                     >
@@ -516,27 +523,25 @@ export default function NotificationsPage() {
                     onClick={() => toggleSetting(item.key)}
                     style={{
                       position: 'relative',
-                      width: 62,
-                      height: 36,
+                      width: 66,
+                      height: 38,
                       borderRadius: 999,
-                      border: 'none',
-                      background: enabled ? '#ff4fa0' : '#ddd1c3',
+                      border: '2px solid #111111',
+                      background: enabled ? accent.toggleOn : '#ddd1c3',
                       cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      boxShadow: enabled ? '0 10px 20px rgba(255,79,160,0.18)' : 'none',
                     }}
                   >
                     <span
                       style={{
                         position: 'absolute',
-                        top: 4,
-                        left: enabled ? 30 : 4,
+                        top: 3,
+                        left: enabled ? 31 : 3,
                         width: 28,
                         height: 28,
                         borderRadius: 999,
                         background: '#fff',
+                        border: '2px solid #111111',
                         transition: 'all 0.2s ease',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.12)',
                       }}
                     />
                   </button>
@@ -545,9 +550,9 @@ export default function NotificationsPage() {
                 <div
                   style={{
                     marginTop: 14,
-                    borderRadius: 20,
+                    borderRadius: 22,
                     background: '#fcfaf6',
-                    border: '1px solid #f1e8dc',
+                    border: '2px solid #111111',
                     padding: '12px 14px',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -558,7 +563,7 @@ export default function NotificationsPage() {
                   <div
                     style={{
                       fontSize: 13,
-                      color: '#7b7268',
+                      color: '#6f7782',
                       fontWeight: 800,
                     }}
                   >
@@ -569,8 +574,9 @@ export default function NotificationsPage() {
                     style={{
                       borderRadius: 999,
                       padding: '7px 10px',
-                      background: enabled ? '#eef9f1' : '#f4efe8',
+                      background: enabled ? '#edf9ef' : '#f4efe8',
                       color: enabled ? '#2fa35a' : '#7d7268',
+                      border: '2px solid #111111',
                       fontSize: 12,
                       fontWeight: 900,
                     }}
