@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
 type PaymentMethod = {
@@ -73,6 +73,7 @@ const paymentMethods: PaymentMethod[] = [
 
 export default function NewDealPage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [discountTitle, setDiscountTitle] = useState('');
   const [discountPercent, setDiscountPercent] = useState('20');
@@ -83,6 +84,7 @@ export default function NewDealPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<string>('card');
   const [photoName, setPhotoName] = useState('');
+  const [photoPreview, setPhotoPreview] = useState('');
 
   const totalPrice = useMemo(() => days * 1, [days]);
   const daysOptions = Array.from({ length: 100 }, (_, index) => index + 1);
@@ -93,11 +95,53 @@ export default function NewDealPage() {
       ? `Опубликовать скидку на ${days} день: £${totalPrice}`
       : `Опубликовать скидку на ${days} дней: £${totalPrice}`;
 
-  const handleFakePhotoUpload = () => {
-    setPhotoName('discount-photo.jpg');
+  const handleOpenFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhotoSelected = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (photoPreview) {
+      URL.revokeObjectURL(photoPreview);
+    }
+
+    const preview = URL.createObjectURL(file);
+    setPhotoName(file.name);
+    setPhotoPreview(preview);
+    event.target.value = '';
+  };
+
+  const handleRemovePhoto = () => {
+    if (photoPreview) {
+      URL.revokeObjectURL(photoPreview);
+    }
+    setPhotoPreview('');
+    setPhotoName('');
   };
 
   const handleOpenPayment = () => {
+    if (!discountTitle.trim()) {
+      alert('Введите название скидки');
+      return;
+    }
+
+    if (!discountPercent.trim()) {
+      alert('Введите размер скидки');
+      return;
+    }
+
+    if (!description.trim()) {
+      alert('Введите описание');
+      return;
+    }
+
+    if (!photoName.trim()) {
+      alert('Добавьте фото');
+      return;
+    }
+
     setShowPaymentSheet(true);
     setIsSuccess(false);
   };
@@ -105,6 +149,10 @@ export default function NewDealPage() {
   const handlePay = () => {
     setShowPaymentSheet(false);
     setIsSuccess(true);
+
+    setTimeout(() => {
+      router.push('/');
+    }, 900);
   };
 
   return (
@@ -480,6 +528,215 @@ export default function NewDealPage() {
             ) : null}
           </div>
 
+          <div
+            style={{
+              marginTop: 16,
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 18,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 8,
+              }}
+            >
+              Фото
+            </div>
+
+            <div
+              style={{
+                fontSize: 14,
+                lineHeight: 1.5,
+                color: '#7b7268',
+                fontWeight: 700,
+                marginBottom: 14,
+              }}
+            >
+              Добавьте фото для привлечения внимания
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoSelected}
+              style={{ display: 'none' }}
+            />
+
+            {!photoPreview ? (
+              <button
+                type="button"
+                onClick={handleOpenFilePicker}
+                style={{
+                  width: '100%',
+                  minHeight: 96,
+                  borderRadius: 22,
+                  border: '1.5px solid #111111',
+                  background: '#fff',
+                  padding: 14,
+                  display: 'grid',
+                  gridTemplateColumns: '72px 1fr',
+                  gap: 14,
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 22,
+                    border: '2px solid #2f8c67',
+                    background: '#f5fff8',
+                    color: '#2f8c67',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 42,
+                    fontWeight: 700,
+                  }}
+                >
+                  +
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 900,
+                      color: '#2f8c67',
+                    }}
+                  >
+                    Добавить фото
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 14,
+                      color: '#7b7268',
+                      fontWeight: 700,
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    JPG / PNG / WEBP
+                  </div>
+                </div>
+              </button>
+            ) : (
+              <div
+                style={{
+                  borderRadius: 22,
+                  border: '1.5px solid #111111',
+                  overflow: 'hidden',
+                  background: '#fff',
+                }}
+              >
+                <div style={{ position: 'relative' }}>
+                  <img
+                    src={photoPreview}
+                    alt={photoName || 'deal-photo'}
+                    style={{
+                      width: '100%',
+                      height: 220,
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    style={{
+                      position: 'absolute',
+                      top: 10,
+                      right: 10,
+                      width: 34,
+                      height: 34,
+                      borderRadius: 999,
+                      border: '1.5px solid #111111',
+                      background: '#ffffff',
+                      color: '#17130f',
+                      fontSize: 20,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 10,
+                  }}
+                >
+                  <div
+                    style={{
+                      minWidth: 0,
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 900,
+                        color: '#17130f',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Фото добавлено
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 4,
+                        fontSize: 13,
+                        color: '#7b7268',
+                        fontWeight: 700,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {photoName}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenFilePicker}
+                    style={{
+                      height: 40,
+                      borderRadius: 14,
+                      border: '1.5px solid #111111',
+                      background: '#ffffff',
+                      color: '#17130f',
+                      padding: '0 14px',
+                      fontSize: 14,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                    }}
+                  >
+                    Заменить
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           <button
             type="button"
             onClick={handleOpenPayment}
@@ -526,100 +783,6 @@ export default function NewDealPage() {
                 {value} {value === 1 ? 'день' : value < 5 ? 'дня' : 'дней'} за £{value}
               </div>
             ))}
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
-              borderRadius: 30,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 8,
-              }}
-            >
-              Фото
-            </div>
-
-            <div
-              style={{
-                fontSize: 14,
-                lineHeight: 1.5,
-                color: '#7b7268',
-                fontWeight: 700,
-                marginBottom: 14,
-              }}
-            >
-              Добавьте фото для привлечения внимания
-            </div>
-
-            <button
-              type="button"
-              onClick={handleFakePhotoUpload}
-              style={{
-                width: '100%',
-                minHeight: 96,
-                borderRadius: 22,
-                border: '1.5px solid #111111',
-                background: '#fff',
-                padding: 14,
-                display: 'grid',
-                gridTemplateColumns: '72px 1fr',
-                gap: 14,
-                alignItems: 'center',
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              <div
-                style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: 22,
-                  border: '2px solid #2f8c67',
-                  background: '#f5fff8',
-                  color: '#2f8c67',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 42,
-                  fontWeight: 700,
-                }}
-              >
-                +
-              </div>
-
-              <div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 900,
-                    color: '#2f8c67',
-                  }}
-                >
-                  {photoName ? 'Фото добавлено' : 'Добавить фото'}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 6,
-                    fontSize: 14,
-                    color: '#7b7268',
-                    fontWeight: 700,
-                    wordBreak: 'break-word',
-                  }}
-                >
-                  {photoName || 'JPG / PNG / WEBP'}
-                </div>
-              </div>
-            </button>
           </div>
 
           {isSuccess ? (
