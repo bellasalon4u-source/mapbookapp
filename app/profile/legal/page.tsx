@@ -185,11 +185,11 @@ type LegalItem = {
 };
 
 function accentStyles(accent: LegalItem['accent']) {
-  if (accent === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
-  if (accent === 'green') return { background: '#eef9f1', color: '#2fa35a' };
-  if (accent === 'blue') return { background: '#eef4ff', color: '#2f7cf6' };
+  if (accent === 'pink') return { background: '#fff0f6', color: '#ff4fa0' };
+  if (accent === 'green') return { background: '#edf9ef', color: '#2fa35a' };
+  if (accent === 'blue') return { background: '#edf4ff', color: '#2f7cf6' };
   if (accent === 'violet') return { background: '#f3efff', color: '#7a5af8' };
-  if (accent === 'orange') return { background: '#fff5e8', color: '#d68612' };
+  if (accent === 'orange') return { background: '#fff4e7', color: '#d68612' };
   return { background: '#f4efe8', color: '#6d6258' };
 }
 
@@ -278,7 +278,7 @@ export default function LegalPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
+        background: '#f7f4ee',
         padding: '20px 16px 110px',
       }}
     >
@@ -298,10 +298,10 @@ export default function LegalPage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
               fontSize: 26,
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              fontWeight: 900,
               cursor: 'pointer',
             }}
           >
@@ -336,11 +336,10 @@ export default function LegalPage() {
         <div
           style={{
             marginTop: 18,
-            borderRadius: 32,
-            border: '1px solid #f0e3d7',
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
+            borderRadius: 34,
+            border: '2px solid #111111',
+            background: '#ffffff',
             padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           <div
@@ -357,7 +356,8 @@ export default function LegalPage() {
                 width: 56,
                 height: 56,
                 borderRadius: 20,
-                background: '#fff1f7',
+                border: '2px solid #111111',
+                background: '#fff0f6',
                 color: '#ff4fa0',
                 display: 'flex',
                 alignItems: 'center',
@@ -402,8 +402,9 @@ export default function LegalPage() {
             <div
               style={{
                 borderRadius: 999,
+                border: '2px solid #111111',
                 padding: '10px 14px',
-                background: '#eef9f1',
+                background: '#edf9ef',
                 color: '#2fa35a',
                 fontSize: 12,
                 fontWeight: 900,
@@ -415,8 +416,9 @@ export default function LegalPage() {
             <div
               style={{
                 borderRadius: 999,
+                border: '2px solid #111111',
                 padding: '10px 14px',
-                background: '#eef4ff',
+                background: '#edf4ff',
                 color: '#2f7cf6',
                 fontSize: 12,
                 fontWeight: 900,
@@ -430,11 +432,10 @@ export default function LegalPage() {
         <div
           style={{
             marginTop: 18,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
+            borderRadius: 32,
+            border: '2px solid #111111',
             background: '#fff',
             padding: 16,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           <div
@@ -465,7 +466,7 @@ export default function LegalPage() {
                     alignItems: 'center',
                     padding: '14px 16px',
                     textAlign: 'left',
-                    border: '1px solid #f1e8dc',
+                    border: '2px solid #111111',
                     borderRadius: 24,
                     background: '#fff',
                     cursor: 'pointer',
@@ -476,6 +477,7 @@ export default function LegalPage() {
                       width: 46,
                       height: 46,
                       borderRadius: 16,
+                      border: '2px solid #111111',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -529,8 +531,8 @@ export default function LegalPage() {
           style={{
             marginTop: 16,
             borderRadius: 24,
+            border: '2px solid #111111',
             background: '#fff8f2',
-            border: '1px solid #f1e3d3',
             padding: 16,
             fontSize: 13,
             lineHeight: 1.6,
