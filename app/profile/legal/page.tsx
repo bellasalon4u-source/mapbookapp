@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
 import {
@@ -197,7 +197,7 @@ function accentStyles(accent: LegalItem['accent']) {
   return { background: '#f4efe8', color: '#6d6258' };
 }
 
-const shellCardStyle: React.CSSProperties = {
+const shellCardStyle: CSSProperties = {
   borderRadius: 32,
   border: '2px solid #111111',
   background: '#ffffff',
