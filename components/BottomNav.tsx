@@ -105,48 +105,9 @@ export default function BottomNav() {
           ? 'Profil'
           : 'Profile',
 
-      addAdvertisement:
-        language === 'ES'
-          ? 'Añadir anuncio'
-          : language === 'RU'
-          ? 'Добавить рекламу'
-          : language === 'CZ'
-          ? 'Přidat reklamu'
-          : language === 'DE'
-          ? 'Werbung hinzufügen'
-          : language === 'PL'
-          ? 'Dodaj reklamę'
-          : 'Add advertisement',
-
-      addService:
-        language === 'ES'
-          ? 'Añadir servicio'
-          : language === 'RU'
-          ? 'Добавить объявление'
-          : language === 'CZ'
-          ? 'Přidat službu'
-          : language === 'DE'
-          ? 'Service hinzufügen'
-          : language === 'PL'
-          ? 'Dodaj usługę'
-          : 'Add service',
-
-      addDeal:
-        language === 'ES'
-          ? 'Oferta del día'
-          : language === 'RU'
-          ? 'Скидка дня'
-          : language === 'CZ'
-          ? 'Sleva dne'
-          : language === 'DE'
-          ? 'Tagesrabatt'
-          : language === 'PL'
-          ? 'Zniżka dnia'
-          : 'Deal of the day',
-
       addAdvertisementShort:
         language === 'ES'
-          ? 'Реклама'
+          ? 'Publicidad'
           : language === 'RU'
           ? 'Реклама'
           : language === 'CZ'
@@ -159,20 +120,20 @@ export default function BottomNav() {
 
       addServiceShort:
         language === 'ES'
-          ? 'Объявление'
+          ? 'Servicio'
           : language === 'RU'
           ? 'Объявление'
           : language === 'CZ'
           ? 'Služba'
           : language === 'DE'
-          ? 'Anzeige'
+          ? 'Service'
           : language === 'PL'
           ? 'Usługa'
           : 'Listing',
 
       addDealShort:
         language === 'ES'
-          ? 'Скидка'
+          ? 'Descuento'
           : language === 'RU'
           ? 'Скидка'
           : language === 'CZ'
@@ -233,12 +194,11 @@ export default function BottomNav() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(20,20,20,0.18)',
+            background: 'rgba(20,20,20,0.16)',
             zIndex: 120,
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
-            pointerEvents: 'auto',
           }}
         >
           <div
@@ -246,14 +206,14 @@ export default function BottomNav() {
             style={{
               width: '100%',
               maxWidth: 430,
-              padding: '0 14px calc(94px + env(safe-area-inset-bottom))',
+              padding: '0 14px calc(92px + env(safe-area-inset-bottom))',
               boxSizing: 'border-box',
             }}
           >
             <div
               style={{
                 border: '2px solid #111111',
-                borderRadius: 28,
+                borderRadius: 24,
                 background: '#ffffff',
                 boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
                 overflow: 'hidden',
@@ -270,7 +230,7 @@ export default function BottomNav() {
                   type="button"
                   onClick={handleGoToAdvertisement}
                   style={{
-                    minHeight: 118,
+                    minHeight: 114,
                     border: 'none',
                     borderRight: '2px solid #111111',
                     background: '#ffe44d',
@@ -285,7 +245,7 @@ export default function BottomNav() {
                 >
                   <span
                     style={{
-                      fontSize: 26,
+                      fontSize: 30,
                       lineHeight: 1,
                       color: '#c69212',
                     }}
@@ -309,7 +269,7 @@ export default function BottomNav() {
                   type="button"
                   onClick={handleGoToService}
                   style={{
-                    minHeight: 118,
+                    minHeight: 114,
                     border: 'none',
                     borderRight: '2px solid #111111',
                     background: '#45c63d',
@@ -324,7 +284,7 @@ export default function BottomNav() {
                 >
                   <span
                     style={{
-                      fontSize: 26,
+                      fontSize: 30,
                       lineHeight: 1,
                       color: '#ffffff',
                     }}
@@ -348,7 +308,7 @@ export default function BottomNav() {
                   type="button"
                   onClick={handleGoToDeal}
                   style={{
-                    minHeight: 118,
+                    minHeight: 114,
                     border: 'none',
                     background: '#ff4f4f',
                     padding: '14px 10px 12px',
@@ -363,12 +323,13 @@ export default function BottomNav() {
                 >
                   <span
                     style={{
-                      fontSize: 26,
+                      fontSize: 30,
                       lineHeight: 1,
                       color: '#ffffff',
+                      fontWeight: 900,
                     }}
                   >
-                    % 
+                    %
                   </span>
                   <span
                     style={{
@@ -381,6 +342,7 @@ export default function BottomNav() {
                   >
                     {navText.addDealShort}
                   </span>
+
                   <span
                     style={{
                       position: 'absolute',
@@ -406,7 +368,7 @@ export default function BottomNav() {
                 onClick={handleCloseAddMenu}
                 style={{
                   width: '100%',
-                  height: 50,
+                  height: 48,
                   border: 'none',
                   borderTop: '2px solid #111111',
                   background: '#ffffff',
@@ -430,7 +392,7 @@ export default function BottomNav() {
           right: 0,
           bottom: 0,
           background: 'rgba(247,244,238,0.98)',
-          borderTop: '2px solid #111111',
+          borderTop: '1px solid #e3ddd5',
           backdropFilter: 'blur(10px)',
           zIndex: 80,
         }}
