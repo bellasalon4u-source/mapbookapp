@@ -923,7 +923,7 @@ export default function PaymentsPage() {
             </div>
 
             <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
-              {cryptoWallets.map((wallet, index) => (
+              {cryptoWallets.map((wallet) => (
                 <div
                   key={wallet.id}
                   style={{
