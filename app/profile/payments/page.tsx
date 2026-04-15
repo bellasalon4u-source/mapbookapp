@@ -53,6 +53,7 @@ const paymentTexts = {
     fastProtected: 'Fast and protected',
     sectionActions: 'Quick actions',
     manageAll: 'Manage all methods',
+    totalMethods: 'Total methods',
   },
   ES: {
     title: 'Métodos de pago',
@@ -92,6 +93,7 @@ const paymentTexts = {
     fastProtected: 'Rápido y protegido',
     sectionActions: 'Acciones rápidas',
     manageAll: 'Gestionar todos los métodos',
+    totalMethods: 'Total métodos',
   },
   RU: {
     title: 'Способы оплаты',
@@ -131,6 +133,7 @@ const paymentTexts = {
     fastProtected: 'Быстро и защищённо',
     sectionActions: 'Быстрые действия',
     manageAll: 'Управлять всеми способами',
+    totalMethods: 'Всего способов',
   },
   CZ: {
     title: 'Platební metody',
@@ -170,6 +173,7 @@ const paymentTexts = {
     fastProtected: 'Rychlé a chráněné',
     sectionActions: 'Rychlé akce',
     manageAll: 'Spravovat všechny metody',
+    totalMethods: 'Celkem metod',
   },
   DE: {
     title: 'Zahlungsmethoden',
@@ -209,6 +213,7 @@ const paymentTexts = {
     fastProtected: 'Schnell und geschützt',
     sectionActions: 'Schnellaktionen',
     manageAll: 'Alle Methoden verwalten',
+    totalMethods: 'Methoden gesamt',
   },
   PL: {
     title: 'Metody płatności',
@@ -248,15 +253,16 @@ const paymentTexts = {
     fastProtected: 'Szybko i bezpiecznie',
     sectionActions: 'Szybkie akcje',
     manageAll: 'Zarządzaj wszystkimi metodami',
+    totalMethods: 'Łącznie metod',
   },
 } as const;
 
 function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange' | 'neutral') {
-  if (kind === 'green') return { background: '#dff2e3', color: '#1d7a38' };
-  if (kind === 'blue') return { background: '#e6efff', color: '#2559b7' };
-  if (kind === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
-  if (kind === 'orange') return { background: '#fff0da', color: '#c07a00' };
-  return { background: '#f4efe8', color: '#6d6258' };
+  if (kind === 'green') return { background: '#ecfdf3', color: '#15803d' };
+  if (kind === 'blue') return { background: '#eef4ff', color: '#2563eb' };
+  if (kind === 'pink') return { background: '#fff0f6', color: '#ff4fa0' };
+  if (kind === 'orange') return { background: '#fff4db', color: '#b7791f' };
+  return { background: '#f3f4f6', color: '#4b5563' };
 }
 
 function sectionCardStyle(): CSSProperties {
@@ -322,6 +328,7 @@ export default function PaymentsPage() {
         minHeight: '100vh',
         background: '#ffffff',
         padding: '20px 16px 110px',
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -352,7 +359,15 @@ export default function PaymentsPage() {
           </button>
 
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 22, fontWeight: 900, color: '#17130f' }}>{text.title}</div>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 900,
+                color: '#17130f',
+              }}
+            >
+              {text.title}
+            </div>
             <div
               style={{
                 marginTop: 4,
@@ -369,136 +384,143 @@ export default function PaymentsPage() {
           <div />
         </div>
 
-        <div
-          style={{
-            marginTop: 18,
-            ...sectionCardStyle(),
-          }}
-        >
+        <div style={{ marginTop: 18, ...sectionCardStyle() }}>
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto',
-              gap: 14,
-              alignItems: 'start',
+              borderRadius: 24,
+              border: '2px solid #111111',
+              background: '#2f241c',
+              color: '#fff',
+              padding: 18,
             }}
           >
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: '#17130f' }}>{text.trusted}</div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr auto',
+                gap: 14,
+                alignItems: 'start',
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 20, fontWeight: 900, color: '#ffffff' }}>{text.trusted}</div>
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 14,
+                    lineHeight: 1.55,
+                    color: '#ddd2c6',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.trustedSub}
+                </div>
+              </div>
+
               <div
                 style={{
-                  marginTop: 6,
-                  fontSize: 14,
-                  lineHeight: 1.55,
-                  color: '#7b7268',
-                  fontWeight: 700,
+                  minWidth: 92,
+                  borderRadius: 20,
+                  border: '2px solid #111111',
+                  background: '#fff0f6',
+                  color: '#ff4fa0',
+                  padding: '12px 12px 10px',
+                  textAlign: 'center',
                 }}
               >
-                {text.trustedSub}
+                <div style={{ fontSize: 26, fontWeight: 900, lineHeight: 1 }}>{totalMethods}</div>
+                <div style={{ marginTop: 4, fontSize: 11, fontWeight: 900 }}>
+                  {text.totalMethods}
+                </div>
               </div>
             </div>
 
             <div
               style={{
-                minWidth: 82,
-                borderRadius: 22,
-                border: '2px solid #111111',
-                background: '#fff1f7',
-                color: '#ff4fa0',
-                padding: '12px 12px 10px',
-                textAlign: 'center',
+                marginTop: 16,
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 10,
               }}
             >
-              <div style={{ fontSize: 26, fontWeight: 900, lineHeight: 1 }}>{totalMethods}</div>
-              <div style={{ marginTop: 4, fontSize: 11, fontWeight: 900 }}>{text.available}</div>
+              <span
+                style={{
+                  ...badgeStyle('green'),
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  padding: '10px 12px',
+                  fontSize: 12,
+                  fontWeight: 900,
+                }}
+              >
+                {text.secure}
+              </span>
+              <span
+                style={{
+                  ...badgeStyle('blue'),
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  padding: '10px 12px',
+                  fontSize: 12,
+                  fontWeight: 900,
+                }}
+              >
+                {text.instantCheckout}
+              </span>
+              <span
+                style={{
+                  ...badgeStyle('orange'),
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  padding: '10px 12px',
+                  fontSize: 12,
+                  fontWeight: 900,
+                }}
+              >
+                {text.fastProtected}
+              </span>
             </div>
-          </div>
 
-          <div
-            style={{
-              marginTop: 16,
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 10,
-            }}
-          >
-            <span
+            <div
               style={{
-                ...badgeStyle('green'),
-                borderRadius: 999,
-                border: '2px solid #111111',
-                padding: '10px 12px',
-                fontSize: 12,
-                fontWeight: 900,
+                marginTop: 16,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
               }}
             >
-              {text.secure}
-            </span>
-            <span
-              style={{
-                ...badgeStyle('blue'),
-                borderRadius: 999,
-                border: '2px solid #111111',
-                padding: '10px 12px',
-                fontSize: 12,
-                fontWeight: 900,
-              }}
-            >
-              {text.instantCheckout}
-            </span>
-            <span
-              style={{
-                ...badgeStyle('orange'),
-                borderRadius: 999,
-                border: '2px solid #111111',
-                padding: '10px 12px',
-                fontSize: 12,
-                fontWeight: 900,
-              }}
-            >
-              {text.fastProtected}
-            </span>
-          </div>
+              <button
+                type="button"
+                style={{
+                  height: 52,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#45c63d',
+                  color: '#fff',
+                  fontSize: 14,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.addNew}
+              </button>
 
-          <div
-            style={{
-              marginTop: 16,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 10,
-            }}
-          >
-            <button
-              type="button"
-              style={{
-                height: 52,
-                borderRadius: 18,
-                border: '2px solid #111111',
-                background: '#45c63d',
-                color: '#fff',
-                fontSize: 14,
-                fontWeight: 900,
-                cursor: 'pointer',
-              }}
-            >
-              {text.addNew}
-            </button>
-
-            <button
-              type="button"
-              style={{
-                height: 52,
-                borderRadius: 18,
-                border: '2px solid #111111',
-                background: '#fff',
-                color: '#17130f',
-                fontSize: 14,
-                fontWeight: 900,
-                cursor: 'pointer',
-              }}
-            >
-              {text.manageAll}
-            </button>
+              <button
+                type="button"
+                style={{
+                  height: 52,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#fff',
+                  color: '#17130f',
+                  fontSize: 14,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.manageAll}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -531,7 +553,7 @@ export default function PaymentsPage() {
               style={{
                 border: '2px solid #111111',
                 borderRadius: 18,
-                background: '#fff1f7',
+                background: '#fff0f6',
                 color: '#ff4fa0',
                 minHeight: 48,
                 padding: '0 16px',
@@ -600,7 +622,7 @@ export default function PaymentsPage() {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {card.isDefault && (
+                    {card.isDefault ? (
                       <span
                         style={{
                           ...badgeStyle(index === 0 ? 'green' : 'orange'),
@@ -614,7 +636,7 @@ export default function PaymentsPage() {
                       >
                         {text.defaultLabel}
                       </span>
-                    )}
+                    ) : null}
 
                     <span
                       style={{
@@ -697,10 +719,10 @@ export default function PaymentsPage() {
               marginTop: 14,
               borderRadius: 22,
               border: '2px solid #111111',
-              background: '#edf9ef',
+              background: '#ecfdf3',
               padding: '14px 16px',
               fontSize: 14,
-              color: '#2f6f46',
+              color: '#15803d',
               fontWeight: 800,
             }}
           >
@@ -1021,7 +1043,7 @@ export default function PaymentsPage() {
                 marginTop: 12,
                 borderRadius: 18,
                 border: '2px solid #111111',
-                background: '#edf4ff',
+                background: '#eef4ff',
                 padding: '12px 14px',
                 fontSize: 13,
                 color: '#2f5dc4',
