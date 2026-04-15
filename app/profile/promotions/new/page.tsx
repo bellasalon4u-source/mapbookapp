@@ -17,7 +17,7 @@ const radiusOptions: RadiusOption[] = [
     id: '10',
     label: '10 км',
     km: 10,
-    pricePerDay: 1.0,
+    pricePerDay: 1,
     color: '#2f8c67',
     bg: '#edf9ef',
   },
@@ -25,7 +25,7 @@ const radiusOptions: RadiusOption[] = [
     id: '50',
     label: '50 км',
     km: 50,
-    pricePerDay: 2.0,
+    pricePerDay: 2,
     color: '#c69212',
     bg: '#fff7d6',
   },
@@ -46,7 +46,6 @@ export default function NewPromotionPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [discountText, setDiscountText] = useState('');
-  const [price, setPrice] = useState('');
   const [days, setDays] = useState(10);
   const [radius, setRadius] = useState<RadiusOption['id']>('10');
   const [photoName, setPhotoName] = useState('');
@@ -75,12 +74,12 @@ export default function NewPromotionPage() {
     }
 
     if (!description.trim()) {
-      alert('Введите описание');
+      alert('Введите описание рекламы');
       return;
     }
 
-    if (!price.trim()) {
-      alert('Введите цену');
+    if (!photoName.trim()) {
+      alert('Добавьте фото для рекламы');
       return;
     }
 
@@ -252,83 +251,6 @@ export default function NewPromotionPage() {
               boxSizing: 'border-box',
             }}
           />
-
-          <div
-            style={{
-              marginTop: 18,
-              display: 'grid',
-              gridTemplateColumns: '1fr 110px',
-              gap: 12,
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 900,
-                  color: '#17130f',
-                  marginBottom: 12,
-                }}
-              >
-                Цена <span style={{ color: '#ef4444' }}>*</span>
-              </div>
-
-              <input
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="Например: £25 today"
-                style={{
-                  width: '100%',
-                  height: 58,
-                  borderRadius: 18,
-                  border: '1.5px solid #111111',
-                  background: '#fff',
-                  padding: '0 16px',
-                  fontSize: 16,
-                  color: '#17130f',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
-
-            <div>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 900,
-                  color: '#17130f',
-                  marginBottom: 12,
-                }}
-              >
-                Дни
-              </div>
-
-              <select
-                value={days}
-                onChange={(e) => setDays(Number(e.target.value))}
-                style={{
-                  width: '100%',
-                  height: 58,
-                  borderRadius: 18,
-                  border: '1.5px solid #111111',
-                  background: '#fff',
-                  padding: '0 12px',
-                  fontSize: 16,
-                  color: '#17130f',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                  fontWeight: 900,
-                }}
-              >
-                {Array.from({ length: 21 }, (_, index) => index + 10).map((day) => (
-                  <option key={day} value={day}>
-                    {day}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
         </div>
 
         <div
@@ -465,13 +387,93 @@ export default function NewPromotionPage() {
         >
           <div
             style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 110px',
+              gap: 12,
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 900,
+                  color: '#17130f',
+                  marginBottom: 12,
+                }}
+              >
+                Срок рекламы
+              </div>
+
+              <div
+                style={{
+                  fontSize: 14,
+                  lineHeight: 1.45,
+                  color: '#7b7268',
+                  fontWeight: 700,
+                  marginBottom: 12,
+                }}
+              >
+                От 10 до 30 дней
+              </div>
+            </div>
+
+            <div>
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 900,
+                  color: '#17130f',
+                  marginBottom: 12,
+                }}
+              >
+                Дни
+              </div>
+
+              <select
+                value={days}
+                onChange={(e) => setDays(Number(e.target.value))}
+                style={{
+                  width: '100%',
+                  height: 58,
+                  borderRadius: 18,
+                  border: '1.5px solid #111111',
+                  background: '#fff',
+                  padding: '0 12px',
+                  fontSize: 16,
+                  color: '#17130f',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  fontWeight: 900,
+                }}
+              >
+                {Array.from({ length: 21 }, (_, index) => index + 10).map((day) => (
+                  <option key={day} value={day}>
+                    {day}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 16,
+            borderRadius: 30,
+            border: '2px solid #111111',
+            background: '#fff',
+            padding: 18,
+          }}
+        >
+          <div
+            style={{
               fontSize: 18,
               fontWeight: 900,
               color: '#17130f',
               marginBottom: 8,
             }}
           >
-            Фото
+            Фото <span style={{ color: '#ef4444' }}>*</span>
           </div>
 
           <div
