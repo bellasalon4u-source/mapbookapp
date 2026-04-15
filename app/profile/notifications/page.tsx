@@ -155,21 +155,21 @@ type NotificationKey = keyof UserProfile['notificationSettings'];
 function getCardAccent(key: NotificationKey) {
   if (key === 'messages') {
     return {
-      iconBg: '#edf4ff',
-      iconColor: '#2f7cf6',
-      chipBg: '#edf4ff',
-      chipColor: '#2f7cf6',
-      toggleOn: '#2f7cf6',
+      iconBg: '#eef4ff',
+      iconColor: '#2563eb',
+      chipBg: '#eef4ff',
+      chipColor: '#2563eb',
+      toggleOn: '#2563eb',
       icon: '✉️',
     };
   }
 
   if (key === 'bookings') {
     return {
-      iconBg: '#edf9ef',
-      iconColor: '#2fa35a',
-      chipBg: '#edf9ef',
-      chipColor: '#2fa35a',
+      iconBg: '#ecfdf3',
+      iconColor: '#15803d',
+      chipBg: '#ecfdf3',
+      chipColor: '#15803d',
       toggleOn: '#45c63d',
       icon: '📅',
     };
@@ -177,10 +177,10 @@ function getCardAccent(key: NotificationKey) {
 
   if (key === 'reminders') {
     return {
-      iconBg: '#fff4e7',
-      iconColor: '#d68612',
-      chipBg: '#fff4e7',
-      chipColor: '#d68612',
+      iconBg: '#fff4db',
+      iconColor: '#b7791f',
+      chipBg: '#fff4db',
+      chipColor: '#b7791f',
       toggleOn: '#d68612',
       icon: '⏰',
     };
@@ -292,8 +292,9 @@ export default function NotificationsPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f4ee',
+        background: '#ffffff',
         padding: '20px 16px 110px',
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -329,6 +330,7 @@ export default function NotificationsPage() {
                 fontSize: 22,
                 fontWeight: 900,
                 color: '#17130f',
+                lineHeight: 1.1,
               }}
             >
               {text.title}
@@ -339,6 +341,7 @@ export default function NotificationsPage() {
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
               {text.subtitle}
@@ -348,99 +351,110 @@ export default function NotificationsPage() {
           <div />
         </div>
 
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 32,
-            border: '2px solid #111111',
-            background: '#ffffff',
-            padding: 18,
-          }}
-        >
+        <section style={{ marginTop: 18 }}>
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto',
-              gap: 14,
-              alignItems: 'start',
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 18,
             }}
           >
-            <div>
-              <div
-                style={{
-                  fontSize: 20,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.overview}
-              </div>
-              <div
-                style={{
-                  marginTop: 6,
-                  fontSize: 14,
-                  lineHeight: 1.5,
-                  color: '#6f7782',
-                  fontWeight: 700,
-                }}
-              >
-                {text.overviewSub}
-              </div>
-            </div>
-
             <div
               style={{
-                minWidth: 82,
                 borderRadius: 24,
                 border: '2px solid #111111',
-                background: '#fff0f6',
-                color: '#ff4fa0',
-                padding: '12px 12px 10px',
-                textAlign: 'center',
+                background: '#2f241c',
+                color: '#fff',
+                padding: 18,
               }}
             >
               <div
                 style={{
-                  fontSize: 24,
-                  fontWeight: 900,
-                  lineHeight: 1,
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  gap: 14,
+                  alignItems: 'start',
                 }}
               >
-                {enabledCount}
+                <div>
+                  <div
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 900,
+                      color: '#ffffff',
+                    }}
+                  >
+                    {text.overview}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 14,
+                      lineHeight: 1.5,
+                      color: '#ddd2c6',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {text.overviewSub}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    minWidth: 82,
+                    borderRadius: 22,
+                    border: '2px solid #111111',
+                    background: '#fff0f6',
+                    color: '#ff4fa0',
+                    padding: '12px 12px 10px',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 24,
+                      fontWeight: 900,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {enabledCount}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontSize: 11,
+                      fontWeight: 900,
+                    }}
+                  >
+                    {text.activeNow}
+                  </div>
+                </div>
               </div>
+
               <div
                 style={{
-                  marginTop: 4,
-                  fontSize: 11,
+                  marginTop: 14,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  borderRadius: 999,
+                  padding: '10px 14px',
+                  background: '#ecfdf3',
+                  color: '#15803d',
+                  border: '2px solid #111111',
+                  fontSize: 12,
                   fontWeight: 900,
                 }}
               >
-                {text.activeNow}
+                <span>🛡️</span>
+                <span>{text.protected}</span>
               </div>
             </div>
           </div>
+        </section>
 
-          <div
-            style={{
-              marginTop: 14,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              borderRadius: 999,
-              padding: '10px 14px',
-              background: '#edf9ef',
-              color: '#2fa35a',
-              border: '2px solid #111111',
-              fontSize: 12,
-              fontWeight: 900,
-            }}
-          >
-            <span>🛡️</span>
-            <span>{text.protected}</span>
-          </div>
-        </div>
-
-        <div style={{ marginTop: 18, display: 'grid', gap: 14 }}>
+        <section style={{ marginTop: 18, display: 'grid', gap: 14 }}>
           {items.map((item) => {
             const enabled = profile.notificationSettings[item.key];
             const accent = getCardAccent(item.key);
@@ -561,7 +575,7 @@ export default function NotificationsPage() {
                   style={{
                     marginTop: 14,
                     borderRadius: 22,
-                    background: '#fcfaf6',
+                    background: '#fff',
                     border: '2px solid #111111',
                     padding: '12px 14px',
                     display: 'flex',
@@ -584,8 +598,8 @@ export default function NotificationsPage() {
                     style={{
                       borderRadius: 999,
                       padding: '7px 10px',
-                      background: enabled ? '#edf9ef' : '#f4efe8',
-                      color: enabled ? '#2fa35a' : '#7d7268',
+                      background: enabled ? '#ecfdf3' : '#f3f4f6',
+                      color: enabled ? '#15803d' : '#7d7268',
                       border: '2px solid #111111',
                       fontSize: 12,
                       fontWeight: 900,
@@ -597,7 +611,7 @@ export default function NotificationsPage() {
               </div>
             );
           })}
-        </div>
+        </section>
       </div>
 
       <BottomNav active="profile" />
