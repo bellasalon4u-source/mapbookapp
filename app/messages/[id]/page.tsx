@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   getSavedLanguage,
@@ -13,6 +13,9 @@ type MessageItem = {
   text: string;
   fromMe: boolean;
   time: string;
+  isRead?: boolean;
+  isDelivered?: boolean;
+  isAlert?: boolean;
 };
 
 type ChatItem = {
@@ -20,6 +23,7 @@ type ChatItem = {
   name: string;
   avatar: string;
   online: boolean;
+  category?: string;
   messages: MessageItem[];
 };
 
@@ -123,10 +127,29 @@ const mockChats: ChatItem[] = [
     avatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
     online: true,
+    category: 'Hair Extensions',
     messages: [
-      { id: '1', text: 'Hi! Your booking is confirmed.', fromMe: false, time: '10:12' },
-      { id: '2', text: 'Perfect, thank you.', fromMe: true, time: '10:13' },
-      { id: '3', text: 'Please come 5 minutes earlier if possible.', fromMe: false, time: '10:15' },
+      {
+        id: '1',
+        text: 'Hi! Your booking is confirmed.',
+        fromMe: false,
+        time: '10:12',
+      },
+      {
+        id: '2',
+        text: 'Perfect, thank you.',
+        fromMe: true,
+        time: '10:13',
+        isRead: true,
+        isDelivered: true,
+      },
+      {
+        id: '3',
+        text: 'Please come 5 minutes earlier if possible.',
+        fromMe: false,
+        time: '10:15',
+        isAlert: true,
+      },
     ],
   },
   {
@@ -135,9 +158,21 @@ const mockChats: ChatItem[] = [
     avatar:
       'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
     online: false,
+    category: 'Massage',
     messages: [
-      { id: '1', text: 'Hello! We still have one free slot today.', fromMe: false, time: '09:20' },
-      { id: '2', text: 'What time is available?', fromMe: true, time: '09:21' },
+      {
+        id: '1',
+        text: 'Hello! We still have one free slot today.',
+        fromMe: false,
+        time: '09:20',
+      },
+      {
+        id: '2',
+        text: 'What time is available?',
+        fromMe: true,
+        time: '09:21',
+        isDelivered: true,
+      },
     ],
   },
   {
@@ -146,15 +181,55 @@ const mockChats: ChatItem[] = [
     avatar:
       'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80',
     online: true,
+    category: 'Brows',
     messages: [
-      { id: '1', text: 'I have one more slot tomorrow if you want.', fromMe: false, time: '13:00' },
+      {
+        id: '1',
+        text: 'I have one more slot tomorrow if you want.',
+        fromMe: false,
+        time: '13:00',
+      },
     ],
   },
 ];
 
+function getStatusMeta(message: MessageItem) {
+  if (message.fromMe) {
+    if (message.isRead) {
+      return {
+        icon: '✓✓',
+        color: '#2f8cff',
+      };
+    }
+
+    if (message.isDelivered) {
+      return {
+        icon: '✓✓',
+        color: '#8f98a3',
+      };
+    }
+
+    return {
+      icon: '✓',
+      color: '#e53935',
+    };
+  }
+
+  if (message.isAlert) {
+    return {
+      icon: '!',
+      color: '#e53935',
+    };
+  }
+
+  return null;
+}
+
 export default function ChatPage() {
   const params = useParams();
   const router = useRouter();
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<MessageItem[]>([]);
@@ -183,12 +258,20 @@ export default function ChatPage() {
     }
   }, [chat]);
 
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 80);
+
+    return () => window.clearTimeout(id);
+  }, [messages]);
+
   if (!chat) {
     return (
       <main
         style={{
           minHeight: '100vh',
-          background: '#f7f5f1',
+          background: '#f7f4ee',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -196,7 +279,7 @@ export default function ChatPage() {
           fontFamily: 'Arial, sans-serif',
           color: '#1f2430',
           fontSize: 18,
-          fontWeight: 800,
+          fontWeight: 900,
         }}
       >
         {text.notFound}
@@ -218,8 +301,10 @@ export default function ChatPage() {
           hour: '2-digit',
           minute: '2-digit',
         }),
+        isDelivered: true,
       },
     ]);
+
     setInput('');
   };
 
@@ -227,170 +312,239 @@ export default function ChatPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f5f1',
+        background: '#f7f4ee',
         fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
         display: 'flex',
         flexDirection: 'column',
       }}
     >
-      <div style={{ maxWidth: 430, width: '100%', margin: '0 auto', flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div
+        style={{
+          maxWidth: 430,
+          width: '100%',
+          margin: '0 auto',
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <header
           style={{
             position: 'sticky',
             top: 0,
             zIndex: 20,
-            background: 'rgba(247,245,241,0.96)',
-            backdropFilter: 'blur(10px)',
-            borderBottom: '1px solid #e6dfd5',
-            padding: '16px',
-            display: 'grid',
-            gridTemplateColumns: '52px 1fr 52px',
-            gap: 12,
-            alignItems: 'center',
+            background: '#f7f4ee',
+            padding: '16px 16px 12px',
           }}
         >
-          <button
-            type="button"
-            onClick={() => router.back()}
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: 999,
-              border: '1px solid #e5ddd1',
-              background: '#fff',
-              fontSize: 24,
-              color: '#1f2430',
-              lineHeight: 1,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
-            }}
-          >
-            ←
-          </button>
-
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
+              display: 'grid',
+              gridTemplateColumns: '54px 1fr 54px',
               gap: 12,
-              minWidth: 0,
+              alignItems: 'center',
             }}
           >
-            <img
-              src={chat.avatar}
-              alt={chat.name}
+            <button
+              type="button"
+              onClick={() => router.back()}
               style={{
-                width: 52,
-                height: 52,
-                borderRadius: 16,
-                objectFit: 'cover',
-                flexShrink: 0,
+                width: 54,
+                height: 54,
+                borderRadius: 999,
+                border: '2px solid #111111',
+                background: '#fff',
+                fontSize: 24,
+                color: '#1f2430',
+                lineHeight: 1,
+                cursor: 'pointer',
+                fontWeight: 900,
               }}
-            />
+            >
+              ←
+            </button>
 
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 900,
-                  color: '#1f2430',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {chat.name}
+            <div
+              style={{
+                background: '#fff',
+                border: '2px solid #111111',
+                borderRadius: 26,
+                padding: '10px 12px',
+                display: 'grid',
+                gridTemplateColumns: '56px 1fr',
+                gap: 12,
+                alignItems: 'center',
+                minWidth: 0,
+              }}
+            >
+              <div style={{ position: 'relative' }}>
+                <img
+                  src={chat.avatar}
+                  alt={chat.name}
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 18,
+                    objectFit: 'cover',
+                    display: 'block',
+                    border: '2px solid #111111',
+                  }}
+                />
+                <span
+                  style={{
+                    position: 'absolute',
+                    right: -2,
+                    bottom: -2,
+                    width: 16,
+                    height: 16,
+                    borderRadius: 999,
+                    background: chat.online ? '#2fbb52' : '#c7c7c7',
+                    border: '2px solid #ffffff',
+                  }}
+                />
               </div>
 
-              <div
-                style={{
-                  marginTop: 4,
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: chat.online ? '#2d9b47' : '#7a8490',
-                }}
-              >
-                {chat.online ? text.online : text.offline}
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 900,
+                    color: '#1f2430',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    lineHeight: 1.15,
+                  }}
+                >
+                  {chat.name}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 4,
+                    fontSize: 13,
+                    fontWeight: 900,
+                    color: chat.online ? '#2fbb52' : '#8b95a1',
+                  }}
+                >
+                  {chat.online ? text.online : text.offline}
+                </div>
               </div>
             </div>
-          </div>
 
-          <button
-            type="button"
-            onClick={() => router.push('/')}
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: 999,
-              border: '1px solid #e5ddd1',
-              background: '#fff',
-              fontSize: 22,
-              color: '#1f2430',
-              lineHeight: 1,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
-            }}
-          >
-            ⌂
-          </button>
+            <button
+              type="button"
+              onClick={() => router.push('/')}
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 999,
+                border: '2px solid #111111',
+                background: '#fff',
+                fontSize: 22,
+                color: '#1f2430',
+                lineHeight: 1,
+                cursor: 'pointer',
+                fontWeight: 900,
+              }}
+            >
+              ⌂
+            </button>
+          </div>
         </header>
 
         <section
           style={{
             flex: 1,
-            padding: '16px',
+            padding: '8px 16px 16px',
             display: 'flex',
             flexDirection: 'column',
             gap: 12,
+            overflowY: 'auto',
           }}
         >
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              style={{
-                alignSelf: message.fromMe ? 'flex-end' : 'flex-start',
-                maxWidth: '82%',
-                background: message.fromMe ? '#2f8cff' : '#fff',
-                color: message.fromMe ? '#fff' : '#1f2430',
-                border: message.fromMe ? 'none' : '1px solid #e7e0d6',
-                borderRadius: 22,
-                padding: '12px 14px',
-                boxShadow: '0 4px 10px rgba(0,0,0,0.04)',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 16,
-                  lineHeight: 1.45,
-                  fontWeight: 700,
-                  wordBreak: 'break-word',
-                }}
-              >
-                {message.text}
-              </div>
+          {messages.map((message) => {
+            const statusMeta = getStatusMeta(message);
 
+            return (
               <div
+                key={message.id}
                 style={{
-                  marginTop: 6,
-                  fontSize: 12,
-                  opacity: 0.72,
-                  textAlign: 'right',
-                  fontWeight: 700,
+                  display: 'flex',
+                  justifyContent: message.fromMe ? 'flex-end' : 'flex-start',
                 }}
               >
-                {message.time}
+                <div
+                  style={{
+                    maxWidth: '82%',
+                    background: message.fromMe ? '#eaf3ff' : '#ffffff',
+                    color: '#1f2430',
+                    border: '2px solid #111111',
+                    borderRadius: 24,
+                    padding: '12px 14px 10px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 16,
+                      lineHeight: 1.45,
+                      fontWeight: 800,
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {message.text}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 8,
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}
+                  >
+                    {statusMeta ? (
+                      <span
+                        style={{
+                          minWidth: 18,
+                          textAlign: 'center',
+                          fontSize: 12,
+                          fontWeight: 900,
+                          color: statusMeta.color,
+                          lineHeight: 1,
+                        }}
+                      >
+                        {statusMeta.icon}
+                      </span>
+                    ) : null}
+
+                    <span
+                      style={{
+                        fontSize: 12,
+                        color: '#7b8590',
+                        fontWeight: 900,
+                        lineHeight: 1,
+                      }}
+                    >
+                      {message.time}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
+
+          <div ref={messagesEndRef} />
         </section>
 
         <div
           style={{
             position: 'sticky',
             bottom: 0,
-            background: 'rgba(247,245,241,0.96)',
-            backdropFilter: 'blur(10px)',
-            borderTop: '1px solid #e6dfd5',
-            padding: '12px 16px calc(12px + env(safe-area-inset-bottom))',
+            background: '#f7f4ee',
+            padding: '10px 16px calc(12px + env(safe-area-inset-bottom))',
           }}
         >
           <div
@@ -413,14 +567,15 @@ export default function ChatPage() {
               placeholder={text.placeholder}
               style={{
                 width: '100%',
-                height: 54,
-                borderRadius: 18,
-                border: '1px solid #e7e0d6',
+                height: 56,
+                borderRadius: 20,
+                border: '2px solid #111111',
                 background: '#fff',
                 padding: '0 16px',
                 fontSize: 16,
                 outline: 'none',
                 boxSizing: 'border-box',
+                color: '#1f2430',
               }}
             />
 
@@ -428,15 +583,16 @@ export default function ChatPage() {
               type="button"
               onClick={handleSend}
               style={{
-                height: 54,
-                border: 'none',
-                borderRadius: 18,
-                background: '#2f8cff',
+                height: 56,
+                minWidth: 96,
+                border: '2px solid #111111',
+                borderRadius: 20,
+                background: '#45c63d',
                 color: '#fff',
                 padding: '0 18px',
                 fontSize: 15,
                 fontWeight: 900,
-                boxShadow: '0 8px 18px rgba(47,140,255,0.22)',
+                cursor: 'pointer',
               }}
             >
               {text.send}
