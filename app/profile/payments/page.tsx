@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
 import {
   getPaymentsState,
   subscribeToPaymentsStore,
@@ -282,11 +286,16 @@ export default function PaymentsPage() {
     syncLanguage();
     syncPayments();
 
-    window.addEventListener('focus', syncLanguage);
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
     const unsubPayments = subscribeToPaymentsStore(syncPayments);
+
+    window.addEventListener('focus', syncLanguage);
 
     return () => {
       window.removeEventListener('focus', syncLanguage);
+      unsubLanguage();
       unsubPayments();
     };
   }, []);
@@ -333,6 +342,7 @@ export default function PaymentsPage() {
               fontSize: 26,
               fontWeight: 900,
               cursor: 'pointer',
+              color: '#17130f',
             }}
           >
             ←
@@ -534,7 +544,7 @@ export default function PaymentsPage() {
           </div>
 
           <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
-            {payments.savedCards.map((card, index) => (
+            {(payments.savedCards || []).map((card, index) => (
               <div
                 key={card.id}
                 style={{
@@ -544,7 +554,7 @@ export default function PaymentsPage() {
                       ? 'linear-gradient(180deg, #2f241c 0%, #1f1712 100%)'
                       : '#fff',
                   color: index === 0 ? '#fff' : '#17130f',
-                  border: index === 0 ? '2px solid #111111' : '2px solid #111111',
+                  border: '2px solid #111111',
                   padding: 16,
                 }}
               >
@@ -733,7 +743,7 @@ export default function PaymentsPage() {
               >
                 <div>
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                    {payments.paypalEmail}
+                    {payments.paypalEmail || text.notConnected || 'PayPal'}
                   </div>
                   <div
                     style={{
@@ -749,7 +759,7 @@ export default function PaymentsPage() {
 
                 <span
                   style={{
-                    ...badgeStyle('blue'),
+                    ...badgeStyle(payments.paypalEmail ? 'blue' : 'neutral'),
                     borderRadius: 999,
                     border: '2px solid #111111',
                     padding: '8px 12px',
@@ -758,7 +768,7 @@ export default function PaymentsPage() {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {text.connected}
+                  {payments.paypalEmail ? text.connected : text.notConnected}
                 </span>
               </div>
 
@@ -910,7 +920,7 @@ export default function PaymentsPage() {
             </div>
 
             <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
-              {payments.cryptoWallets.map((wallet, index) => (
+              {(payments.cryptoWallets || []).map((wallet, index) => (
                 <div
                   key={wallet.id}
                   style={{
