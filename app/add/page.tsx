@@ -1,6 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { addListing } from '../../services/listingsStore';
 import {
@@ -27,6 +35,12 @@ type PhoneContactValue = {
   number: string;
 };
 
+type ServicePhotoItem = {
+  id: string;
+  file: File;
+  preview: string;
+};
+
 type CategoryItem = {
   value: string;
   label: string;
@@ -37,6 +51,202 @@ type SubcategoryItem = {
   value: string;
   label: string;
 };
+
+type CopyText = {
+  title: string;
+  subtitle: string;
+  requiredFields: string;
+  photos: string;
+  photosHint: string;
+  uploadPhotos: string;
+  tapMainPhotoHint: string;
+  mainPhoto: string;
+  deletePhoto: string;
+  clearField: string;
+  serviceInfo: string;
+  serviceTitle: string;
+  serviceTitlePlaceholder: string;
+  description: string;
+  descriptionPlaceholder: string;
+  category: string;
+  subcategory: string;
+  price: string;
+  pricePlaceholder: string;
+  location: string;
+  locationHint: string;
+  city: string;
+  cityPlaceholder: string;
+  district: string;
+  districtPlaceholder: string;
+  addressDetails: string;
+  addressDetailsPlaceholder: string;
+  hours: string;
+  hoursPlaceholder: string;
+  availability: string;
+  availabilityHint: string;
+  atClient: string;
+  atMyPlace: string;
+  online: string;
+  paymentMethods: string;
+  paymentHint: string;
+  cash: string;
+  card: string;
+  wallet: string;
+  contacts: string;
+  contactsHint: string;
+  phone: string;
+  whatsapp: string;
+  businessWhatsapp: string;
+  telegram: string;
+  viber: string;
+  instagram: string;
+  website: string;
+  email: string;
+  chooseCountry: string;
+  searchCountry: string;
+  phoneNumber: string;
+  publish: string;
+  enterServiceTitle: string;
+  enterPrice: string;
+  enterCity: string;
+  enterDistrict: string;
+  published: string;
+};
+
+const textByLanguage: Record<AppLanguage, CopyText> = {
+  EN: {
+    title: 'Add your service',
+    subtitle: 'Create a strong listing for clients nearby',
+    requiredFields: '* Required fields',
+    photos: 'Photos',
+    photosHint: 'Add great photos to get more views',
+    uploadPhotos: 'Upload photos',
+    tapMainPhotoHint: 'Tap a photo to make it main',
+    mainPhoto: 'Main',
+    deletePhoto: 'Delete photo',
+    clearField: 'Clear field',
+    serviceInfo: 'Service info',
+    serviceTitle: 'Service title',
+    serviceTitlePlaceholder: 'Enter service title',
+    description: 'Description',
+    descriptionPlaceholder: 'Describe your service...',
+    category: 'Category',
+    subcategory: 'Subcategory',
+    price: 'Price',
+    pricePlaceholder: 'Enter price',
+    location: 'Location',
+    locationHint: 'Add a clearer location for clients',
+    city: 'City / town',
+    cityPlaceholder: 'Enter city or town',
+    district: 'District / area',
+    districtPlaceholder: 'Enter district or area',
+    addressDetails: 'Address details',
+    addressDetailsPlaceholder: 'Building, street, floor, studio number...',
+    hours: 'Working hours',
+    hoursPlaceholder: 'For example: 09:00 - 20:00',
+    availability: 'Availability',
+    availabilityHint: 'This affects your map status',
+    atClient: 'At client',
+    atMyPlace: 'At my place',
+    online: 'Online',
+    paymentMethods: 'Payment methods',
+    paymentHint: 'How can clients pay?',
+    cash: 'Cash',
+    card: 'Card',
+    wallet: 'E-money',
+    contacts: 'Contacts',
+    contactsHint: 'Add each contact channel separately',
+    phone: 'Phone',
+    whatsapp: 'WhatsApp',
+    businessWhatsapp: 'Business WhatsApp',
+    telegram: 'Telegram',
+    viber: 'Viber',
+    instagram: 'Instagram',
+    website: 'Website',
+    email: 'Email',
+    chooseCountry: 'Choose country',
+    searchCountry: 'Search country or code',
+    phoneNumber: 'Phone number',
+    publish: 'Publish service',
+    enterServiceTitle: 'Please enter service title',
+    enterPrice: 'Please enter price',
+    enterCity: 'Please enter city / town',
+    enterDistrict: 'Please enter district / area',
+    published: 'Service published successfully',
+  },
+  RU: {
+    title: 'Добавить услугу',
+    subtitle: 'Создайте сильное объявление для клиентов рядом',
+    requiredFields: '* Обязательные поля',
+    photos: 'Фото',
+    photosHint: 'Добавьте хорошие фото, чтобы получить больше просмотров',
+    uploadPhotos: 'Загрузить фото',
+    tapMainPhotoHint: 'Нажмите на фото, чтобы сделать его главным',
+    mainPhoto: 'Главное',
+    deletePhoto: 'Удалить фото',
+    clearField: 'Очистить поле',
+    serviceInfo: 'Информация об услуге',
+    serviceTitle: 'Название услуги',
+    serviceTitlePlaceholder: 'Введите название услуги',
+    description: 'Описание',
+    descriptionPlaceholder: 'Опишите вашу услугу...',
+    category: 'Категория',
+    subcategory: 'Подкатегория',
+    price: 'Цена',
+    pricePlaceholder: 'Введите цену',
+    location: 'Локация',
+    locationHint: 'Добавьте более понятную локацию для клиентов',
+    city: 'Город / населённый пункт',
+    cityPlaceholder: 'Введите город или населённый пункт',
+    district: 'Район / зона',
+    districtPlaceholder: 'Введите район или зону',
+    addressDetails: 'Подробный адрес',
+    addressDetailsPlaceholder: 'Дом, улица, этаж, номер студии...',
+    hours: 'Часы работы',
+    hoursPlaceholder: 'Например: 09:00 - 20:00',
+    availability: 'Доступность',
+    availabilityHint: 'Это влияет на статус на карте',
+    atClient: 'У клиента',
+    atMyPlace: 'У меня',
+    online: 'Онлайн',
+    paymentMethods: 'Способы оплаты',
+    paymentHint: 'Как клиенты могут оплатить?',
+    cash: 'Наличные',
+    card: 'Карта',
+    wallet: 'Электронные деньги',
+    contacts: 'Контакты',
+    contactsHint: 'Добавьте каждый канал связи отдельно',
+    phone: 'Телефон',
+    whatsapp: 'WhatsApp',
+    businessWhatsapp: 'Business WhatsApp',
+    telegram: 'Telegram',
+    viber: 'Viber',
+    instagram: 'Instagram',
+    website: 'Сайт',
+    email: 'Email',
+    chooseCountry: 'Выберите страну',
+    searchCountry: 'Поиск страны или кода',
+    phoneNumber: 'Номер телефона',
+    publish: 'Опубликовать услугу',
+    enterServiceTitle: 'Введите название услуги',
+    enterPrice: 'Введите цену',
+    enterCity: 'Введите город / населённый пункт',
+    enterDistrict: 'Введите район / зону',
+    published: 'Услуга успешно опубликована',
+  },
+  ES: {} as CopyText,
+  CZ: {} as CopyText,
+  DE: {} as CopyText,
+  PL: {} as CopyText,
+  UA: {} as CopyText,
+  IT: {} as CopyText,
+  FR: {} as CopyText,
+  AR: {} as CopyText,
+};
+
+(['ES', 'CZ', 'DE', 'PL', 'UA', 'IT', 'FR', 'AR'] as AppLanguage[]).forEach((lang) => {
+  textByLanguage[lang] = textByLanguage.EN;
+});
 
 const categoriesByLanguage: Record<AppLanguage, CategoryItem[]> = {
   EN: [
@@ -65,114 +275,22 @@ const categoriesByLanguage: Record<AppLanguage, CategoryItem[]> = {
     { value: 'Events', label: 'События', icon: '🎉' },
     { value: 'Creative', label: 'Креатив', icon: '🎨' },
   ],
-  ES: [
-    { value: 'Beauty', label: 'Belleza', icon: '💄' },
-    { value: 'Wellness', label: 'Bienestar', icon: '🧘' },
-    { value: 'Home', label: 'Hogar', icon: '🏠' },
-    { value: 'Repairs', label: 'Reparaciones', icon: '🛠️' },
-    { value: 'Tech', label: 'Tecnología', icon: '📱' },
-    { value: 'Pets', label: 'Mascotas', icon: '🐾' },
-    { value: 'Auto', label: 'Auto', icon: '🚗' },
-    { value: 'Moving', label: 'Mudanza', icon: '📦' },
-    { value: 'Activities', label: 'Actividades', icon: '🎯' },
-    { value: 'Events', label: 'Eventos', icon: '🎉' },
-    { value: 'Creative', label: 'Creativo', icon: '🎨' },
-  ],
-  CZ: [
-    { value: 'Beauty', label: 'Krása', icon: '💄' },
-    { value: 'Wellness', label: 'Wellness', icon: '🧘' },
-    { value: 'Home', label: 'Domov', icon: '🏠' },
-    { value: 'Repairs', label: 'Opravy', icon: '🛠️' },
-    { value: 'Tech', label: 'Technika', icon: '📱' },
-    { value: 'Pets', label: 'Mazlíčci', icon: '🐾' },
-    { value: 'Auto', label: 'Auto', icon: '🚗' },
-    { value: 'Moving', label: 'Stěhování', icon: '📦' },
-    { value: 'Activities', label: 'Aktivity', icon: '🎯' },
-    { value: 'Events', label: 'Události', icon: '🎉' },
-    { value: 'Creative', label: 'Kreativa', icon: '🎨' },
-  ],
-  DE: [
-    { value: 'Beauty', label: 'Beauty', icon: '💄' },
-    { value: 'Wellness', label: 'Wellness', icon: '🧘' },
-    { value: 'Home', label: 'Zuhause', icon: '🏠' },
-    { value: 'Repairs', label: 'Reparaturen', icon: '🛠️' },
-    { value: 'Tech', label: 'Technik', icon: '📱' },
-    { value: 'Pets', label: 'Haustiere', icon: '🐾' },
-    { value: 'Auto', label: 'Auto', icon: '🚗' },
-    { value: 'Moving', label: 'Umzug', icon: '📦' },
-    { value: 'Activities', label: 'Aktivitäten', icon: '🎯' },
-    { value: 'Events', label: 'Events', icon: '🎉' },
-    { value: 'Creative', label: 'Kreativ', icon: '🎨' },
-  ],
-  PL: [
-    { value: 'Beauty', label: 'Uroda', icon: '💄' },
-    { value: 'Wellness', label: 'Wellness', icon: '🧘' },
-    { value: 'Home', label: 'Dom', icon: '🏠' },
-    { value: 'Repairs', label: 'Naprawy', icon: '🛠️' },
-    { value: 'Tech', label: 'Technika', icon: '📱' },
-    { value: 'Pets', label: 'Zwierzęta', icon: '🐾' },
-    { value: 'Auto', label: 'Auto', icon: '🚗' },
-    { value: 'Moving', label: 'Przeprowadzka', icon: '📦' },
-    { value: 'Activities', label: 'Aktywności', icon: '🎯' },
-    { value: 'Events', label: 'Wydarzenia', icon: '🎉' },
-    { value: 'Creative', label: 'Kreatywne', icon: '🎨' },
-  ],
-  UA: [
-    { value: 'Beauty', label: 'Краса', icon: '💄' },
-    { value: 'Wellness', label: 'Велнес', icon: '🧘' },
-    { value: 'Home', label: 'Дім', icon: '🏠' },
-    { value: 'Repairs', label: 'Ремонт', icon: '🛠️' },
-    { value: 'Tech', label: 'Техніка', icon: '📱' },
-    { value: 'Pets', label: 'Тварини', icon: '🐾' },
-    { value: 'Auto', label: 'Авто', icon: '🚗' },
-    { value: 'Moving', label: 'Переїзд', icon: '📦' },
-    { value: 'Activities', label: 'Активності', icon: '🎯' },
-    { value: 'Events', label: 'Події', icon: '🎉' },
-    { value: 'Creative', label: 'Креатив', icon: '🎨' },
-  ],
-  IT: [
-    { value: 'Beauty', label: 'Bellezza', icon: '💄' },
-    { value: 'Wellness', label: 'Benessere', icon: '🧘' },
-    { value: 'Home', label: 'Casa', icon: '🏠' },
-    { value: 'Repairs', label: 'Riparazioni', icon: '🛠️' },
-    { value: 'Tech', label: 'Tecnologia', icon: '📱' },
-    { value: 'Pets', label: 'Animali', icon: '🐾' },
-    { value: 'Auto', label: 'Auto', icon: '🚗' },
-    { value: 'Moving', label: 'Trasloco', icon: '📦' },
-    { value: 'Activities', label: 'Attività', icon: '🎯' },
-    { value: 'Events', label: 'Eventi', icon: '🎉' },
-    { value: 'Creative', label: 'Creativo', icon: '🎨' },
-  ],
-  FR: [
-    { value: 'Beauty', label: 'Beauté', icon: '💄' },
-    { value: 'Wellness', label: 'Bien-être', icon: '🧘' },
-    { value: 'Home', label: 'Maison', icon: '🏠' },
-    { value: 'Repairs', label: 'Réparations', icon: '🛠️' },
-    { value: 'Tech', label: 'Tech', icon: '📱' },
-    { value: 'Pets', label: 'Animaux', icon: '🐾' },
-    { value: 'Auto', label: 'Auto', icon: '🚗' },
-    { value: 'Moving', label: 'Déménagement', icon: '📦' },
-    { value: 'Activities', label: 'Activités', icon: '🎯' },
-    { value: 'Events', label: 'Événements', icon: '🎉' },
-    { value: 'Creative', label: 'Créatif', icon: '🎨' },
-  ],
-  AR: [
-    { value: 'Beauty', label: 'الجمال', icon: '💄' },
-    { value: 'Wellness', label: 'العافية', icon: '🧘' },
-    { value: 'Home', label: 'المنزل', icon: '🏠' },
-    { value: 'Repairs', label: 'الإصلاحات', icon: '🛠️' },
-    { value: 'Tech', label: 'التقنية', icon: '📱' },
-    { value: 'Pets', label: 'الحيوانات', icon: '🐾' },
-    { value: 'Auto', label: 'السيارات', icon: '🚗' },
-    { value: 'Moving', label: 'الانتقال', icon: '📦' },
-    { value: 'Activities', label: 'الأنشطة', icon: '🎯' },
-    { value: 'Events', label: 'الفعاليات', icon: '🎉' },
-    { value: 'Creative', label: 'إبداعي', icon: '🎨' },
-  ],
+  ES: [] as CategoryItem[],
+  CZ: [] as CategoryItem[],
+  DE: [] as CategoryItem[],
+  PL: [] as CategoryItem[],
+  UA: [] as CategoryItem[],
+  IT: [] as CategoryItem[],
+  FR: [] as CategoryItem[],
+  AR: [] as CategoryItem[],
 };
 
-const beautySubcategoriesBase: Record<AppLanguage, SubcategoryItem[]> = {
-  EN: [
+(['ES', 'CZ', 'DE', 'PL', 'UA', 'IT', 'FR', 'AR'] as AppLanguage[]).forEach((lang) => {
+  categoriesByLanguage[lang] = categoriesByLanguage.EN;
+});
+
+const subcategoriesByCategory: Record<string, SubcategoryItem[]> = {
+  Beauty: [
     { value: 'Hair', label: 'Hair' },
     { value: 'Nails', label: 'Nails' },
     { value: 'Brows', label: 'Brows' },
@@ -180,742 +298,56 @@ const beautySubcategoriesBase: Record<AppLanguage, SubcategoryItem[]> = {
     { value: 'Makeup', label: 'Makeup' },
     { value: 'Keratin', label: 'Keratin' },
   ],
-  RU: [
-    { value: 'Hair', label: 'Волосы' },
-    { value: 'Nails', label: 'Ногти' },
-    { value: 'Brows', label: 'Брови' },
-    { value: 'Lashes', label: 'Ресницы' },
-    { value: 'Makeup', label: 'Макияж' },
-    { value: 'Keratin', label: 'Кератин' },
+  Wellness: [
+    { value: 'Massage', label: 'Massage' },
+    { value: 'SPA', label: 'SPA' },
+    { value: 'Yoga', label: 'Yoga' },
   ],
-  ES: [
-    { value: 'Hair', label: 'Cabello' },
-    { value: 'Nails', label: 'Uñas' },
-    { value: 'Brows', label: 'Cejas' },
-    { value: 'Lashes', label: 'Pestañas' },
-    { value: 'Makeup', label: 'Maquillaje' },
-    { value: 'Keratin', label: 'Keratina' },
+  Home: [
+    { value: 'Cleaning', label: 'Cleaning' },
+    { value: 'Deep Cleaning', label: 'Deep Cleaning' },
+    { value: 'Furniture', label: 'Furniture' },
   ],
-  CZ: [
-    { value: 'Hair', label: 'Vlasy' },
-    { value: 'Nails', label: 'Nehty' },
-    { value: 'Brows', label: 'Obočí' },
-    { value: 'Lashes', label: 'Řasy' },
-    { value: 'Makeup', label: 'Make-up' },
-    { value: 'Keratin', label: 'Keratin' },
+  Repairs: [
+    { value: 'Electrician', label: 'Electrician' },
+    { value: 'Plumber', label: 'Plumber' },
+    { value: 'Handyman', label: 'Handyman' },
   ],
-  DE: [
-    { value: 'Hair', label: 'Haare' },
-    { value: 'Nails', label: 'Nägel' },
-    { value: 'Brows', label: 'Augenbrauen' },
-    { value: 'Lashes', label: 'Wimpern' },
-    { value: 'Makeup', label: 'Make-up' },
-    { value: 'Keratin', label: 'Keratin' },
+  Tech: [
+    { value: 'Phone Repair', label: 'Phone Repair' },
+    { value: 'Laptop Repair', label: 'Laptop Repair' },
+    { value: 'Setup', label: 'Setup' },
   ],
-  PL: [
-    { value: 'Hair', label: 'Włosy' },
-    { value: 'Nails', label: 'Paznokcie' },
-    { value: 'Brows', label: 'Brwi' },
-    { value: 'Lashes', label: 'Rzęsy' },
-    { value: 'Makeup', label: 'Makijaż' },
-    { value: 'Keratin', label: 'Keratyna' },
+  Pets: [
+    { value: 'Pet Sitting', label: 'Pet Sitting' },
+    { value: 'Dog Walking', label: 'Dog Walking' },
+    { value: 'Grooming', label: 'Grooming' },
   ],
-  UA: [
-    { value: 'Hair', label: 'Волосся' },
-    { value: 'Nails', label: 'Нігті' },
-    { value: 'Brows', label: 'Брови' },
-    { value: 'Lashes', label: 'Вії' },
-    { value: 'Makeup', label: 'Макіяж' },
-    { value: 'Keratin', label: 'Кератин' },
+  Auto: [
+    { value: 'Car Wash', label: 'Car Wash' },
+    { value: 'Diagnostics', label: 'Diagnostics' },
+    { value: 'Tyres', label: 'Tyres' },
   ],
-  IT: [
-    { value: 'Hair', label: 'Capelli' },
-    { value: 'Nails', label: 'Unghie' },
-    { value: 'Brows', label: 'Sopracciglia' },
-    { value: 'Lashes', label: 'Ciglia' },
-    { value: 'Makeup', label: 'Make-up' },
-    { value: 'Keratin', label: 'Cheratina' },
+  Moving: [
+    { value: 'Small Moves', label: 'Small Moves' },
+    { value: 'Packing', label: 'Packing' },
+    { value: 'Van Help', label: 'Van Help' },
   ],
-  FR: [
-    { value: 'Hair', label: 'Cheveux' },
-    { value: 'Nails', label: 'Ongles' },
-    { value: 'Brows', label: 'Sourcils' },
-    { value: 'Lashes', label: 'Cils' },
-    { value: 'Makeup', label: 'Maquillage' },
-    { value: 'Keratin', label: 'Kératine' },
+  Activities: [
+    { value: 'Coach', label: 'Coach' },
+    { value: 'Tutor', label: 'Tutor' },
+    { value: 'Guide', label: 'Guide' },
   ],
-  AR: [
-    { value: 'Hair', label: 'الشعر' },
-    { value: 'Nails', label: 'الأظافر' },
-    { value: 'Brows', label: 'الحواجب' },
-    { value: 'Lashes', label: 'الرموش' },
-    { value: 'Makeup', label: 'المكياج' },
-    { value: 'Keratin', label: 'الكيراتين' },
+  Events: [
+    { value: 'Photographer', label: 'Photographer' },
+    { value: 'Decor', label: 'Decor' },
+    { value: 'Host', label: 'Host' },
   ],
-};
-
-const subcategoriesByCategory: Record<string, Record<AppLanguage, SubcategoryItem[]>> = {
-  Beauty: beautySubcategoriesBase,
-};
-
-const pageTexts: Record<
-  AppLanguage,
-  {
-    title: string;
-    subtitle: string;
-    photosSection: string;
-    photosHint: string;
-    uploadPhotos: string;
-    tapMainPhotoHint: string;
-    mainPhoto: string;
-    deletePhoto: string;
-    clearField: string;
-    requiredFieldsHint: string;
-    serviceTitle: string;
-    serviceTitlePlaceholder: string;
-    description: string;
-    descriptionPlaceholder: string;
-    category: string;
-    subcategory: string;
-    price: string;
-    pricePlaceholder: string;
-    location: string;
-    locationHint: string;
-    city: string;
-    cityPlaceholder: string;
-    district: string;
-    districtPlaceholder: string;
-    addressDetails: string;
-    addressDetailsPlaceholder: string;
-    hours: string;
-    hoursPlaceholder: string;
-    availableToday: string;
-    availableTodayHint: string;
-    atClient: string;
-    atMyPlace: string;
-    online: string;
-    paymentMethods: string;
-    paymentMethodsHint: string;
-    cash: string;
-    card: string;
-    wallet: string;
-    contact: string;
-    contactHint: string;
-    phone: string;
-    whatsapp: string;
-    businessWhatsapp: string;
-    telegram: string;
-    viber: string;
-    instagram: string;
-    website: string;
-    email: string;
-    chooseCountry: string;
-    searchCountry: string;
-    phoneNumber: string;
-    publishService: string;
-    pleaseEnterServiceTitle: string;
-    pleaseEnterPrice: string;
-    pleaseEnterCity: string;
-    pleaseEnterDistrict: string;
-    servicePublishedSuccessfully: string;
-  }
-> = {
-  EN: {
-    title: 'Add your service',
-    subtitle: 'Create a strong listing for clients nearby',
-    photosSection: 'Photos',
-    photosHint: 'Add great photos to get more views',
-    uploadPhotos: 'Upload photos',
-    tapMainPhotoHint: 'Tap any photo to make it main',
-    mainPhoto: 'Main',
-    deletePhoto: 'Delete photo',
-    clearField: 'Clear field',
-    requiredFieldsHint: '* Required fields',
-    serviceTitle: 'Service title',
-    serviceTitlePlaceholder: 'Enter service title',
-    description: 'Description',
-    descriptionPlaceholder: 'Describe your service...',
-    category: 'Category',
-    subcategory: 'Subcategory',
-    price: 'Price',
-    pricePlaceholder: 'Enter price',
-    location: 'Location',
-    locationHint: 'Add a clearer structured location for clients',
-    city: 'City / town',
-    cityPlaceholder: 'Enter city or town',
-    district: 'District / area',
-    districtPlaceholder: 'Enter district or area',
-    addressDetails: 'Address details',
-    addressDetailsPlaceholder: 'Building, street, floor, studio number...',
-    hours: 'Working hours',
-    hoursPlaceholder: 'Select hours',
-    availableToday: 'Available today',
-    availableTodayHint: 'This affects the map pin status',
-    atClient: 'At client',
-    atMyPlace: 'At my place',
-    online: 'Online',
-    paymentMethods: 'Payment methods',
-    paymentMethodsHint: 'How can clients pay?',
-    cash: 'Cash',
-    card: 'Card',
-    wallet: 'E-money',
-    contact: 'Contacts',
-    contactHint: 'Add every contact channel separately',
-    phone: 'Phone',
-    whatsapp: 'WhatsApp',
-    businessWhatsapp: 'Business WhatsApp',
-    telegram: 'Telegram',
-    viber: 'Viber',
-    instagram: 'Instagram',
-    website: 'Website',
-    email: 'Email',
-    chooseCountry: 'Choose country',
-    searchCountry: 'Search country or code',
-    phoneNumber: 'Phone number',
-    publishService: 'Publish service',
-    pleaseEnterServiceTitle: 'Please enter service title',
-    pleaseEnterPrice: 'Please enter price',
-    pleaseEnterCity: 'Please enter city / town',
-    pleaseEnterDistrict: 'Please enter district / area',
-    servicePublishedSuccessfully: 'Service published successfully',
-  },
-  RU: {
-    title: 'Добавить услугу',
-    subtitle: 'Создайте сильное объявление для клиентов рядом',
-    photosSection: 'Фото',
-    photosHint: 'Добавьте хорошие фото, чтобы получить больше просмотров',
-    uploadPhotos: 'Загрузить фото',
-    tapMainPhotoHint: 'Нажмите на фото, чтобы сделать его главным',
-    mainPhoto: 'Главное',
-    deletePhoto: 'Удалить фото',
-    clearField: 'Очистить поле',
-    requiredFieldsHint: '* Обязательные поля',
-    serviceTitle: 'Название услуги',
-    serviceTitlePlaceholder: 'Введите название услуги',
-    description: 'Описание',
-    descriptionPlaceholder: 'Опишите вашу услугу...',
-    category: 'Категория',
-    subcategory: 'Подкатегория',
-    price: 'Цена',
-    pricePlaceholder: 'Введите цену',
-    location: 'Локация',
-    locationHint: 'Добавьте более понятную локацию для клиентов',
-    city: 'Город / населённый пункт',
-    cityPlaceholder: 'Введите город или населённый пункт',
-    district: 'Район / зона',
-    districtPlaceholder: 'Введите район или зону',
-    addressDetails: 'Подробный адрес',
-    addressDetailsPlaceholder: 'Дом, улица, этаж, номер студии...',
-    hours: 'Часы работы',
-    hoursPlaceholder: 'Выберите часы',
-    availableToday: 'Доступно сегодня',
-    availableTodayHint: 'Это влияет на статус пина на карте',
-    atClient: 'У клиента',
-    atMyPlace: 'У меня',
-    online: 'Онлайн',
-    paymentMethods: 'Способы оплаты',
-    paymentMethodsHint: 'Как клиенты могут оплатить?',
-    cash: 'Наличные',
-    card: 'Карта',
-    wallet: 'Электронные деньги',
-    contact: 'Контакты',
-    contactHint: 'Добавьте каждый канал связи отдельно',
-    phone: 'Телефон',
-    whatsapp: 'WhatsApp',
-    businessWhatsapp: 'Business WhatsApp',
-    telegram: 'Telegram',
-    viber: 'Viber',
-    instagram: 'Instagram',
-    website: 'Сайт',
-    email: 'Email',
-    chooseCountry: 'Выберите страну',
-    searchCountry: 'Поиск страны или кода',
-    phoneNumber: 'Номер телефона',
-    publishService: 'Опубликовать услугу',
-    pleaseEnterServiceTitle: 'Введите название услуги',
-    pleaseEnterPrice: 'Введите цену',
-    pleaseEnterCity: 'Введите город / населённый пункт',
-    pleaseEnterDistrict: 'Введите район / зону',
-    servicePublishedSuccessfully: 'Услуга успешно опубликована',
-  },
-  ES: {
-    title: 'Añadir tu servicio',
-    subtitle: 'Crea un anuncio fuerte para clientes cercanos',
-    photosSection: 'Fotos',
-    photosHint: 'Añade buenas fotos para conseguir más visitas',
-    uploadPhotos: 'Subir fotos',
-    tapMainPhotoHint: 'Toca una foto para ponerla como principal',
-    mainPhoto: 'Principal',
-    deletePhoto: 'Eliminar foto',
-    clearField: 'Borrar campo',
-    requiredFieldsHint: '* Campos obligatorios',
-    serviceTitle: 'Título del servicio',
-    serviceTitlePlaceholder: 'Introduce el título del servicio',
-    description: 'Descripción',
-    descriptionPlaceholder: 'Describe tu servicio...',
-    category: 'Categoría',
-    subcategory: 'Subcategoría',
-    price: 'Precio',
-    pricePlaceholder: 'Introduce el precio',
-    location: 'Ubicación',
-    locationHint: 'Añade una ubicación más clara para los clientes',
-    city: 'Ciudad / localidad',
-    cityPlaceholder: 'Introduce ciudad o localidad',
-    district: 'Distrito / zona',
-    districtPlaceholder: 'Introduce distrito o zona',
-    addressDetails: 'Dirección detallada',
-    addressDetailsPlaceholder: 'Edificio, calle, piso, número de estudio...',
-    hours: 'Horario',
-    hoursPlaceholder: 'Selecciona horario',
-    availableToday: 'Disponible hoy',
-    availableTodayHint: 'Esto afecta el estado del pin en el mapa',
-    atClient: 'A domicilio',
-    atMyPlace: 'En mi lugar',
-    online: 'Online',
-    paymentMethods: 'Métodos de pago',
-    paymentMethodsHint: '¿Cómo pueden pagar los clientes?',
-    cash: 'Efectivo',
-    card: 'Tarjeta',
-    wallet: 'Dinero electrónico',
-    contact: 'Contactos',
-    contactHint: 'Añade cada canal de contacto por separado',
-    phone: 'Teléfono',
-    whatsapp: 'WhatsApp',
-    businessWhatsapp: 'WhatsApp Business',
-    telegram: 'Telegram',
-    viber: 'Viber',
-    instagram: 'Instagram',
-    website: 'Sitio web',
-    email: 'Email',
-    chooseCountry: 'Elegir país',
-    searchCountry: 'Buscar país o código',
-    phoneNumber: 'Número de teléfono',
-    publishService: 'Publicar servicio',
-    pleaseEnterServiceTitle: 'Introduce el título del servicio',
-    pleaseEnterPrice: 'Introduce el precio',
-    pleaseEnterCity: 'Introduce ciudad / localidad',
-    pleaseEnterDistrict: 'Introduce distrito / zona',
-    servicePublishedSuccessfully: 'Servicio publicado con éxito',
-  },
-  CZ: {
-    title: 'Přidat službu',
-    subtitle: 'Vytvořte silnou nabídku pro klienty v okolí',
-    photosSection: 'Fotky',
-    photosHint: 'Přidejte kvalitní fotky pro více zobrazení',
-    uploadPhotos: 'Nahrát fotky',
-    tapMainPhotoHint: 'Klepněte na fotku pro nastavení hlavní',
-    mainPhoto: 'Hlavní',
-    deletePhoto: 'Smazat fotku',
-    clearField: 'Vymazat pole',
-    requiredFieldsHint: '* Povinná pole',
-    serviceTitle: 'Název služby',
-    serviceTitlePlaceholder: 'Zadejte název služby',
-    description: 'Popis',
-    descriptionPlaceholder: 'Popište svou službu...',
-    category: 'Kategorie',
-    subcategory: 'Podkategorie',
-    price: 'Cena',
-    pricePlaceholder: 'Zadejte cenu',
-    location: 'Lokalita',
-    locationHint: 'Přidejte jasnější lokalitu pro klienty',
-    city: 'Město / obec',
-    cityPlaceholder: 'Zadejte město nebo obec',
-    district: 'Čtvrť / oblast',
-    districtPlaceholder: 'Zadejte čtvrť nebo oblast',
-    addressDetails: 'Podrobná adresa',
-    addressDetailsPlaceholder: 'Budova, ulice, patro, číslo studia...',
-    hours: 'Pracovní doba',
-    hoursPlaceholder: 'Vyberte hodiny',
-    availableToday: 'Dostupné dnes',
-    availableTodayHint: 'To ovlivňuje stav pinu na mapě',
-    atClient: 'U klienta',
-    atMyPlace: 'U mě',
-    online: 'Online',
-    paymentMethods: 'Způsoby platby',
-    paymentMethodsHint: 'Jak mohou klienti zaplatit?',
-    cash: 'Hotovost',
-    card: 'Karta',
-    wallet: 'Elektronické peníze',
-    contact: 'Kontakty',
-    contactHint: 'Přidejte každý kontakt zvlášť',
-    phone: 'Telefon',
-    whatsapp: 'WhatsApp',
-    businessWhatsapp: 'Business WhatsApp',
-    telegram: 'Telegram',
-    viber: 'Viber',
-    instagram: 'Instagram',
-    website: 'Web',
-    email: 'Email',
-    chooseCountry: 'Vyberte zemi',
-    searchCountry: 'Hledat zemi nebo kód',
-    phoneNumber: 'Telefonní číslo',
-    publishService: 'Publikovat službu',
-    pleaseEnterServiceTitle: 'Zadejte název služby',
-    pleaseEnterPrice: 'Zadejte cenu',
-    pleaseEnterCity: 'Zadejte město / obec',
-    pleaseEnterDistrict: 'Zadejte čtvrť / oblast',
-    servicePublishedSuccessfully: 'Služba byla úspěšně publikována',
-  },
-  DE: {
-    title: 'Dienstleistung hinzufügen',
-    subtitle: 'Erstelle ein starkes Angebot für Kunden in der Nähe',
-    photosSection: 'Fotos',
-    photosHint: 'Füge gute Fotos hinzu, um mehr Aufrufe zu erhalten',
-    uploadPhotos: 'Fotos hochladen',
-    tapMainPhotoHint: 'Tippe auf ein Foto, um es als Hauptfoto festzulegen',
-    mainPhoto: 'Hauptfoto',
-    deletePhoto: 'Foto löschen',
-    clearField: 'Feld leeren',
-    requiredFieldsHint: '* Pflichtfelder',
-    serviceTitle: 'Titel der Dienstleistung',
-    serviceTitlePlaceholder: 'Titel der Dienstleistung eingeben',
-    description: 'Beschreibung',
-    descriptionPlaceholder: 'Beschreibe deine Dienstleistung...',
-    category: 'Kategorie',
-    subcategory: 'Unterkategorie',
-    price: 'Preis',
-    pricePlaceholder: 'Preis eingeben',
-    location: 'Standort',
-    locationHint: 'Füge einen klareren Standort für Kunden hinzu',
-    city: 'Stadt / Ort',
-    cityPlaceholder: 'Stadt oder Ort eingeben',
-    district: 'Bezirk / Gebiet',
-    districtPlaceholder: 'Bezirk oder Gebiet eingeben',
-    addressDetails: 'Adressdetails',
-    addressDetailsPlaceholder: 'Gebäude, Straße, Etage, Studio-Nummer...',
-    hours: 'Arbeitszeiten',
-    hoursPlaceholder: 'Zeiten wählen',
-    availableToday: 'Heute verfügbar',
-    availableTodayHint: 'Das beeinflusst den Status des Kartenpins',
-    atClient: 'Beim Kunden',
-    atMyPlace: 'Bei mir',
-    online: 'Online',
-    paymentMethods: 'Zahlungsmethoden',
-    paymentMethodsHint: 'Wie können Kunden bezahlen?',
-    cash: 'Bar',
-    card: 'Karte',
-    wallet: 'E-Geld',
-    contact: 'Kontakte',
-    contactHint: 'Jeden Kontaktkanal separat hinzufügen',
-    phone: 'Telefon',
-    whatsapp: 'WhatsApp',
-    businessWhatsapp: 'Business WhatsApp',
-    telegram: 'Telegram',
-    viber: 'Viber',
-    instagram: 'Instagram',
-    website: 'Website',
-    email: 'E-Mail',
-    chooseCountry: 'Land wählen',
-    searchCountry: 'Land oder Code suchen',
-    phoneNumber: 'Telefonnummer',
-    publishService: 'Dienstleistung veröffentlichen',
-    pleaseEnterServiceTitle: 'Bitte Titel der Dienstleistung eingeben',
-    pleaseEnterPrice: 'Bitte Preis eingeben',
-    pleaseEnterCity: 'Bitte Stadt / Ort eingeben',
-    pleaseEnterDistrict: 'Bitte Bezirk / Gebiet eingeben',
-    servicePublishedSuccessfully: 'Dienstleistung erfolgreich veröffentlicht',
-  },
-  PL: {
-    title: 'Dodaj usługę',
-    subtitle: 'Stwórz mocne ogłoszenie dla klientów w pobliżu',
-    photosSection: 'Zdjęcia',
-    photosHint: 'Dodaj dobre zdjęcia, aby zdobyć więcej wyświetleń',
-    uploadPhotos: 'Prześlij zdjęcia',
-    tapMainPhotoHint: 'Dotknij zdjęcia, aby ustawić je jako główne',
-    mainPhoto: 'Główne',
-    deletePhoto: 'Usuń zdjęcie',
-    clearField: 'Wyczyść pole',
-    requiredFieldsHint: '* Pola obowiązkowe',
-    serviceTitle: 'Nazwa usługi',
-    serviceTitlePlaceholder: 'Wpisz nazwę usługi',
-    description: 'Opis',
-    descriptionPlaceholder: 'Opisz swoją usługę...',
-    category: 'Kategoria',
-    subcategory: 'Podkategoria',
-    price: 'Cena',
-    pricePlaceholder: 'Wpisz cenę',
-    location: 'Lokalizacja',
-    locationHint: 'Dodaj bardziej przejrzystą lokalizację dla klientów',
-    city: 'Miasto / miejscowość',
-    cityPlaceholder: 'Wpisz miasto lub miejscowość',
-    district: 'Dzielnica / obszar',
-    districtPlaceholder: 'Wpisz dzielnicę lub obszar',
-    addressDetails: 'Szczegóły adresu',
-    addressDetailsPlaceholder: 'Budynek, ulica, piętro, numer studia...',
-    hours: 'Godziny pracy',
-    hoursPlaceholder: 'Wybierz godziny',
-    availableToday: 'Dostępne dziś',
-    availableTodayHint: 'Wpływa to na status pinezki na mapie',
-    atClient: 'U klienta',
-    atMyPlace: 'U mnie',
-    online: 'Online',
-    paymentMethods: 'Metody płatności',
-    paymentMethodsHint: 'Jak klienci mogą zapłacić?',
-    cash: 'Gotówka',
-    card: 'Karta',
-    wallet: 'Pieniądz elektroniczny',
-    contact: 'Kontakty',
-    contactHint: 'Dodaj każdy kanał kontaktu osobno',
-    phone: 'Telefon',
-    whatsapp: 'WhatsApp',
-    businessWhatsapp: 'Business WhatsApp',
-    telegram: 'Telegram',
-    viber: 'Viber',
-    instagram: 'Instagram',
-    website: 'Strona internetowa',
-    email: 'Email',
-    chooseCountry: 'Wybierz kraj',
-    searchCountry: 'Szukaj kraju lub kodu',
-    phoneNumber: 'Numer telefonu',
-    publishService: 'Opublikuj usługę',
-    pleaseEnterServiceTitle: 'Wpisz nazwę usługi',
-    pleaseEnterPrice: 'Wpisz cenę',
-    pleaseEnterCity: 'Wpisz miasto / miejscowość',
-    pleaseEnterDistrict: 'Wpisz dzielnicę / obszar',
-    servicePublishedSuccessfully: 'Usługa została opublikowana',
-  },
-  UA: {
-    title: 'Додати послугу',
-    subtitle: 'Створіть сильне оголошення для клієнтів поруч',
-    photosSection: 'Фото',
-    photosHint: 'Додайте якісні фото, щоб отримати більше переглядів',
-    uploadPhotos: 'Завантажити фото',
-    tapMainPhotoHint: 'Натисніть на фото, щоб зробити його головним',
-    mainPhoto: 'Головне',
-    deletePhoto: 'Видалити фото',
-    clearField: 'Очистити поле',
-    requiredFieldsHint: '* Обовʼязкові поля',
-    serviceTitle: 'Назва послуги',
-    serviceTitlePlaceholder: 'Введіть назву послуги',
-    description: 'Опис',
-    descriptionPlaceholder: 'Опишіть вашу послугу...',
-    category: 'Категорія',
-    subcategory: 'Підкатегорія',
-    price: 'Ціна',
-    pricePlaceholder: 'Введіть ціну',
-    location: 'Локація',
-    locationHint: 'Додайте зрозумілішу локацію для клієнтів',
-    city: 'Місто / населений пункт',
-    cityPlaceholder: 'Введіть місто або населений пункт',
-    district: 'Район / зона',
-    districtPlaceholder: 'Введіть район або зону',
-    addressDetails: 'Детальна адреса',
-    addressDetailsPlaceholder: 'Будинок, вулиця, поверх, номер студії...',
-    hours: 'Години роботи',
-    hoursPlaceholder: 'Оберіть години',
-    availableToday: 'Доступно сьогодні',
-    availableTodayHint: 'Це впливає на статус піна на мапі',
-    atClient: 'У клієнта',
-    atMyPlace: 'У мене',
-    online: 'Онлайн',
-    paymentMethods: 'Способи оплати',
-    paymentMethodsHint: 'Як клієнти можуть оплатити?',
-    cash: 'Готівка',
-    card: 'Карта',
-    wallet: 'Електронні гроші',
-    contact: 'Контакти',
-    contactHint: 'Додайте кожен канал звʼязку окремо',
-    phone: 'Телефон',
-    whatsapp: 'WhatsApp',
-    businessWhatsapp: 'Business WhatsApp',
-    telegram: 'Telegram',
-    viber: 'Viber',
-    instagram: 'Instagram',
-    website: 'Сайт',
-    email: 'Email',
-    chooseCountry: 'Оберіть країну',
-    searchCountry: 'Пошук країни або коду',
-    phoneNumber: 'Номер телефону',
-    publishService: 'Опублікувати послугу',
-    pleaseEnterServiceTitle: 'Введіть назву послуги',
-    pleaseEnterPrice: 'Введіть ціну',
-    pleaseEnterCity: 'Введіть місто / населений пункт',
-    pleaseEnterDistrict: 'Введіть район / зону',
-    servicePublishedSuccessfully: 'Послугу успішно опубліковано',
-  },
-  IT: {
-    title: 'Aggiungi il tuo servizio',
-    subtitle: 'Crea un annuncio forte per clienti nelle vicinanze',
-    photosSection: 'Foto',
-    photosHint: 'Aggiungi belle foto per ottenere più visualizzazioni',
-    uploadPhotos: 'Carica foto',
-    tapMainPhotoHint: 'Tocca una foto per renderla principale',
-    mainPhoto: 'Principale',
-    deletePhoto: 'Elimina foto',
-    clearField: 'Cancella campo',
-    requiredFieldsHint: '* Campi obbligatori',
-    serviceTitle: 'Titolo del servizio',
-    serviceTitlePlaceholder: 'Inserisci il titolo del servizio',
-    description: 'Descrizione',
-    descriptionPlaceholder: 'Descrivi il tuo servizio...',
-    category: 'Categoria',
-    subcategory: 'Sottocategoria',
-    price: 'Prezzo',
-    pricePlaceholder: 'Inserisci il prezzo',
-    location: 'Posizione',
-    locationHint: 'Aggiungi una posizione più chiara per i clienti',
-    city: 'Città / località',
-    cityPlaceholder: 'Inserisci città o località',
-    district: 'Zona / area',
-    districtPlaceholder: 'Inserisci zona o area',
-    addressDetails: 'Dettagli indirizzo',
-    addressDetailsPlaceholder: 'Edificio, via, piano, numero studio...',
-    hours: 'Orari di lavoro',
-    hoursPlaceholder: 'Seleziona orari',
-    availableToday: 'Disponibile oggi',
-    availableTodayHint: 'Questo influenza lo stato del pin sulla mappa',
-    atClient: 'Dal cliente',
-    atMyPlace: 'Da me',
-    online: 'Online',
-    paymentMethods: 'Metodi di pagamento',
-    paymentMethodsHint: 'Come possono pagare i clienti?',
-    cash: 'Contanti',
-    card: 'Carta',
-    wallet: 'Denaro elettronico',
-    contact: 'Contatti',
-    contactHint: 'Aggiungi ogni canale di contatto separatamente',
-    phone: 'Telefono',
-    whatsapp: 'WhatsApp',
-    businessWhatsapp: 'WhatsApp Business',
-    telegram: 'Telegram',
-    viber: 'Viber',
-    instagram: 'Instagram',
-    website: 'Sito web',
-    email: 'Email',
-    chooseCountry: 'Scegli paese',
-    searchCountry: 'Cerca paese o prefisso',
-    phoneNumber: 'Numero di telefono',
-    publishService: 'Pubblica servizio',
-    pleaseEnterServiceTitle: 'Inserisci il titolo del servizio',
-    pleaseEnterPrice: 'Inserisci il prezzo',
-    pleaseEnterCity: 'Inserisci città / località',
-    pleaseEnterDistrict: 'Inserisci zona / area',
-    servicePublishedSuccessfully: 'Servizio pubblicato con successo',
-  },
-  FR: {
-    title: 'Ajouter votre service',
-    subtitle: 'Créez une annonce forte pour les clients à proximité',
-    photosSection: 'Photos',
-    photosHint: 'Ajoutez de belles photos pour obtenir plus de vues',
-    uploadPhotos: 'Télécharger des photos',
-    tapMainPhotoHint: 'Touchez une photo pour la mettre en principale',
-    mainPhoto: 'Principale',
-    deletePhoto: 'Supprimer photo',
-    clearField: 'Effacer le champ',
-    requiredFieldsHint: '* Champs obligatoires',
-    serviceTitle: 'Titre du service',
-    serviceTitlePlaceholder: 'Entrez le titre du service',
-    description: 'Description',
-    descriptionPlaceholder: 'Décrivez votre service...',
-    category: 'Catégorie',
-    subcategory: 'Sous-catégorie',
-    price: 'Prix',
-    pricePlaceholder: 'Entrez le prix',
-    location: 'Localisation',
-    locationHint: 'Ajoutez une localisation plus claire pour les clients',
-    city: 'Ville / localité',
-    cityPlaceholder: 'Entrez la ville ou localité',
-    district: 'Quartier / zone',
-    districtPlaceholder: 'Entrez le quartier ou la zone',
-    addressDetails: 'Détails de l’adresse',
-    addressDetailsPlaceholder: 'Bâtiment, rue, étage, numéro du studio...',
-    hours: 'Horaires',
-    hoursPlaceholder: 'Sélectionnez les horaires',
-    availableToday: 'Disponible aujourd’hui',
-    availableTodayHint: 'Cela affecte le statut du pin sur la carte',
-    atClient: 'Chez le client',
-    atMyPlace: 'Chez moi',
-    online: 'En ligne',
-    paymentMethods: 'Moyens de paiement',
-    paymentMethodsHint: 'Comment les clients peuvent-ils payer ?',
-    cash: 'Espèces',
-    card: 'Carte',
-    wallet: 'Argent électronique',
-    contact: 'Contacts',
-    contactHint: 'Ajoutez chaque canal de contact séparément',
-    phone: 'Téléphone',
-    whatsapp: 'WhatsApp',
-    businessWhatsapp: 'WhatsApp Business',
-    telegram: 'Telegram',
-    viber: 'Viber',
-    instagram: 'Instagram',
-    website: 'Site web',
-    email: 'Email',
-    chooseCountry: 'Choisir un pays',
-    searchCountry: 'Chercher un pays ou code',
-    phoneNumber: 'Numéro de téléphone',
-    publishService: 'Publier le service',
-    pleaseEnterServiceTitle: 'Entrez le titre du service',
-    pleaseEnterPrice: 'Entrez le prix',
-    pleaseEnterCity: 'Entrez la ville / localité',
-    pleaseEnterDistrict: 'Entrez le quartier / zone',
-    servicePublishedSuccessfully: 'Service publié avec succès',
-  },
-  AR: {
-    title: 'أضف خدمتك',
-    subtitle: 'أنشئ إعلانًا قويًا للعملاء القريبين',
-    photosSection: 'الصور',
-    photosHint: 'أضف صورًا جميلة للحصول على المزيد من المشاهدات',
-    uploadPhotos: 'رفع الصور',
-    tapMainPhotoHint: 'اضغط على أي صورة لجعلها الرئيسية',
-    mainPhoto: 'رئيسية',
-    deletePhoto: 'حذف الصورة',
-    clearField: 'مسح الحقل',
-    requiredFieldsHint: '* الحقول المطلوبة',
-    serviceTitle: 'عنوان الخدمة',
-    serviceTitlePlaceholder: 'أدخل عنوان الخدمة',
-    description: 'الوصف',
-    descriptionPlaceholder: 'صف خدمتك...',
-    category: 'الفئة',
-    subcategory: 'الفئة الفرعية',
-    price: 'السعر',
-    pricePlaceholder: 'أدخل السعر',
-    location: 'الموقع',
-    locationHint: 'أضف موقعًا أوضح للعملاء',
-    city: 'المدينة / البلدة',
-    cityPlaceholder: 'أدخل المدينة أو البلدة',
-    district: 'المنطقة / الحي',
-    districtPlaceholder: 'أدخل المنطقة أو الحي',
-    addressDetails: 'تفاصيل العنوان',
-    addressDetailsPlaceholder: 'المبنى، الشارع، الطابق، رقم الاستوديو...',
-    hours: 'ساعات العمل',
-    hoursPlaceholder: 'اختر الساعات',
-    availableToday: 'متاح اليوم',
-    availableTodayHint: 'هذا يؤثر على حالة الدبوس على الخريطة',
-    atClient: 'عند العميل',
-    atMyPlace: 'في مكاني',
-    online: 'أونلاين',
-    paymentMethods: 'طرق الدفع',
-    paymentMethodsHint: 'كيف يمكن للعملاء الدفع؟',
-    cash: 'نقدًا',
-    card: 'بطاقة',
-    wallet: 'أموال إلكترونية',
-    contact: 'جهات الاتصال',
-    contactHint: 'أضف كل قناة تواصل بشكل منفصل',
-    phone: 'الهاتف',
-    whatsapp: 'واتساب',
-    businessWhatsapp: 'واتساب للأعمال',
-    telegram: 'تيليجرام',
-    viber: 'فايبر',
-    instagram: 'إنستغرام',
-    website: 'الموقع',
-    email: 'البريد الإلكتروني',
-    chooseCountry: 'اختر الدولة',
-    searchCountry: 'ابحث عن دولة أو رمز',
-    phoneNumber: 'رقم الهاتف',
-    publishService: 'نشر الخدمة',
-    pleaseEnterServiceTitle: 'أدخل عنوان الخدمة',
-    pleaseEnterPrice: 'أدخل السعر',
-    pleaseEnterCity: 'أدخل المدينة / البلدة',
-    pleaseEnterDistrict: 'أدخل المنطقة / الحي',
-    servicePublishedSuccessfully: 'تم نشر الخدمة بنجاح',
-  },
-};
-
-type ServicePhotoItem = {
-  id: string;
-  file: File;
-  preview: string;
+  Creative: [
+    { value: 'Design', label: 'Design' },
+    { value: 'Content', label: 'Content' },
+    { value: 'Editing', label: 'Editing' },
+  ],
 };
 
 function normalizeInstagram(value: string) {
@@ -933,23 +365,36 @@ function normalizeWebsite(value: string) {
   return `https://${trimmed}`;
 }
 
+function inputBaseStyle(): React.CSSProperties {
+  return {
+    width: '100%',
+    border: '1.5px solid #111111',
+    borderRadius: 18,
+    padding: '16px 14px',
+    fontSize: 16,
+    outline: 'none',
+    boxSizing: 'border-box',
+    background: '#ffffff',
+    color: '#17130f',
+  };
+}
+
 function SectionCard({
   title,
   children,
   required,
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   required?: boolean;
 }) {
   return (
     <div
       style={{
-        background: '#fff',
-        borderRadius: 28,
+        background: '#f7f4ee',
+        borderRadius: 30,
         padding: 18,
-        boxShadow: '0 6px 18px rgba(0,0,0,0.05)',
-        border: '1px solid #ebe4da',
+        border: '2px solid #111111',
       }}
     >
       <div
@@ -962,9 +407,9 @@ function SectionCard({
       >
         <div
           style={{
-            fontSize: 19,
+            fontSize: 18,
             fontWeight: 900,
-            color: '#1f2430',
+            color: '#17130f',
           }}
         >
           {title}
@@ -973,7 +418,7 @@ function SectionCard({
         {required ? (
           <span
             style={{
-              color: '#ff4d4f',
+              color: '#ef4444',
               fontSize: 18,
               fontWeight: 900,
               lineHeight: 1,
@@ -993,7 +438,7 @@ function FieldLabel({
   children,
   required,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   required?: boolean;
 }) {
   return (
@@ -1003,16 +448,16 @@ function FieldLabel({
         alignItems: 'center',
         gap: 6,
         fontSize: 16,
-        fontWeight: 800,
-        marginBottom: 8,
-        color: '#1f2430',
+        fontWeight: 900,
+        marginBottom: 10,
+        color: '#17130f',
       }}
     >
       <span>{children}</span>
       {required ? (
         <span
           style={{
-            color: '#ff4d4f',
+            color: '#ef4444',
             fontSize: 16,
             fontWeight: 900,
             lineHeight: 1,
@@ -1039,13 +484,13 @@ function ClearValueButton({
       title={title}
       onClick={onClick}
       style={{
-        width: 30,
-        height: 30,
+        width: 34,
+        height: 34,
         borderRadius: 999,
-        border: 'none',
-        background: '#ece7df',
-        color: '#5f6b77',
-        fontSize: 18,
+        border: '1.5px solid #111111',
+        background: '#ffffff',
+        color: '#17130f',
+        fontSize: 20,
         fontWeight: 900,
         lineHeight: 1,
         cursor: 'pointer',
@@ -1076,18 +521,17 @@ function ContactInput({
   onBlur?: () => void;
   onClear?: () => void;
   placeholder: string;
-  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  inputMode?: HTMLAttributes<HTMLInputElement>['inputMode'];
   type?: string;
   clearTitle: string;
 }) {
   return (
     <div
       style={{
-        border: '1px solid #e7e0d6',
-        borderRadius: 18,
-        background: '#fff',
+        border: '2px solid #111111',
+        borderRadius: 24,
+        background: '#ffffff',
         padding: 14,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
       }}
     >
       <div
@@ -1100,10 +544,11 @@ function ContactInput({
       >
         <div
           style={{
-            width: 38,
-            height: 38,
+            width: 40,
+            height: 40,
             borderRadius: 12,
-            background: '#f7f5f1',
+            border: '1.5px solid #111111',
+            background: '#f7f4ee',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -1117,8 +562,8 @@ function ContactInput({
         <div
           style={{
             fontSize: 15,
-            fontWeight: 800,
-            color: '#1f2430',
+            fontWeight: 900,
+            color: '#17130f',
           }}
         >
           {label}
@@ -1143,22 +588,10 @@ function ContactInput({
           autoCapitalize="none"
           autoCorrect="off"
           spellCheck={false}
-          style={{
-            width: '100%',
-            border: '1px solid #ece5da',
-            borderRadius: 14,
-            padding: '14px 12px',
-            fontSize: 16,
-            outline: 'none',
-            boxSizing: 'border-box',
-            background: '#fcfbf9',
-            color: '#1f2430',
-          }}
+          style={inputBaseStyle()}
         />
 
-        {onClear && value ? (
-          <ClearValueButton onClick={onClear} title={clearTitle} />
-        ) : null}
+        {onClear && value ? <ClearValueButton onClick={onClear} title={clearTitle} /> : null}
       </div>
     </div>
   );
@@ -1204,11 +637,10 @@ function PhoneChannelInput({
   return (
     <div
       style={{
-        border: '1px solid #e7e0d6',
-        borderRadius: 18,
-        background: '#fff',
+        border: '2px solid #111111',
+        borderRadius: 24,
+        background: '#ffffff',
         padding: 14,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
       }}
     >
       <div
@@ -1221,10 +653,11 @@ function PhoneChannelInput({
       >
         <div
           style={{
-            width: 38,
-            height: 38,
+            width: 40,
+            height: 40,
             borderRadius: 12,
-            background: '#f7f5f1',
+            border: '1.5px solid #111111',
+            background: '#f7f4ee',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -1238,8 +671,8 @@ function PhoneChannelInput({
         <div
           style={{
             fontSize: 15,
-            fontWeight: 800,
-            color: '#1f2430',
+            fontWeight: 900,
+            color: '#17130f',
           }}
         >
           {label}
@@ -1249,7 +682,7 @@ function PhoneChannelInput({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: value.number ? '130px 1fr auto' : '130px 1fr',
+          gridTemplateColumns: value.number ? '132px 1fr auto' : '132px 1fr',
           gap: 10,
           alignItems: 'center',
         }}
@@ -1260,19 +693,19 @@ function PhoneChannelInput({
             onClick={() => setOpen((prev) => !prev)}
             style={{
               width: '100%',
-              height: 50,
-              border: '1px solid #ece5da',
-              borderRadius: 14,
-              background: '#fcfbf9',
+              height: 56,
+              border: '1.5px solid #111111',
+              borderRadius: 18,
+              background: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 8,
               padding: '0 12px',
               cursor: 'pointer',
-              color: '#1f2430',
+              color: '#17130f',
               fontSize: 15,
-              fontWeight: 800,
+              fontWeight: 900,
             }}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1288,21 +721,21 @@ function PhoneChannelInput({
                 position: 'absolute',
                 left: 0,
                 top: 'calc(100% + 8px)',
-                width: 280,
+                width: 290,
                 maxWidth: 'calc(100vw - 40px)',
-                background: '#fff',
-                border: '1px solid #e7e0d6',
-                borderRadius: 18,
+                background: '#ffffff',
+                border: '1.5px solid #111111',
+                borderRadius: 22,
                 boxShadow: '0 12px 28px rgba(0,0,0,0.12)',
                 padding: 12,
-                zIndex: 40,
+                zIndex: 50,
               }}
             >
               <div
                 style={{
                   fontSize: 13,
                   fontWeight: 800,
-                  color: '#7a8490',
+                  color: '#7a7268',
                   marginBottom: 8,
                 }}
               >
@@ -1314,13 +747,9 @@ function PhoneChannelInput({
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={text.searchCountry}
                 style={{
-                  width: '100%',
-                  border: '1px solid #ece5da',
-                  borderRadius: 12,
+                  ...inputBaseStyle(),
                   padding: '12px 10px',
                   fontSize: 14,
-                  outline: 'none',
-                  boxSizing: 'border-box',
                   marginBottom: 10,
                 }}
               />
@@ -1346,9 +775,9 @@ function PhoneChannelInput({
                       setSearch('');
                     }}
                     style={{
-                      border: '1px solid #f0e9de',
+                      border: '1.5px solid #111111',
                       background: '#fff',
-                      borderRadius: 12,
+                      borderRadius: 14,
                       padding: '10px 12px',
                       display: 'flex',
                       alignItems: 'center',
@@ -1358,20 +787,13 @@ function PhoneChannelInput({
                       textAlign: 'left',
                     }}
                   >
-                    <span
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        minWidth: 0,
-                      }}
-                    >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
                       <span>{item.flag}</span>
                       <span
                         style={{
                           fontSize: 14,
                           fontWeight: 700,
-                          color: '#1f2430',
+                          color: '#17130f',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -1412,22 +834,12 @@ function PhoneChannelInput({
           autoCorrect="off"
           spellCheck={false}
           style={{
-            width: '100%',
-            border: '1px solid #ece5da',
-            borderRadius: 14,
-            padding: '14px 12px',
-            fontSize: 16,
-            outline: 'none',
-            boxSizing: 'border-box',
-            background: '#fcfbf9',
-            color: '#1f2430',
-            height: 50,
+            ...inputBaseStyle(),
+            height: 56,
           }}
         />
 
-        {value.number ? (
-          <ClearValueButton onClick={onClear} title={clearTitle} />
-        ) : null}
+        {value.number ? <ClearValueButton onClick={onClear} title={clearTitle} /> : null}
       </div>
     </div>
   );
@@ -1457,26 +869,14 @@ export default function AddServicePage() {
   const [card, setCard] = useState(true);
   const [wallet, setWallet] = useState(false);
 
-  const [phone, setPhone] = useState<PhoneContactValue>({
-    countryCode: 'GB',
-    number: '',
-  });
-  const [whatsapp, setWhatsapp] = useState<PhoneContactValue>({
-    countryCode: 'GB',
-    number: '',
-  });
+  const [phone, setPhone] = useState<PhoneContactValue>({ countryCode: 'GB', number: '' });
+  const [whatsapp, setWhatsapp] = useState<PhoneContactValue>({ countryCode: 'GB', number: '' });
   const [businessWhatsapp, setBusinessWhatsapp] = useState<PhoneContactValue>({
     countryCode: 'GB',
     number: '',
   });
-  const [telegram, setTelegram] = useState<PhoneContactValue>({
-    countryCode: 'GB',
-    number: '',
-  });
-  const [viber, setViber] = useState<PhoneContactValue>({
-    countryCode: 'GB',
-    number: '',
-  });
+  const [telegram, setTelegram] = useState<PhoneContactValue>({ countryCode: 'GB', number: '' });
+  const [viber, setViber] = useState<PhoneContactValue>({ countryCode: 'GB', number: '' });
 
   const [instagram, setInstagram] = useState('');
   const [website, setWebsite] = useState('');
@@ -1486,56 +886,46 @@ export default function AddServicePage() {
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
-
-    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+    const unsub = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
-
-    return () => {
-      unsubLanguage();
-    };
+    return () => unsub();
   }, []);
 
   useEffect(() => {
     return () => {
-      photos.forEach((item) => {
-        URL.revokeObjectURL(item.preview);
-      });
+      photos.forEach((item) => URL.revokeObjectURL(item.preview));
     };
   }, [photos]);
 
-  const text = pageTexts[language] || pageTexts.EN;
+  const text = textByLanguage[language] || textByLanguage.EN;
   const categories = categoriesByLanguage[language] || categoriesByLanguage.EN;
 
   const subcategories = useMemo(() => {
-    const map = subcategoriesByCategory[category];
-    if (!map) return [] as SubcategoryItem[];
-    return map[language] || map.EN || [];
-  }, [category, language]);
+    return subcategoriesByCategory[category] || [];
+  }, [category]);
 
   useEffect(() => {
     if (!subcategories.length) {
       setSubcategory('');
       return;
     }
-
-    const exists = subcategories.some((item) => item.value === subcategory);
-    if (!exists) {
+    if (!subcategories.some((item) => item.value === subcategory)) {
       setSubcategory(subcategories[0].value);
     }
   }, [subcategory, subcategories]);
 
   const handleCategoryChange = (value: string) => {
     setCategory(value);
-    const nextSubs = subcategoriesByCategory[value]?.[language] || subcategoriesByCategory[value]?.EN || [];
-    setSubcategory(nextSubs[0]?.value || '');
+    const next = subcategoriesByCategory[value] || [];
+    setSubcategory(next[0]?.value || '');
   };
 
   const handleOpenFilePicker = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFilesSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilesSelected = (event: ChangeEvent<HTMLInputElement>) => {
     const nextFiles = Array.from(event.target.files || []);
     if (!nextFiles.length) return;
 
@@ -1555,9 +945,7 @@ export default function AddServicePage() {
   const handleRemovePhoto = (photoId: string) => {
     setPhotos((prev) => {
       const found = prev.find((item) => item.id === photoId);
-      if (found) {
-        URL.revokeObjectURL(found.preview);
-      }
+      if (found) URL.revokeObjectURL(found.preview);
       return prev.filter((item) => item.id !== photoId);
     });
   };
@@ -1579,30 +967,30 @@ export default function AddServicePage() {
     return `${country.dial} ${value.number.trim()}`;
   };
 
-  const composedLocation = [city.trim(), district.trim(), addressDetails.trim()]
-    .filter(Boolean)
-    .join(', ');
-
   const handlePublish = () => {
     if (!title.trim()) {
-      alert(text.pleaseEnterServiceTitle);
+      alert(text.enterServiceTitle);
       return;
     }
 
     if (!price.trim()) {
-      alert(text.pleaseEnterPrice);
+      alert(text.enterPrice);
       return;
     }
 
     if (!city.trim()) {
-      alert(text.pleaseEnterCity);
+      alert(text.enterCity);
       return;
     }
 
     if (!district.trim()) {
-      alert(text.pleaseEnterDistrict);
+      alert(text.enterDistrict);
       return;
     }
+
+    const composedLocation = [city.trim(), district.trim(), addressDetails.trim()]
+      .filter(Boolean)
+      .join(', ');
 
     const serviceModes = [
       atClient ? 'at_client' : null,
@@ -1640,7 +1028,7 @@ export default function AddServicePage() {
       photos: photos.map((item) => item.preview),
     });
 
-    alert(text.servicePublishedSuccessfully);
+    alert(text.published);
     router.push('/');
   };
 
@@ -1648,9 +1036,9 @@ export default function AddServicePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f5f1',
+        background: '#f7f4ee',
         fontFamily: 'Arial, sans-serif',
-        color: '#1f2430',
+        color: '#17130f',
         paddingBottom: 124,
       }}
     >
@@ -1660,9 +1048,9 @@ export default function AddServicePage() {
             position: 'sticky',
             top: 0,
             zIndex: 30,
-            background: 'rgba(247,245,241,0.98)',
+            background: 'rgba(247,244,238,0.98)',
             backdropFilter: 'blur(10px)',
-            borderBottom: '1px solid #e6dfd5',
+            borderBottom: '1px solid #ddd4c7',
             padding: '16px 16px 14px',
             display: 'grid',
             gridTemplateColumns: '52px 1fr',
@@ -1677,12 +1065,13 @@ export default function AddServicePage() {
               width: 52,
               height: 52,
               borderRadius: 999,
-              border: '1px solid #e5ddd1',
+              border: '1.5px solid #d8d1c6',
               background: '#fff',
               fontSize: 28,
               color: '#1f2430',
               lineHeight: 1,
               boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
+              cursor: 'pointer',
             }}
           >
             ✕
@@ -1716,11 +1105,10 @@ export default function AddServicePage() {
         <section style={{ padding: '16px 16px 0' }}>
           <div
             style={{
-              background: '#fff',
-              borderRadius: 24,
-              border: '1px solid #ebe4da',
-              boxShadow: '0 6px 18px rgba(0,0,0,0.05)',
-              padding: 16,
+              background: '#f7f4ee',
+              borderRadius: 30,
+              border: '2px solid #111111',
+              padding: 18,
             }}
           >
             <input
@@ -1746,10 +1134,10 @@ export default function AddServicePage() {
                   style={{
                     fontSize: 18,
                     fontWeight: 900,
-                    color: '#1f2430',
+                    color: '#17130f',
                   }}
                 >
-                  {text.photosSection}
+                  {text.photos}
                 </div>
                 <div
                   style={{
@@ -1772,7 +1160,7 @@ export default function AddServicePage() {
                   whiteSpace: 'nowrap',
                 }}
               >
-                {text.requiredFieldsHint}
+                {text.requiredFields}
               </div>
             </div>
 
@@ -1781,8 +1169,8 @@ export default function AddServicePage() {
               onClick={handleOpenFilePicker}
               style={{
                 width: '100%',
-                border: '1px dashed #cad8cb',
-                background: '#fcfffc',
+                border: '1.5px solid #111111',
+                background: '#ffffff',
                 borderRadius: 22,
                 padding: '18px 16px',
                 display: 'flex',
@@ -1793,15 +1181,15 @@ export default function AddServicePage() {
             >
               <div
                 style={{
-                  width: 54,
-                  height: 54,
-                  borderRadius: 16,
+                  width: 72,
+                  height: 72,
+                  borderRadius: 22,
                   border: '2px solid #4ea560',
                   color: '#4ea560',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 30,
+                  fontSize: 42,
                   fontWeight: 700,
                   flexShrink: 0,
                   background: '#f4fbf5',
@@ -1814,7 +1202,7 @@ export default function AddServicePage() {
                 <div
                   style={{
                     fontSize: 18,
-                    fontWeight: 800,
+                    fontWeight: 900,
                     color: '#2d7b3c',
                   }}
                 >
@@ -1851,10 +1239,9 @@ export default function AddServicePage() {
                         position: 'relative',
                         borderRadius: 18,
                         overflow: 'hidden',
-                        border: index === 0 ? '3px solid #2d7b3c' : '1px solid #e7e0d6',
+                        border: index === 0 ? '3px solid #2d7b3c' : '1.5px solid #111111',
                         background: '#f8f8f8',
                         aspectRatio: '1 / 1',
-                        boxShadow: index === 0 ? '0 8px 18px rgba(45,123,60,0.14)' : 'none',
                       }}
                     >
                       <button
@@ -1911,14 +1298,13 @@ export default function AddServicePage() {
                           width: 32,
                           height: 32,
                           borderRadius: 999,
-                          border: 'none',
+                          border: '1.5px solid #111111',
                           background: 'rgba(255,255,255,0.96)',
-                          color: '#1f2430',
+                          color: '#17130f',
                           fontSize: 20,
                           fontWeight: 900,
                           lineHeight: 1,
                           cursor: 'pointer',
-                          boxShadow: '0 4px 10px rgba(0,0,0,0.12)',
                         }}
                       >
                         ×
@@ -1932,21 +1318,15 @@ export default function AddServicePage() {
         </section>
 
         <section style={{ padding: '16px 16px 0' }}>
-          <SectionCard title={text.serviceTitle} required>
+          <SectionCard title={text.serviceInfo} required>
             <FieldLabel required>{text.serviceTitle}</FieldLabel>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={text.serviceTitlePlaceholder}
               style={{
-                width: '100%',
-                border: '1px solid #e7e0d6',
-                borderRadius: 16,
-                padding: '16px 14px',
-                fontSize: 17,
-                outline: 'none',
+                ...inputBaseStyle(),
                 marginBottom: 18,
-                boxSizing: 'border-box',
               }}
             />
 
@@ -1957,14 +1337,8 @@ export default function AddServicePage() {
               placeholder={text.descriptionPlaceholder}
               rows={5}
               style={{
-                width: '100%',
-                border: '1px solid #e7e0d6',
-                borderRadius: 16,
-                padding: '16px 14px',
-                fontSize: 17,
-                outline: 'none',
+                ...inputBaseStyle(),
                 resize: 'none',
-                boxSizing: 'border-box',
               }}
             />
           </SectionCard>
@@ -1977,14 +1351,8 @@ export default function AddServicePage() {
               value={category}
               onChange={(e) => handleCategoryChange(e.target.value)}
               style={{
-                width: '100%',
-                border: '1px solid #e7e0d6',
-                borderRadius: 16,
-                padding: '16px 14px',
-                fontSize: 17,
-                outline: 'none',
+                ...inputBaseStyle(),
                 marginBottom: 18,
-                background: '#fff',
               }}
             >
               {categories.map((item) => (
@@ -1998,15 +1366,7 @@ export default function AddServicePage() {
             <select
               value={subcategory}
               onChange={(e) => setSubcategory(e.target.value)}
-              style={{
-                width: '100%',
-                border: '1px solid #e7e0d6',
-                borderRadius: 16,
-                padding: '16px 14px',
-                fontSize: 17,
-                outline: 'none',
-                background: '#fff',
-              }}
+              style={inputBaseStyle()}
             >
               {subcategories.map((item) => (
                 <option key={item.value} value={item.value}>
@@ -2024,16 +1384,7 @@ export default function AddServicePage() {
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               placeholder={text.pricePlaceholder}
-              style={{
-                width: '100%',
-                border: '1px solid #e7e0d6',
-                borderRadius: 16,
-                padding: '16px 14px',
-                fontSize: 17,
-                outline: 'none',
-                marginBottom: 18,
-                boxSizing: 'border-box',
-              }}
+              style={inputBaseStyle()}
             />
           </SectionCard>
         </section>
@@ -2058,14 +1409,8 @@ export default function AddServicePage() {
               onChange={(e) => setCity(e.target.value)}
               placeholder={text.cityPlaceholder}
               style={{
-                width: '100%',
-                border: '1px solid #e7e0d6',
-                borderRadius: 16,
-                padding: '16px 14px',
-                fontSize: 17,
-                outline: 'none',
+                ...inputBaseStyle(),
                 marginBottom: 18,
-                boxSizing: 'border-box',
               }}
             />
 
@@ -2075,14 +1420,8 @@ export default function AddServicePage() {
               onChange={(e) => setDistrict(e.target.value)}
               placeholder={text.districtPlaceholder}
               style={{
-                width: '100%',
-                border: '1px solid #e7e0d6',
-                borderRadius: 16,
-                padding: '16px 14px',
-                fontSize: 17,
-                outline: 'none',
+                ...inputBaseStyle(),
                 marginBottom: 18,
-                boxSizing: 'border-box',
               }}
             />
 
@@ -2093,14 +1432,8 @@ export default function AddServicePage() {
               placeholder={text.addressDetailsPlaceholder}
               rows={3}
               style={{
-                width: '100%',
-                border: '1px solid #e7e0d6',
-                borderRadius: 16,
-                padding: '16px 14px',
-                fontSize: 17,
-                outline: 'none',
+                ...inputBaseStyle(),
                 resize: 'none',
-                boxSizing: 'border-box',
               }}
             />
           </SectionCard>
@@ -2113,21 +1446,13 @@ export default function AddServicePage() {
               value={hours}
               onChange={(e) => setHours(e.target.value)}
               placeholder={text.hoursPlaceholder}
-              style={{
-                width: '100%',
-                border: '1px solid #e7e0d6',
-                borderRadius: 16,
-                padding: '16px 14px',
-                fontSize: 17,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
+              style={inputBaseStyle()}
             />
           </SectionCard>
         </section>
 
         <section style={{ padding: '16px 16px 0' }}>
-          <SectionCard title={text.availableToday}>
+          <SectionCard title={text.availability}>
             <div
               style={{
                 display: 'flex',
@@ -2144,7 +1469,7 @@ export default function AddServicePage() {
                   lineHeight: 1.4,
                 }}
               >
-                {text.availableTodayHint}
+                {text.availabilityHint}
               </div>
 
               <button
@@ -2154,22 +1479,22 @@ export default function AddServicePage() {
                   width: 64,
                   height: 36,
                   borderRadius: 999,
-                  border: 'none',
+                  border: '1.5px solid #111111',
                   background: availableToday ? '#4f91f1' : '#d6dbe2',
                   position: 'relative',
                   flexShrink: 0,
+                  cursor: 'pointer',
                 }}
               >
                 <span
                   style={{
                     position: 'absolute',
-                    top: 4,
-                    left: availableToday ? 32 : 4,
+                    top: 3,
+                    left: availableToday ? 31 : 3,
                     width: 28,
                     height: 28,
                     borderRadius: 999,
                     background: '#fff',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
                   }}
                 />
               </button>
@@ -2183,53 +1508,29 @@ export default function AddServicePage() {
                 gap: 10,
               }}
             >
-              <button
-                type="button"
-                onClick={() => setAtClient((v) => !v)}
-                style={{
-                  borderRadius: 16,
-                  border: atClient ? '2px solid #5aa764' : '1px solid #ddd8cf',
-                  background: atClient ? '#5aa764' : '#faf8f4',
-                  color: atClient ? '#fff' : '#1f2430',
-                  padding: '14px 10px',
-                  fontSize: 15,
-                  fontWeight: 800,
-                }}
-              >
-                {text.atClient}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAtMyPlace((v) => !v)}
-                style={{
-                  borderRadius: 16,
-                  border: atMyPlace ? '2px solid #5aa764' : '1px solid #ddd8cf',
-                  background: atMyPlace ? '#5aa764' : '#faf8f4',
-                  color: atMyPlace ? '#fff' : '#1f2430',
-                  padding: '14px 10px',
-                  fontSize: 15,
-                  fontWeight: 800,
-                }}
-              >
-                {text.atMyPlace}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setOnline((v) => !v)}
-                style={{
-                  borderRadius: 16,
-                  border: online ? '2px solid #5aa764' : '1px solid #ddd8cf',
-                  background: online ? '#5aa764' : '#faf8f4',
-                  color: online ? '#fff' : '#1f2430',
-                  padding: '14px 10px',
-                  fontSize: 15,
-                  fontWeight: 800,
-                }}
-              >
-                {text.online}
-              </button>
+              {[
+                { active: atClient, set: setAtClient, label: text.atClient },
+                { active: atMyPlace, set: setAtMyPlace, label: text.atMyPlace },
+                { active: online, set: setOnline, label: text.online },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => item.set((v: boolean) => !v)}
+                  style={{
+                    borderRadius: 18,
+                    border: '1.5px solid #111111',
+                    background: item.active ? '#5aa764' : '#ffffff',
+                    color: item.active ? '#ffffff' : '#17130f',
+                    padding: '14px 10px',
+                    fontSize: 15,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
           </SectionCard>
         </section>
@@ -2244,78 +1545,44 @@ export default function AddServicePage() {
                 fontWeight: 700,
               }}
             >
-              {text.paymentMethodsHint}
+              {text.paymentHint}
             </div>
 
             <div style={{ display: 'grid', gap: 10 }}>
-              <button
-                type="button"
-                onClick={() => setCash((v) => !v)}
-                style={{
-                  borderRadius: 18,
-                  border: cash ? '2px solid #4f91f1' : '1px solid #ddd8cf',
-                  background: cash ? '#eef5ff' : '#fff',
-                  padding: '16px 14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  fontSize: 16,
-                  fontWeight: 800,
-                  color: '#1f2430',
-                }}
-              >
-                <span style={{ fontSize: 24 }}>💵</span>
-                <span style={{ flex: 1, textAlign: 'left' }}>{text.cash}</span>
-                <span style={{ fontSize: 18 }}>{cash ? '☑' : '☐'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setCard((v) => !v)}
-                style={{
-                  borderRadius: 18,
-                  border: card ? '2px solid #4f91f1' : '1px solid #ddd8cf',
-                  background: card ? '#eef5ff' : '#fff',
-                  padding: '16px 14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  fontSize: 16,
-                  fontWeight: 800,
-                  color: '#1f2430',
-                }}
-              >
-                <span style={{ fontSize: 24 }}>💳</span>
-                <span style={{ flex: 1, textAlign: 'left' }}>{text.card}</span>
-                <span style={{ fontSize: 18 }}>{card ? '☑' : '☐'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setWallet((v) => !v)}
-                style={{
-                  borderRadius: 18,
-                  border: wallet ? '2px solid #4f91f1' : '1px solid #ddd8cf',
-                  background: wallet ? '#eef5ff' : '#fff',
-                  padding: '16px 14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  fontSize: 16,
-                  fontWeight: 800,
-                  color: '#1f2430',
-                }}
-              >
-                <span style={{ fontSize: 24 }}>👛</span>
-                <span style={{ flex: 1, textAlign: 'left' }}>{text.wallet}</span>
-                <span style={{ fontSize: 18 }}>{wallet ? '☑' : '☐'}</span>
-              </button>
+              {[
+                { active: cash, set: setCash, label: text.cash, icon: '💵' },
+                { active: card, set: setCard, label: text.card, icon: '💳' },
+                { active: wallet, set: setWallet, label: text.wallet, icon: '👛' },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => item.set((v: boolean) => !v)}
+                  style={{
+                    borderRadius: 20,
+                    border: '1.5px solid #111111',
+                    background: item.active ? '#eef5ff' : '#ffffff',
+                    padding: '16px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span style={{ fontSize: 24 }}>{item.icon}</span>
+                  <span style={{ flex: 1, textAlign: 'left' }}>{item.label}</span>
+                  <span style={{ fontSize: 18 }}>{item.active ? '☑' : '☐'}</span>
+                </button>
+              ))}
             </div>
           </SectionCard>
         </section>
 
         <section style={{ padding: '16px 16px 0' }}>
-          <SectionCard title={text.contact}>
+          <SectionCard title={text.contacts}>
             <div
               style={{
                 fontSize: 14,
@@ -2325,7 +1592,7 @@ export default function AddServicePage() {
                 lineHeight: 1.4,
               }}
             >
-              {text.contactHint}
+              {text.contactsHint}
             </div>
 
             <div style={{ display: 'grid', gap: 12 }}>
@@ -2445,8 +1712,8 @@ export default function AddServicePage() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(247,245,241,0.98)',
-          borderTop: '1px solid #e6dfd5',
+          background: 'rgba(247,244,238,0.98)',
+          borderTop: '1px solid #ddd4c7',
           backdropFilter: 'blur(10px)',
           padding: '12px 16px calc(12px + env(safe-area-inset-bottom))',
         }}
@@ -2457,17 +1724,18 @@ export default function AddServicePage() {
             onClick={handlePublish}
             style={{
               width: '100%',
-              border: 'none',
-              background: 'linear-gradient(180deg, #279ca2 0%, #1f8b91 100%)',
+              border: '2px solid #111111',
+              background: '#279ca2',
               color: '#fff',
-              borderRadius: 20,
+              borderRadius: 22,
               padding: '18px 18px',
               fontSize: 18,
               fontWeight: 900,
-              boxShadow: '0 10px 24px rgba(31,139,145,0.24)',
+              boxShadow: '0 6px 0 rgba(17,17,17,0.08)',
+              cursor: 'pointer',
             }}
           >
-            {text.publishService}
+            {text.publish}
           </button>
         </div>
       </div>
