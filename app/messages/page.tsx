@@ -90,6 +90,22 @@ function getReadStatusIcon(unreadCount: number) {
   };
 }
 
+function getLastMessageTime(lastMessage: any) {
+  if (!lastMessage) return '';
+
+  if (lastMessage.sentAt) {
+    const date = new Date(lastMessage.sentAt);
+    if (!Number.isNaN(date.getTime())) {
+      return date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+  }
+
+  return lastMessage.time || '';
+}
+
 export default function MessagesPage() {
   const router = useRouter();
 
@@ -166,7 +182,9 @@ export default function MessagesPage() {
       return (
         thread.providerName.toLowerCase().includes(q) ||
         thread.category.toLowerCase().includes(q) ||
-        (lastMessage?.text || '').toLowerCase().includes(q)
+        String(lastMessage?.text || '')
+          .toLowerCase()
+          .includes(q)
       );
     });
   }, [threads, search]);
@@ -411,12 +429,7 @@ export default function MessagesPage() {
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {lastMessage
-                          ? new Date(lastMessage.sentAt).toLocaleTimeString([], {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : ''}
+                        {getLastMessageTime(lastMessage)}
                       </div>
 
                       {thread.unreadCount > 0 ? (
