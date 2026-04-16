@@ -214,9 +214,15 @@ function getAmountColor(amount: number) {
 }
 
 function getTransactionIcon(tx: WalletTransaction) {
-  if (tx.amount > 0) return { icon: '↘', bg: '#ecfdf3', color: '#15803d' };
-  if (tx.status === 'pending') return { icon: '⏳', bg: '#fff4db', color: '#b7791f' };
-  if (tx.status === 'failed') return { icon: '✕', bg: '#fff1f2', color: '#dc2626' };
+  if (tx.amount > 0) {
+    return { icon: '↘', bg: '#ecfdf3', color: '#15803d' };
+  }
+  if (tx.status === 'pending') {
+    return { icon: '⏳', bg: '#fff4db', color: '#b7791f' };
+  }
+  if (tx.status === 'failed') {
+    return { icon: '✕', bg: '#fff1f2', color: '#dc2626' };
+  }
   return { icon: '↗', bg: '#eef4ff', color: '#2563eb' };
 }
 
@@ -269,9 +275,17 @@ export default function BalancePage() {
   const filteredTransactions = useMemo(() => {
     const items = wallet.transactions || [];
 
-    if (filter === 'incoming') return items.filter((item) => item.amount > 0);
-    if (filter === 'outgoing') return items.filter((item) => item.amount < 0);
-    if (filter === 'pending') return items.filter((item) => item.status === 'pending);
+    if (filter === 'incoming') {
+      return items.filter((item) => item.amount > 0);
+    }
+
+    if (filter === 'outgoing') {
+      return items.filter((item) => item.amount < 0);
+    }
+
+    if (filter === 'pending') {
+      return items.filter((item) => item.status === 'pending');
+    }
 
     return items;
   }, [filter, wallet.transactions]);
