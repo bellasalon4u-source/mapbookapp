@@ -189,16 +189,16 @@ type LegalItem = {
 };
 
 function accentStyles(accent: LegalItem['accent']) {
-  if (accent === 'pink') return { background: '#fff0f6', color: '#ff4fa0' };
-  if (accent === 'green') return { background: '#edf9ef', color: '#2fa35a' };
-  if (accent === 'blue') return { background: '#edf4ff', color: '#2f7cf6' };
+  if (accent === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
+  if (accent === 'green') return { background: '#dff2e3', color: '#1d7a38' };
+  if (accent === 'blue') return { background: '#e6efff', color: '#2559b7' };
   if (accent === 'violet') return { background: '#f3efff', color: '#7a5af8' };
-  if (accent === 'orange') return { background: '#fff4e7', color: '#d68612' };
+  if (accent === 'orange') return { background: '#fff0da', color: '#c07a00' };
   return { background: '#f4efe8', color: '#6d6258' };
 }
 
 const shellCardStyle: CSSProperties = {
-  borderRadius: 32,
+  borderRadius: 30,
   border: '2px solid #111111',
   background: '#ffffff',
   padding: 18,
@@ -295,8 +295,9 @@ export default function LegalPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f4ee',
+        background: '#ffffff',
         padding: '20px 16px 110px',
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -342,6 +343,7 @@ export default function LegalPage() {
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
               {text.subtitle}
@@ -359,87 +361,97 @@ export default function LegalPage() {
         >
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '56px 1fr',
-              gap: 12,
-              alignItems: 'center',
-              marginBottom: 14,
+              borderRadius: 24,
+              border: '2px solid #111111',
+              background: '#2f241c',
+              color: '#fff',
+              padding: 18,
             }}
           >
             <div
               style={{
-                width: 56,
-                height: 56,
-                borderRadius: 20,
-                border: '2px solid #111111',
-                background: '#fff0f6',
-                color: '#ff4fa0',
-                display: 'flex',
+                display: 'grid',
+                gridTemplateColumns: '56px 1fr',
+                gap: 12,
                 alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 26,
+                marginBottom: 14,
               }}
             >
-              ⚖️
-            </div>
-
-            <div>
               <div
                 style={{
-                  fontSize: 20,
+                  width: 56,
+                  height: 56,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#fff1f7',
+                  color: '#ff4fa0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 26,
+                }}
+              >
+                ⚖️
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 900,
+                    color: '#ffffff',
+                  }}
+                >
+                  {text.heroTitle}
+                </div>
+                <div
+                  style={{
+                    marginTop: 4,
+                    fontSize: 14,
+                    lineHeight: 1.55,
+                    color: '#ddd2c6',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.heroSub}
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 10,
+              }}
+            >
+              <div
+                style={{
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  padding: '10px 14px',
+                  background: '#dff2e3',
+                  color: '#1d7a38',
+                  fontSize: 12,
                   fontWeight: 900,
-                  color: '#17130f',
                 }}
               >
-                {text.heroTitle}
+                🛡️ {text.protected}
               </div>
+
               <div
                 style={{
-                  marginTop: 4,
-                  fontSize: 14,
-                  lineHeight: 1.55,
-                  color: '#7b7268',
-                  fontWeight: 700,
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  padding: '10px 14px',
+                  background: '#e6efff',
+                  color: '#2559b7',
+                  fontSize: 12,
+                  fontWeight: 900,
                 }}
               >
-                {text.heroSub}
+                📘 {text.launchReady}
               </div>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 10,
-            }}
-          >
-            <div
-              style={{
-                borderRadius: 999,
-                border: '2px solid #111111',
-                padding: '10px 14px',
-                background: '#edf9ef',
-                color: '#2fa35a',
-                fontSize: 12,
-                fontWeight: 900,
-              }}
-            >
-              🛡️ {text.protected}
-            </div>
-
-            <div
-              style={{
-                borderRadius: 999,
-                border: '2px solid #111111',
-                padding: '10px 14px',
-                background: '#edf4ff',
-                color: '#2f7cf6',
-                fontSize: 12,
-                fontWeight: 900,
-              }}
-            >
-              📘 {text.launchReady}
             </div>
           </div>
         </div>
