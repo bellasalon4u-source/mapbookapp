@@ -46,9 +46,9 @@ const savedMastersTexts = {
   },
   RU: {
     title: 'Сохранённые мастера',
-    subtitle: 'Мастера, которые вам понравились и к которым можно вернуться',
+    subtitle: 'Специалисты, которые вам понравились и к которым вы хотите вернуться',
     empty: 'У вас пока нет сохранённых мастеров',
-    emptySub: 'Сохраняйте понравившихся мастеров, и они появятся здесь.',
+    emptySub: 'Сохраняйте понравившихся специалистов, и они появятся здесь.',
     categoryFallback: 'Специалист',
     openProfile: 'Открыть профиль',
     remove: 'Убрать',
@@ -78,7 +78,7 @@ const savedMastersTexts = {
   },
   DE: {
     title: 'Gespeicherte Profis',
-    subtitle: 'Profis, die dir gefallen haben und zu denen du zurückkehren kannst',
+    subtitle: 'Profis, die dir gefallen haben und zu denen du zurückkehren möchtest',
     empty: 'Du hast noch keine gespeicherten Profis',
     emptySub: 'Speichere Profis, die dir gefallen, und sie erscheinen hier.',
     categoryFallback: 'Spezialist',
@@ -94,7 +94,7 @@ const savedMastersTexts = {
   },
   PL: {
     title: 'Zapisani specjaliści',
-    subtitle: 'Specjaliści, którzy Ci się spodobali i do których możesz wrócić',
+    subtitle: 'Specjaliści, którzy Ci się spodobali i do których chcesz wrócić',
     empty: 'Nie masz jeszcze zapisanych specjalistów',
     emptySub: 'Zapisuj ulubionych specjalistów, a pojawią się tutaj.',
     categoryFallback: 'Specjalista',
@@ -122,10 +122,10 @@ type SavedMasterItem = {
 };
 
 function accentStyle(kind: 'pink' | 'green' | 'blue' | 'orange' | 'neutral') {
-  if (kind === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
-  if (kind === 'green') return { background: '#eef9f1', color: '#2fa35a' };
-  if (kind === 'blue') return { background: '#eef4ff', color: '#2f7cf6' };
-  if (kind === 'orange') return { background: '#fff5e8', color: '#d68612' };
+  if (kind === 'pink') return { background: '#fff0f6', color: '#ff4fa0' };
+  if (kind === 'green') return { background: '#dff2e3', color: '#1d7a38' };
+  if (kind === 'blue') return { background: '#e6efff', color: '#2559b7' };
+  if (kind === 'orange') return { background: '#fff0da', color: '#c07a00' };
   return { background: '#f4efe8', color: '#6d6258' };
 }
 
@@ -157,8 +157,7 @@ export default function SavedMastersPage() {
   }, []);
 
   const text =
-    savedMastersTexts[language as keyof typeof savedMastersTexts] ||
-    savedMastersTexts.EN;
+    savedMastersTexts[language as keyof typeof savedMastersTexts] || savedMastersTexts.EN;
 
   const allMasters = getAllMasters() as SavedMasterItem[];
 
@@ -173,6 +172,7 @@ export default function SavedMastersPage() {
         minHeight: '100vh',
         background: '#fbf7ef',
         padding: '20px 16px 110px',
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -191,10 +191,11 @@ export default function SavedMastersPage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
               fontSize: 26,
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              fontWeight: 900,
+              color: '#17130f',
               cursor: 'pointer',
             }}
           >
@@ -207,6 +208,7 @@ export default function SavedMastersPage() {
                 fontSize: 22,
                 fontWeight: 900,
                 color: '#17130f',
+                lineHeight: 1.1,
               }}
             >
               {text.title}
@@ -217,6 +219,7 @@ export default function SavedMastersPage() {
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
               {text.subtitle}
@@ -230,10 +233,9 @@ export default function SavedMastersPage() {
           style={{
             marginTop: 18,
             borderRadius: 30,
-            border: '1px solid #f0e3d7',
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
+            border: '2px solid #111111',
+            background: '#fff',
             padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           <div
@@ -269,20 +271,17 @@ export default function SavedMastersPage() {
 
             <div
               style={{
-                minWidth: 84,
-                borderRadius: 20,
-                background: '#fff1f7',
+                minWidth: 90,
+                borderRadius: 22,
+                border: '2px solid #111111',
+                background: '#fff0f6',
                 color: '#ff4fa0',
-                padding: '14px 12px',
+                padding: '12px 12px 10px',
                 textAlign: 'center',
               }}
             >
-              <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1 }}>
-                {savedMasters.length}
-              </div>
-              <div style={{ marginTop: 4, fontSize: 11, fontWeight: 900 }}>
-                {text.savedCount}
-              </div>
+              <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1 }}>{savedMasters.length}</div>
+              <div style={{ marginTop: 6, fontSize: 12, fontWeight: 900 }}>{text.savedCount}</div>
             </div>
           </div>
 
@@ -298,7 +297,8 @@ export default function SavedMastersPage() {
               style={{
                 ...accentStyle('pink'),
                 borderRadius: 999,
-                padding: '10px 14px',
+                border: '2px solid #111111',
+                padding: '9px 14px',
                 fontSize: 12,
                 fontWeight: 900,
               }}
@@ -310,7 +310,8 @@ export default function SavedMastersPage() {
               style={{
                 ...accentStyle('blue'),
                 borderRadius: 999,
-                padding: '10px 14px',
+                border: '2px solid #111111',
+                padding: '9px 14px',
                 fontSize: 12,
                 fontWeight: 900,
               }}
@@ -320,16 +321,15 @@ export default function SavedMastersPage() {
           </div>
         </div>
 
-        <div style={{ marginTop: 18, display: 'grid', gap: 14 }}>
+        <div style={{ marginTop: 18, display: 'grid', gap: 16 }}>
           {savedMasters.length === 0 && (
             <div
               style={{
                 borderRadius: 30,
-                border: '1px solid #efe4d7',
+                border: '2px solid #111111',
                 background: '#fff',
                 padding: 24,
                 textAlign: 'center',
-                boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
               }}
             >
               <div
@@ -338,7 +338,8 @@ export default function SavedMastersPage() {
                   height: 64,
                   margin: '0 auto 14px',
                   borderRadius: 22,
-                  background: '#fff1f7',
+                  border: '2px solid #111111',
+                  background: '#fff0f6',
                   color: '#ff4fa0',
                   display: 'flex',
                   alignItems: 'center',
@@ -378,10 +379,9 @@ export default function SavedMastersPage() {
               key={master.id}
               style={{
                 borderRadius: 30,
-                border: '1px solid #efe4d7',
+                border: '2px solid #111111',
                 background: '#fff',
                 padding: 16,
-                boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
               }}
             >
               <div
@@ -405,7 +405,7 @@ export default function SavedMastersPage() {
                       borderRadius: 24,
                       objectFit: 'cover',
                       display: 'block',
-                      boxShadow: '0 10px 22px rgba(44, 23, 10, 0.10)',
+                      border: '2px solid #111111',
                     }}
                   />
 
@@ -413,14 +413,13 @@ export default function SavedMastersPage() {
                     <div
                       style={{
                         position: 'absolute',
-                        right: -3,
-                        bottom: -3,
-                        width: 24,
-                        height: 24,
+                        right: -4,
+                        bottom: -4,
+                        width: 28,
+                        height: 28,
                         borderRadius: 999,
                         background: '#2fa35a',
-                        border: '3px solid #fff',
-                        boxShadow: '0 6px 14px rgba(47,163,90,0.22)',
+                        border: '3px solid #ffffff',
                       }}
                     />
                   )}
@@ -453,6 +452,7 @@ export default function SavedMastersPage() {
                           fontSize: 14,
                           color: '#7b7268',
                           fontWeight: 700,
+                          textTransform: 'lowercase',
                         }}
                       >
                         {master.category || text.categoryFallback}
@@ -474,8 +474,9 @@ export default function SavedMastersPage() {
                       <div
                         style={{
                           ...accentStyle(index % 2 === 0 ? 'orange' : 'green'),
-                          borderRadius: 16,
-                          padding: '9px 12px',
+                          borderRadius: 18,
+                          border: '2px solid #111111',
+                          padding: '10px 12px',
                           fontSize: 13,
                           fontWeight: 900,
                           whiteSpace: 'nowrap',
@@ -498,6 +499,7 @@ export default function SavedMastersPage() {
                       style={{
                         ...accentStyle('blue'),
                         borderRadius: 999,
+                        border: '2px solid #111111',
                         padding: '8px 12px',
                         fontSize: 12,
                         fontWeight: 900,
@@ -511,6 +513,7 @@ export default function SavedMastersPage() {
                         style={{
                           ...accentStyle('green'),
                           borderRadius: 999,
+                          border: '2px solid #111111',
                           padding: '8px 12px',
                           fontSize: 12,
                           fontWeight: 900,
@@ -533,16 +536,15 @@ export default function SavedMastersPage() {
                       type="button"
                       onClick={() => router.push(`/master/${master.id}`)}
                       style={{
-                        border: 'none',
+                        border: '2px solid #111111',
                         borderRadius: 18,
                         background: 'linear-gradient(180deg, #2b221c 0%, #1f1712 100%)',
                         color: '#fff',
-                        minHeight: 48,
+                        minHeight: 52,
                         padding: '0 14px',
                         fontSize: 14,
                         fontWeight: 900,
                         cursor: 'pointer',
-                        boxShadow: '0 12px 24px rgba(31,23,18,0.18)',
                       }}
                     >
                       {text.openProfile}
@@ -552,11 +554,11 @@ export default function SavedMastersPage() {
                       type="button"
                       onClick={() => toggleLikedMaster(master.id)}
                       style={{
-                        border: '1px solid #f1d9e6',
+                        border: '2px solid #111111',
                         borderRadius: 18,
-                        background: '#fff1f7',
+                        background: '#fff0f6',
                         color: '#ff4fa0',
-                        minHeight: 48,
+                        minHeight: 52,
                         padding: '0 14px',
                         fontSize: 14,
                         fontWeight: 900,
