@@ -26,6 +26,7 @@ type BookingItem = {
 const pageTexts = {
   EN: {
     title: 'My bookings',
+    subtitle: 'Upcoming visits and booking history',
     upcoming: 'Upcoming',
     completed: 'Completed',
     cancelled: 'Cancelled',
@@ -41,9 +42,13 @@ const pageTexts = {
     emptyCancelled: 'No cancelled bookings yet',
     back: 'Back',
     home: 'Home',
+    total: 'Total',
+    bookingOverview: 'Booking overview',
+    activeNow: 'Active now',
   },
   ES: {
     title: 'Mis reservas',
+    subtitle: 'Próximas visitas e historial de reservas',
     upcoming: 'Próximas',
     completed: 'Completadas',
     cancelled: 'Canceladas',
@@ -59,9 +64,13 @@ const pageTexts = {
     emptyCancelled: 'Aún no hay reservas canceladas',
     back: 'Atrás',
     home: 'Inicio',
+    total: 'Total',
+    bookingOverview: 'Resumen de reservas',
+    activeNow: 'Activo ahora',
   },
   RU: {
     title: 'Мои бронирования',
+    subtitle: 'Предстоящие визиты и история бронирований',
     upcoming: 'Предстоящие',
     completed: 'Завершённые',
     cancelled: 'Отменённые',
@@ -77,9 +86,13 @@ const pageTexts = {
     emptyCancelled: 'Пока нет отменённых бронирований',
     back: 'Назад',
     home: 'Главная',
+    total: 'Всего',
+    bookingOverview: 'Обзор бронирований',
+    activeNow: 'Активно сейчас',
   },
   CZ: {
     title: 'Moje rezervace',
+    subtitle: 'Nadcházející návštěvy a historie rezervací',
     upcoming: 'Nadcházející',
     completed: 'Dokončené',
     cancelled: 'Zrušené',
@@ -95,9 +108,13 @@ const pageTexts = {
     emptyCancelled: 'Zatím žádné zrušené rezervace',
     back: 'Zpět',
     home: 'Domů',
+    total: 'Celkem',
+    bookingOverview: 'Přehled rezervací',
+    activeNow: 'Aktivní nyní',
   },
   DE: {
     title: 'Meine Buchungen',
+    subtitle: 'Bevorstehende Besuche und Buchungsverlauf',
     upcoming: 'Bevorstehend',
     completed: 'Abgeschlossen',
     cancelled: 'Storniert',
@@ -113,9 +130,13 @@ const pageTexts = {
     emptyCancelled: 'Noch keine stornierten Buchungen',
     back: 'Zurück',
     home: 'Start',
+    total: 'Gesamt',
+    bookingOverview: 'Buchungsübersicht',
+    activeNow: 'Jetzt aktiv',
   },
   PL: {
     title: 'Moje rezerwacje',
+    subtitle: 'Nadchodzące wizyty i historia rezerwacji',
     upcoming: 'Nadchodzące',
     completed: 'Zakończone',
     cancelled: 'Anulowane',
@@ -131,6 +152,9 @@ const pageTexts = {
     emptyCancelled: 'Brak anulowanych rezerwacji',
     back: 'Wstecz',
     home: 'Strona główna',
+    total: 'Łącznie',
+    bookingOverview: 'Przegląd rezerwacji',
+    activeNow: 'Aktywne teraz',
   },
 } as const;
 
@@ -182,19 +206,15 @@ const demoBookings: BookingItem[] = [
 ];
 
 function getTexts(language: AppLanguage) {
-  return (
-    pageTexts[language as keyof typeof pageTexts] ||
-    pageTexts.EN
-  );
+  return pageTexts[language as keyof typeof pageTexts] || pageTexts.EN;
 }
 
 function getStatusMeta(status: BookingStatus, text: ReturnType<typeof getTexts>) {
   if (status === 'pending') {
     return {
       label: text.pending,
-      bg: '#f7e5b7',
-      color: '#8a6508',
-      border: '#d5b35b',
+      bg: '#fff0da',
+      color: '#c07a00',
     };
   }
 
@@ -203,7 +223,6 @@ function getStatusMeta(status: BookingStatus, text: ReturnType<typeof getTexts>)
       label: text.confirmed,
       bg: '#dff2e3',
       color: '#1d7a38',
-      border: '#8bc59b',
     };
   }
 
@@ -212,7 +231,6 @@ function getStatusMeta(status: BookingStatus, text: ReturnType<typeof getTexts>)
       label: text.completedStatus,
       bg: '#e6efff',
       color: '#2559b7',
-      border: '#97b3e8',
     };
   }
 
@@ -220,7 +238,6 @@ function getStatusMeta(status: BookingStatus, text: ReturnType<typeof getTexts>)
     label: text.cancelledStatus,
     bg: '#fde5e5',
     color: '#b53a3a',
-    border: '#e4a4a4',
   };
 }
 
@@ -262,58 +279,51 @@ export default function BookingsPage() {
       ? text.emptyCompleted
       : text.emptyCancelled;
 
+  const activeNowCount = demoBookings.filter(
+    (item) => item.status === 'pending' || item.status === 'confirmed'
+  ).length;
+
   return (
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f4ee',
-        color: '#1f2430',
+        background: '#ffffff',
+        color: '#17130f',
         paddingBottom: 110,
+        fontFamily: 'Arial, sans-serif',
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto' }}>
-        <header
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '20px 16px 110px' }}>
+        <div
           style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 20,
-            background: 'rgba(247,244,238,0.96)',
-            backdropFilter: 'blur(10px)',
-            borderBottom: '1px solid #e7dfd4',
-            padding: '16px',
+            display: 'grid',
+            gridTemplateColumns: '54px 1fr 54px',
+            alignItems: 'center',
+            gap: 12,
           }}
         >
-          <div
+          <button
+            type="button"
+            onClick={() => router.back()}
+            aria-label={text.back}
             style={{
-              display: 'grid',
-              gridTemplateColumns: '54px 1fr 54px',
-              alignItems: 'center',
-              gap: 12,
+              width: 54,
+              height: 54,
+              borderRadius: 999,
+              border: '2px solid #111111',
+              background: '#fff',
+              fontSize: 26,
+              color: '#17130f',
+              fontWeight: 900,
+              cursor: 'pointer',
             }}
           >
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={text.back}
-              style={{
-                width: 54,
-                height: 54,
-                borderRadius: 999,
-                border: '1.5px solid #1d1d1d',
-                background: '#fff',
-                fontSize: 26,
-                color: '#1f2430',
-                lineHeight: 1,
-                boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
-                cursor: 'pointer',
-              }}
-            >
-              ←
-            </button>
+            ←
+          </button>
 
+          <div style={{ textAlign: 'center' }}>
             <div
               style={{
-                textAlign: 'center',
                 fontSize: 22,
                 fontWeight: 900,
                 color: '#17130f',
@@ -322,34 +332,157 @@ export default function BookingsPage() {
             >
               {text.title}
             </div>
-
-            <button
-              type="button"
-              onClick={() => router.push('/')}
-              aria-label={text.home}
+            <div
               style={{
-                width: 54,
-                height: 54,
-                borderRadius: 999,
-                border: '1.5px solid #1d1d1d',
-                background: '#fff',
-                fontSize: 24,
-                color: '#1f2430',
-                lineHeight: 1,
-                boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
-                cursor: 'pointer',
+                marginTop: 4,
+                fontSize: 13,
+                color: '#7b7268',
+                fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
-              ⌂
-            </button>
+              {text.subtitle}
+            </div>
           </div>
-        </header>
 
-        <section style={{ padding: '16px' }}>
+          <button
+            type="button"
+            onClick={() => router.push('/')}
+            aria-label={text.home}
+            style={{
+              width: 54,
+              height: 54,
+              borderRadius: 999,
+              border: '2px solid #111111',
+              background: '#fff',
+              fontSize: 22,
+              color: '#17130f',
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            ⌂
+          </button>
+        </div>
+
+        <section style={{ marginTop: 18 }}>
           <div
             style={{
-              background: '#ebe6dd',
-              border: '1.5px solid #1d1d1d',
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 18,
+            }}
+          >
+            <div
+              style={{
+                borderRadius: 24,
+                border: '2px solid #111111',
+                background: '#2f241c',
+                color: '#fff',
+                padding: 18,
+              }}
+            >
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '56px 1fr',
+                  gap: 14,
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 18,
+                    border: '2px solid #111111',
+                    background: '#fff1f7',
+                    color: '#ff4fa0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 26,
+                  }}
+                >
+                  📅
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 900,
+                      color: '#ffffff',
+                    }}
+                  >
+                    {text.bookingOverview}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 14,
+                      lineHeight: 1.5,
+                      color: '#ddd2c6',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {text.title}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 10,
+                }}
+              >
+                <div
+                  style={{
+                    minHeight: 40,
+                    padding: '0 14px',
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: '#dff2e3',
+                    color: '#1d7a38',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    fontSize: 13,
+                    fontWeight: 900,
+                  }}
+                >
+                  {text.activeNow}: {activeNowCount}
+                </div>
+
+                <div
+                  style={{
+                    minHeight: 40,
+                    padding: '0 14px',
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#17130f',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    fontSize: 13,
+                    fontWeight: 900,
+                  }}
+                >
+                  {text.total}: {demoBookings.length}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section style={{ marginTop: 16 }}>
+          <div
+            style={{
+              background: '#fff',
+              border: '2px solid #111111',
               borderRadius: 26,
               padding: 8,
               display: 'grid',
@@ -370,15 +503,14 @@ export default function BookingsPage() {
                   type="button"
                   onClick={() => setActiveTab(tabKey)}
                   style={{
-                    minHeight: 54,
-                    borderRadius: 20,
-                    border: active ? '1.5px solid #1d1d1d' : '1px solid transparent',
-                    background: active ? '#fff' : 'transparent',
-                    color: '#17130f',
-                    fontSize: 16,
+                    minHeight: 52,
+                    borderRadius: 18,
+                    border: '2px solid #111111',
+                    background: active ? '#17130f' : '#fff',
+                    color: active ? '#fff' : '#17130f',
+                    fontSize: 15,
                     fontWeight: 900,
                     cursor: 'pointer',
-                    boxShadow: active ? '0 4px 10px rgba(0,0,0,0.06)' : 'none',
                   }}
                 >
                   {label}
@@ -388,12 +520,12 @@ export default function BookingsPage() {
           </div>
         </section>
 
-        <section style={{ padding: '0 16px' }}>
+        <section style={{ marginTop: 18 }}>
           {filteredBookings.length === 0 ? (
             <div
               style={{
                 background: '#fff',
-                border: '1.5px solid #1d1d1d',
+                border: '2px solid #111111',
                 borderRadius: 28,
                 padding: '28px 20px',
                 textAlign: 'center',
@@ -416,10 +548,9 @@ export default function BookingsPage() {
                     key={booking.id}
                     style={{
                       background: '#fff',
-                      border: '1.5px solid #1d1d1d',
+                      border: '2px solid #111111',
                       borderRadius: 30,
                       padding: 18,
-                      boxShadow: '0 8px 18px rgba(0,0,0,0.05)',
                     }}
                   >
                     <div
@@ -438,10 +569,10 @@ export default function BookingsPage() {
                           minHeight: 42,
                           padding: '0 16px',
                           borderRadius: 999,
-                          border: `1.5px solid ${statusMeta.border}`,
+                          border: '2px solid #111111',
                           background: statusMeta.bg,
                           color: statusMeta.color,
-                          fontSize: 15,
+                          fontSize: 13,
                           fontWeight: 900,
                         }}
                       >
@@ -451,13 +582,15 @@ export default function BookingsPage() {
                       <button
                         type="button"
                         style={{
-                          border: 'none',
-                          background: 'transparent',
-                          color: '#666',
-                          fontSize: 28,
+                          border: '2px solid #111111',
+                          background: '#fff',
+                          color: '#17130f',
+                          width: 42,
+                          height: 42,
+                          borderRadius: 999,
+                          fontSize: 20,
                           lineHeight: 1,
                           cursor: 'pointer',
-                          padding: 0,
                         }}
                       >
                         ⋯
@@ -480,7 +613,7 @@ export default function BookingsPage() {
                           height: 96,
                           objectFit: 'cover',
                           borderRadius: 22,
-                          border: '1.5px solid #1d1d1d',
+                          border: '2px solid #111111',
                           display: 'block',
                         }}
                       />
@@ -500,7 +633,7 @@ export default function BookingsPage() {
                         <div
                           style={{
                             marginTop: 8,
-                            fontSize: 16,
+                            fontSize: 15,
                             fontWeight: 700,
                             color: '#6d6d6d',
                             lineHeight: 1.35,
@@ -512,7 +645,7 @@ export default function BookingsPage() {
                         <div
                           style={{
                             marginTop: 8,
-                            fontSize: 16,
+                            fontSize: 15,
                             fontWeight: 700,
                             color: '#5c6470',
                             lineHeight: 1.35,
@@ -524,7 +657,7 @@ export default function BookingsPage() {
                         <div
                           style={{
                             marginTop: 8,
-                            fontSize: 16,
+                            fontSize: 17,
                             fontWeight: 900,
                             color: '#17130f',
                           }}
@@ -538,12 +671,12 @@ export default function BookingsPage() {
                       <button
                         type="button"
                         style={{
-                          minHeight: 60,
+                          minHeight: 56,
                           borderRadius: 22,
-                          border: '2px solid #1d1d1d',
+                          border: '2px solid #111111',
                           background: '#ffffff',
-                          color: '#1d7a38',
-                          fontSize: 17,
+                          color: '#17130f',
+                          fontSize: 16,
                           fontWeight: 900,
                           cursor: 'pointer',
                         }}
@@ -555,12 +688,12 @@ export default function BookingsPage() {
                         <button
                           type="button"
                           style={{
-                            minHeight: 60,
+                            minHeight: 56,
                             borderRadius: 22,
-                            border: '2px solid #1d1d1d',
+                            border: '2px solid #111111',
                             background: '#fdeaea',
                             color: '#c74343',
-                            fontSize: 17,
+                            fontSize: 16,
                             fontWeight: 900,
                             cursor: 'pointer',
                           }}
@@ -571,12 +704,12 @@ export default function BookingsPage() {
                         <button
                           type="button"
                           style={{
-                            minHeight: 60,
+                            minHeight: 56,
                             borderRadius: 22,
-                            border: '2px solid #1d1d1d',
+                            border: '2px solid #111111',
                             background: '#eaf2ff',
                             color: '#1f4fa8',
-                            fontSize: 17,
+                            fontSize: 16,
                             fontWeight: 900,
                             cursor: 'pointer',
                           }}
@@ -593,7 +726,7 @@ export default function BookingsPage() {
         </section>
       </div>
 
-      <BottomNav />
+      <BottomNav active="profile" />
     </main>
   );
 }
