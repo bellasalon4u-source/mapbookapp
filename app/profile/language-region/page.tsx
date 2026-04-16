@@ -505,96 +505,16 @@ const languageOptions: { value: AppLanguage; label: string; flag: string }[] = [
 
 function getRegionOptions(text: PageTextShape): RegionOption[] {
   return [
-    {
-      value: 'United Kingdom',
-      label: 'United Kingdom',
-      subtitle: text.londonEurope,
-      flag: '🇬🇧',
-      lat: 51.5074,
-      lng: -0.1278,
-      currency: 'GBP',
-    },
-    {
-      value: 'Spain',
-      label: 'Spain',
-      subtitle: text.madridEurope,
-      flag: '🇪🇸',
-      lat: 40.4168,
-      lng: -3.7038,
-      currency: 'EUR',
-    },
-    {
-      value: 'Czech Republic',
-      label: 'Czech Republic',
-      subtitle: text.pragueEurope,
-      flag: '🇨🇿',
-      lat: 50.0755,
-      lng: 14.4378,
-      currency: 'CZK',
-    },
-    {
-      value: 'Germany',
-      label: 'Germany',
-      subtitle: text.berlinEurope,
-      flag: '🇩🇪',
-      lat: 52.52,
-      lng: 13.405,
-      currency: 'EUR',
-    },
-    {
-      value: 'Poland',
-      label: 'Poland',
-      subtitle: text.warsawEurope,
-      flag: '🇵🇱',
-      lat: 52.2297,
-      lng: 21.0122,
-      currency: 'PLN',
-    },
-    {
-      value: 'Ukraine',
-      label: 'Ukraine',
-      subtitle: text.kyivEurope,
-      flag: '🇺🇦',
-      lat: 50.4501,
-      lng: 30.5234,
-      currency: 'UAH',
-    },
-    {
-      value: 'United States',
-      label: 'United States',
-      subtitle: text.newYorkNA,
-      flag: '🇺🇸',
-      lat: 40.7128,
-      lng: -74.006,
-      currency: 'USD',
-    },
-    {
-      value: 'United Arab Emirates',
-      label: 'United Arab Emirates',
-      subtitle: text.dubaiME,
-      flag: '🇦🇪',
-      lat: 25.2048,
-      lng: 55.2708,
-      currency: 'AED',
-    },
-    {
-      value: 'Italy',
-      label: 'Italy',
-      subtitle: text.romeEurope,
-      flag: '🇮🇹',
-      lat: 41.9028,
-      lng: 12.4964,
-      currency: 'EUR',
-    },
-    {
-      value: 'France',
-      label: 'France',
-      subtitle: text.parisEurope,
-      flag: '🇫🇷',
-      lat: 48.8566,
-      lng: 2.3522,
-      currency: 'EUR',
-    },
+    { value: 'United Kingdom', label: 'United Kingdom', subtitle: text.londonEurope, flag: '🇬🇧', lat: 51.5074, lng: -0.1278, currency: 'GBP' },
+    { value: 'Spain', label: 'Spain', subtitle: text.madridEurope, flag: '🇪🇸', lat: 40.4168, lng: -3.7038, currency: 'EUR' },
+    { value: 'Czech Republic', label: 'Czech Republic', subtitle: text.pragueEurope, flag: '🇨🇿', lat: 50.0755, lng: 14.4378, currency: 'CZK' },
+    { value: 'Germany', label: 'Germany', subtitle: text.berlinEurope, flag: '🇩🇪', lat: 52.52, lng: 13.405, currency: 'EUR' },
+    { value: 'Poland', label: 'Poland', subtitle: text.warsawEurope, flag: '🇵🇱', lat: 52.2297, lng: 21.0122, currency: 'PLN' },
+    { value: 'Ukraine', label: 'Ukraine', subtitle: text.kyivEurope, flag: '🇺🇦', lat: 50.4501, lng: 30.5234, currency: 'UAH' },
+    { value: 'United States', label: 'United States', subtitle: text.newYorkNA, flag: '🇺🇸', lat: 40.7128, lng: -74.006, currency: 'USD' },
+    { value: 'United Arab Emirates', label: 'United Arab Emirates', subtitle: text.dubaiME, flag: '🇦🇪', lat: 25.2048, lng: 55.2708, currency: 'AED' },
+    { value: 'Italy', label: 'Italy', subtitle: text.romeEurope, flag: '🇮🇹', lat: 41.9028, lng: 12.4964, currency: 'EUR' },
+    { value: 'France', label: 'France', subtitle: text.parisEurope, flag: '🇫🇷', lat: 48.8566, lng: 2.3522, currency: 'EUR' },
   ];
 }
 
@@ -632,22 +552,22 @@ function Radio({ checked }: { checked: boolean }) {
   return (
     <div
       style={{
-        width: 26,
-        height: 26,
+        width: 24,
+        height: 24,
         borderRadius: 999,
         border: '2px solid #111111',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        flexShrink: 0,
         background: '#fff',
+        flexShrink: 0,
       }}
     >
       {checked ? (
         <div
           style={{
-            width: 12,
-            height: 12,
+            width: 10,
+            height: 10,
             borderRadius: 999,
             background: '#111111',
           }}
@@ -661,7 +581,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
-        fontSize: 19,
+        fontSize: 18,
         fontWeight: 900,
         color: '#17130f',
         marginBottom: 14,
@@ -672,7 +592,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SharpCard({
+function Card({
   children,
   compact = false,
 }: {
@@ -683,10 +603,9 @@ function SharpCard({
     <div
       style={{
         background: '#fff',
-        borderRadius: compact ? 28 : 32,
+        borderRadius: compact ? 28 : 30,
         padding: compact ? 16 : 18,
         border: '2px solid #111111',
-        marginBottom: 16,
       }}
     >
       {children}
@@ -704,9 +623,7 @@ export default function LanguageRegionPage() {
   const initialRegionSettings = getAppRegionSettings();
 
   const [selectedRegion, setSelectedRegion] = useState(initialRegionSettings.region);
-  const [selectedCurrency, setSelectedCurrency] = useState<AppCurrency>(
-    initialRegionSettings.currency
-  );
+  const [selectedCurrency, setSelectedCurrency] = useState<AppCurrency>(initialRegionSettings.currency);
   const [selectedLocationMode, setSelectedLocationMode] = useState<SearchLocationMode>(
     initialRegionSettings.locationMode
   );
@@ -859,8 +776,9 @@ export default function LanguageRegionPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f4ee',
+        background: '#ffffff',
         padding: '20px 16px 120px',
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -934,361 +852,357 @@ export default function LanguageRegionPage() {
           </button>
         </div>
 
-        <SharpCard compact>
-          <div
-            style={{
-              display: 'grid',
-              gap: 10,
-            }}
-          >
+        <div style={{ display: 'grid', gap: 16 }}>
+          <Card compact>
             <div
               style={{
-                fontSize: 17,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.compactSetup}
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gap: 8,
+                borderRadius: 24,
+                border: '2px solid #111111',
+                background: '#2f241c',
+                color: '#fff',
+                padding: 16,
               }}
             >
               <div
                 style={{
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#f8f5ef',
-                  padding: '10px 12px',
+                  fontSize: 17,
+                  fontWeight: 900,
+                  color: '#ffffff',
                 }}
               >
-                <div style={{ fontSize: 11, color: '#8b8277', fontWeight: 900, marginBottom: 4 }}>
-                  {text.languageApp}
-                </div>
-                <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
-                  {languageOptions.find((item) => item.value === selectedLanguage)?.flag}{' '}
-                  {languageOptions.find((item) => item.value === selectedLanguage)?.label}
-                </div>
+                {text.compactSetup}
               </div>
 
               <div
                 style={{
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#f8f5ef',
-                  padding: '10px 12px',
+                  marginTop: 12,
+                  display: 'grid',
+                  gap: 10,
                 }}
               >
-                <div style={{ fontSize: 11, color: '#8b8277', fontWeight: 900, marginBottom: 4 }}>
+                <div
+                  style={{
+                    borderRadius: 18,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    padding: '10px 12px',
+                  }}
+                >
+                  <div style={{ fontSize: 11, color: '#8b8277', fontWeight: 900, marginBottom: 4 }}>
+                    {text.languageApp}
+                  </div>
+                  <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
+                    {languageOptions.find((item) => item.value === selectedLanguage)?.flag}{' '}
+                    {languageOptions.find((item) => item.value === selectedLanguage)?.label}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    borderRadius: 18,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    padding: '10px 12px',
+                  }}
+                >
+                  <div style={{ fontSize: 11, color: '#8b8277', fontWeight: 900, marginBottom: 4 }}>
+                    {text.selected}
+                  </div>
+                  <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
+                    {selectedRegion} · {selectedCurrency}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    borderRadius: 18,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    padding: '10px 12px',
+                  }}
+                >
+                  <div style={{ fontSize: 11, color: '#8b8277', fontWeight: 900, marginBottom: 4 }}>
+                    {text.livePreview}
+                  </div>
+                  <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
+                    {locationSummary}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card>
+            <SectionTitle>{text.languageSection}</SectionTitle>
+
+            <div style={{ display: 'grid', gap: 10 }}>
+              {languageOptions.map((option) => {
+                const checked = selectedLanguage === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setSelectedLanguage(option.value)}
+                    style={{
+                      width: '100%',
+                      display: 'grid',
+                      gridTemplateColumns: '34px 1fr auto',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '14px 12px',
+                      background: checked ? '#f7f1e7' : '#fff',
+                      border: '2px solid #111111',
+                      textAlign: 'left',
+                      borderRadius: 22,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div style={{ fontSize: 24 }}>{option.flag}</div>
+
+                    <div>
+                      <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                        {option.label}
+                      </div>
+                      <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
+                        {text.languageApp}
+                      </div>
+                    </div>
+
+                    <Radio checked={checked} />
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+
+          <Card>
+            <SectionTitle>{text.regionSection}</SectionTitle>
+
+            <div style={{ display: 'grid', gap: 10 }}>
+              {regionOptions.map((option) => {
+                const checked = selectedRegion === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      setSelectedRegion(option.value);
+
+                      if (selectedCurrency === selectedRegionMeta.currency) {
+                        setSelectedCurrency(option.currency);
+                      }
+
+                      if (selectedLocationMode === 'custom') {
+                        setSelectedLocation({
+                          source: 'custom',
+                          label: option.label,
+                          lat: option.lat,
+                          lng: option.lng,
+                        });
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'grid',
+                      gridTemplateColumns: '34px 1fr auto',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '14px 12px',
+                      background: checked ? '#f7f1e7' : '#fff',
+                      border: '2px solid #111111',
+                      textAlign: 'left',
+                      borderRadius: 22,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div style={{ fontSize: 24 }}>{option.flag}</div>
+
+                    <div>
+                      <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                        {option.label}
+                      </div>
+                      <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
+                        {option.subtitle}
+                      </div>
+                    </div>
+
+                    <Radio checked={checked} />
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+
+          <Card>
+            <SectionTitle>{text.currencySection}</SectionTitle>
+
+            <div style={{ display: 'grid', gap: 10 }}>
+              {currencyOptions.map((option) => {
+                const checked = selectedCurrency === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setSelectedCurrency(option.value)}
+                    style={{
+                      width: '100%',
+                      display: 'grid',
+                      gridTemplateColumns: '62px 1fr auto',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '14px 12px',
+                      background: checked ? '#f7f1e7' : '#fff',
+                      border: '2px solid #111111',
+                      textAlign: 'left',
+                      borderRadius: 22,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 22,
+                        fontWeight: 900,
+                        color: '#17130f',
+                      }}
+                    >
+                      {option.symbol}
+                    </div>
+
+                    <div>
+                      <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                        {option.title}
+                      </div>
+                      <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
+                        {option.subtitle}
+                      </div>
+                    </div>
+
+                    <Radio checked={checked} />
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+
+          <Card>
+            <SectionTitle>{text.locationSection}</SectionTitle>
+
+            <div style={{ display: 'grid', gap: 12 }}>
+              <button
+                type="button"
+                onClick={handleUseCurrentLocation}
+                style={{
+                  width: '100%',
+                  display: 'grid',
+                  gridTemplateColumns: '34px 1fr auto',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: '16px 14px',
+                  background: selectedLocationMode === 'current' ? '#f1efe7' : '#fff',
+                  border: '2px solid #111111',
+                  textAlign: 'left',
+                  borderRadius: 24,
+                  cursor: 'pointer',
+                }}
+              >
+                <div style={{ fontSize: 24 }}>📍</div>
+
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                    {isLocating ? text.locationLoading : text.useCurrentLocation}
+                  </div>
+                  <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700, marginTop: 4 }}>
+                    {text.currentLocationHint}
+                  </div>
+                </div>
+
+                <Radio checked={selectedLocationMode === 'current'} />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleUseRegionLocation}
+                style={{
+                  width: '100%',
+                  display: 'grid',
+                  gridTemplateColumns: '34px 1fr auto',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: '16px 14px',
+                  background: selectedLocationMode === 'custom' ? '#f1efe7' : '#fff',
+                  border: '2px solid #111111',
+                  textAlign: 'left',
+                  borderRadius: 24,
+                  cursor: 'pointer',
+                }}
+              >
+                <div style={{ fontSize: 24 }}>🗺️</div>
+
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                    {text.useRegionLocation}
+                  </div>
+                  <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700, marginTop: 4 }}>
+                    {text.regionLocationHint}
+                  </div>
+                </div>
+
+                <Radio checked={selectedLocationMode === 'custom'} />
+              </button>
+
+              <div
+                style={{
+                  borderRadius: 20,
+                  background: '#f8f5ef',
+                  border: '2px solid #111111',
+                  padding: '12px 14px',
+                }}
+              >
+                <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 900, marginBottom: 4 }}>
                   {text.selected}
                 </div>
-                <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
-                  {selectedRegion} · {selectedCurrency}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#f8f5ef',
-                  padding: '10px 12px',
-                }}
-              >
-                <div style={{ fontSize: 11, color: '#8b8277', fontWeight: 900, marginBottom: 4 }}>
-                  {text.livePreview}
-                </div>
-                <div style={{ fontSize: 15, color: '#17130f', fontWeight: 900 }}>
+                <div style={{ fontSize: 14, color: '#17130f', fontWeight: 900 }}>
                   {locationSummary}
                 </div>
               </div>
             </div>
-          </div>
-        </SharpCard>
-
-        <SharpCard>
-          <SectionTitle>{text.languageSection}</SectionTitle>
-
-          <div>
-            {languageOptions.map((option, index) => {
-              const checked = selectedLanguage === option.value;
-
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setSelectedLanguage(option.value)}
-                  style={{
-                    width: '100%',
-                    display: 'grid',
-                    gridTemplateColumns: '34px 1fr auto',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '14px 4px',
-                    background: checked ? '#f7f1e7' : 'transparent',
-                    border: 'none',
-                    borderBottom: index !== languageOptions.length - 1 ? '2px solid #ece2d6' : 'none',
-                    textAlign: 'left',
-                    borderRadius: 18,
-                    cursor: 'pointer',
-                  }}
-                >
-                  <div style={{ fontSize: 24 }}>{option.flag}</div>
-
-                  <div>
-                    <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                      {option.label}
-                    </div>
-                    <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
-                      {text.languageApp}
-                    </div>
-                  </div>
-
-                  <Radio checked={checked} />
-                </button>
-              );
-            })}
-          </div>
-        </SharpCard>
-
-        <SharpCard>
-          <SectionTitle>{text.regionSection}</SectionTitle>
-
-          <div>
-            {regionOptions.map((option, index) => {
-              const checked = selectedRegion === option.value;
-
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    setSelectedRegion(option.value);
-
-                    if (selectedCurrency === selectedRegionMeta.currency) {
-                      setSelectedCurrency(option.currency);
-                    }
-
-                    if (selectedLocationMode === 'custom') {
-                      setSelectedLocation({
-                        source: 'custom',
-                        label: option.label,
-                        lat: option.lat,
-                        lng: option.lng,
-                      });
-                    }
-                  }}
-                  style={{
-                    width: '100%',
-                    display: 'grid',
-                    gridTemplateColumns: '34px 1fr auto',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '14px 4px',
-                    background: checked ? '#f7f1e7' : 'transparent',
-                    border: 'none',
-                    borderBottom: index !== regionOptions.length - 1 ? '2px solid #ece2d6' : 'none',
-                    textAlign: 'left',
-                    borderRadius: 18,
-                    cursor: 'pointer',
-                  }}
-                >
-                  <div style={{ fontSize: 24 }}>{option.flag}</div>
-
-                  <div>
-                    <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                      {option.label}
-                    </div>
-                    <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
-                      {option.subtitle}
-                    </div>
-                  </div>
-
-                  <Radio checked={checked} />
-                </button>
-              );
-            })}
-          </div>
-        </SharpCard>
-
-        <SharpCard>
-          <SectionTitle>{text.currencySection}</SectionTitle>
-
-          <div>
-            {currencyOptions.map((option, index) => {
-              const checked = selectedCurrency === option.value;
-
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setSelectedCurrency(option.value)}
-                  style={{
-                    width: '100%',
-                    display: 'grid',
-                    gridTemplateColumns: '62px 1fr auto',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '14px 4px',
-                    background: checked ? '#f7f1e7' : 'transparent',
-                    border: 'none',
-                    borderBottom: index !== currencyOptions.length - 1 ? '2px solid #ece2d6' : 'none',
-                    textAlign: 'left',
-                    borderRadius: 18,
-                    cursor: 'pointer',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 22,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
-                    {option.symbol}
-                  </div>
-
-                  <div>
-                    <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                      {option.title}
-                    </div>
-                    <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700 }}>
-                      {option.subtitle}
-                    </div>
-                  </div>
-
-                  <Radio checked={checked} />
-                </button>
-              );
-            })}
-          </div>
-        </SharpCard>
-
-        <SharpCard>
-          <SectionTitle>{text.locationSection}</SectionTitle>
+          </Card>
 
           <div
             style={{
-              display: 'grid',
-              gap: 12,
+              background: '#fff',
+              borderRadius: 24,
+              padding: '14px 16px',
+              border: '2px solid #111111',
+              color: '#6d6459',
+              fontSize: 14,
+              fontWeight: 700,
             }}
           >
-            <button
-              type="button"
-              onClick={handleUseCurrentLocation}
-              style={{
-                width: '100%',
-                display: 'grid',
-                gridTemplateColumns: '34px 1fr auto',
-                alignItems: 'center',
-                gap: 12,
-                padding: '16px 14px',
-                background: selectedLocationMode === 'current' ? '#f1efe7' : '#fff',
-                border: '2px solid #111111',
-                textAlign: 'left',
-                borderRadius: 24,
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ fontSize: 24 }}>📍</div>
-
-              <div>
-                <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                  {isLocating ? text.locationLoading : text.useCurrentLocation}
-                </div>
-                <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700, marginTop: 4 }}>
-                  {text.currentLocationHint}
-                </div>
-              </div>
-
-              <Radio checked={selectedLocationMode === 'current'} />
-            </button>
-
-            <button
-              type="button"
-              onClick={handleUseRegionLocation}
-              style={{
-                width: '100%',
-                display: 'grid',
-                gridTemplateColumns: '34px 1fr auto',
-                alignItems: 'center',
-                gap: 12,
-                padding: '16px 14px',
-                background: selectedLocationMode === 'custom' ? '#f1efe7' : '#fff',
-                border: '2px solid #111111',
-                textAlign: 'left',
-                borderRadius: 24,
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ fontSize: 24 }}>🗺️</div>
-
-              <div>
-                <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                  {text.useRegionLocation}
-                </div>
-                <div style={{ fontSize: 13, color: '#7c746a', fontWeight: 700, marginTop: 4 }}>
-                  {text.regionLocationHint}
-                </div>
-              </div>
-
-              <Radio checked={selectedLocationMode === 'custom'} />
-            </button>
-
-            <div
-              style={{
-                marginTop: 2,
-                borderRadius: 20,
-                background: '#f8f5ef',
-                border: '2px solid #111111',
-                padding: '12px 14px',
-              }}
-            >
-              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 900, marginBottom: 4 }}>
-                {text.selected}
-              </div>
-              <div style={{ fontSize: 14, color: '#17130f', fontWeight: 900 }}>
-                {locationSummary}
-              </div>
-            </div>
+            {profile.fullName} · {selectedLanguage} · {selectedRegion} · {selectedCurrency}
           </div>
-        </SharpCard>
 
-        <div
-          style={{
-            background: '#fff',
-            borderRadius: 24,
-            padding: '14px 16px',
-            border: '2px solid #111111',
-            color: '#6d6459',
-            fontSize: 14,
-            fontWeight: 700,
-            marginBottom: 16,
-          }}
-        >
-          {profile.fullName} · {selectedLanguage} · {selectedRegion} · {selectedCurrency}
+          <button
+            type="button"
+            onClick={handleSave}
+            style={{
+              width: '100%',
+              minHeight: 58,
+              borderRadius: 999,
+              border: '2px solid #111111',
+              background: '#2ea44f',
+              color: '#fff',
+              fontSize: 17,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            {text.saveBottom}
+          </button>
         </div>
-
-        <button
-          type="button"
-          onClick={handleSave}
-          style={{
-            width: '100%',
-            minHeight: 58,
-            borderRadius: 999,
-            border: '2px solid #111111',
-            background: '#2ea44f',
-            color: '#fff',
-            fontSize: 17,
-            fontWeight: 900,
-            cursor: 'pointer',
-          }}
-        >
-          {text.saveBottom}
-        </button>
       </div>
 
       <BottomNav active="profile" />
