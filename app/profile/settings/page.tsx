@@ -198,10 +198,10 @@ type SettingsItem = {
 
 function accentStyles(accent: SettingsItem['accent']) {
   if (accent === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
-  if (accent === 'green') return { background: '#eef9f1', color: '#2fa35a' };
-  if (accent === 'blue') return { background: '#eef4ff', color: '#2f7cf6' };
+  if (accent === 'green') return { background: '#dff2e3', color: '#1d7a38' };
+  if (accent === 'blue') return { background: '#e6efff', color: '#2559b7' };
   if (accent === 'violet') return { background: '#f3efff', color: '#7a5af8' };
-  if (accent === 'orange') return { background: '#fff5e8', color: '#d68612' };
+  if (accent === 'orange') return { background: '#fff0da', color: '#c07a00' };
   if (accent === 'danger') return { background: '#fff1f1', color: '#ef4444' };
   return { background: '#f4efe8', color: '#6d6258' };
 }
@@ -320,8 +320,9 @@ export default function AccountSettingsPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
+        background: '#ffffff',
         padding: '20px 16px 110px',
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -340,10 +341,11 @@ export default function AccountSettingsPage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
               fontSize: 26,
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              fontWeight: 900,
+              color: '#17130f',
               cursor: 'pointer',
             }}
           >
@@ -366,6 +368,7 @@ export default function AccountSettingsPage() {
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
               {text.subtitle}
@@ -378,105 +381,117 @@ export default function AccountSettingsPage() {
         <div
           style={{
             marginTop: 18,
-            borderRadius: 32,
-            border: '1px solid #efe4d7',
+            borderRadius: 30,
+            border: '2px solid #111111',
             background: '#fff',
             padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           <div
             style={{
-              fontSize: 16,
-              fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 14,
+              borderRadius: 24,
+              border: '2px solid #111111',
+              background: '#2f241c',
+              color: '#fff',
+              padding: 16,
             }}
           >
-            {text.profileSection}
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '72px 1fr',
-              gap: 14,
-              alignItems: 'center',
-            }}
-          >
-            <img
-              src={profile.avatar}
-              alt={profile.fullName}
+            <div
               style={{
-                width: 72,
-                height: 72,
-                borderRadius: 24,
-                objectFit: 'cover',
-                display: 'block',
-                boxShadow: '0 10px 22px rgba(44, 23, 10, 0.10)',
+                fontSize: 16,
+                fontWeight: 900,
+                color: '#ffffff',
+                marginBottom: 14,
               }}
-            />
+            >
+              {text.profileSection}
+            </div>
 
-            <div style={{ minWidth: 0 }}>
-              <div
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '72px 1fr',
+                gap: 14,
+                alignItems: 'center',
+              }}
+            >
+              <img
+                src={profile.avatar}
+                alt={profile.fullName}
                 style={{
-                  fontSize: 20,
-                  fontWeight: 900,
-                  color: '#17130f',
-                  lineHeight: 1.1,
+                  width: 72,
+                  height: 72,
+                  borderRadius: 22,
+                  objectFit: 'cover',
+                  display: 'block',
+                  border: '2px solid #111111',
+                  background: '#fff',
                 }}
-              >
-                {profile.fullName}
-              </div>
+              />
 
-              <div
-                style={{
-                  marginTop: 6,
-                  fontSize: 14,
-                  color: '#7b7268',
-                  fontWeight: 700,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {profile.email}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 10,
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 8,
-                }}
-              >
-                <span
+              <div style={{ minWidth: 0 }}>
+                <div
                   style={{
-                    borderRadius: 999,
-                    padding: '8px 12px',
-                    background: '#eef9f1',
-                    color: '#2fa35a',
-                    fontSize: 12,
+                    fontSize: 20,
                     fontWeight: 900,
+                    color: '#ffffff',
+                    lineHeight: 1.1,
                   }}
                 >
-                  {text.status}
-                </span>
+                  {profile.fullName}
+                </div>
 
-                {profile.isVerified ? (
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 14,
+                    color: '#ddd2c6',
+                    fontWeight: 700,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {profile.email}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 10,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 8,
+                  }}
+                >
                   <span
                     style={{
                       borderRadius: 999,
                       padding: '8px 12px',
-                      background: '#eef4ff',
-                      color: '#2f7cf6',
+                      border: '2px solid #111111',
+                      background: '#dff2e3',
+                      color: '#1d7a38',
                       fontSize: 12,
                       fontWeight: 900,
                     }}
                   >
-                    {text.verified}
+                    {text.status}
                   </span>
-                ) : null}
+
+                  {profile.isVerified ? (
+                    <span
+                      style={{
+                        borderRadius: 999,
+                        padding: '8px 12px',
+                        border: '2px solid #111111',
+                        background: '#e6efff',
+                        color: '#2559b7',
+                        fontSize: 12,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {text.verified}
+                    </span>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
@@ -487,9 +502,8 @@ export default function AccountSettingsPage() {
             marginTop: 18,
             overflow: 'hidden',
             borderRadius: 30,
-            border: '1px solid #efe4d7',
+            border: '2px solid #111111',
             background: '#fff',
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           {mainItems.map((item, index) => {
@@ -509,7 +523,7 @@ export default function AccountSettingsPage() {
                   padding: '16px 18px',
                   textAlign: 'left',
                   border: 'none',
-                  borderTop: index !== 0 ? '1px solid #f4eadf' : 'none',
+                  borderTop: index !== 0 ? '2px solid #111111' : 'none',
                   background: '#fff',
                   cursor: 'pointer',
                 }}
@@ -523,6 +537,7 @@ export default function AccountSettingsPage() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 20,
+                    border: '2px solid #111111',
                     ...accent,
                   }}
                 >
@@ -556,7 +571,7 @@ export default function AccountSettingsPage() {
                 <span
                   style={{
                     fontSize: 20,
-                    color: '#938475',
+                    color: '#17130f',
                     fontWeight: 900,
                   }}
                 >
@@ -571,10 +586,9 @@ export default function AccountSettingsPage() {
           style={{
             marginTop: 18,
             borderRadius: 30,
-            border: '1px solid #f2dede',
+            border: '2px solid #111111',
             background: '#fff',
             padding: 16,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
           }}
         >
           <div
@@ -602,7 +616,7 @@ export default function AccountSettingsPage() {
                   alignItems: 'center',
                   padding: '14px 16px',
                   textAlign: 'left',
-                  border: '1px solid #f4dede',
+                  border: '2px solid #111111',
                   borderRadius: 22,
                   background: '#fff8f8',
                   cursor: 'pointer',
@@ -617,6 +631,7 @@ export default function AccountSettingsPage() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 20,
+                    border: '2px solid #111111',
                     background: '#fff1f1',
                     color: '#ef4444',
                   }}
