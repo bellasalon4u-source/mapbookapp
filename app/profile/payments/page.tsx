@@ -47,13 +47,8 @@ const paymentTexts = {
     bankAvailable: 'Business and manual transfer available',
     trusted: 'Trusted payments',
     trustedSub: 'Your checkout methods are ready and protected',
-    paymentOverview: 'Payment overview',
-    checkoutReady: 'Checkout ready',
-    walletReady: 'Wallet ready',
-    fastProtected: 'Fast and protected',
-    sectionActions: 'Quick actions',
-    manageAll: 'Manage all methods',
     totalMethods: 'Total methods',
+    readyLabel: 'Ready to pay',
   },
   ES: {
     title: 'Métodos de pago',
@@ -87,13 +82,8 @@ const paymentTexts = {
     bankAvailable: 'Transferencia manual y pagos para empresas disponibles',
     trusted: 'Pagos seguros',
     trustedSub: 'Tus métodos de pago están listos y protegidos',
-    paymentOverview: 'Resumen de pagos',
-    checkoutReady: 'Checkout listo',
-    walletReady: 'Billetera lista',
-    fastProtected: 'Rápido y protegido',
-    sectionActions: 'Acciones rápidas',
-    manageAll: 'Gestionar todos los métodos',
     totalMethods: 'Total métodos',
+    readyLabel: 'Listo para pagar',
   },
   RU: {
     title: 'Способы оплаты',
@@ -127,13 +117,8 @@ const paymentTexts = {
     bankAvailable: 'Доступны business и manual transfer',
     trusted: 'Надёжные платежи',
     trustedSub: 'Ваши способы оплаты готовы и защищены',
-    paymentOverview: 'Обзор платежей',
-    checkoutReady: 'Checkout готов',
-    walletReady: 'Кошелёк готов',
-    fastProtected: 'Быстро и защищённо',
-    sectionActions: 'Быстрые действия',
-    manageAll: 'Управлять всеми способами',
     totalMethods: 'Всего способов',
+    readyLabel: 'Готово к оплате',
   },
   CZ: {
     title: 'Platební metody',
@@ -167,13 +152,8 @@ const paymentTexts = {
     bankAvailable: 'Dostupný ruční a firemní převod',
     trusted: 'Důvěryhodné platby',
     trustedSub: 'Vaše platební metody jsou připravené a chráněné',
-    paymentOverview: 'Přehled plateb',
-    checkoutReady: 'Checkout připraven',
-    walletReady: 'Peněženka připravena',
-    fastProtected: 'Rychlé a chráněné',
-    sectionActions: 'Rychlé akce',
-    manageAll: 'Spravovat všechny metody',
     totalMethods: 'Celkem metod',
+    readyLabel: 'Připraveno k platbě',
   },
   DE: {
     title: 'Zahlungsmethoden',
@@ -207,13 +187,8 @@ const paymentTexts = {
     bankAvailable: 'Manuelle und Business-Überweisung verfügbar',
     trusted: 'Sichere Zahlungen',
     trustedSub: 'Deine Zahlungsmethoden sind bereit und geschützt',
-    paymentOverview: 'Zahlungsübersicht',
-    checkoutReady: 'Checkout bereit',
-    walletReady: 'Wallet bereit',
-    fastProtected: 'Schnell und geschützt',
-    sectionActions: 'Schnellaktionen',
-    manageAll: 'Alle Methoden verwalten',
     totalMethods: 'Methoden gesamt',
+    readyLabel: 'Bereit zum Bezahlen',
   },
   PL: {
     title: 'Metody płatności',
@@ -247,32 +222,32 @@ const paymentTexts = {
     bankAvailable: 'Dostępny przelew ręczny i firmowy',
     trusted: 'Bezpieczne płatności',
     trustedSub: 'Twoje metody płatności są gotowe i chronione',
-    paymentOverview: 'Przegląd płatności',
-    checkoutReady: 'Checkout gotowy',
-    walletReady: 'Portfel gotowy',
-    fastProtected: 'Szybko i bezpiecznie',
-    sectionActions: 'Szybkie akcje',
-    manageAll: 'Zarządzaj wszystkimi metodami',
     totalMethods: 'Łącznie metod',
+    readyLabel: 'Gotowe do płatności',
   },
 } as const;
 
 function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange' | 'neutral') {
-  if (kind === 'green') return { background: '#ecfdf3', color: '#15803d' };
-  if (kind === 'blue') return { background: '#eef4ff', color: '#2563eb' };
+  if (kind === 'green') return { background: '#dff2e3', color: '#1d7a38' };
+  if (kind === 'blue') return { background: '#e6efff', color: '#2559b7' };
   if (kind === 'pink') return { background: '#fff0f6', color: '#ff4fa0' };
-  if (kind === 'orange') return { background: '#fff4db', color: '#b7791f' };
-  return { background: '#f3f4f6', color: '#4b5563' };
+  if (kind === 'orange') return { background: '#fff0da', color: '#c07a00' };
+  return { background: '#f4efe8', color: '#6d6258' };
 }
 
-function sectionCardStyle(): CSSProperties {
-  return {
-    borderRadius: 30,
-    border: '2px solid #111111',
-    background: '#ffffff',
-    padding: 18,
-  };
-}
+const sectionCardStyle: CSSProperties = {
+  borderRadius: 30,
+  border: '2px solid #111111',
+  background: '#ffffff',
+  padding: 18,
+};
+
+const innerCardStyle: CSSProperties = {
+  borderRadius: 24,
+  border: '2px solid #111111',
+  background: '#ffffff',
+  padding: 14,
+};
 
 export default function PaymentsPage() {
   const router = useRouter();
@@ -326,7 +301,7 @@ export default function PaymentsPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#ffffff',
+        background: '#f7f4ee',
         padding: '20px 16px 110px',
         fontFamily: 'Arial, sans-serif',
       }}
@@ -364,6 +339,7 @@ export default function PaymentsPage() {
                 fontSize: 22,
                 fontWeight: 900,
                 color: '#17130f',
+                lineHeight: 1.1,
               }}
             >
               {text.title}
@@ -384,7 +360,7 @@ export default function PaymentsPage() {
           <div />
         </div>
 
-        <div style={{ marginTop: 18, ...sectionCardStyle() }}>
+        <div style={{ marginTop: 18, ...sectionCardStyle }}>
           <div
             style={{
               borderRadius: 24,
@@ -403,7 +379,9 @@ export default function PaymentsPage() {
               }}
             >
               <div>
-                <div style={{ fontSize: 20, fontWeight: 900, color: '#ffffff' }}>{text.trusted}</div>
+                <div style={{ fontSize: 20, fontWeight: 900, color: '#ffffff' }}>
+                  {text.trusted}
+                </div>
                 <div
                   style={{
                     marginTop: 6,
@@ -420,7 +398,7 @@ export default function PaymentsPage() {
               <div
                 style={{
                   minWidth: 92,
-                  borderRadius: 20,
+                  borderRadius: 22,
                   border: '2px solid #111111',
                   background: '#fff0f6',
                   color: '#ff4fa0',
@@ -477,54 +455,13 @@ export default function PaymentsPage() {
                   fontWeight: 900,
                 }}
               >
-                {text.fastProtected}
+                {text.readyLabel}
               </span>
-            </div>
-
-            <div
-              style={{
-                marginTop: 16,
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-              }}
-            >
-              <button
-                type="button"
-                style={{
-                  height: 52,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#45c63d',
-                  color: '#fff',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.addNew}
-              </button>
-
-              <button
-                type="button"
-                style={{
-                  height: 52,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#fff',
-                  color: '#17130f',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.manageAll}
-              </button>
             </div>
           </div>
         </div>
 
-        <div style={{ marginTop: 16, ...sectionCardStyle() }}>
+        <div style={{ marginTop: 16, ...sectionCardStyle }}>
           <div
             style={{
               display: 'flex',
@@ -700,8 +637,8 @@ export default function PaymentsPage() {
                       height: 46,
                       borderRadius: 16,
                       border: '2px solid #111111',
-                      background: index === 0 ? 'rgba(255,255,255,0.08)' : '#fff5f5',
-                      color: index === 0 ? '#fff' : '#ef4444',
+                      background: index === 0 ? 'rgba(255,255,255,0.08)' : '#fff0f6',
+                      color: index === 0 ? '#fff' : '#ff4fa0',
                       fontSize: 13,
                       fontWeight: 900,
                       cursor: 'pointer',
@@ -719,10 +656,10 @@ export default function PaymentsPage() {
               marginTop: 14,
               borderRadius: 22,
               border: '2px solid #111111',
-              background: '#ecfdf3',
+              background: '#dff2e3',
               padding: '14px 16px',
               fontSize: 14,
-              color: '#15803d',
+              color: '#1d7a38',
               fontWeight: 800,
             }}
           >
@@ -731,7 +668,7 @@ export default function PaymentsPage() {
         </div>
 
         <div style={{ marginTop: 16, display: 'grid', gap: 16 }}>
-          <div style={sectionCardStyle()}>
+          <div style={sectionCardStyle}>
             <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>{text.paypal}</div>
             <div
               style={{
@@ -745,15 +682,7 @@ export default function PaymentsPage() {
               {text.paypalHint}
             </div>
 
-            <div
-              style={{
-                marginTop: 14,
-                borderRadius: 24,
-                background: '#fff',
-                border: '2px solid #111111',
-                padding: 16,
-              }}
-            >
+            <div style={{ marginTop: 14, ...innerCardStyle }}>
               <div
                 style={{
                   display: 'flex',
@@ -836,7 +765,7 @@ export default function PaymentsPage() {
             </div>
           </div>
 
-          <div style={sectionCardStyle()}>
+          <div style={sectionCardStyle}>
             <div
               style={{
                 display: 'flex',
@@ -882,10 +811,7 @@ export default function PaymentsPage() {
                 <div
                   key={item.name}
                   style={{
-                    borderRadius: 22,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    padding: 14,
+                    ...innerCardStyle,
                     display: 'flex',
                     justifyContent: 'space-between',
                     gap: 12,
@@ -926,7 +852,7 @@ export default function PaymentsPage() {
             </div>
           </div>
 
-          <div style={sectionCardStyle()}>
+          <div style={sectionCardStyle}>
             <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>{text.crypto}</div>
             <div
               style={{
@@ -945,10 +871,7 @@ export default function PaymentsPage() {
                 <div
                   key={wallet.id}
                   style={{
-                    borderRadius: 22,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    padding: 14,
+                    ...innerCardStyle,
                   }}
                 >
                   <div
@@ -1024,8 +947,8 @@ export default function PaymentsPage() {
                         height: 46,
                         borderRadius: 16,
                         border: '2px solid #111111',
-                        background: '#fff5f5',
-                        color: '#ef4444',
+                        background: '#fff0f6',
+                        color: '#ff4fa0',
                         fontSize: 13,
                         fontWeight: 900,
                         cursor: 'pointer',
@@ -1043,10 +966,10 @@ export default function PaymentsPage() {
                 marginTop: 12,
                 borderRadius: 18,
                 border: '2px solid #111111',
-                background: '#eef4ff',
+                background: '#e6efff',
                 padding: '12px 14px',
                 fontSize: 13,
-                color: '#2f5dc4',
+                color: '#2559b7',
                 fontWeight: 800,
               }}
             >
@@ -1054,7 +977,7 @@ export default function PaymentsPage() {
             </div>
           </div>
 
-          <div style={sectionCardStyle()}>
+          <div style={sectionCardStyle}>
             <div
               style={{
                 display: 'flex',
@@ -1096,10 +1019,7 @@ export default function PaymentsPage() {
             <div
               style={{
                 marginTop: 14,
-                borderRadius: 22,
-                background: '#fff',
-                border: '2px solid #111111',
-                padding: 14,
+                ...innerCardStyle,
               }}
             >
               <div style={{ fontSize: 14, fontWeight: 900, color: '#17130f' }}>
