@@ -63,9 +63,27 @@ type ExtraProfileData = {
   contacts: Record<ContactKey, string>;
   avatarHistory: string[];
   contactPhoneMeta?: Partial<Record<PhoneContactKey, PhoneContactValue>>;
+  selectedCountryCode?: string;
+  postcode?: string;
+  formattedAddress?: string;
+  lat?: number;
+  lng?: number;
+};
+
+type AddressSuggestion = {
+  id: string;
+  title: string;
+  subtitle: string;
+  postcode?: string;
+  city?: string;
+  district?: string;
+  addressLine?: string;
+  lat?: number;
+  lng?: number;
 };
 
 const EXTRA_PROFILE_STORAGE_KEY = 'mapbook_profile_extra_v2';
+const MAPBOX_PUBLIC_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
 const COUNTRIES: CountryOption[] = [
   { code: 'GB', dial: '+44', flag: '🇬🇧', label: 'United Kingdom' },
@@ -761,6 +779,11 @@ function readExtraProfileData(): ExtraProfileData {
       contacts: emptyContacts(),
       avatarHistory: [],
       contactPhoneMeta: emptyPhoneMeta(),
+      selectedCountryCode: 'GB',
+      postcode: '',
+      formattedAddress: '',
+      lat: undefined,
+      lng: undefined,
     };
   }
 
@@ -773,6 +796,11 @@ function readExtraProfileData(): ExtraProfileData {
         contacts: emptyContacts(),
         avatarHistory: [],
         contactPhoneMeta: emptyPhoneMeta(),
+        selectedCountryCode: 'GB',
+        postcode: '',
+        formattedAddress: '',
+        lat: undefined,
+        lng: undefined,
       };
     }
 
@@ -802,6 +830,11 @@ function readExtraProfileData(): ExtraProfileData {
           parsed.contactPhoneMeta?.telegram || parseStoredPhoneContact(contacts.telegram),
         viber: parsed.contactPhoneMeta?.viber || parseStoredPhoneContact(contacts.viber),
       },
+      selectedCountryCode: parsed.selectedCountryCode || 'GB',
+      postcode: parsed.postcode || '',
+      formattedAddress: parsed.formattedAddress || '',
+      lat: parsed.lat,
+      lng: parsed.lng,
     };
   } catch {
     return {
@@ -810,6 +843,11 @@ function readExtraProfileData(): ExtraProfileData {
       contacts: emptyContacts(),
       avatarHistory: [],
       contactPhoneMeta: emptyPhoneMeta(),
+      selectedCountryCode: 'GB',
+      postcode: '',
+      formattedAddress: '',
+      lat: undefined,
+      lng: undefined,
     };
   }
 }
@@ -825,6 +863,117 @@ function getAccentColors(accent: ContactItem['accent']) {
   if (accent === 'violet') return { bg: '#f3efff', border: '#111111', text: '#7a5af8' };
   if (accent === 'orange') return { bg: '#fff4e7', border: '#111111', text: '#d68612' };
   return { bg: '#fff0f6', border: '#111111', text: '#ff4fa0' };
+}
+
+function normalizeUkPostcode(value: string) {
+  return value.toUpperCase().replace(/\s+/g, '').trim();
+}
+
+async function fetchUkPostcodeSuggestions(query: string): Promise<AddressSuggestion[]> {
+  const normalized = normalizeUkPostcode(query);
+  if (!normalized || normalized.length < 3) return [];
+
+  const autoRes = await fetch(
+    `https://api.postcodes.io/postcodes/${encodeURIComponent(normalized)}/autocomplete?limit=6`
+  );
+
+  if (!autoRes.ok) return [];
+
+  const autoData = await autoRes.json();
+  const codes: string[] = Array.isArray(autoData?.result) ? autoData.result : [];
+
+  if (!codes.length) return [];
+
+  const details = await Promise.all(
+    codes.map(async (code) => {
+      const res = await fetch(
+        `https://api.postcodes.io/postcodes/${encodeURIComponent(code.replace(/\s+/g, ''))}`
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      const item = data?.result;
+      if (!item) return null;
+
+      const cityValue =
+        item.admin_district || item.parish || item.admin_ward || item.region || '';
+      const districtValue = item.admin_ward || item.parliamentary_constituency || '';
+      const subtitle = [item.admin_district, item.region, item.country].filter(Boolean).join(', ');
+
+      return {
+        id: `uk-${item.postcode}`,
+        title: item.postcode,
+        subtitle,
+        postcode: item.postcode,
+        city: cityValue,
+        district: districtValue,
+        addressLine: item.postcode,
+        lat: item.latitude,
+        lng: item.longitude,
+      } as AddressSuggestion;
+    })
+  );
+
+  return details.filter(Boolean) as AddressSuggestion[];
+}
+
+async function fetchGlobalAddressSuggestions(
+  query: string,
+  countryCode: string
+): Promise<AddressSuggestion[]> {
+  if (!MAPBOX_PUBLIC_TOKEN || query.trim().length < 3) return [];
+
+  const res = await fetch(
+    `https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(
+      query
+    )}&access_token=${encodeURIComponent(
+      MAPBOX_PUBLIC_TOKEN
+    )}&limit=6&country=${encodeURIComponent(countryCode.toLowerCase())}&types=address,street,place,postcode`
+  );
+
+  if (!res.ok) return [];
+
+  const data = await res.json();
+  const features = Array.isArray(data?.features) ? data.features : [];
+
+  return features.map((feature: any, index: number) => {
+    const context = Array.isArray(feature.properties?.context)
+      ? feature.properties.context
+      : [];
+
+    const postcodeCtx = context.find((c: any) => c?.id?.startsWith('postcode'));
+    const placeCtx = context.find((c: any) => c?.id?.startsWith('place'));
+    const districtCtx =
+      context.find((c: any) => c?.id?.startsWith('district')) ||
+      context.find((c: any) => c?.id?.startsWith('locality')) ||
+      context.find((c: any) => c?.id?.startsWith('neighborhood'));
+
+    const title =
+      feature.properties?.name ||
+      feature.properties?.full_address ||
+      feature.name ||
+      query;
+
+    const subtitle =
+      feature.properties?.place_formatted ||
+      feature.properties?.full_address ||
+      '';
+
+    const coords = Array.isArray(feature.geometry?.coordinates)
+      ? feature.geometry.coordinates
+      : [];
+
+    return {
+      id: feature.id || `mapbox-${index}`,
+      title,
+      subtitle,
+      postcode: postcodeCtx?.name || '',
+      city: placeCtx?.name || '',
+      district: districtCtx?.name || '',
+      addressLine: feature.properties?.full_address || title,
+      lat: coords[1],
+      lng: coords[0],
+    } as AddressSuggestion;
+  });
 }
 
 function FieldHeader({
@@ -925,7 +1074,13 @@ function ContactBrandIcon({
     return (
       <svg viewBox="0 0 24 24" style={commonSvgStyle} aria-hidden="true">
         <defs>
-          <linearGradient id="instagramGradientMapbookContactFull" x1="0%" y1="100%" x2="100%" y2="0%">
+          <linearGradient
+            id="instagramGradientMapbookContactFull"
+            x1="0%"
+            y1="100%"
+            x2="100%"
+            y2="0%"
+          >
             <stop offset="0%" stopColor="#feda75" />
             <stop offset="30%" stopColor="#fa7e1e" />
             <stop offset="60%" stopColor="#d62976" />
@@ -933,7 +1088,14 @@ function ContactBrandIcon({
             <stop offset="100%" stopColor="#4f5bd5" />
           </linearGradient>
         </defs>
-        <rect x="3" y="3" width="18" height="18" rx="5" fill="url(#instagramGradientMapbookContactFull)" />
+        <rect
+          x="3"
+          y="3"
+          width="18"
+          height="18"
+          rx="5"
+          fill="url(#instagramGradientMapbookContactFull)"
+        />
         <circle cx="12" cy="12" r="4" fill="none" stroke="#fff" strokeWidth="2" />
         <circle cx="17.2" cy="6.8" r="1.2" fill="#fff" />
       </svg>
@@ -1328,6 +1490,19 @@ export default function EditProfilePage() {
   const [city, setCity] = useState(getUserProfile().city);
   const [district, setDistrict] = useState(initialExtra.district);
   const [address, setAddress] = useState(initialExtra.address);
+  const [selectedCountryCode, setSelectedCountryCode] = useState(
+    initialExtra.selectedCountryCode || 'GB'
+  );
+  const [postcode, setPostcode] = useState(initialExtra.postcode || '');
+  const [formattedAddress, setFormattedAddress] = useState(initialExtra.formattedAddress || '');
+  const [addressSearch, setAddressSearch] = useState(initialExtra.formattedAddress || '');
+  const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
+  const [addressLoading, setAddressLoading] = useState(false);
+  const [addressDropdownOpen, setAddressDropdownOpen] = useState(false);
+  const [addressMeta, setAddressMeta] = useState<{ lat?: number; lng?: number }>({
+    lat: initialExtra.lat,
+    lng: initialExtra.lng,
+  });
   const [bio, setBio] = useState(getUserProfile().bio);
   const [avatar, setAvatar] = useState(getUserProfile().avatar);
   const [avatarHistory, setAvatarHistory] = useState<string[]>([
@@ -1392,6 +1567,14 @@ export default function EditProfilePage() {
       setCity(next.city);
       setDistrict(extra.district || '');
       setAddress(extra.address || '');
+      setSelectedCountryCode(extra.selectedCountryCode || 'GB');
+      setPostcode(extra.postcode || '');
+      setFormattedAddress(extra.formattedAddress || '');
+      setAddressSearch(extra.formattedAddress || '');
+      setAddressMeta({
+        lat: extra.lat,
+        lng: extra.lng,
+      });
       setBio(next.bio);
       setAvatar(next.avatar);
       setAvatarHistory((prev) =>
@@ -1432,6 +1615,51 @@ export default function EditProfilePage() {
       unsubProfile();
     };
   }, []);
+
+  useEffect(() => {
+    const run = async () => {
+      const query = addressSearch.trim();
+
+      if (query.length < 3) {
+        setAddressSuggestions([]);
+        setAddressDropdownOpen(false);
+        return;
+      }
+
+      try {
+        setAddressLoading(true);
+
+        let results: AddressSuggestion[] = [];
+
+        if (selectedCountryCode === 'GB') {
+          const normalized = normalizeUkPostcode(query);
+          const looksLikePostcode = /^[A-Z0-9\s]{3,8}$/i.test(normalized);
+
+          if (looksLikePostcode) {
+            results = await fetchUkPostcodeSuggestions(query);
+          } else {
+            results = await fetchGlobalAddressSuggestions(query, selectedCountryCode);
+          }
+        } else {
+          results = await fetchGlobalAddressSuggestions(query, selectedCountryCode);
+        }
+
+        setAddressSuggestions(results);
+        setAddressDropdownOpen(results.length > 0);
+      } catch {
+        setAddressSuggestions([]);
+        setAddressDropdownOpen(false);
+      } finally {
+        setAddressLoading(false);
+      }
+    };
+
+    const timer = window.setTimeout(run, 350);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [addressSearch, selectedCountryCode]);
 
   const text = useMemo(() => editProfileTexts[language] || editProfileTexts.EN, [language]);
 
@@ -1503,6 +1731,23 @@ export default function EditProfilePage() {
     setActiveContactCountryPicker(null);
   };
 
+  const applyAddressSuggestion = (item: AddressSuggestion) => {
+    const nextFormatted = item.subtitle ? `${item.title}, ${item.subtitle}` : item.title;
+
+    setAddressSearch(nextFormatted);
+    setFormattedAddress(nextFormatted);
+    setPostcode(item.postcode || '');
+    setCity(item.city || '');
+    setDistrict(item.district || '');
+    setAddress(item.addressLine || item.title || '');
+    setAddressDropdownOpen(false);
+    setAddressSuggestions([]);
+    setAddressMeta({
+      lat: item.lat,
+      lng: item.lng,
+    });
+  };
+
   const handleSave = () => {
     const combinedFullName = `${firstName} ${lastName}`.trim();
     const finalPhone = combinePhone(phoneCountry, phoneNumber);
@@ -1548,6 +1793,11 @@ export default function EditProfilePage() {
       contacts: nextContacts,
       avatarHistory,
       contactPhoneMeta,
+      selectedCountryCode,
+      postcode,
+      formattedAddress,
+      lat: addressMeta.lat,
+      lng: addressMeta.lng,
     });
 
     alert(text.saved);
@@ -1990,6 +2240,136 @@ export default function EditProfilePage() {
           </div>
 
           <div style={{ display: 'grid', gap: 14 }}>
+            <label>
+              <FieldHeader title={text.country} helper={text.required} />
+              <select
+                value={selectedCountryCode}
+                onChange={(e) => {
+                  const nextCode = e.target.value;
+                  setSelectedCountryCode(nextCode);
+                  setAddressSuggestions([]);
+                  setAddressDropdownOpen(false);
+                  setAddressSearch('');
+                  setFormattedAddress('');
+                  setPostcode('');
+                  setCity('');
+                  setDistrict('');
+                  setAddress('');
+                  setAddressMeta({});
+                }}
+                style={textInputStyle}
+              >
+                {COUNTRIES.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.flag} {country.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              <FieldHeader
+                title={selectedCountryCode === 'GB' ? 'Postcode' : 'Postcode / ZIP'}
+                helper={text.optional}
+              />
+              <input
+                value={postcode}
+                onChange={(e) => {
+                  setPostcode(e.target.value);
+                  if (selectedCountryCode === 'GB') {
+                    setAddressSearch(e.target.value);
+                  }
+                }}
+                placeholder={selectedCountryCode === 'GB' ? 'SW1A 1AA' : 'ZIP / postal code'}
+                style={textInputStyle}
+              />
+            </label>
+
+            <label>
+              <FieldHeader
+                title={selectedCountryCode === 'GB' ? 'Address lookup' : 'Address search'}
+                helper={text.optional}
+              />
+              <input
+                value={addressSearch}
+                onChange={(e) => setAddressSearch(e.target.value)}
+                placeholder={
+                  selectedCountryCode === 'GB'
+                    ? 'Start typing postcode or address'
+                    : 'Start typing address'
+                }
+                style={textInputStyle}
+              />
+
+              {addressLoading ? (
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 12,
+                    fontWeight: 800,
+                    color: '#8a7f74',
+                  }}
+                >
+                  Searching...
+                </div>
+              ) : null}
+
+              {addressDropdownOpen && addressSuggestions.length > 0 ? (
+                <div
+                  style={{
+                    marginTop: 8,
+                    border: '2px solid #111111',
+                    borderRadius: 22,
+                    background: '#fff',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {addressSuggestions.map((item, index) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => applyAddressSuggestion(item)}
+                      style={{
+                        width: '100%',
+                        border: 'none',
+                        borderBottom:
+                          index === addressSuggestions.length - 1
+                            ? 'none'
+                            : '2px solid #111111',
+                        background: '#fff',
+                        padding: '12px 14px',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 900,
+                          color: '#17130f',
+                        }}
+                      >
+                        {item.title}
+                      </div>
+                      {item.subtitle ? (
+                        <div
+                          style={{
+                            marginTop: 4,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: '#7b7268',
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          {item.subtitle}
+                        </div>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </label>
+
             <label>
               <FieldHeader title={text.city} helper={text.required} />
               <input
