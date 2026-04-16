@@ -172,9 +172,18 @@ const inviteHistory: InviteItem[] = [
 ];
 
 function statusStyle(status: InviteItem['status']) {
-  if (status === 'booked') return { background: '#eef9f1', color: '#2fa35a' };
-  if (status === 'joined') return { background: '#eef4ff', color: '#2f7cf6' };
-  return { background: '#fff5e8', color: '#d68612' };
+  if (status === 'booked') return { background: '#ecfdf3', color: '#15803d' };
+  if (status === 'joined') return { background: '#eef4ff', color: '#2563eb' };
+  return { background: '#fff4db', color: '#b7791f' };
+}
+
+function statCardStyle(bg: string) {
+  return {
+    borderRadius: 22,
+    border: '2px solid #111111',
+    background: bg,
+    padding: 14,
+  } as const;
 }
 
 export default function InvitePage() {
@@ -216,12 +225,32 @@ export default function InvitePage() {
     }
   };
 
+  const handleShare = async () => {
+    const shareText = `${text.inviteLink}: ${inviteLink}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'MapBook',
+          text: shareText,
+          url: inviteLink,
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(inviteLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {}
+  };
+
   return (
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
+        background: '#f7f4ee',
         padding: '20px 16px 110px',
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
@@ -240,10 +269,11 @@ export default function InvitePage() {
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #efe4d7',
+              border: '2px solid #111111',
               background: '#fff',
+              color: '#17130f',
               fontSize: 26,
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
+              fontWeight: 900,
               cursor: 'pointer',
             }}
           >
@@ -251,7 +281,14 @@ export default function InvitePage() {
           </button>
 
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 22, fontWeight: 900, color: '#17130f' }}>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 900,
+                color: '#17130f',
+                lineHeight: 1.1,
+              }}
+            >
               {text.title}
             </div>
             <div
@@ -260,6 +297,7 @@ export default function InvitePage() {
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
+                lineHeight: 1.35,
               }}
             >
               {text.subtitle}
@@ -269,354 +307,375 @@ export default function InvitePage() {
           <div />
         </div>
 
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 32,
-            border: '1px solid #f0e3d7',
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
+        <section style={{ marginTop: 18 }}>
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '56px 1fr',
-              gap: 12,
-              alignItems: 'center',
-            }}
-          >
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 20,
-                background: '#fff1f7',
-                color: '#ff4fa0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 26,
-              }}
-            >
-              🎁
-            </div>
-
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: '#17130f' }}>
-                {text.heroTitle}
-              </div>
-              <div
-                style={{
-                  marginTop: 4,
-                  fontSize: 14,
-                  lineHeight: 1.55,
-                  color: '#7b7268',
-                  fontWeight: 700,
-                }}
-              >
-                {text.heroSub}
-              </div>
-            </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
-              borderRadius: 24,
+              borderRadius: 30,
+              border: '2px solid #111111',
               background: '#fff',
-              border: '1px solid #f1e8dc',
-              padding: 16,
+              padding: 18,
             }}
           >
-            <div style={{ fontSize: 13, color: '#8b8277', fontWeight: 800 }}>
-              {text.yourCode}
-            </div>
             <div
               style={{
-                marginTop: 8,
-                fontSize: 26,
-                fontWeight: 900,
-                color: '#17130f',
-                letterSpacing: 1,
+                display: 'grid',
+                gridTemplateColumns: '58px 1fr',
+                gap: 12,
+                alignItems: 'center',
               }}
             >
-              {referralCode}
-            </div>
-
-            <button
-              type="button"
-              onClick={handleCopy}
-              style={{
-                marginTop: 12,
-                border: 'none',
-                borderRadius: 18,
-                background: '#2f241c',
-                color: '#fff',
-                minHeight: 48,
-                padding: '0 18px',
-                fontSize: 14,
-                fontWeight: 900,
-                cursor: 'pointer',
-              }}
-            >
-              {copied ? text.copied : text.copy}
-            </button>
-          </div>
-
-          <div
-            style={{
-              marginTop: 12,
-              borderRadius: 20,
-              background: '#eef4ff',
-              padding: '12px 14px',
-              fontSize: 13,
-              color: '#2f5dc4',
-              fontWeight: 800,
-              lineHeight: 1.45,
-              wordBreak: 'break-all',
-            }}
-          >
-            {text.inviteLink}: {inviteLink}
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 16,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
-            }}
-          >
-            {text.rewards}
-          </div>
-
-          <div style={{ display: 'grid', gap: 10 }}>
-            {[text.reward1, text.reward2, text.reward3].map((item) => (
               <div
-                key={item}
                 style={{
+                  width: 58,
+                  height: 58,
                   borderRadius: 20,
-                  background: '#fcfaf6',
-                  border: '1px solid #f1e8dc',
-                  padding: 14,
-                  fontSize: 14,
-                  lineHeight: 1.5,
-                  color: '#6d6258',
-                  fontWeight: 700,
+                  border: '2px solid #111111',
+                  background: '#fff0f6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 28,
                 }}
               >
-                {item}
+                🎁
               </div>
-            ))}
-          </div>
-        </div>
 
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 16,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
-            }}
-          >
-            {text.stats}
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              gap: 10,
-            }}
-          >
-            <div
-              style={{
-                borderRadius: 22,
-                background: '#fff',
-                border: '1px solid #f1e8dc',
-                padding: 14,
-              }}
-            >
-              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800 }}>
-                {text.invited}
-              </div>
-              <div style={{ marginTop: 8, fontSize: 24, fontWeight: 900, color: '#17130f' }}>
-                12
+              <div>
+                <div
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {text.heroTitle}
+                </div>
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 14,
+                    lineHeight: 1.55,
+                    color: '#7b7268',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.heroSub}
+                </div>
               </div>
             </div>
 
             <div
               style={{
-                borderRadius: 22,
+                marginTop: 16,
+                borderRadius: 26,
+                border: '2px solid #111111',
                 background: '#fff',
-                border: '1px solid #f1e8dc',
-                padding: 14,
+                padding: 16,
               }}
             >
-              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800 }}>
-                {text.joined}
+              <div
+                style={{
+                  fontSize: 13,
+                  color: '#8a7f74',
+                  fontWeight: 900,
+                }}
+              >
+                {text.yourCode}
               </div>
-              <div style={{ marginTop: 8, fontSize: 24, fontWeight: 900, color: '#17130f' }}>
-                8
-              </div>
-            </div>
 
-            <div
-              style={{
-                borderRadius: 22,
-                background: '#fff',
-                border: '1px solid #f1e8dc',
-                padding: 14,
-              }}
-            >
-              <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800 }}>
-                {text.earned}
-              </div>
-              <div style={{ marginTop: 8, fontSize: 24, fontWeight: 900, color: '#17130f' }}>
-                £15
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: 18,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 16,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
-            }}
-          >
-            {text.history}
-          </div>
-
-          {inviteHistory.length === 0 ? (
-            <div
-              style={{
-                borderRadius: 24,
-                background: '#fcfaf6',
-                border: '1px solid #f1e8dc',
-                padding: 22,
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ fontSize: 17, fontWeight: 900, color: '#17130f' }}>{text.empty}</div>
               <div
                 style={{
                   marginTop: 8,
-                  fontSize: 14,
-                  lineHeight: 1.55,
-                  color: '#7b7268',
-                  fontWeight: 700,
+                  fontSize: 28,
+                  fontWeight: 900,
+                  color: '#17130f',
+                  lineHeight: 1.1,
+                  wordBreak: 'break-word',
                 }}
               >
-                {text.emptySub}
+                {referralCode}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: 'flex',
+                  gap: 10,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  style={{
+                    minHeight: 48,
+                    padding: '0 18px',
+                    borderRadius: 18,
+                    border: '2px solid #111111',
+                    background: '#2f241c',
+                    color: '#fff',
+                    fontSize: 14,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {copied ? text.copied : text.copy}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  style={{
+                    minHeight: 48,
+                    padding: '0 18px',
+                    borderRadius: 18,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#17130f',
+                    fontSize: 14,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.share}
+                </button>
               </div>
             </div>
-          ) : (
-            <div style={{ display: 'grid', gap: 12 }}>
-              {inviteHistory.map((item) => {
-                const badge = statusStyle(item.status);
 
+            <div
+              style={{
+                marginTop: 12,
+                borderRadius: 22,
+                border: '2px solid #111111',
+                background: '#eef4ff',
+                padding: '12px 14px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 900,
+                  color: '#2563eb',
+                }}
+              >
+                {text.inviteLink}
+              </div>
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: '#2f5dc4',
+                  lineHeight: 1.45,
+                  wordBreak: 'break-all',
+                }}
+              >
+                {inviteLink}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section style={{ marginTop: 18 }}>
+          <div
+            style={{
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 16,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 12,
+              }}
+            >
+              {text.rewards}
+            </div>
+
+            <div style={{ display: 'grid', gap: 10 }}>
+              {[text.reward1, text.reward2, text.reward3].map((item, index) => {
+                const backgrounds = ['#fcfaf6', '#fff8fb', '#f7fbff'];
                 return (
                   <div
-                    key={item.id}
+                    key={item}
                     style={{
-                      borderRadius: 24,
-                      border: '1px solid #f1e8dc',
-                      background: '#fff',
+                      borderRadius: 22,
+                      border: '2px solid #111111',
+                      background: backgrounds[index] || '#fcfaf6',
                       padding: 14,
+                      fontSize: 14,
+                      lineHeight: 1.5,
+                      color: '#6d6258',
+                      fontWeight: 700,
                     }}
                   >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        gap: 12,
-                        alignItems: 'center',
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                          {item.name}
-                        </div>
-                        <div
-                          style={{
-                            marginTop: 6,
-                            display: 'inline-flex',
-                            borderRadius: 999,
-                            padding: '8px 12px',
-                            fontSize: 12,
-                            fontWeight: 900,
-                            ...badge,
-                          }}
-                        >
-                          {statusLabel(item.status)}
-                        </div>
-                      </div>
-
-                      <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
-                        £{item.reward}
-                      </div>
-                    </div>
+                    {item}
                   </div>
                 );
               })}
             </div>
-          )}
-        </div>
+          </div>
+        </section>
 
-        <button
-          type="button"
-          style={{
-            marginTop: 18,
-            width: '100%',
-            border: 'none',
-            borderRadius: 24,
-            background: 'linear-gradient(180deg, #2b221c 0%, #1f1712 100%)',
-            color: '#fff',
-            minHeight: 56,
-            fontSize: 16,
-            fontWeight: 900,
-            cursor: 'pointer',
-            boxShadow: '0 14px 28px rgba(31,23,18,0.20)',
-          }}
-        >
-          {text.share}
-        </button>
+        <section style={{ marginTop: 18 }}>
+          <div
+            style={{
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 16,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 12,
+              }}
+            >
+              {text.stats}
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: 10,
+              }}
+            >
+              <div style={statCardStyle('#fff')}>
+                <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 800 }}>
+                  {text.invited}
+                </div>
+                <div style={{ marginTop: 8, fontSize: 24, fontWeight: 900, color: '#17130f' }}>
+                  12
+                </div>
+              </div>
+
+              <div style={statCardStyle('#eef4ff')}>
+                <div style={{ fontSize: 12, color: '#5f6b85', fontWeight: 800 }}>
+                  {text.joined}
+                </div>
+                <div style={{ marginTop: 8, fontSize: 24, fontWeight: 900, color: '#2563eb' }}>
+                  8
+                </div>
+              </div>
+
+              <div style={statCardStyle('#ecfdf3')}>
+                <div style={{ fontSize: 12, color: '#52725b', fontWeight: 800 }}>
+                  {text.earned}
+                </div>
+                <div style={{ marginTop: 8, fontSize: 24, fontWeight: 900, color: '#15803d' }}>
+                  £15
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section style={{ marginTop: 18 }}>
+          <div
+            style={{
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 16,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 12,
+              }}
+            >
+              {text.history}
+            </div>
+
+            {inviteHistory.length === 0 ? (
+              <div
+                style={{
+                  borderRadius: 24,
+                  border: '2px solid #111111',
+                  background: '#fcfaf6',
+                  padding: 22,
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ fontSize: 17, fontWeight: 900, color: '#17130f' }}>{text.empty}</div>
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 14,
+                    lineHeight: 1.55,
+                    color: '#7b7268',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.emptySub}
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gap: 12 }}>
+                {inviteHistory.map((item) => {
+                  const badge = statusStyle(item.status);
+
+                  return (
+                    <div
+                      key={item.id}
+                      style={{
+                        borderRadius: 24,
+                        border: '2px solid #111111',
+                        background: '#fff',
+                        padding: 14,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          gap: 12,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                            {item.name}
+                          </div>
+                          <div
+                            style={{
+                              marginTop: 6,
+                              display: 'inline-flex',
+                              borderRadius: 999,
+                              border: '2px solid #111111',
+                              padding: '8px 12px',
+                              fontSize: 12,
+                              fontWeight: 900,
+                              ...badge,
+                            }}
+                          >
+                            {statusLabel(item.status)}
+                          </div>
+                        </div>
+
+                        <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
+                          £{item.reward}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </section>
       </div>
 
       <BottomNav active="profile" />
