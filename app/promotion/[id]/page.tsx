@@ -16,6 +16,16 @@ import {
 } from '../../../services/i18n';
 import { formatDisplayPrice } from '../../../services/currencyDisplay';
 
+type MasterLike = {
+  id: string | number;
+  name?: string;
+  title?: string;
+  category?: string;
+  subcategory?: string;
+  avatar?: string;
+  rating?: number;
+};
+
 function SectionCard({
   title,
   children,
@@ -27,19 +37,19 @@ function SectionCard({
     <div
       style={{
         background: '#ffffff',
-        borderRadius: 28,
-        padding: 22,
-        border: '1px solid #efe7db',
-        boxShadow: '0 2px 10px rgba(44, 26, 12, 0.04)',
+        borderRadius: 30,
+        padding: 18,
+        border: '2px solid #111111',
       }}
     >
       <h2
         style={{
-          fontSize: 28,
-          fontWeight: 800,
-          color: '#1f1f1f',
+          fontSize: 22,
+          fontWeight: 900,
+          color: '#17130f',
           margin: 0,
           marginBottom: 14,
+          lineHeight: 1.15,
         }}
       >
         {title}
@@ -53,18 +63,18 @@ function getTexts(language: AppLanguage) {
   if (language === 'RU') {
     return {
       back: 'Назад',
+      close: 'Закрыть',
       notFound: 'Реклама не найдена',
       notFoundSub: 'Это предложение недоступно или больше не существует.',
-      sponsored: 'Sponsored',
       specialOffer: 'Специальное предложение',
       views: 'Просмотры',
       category: 'Категория',
       save: 'Экономия',
       professional: 'Специалист',
-      openProfile: 'Профиль',
+      openProfile: 'Открыть профиль',
       share: 'Поделиться',
       bookNow: 'Забронировать',
-      aboutOffer: 'Об этом предложении',
+      aboutOffer: 'Об этой рекламе',
       included: 'Что входит',
       pricing: 'Стоимость',
       oldPrice: 'Старая цена',
@@ -77,15 +87,17 @@ function getTexts(language: AppLanguage) {
       distance: 'Расстояние',
       copied: 'Ссылка скопирована',
       beauty: 'Красота',
+      providerFallback: 'Исполнитель',
+      noAddress: 'Контакты и адрес указаны в рекламе',
     };
   }
 
   if (language === 'ES') {
     return {
       back: 'Atrás',
-      notFound: 'Anuncio no encontrado',
-      notFoundSub: 'Esta promoción no está disponible o ya no existe.',
-      sponsored: 'Sponsored',
+      close: 'Cerrar',
+      notFound: 'Publicidad no encontrada',
+      notFoundSub: 'Esta oferta no está disponible o ya no existe.',
       specialOffer: 'Oferta especial',
       views: 'Vistas',
       category: 'Categoría',
@@ -94,7 +106,7 @@ function getTexts(language: AppLanguage) {
       openProfile: 'Abrir perfil',
       share: 'Compartir',
       bookNow: 'Reservar',
-      aboutOffer: 'Sobre esta oferta',
+      aboutOffer: 'Sobre esta publicidad',
       included: 'Qué incluye',
       pricing: 'Precio',
       oldPrice: 'Precio anterior',
@@ -107,24 +119,26 @@ function getTexts(language: AppLanguage) {
       distance: 'Distancia',
       copied: 'Enlace copiado',
       beauty: 'Belleza',
+      providerFallback: 'Profesional',
+      noAddress: 'Los contactos y la dirección están indicados en la publicidad',
     };
   }
 
   if (language === 'CZ') {
     return {
       back: 'Zpět',
+      close: 'Zavřít',
       notFound: 'Reklama nenalezena',
       notFoundSub: 'Tato nabídka není dostupná nebo již neexistuje.',
-      sponsored: 'Sponsored',
       specialOffer: 'Speciální nabídka',
       views: 'Zobrazení',
       category: 'Kategorie',
       save: 'Úspora',
-      professional: 'Profesionál',
+      professional: 'Specialista',
       openProfile: 'Otevřít profil',
       share: 'Sdílet',
       bookNow: 'Rezervovat',
-      aboutOffer: 'O této nabídce',
+      aboutOffer: 'O této reklamě',
       included: 'Co je zahrnuto',
       pricing: 'Cena',
       oldPrice: 'Původní cena',
@@ -137,15 +151,17 @@ function getTexts(language: AppLanguage) {
       distance: 'Vzdálenost',
       copied: 'Odkaz zkopírován',
       beauty: 'Krása',
+      providerFallback: 'Poskytovatel',
+      noAddress: 'Kontakty a adresa jsou uvedeny v reklamě',
     };
   }
 
   if (language === 'DE') {
     return {
       back: 'Zurück',
-      notFound: 'Anzeige nicht gefunden',
+      close: 'Schließen',
+      notFound: 'Werbung nicht gefunden',
       notFoundSub: 'Dieses Angebot ist nicht verfügbar oder existiert nicht mehr.',
-      sponsored: 'Sponsored',
       specialOffer: 'Sonderangebot',
       views: 'Aufrufe',
       category: 'Kategorie',
@@ -154,8 +170,8 @@ function getTexts(language: AppLanguage) {
       openProfile: 'Profil öffnen',
       share: 'Teilen',
       bookNow: 'Jetzt buchen',
-      aboutOffer: 'Über dieses Angebot',
-      included: 'Inklusive',
+      aboutOffer: 'Über diese Werbung',
+      included: 'Enthalten',
       pricing: 'Preis',
       oldPrice: 'Alter Preis',
       now: 'Jetzt',
@@ -167,15 +183,17 @@ function getTexts(language: AppLanguage) {
       distance: 'Entfernung',
       copied: 'Link kopiert',
       beauty: 'Beauty',
+      providerFallback: 'Anbieter',
+      noAddress: 'Kontakte und Adresse stehen in der Werbung',
     };
   }
 
   if (language === 'PL') {
     return {
       back: 'Wstecz',
+      close: 'Zamknij',
       notFound: 'Reklama nie znaleziona',
       notFoundSub: 'Ta oferta jest niedostępna lub już nie istnieje.',
-      sponsored: 'Sponsored',
       specialOffer: 'Oferta specjalna',
       views: 'Wyświetlenia',
       category: 'Kategoria',
@@ -184,7 +202,7 @@ function getTexts(language: AppLanguage) {
       openProfile: 'Otwórz profil',
       share: 'Udostępnij',
       bookNow: 'Zarezerwuj',
-      aboutOffer: 'O tej ofercie',
+      aboutOffer: 'O tej reklamie',
       included: 'Co zawiera',
       pricing: 'Cena',
       oldPrice: 'Stara cena',
@@ -197,23 +215,25 @@ function getTexts(language: AppLanguage) {
       distance: 'Odległość',
       copied: 'Link skopiowany',
       beauty: 'Uroda',
+      providerFallback: 'Wykonawca',
+      noAddress: 'Kontakt i adres są podane w reklamie',
     };
   }
 
   return {
     back: 'Back',
+    close: 'Close',
     notFound: 'Promotion not found',
-    notFoundSub: 'This promotion is unavailable or no longer exists.',
-    sponsored: 'Sponsored',
+    notFoundSub: 'This offer is unavailable or no longer exists.',
     specialOffer: 'Special offer',
     views: 'Views',
     category: 'Category',
-    save: 'Save',
+    save: 'You save',
     professional: 'Professional',
     openProfile: 'Open profile',
     share: 'Share',
     bookNow: 'Book now',
-    aboutOffer: 'About this offer',
+    aboutOffer: 'About this ad',
     included: 'What’s included',
     pricing: 'Pricing',
     oldPrice: 'Old price',
@@ -226,6 +246,8 @@ function getTexts(language: AppLanguage) {
     distance: 'Distance',
     copied: 'Link copied',
     beauty: 'Beauty',
+    providerFallback: 'Provider',
+    noAddress: 'Contacts and address are shown inside this ad',
   };
 }
 
@@ -235,16 +257,61 @@ function parsePriceNumber(value: string | undefined) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function getCategoryLabel(
-  promotion: PromotionItem | null,
-  fallback: string
-) {
+function getCategoryLabel(promotion: PromotionItem | null, fallback: string) {
   if (!promotion) return fallback;
   return (
     categories.find((item) => item.id === promotion.categoryId)?.label ||
     promotion.categoryId ||
     fallback
   );
+}
+
+function normalizeText(value: string) {
+  return String(value || '').toLowerCase().trim();
+}
+
+function findLinkedMaster(promotion: PromotionItem | null): MasterLike | null {
+  if (!promotion) return null;
+
+  const masters = getAllMasters() as MasterLike[];
+
+  const exact = masters.find((item) => String(item.id) === String(promotion.masterId));
+  if (exact) return exact;
+
+  const normalizedTitle = normalizeText(promotion.title);
+  const normalizedSubtitle = normalizeText(promotion.subtitle || '');
+
+  const scored = masters
+    .map((master) => {
+      const haystack = normalizeText(
+        [
+          master.name || '',
+          master.title || '',
+          master.category || '',
+          master.subcategory || '',
+        ].join(' ')
+      );
+
+      let score = 0;
+
+      if (normalizedTitle && haystack.includes(normalizedTitle)) score += 100;
+      if (normalizedSubtitle && haystack.includes(normalizedSubtitle)) score += 50;
+      if (promotion.categoryId && normalizeText(master.category || '') === normalizeText(promotion.categoryId)) {
+        score += 30;
+      }
+
+      normalizedTitle
+        .split(' ')
+        .filter((word) => word.length > 2)
+        .forEach((word) => {
+          if (haystack.includes(word)) score += 10;
+        });
+
+      return { master, score };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  return scored[0]?.score > 0 ? scored[0].master : null;
 }
 
 export default function PromotionDetailsPage() {
@@ -282,11 +349,7 @@ export default function PromotionDetailsPage() {
     }
   }, [promotionId, language]);
 
-  const master = useMemo(() => {
-    if (!promotion) return null;
-    const masters = getAllMasters();
-    return masters.find((item) => String(item.id) === String(promotion.masterId)) || null;
-  }, [promotion]);
+  const master = useMemo(() => findLinkedMaster(promotion), [promotion]);
 
   const categoryLabel = useMemo(() => {
     return getCategoryLabel(promotion, text.beauty);
@@ -320,8 +383,14 @@ export default function PromotionDetailsPage() {
   };
 
   const handleOpenProfile = () => {
-    if (!promotion) return;
-    router.push(`/master/${promotion.masterId}`);
+    if (master?.id) {
+      router.push(`/master/${master.id}`);
+      return;
+    }
+
+    if (promotion?.masterId) {
+      router.push(`/booking/${promotion.masterId}`);
+    }
   };
 
   const handleBookNow = () => {
@@ -334,53 +403,85 @@ export default function PromotionDetailsPage() {
       <main
         style={{
           minHeight: '100vh',
-          background: '#f7f3eb',
-          padding: '24px 16px 120px',
-          fontFamily: 'Inter, Arial, sans-serif',
+          background: '#f7f4ee',
+          padding: '20px 16px 120px',
+          fontFamily: 'Arial, sans-serif',
         }}
       >
-        <div style={{ maxWidth: 720, margin: '0 auto' }}>
-          <button
-            onClick={() => router.back()}
+        <div style={{ maxWidth: 430, margin: '0 auto' }}>
+          <div
             style={{
-              border: 'none',
-              background: '#ffffff',
-              color: '#222222',
-              borderRadius: 999,
-              padding: '18px 24px',
-              fontSize: 18,
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 2px 10px rgba(44, 26, 12, 0.05)',
+              display: 'grid',
+              gridTemplateColumns: '54px 1fr 54px',
+              alignItems: 'center',
+              gap: 12,
             }}
           >
-            ← {text.back}
-          </button>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 999,
+                border: '2px solid #111111',
+                background: '#fff',
+                color: '#17130f',
+                fontSize: 26,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              ←
+            </button>
+
+            <div style={{ textAlign: 'center' }}>
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: '#17130f',
+                  lineHeight: 1.1,
+                }}
+              >
+                {text.notFound}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => router.push('/')}
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 999,
+                border: '2px solid #111111',
+                background: '#fff',
+                color: '#17130f',
+                fontSize: 24,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              ×
+            </button>
+          </div>
 
           <div
             style={{
               marginTop: 18,
-              background: '#ffffff',
-              borderRadius: 28,
+              background: '#fff',
+              borderRadius: 30,
               padding: 24,
-              border: '1px solid #efe7db',
+              border: '2px solid #111111',
             }}
           >
             <div
               style={{
-                fontSize: 28,
-                fontWeight: 900,
-                color: '#20202a',
-                marginBottom: 10,
-              }}
-            >
-              {text.notFound}
-            </div>
-            <div
-              style={{
-                fontSize: 18,
+                fontSize: 16,
                 color: '#6b7280',
                 lineHeight: 1.6,
+                fontWeight: 700,
               }}
             >
               {text.notFoundSub}
@@ -395,64 +496,88 @@ export default function PromotionDetailsPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f3eb',
-        padding: '24px 16px 120px',
-        fontFamily: 'Inter, Arial, sans-serif',
+        background: '#f7f4ee',
+        padding: '20px 16px 120px',
+        fontFamily: 'Arial, sans-serif',
       }}
     >
-      <div
-        style={{
-          maxWidth: 720,
-          margin: '0 auto',
-        }}
-      >
+      <div style={{ maxWidth: 430, margin: '0 auto' }}>
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
+            display: 'grid',
+            gridTemplateColumns: '54px 1fr 54px',
             alignItems: 'center',
+            gap: 12,
             marginBottom: 18,
           }}
         >
           <button
+            type="button"
             onClick={() => router.back()}
             style={{
-              border: 'none',
-              background: '#ffffff',
-              color: '#222222',
+              width: 54,
+              height: 54,
               borderRadius: 999,
-              padding: '18px 24px',
-              fontSize: 18,
-              fontWeight: 700,
+              border: '2px solid #111111',
+              background: '#fff',
+              color: '#17130f',
+              fontSize: 26,
+              fontWeight: 900,
               cursor: 'pointer',
-              boxShadow: '0 2px 10px rgba(44, 26, 12, 0.05)',
             }}
           >
-            ← {text.back}
+            ←
           </button>
 
-          <div
+          <div style={{ textAlign: 'center' }}>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 900,
+                color: '#17130f',
+                lineHeight: 1.1,
+              }}
+            >
+              {promotion.title}
+            </div>
+            <div
+              style={{
+                marginTop: 4,
+                fontSize: 13,
+                color: '#7b7268',
+                fontWeight: 700,
+                lineHeight: 1.35,
+              }}
+            >
+              {promotion.subtitle || text.specialOffer}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => router.push('/')}
             style={{
-              background: '#ffffff',
-              color: '#ff4fa0',
+              width: 54,
+              height: 54,
               borderRadius: 999,
-              padding: '16px 22px',
-              fontSize: 18,
-              fontWeight: 800,
-              boxShadow: '0 2px 10px rgba(44, 26, 12, 0.05)',
+              border: '2px solid #111111',
+              background: '#fff',
+              color: '#17130f',
+              fontSize: 24,
+              fontWeight: 900,
+              cursor: 'pointer',
             }}
           >
-            {text.sponsored}
-          </div>
+            ×
+          </button>
         </div>
 
         <div
           style={{
-            background: '#ffffff',
-            borderRadius: 34,
+            background: '#fff',
+            borderRadius: 30,
             overflow: 'hidden',
-            border: '1px solid #efe7db',
-            boxShadow: '0 6px 18px rgba(44, 26, 12, 0.06)',
+            border: '2px solid #111111',
           }}
         >
           <div style={{ position: 'relative' }}>
@@ -461,72 +586,50 @@ export default function PromotionDetailsPage() {
               alt={promotion.title}
               style={{
                 width: '100%',
-                height: 360,
+                height: 260,
                 objectFit: 'cover',
                 display: 'block',
               }}
             />
 
-            <div
-              style={{
-                position: 'absolute',
-                top: 18,
-                left: 18,
-                background: '#ffffff',
-                color: '#ff4fa0',
-                borderRadius: 999,
-                padding: '12px 20px',
-                fontSize: 16,
-                fontWeight: 800,
-              }}
-            >
-              {text.sponsored}
-            </div>
+            {saveAmount > 0 ? (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 14,
+                  left: 14,
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  background: '#ecfdf3',
+                  color: '#15803d',
+                  padding: '10px 14px',
+                  fontSize: 13,
+                  fontWeight: 900,
+                }}
+              >
+                {text.save} {formatDisplayPrice(saveAmount)}
+              </div>
+            ) : null}
           </div>
 
-          <div style={{ padding: 26 }}>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 36,
-                lineHeight: 1.05,
-                fontWeight: 900,
-                color: '#20202a',
-              }}
-            >
-              {promotion.title}
-            </h1>
-
-            <p
-              style={{
-                marginTop: 12,
-                marginBottom: 18,
-                fontSize: 22,
-                lineHeight: 1.3,
-                color: '#6b7280',
-                fontWeight: 700,
-              }}
-            >
-              {promotion.subtitle || text.specialOffer}
-            </p>
-
+          <div style={{ padding: 16 }}>
             <div
               style={{
                 display: 'flex',
-                gap: 12,
                 flexWrap: 'wrap',
-                marginBottom: 22,
+                gap: 8,
+                marginBottom: 14,
               }}
             >
               <div
                 style={{
-                  background: '#fff5fa',
-                  color: '#ff4fa0',
-                  border: '1px solid #f8d7e8',
                   borderRadius: 999,
-                  padding: '12px 18px',
-                  fontSize: 16,
-                  fontWeight: 800,
+                  border: '2px solid #111111',
+                  background: '#fff0f6',
+                  color: '#ff4fa0',
+                  padding: '9px 12px',
+                  fontSize: 12,
+                  fontWeight: 900,
                 }}
               >
                 {text.views}: {promotion.views}
@@ -534,45 +637,30 @@ export default function PromotionDetailsPage() {
 
               <div
                 style={{
-                  background: '#f8f7f4',
-                  color: '#48505e',
-                  border: '1px solid #e9e4db',
                   borderRadius: 999,
-                  padding: '12px 18px',
-                  fontSize: 16,
-                  fontWeight: 800,
+                  border: '2px solid #111111',
+                  background: '#eef4ff',
+                  color: '#2563eb',
+                  padding: '9px 12px',
+                  fontSize: 12,
+                  fontWeight: 900,
                 }}
               >
                 {text.category}: {categoryLabel}
               </div>
-
-              {saveAmount > 0 ? (
-                <div
-                  style={{
-                    background: '#f1fbf4',
-                    color: '#228b50',
-                    border: '1px solid #d9efdf',
-                    borderRadius: 999,
-                    padding: '12px 18px',
-                    fontSize: 16,
-                    fontWeight: 800,
-                  }}
-                >
-                  {text.save} {formatDisplayPrice(saveAmount)}
-                </div>
-              ) : null}
             </div>
 
             <div
               style={{
-                background: '#ffffff',
-                border: '1px solid #efe7db',
-                borderRadius: 28,
-                padding: 18,
-                display: 'flex',
+                background: '#fff',
+                borderRadius: 24,
+                border: '2px solid #111111',
+                padding: 14,
+                display: 'grid',
+                gridTemplateColumns: '64px 1fr',
+                gap: 12,
                 alignItems: 'center',
-                gap: 16,
-                marginBottom: 20,
+                marginBottom: 14,
               }}
             >
               <img
@@ -582,21 +670,22 @@ export default function PromotionDetailsPage() {
                 }
                 alt={String(master?.name || promotion.title)}
                 style={{
-                  width: 76,
-                  height: 76,
+                  width: 64,
+                  height: 64,
                   objectFit: 'cover',
-                  borderRadius: '50%',
-                  flexShrink: 0,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  display: 'block',
                 }}
               />
 
-              <div style={{ flex: 1 }}>
+              <div>
                 <div
                   style={{
-                    fontSize: 20,
-                    fontWeight: 800,
-                    color: '#20202a',
-                    marginBottom: 4,
+                    fontSize: 18,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    lineHeight: 1.15,
                   }}
                 >
                   {String(master?.name || text.professional)}
@@ -604,23 +693,25 @@ export default function PromotionDetailsPage() {
 
                 <div
                   style={{
-                    fontSize: 18,
+                    marginTop: 6,
+                    fontSize: 14,
                     color: '#6b7280',
-                    fontWeight: 600,
-                    marginBottom: 6,
+                    fontWeight: 700,
+                    lineHeight: 1.4,
                   }}
                 >
-                  {String(master?.subcategory || master?.category || categoryLabel)}
+                  {String(master?.subcategory || master?.title || categoryLabel || text.providerFallback)}
                 </div>
 
                 <div
                   style={{
-                    fontSize: 16,
+                    marginTop: 6,
+                    fontSize: 13,
                     color: '#8b7355',
-                    fontWeight: 700,
+                    fontWeight: 900,
                   }}
                 >
-                  ★ {typeof master?.rating === 'number' ? master.rating : 4.9}
+                  ★ {typeof master?.rating === 'number' ? master.rating.toFixed(1) : '4.9'}
                 </div>
               </div>
             </div>
@@ -629,19 +720,20 @@ export default function PromotionDetailsPage() {
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr 1fr',
-                gap: 14,
+                gap: 10,
               }}
             >
               <button
+                type="button"
                 onClick={handleOpenProfile}
                 style={{
-                  minHeight: 64,
-                  borderRadius: 22,
-                  border: '1px solid #e7dfd3',
-                  background: '#ffffff',
-                  color: '#243041',
-                  fontSize: 18,
-                  fontWeight: 800,
+                  minHeight: 52,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#45c63d',
+                  color: '#ffffff',
+                  fontSize: 14,
+                  fontWeight: 900,
                   cursor: 'pointer',
                 }}
               >
@@ -649,15 +741,16 @@ export default function PromotionDetailsPage() {
               </button>
 
               <button
+                type="button"
                 onClick={handleShare}
                 style={{
-                  minHeight: 64,
-                  borderRadius: 22,
-                  border: '1px solid #e7dfd3',
-                  background: '#ffffff',
-                  color: '#243041',
-                  fontSize: 18,
-                  fontWeight: 800,
+                  minHeight: 52,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#eef4ff',
+                  color: '#2563eb',
+                  fontSize: 14,
+                  fontWeight: 900,
                   cursor: 'pointer',
                 }}
               >
@@ -665,17 +758,17 @@ export default function PromotionDetailsPage() {
               </button>
 
               <button
+                type="button"
                 onClick={handleBookNow}
                 style={{
-                  minHeight: 64,
-                  borderRadius: 22,
-                  border: 'none',
-                  background: '#ff4fa0',
+                  minHeight: 52,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#45c63d',
                   color: '#ffffff',
-                  fontSize: 18,
+                  fontSize: 14,
                   fontWeight: 900,
                   cursor: 'pointer',
-                  boxShadow: '0 10px 24px rgba(255, 79, 160, 0.25)',
                 }}
               >
                 {text.bookNow}
@@ -688,7 +781,7 @@ export default function PromotionDetailsPage() {
           style={{
             display: 'grid',
             gap: 16,
-            marginTop: 18,
+            marginTop: 16,
           }}
         >
           {!!promotion.description && (
@@ -696,10 +789,10 @@ export default function PromotionDetailsPage() {
               <p
                 style={{
                   margin: 0,
-                  fontSize: 18,
+                  fontSize: 15,
                   lineHeight: 1.6,
                   color: '#4b5563',
-                  fontWeight: 500,
+                  fontWeight: 700,
                 }}
               >
                 {promotion.description}
@@ -717,23 +810,24 @@ export default function PromotionDetailsPage() {
                       display: 'flex',
                       alignItems: 'center',
                       gap: 12,
-                      fontSize: 18,
+                      fontSize: 15,
                       color: '#374151',
-                      fontWeight: 600,
+                      fontWeight: 700,
                     }}
                   >
                     <div
                       style={{
-                        width: 28,
-                        height: 28,
+                        width: 26,
+                        height: 26,
                         borderRadius: '50%',
-                        background: '#f1fbf4',
-                        color: '#228b50',
+                        background: '#ecfdf3',
+                        color: '#15803d',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontWeight: 900,
                         flexShrink: 0,
+                        border: '2px solid #111111',
                       }}
                     >
                       ✓
@@ -754,14 +848,14 @@ export default function PromotionDetailsPage() {
                       display: 'flex',
                       justifyContent: 'space-between',
                       gap: 16,
-                      fontSize: 18,
+                      fontSize: 15,
                     }}
                   >
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>{text.oldPrice}</span>
+                    <span style={{ color: '#6b7280', fontWeight: 700 }}>{text.oldPrice}</span>
                     <span
                       style={{
                         color: '#9ca3af',
-                        fontWeight: 700,
+                        fontWeight: 900,
                         textDecoration: 'line-through',
                       }}
                     >
@@ -776,11 +870,11 @@ export default function PromotionDetailsPage() {
                       display: 'flex',
                       justifyContent: 'space-between',
                       gap: 16,
-                      fontSize: 22,
+                      fontSize: 17,
                     }}
                   >
-                    <span style={{ color: '#20202a', fontWeight: 800 }}>{text.now}</span>
-                    <span style={{ color: '#ff4fa0', fontWeight: 900 }}>
+                    <span style={{ color: '#20202a', fontWeight: 900 }}>{text.now}</span>
+                    <span style={{ color: '#45c63d', fontWeight: 900 }}>
                       {formatDisplayPrice(newPriceValue)}
                     </span>
                   </div>
@@ -792,11 +886,11 @@ export default function PromotionDetailsPage() {
                       display: 'flex',
                       justifyContent: 'space-between',
                       gap: 16,
-                      fontSize: 18,
+                      fontSize: 15,
                     }}
                   >
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>{text.youSave}</span>
-                    <span style={{ color: '#228b50', fontWeight: 800 }}>
+                    <span style={{ color: '#6b7280', fontWeight: 700 }}>{text.youSave}</span>
+                    <span style={{ color: '#15803d', fontWeight: 900 }}>
                       {formatDisplayPrice(saveAmount)}
                     </span>
                   </div>
@@ -808,11 +902,11 @@ export default function PromotionDetailsPage() {
                       display: 'flex',
                       justifyContent: 'space-between',
                       gap: 16,
-                      fontSize: 18,
+                      fontSize: 15,
                     }}
                   >
-                    <span style={{ color: '#6b7280', fontWeight: 600 }}>{text.validUntil}</span>
-                    <span style={{ color: '#20202a', fontWeight: 800 }}>
+                    <span style={{ color: '#6b7280', fontWeight: 700 }}>{text.validUntil}</span>
+                    <span style={{ color: '#20202a', fontWeight: 900 }}>
                       {promotion.validUntil}
                     </span>
                   </div>
@@ -828,9 +922,9 @@ export default function PromotionDetailsPage() {
                   <div>
                     <div
                       style={{
-                        fontSize: 14,
+                        fontSize: 12,
                         color: '#9ca3af',
-                        fontWeight: 700,
+                        fontWeight: 900,
                         marginBottom: 4,
                         textTransform: 'uppercase',
                         letterSpacing: 0.5,
@@ -840,9 +934,9 @@ export default function PromotionDetailsPage() {
                     </div>
                     <div
                       style={{
-                        fontSize: 18,
+                        fontSize: 15,
                         color: '#20202a',
-                        fontWeight: 800,
+                        fontWeight: 900,
                       }}
                     >
                       {promotion.area}
@@ -854,9 +948,9 @@ export default function PromotionDetailsPage() {
                   <div>
                     <div
                       style={{
-                        fontSize: 14,
+                        fontSize: 12,
                         color: '#9ca3af',
-                        fontWeight: 700,
+                        fontWeight: 900,
                         marginBottom: 4,
                         textTransform: 'uppercase',
                         letterSpacing: 0.5,
@@ -866,9 +960,10 @@ export default function PromotionDetailsPage() {
                     </div>
                     <div
                       style={{
-                        fontSize: 18,
+                        fontSize: 15,
                         color: '#20202a',
-                        fontWeight: 700,
+                        fontWeight: 900,
+                        lineHeight: 1.5,
                       }}
                     >
                       {promotion.address}
@@ -880,9 +975,9 @@ export default function PromotionDetailsPage() {
                   <div>
                     <div
                       style={{
-                        fontSize: 14,
+                        fontSize: 12,
                         color: '#9ca3af',
-                        fontWeight: 700,
+                        fontWeight: 900,
                         marginBottom: 4,
                         textTransform: 'uppercase',
                         letterSpacing: 0.5,
@@ -892,9 +987,9 @@ export default function PromotionDetailsPage() {
                     </div>
                     <div
                       style={{
-                        fontSize: 18,
+                        fontSize: 15,
                         color: '#20202a',
-                        fontWeight: 700,
+                        fontWeight: 900,
                       }}
                     >
                       {promotion.distance}
