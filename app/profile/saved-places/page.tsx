@@ -434,15 +434,17 @@ export default function SavedPlacesPage() {
                       alignItems: 'start',
                       justifyContent: 'space-between',
                       gap: 10,
+                      flexWrap: 'wrap',
                     }}
                   >
-                    <div style={{ minWidth: 0 }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
                       <div
                         style={{
                           fontSize: 19,
                           fontWeight: 900,
                           color: '#17130f',
                           lineHeight: 1.15,
+                          wordBreak: 'break-word',
                         }}
                       >
                         {place.title}
@@ -469,6 +471,7 @@ export default function SavedPlacesPage() {
                         fontSize: 12,
                         fontWeight: 900,
                         whiteSpace: 'nowrap',
+                        flexShrink: 0,
                       }}
                     >
                       {text.nearby}
@@ -504,6 +507,7 @@ export default function SavedPlacesPage() {
                         padding: '8px 12px',
                         fontSize: 12,
                         fontWeight: 900,
+                        wordBreak: 'break-word',
                       }}
                     >
                       {place.lat.toFixed(3)}, {place.lng.toFixed(3)}
@@ -514,7 +518,7 @@ export default function SavedPlacesPage() {
                     style={{
                       marginTop: 14,
                       display: 'grid',
-                      gridTemplateColumns: '1fr 1fr 1fr',
+                      gridTemplateColumns: '1fr 1fr',
                       gap: 10,
                     }}
                   >
@@ -531,6 +535,7 @@ export default function SavedPlacesPage() {
                         fontSize: 13,
                         fontWeight: 900,
                         cursor: 'pointer',
+                        lineHeight: 1.2,
                       }}
                     >
                       {text.openMap}
@@ -548,6 +553,7 @@ export default function SavedPlacesPage() {
                         fontSize: 13,
                         fontWeight: 900,
                         cursor: 'pointer',
+                        lineHeight: 1.2,
                       }}
                     >
                       {text.route}
@@ -557,6 +563,7 @@ export default function SavedPlacesPage() {
                       type="button"
                       onClick={() => handleRemove(place.id)}
                       style={{
+                        gridColumn: '1 / -1',
                         border: '2px solid #111111',
                         borderRadius: 18,
                         background: '#fff0f6',
@@ -566,6 +573,7 @@ export default function SavedPlacesPage() {
                         fontSize: 13,
                         fontWeight: 900,
                         cursor: 'pointer',
+                        lineHeight: 1.2,
                       }}
                     >
                       {text.remove}
