@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { categories } from '../services/categories';
 import { t, type AppLanguage } from '../services/i18n';
@@ -331,7 +331,6 @@ function translateSubcategory(value: string, language: AppLanguage) {
       AR: 'التجميل',
       PL: 'Estetyka',
     },
-
     Haircut: {
       EN: 'Haircut',
       ES: 'Corte de pelo',
@@ -404,7 +403,6 @@ function translateSubcategory(value: string, language: AppLanguage) {
       AR: 'تصفيف',
       PL: 'Stylizacja',
     },
-
     Massage: {
       EN: 'Massage',
       ES: 'Masaje',
@@ -477,7 +475,6 @@ function translateSubcategory(value: string, language: AppLanguage) {
       AR: 'دعم علاجي',
       PL: 'Wsparcie terapeutyczne',
     },
-
     Cleaning: {
       EN: 'Cleaning',
       ES: 'Limpieza',
@@ -550,7 +547,6 @@ function translateSubcategory(value: string, language: AppLanguage) {
       AR: 'مساعدة منزلية',
       PL: 'Pomoc domowa',
     },
-
     Other: {
       EN: 'Other',
       ES: 'Otro',
@@ -579,7 +575,6 @@ export default function TopCategoriesBar({
   const [menuOpen, setMenuOpen] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string>(activeCategory);
   const [mounted, setMounted] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -622,21 +617,10 @@ export default function TopCategoriesBar({
               position: 'fixed',
               inset: 0,
               zIndex: 2147483647,
-              pointerEvents: 'auto',
+              background: 'rgba(17,17,17,0.22)',
             }}
+            onClick={() => setMenuOpen(false)}
           >
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'rgba(0,0,0,0.02)',
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            />
-
             <div
               style={{
                 position: 'relative',
@@ -645,10 +629,7 @@ export default function TopCategoriesBar({
                 maxWidth: 430,
                 margin: '0 auto',
               }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
+              onClick={(e) => e.stopPropagation()}
             >
               <div
                 style={{
@@ -660,12 +641,9 @@ export default function TopCategoriesBar({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   gap: 12,
-                  background: 'rgba(255,255,255,0.82)',
-                  backdropFilter: 'blur(14px)',
-                  WebkitBackdropFilter: 'blur(14px)',
+                  background: '#ffffff',
                   borderRadius: 24,
-                  border: '1px solid rgba(255,255,255,0.72)',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.10)',
+                  border: '2px solid #111111',
                   padding: '16px 18px',
                 }}
               >
@@ -674,7 +652,7 @@ export default function TopCategoriesBar({
                     style={{
                       fontSize: 22,
                       fontWeight: 900,
-                      color: '#233244',
+                      color: '#17130f',
                       lineHeight: 1.1,
                     }}
                   >
@@ -693,17 +671,19 @@ export default function TopCategoriesBar({
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => setMenuOpen(false)}
                   style={{
                     width: 46,
                     height: 46,
                     borderRadius: 999,
-                    border: '1px solid rgba(210,205,195,0.9)',
-                    background: 'rgba(255,255,255,0.88)',
+                    border: '2px solid #111111',
+                    background: '#ffffff',
                     fontSize: 24,
                     cursor: 'pointer',
                     flexShrink: 0,
-                    color: '#263545',
+                    color: '#17130f',
+                    fontWeight: 900,
                   }}
                 >
                   ✕
@@ -716,23 +696,19 @@ export default function TopCategoriesBar({
                   left: 10,
                   right: 10,
                   top: 118,
-                  height: 'min(320px, 36vh)',
+                  bottom: 18,
                   display: 'grid',
-                  gridTemplateColumns: '34% 66%',
+                  gridTemplateColumns: '36% 64%',
                   gap: 10,
-                  overflow: 'hidden',
+                  minHeight: 0,
                 }}
               >
                 <div
                   style={{
                     minHeight: 0,
-                    height: '100%',
-                    background: 'rgba(255,255,255,0.26)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    borderRadius: 22,
-                    border: '1px solid rgba(255,255,255,0.50)',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                    background: '#f7f4ee',
+                    borderRadius: 24,
+                    border: '2px solid #111111',
                     padding: 10,
                     overflowY: 'auto',
                     overflowX: 'hidden',
@@ -742,7 +718,7 @@ export default function TopCategoriesBar({
                     style={{
                       fontSize: 13,
                       fontWeight: 900,
-                      color: '#233244',
+                      color: '#17130f',
                       marginBottom: 10,
                       paddingLeft: 4,
                     }}
@@ -766,19 +742,20 @@ export default function TopCategoriesBar({
                       return (
                         <button
                           key={item.id}
+                          type="button"
                           onClick={() => {
                             setExpandedCategory(item.id);
                             onSelectCategory(item.id);
                             onClearSubcategory();
                           }}
                           style={{
-                            border: active ? `2px solid ${color}` : '1px solid rgba(255,255,255,0.58)',
+                            border: '2px solid #111111',
                             cursor: 'pointer',
                             textAlign: 'left',
                             borderRadius: 16,
                             padding: '10px 8px',
-                            background: active ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.44)',
-                            boxShadow: active ? `0 6px 14px ${color}22` : 'none',
+                            background: active ? '#ffffff' : '#fdfaf5',
+                            boxShadow: active ? `0 0 0 2px ${color} inset` : 'none',
                             display: 'flex',
                             alignItems: 'center',
                             gap: 8,
@@ -795,7 +772,7 @@ export default function TopCategoriesBar({
                               overflow: 'hidden',
                               flexShrink: 0,
                               background: '#fff',
-                              border: `1.5px solid ${color}`,
+                              border: `2px solid ${color}`,
                             }}
                           >
                             <img
@@ -830,13 +807,9 @@ export default function TopCategoriesBar({
                 <div
                   style={{
                     minHeight: 0,
-                    height: '100%',
-                    background: 'rgba(255,255,255,0.26)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    borderRadius: 22,
-                    border: '1px solid rgba(255,255,255,0.50)',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                    background: '#f7f4ee',
+                    borderRadius: 24,
+                    border: '2px solid #111111',
                     padding: 14,
                     overflowY: 'auto',
                     overflowX: 'hidden',
@@ -846,7 +819,7 @@ export default function TopCategoriesBar({
                     style={{
                       fontSize: 18,
                       fontWeight: 900,
-                      color: '#233244',
+                      color: '#17130f',
                       marginBottom: 12,
                     }}
                   >
@@ -871,21 +844,21 @@ export default function TopCategoriesBar({
                         return (
                           <button
                             key={sub}
+                            type="button"
                             onClick={() => {
                               onSelectCategory(expanded.id);
                               onSelectSubcategory(sub);
                               setMenuOpen(false);
                             }}
                             style={{
-                              border: active ? `2px solid ${color}` : '1px solid rgba(255,255,255,0.58)',
-                              background: active ? 'rgba(255,255,255,0.88)' : 'rgba(255,255,255,0.52)',
-                              color: active ? color : '#2a3442',
+                              border: '2px solid #111111',
+                              background: active ? color : '#ffffff',
+                              color: active ? '#ffffff' : '#17130f',
                               borderRadius: 999,
                               padding: '10px 14px',
                               fontSize: 13,
-                              fontWeight: 800,
+                              fontWeight: 900,
                               cursor: 'pointer',
-                              boxShadow: active ? `0 6px 14px ${color}22` : '0 4px 10px rgba(0,0,0,0.04)',
                             }}
                           >
                             {translateSubcategory(sub, language)}
@@ -923,20 +896,22 @@ export default function TopCategoriesBar({
                           return (
                             <button
                               key={item.id}
+                              type="button"
                               onClick={() => {
                                 setExpandedCategory(item.id);
                                 onSelectCategory(item.id);
                                 onClearSubcategory();
                               }}
                               style={{
-                                border: `1px solid ${color}55`,
-                                background: 'rgba(255,255,255,0.52)',
-                                color: '#111111',
+                                border: '2px solid #111111',
+                                background: '#ffffff',
+                                color: '#17130f',
                                 borderRadius: 999,
                                 padding: '8px 11px',
                                 fontSize: 11,
                                 fontWeight: 900,
                                 cursor: 'pointer',
+                                boxShadow: `inset 0 0 0 2px ${color}33`,
                               }}
                             >
                               {translateCategoryLabel(item.id, language, item.shortLabel || item.label)}
@@ -956,7 +931,6 @@ export default function TopCategoriesBar({
 
   return (
     <div
-      ref={wrapperRef}
       style={{
         position: 'relative',
         zIndex: 120,
@@ -981,6 +955,7 @@ export default function TopCategoriesBar({
           }}
         >
           <button
+            type="button"
             onClick={() => setMenuOpen((prev) => !prev)}
             style={{
               border: 'none',
@@ -1062,6 +1037,7 @@ export default function TopCategoriesBar({
               return (
                 <button
                   key={item.id}
+                  type="button"
                   onClick={() => {
                     onSelectCategory(item.id);
                     onClearSubcategory();
