@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getMasterById } from '../../../services/masters';
+import { getListings } from '../../../services/listingsStore';
 import {
   getSavedLanguage,
   subscribeToLanguageChange,
@@ -106,6 +107,49 @@ function getTexts(language: AppLanguage) {
   return pageTexts[language as keyof typeof pageTexts] || pageTexts.EN;
 }
 
+function normalizeListingToMasterPageShape(id: string) {
+  const listing = getListings().find((item) => String(item.id) === id);
+  if (!listing) return null;
+
+  const fallbackImage =
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80';
+
+  const gallery =
+    listing.photos && listing.photos.length > 0
+      ? listing.photos
+      : [fallbackImage, fallbackImage, fallbackImage];
+
+  const numericPrice = Number(String(listing.price).replace(/[^\d.]/g, '')) || 45;
+
+  return {
+    id: listing.id,
+    name: listing.title,
+    title: listing.subcategory || listing.category || 'Service',
+    city: listing.location || 'Selected region',
+    rating: 4.8,
+    reviews: 12,
+    availableNow: listing.availableToday,
+    priceFrom: numericPrice,
+    description:
+      listing.description || 'Premium service with professional result.',
+    cover: gallery[0] || fallbackImage,
+    avatar: gallery[0] || fallbackImage,
+    gallery:
+      gallery.length >= 3
+        ? gallery
+        : [gallery[0] || fallbackImage, gallery[1] || gallery[0] || fallbackImage, gallery[2] || gallery[0] || fallbackImage],
+    services: [
+      {
+        slug: 'main-service',
+        title: listing.title,
+        duration: listing.hours || 'Flexible time',
+        price: numericPrice,
+        image: gallery[0] || fallbackImage,
+      },
+    ],
+  };
+}
+
 export default function MasterPage() {
   const params = useParams();
   const router = useRouter();
@@ -128,7 +172,11 @@ export default function MasterPage() {
   }, []);
 
   const text = useMemo(() => getTexts(language), [language]);
-  const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
+
+  const master = useMemo(() => {
+    const id = String(params.id);
+    return getMasterById(id) || normalizeListingToMasterPageShape(id);
+  }, [params.id]);
 
   if (!master) {
     return (
@@ -662,7 +710,7 @@ export default function MasterPage() {
               gap: 16,
             }}
           >
-            {master.services.map((service) => (
+            {master.services.map((service: any) => (
               <div
                 key={service.slug}
                 style={{
@@ -860,7 +908,7 @@ export default function MasterPage() {
                 gap: 10,
               }}
             >
-              {master.gallery.map((image, index) => (
+              {master.gallery.map((image: string, index: number) => (
                 <button
                   key={`${image}-${index}`}
                   type="button"
