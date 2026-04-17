@@ -9,17 +9,22 @@ import {
   type AppLanguage,
 } from '../services/i18n';
 
-type BottomNavProps = {
-  active?: 'home' | 'messages' | 'add' | 'bookings' | 'profile';
-};
-
-export default function BottomNav({ active }: BottomNavProps = {}) {
+export default function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
 
   const [unreadMessages, setUnreadMessages] = useState(0);
-  const [language, setLanguage] = useState<AppLanguage>('EN');
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [showAddMenu, setShowAddMenu] = useState(false);
+
+  useEffect(() => {
+    const loadUnread = () => {
+      setUnreadMessages(getUnreadMessagesCount());
+    };
+
+    loadUnread();
+    return subscribeToChatStore(loadUnread);
+  }, []);
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -34,28 +39,8 @@ export default function BottomNav({ active }: BottomNavProps = {}) {
   }, []);
 
   useEffect(() => {
-    const syncUnread = () => {
-      setUnreadMessages(getUnreadMessagesCount());
-    };
-
-    syncUnread();
-    return subscribeToChatStore(syncUnread);
-  }, []);
-
-  useEffect(() => {
     setShowAddMenu(false);
   }, [pathname]);
-
-  useEffect(() => {
-    if (!showAddMenu) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [showAddMenu]);
 
   const navText = useMemo(() => {
     return {
@@ -178,20 +163,14 @@ export default function BottomNav({ active }: BottomNavProps = {}) {
     };
   }, [language]);
 
-  const detectedHome = pathname === '/';
-  const detectedMessages = pathname.startsWith('/messages');
-  const detectedBookings = pathname.startsWith('/bookings') || pathname.startsWith('/booking');
-  const detectedProfile = pathname.startsWith('/profile');
-  const detectedAdd =
+  const isHome = pathname === '/';
+  const isMessages = pathname.startsWith('/messages');
+  const isBookings = pathname.startsWith('/bookings');
+  const isProfile = pathname.startsWith('/profile');
+  const isAdd =
     pathname.startsWith('/add') ||
     pathname.startsWith('/profile/promotions/new') ||
     pathname.startsWith('/profile/deals/new');
-
-  const isHome = active ? active === 'home' : detectedHome;
-  const isMessages = active ? active === 'messages' : detectedMessages;
-  const isBookings = active ? active === 'bookings' : detectedBookings;
-  const isProfile = active ? active === 'profile' : detectedProfile;
-  const isAdd = active ? active === 'add' : detectedAdd;
 
   const handleOpenAddMenu = () => setShowAddMenu(true);
   const handleCloseAddMenu = () => setShowAddMenu(false);
@@ -219,8 +198,8 @@ export default function BottomNav({ active }: BottomNavProps = {}) {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(20,20,20,0.22)',
-            zIndex: 1200,
+            background: 'rgba(20,20,20,0.16)',
+            zIndex: 120,
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
@@ -569,4 +548,4 @@ export default function BottomNav({ active }: BottomNavProps = {}) {
       </nav>
     </>
   );
-} и какой комит /*<<<analysis to=container.exec 《凤凰大参考json code  тәшки{"cmd":["bash","-lc","cat > /tmp/check_bottomnav.tsx <<'EOF'\n'use client';\n\nimport { useEffect, useMemo, useState } from 'react';\nimport { usePathname, useRouter } from 'next/navigation';\nimport { getUnreadMessagesCount, subscribeToChatStore } from '../services/chatStore';\nimport {\n  getSavedLanguage,\n  subscribeToLanguageChange,\n  type AppLanguage,\n} from '../services/i18n';\n\ntype BottomNavProps = {\n  active?: 'home' | 'messages' | 'add' | 'bookings' | 'profile';\n};\n\nexport default function BottomNav({ active }: BottomNavProps = {}) {\n  const router = useRouter();\n  const pathname = usePathname();\n\n  const [unreadMessages, setUnreadMessages] = useState(0);\n  const [language, setLanguage] = useState<AppLanguage>('EN');\n  const [showAddMenu, setShowAddMenu] = useState(false);\n\n  useEffect(() => {\n    setLanguage(getSavedLanguage());\n\n    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {\n      setLanguage(nextLanguage);\n    });\n\n    return () => {\n      unsubLanguage();\n    };\n  }, []);\n\n  useEffect(() => {\n    const syncUnread = () => {\n      setUnreadMessages(getUnreadMessagesCount());\n    };\n\n    syncUnread();\n    return subscribeToChatStore(syncUnread);\n  }, []);\n\n  useEffect(() => {\n    setShowAddMenu(false);\n  }, [pathname]);\n\n  useEffect(() => {\n    if (!showAddMenu) return;\n\n    const previousOverflow = document.body.style.overflow;\n    document.body.style.overflow = 'hidden';\n\n    return () => {\n      document.body.style.overflow = previousOverflow;\n    };\n  }, [showAddMenu]);\n\n  const navText = useMemo(() => {\n    return {\n      home:\n        language === 'ES'\n          ? 'Inicio'\n          : language === 'RU'\n          ? 'Главная'\n          : language === 'CZ'\n          ? 'Domů'\n          : language === 'DE'\n          ? 'Start'\n          : language === 'PL'\n          ? 'Start'\n          : 'Home',\n\n      messages:\n        language === 'ES'\n          ? 'Mensajes'\n          : language === 'RU'\n          ? 'Сообщения'\n          : language === 'CZ'\n          ? 'Zprávy'\n          : language === 'DE'\n          ? 'Nachrichten'\n          : language === 'PL'\n          ? 'Wiadomości'\n          : 'Messages',\n\n      add:\n        language === 'ES'\n          ? 'Añadir'\n          : language === 'RU'\n          ? 'Добавить'\n          : language === 'CZ'\n          ? 'Přidat'\n          : language === 'DE'\n          ? 'Hinzufügen'\n          : language === 'PL'\n          ? 'Dodaj'\n          : 'Add',\n\n      bookings:\n        language === 'ES'\n          ? 'Reservas'\n          : language === 'RU'\n          ? 'Брони'\n          : language === 'CZ'\n          ? 'Rezervace'\n          : language === 'DE'\n          ? 'Buchungen'\n          : language === 'PL'\n          ? 'Rezerwacje'\n          : 'Bookings',\n\n      profile:\n        language === 'ES'\n          ? 'Perfil'\n          : language === 'RU'\n          ? 'Профиль'\n          : language === 'CZ'\n          ? 'Profil'\n          : language === 'DE'\n          ? 'Profil'\n          : language === 'PL'\n          ? 'Profil'\n          : 'Profile',\n\n      addAdvertisementShort:\n        language === 'ES'\n          ? 'Publicidad'\n          : language === 'RU'\n          ? 'Реклама'\n          : language === 'CZ'\n          ? 'Reklama'\n          : language === 'DE'\n          ? 'Werbung'\n          : language === 'PL'\n          ? 'Reklama'\n          : 'Ad',\n\n      addServiceShort:\n        language === 'ES'\n          ? 'Servicio'\n          : language === 'RU'\n          ? 'Услуга'\n          : language === 'CZ'\n          ? 'Služba'\n          : language === 'DE'\n          ? 'Service'\n          : language === 'PL'\n          ? 'Usługa'\n          : 'Service',\n\n      addDealShort:\n        language === 'ES'\n          ? 'Descuento'\n          : language === 'RU'\n          ? 'Скидка'\n          : language === 'CZ'\n          ? 'Sleva'\n          : language === 'DE'\n          ? 'Rabatt'\n          : language === 'PL'\n          ? 'Zniżka'\n          : 'Deal',\n\n      close:\n        language === 'ES'\n          ? 'Cerrar'\n          : language === 'RU'\n          ? 'Закрыть'\n          : language === 'CZ'\n          ? 'Zavřít'\n          : language === 'DE'\n          ? 'Schließen'\n          : language === 'PL'\n          ? 'Zamknij'\n          : 'Close',\n    };\n  }, [language]);\n\n  const detectedHome = pathname === '/';\n  const detectedMessages = pathname.startsWith('/messages');\n  const detectedBookings = pathname.startsWith('/bookings') || pathname.startsWith('/booking');\n  const detectedProfile = pathname.startsWith('/profile');\n  const detectedAdd =\n    pathname.startsWith('/add') ||\n    pathname.startsWith('/profile/promotions/new') ||\n    pathname.startsWith('/profile/deals/new');\n\n  const isHome = active ? active === 'home' : detectedHome;\n  const isMessages = active ? active === 'messages' : detectedMessages;\n  const isBookings = active ? active === 'bookings' : detectedBookings;\n  const isProfile = active ? active === 'profile' : detectedProfile;\n  const isAdd = active ? active === 'add' : detectedAdd;\n\n  const handleOpenAddMenu = () => setShowAddMenu(true);\n  const handleCloseAddMenu = () => setShowAddMenu(false);\n\n  const handleGoToAdvertisement = () => {\n    setShowAddMenu(false);\n    router.push('/profile/promotions/new');\n  };\n\n  const handleGoToService = () => {\n    setShowAddMenu(false);\n    router.push('/add');\n  };\n\n  const handleGoToDeal = () => {\n    setShowAddMenu(false);\n    router.push('/profile/deals/new');\n  };\n\n  return null;\n}\nEOF\nnode -e \"console.log('ok')\""]}
+}
