@@ -17,7 +17,12 @@ export type ListingItem = {
   contact: {
     phone: string;
     whatsapp: string;
+    businessWhatsapp: string;
     telegram: string;
+    viber: string;
+    instagram: string;
+    website: string;
+    email: string;
   };
   photos: string[];
   createdAt: string;
@@ -37,14 +42,59 @@ function canUseStorage() {
   return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 }
 
+function normalizeListing(raw: any): ListingItem | null {
+  if (!raw || typeof raw !== 'object') return null;
+
+  return {
+    id: String(raw.id || ''),
+    title: String(raw.title || ''),
+    description: String(raw.description || ''),
+    category: String(raw.category || ''),
+    subcategory: String(raw.subcategory || ''),
+    price: String(raw.price || ''),
+    location: String(raw.location || ''),
+    hours: String(raw.hours || ''),
+    availableToday: Boolean(raw.availableToday),
+    serviceModes: Array.isArray(raw.serviceModes)
+      ? raw.serviceModes.filter((item: unknown) =>
+          item === 'at_client' || item === 'at_my_place' || item === 'online'
+        )
+      : [],
+    paymentMethods: Array.isArray(raw.paymentMethods)
+      ? raw.paymentMethods.filter((item: unknown) =>
+          item === 'cash' || item === 'card' || item === 'wallet'
+        )
+      : [],
+    contact: {
+      phone: String(raw.contact?.phone || ''),
+      whatsapp: String(raw.contact?.whatsapp || ''),
+      businessWhatsapp: String(raw.contact?.businessWhatsapp || ''),
+      telegram: String(raw.contact?.telegram || ''),
+      viber: String(raw.contact?.viber || ''),
+      instagram: String(raw.contact?.instagram || ''),
+      website: String(raw.contact?.website || ''),
+      email: String(raw.contact?.email || ''),
+    },
+    photos: Array.isArray(raw.photos)
+      ? raw.photos.filter((item: unknown) => typeof item === 'string')
+      : [],
+    createdAt: String(raw.createdAt || new Date().toISOString()),
+  };
+}
+
 function readListings(): ListingItem[] {
   if (!canUseStorage()) return [];
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
+
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .map((item) => normalizeListing(item))
+      .filter((item): item is ListingItem => item !== null);
   } catch {
     return [];
   }
@@ -65,6 +115,17 @@ export function addListing(
 ): ListingItem {
   const newItem: ListingItem = {
     ...payload,
+    contact: {
+      phone: String(payload.contact?.phone || ''),
+      whatsapp: String(payload.contact?.whatsapp || ''),
+      businessWhatsapp: String(payload.contact?.businessWhatsapp || ''),
+      telegram: String(payload.contact?.telegram || ''),
+      viber: String(payload.contact?.viber || ''),
+      instagram: String(payload.contact?.instagram || ''),
+      website: String(payload.contact?.website || ''),
+      email: String(payload.contact?.email || ''),
+    },
+    photos: Array.isArray(payload.photos) ? payload.photos : [],
     id: `listing_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
     createdAt: new Date().toISOString(),
   };
