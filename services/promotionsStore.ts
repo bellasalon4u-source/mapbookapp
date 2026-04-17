@@ -64,21 +64,29 @@ const listeners = new Set<PromotionsListener>();
 const defaultPromotions: PromotionRecord[] = [
   {
     id: 'promo-1',
-    masterId: 'master-keratin-1',
+    masterId: 'camden-brows-bar',
     title: {
       EN: 'Keratin Hair Extensions',
       ES: 'Extensiones de cabello de queratina',
       RU: 'Кератиновое наращивание волос',
+      UA: 'Кератинове нарощення волосся',
       CZ: 'Keratinové prodloužení vlasů',
       DE: 'Keratin-Haarverlängerung',
+      IT: 'Extension capelli alla cheratina',
+      FR: 'Extensions kératine',
+      AR: 'وصلات شعر بالكيراتين',
       PL: 'Keratinowe przedłużanie włosów',
     },
     subtitle: {
       EN: '20% off this week',
       ES: '20% de descuento esta semana',
       RU: 'Скидка 20% на этой неделе',
+      UA: 'Знижка 20% цього тижня',
       CZ: '20% sleva tento týden',
       DE: '20 % Rabatt diese Woche',
+      IT: '20% di sconto questa settimana',
+      FR: '20 % de réduction cette semaine',
+      AR: 'خصم 20٪ هذا الأسبوع',
       PL: '20% zniżki w tym tygodniu',
     },
     image:
@@ -96,8 +104,12 @@ const defaultPromotions: PromotionRecord[] = [
       EN: 'Get a professional keratin hair extensions service with a personalised consultation, colour match and a natural blend finish. Perfect for clients who want extra length, extra volume and a seamless result.',
       ES: 'Obtén un servicio profesional de extensiones de queratina con consulta personalizada, igualación de color y un acabado natural. Ideal para clientes que desean más largo, más volumen y un resultado uniforme.',
       RU: 'Профессиональное кератиновое наращивание волос с персональной консультацией, подбором цвета и натуральным финишем. Идеально для клиентов, которые хотят больше длины, объёма и максимально естественный результат.',
+      UA: 'Професійне кератинове нарощення волосся з персональною консультацією, підбором кольору та натуральним фінішем. Ідеально для клієнтів, які хочуть більше довжини, об’єму та максимально природний результат.',
       CZ: 'Získejte profesionální keratinové prodloužení vlasů s osobní konzultací, sladěním barvy a přirozeným výsledkem. Ideální pro klienty, kteří chtějí větší délku, objem a hladký efekt.',
       DE: 'Professionelle Keratin-Haarverlängerung mit persönlicher Beratung, Farbabstimmung und natürlichem Finish. Perfekt für Kundinnen, die mehr Länge, mehr Volumen und ein nahtloses Ergebnis möchten.',
+      IT: 'Servizio professionale di extension alla cheratina con consulenza personalizzata, abbinamento colore e risultato naturale.',
+      FR: 'Service professionnel d’extensions kératine avec consultation personnalisée, correspondance de couleur et rendu naturel.',
+      AR: 'خدمة احترافية لوصلات الشعر بالكيراتين مع استشارة شخصية ومطابقة اللون ونتيجة طبيعية.',
       PL: 'Profesjonalne keratynowe przedłużanie włosów z indywidualną konsultacją, doborem koloru i naturalnym efektem. Idealne dla klientek, które chcą większej długości, objętości i płynnego rezultatu.',
     },
     included: {
@@ -122,6 +134,13 @@ const defaultPromotions: PromotionRecord[] = [
         'Стрижка для смешивания и укладка',
         'Рекомендации по уходу',
       ],
+      UA: [
+        'Персональна консультація',
+        'Підбір кольору',
+        'Нарощення на кератин',
+        'Стрижка для змішування та укладка',
+        'Рекомендації з догляду',
+      ],
       CZ: [
         'Osobní konzultace',
         'Sladění barvy',
@@ -135,6 +154,27 @@ const defaultPromotions: PromotionRecord[] = [
         'Keratin-Extensions Anbringung',
         'Blending-Schnitt und Styling',
         'Pflegehinweise',
+      ],
+      IT: [
+        'Consulenza personale',
+        'Abbinamento colore',
+        'Applicazione extension cheratina',
+        'Taglio e styling',
+        'Consigli post trattamento',
+      ],
+      FR: [
+        'Consultation personnalisée',
+        'Correspondance de couleur',
+        'Pose d’extensions kératine',
+        'Coupe fondu et coiffage',
+        'Conseils après soin',
+      ],
+      AR: [
+        'استشارة شخصية',
+        'مطابقة اللون',
+        'تركيب وصلات الكيراتين',
+        'قص وتهيئة',
+        'نصائح العناية بعد الخدمة',
       ],
       PL: [
         'Konsultacja indywidualna',
@@ -150,52 +190,76 @@ const defaultPromotions: PromotionRecord[] = [
       EN: '20 April',
       ES: '20 de abril',
       RU: '20 апреля',
+      UA: '20 квітня',
       CZ: '20. dubna',
       DE: '20. April',
+      IT: '20 aprile',
+      FR: '20 avril',
+      AR: '20 أبريل',
       PL: '20 kwietnia',
     },
     area: {
       EN: 'Camden, London',
       ES: 'Camden, Londres',
       RU: 'Камден, Лондон',
+      UA: 'Камден, Лондон',
       CZ: 'Camden, Londýn',
       DE: 'Camden, London',
+      IT: 'Camden, Londra',
+      FR: 'Camden, Londres',
+      AR: 'كامدن، لندن',
       PL: 'Camden, Londyn',
     },
     address: {
       EN: '24 Camden High Street, London',
       ES: '24 Camden High Street, Londres',
       RU: '24 Camden High Street, Лондон',
+      UA: '24 Camden High Street, Лондон',
       CZ: '24 Camden High Street, Londýn',
       DE: '24 Camden High Street, London',
+      IT: '24 Camden High Street, Londra',
+      FR: '24 Camden High Street, Londres',
+      AR: '24 Camden High Street، لندن',
       PL: '24 Camden High Street, Londyn',
     },
     distance: {
       EN: '1.2 miles away',
       ES: 'a 1.2 millas',
       RU: '1.2 мили от вас',
+      UA: '1.2 милі від вас',
       CZ: '1,2 míle od vás',
       DE: '1,2 Meilen entfernt',
+      IT: 'a 1.2 miglia',
+      FR: 'à 1,2 miles',
+      AR: 'يبعد 1.2 ميل',
       PL: '1.2 mili od Ciebie',
     },
   },
   {
     id: 'promo-2',
-    masterId: 'master-barber-1',
+    masterId: 'soho-barber-club',
     title: {
       EN: 'Barber Fade + Beard',
       ES: 'Fade de barbería + barba',
       RU: 'Барбер fade + борода',
+      UA: 'Барбер fade + борода',
       CZ: 'Barber fade + vousy',
       DE: 'Barber Fade + Bart',
+      IT: 'Fade barber + barba',
+      FR: 'Fade barber + barbe',
+      AR: 'فيد حلاقة + لحية',
       PL: 'Barber fade + broda',
     },
     subtitle: {
       EN: 'From £25 today',
       ES: 'Desde £25 hoy',
       RU: 'От £25 сегодня',
+      UA: 'Від £25 сьогодні',
       CZ: 'Od £25 dnes',
       DE: 'Heute ab £25',
+      IT: 'Da £25 oggi',
+      FR: 'À partir de £25 aujourd’hui',
+      AR: 'ابتداءً من £25 اليوم',
       PL: 'Od £25 dzisiaj',
     },
     image:
@@ -213,16 +277,24 @@ const defaultPromotions: PromotionRecord[] = [
       EN: 'Fresh barber fade with beard shaping for a clean modern look. Ideal for a quick refresh before work, events or weekends.',
       ES: 'Fade limpio con perfilado de barba para un look moderno. Ideal para renovarte rápidamente antes del trabajo, eventos o fines de semana.',
       RU: 'Свежий барбер fade с оформлением бороды для чистого современного образа. Идеально для быстрого обновления перед работой, встречами или выходными.',
+      UA: 'Свіжий барбер fade з оформленням бороди для сучасного образу. Ідеально для швидкого оновлення перед роботою, зустрічами або вихідними.',
       CZ: 'Čerstvý barber fade s úpravou vousů pro čistý moderní vzhled. Ideální pro rychlé osvěžení před prací, akcí nebo víkendem.',
       DE: 'Frischer Barber Fade mit Bartformung für einen sauberen modernen Look. Ideal für ein schnelles Fresh-up vor Arbeit, Events oder dem Wochenende.',
+      IT: 'Fade pulito con sistemazione barba per un look moderno e ordinato.',
+      FR: 'Fade propre avec mise en forme de la barbe pour un look moderne.',
+      AR: 'فيد حلاقة مرتب مع تحديد اللحية لإطلالة عصرية ونظيفة.',
       PL: 'Świeży barber fade z modelowaniem brody dla nowoczesnego wyglądu. Idealne szybkie odświeżenie przed pracą, wydarzeniem lub weekendem.',
     },
     included: {
       EN: ['Skin fade or taper fade', 'Beard shaping', 'Neck clean-up', 'Styling finish'],
       ES: ['Skin fade o taper fade', 'Perfilado de barba', 'Limpieza del cuello', 'Acabado de peinado'],
       RU: ['Skin fade или taper fade', 'Оформление бороды', 'Очистка шеи', 'Финишная укладка'],
+      UA: ['Skin fade або taper fade', 'Оформлення бороди', 'Очищення шиї', 'Фінальна укладка'],
       CZ: ['Skin fade nebo taper fade', 'Úprava vousů', 'Začištění krku', 'Finální styling'],
       DE: ['Skin Fade oder Taper Fade', 'Bartformung', 'Nackenreinigung', 'Styling-Finish'],
+      IT: ['Skin fade o taper fade', 'Definizione barba', 'Pulizia collo', 'Styling finale'],
+      FR: ['Skin fade ou taper fade', 'Taille de barbe', 'Nettoyage du cou', 'Finition coiffage'],
+      AR: ['Skin fade أو taper fade', 'تهذيب اللحية', 'تنظيف الرقبة', 'تصفيف نهائي'],
       PL: ['Skin fade lub taper fade', 'Modelowanie brody', 'Oczyszczenie karku', 'Wykończenie stylizacji'],
     },
     oldPrice: '£35',
@@ -231,52 +303,76 @@ const defaultPromotions: PromotionRecord[] = [
       EN: 'Today',
       ES: 'Hoy',
       RU: 'Сегодня',
+      UA: 'Сьогодні',
       CZ: 'Dnes',
       DE: 'Heute',
+      IT: 'Oggi',
+      FR: 'Aujourd’hui',
+      AR: 'اليوم',
       PL: 'Dzisiaj',
     },
     area: {
       EN: 'Soho, London',
       ES: 'Soho, Londres',
       RU: 'Сохо, Лондон',
+      UA: 'Сохо, Лондон',
       CZ: 'Soho, Londýn',
       DE: 'Soho, London',
+      IT: 'Soho, Londra',
+      FR: 'Soho, Londres',
+      AR: 'سوهو، لندن',
       PL: 'Soho, Londyn',
     },
     address: {
       EN: '18 Wardour Street, London',
       ES: '18 Wardour Street, Londres',
       RU: '18 Wardour Street, Лондон',
+      UA: '18 Wardour Street, Лондон',
       CZ: '18 Wardour Street, Londýn',
       DE: '18 Wardour Street, London',
+      IT: '18 Wardour Street, Londra',
+      FR: '18 Wardour Street, Londres',
+      AR: '18 Wardour Street، لندن',
       PL: '18 Wardour Street, Londyn',
     },
     distance: {
       EN: '0.8 miles away',
       ES: 'a 0.8 millas',
       RU: '0.8 мили от вас',
+      UA: '0.8 милі від вас',
       CZ: '0,8 míle od vás',
       DE: '0,8 Meilen entfernt',
+      IT: 'a 0.8 miglia',
+      FR: 'à 0,8 miles',
+      AR: 'يبعد 0.8 ميل',
       PL: '0.8 mili od Ciebie',
     },
   },
   {
     id: 'promo-3',
-    masterId: 'master-massage-1',
+    masterId: 'nadia-wellness',
     title: {
       EN: 'Relax Massage Session',
       ES: 'Sesión de masaje relax',
       RU: 'Сеанс расслабляющего массажа',
+      UA: 'Сеанс розслаблюючого масажу',
       CZ: 'Relaxační masáž',
       DE: 'Entspannungsmassage',
+      IT: 'Sessione massaggio relax',
+      FR: 'Séance de massage relax',
+      AR: 'جلسة مساج استرخاء',
       PL: 'Sesja masażu relaksacyjnego',
     },
     subtitle: {
       EN: 'Free aromatherapy upgrade',
       ES: 'Mejora gratis a aromaterapia',
       RU: 'Бесплатное улучшение до ароматерапии',
+      UA: 'Безкоштовне покращення до ароматерапії',
       CZ: 'Aromaterapie zdarma',
       DE: 'Kostenloses Aromatherapie-Upgrade',
+      IT: 'Upgrade aromaterapia gratuito',
+      FR: 'Upgrade aromathérapie offert',
+      AR: 'ترقية مجانية إلى العلاج العطري',
       PL: 'Darmowe ulepszenie do aromaterapii',
     },
     image:
@@ -294,8 +390,12 @@ const defaultPromotions: PromotionRecord[] = [
       EN: 'A calming massage session designed to help you relax, release tension and reset. Includes a complimentary aromatherapy upgrade.',
       ES: 'Una sesión de masaje relajante diseñada para ayudarte a desconectar, liberar tensión y reiniciar. Incluye una mejora gratuita a aromaterapia.',
       RU: 'Расслабляющий массаж, который помогает снять напряжение, расслабиться и восстановиться. Включает бесплатное улучшение до ароматерапии.',
+      UA: 'Розслаблюючий масаж, який допомагає зняти напругу, розслабитися і відновитися. Включає безкоштовне покращення до ароматерапії.',
       CZ: 'Uklidňující masáž navržená tak, aby vám pomohla relaxovat, uvolnit napětí a načerpat novou energii. Zahrnuje aromaterapii zdarma.',
       DE: 'Eine beruhigende Massage, die Ihnen hilft, zu entspannen, Spannungen zu lösen und neue Energie zu tanken. Inklusive kostenlosem Aromatherapie-Upgrade.',
+      IT: 'Una sessione rilassante pensata per sciogliere la tensione e rigenerarti. Include upgrade aromaterapia gratuito.',
+      FR: 'Un massage apaisant pour vous détendre, relâcher les tensions et vous recentrer. Inclut un upgrade aromathérapie offert.',
+      AR: 'جلسة مساج مهدئة تساعدك على الاسترخاء وتخفيف التوتر واستعادة النشاط، مع ترقية مجانية للعلاج العطري.',
       PL: 'Relaksujący masaż zaprojektowany, aby pomóc Ci się wyciszyć, rozluźnić napięcie i odzyskać równowagę. Zawiera darmowe ulepszenie do aromaterapii.',
     },
     included: {
@@ -317,6 +417,12 @@ const defaultPromotions: PromotionRecord[] = [
         'Спокойная атмосфера кабинета',
         'Советы после процедуры',
       ],
+      UA: [
+        'Масаж 60 хвилин',
+        'Ароматерапія',
+        'Спокійна атмосфера кабінету',
+        'Поради після процедури',
+      ],
       CZ: [
         '60minutová masáž',
         'Aromaterapie',
@@ -328,6 +434,24 @@ const defaultPromotions: PromotionRecord[] = [
         'Aromatherapie-Upgrade',
         'Entspannender Behandlungsraum',
         'Pflegehinweise danach',
+      ],
+      IT: [
+        'Massaggio da 60 minuti',
+        'Upgrade aromaterapia',
+        'Cabina relax',
+        'Consigli post trattamento',
+      ],
+      FR: [
+        'Massage 60 minutes',
+        'Upgrade aromathérapie',
+        'Cabine relaxante',
+        'Conseils après soin',
+      ],
+      AR: [
+        'مساج لمدة 60 دقيقة',
+        'ترقية علاج عطري',
+        'غرفة علاج مريحة',
+        'نصائح بعد الجلسة',
       ],
       PL: [
         '60-minutowy masaż',
@@ -342,32 +466,48 @@ const defaultPromotions: PromotionRecord[] = [
       EN: 'This week',
       ES: 'Esta semana',
       RU: 'На этой неделе',
+      UA: 'Цього тижня',
       CZ: 'Tento týden',
       DE: 'Diese Woche',
+      IT: 'Questa settimana',
+      FR: 'Cette semaine',
+      AR: 'هذا الأسبوع',
       PL: 'W tym tygodniu',
     },
     area: {
       EN: 'Covent Garden, London',
       ES: 'Covent Garden, Londres',
       RU: 'Ковент-Гарден, Лондон',
+      UA: 'Ковент-Гарден, Лондон',
       CZ: 'Covent Garden, Londýn',
       DE: 'Covent Garden, London',
+      IT: 'Covent Garden, Londra',
+      FR: 'Covent Garden, Londres',
+      AR: 'كوفنت غاردن، لندن',
       PL: 'Covent Garden, Londyn',
     },
     address: {
       EN: '12 Floral Street, London',
       ES: '12 Floral Street, Londres',
       RU: '12 Floral Street, Лондон',
+      UA: '12 Floral Street, Лондон',
       CZ: '12 Floral Street, Londýn',
       DE: '12 Floral Street, London',
+      IT: '12 Floral Street, Londra',
+      FR: '12 Floral Street, Londres',
+      AR: '12 Floral Street، لندن',
       PL: '12 Floral Street, Londyn',
     },
     distance: {
       EN: '1.5 miles away',
       ES: 'a 1.5 millas',
       RU: '1.5 мили от вас',
+      UA: '1.5 милі від вас',
       CZ: '1,5 míle od vás',
       DE: '1,5 Meilen entfernt',
+      IT: 'a 1.5 miglia',
+      FR: 'à 1,5 miles',
+      AR: 'يبعد 1.5 ميل',
       PL: '1.5 mili od Ciebie',
     },
   },
@@ -398,7 +538,20 @@ function pickLocalizedText(value: LocalizedText | undefined, language: AppLangua
     return value;
   }
 
-  return value[language] || value.EN || '';
+  return (
+    value[language] ||
+    value.EN ||
+    value.RU ||
+    value.ES ||
+    value.DE ||
+    value.CZ ||
+    value.PL ||
+    value.UA ||
+    value.IT ||
+    value.FR ||
+    value.AR ||
+    ''
+  );
 }
 
 function pickLocalizedList(value: LocalizedList | undefined, language: AppLanguage): string[] {
@@ -408,7 +561,20 @@ function pickLocalizedList(value: LocalizedList | undefined, language: AppLangua
     return value;
   }
 
-  return value[language] || value.EN || [];
+  return (
+    value[language] ||
+    value.EN ||
+    value.RU ||
+    value.ES ||
+    value.DE ||
+    value.CZ ||
+    value.PL ||
+    value.UA ||
+    value.IT ||
+    value.FR ||
+    value.AR ||
+    []
+  );
 }
 
 function normalizePromotionRecord(item: PromotionRecord): PromotionRecord {
