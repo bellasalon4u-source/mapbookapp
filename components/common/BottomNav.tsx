@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { getUnreadMessagesCount, subscribeToChatStore } from '../services/chatStore';
+import { getUnreadMessagesCount, subscribeToChatStore } from '../../services/chatStore';
 import {
   getSavedLanguage,
   subscribeToLanguageChange,
   type AppLanguage,
-} from '../services/i18n';
+} from '../../services/i18n';
 
 type BottomNavProps = {
   active?: 'home' | 'messages' | 'add' | 'bookings' | 'profile';
