@@ -331,6 +331,19 @@ function accentStyles(accent: ProfileCard['accent']) {
   return { background: '#f3f4f6', color: '#4b5563' };
 }
 
+const greenActionButtonStyle = {
+  minHeight: 54,
+  borderRadius: 999,
+  border: '2px solid #111111',
+  background: '#31b44b',
+  color: '#fff',
+  padding: '0 20px',
+  fontSize: 14,
+  fontWeight: 900,
+  cursor: 'pointer',
+  boxShadow: '0 2px 0 rgba(0,0,0,0.08)',
+} as const;
+
 export default function ProfilePage() {
   const router = useRouter();
 
@@ -512,17 +525,7 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => router.push('/profile/edit')}
-            style={{
-              minHeight: 54,
-              borderRadius: 999,
-              border: '2px solid #111111',
-              background: '#2f241c',
-              color: '#fff',
-              padding: '0 18px',
-              fontSize: 14,
-              fontWeight: 900,
-              cursor: 'pointer',
-            }}
+            style={greenActionButtonStyle}
           >
             {text.editProfile}
           </button>
