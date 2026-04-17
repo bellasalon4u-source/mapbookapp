@@ -1,7 +1,18 @@
 'use client';
 
-import { useMemo, useRef, useState, type ChangeEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from 'react';
 import { useRouter } from 'next/navigation';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../../services/i18n';
 
 type PaymentMethod = {
   id: string;
@@ -12,69 +23,630 @@ type PaymentMethod = {
   accentColor: string;
 };
 
-const paymentMethods: PaymentMethod[] = [
-  {
-    id: 'card',
-    title: 'Банковская карта',
-    subtitle: 'Visa / Mastercard',
-    icon: '💳',
-    accentBg: '#edf4ff',
-    accentColor: '#2f7cf6',
+type DealTexts = {
+  pageTitle: string;
+  pageSubtitle: string;
+  discountTitle: string;
+  discountTitlePlaceholder: string;
+  discountPercent: string;
+  onlyToday: string;
+  description: string;
+  descriptionPlaceholder: string;
+  chooseDays: string;
+  photo: string;
+  photoHint: string;
+  addPhoto: string;
+  replacePhoto: string;
+  photoAdded: string;
+  totalToPay: string;
+  choosePaymentMethod: string;
+  paymentMethodsHint: string;
+  selected: string;
+  cancel: string;
+  pay: string;
+  done: string;
+  ok: string;
+  publishDay1: string;
+  publishDays: string;
+  day: string;
+  day2to4: string;
+  days: string;
+  forPrice: string;
+  enterDiscountTitle: string;
+  enterDiscountPercent: string;
+  enterDescription: string;
+  addPhotoAlert: string;
+};
+
+const textByLanguage: Record<AppLanguage, DealTexts> = {
+  EN: {
+    pageTitle: 'Add day deal',
+    pageSubtitle: 'Create a special offer for today or several days.',
+    discountTitle: 'Deal title',
+    discountTitlePlaceholder: 'Enter deal title',
+    discountPercent: 'Discount size',
+    onlyToday: 'For a limited time',
+    description: 'Description',
+    descriptionPlaceholder: 'Enter description...',
+    chooseDays: 'Choose number of days',
+    photo: 'Photo',
+    photoHint: 'Add a photo to attract attention',
+    addPhoto: 'Add photo',
+    replacePhoto: 'Replace',
+    photoAdded: 'Photo added',
+    totalToPay: 'Total to pay',
+    choosePaymentMethod: 'Choose payment method',
+    paymentMethodsHint: 'All MapBook payment methods are available',
+    selected: 'Selected',
+    cancel: 'Cancel',
+    pay: 'Pay',
+    done: 'Done',
+    ok: 'OK',
+    publishDay1: 'Publish deal for 1 day',
+    publishDays: 'Publish deal for {days} days',
+    day: 'day',
+    day2to4: 'days',
+    days: 'days',
+    forPrice: 'for',
+    enterDiscountTitle: 'Enter deal title',
+    enterDiscountPercent: 'Enter discount size',
+    enterDescription: 'Enter description',
+    addPhotoAlert: 'Add photo',
   },
-  {
-    id: 'paypal',
-    title: 'PayPal',
-    subtitle: 'Быстрая оплата',
-    icon: '🅿️',
-    accentBg: '#eef5ff',
-    accentColor: '#2563eb',
+  RU: {
+    pageTitle: 'Добавить скидку дня',
+    pageSubtitle: 'Создайте специальное предложение на сегодня или на несколько дней.',
+    discountTitle: 'Название скидки',
+    discountTitlePlaceholder: 'Введите название скидки',
+    discountPercent: 'Размер скидки',
+    onlyToday: 'Ограниченное предложение',
+    description: 'Описание',
+    descriptionPlaceholder: 'Введите описание...',
+    chooseDays: 'Выбрать количество дней',
+    photo: 'Фото',
+    photoHint: 'Добавьте фото для привлечения внимания',
+    addPhoto: 'Добавить фото',
+    replacePhoto: 'Заменить',
+    photoAdded: 'Фото добавлено',
+    totalToPay: 'Итого к оплате',
+    choosePaymentMethod: 'Выберите способ оплаты',
+    paymentMethodsHint: 'Доступны все способы оплаты MapBook',
+    selected: 'Выбрано',
+    cancel: 'Отмена',
+    pay: 'Оплатить',
+    done: 'Готово',
+    ok: 'OK',
+    publishDay1: 'Опубликовать скидку на 1 день',
+    publishDays: 'Опубликовать скидку на {days} дней',
+    day: 'день',
+    day2to4: 'дня',
+    days: 'дней',
+    forPrice: 'за',
+    enterDiscountTitle: 'Введите название скидки',
+    enterDiscountPercent: 'Введите размер скидки',
+    enterDescription: 'Введите описание',
+    addPhotoAlert: 'Добавьте фото',
   },
-  {
-    id: 'apple-pay',
-    title: 'Apple Pay',
-    subtitle: 'Express checkout',
-    icon: '',
-    accentBg: '#f4efe8',
-    accentColor: '#17130f',
+  ES: {
+    pageTitle: 'Añadir descuento',
+    pageSubtitle: 'Crea una oferta especial para hoy o para varios días.',
+    discountTitle: 'Título del descuento',
+    discountTitlePlaceholder: 'Introduce el título del descuento',
+    discountPercent: 'Tamaño del descuento',
+    onlyToday: 'Oferta limitada',
+    description: 'Descripción',
+    descriptionPlaceholder: 'Introduce la descripción...',
+    chooseDays: 'Elegir número de días',
+    photo: 'Foto',
+    photoHint: 'Añade una foto para atraer atención',
+    addPhoto: 'Añadir foto',
+    replacePhoto: 'Reemplazar',
+    photoAdded: 'Foto añadida',
+    totalToPay: 'Total a pagar',
+    choosePaymentMethod: 'Elige método de pago',
+    paymentMethodsHint: 'Todos los métodos de pago de MapBook están disponibles',
+    selected: 'Seleccionado',
+    cancel: 'Cancelar',
+    pay: 'Pagar',
+    done: 'Hecho',
+    ok: 'OK',
+    publishDay1: 'Publicar descuento por 1 día',
+    publishDays: 'Publicar descuento por {days} días',
+    day: 'día',
+    day2to4: 'días',
+    days: 'días',
+    forPrice: 'por',
+    enterDiscountTitle: 'Introduce el título del descuento',
+    enterDiscountPercent: 'Introduce el tamaño del descuento',
+    enterDescription: 'Introduce la descripción',
+    addPhotoAlert: 'Añade una foto',
   },
-  {
-    id: 'google-pay',
-    title: 'Google Pay',
-    subtitle: 'Оплата в 1 касание',
-    icon: '🟢',
-    accentBg: '#eef9f1',
-    accentColor: '#2fa35a',
+  CZ: {
+    pageTitle: 'Přidat slevu dne',
+    pageSubtitle: 'Vytvořte speciální nabídku na dnešek nebo na několik dní.',
+    discountTitle: 'Název slevy',
+    discountTitlePlaceholder: 'Zadejte název slevy',
+    discountPercent: 'Výše slevy',
+    onlyToday: 'Časově omezená nabídka',
+    description: 'Popis',
+    descriptionPlaceholder: 'Zadejte popis...',
+    chooseDays: 'Vyberte počet dní',
+    photo: 'Foto',
+    photoHint: 'Přidejte fotku pro větší pozornost',
+    addPhoto: 'Přidat foto',
+    replacePhoto: 'Nahradit',
+    photoAdded: 'Foto přidáno',
+    totalToPay: 'Celkem k platbě',
+    choosePaymentMethod: 'Vyberte způsob platby',
+    paymentMethodsHint: 'K dispozici jsou všechny platební metody MapBook',
+    selected: 'Vybráno',
+    cancel: 'Zrušit',
+    pay: 'Zaplatit',
+    done: 'Hotovo',
+    ok: 'OK',
+    publishDay1: 'Publikovat slevu na 1 den',
+    publishDays: 'Publikovat slevu na {days} dní',
+    day: 'den',
+    day2to4: 'dny',
+    days: 'dní',
+    forPrice: 'za',
+    enterDiscountTitle: 'Zadejte název slevy',
+    enterDiscountPercent: 'Zadejte výši slevy',
+    enterDescription: 'Zadejte popis',
+    addPhotoAlert: 'Přidejte fotku',
   },
-  {
-    id: 'wallet',
-    title: 'Баланс MapBook',
-    subtitle: 'Списать с кошелька',
-    icon: '👛',
-    accentBg: '#fff1f7',
-    accentColor: '#ff4fa0',
+  DE: {
+    pageTitle: 'Tagesrabatt hinzufügen',
+    pageSubtitle: 'Erstellen Sie ein Sonderangebot für heute oder mehrere Tage.',
+    discountTitle: 'Rabatttitel',
+    discountTitlePlaceholder: 'Rabatttitel eingeben',
+    discountPercent: 'Rabattgröße',
+    onlyToday: 'Zeitlich begrenztes Angebot',
+    description: 'Beschreibung',
+    descriptionPlaceholder: 'Beschreibung eingeben...',
+    chooseDays: 'Anzahl der Tage wählen',
+    photo: 'Foto',
+    photoHint: 'Foto hinzufügen, um Aufmerksamkeit zu bekommen',
+    addPhoto: 'Foto hinzufügen',
+    replacePhoto: 'Ersetzen',
+    photoAdded: 'Foto hinzugefügt',
+    totalToPay: 'Gesamtbetrag',
+    choosePaymentMethod: 'Zahlungsmethode wählen',
+    paymentMethodsHint: 'Alle MapBook-Zahlungsmethoden sind verfügbar',
+    selected: 'Ausgewählt',
+    cancel: 'Abbrechen',
+    pay: 'Bezahlen',
+    done: 'Fertig',
+    ok: 'OK',
+    publishDay1: 'Rabatt für 1 Tag veröffentlichen',
+    publishDays: 'Rabatt für {days} Tage veröffentlichen',
+    day: 'Tag',
+    day2to4: 'Tage',
+    days: 'Tage',
+    forPrice: 'für',
+    enterDiscountTitle: 'Rabatttitel eingeben',
+    enterDiscountPercent: 'Rabattgröße eingeben',
+    enterDescription: 'Beschreibung eingeben',
+    addPhotoAlert: 'Foto hinzufügen',
   },
-  {
-    id: 'crypto',
-    title: 'Криптокошелёк',
-    subtitle: 'USDT / USDC',
-    icon: '₿',
-    accentBg: '#fff6e8',
-    accentColor: '#d68612',
+  PL: {
+    pageTitle: 'Dodaj zniżkę dnia',
+    pageSubtitle: 'Utwórz specjalną ofertę na dziś lub na kilka dni.',
+    discountTitle: 'Nazwa zniżki',
+    discountTitlePlaceholder: 'Wpisz nazwę zniżki',
+    discountPercent: 'Wysokość zniżki',
+    onlyToday: 'Oferta ograniczona czasowo',
+    description: 'Opis',
+    descriptionPlaceholder: 'Wpisz opis...',
+    chooseDays: 'Wybierz liczbę dni',
+    photo: 'Zdjęcie',
+    photoHint: 'Dodaj zdjęcie, aby przyciągnąć uwagę',
+    addPhoto: 'Dodaj zdjęcie',
+    replacePhoto: 'Zamień',
+    photoAdded: 'Zdjęcie dodane',
+    totalToPay: 'Razem do zapłaty',
+    choosePaymentMethod: 'Wybierz metodę płatności',
+    paymentMethodsHint: 'Dostępne są wszystkie metody płatności MapBook',
+    selected: 'Wybrano',
+    cancel: 'Anuluj',
+    pay: 'Zapłać',
+    done: 'Gotowe',
+    ok: 'OK',
+    publishDay1: 'Opublikuj zniżkę na 1 dzień',
+    publishDays: 'Opublikuj zniżkę na {days} dni',
+    day: 'dzień',
+    day2to4: 'dni',
+    days: 'dni',
+    forPrice: 'za',
+    enterDiscountTitle: 'Wpisz nazwę zniżki',
+    enterDiscountPercent: 'Wpisz wysokość zniżki',
+    enterDescription: 'Wpisz opis',
+    addPhotoAlert: 'Dodaj zdjęcie',
   },
-  {
-    id: 'bank',
-    title: 'Банковский перевод',
-    subtitle: 'Manual transfer',
-    icon: '🏦',
-    accentBg: '#f3efff',
-    accentColor: '#7a5af8',
-  },
-];
+  UA: {} as DealTexts,
+  IT: {} as DealTexts,
+  FR: {} as DealTexts,
+  AR: {} as DealTexts,
+};
+
+(['UA', 'IT', 'FR', 'AR'] as AppLanguage[]).forEach((lang) => {
+  textByLanguage[lang] = textByLanguage.EN;
+});
+
+const paymentMethodsByLanguage: Record<AppLanguage, PaymentMethod[]> = {
+  EN: [
+    {
+      id: 'card',
+      title: 'Bank card',
+      subtitle: 'Visa / Mastercard',
+      icon: '💳',
+      accentBg: '#edf4ff',
+      accentColor: '#2f7cf6',
+    },
+    {
+      id: 'paypal',
+      title: 'PayPal',
+      subtitle: 'Fast payment',
+      icon: '🅿️',
+      accentBg: '#eef5ff',
+      accentColor: '#2563eb',
+    },
+    {
+      id: 'apple-pay',
+      title: 'Apple Pay',
+      subtitle: 'Express checkout',
+      icon: '',
+      accentBg: '#f4efe8',
+      accentColor: '#17130f',
+    },
+    {
+      id: 'google-pay',
+      title: 'Google Pay',
+      subtitle: 'One-tap payment',
+      icon: '🟢',
+      accentBg: '#eef9f1',
+      accentColor: '#2fa35a',
+    },
+    {
+      id: 'wallet',
+      title: 'MapBook balance',
+      subtitle: 'Charge from wallet',
+      icon: '👛',
+      accentBg: '#fff1f7',
+      accentColor: '#ff4fa0',
+    },
+    {
+      id: 'crypto',
+      title: 'Crypto wallet',
+      subtitle: 'USDT / USDC',
+      icon: '₿',
+      accentBg: '#fff6e8',
+      accentColor: '#d68612',
+    },
+    {
+      id: 'bank',
+      title: 'Bank transfer',
+      subtitle: 'Manual transfer',
+      icon: '🏦',
+      accentBg: '#f3efff',
+      accentColor: '#7a5af8',
+    },
+  ],
+  RU: [
+    {
+      id: 'card',
+      title: 'Банковская карта',
+      subtitle: 'Visa / Mastercard',
+      icon: '💳',
+      accentBg: '#edf4ff',
+      accentColor: '#2f7cf6',
+    },
+    {
+      id: 'paypal',
+      title: 'PayPal',
+      subtitle: 'Быстрая оплата',
+      icon: '🅿️',
+      accentBg: '#eef5ff',
+      accentColor: '#2563eb',
+    },
+    {
+      id: 'apple-pay',
+      title: 'Apple Pay',
+      subtitle: 'Express checkout',
+      icon: '',
+      accentBg: '#f4efe8',
+      accentColor: '#17130f',
+    },
+    {
+      id: 'google-pay',
+      title: 'Google Pay',
+      subtitle: 'Оплата в 1 касание',
+      icon: '🟢',
+      accentBg: '#eef9f1',
+      accentColor: '#2fa35a',
+    },
+    {
+      id: 'wallet',
+      title: 'Баланс MapBook',
+      subtitle: 'Списать с кошелька',
+      icon: '👛',
+      accentBg: '#fff1f7',
+      accentColor: '#ff4fa0',
+    },
+    {
+      id: 'crypto',
+      title: 'Криптокошелёк',
+      subtitle: 'USDT / USDC',
+      icon: '₿',
+      accentBg: '#fff6e8',
+      accentColor: '#d68612',
+    },
+    {
+      id: 'bank',
+      title: 'Банковский перевод',
+      subtitle: 'Manual transfer',
+      icon: '🏦',
+      accentBg: '#f3efff',
+      accentColor: '#7a5af8',
+    },
+  ],
+  ES: [
+    {
+      id: 'card',
+      title: 'Tarjeta bancaria',
+      subtitle: 'Visa / Mastercard',
+      icon: '💳',
+      accentBg: '#edf4ff',
+      accentColor: '#2f7cf6',
+    },
+    {
+      id: 'paypal',
+      title: 'PayPal',
+      subtitle: 'Pago rápido',
+      icon: '🅿️',
+      accentBg: '#eef5ff',
+      accentColor: '#2563eb',
+    },
+    {
+      id: 'apple-pay',
+      title: 'Apple Pay',
+      subtitle: 'Pago exprés',
+      icon: '',
+      accentBg: '#f4efe8',
+      accentColor: '#17130f',
+    },
+    {
+      id: 'google-pay',
+      title: 'Google Pay',
+      subtitle: 'Pago en 1 toque',
+      icon: '🟢',
+      accentBg: '#eef9f1',
+      accentColor: '#2fa35a',
+    },
+    {
+      id: 'wallet',
+      title: 'Saldo MapBook',
+      subtitle: 'Cobrar desde la cartera',
+      icon: '👛',
+      accentBg: '#fff1f7',
+      accentColor: '#ff4fa0',
+    },
+    {
+      id: 'crypto',
+      title: 'Cartera cripto',
+      subtitle: 'USDT / USDC',
+      icon: '₿',
+      accentBg: '#fff6e8',
+      accentColor: '#d68612',
+    },
+    {
+      id: 'bank',
+      title: 'Transferencia bancaria',
+      subtitle: 'Transferencia manual',
+      icon: '🏦',
+      accentBg: '#f3efff',
+      accentColor: '#7a5af8',
+    },
+  ],
+  CZ: [
+    {
+      id: 'card',
+      title: 'Bankovní karta',
+      subtitle: 'Visa / Mastercard',
+      icon: '💳',
+      accentBg: '#edf4ff',
+      accentColor: '#2f7cf6',
+    },
+    {
+      id: 'paypal',
+      title: 'PayPal',
+      subtitle: 'Rychlá platba',
+      icon: '🅿️',
+      accentBg: '#eef5ff',
+      accentColor: '#2563eb',
+    },
+    {
+      id: 'apple-pay',
+      title: 'Apple Pay',
+      subtitle: 'Expresní platba',
+      icon: '',
+      accentBg: '#f4efe8',
+      accentColor: '#17130f',
+    },
+    {
+      id: 'google-pay',
+      title: 'Google Pay',
+      subtitle: 'Platba jedním klepnutím',
+      icon: '🟢',
+      accentBg: '#eef9f1',
+      accentColor: '#2fa35a',
+    },
+    {
+      id: 'wallet',
+      title: 'Zůstatek MapBook',
+      subtitle: 'Strhnout z peněženky',
+      icon: '👛',
+      accentBg: '#fff1f7',
+      accentColor: '#ff4fa0',
+    },
+    {
+      id: 'crypto',
+      title: 'Krypto peněženka',
+      subtitle: 'USDT / USDC',
+      icon: '₿',
+      accentBg: '#fff6e8',
+      accentColor: '#d68612',
+    },
+    {
+      id: 'bank',
+      title: 'Bankovní převod',
+      subtitle: 'Ruční převod',
+      icon: '🏦',
+      accentBg: '#f3efff',
+      accentColor: '#7a5af8',
+    },
+  ],
+  DE: [
+    {
+      id: 'card',
+      title: 'Bankkarte',
+      subtitle: 'Visa / Mastercard',
+      icon: '💳',
+      accentBg: '#edf4ff',
+      accentColor: '#2f7cf6',
+    },
+    {
+      id: 'paypal',
+      title: 'PayPal',
+      subtitle: 'Schnelle Zahlung',
+      icon: '🅿️',
+      accentBg: '#eef5ff',
+      accentColor: '#2563eb',
+    },
+    {
+      id: 'apple-pay',
+      title: 'Apple Pay',
+      subtitle: 'Express-Checkout',
+      icon: '',
+      accentBg: '#f4efe8',
+      accentColor: '#17130f',
+    },
+    {
+      id: 'google-pay',
+      title: 'Google Pay',
+      subtitle: 'Ein-Klick-Zahlung',
+      icon: '🟢',
+      accentBg: '#eef9f1',
+      accentColor: '#2fa35a',
+    },
+    {
+      id: 'wallet',
+      title: 'MapBook-Guthaben',
+      subtitle: 'Vom Wallet abbuchen',
+      icon: '👛',
+      accentBg: '#fff1f7',
+      accentColor: '#ff4fa0',
+    },
+    {
+      id: 'crypto',
+      title: 'Krypto-Wallet',
+      subtitle: 'USDT / USDC',
+      icon: '₿',
+      accentBg: '#fff6e8',
+      accentColor: '#d68612',
+    },
+    {
+      id: 'bank',
+      title: 'Banküberweisung',
+      subtitle: 'Manuelle Überweisung',
+      icon: '🏦',
+      accentBg: '#f3efff',
+      accentColor: '#7a5af8',
+    },
+  ],
+  PL: [
+    {
+      id: 'card',
+      title: 'Karta bankowa',
+      subtitle: 'Visa / Mastercard',
+      icon: '💳',
+      accentBg: '#edf4ff',
+      accentColor: '#2f7cf6',
+    },
+    {
+      id: 'paypal',
+      title: 'PayPal',
+      subtitle: 'Szybka płatność',
+      icon: '🅿️',
+      accentBg: '#eef5ff',
+      accentColor: '#2563eb',
+    },
+    {
+      id: 'apple-pay',
+      title: 'Apple Pay',
+      subtitle: 'Express checkout',
+      icon: '',
+      accentBg: '#f4efe8',
+      accentColor: '#17130f',
+    },
+    {
+      id: 'google-pay',
+      title: 'Google Pay',
+      subtitle: 'Płatność jednym dotknięciem',
+      icon: '🟢',
+      accentBg: '#eef9f1',
+      accentColor: '#2fa35a',
+    },
+    {
+      id: 'wallet',
+      title: 'Saldo MapBook',
+      subtitle: 'Pobierz z portfela',
+      icon: '👛',
+      accentBg: '#fff1f7',
+      accentColor: '#ff4fa0',
+    },
+    {
+      id: 'crypto',
+      title: 'Portfel krypto',
+      subtitle: 'USDT / USDC',
+      icon: '₿',
+      accentBg: '#fff6e8',
+      accentColor: '#d68612',
+    },
+    {
+      id: 'bank',
+      title: 'Przelew bankowy',
+      subtitle: 'Przelew ręczny',
+      icon: '🏦',
+      accentBg: '#f3efff',
+      accentColor: '#7a5af8',
+    },
+  ],
+  UA: [] as PaymentMethod[],
+  IT: [] as PaymentMethod[],
+  FR: [] as PaymentMethod[],
+  AR: [] as PaymentMethod[],
+};
+
+(['UA', 'IT', 'FR', 'AR'] as AppLanguage[]).forEach((lang) => {
+  paymentMethodsByLanguage[lang] = paymentMethodsByLanguage.EN;
+});
+
+function getDayWord(days: number, language: AppLanguage, text: DealTexts) {
+  if (language === 'RU') {
+    if (days % 10 === 1 && days % 100 !== 11) return text.day;
+    if ([2, 3, 4].includes(days % 10) && ![12, 13, 14].includes(days % 100)) return text.day2to4;
+    return text.days;
+  }
+
+  return days === 1 ? text.day : text.days;
+}
 
 export default function NewDealPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [discountTitle, setDiscountTitle] = useState('');
   const [discountPercent, setDiscountPercent] = useState('20');
   const [description, setDescription] = useState('');
@@ -86,14 +658,29 @@ export default function NewDealPage() {
   const [photoName, setPhotoName] = useState('');
   const [photoPreview, setPhotoPreview] = useState('');
 
+  useEffect(() => {
+    setLanguage(getSavedLanguage());
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    return () => {
+      unsubLanguage();
+    };
+  }, []);
+
+  const text = textByLanguage[language] || textByLanguage.EN;
+  const paymentMethods = paymentMethodsByLanguage[language] || paymentMethodsByLanguage.EN;
+
   const totalPrice = useMemo(() => days * 1, [days]);
   const daysOptions = Array.from({ length: 100 }, (_, index) => index + 1);
   const selectedPaymentData = paymentMethods.find((item) => item.id === selectedPayment);
 
   const publishText =
     days === 1
-      ? `Опубликовать скидку на ${days} день: £${totalPrice}`
-      : `Опубликовать скидку на ${days} дней: £${totalPrice}`;
+      ? `${text.publishDay1}: £${totalPrice}`
+      : `${text.publishDays.replace('{days}', String(days))}: £${totalPrice}`;
 
   const handleOpenFilePicker = () => {
     fileInputRef.current?.click();
@@ -123,22 +710,22 @@ export default function NewDealPage() {
 
   const handleOpenPayment = () => {
     if (!discountTitle.trim()) {
-      alert('Введите название скидки');
+      alert(text.enterDiscountTitle);
       return;
     }
 
     if (!discountPercent.trim()) {
-      alert('Введите размер скидки');
+      alert(text.enterDiscountPercent);
       return;
     }
 
     if (!description.trim()) {
-      alert('Введите описание');
+      alert(text.enterDescription);
       return;
     }
 
     if (!photoName.trim()) {
-      alert('Добавьте фото');
+      alert(text.addPhotoAlert);
       return;
     }
 
@@ -202,7 +789,7 @@ export default function NewDealPage() {
                   lineHeight: 1.1,
                 }}
               >
-                Добавить скидку дня
+                {text.pageTitle}
               </div>
 
               <div
@@ -214,7 +801,7 @@ export default function NewDealPage() {
                   fontWeight: 700,
                 }}
               >
-                Создайте уникальное предложение только на сегодня.
+                {text.pageSubtitle}
               </div>
             </div>
           </div>
@@ -235,13 +822,13 @@ export default function NewDealPage() {
                 marginBottom: 12,
               }}
             >
-              Название скидки <span style={{ color: '#ef4444' }}>*</span>
+              {text.discountTitle} <span style={{ color: '#ef4444' }}>*</span>
             </div>
 
             <input
               value={discountTitle}
               onChange={(e) => setDiscountTitle(e.target.value)}
-              placeholder="Введите название скидки"
+              placeholder={text.discountTitlePlaceholder}
               style={{
                 width: '100%',
                 height: 58,
@@ -273,7 +860,7 @@ export default function NewDealPage() {
                     color: '#17130f',
                   }}
                 >
-                  Размер скидки <span style={{ color: '#ef4444' }}>*</span>
+                  {text.discountPercent} <span style={{ color: '#ef4444' }}>*</span>
                 </div>
 
                 <div
@@ -284,7 +871,7 @@ export default function NewDealPage() {
                     fontWeight: 700,
                   }}
                 >
-                  Только сегодня
+                  {text.onlyToday}
                 </div>
               </div>
 
@@ -316,7 +903,7 @@ export default function NewDealPage() {
                     textAlign: 'center',
                   }}
                 >
-                  Только сегодня
+                  {text.onlyToday}
                 </div>
               </div>
 
@@ -352,13 +939,13 @@ export default function NewDealPage() {
                 marginBottom: 12,
               }}
             >
-              Описание
+              {text.description}
             </div>
 
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Введите описание..."
+              placeholder={text.descriptionPlaceholder}
               rows={4}
               style={{
                 width: '100%',
@@ -393,7 +980,7 @@ export default function NewDealPage() {
                 marginBottom: 14,
               }}
             >
-              Выбрать количество дней
+              {text.chooseDays}
             </div>
 
             <div
@@ -521,7 +1108,7 @@ export default function NewDealPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    OK
+                    {text.ok}
                   </button>
                 </div>
               </div>
@@ -545,7 +1132,7 @@ export default function NewDealPage() {
                 marginBottom: 8,
               }}
             >
-              Фото
+              {text.photo}
             </div>
 
             <div
@@ -557,7 +1144,7 @@ export default function NewDealPage() {
                 marginBottom: 14,
               }}
             >
-              Добавьте фото для привлечения внимания
+              {text.photoHint}
             </div>
 
             <input
@@ -613,7 +1200,7 @@ export default function NewDealPage() {
                       color: '#2f8c67',
                     }}
                   >
-                    Добавить фото
+                    {text.addPhoto}
                   </div>
 
                   <div
@@ -696,7 +1283,7 @@ export default function NewDealPage() {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      Фото добавлено
+                      {text.photoAdded}
                     </div>
 
                     <div
@@ -730,7 +1317,7 @@ export default function NewDealPage() {
                       flexShrink: 0,
                     }}
                   >
-                    Заменить
+                    {text.replacePhoto}
                   </button>
                 </div>
               </div>
@@ -754,7 +1341,7 @@ export default function NewDealPage() {
               boxShadow: '0 6px 0 rgba(17,17,17,0.08)',
             }}
           >
-            {publishText}
+            {publishText} · £{totalPrice}
           </button>
 
           <div
@@ -780,7 +1367,7 @@ export default function NewDealPage() {
                   fontWeight: 900,
                 }}
               >
-                {value} {value === 1 ? 'день' : value < 5 ? 'дня' : 'дней'} за £{value}
+                {value} {getDayWord(value, language, text)} £{value}
               </div>
             ))}
           </div>
@@ -799,7 +1386,7 @@ export default function NewDealPage() {
                 textAlign: 'center',
               }}
             >
-              Готово
+              {text.done}
             </div>
           ) : null}
         </div>
@@ -840,7 +1427,7 @@ export default function NewDealPage() {
                 color: '#17130f',
               }}
             >
-              Выберите способ оплаты
+              {text.choosePaymentMethod}
             </div>
 
             <div
@@ -853,7 +1440,7 @@ export default function NewDealPage() {
                 lineHeight: 1.5,
               }}
             >
-              Доступны все способы оплаты MapBook
+              {text.paymentMethodsHint}
             </div>
 
             <div
@@ -876,7 +1463,7 @@ export default function NewDealPage() {
                   color: '#17130f',
                 }}
               >
-                Итого к оплате
+                {text.totalToPay}
               </div>
 
               <div
@@ -995,7 +1582,7 @@ export default function NewDealPage() {
                 fontWeight: 900,
               }}
             >
-              Выбрано: {selectedPaymentData?.title}
+              {text.selected}: {selectedPaymentData?.title}
             </div>
 
             <div
@@ -1020,7 +1607,7 @@ export default function NewDealPage() {
                   cursor: 'pointer',
                 }}
               >
-                Отмена
+                {text.cancel}
               </button>
 
               <button
@@ -1037,7 +1624,7 @@ export default function NewDealPage() {
                   cursor: 'pointer',
                 }}
               >
-                Оплатить £{totalPrice}
+                {text.pay} £{totalPrice}
               </button>
             </div>
           </div>
