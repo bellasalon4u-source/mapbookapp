@@ -295,7 +295,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       RU: 'Питомцы',
       CZ: 'Mazlíčci',
       DE: 'Haustiere',
-      PL: 'Zwierzęта',
+      PL: 'Zwierzęta',
     },
     fashion: {
       EN: 'Fashion',
