@@ -255,6 +255,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Beauty',
       PL: 'Uroda',
       UA: 'Краса',
+      IT: 'Bellezza',
+      FR: 'Beauté',
+      AR: 'الجمال',
     },
     barber: {
       EN: 'Barber',
@@ -264,6 +267,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Barber',
       PL: 'Barber',
       UA: 'Барбер',
+      IT: 'Barbiere',
+      FR: 'Barbier',
+      AR: 'حلاق',
     },
     wellness: {
       EN: 'Wellness',
@@ -273,6 +279,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Wellness',
       PL: 'Wellness',
       UA: 'Велнес',
+      IT: 'Benessere',
+      FR: 'Bien-être',
+      AR: 'العافية',
     },
     home: {
       EN: 'Home',
@@ -282,6 +291,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Zuhause',
       PL: 'Dom',
       UA: 'Дім',
+      IT: 'Casa',
+      FR: 'Maison',
+      AR: 'المنزل',
     },
     repairs: {
       EN: 'Repairs',
@@ -291,6 +303,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Reparaturen',
       PL: 'Naprawy',
       UA: 'Ремонт',
+      IT: 'Riparazioni',
+      FR: 'Réparations',
+      AR: 'إصلاحات',
     },
     tech: {
       EN: 'Tech',
@@ -300,6 +315,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Technik',
       PL: 'Technika',
       UA: 'Техніка',
+      IT: 'Tech',
+      FR: 'Tech',
+      AR: 'تقنية',
     },
     pets: {
       EN: 'Pets',
@@ -309,6 +327,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Haustiere',
       PL: 'Zwierzęta',
       UA: 'Улюбленці',
+      IT: 'Animali',
+      FR: 'Animaux',
+      AR: 'الحيوانات',
     },
     fashion: {
       EN: 'Fashion',
@@ -318,6 +339,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Mode',
       PL: 'Moda',
       UA: 'Мода',
+      IT: 'Moda',
+      FR: 'Mode',
+      AR: 'الموضة',
     },
     auto: {
       EN: 'Auto',
@@ -327,6 +351,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Auto',
       PL: 'Auto',
       UA: 'Авто',
+      IT: 'Auto',
+      FR: 'Auto',
+      AR: 'السيارات',
     },
     moving: {
       EN: 'Moving',
@@ -336,6 +363,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Umzug',
       PL: 'Przeprowadzka',
       UA: 'Переїзд',
+      IT: 'Trasloco',
+      FR: 'Déménagement',
+      AR: 'الانتقال',
     },
     fitness: {
       EN: 'Fitness',
@@ -345,6 +375,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Fitness',
       PL: 'Fitness',
       UA: 'Фітнес',
+      IT: 'Fitness',
+      FR: 'Fitness',
+      AR: 'لياقة',
     },
     education: {
       EN: 'Education',
@@ -354,6 +387,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Bildung',
       PL: 'Edukacja',
       UA: 'Освіта',
+      IT: 'Educazione',
+      FR: 'Éducation',
+      AR: 'التعليم',
     },
     events: {
       EN: 'Events',
@@ -363,6 +399,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Events',
       PL: 'Wydarzenia',
       UA: 'Події',
+      IT: 'Eventi',
+      FR: 'Événements',
+      AR: 'الفعاليات',
     },
     activities: {
       EN: 'Activities',
@@ -372,6 +411,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Aktivitäten',
       PL: 'Aktywności',
       UA: 'Активності',
+      IT: 'Attività',
+      FR: 'Activités',
+      AR: 'الأنشطة',
     },
     creative: {
       EN: 'Creative',
@@ -381,6 +423,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Kreativ',
       PL: 'Kreatywne',
       UA: 'Креатив',
+      IT: 'Creativo',
+      FR: 'Créatif',
+      AR: 'إبداعي',
     },
   };
 
@@ -907,13 +952,13 @@ export default function HomePage() {
           borderImage: `${borderGradient} 1`,
         }}
       >
-        <section style={{ padding: '16px 12px 0' }}>
+        <section style={{ padding: '10px 12px 0' }}>
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
                 background: '#ffffff',
-                borderRadius: 34,
-                padding: 14,
+                borderRadius: 28,
+                padding: 12,
                 border: '2px solid #111111',
               }}
             >
@@ -921,13 +966,13 @@ export default function HomePage() {
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
-                  gap: 12,
+                  gap: 10,
                   alignItems: 'center',
                 }}
               >
                 <div
                   style={{
-                    height: 54,
+                    height: 48,
                     borderRadius: 999,
                     border: '2px solid #111111',
                     background: '#fff',
@@ -938,7 +983,7 @@ export default function HomePage() {
                     minWidth: 0,
                   }}
                 >
-                  <span style={{ fontSize: 28, lineHeight: 1 }}>🔎</span>
+                  <span style={{ fontSize: 24, lineHeight: 1 }}>🔎</span>
                   <input
                     value={search}
                     onFocus={() => setSearchOpen(true)}
@@ -970,7 +1015,7 @@ export default function HomePage() {
                       border: 'none',
                       outline: 'none',
                       background: 'transparent',
-                      fontSize: 15,
+                      fontSize: 14,
                       color: '#2b2f36',
                       fontWeight: 700,
                     }}
@@ -999,34 +1044,34 @@ export default function HomePage() {
                 <button
                   onClick={() => router.push('/profile/language-region')}
                   style={{
-                    height: 54,
+                    height: 48,
                     borderRadius: 999,
                     border: '2px solid #111111',
                     background: '#fff',
                     color: '#111111',
-                    padding: '0 18px',
-                    fontSize: 18,
+                    padding: '0 16px',
+                    fontSize: 16,
                     fontWeight: 900,
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 10,
+                    gap: 8,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  <span style={{ fontSize: 24 }}>{languageFlag(language)}</span>
+                  <span style={{ fontSize: 22 }}>{languageFlag(language)}</span>
                   <span>{language}</span>
                 </button>
               </div>
 
               <div
                 style={{
-                  marginTop: 14,
+                  marginTop: 12,
                   display: 'grid',
                   gridTemplateColumns: '1fr auto auto auto',
                   alignItems: 'center',
-                  gap: 12,
+                  gap: 10,
                 }}
               >
                 <div
@@ -1035,7 +1080,7 @@ export default function HomePage() {
                     alignItems: 'center',
                     gap: 8,
                     minWidth: 0,
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: 900,
                     color: '#1f2430',
                   }}
@@ -1060,9 +1105,9 @@ export default function HomePage() {
                     padding: 0,
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 5,
                     cursor: 'pointer',
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 900,
                     color: '#ff4d4f',
                     whiteSpace: 'nowrap',
@@ -1080,9 +1125,9 @@ export default function HomePage() {
                     padding: 0,
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 5,
                     cursor: 'pointer',
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 900,
                     color: '#ff4d4f',
                     whiteSpace: 'nowrap',
@@ -1096,8 +1141,8 @@ export default function HomePage() {
                   <button
                     onClick={() => router.push('/profile')}
                     style={{
-                      width: 42,
-                      height: 42,
+                      width: 38,
+                      height: 38,
                       borderRadius: 999,
                       border: '2px solid #111111',
                       background: '#fff',
@@ -1125,8 +1170,8 @@ export default function HomePage() {
                         position: 'absolute',
                         top: 1,
                         right: 1,
-                        width: 10,
-                        height: 10,
+                        width: 9,
+                        height: 9,
                         borderRadius: '50%',
                         background: '#ff3b30',
                         border: '2px solid #ffffff',
@@ -1146,7 +1191,7 @@ export default function HomePage() {
                   top: 'calc(100% + 8px)',
                   background: 'rgba(255,255,255,0.98)',
                   border: '2px solid #111111',
-                  borderRadius: 24,
+                  borderRadius: 22,
                   boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
                   padding: 12,
                   maxHeight: 380,
@@ -1445,7 +1490,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '12px 0 0' }}>
+        <section style={{ padding: '10px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1464,20 +1509,20 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '12px 12px 0' }}>
+        <section style={{ padding: '10px 12px 0' }}>
           <div
             style={{
               border: '2px solid #111111',
-              borderRadius: 34,
+              borderRadius: 28,
               background: '#fff',
-              padding: 18,
+              padding: 14,
             }}
           >
             <div
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: 14,
+                gap: 12,
               }}
             >
               <button
@@ -1485,30 +1530,30 @@ export default function HomePage() {
                   setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))
                 }
                 style={{
-                  minHeight: 78,
+                  minHeight: 64,
                   border: '2px solid #111111',
-                  borderRadius: 28,
-                  background: likedFilterMode === 'category' ? '#3d6dcc' : '#3d6dcc',
+                  borderRadius: 24,
+                  background: '#3d6dcc',
                   color: '#fff',
                   cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 10,
-                  padding: '0 16px',
+                  gap: 8,
+                  padding: '0 14px',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 8,
                     minWidth: 0,
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 900,
                   }}
                 >
-                  <span style={{ color: '#ff3355', fontSize: 24 }}>♥</span>
+                  <span style={{ color: '#ff3355', fontSize: 20 }}>♥</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1522,8 +1567,8 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    width: 48,
-                    height: 48,
+                    width: 42,
+                    height: 42,
                     borderRadius: 999,
                     border: '2px solid #111111',
                     background: '#fff',
@@ -1531,7 +1576,7 @@ export default function HomePage() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: 900,
                     flexShrink: 0,
                   }}
@@ -1545,30 +1590,30 @@ export default function HomePage() {
                   setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))
                 }
                 style={{
-                  minHeight: 78,
+                  minHeight: 64,
                   border: '2px solid #111111',
-                  borderRadius: 28,
+                  borderRadius: 24,
                   background: '#ead98d',
                   color: '#111111',
                   cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 10,
-                  padding: '0 16px',
+                  gap: 8,
+                  padding: '0 14px',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 8,
                     minWidth: 0,
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 900,
                   }}
                 >
-                  <span style={{ fontSize: 22 }}>🪙</span>
+                  <span style={{ fontSize: 18 }}>🪙</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1586,8 +1631,8 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    width: 48,
-                    height: 48,
+                    width: 42,
+                    height: 42,
                     borderRadius: 999,
                     border: '2px solid #111111',
                     background: '#fff',
@@ -1595,7 +1640,7 @@ export default function HomePage() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: 900,
                     flexShrink: 0,
                   }}
@@ -1607,30 +1652,30 @@ export default function HomePage() {
               <button
                 onClick={() => setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
                 style={{
-                  minHeight: 78,
+                  minHeight: 64,
                   border: '2px solid #111111',
-                  borderRadius: 28,
+                  borderRadius: 24,
                   background: '#3d6dcc',
                   color: '#fff',
                   cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 10,
-                  padding: '0 16px',
+                  gap: 8,
+                  padding: '0 14px',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 8,
                     minWidth: 0,
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 900,
                   }}
                 >
-                  <span style={{ color: '#ff3355', fontSize: 24 }}>♥</span>
+                  <span style={{ color: '#ff3355', fontSize: 20 }}>♥</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1648,8 +1693,8 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    width: 48,
-                    height: 48,
+                    width: 42,
+                    height: 42,
                     borderRadius: 999,
                     border: '2px solid #111111',
                     background: '#fff',
@@ -1657,7 +1702,7 @@ export default function HomePage() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: 900,
                     flexShrink: 0,
                   }}
@@ -1669,30 +1714,30 @@ export default function HomePage() {
               <button
                 onClick={() => setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
                 style={{
-                  minHeight: 78,
+                  minHeight: 64,
                   border: '2px solid #111111',
-                  borderRadius: 28,
+                  borderRadius: 24,
                   background: '#ead98d',
                   color: '#111111',
                   cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 10,
-                  padding: '0 16px',
+                  gap: 8,
+                  padding: '0 14px',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 8,
                     minWidth: 0,
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 900,
                   }}
                 >
-                  <span style={{ fontSize: 22 }}>🪙</span>
+                  <span style={{ fontSize: 18 }}>🪙</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1710,8 +1755,8 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    width: 48,
-                    height: 48,
+                    width: 42,
+                    height: 42,
                     borderRadius: 999,
                     border: '2px solid #111111',
                     background: '#fff',
@@ -1719,7 +1764,7 @@ export default function HomePage() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: 900,
                     flexShrink: 0,
                   }}
@@ -1735,8 +1780,8 @@ export default function HomePage() {
           <div
             style={{
               background: '#ffffff',
-              borderTop: '2px solid #111111',
-              borderBottom: '2px solid #111111',
+              borderTop: '1px solid #e7e1d8',
+              borderBottom: '1px solid #e7e1d8',
             }}
           >
             <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
@@ -1769,17 +1814,17 @@ export default function HomePage() {
         </section>
 
         {filteredPromotions.length > 0 && (
-          <section style={{ padding: '14px 0 0' }}>
+          <section style={{ padding: '12px 0 0' }}>
             <div
               style={{
                 background: '#ece7dd',
-                borderTop: '2px solid rgba(0,0,0,0.08)',
-                padding: '0 0 14px',
+                borderTop: '1px solid rgba(0,0,0,0.08)',
+                padding: '0 0 12px',
               }}
             >
               <div
                 style={{
-                  padding: '14px 14px 0',
+                  padding: '12px 14px 0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -1805,7 +1850,7 @@ export default function HomePage() {
                   style={{
                     border: 'none',
                     background: 'transparent',
-                    fontSize: 26,
+                    fontSize: 24,
                     color: '#8d918f',
                     lineHeight: 1,
                     cursor: 'pointer',
@@ -1820,7 +1865,7 @@ export default function HomePage() {
                 style={{
                   marginTop: 12,
                   display: 'flex',
-                  gap: 14,
+                  gap: 12,
                   overflowX: 'auto',
                   overflowY: 'hidden',
                   padding: '0 14px 6px',
@@ -1837,9 +1882,9 @@ export default function HomePage() {
                     }}
                     data-promo-id={promo.id}
                     style={{
-                      minWidth: 320,
-                      maxWidth: 320,
-                      borderRadius: 34,
+                      minWidth: 260,
+                      maxWidth: 260,
+                      borderRadius: 28,
                       border: '2px solid #111111',
                       background: '#fff',
                       overflow: 'hidden',
@@ -1864,7 +1909,7 @@ export default function HomePage() {
                           alt={promo.title}
                           style={{
                             width: '100%',
-                            height: 210,
+                            height: 170,
                             objectFit: 'cover',
                             display: 'block',
                           }}
@@ -1873,12 +1918,12 @@ export default function HomePage() {
                         <div
                           style={{
                             position: 'absolute',
-                            top: 14,
-                            left: 14,
+                            top: 12,
+                            left: 12,
                             background: '#fff',
                             color: '#ff4f93',
                             borderRadius: 999,
-                            padding: '10px 16px',
+                            padding: '8px 14px',
                             fontSize: 12,
                             fontWeight: 900,
                             border: '2px solid #111111',
@@ -1888,10 +1933,10 @@ export default function HomePage() {
                         </div>
                       </div>
 
-                      <div style={{ padding: '16px 16px 10px' }}>
+                      <div style={{ padding: '14px 16px 8px' }}>
                         <div
                           style={{
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: 900,
                             color: '#1f2430',
                             lineHeight: 1.2,
@@ -1902,8 +1947,8 @@ export default function HomePage() {
 
                         <div
                           style={{
-                            marginTop: 10,
-                            fontSize: 14,
+                            marginTop: 8,
+                            fontSize: 13,
                             fontWeight: 700,
                             color: '#6b7280',
                             lineHeight: 1.45,
@@ -1919,8 +1964,8 @@ export default function HomePage() {
 
                         <div
                           style={{
-                            marginTop: 12,
-                            fontSize: 13,
+                            marginTop: 10,
+                            fontSize: 12,
                             fontWeight: 900,
                             color: '#ff4f93',
                           }}
@@ -1938,19 +1983,19 @@ export default function HomePage() {
                       style={{
                         display: 'grid',
                         gridTemplateColumns: '1fr 1fr',
-                        gap: 14,
-                        padding: '0 16px 18px',
+                        gap: 12,
+                        padding: '0 16px 16px',
                       }}
                     >
                       <button
                         onClick={() => openPromotionView(promo)}
                         style={{
-                          height: 54,
-                          borderRadius: 20,
+                          height: 48,
+                          borderRadius: 18,
                           border: '2px solid #111111',
                           background: '#1f4da8',
                           color: '#fff',
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: 900,
                           cursor: 'pointer',
                         }}
@@ -1961,12 +2006,12 @@ export default function HomePage() {
                       <button
                         onClick={() => openPromotionBooking(promo)}
                         style={{
-                          height: 54,
-                          borderRadius: 20,
+                          height: 48,
+                          borderRadius: 18,
                           border: '2px solid #111111',
                           background: '#ff5252',
                           color: '#fff',
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: 900,
                           cursor: 'pointer',
                         }}
