@@ -8,20 +8,15 @@ import {
   subscribeToLanguageChange,
   type AppLanguage,
 } from '../../services/i18n';
+import {
+  getBookings,
+  subscribeToBookingsStore,
+  updateBookingStatus,
+  type BookingItem,
+  type BookingStatus,
+} from '../services/bookingsStore';
 
-type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 type BookingTab = 'upcoming' | 'completed' | 'cancelled';
-
-type BookingItem = {
-  id: string;
-  title: string;
-  place: string;
-  date: string;
-  time: string;
-  status: BookingStatus;
-  image: string;
-  price: string;
-};
 
 const pageTexts = {
   EN: {
@@ -45,6 +40,9 @@ const pageTexts = {
     total: 'Total',
     bookingOverview: 'Booking overview',
     activeNow: 'Active now',
+    menuClose: 'Close',
+    menuCancel: 'Cancel booking',
+    menuOpenProfile: 'Open profile',
   },
   ES: {
     title: 'Mis reservas',
@@ -67,6 +65,9 @@ const pageTexts = {
     total: 'Total',
     bookingOverview: 'Resumen de reservas',
     activeNow: 'Activo ahora',
+    menuClose: 'Cerrar',
+    menuCancel: 'Cancelar reserva',
+    menuOpenProfile: 'Abrir perfil',
   },
   RU: {
     title: 'Мои бронирования',
@@ -89,6 +90,34 @@ const pageTexts = {
     total: 'Всего',
     bookingOverview: 'Обзор бронирований',
     activeNow: 'Активно сейчас',
+    menuClose: 'Закрыть',
+    menuCancel: 'Отменить бронь',
+    menuOpenProfile: 'Открыть профиль',
+  },
+  UA: {
+    title: 'Мої бронювання',
+    subtitle: 'Майбутні візити та історія бронювань',
+    upcoming: 'Майбутні',
+    completed: 'Завершені',
+    cancelled: 'Скасовані',
+    pending: 'В очікуванні',
+    confirmed: 'Підтверджено',
+    completedStatus: 'Завершено',
+    cancelledStatus: 'Скасовано',
+    serviceDetails: 'Деталі послуги',
+    cancelBooking: 'Скасувати бронювання',
+    rebook: 'Забронювати знову',
+    emptyUpcoming: 'Поки немає майбутніх бронювань',
+    emptyCompleted: 'Поки немає завершених бронювань',
+    emptyCancelled: 'Поки немає скасованих бронювань',
+    back: 'Назад',
+    home: 'Головна',
+    total: 'Усього',
+    bookingOverview: 'Огляд бронювань',
+    activeNow: 'Активно зараз',
+    menuClose: 'Закрити',
+    menuCancel: 'Скасувати бронювання',
+    menuOpenProfile: 'Відкрити профіль',
   },
   CZ: {
     title: 'Moje rezervace',
@@ -111,6 +140,9 @@ const pageTexts = {
     total: 'Celkem',
     bookingOverview: 'Přehled rezervací',
     activeNow: 'Aktivní nyní',
+    menuClose: 'Zavřít',
+    menuCancel: 'Zrušit rezervaci',
+    menuOpenProfile: 'Otevřít profil',
   },
   DE: {
     title: 'Meine Buchungen',
@@ -133,6 +165,9 @@ const pageTexts = {
     total: 'Gesamt',
     bookingOverview: 'Buchungsübersicht',
     activeNow: 'Jetzt aktiv',
+    menuClose: 'Schließen',
+    menuCancel: 'Buchung stornieren',
+    menuOpenProfile: 'Profil öffnen',
   },
   PL: {
     title: 'Moje rezerwacje',
@@ -155,58 +190,18 @@ const pageTexts = {
     total: 'Łącznie',
     bookingOverview: 'Przegląd rezerwacji',
     activeNow: 'Aktywne teraz',
+    menuClose: 'Zamknij',
+    menuCancel: 'Anuluj rezerwację',
+    menuOpenProfile: 'Otwórz profil',
   },
 } as const;
 
-const demoBookings: BookingItem[] = [
-  {
-    id: 'booking-1',
-    title: 'Brow Shape',
-    place: 'Camden Brows Bar',
-    date: '24 Apr 2026',
-    time: '12:00',
-    status: 'pending',
-    image:
-      'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=600&q=80',
-    price: '£28',
-  },
-  {
-    id: 'booking-2',
-    title: "Men's Haircut",
-    place: 'Soho Barber Club',
-    date: '27 Apr 2026',
-    time: '15:30',
-    status: 'confirmed',
-    image:
-      'https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=600&q=80',
-    price: '£25',
-  },
-  {
-    id: 'booking-3',
-    title: 'Relax Massage Session',
-    place: 'Mila Wellness',
-    date: '14 Apr 2026',
-    time: '18:00',
-    status: 'completed',
-    image:
-      'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=600&q=80',
-    price: '£45',
-  },
-  {
-    id: 'booking-4',
-    title: 'Nail Set',
-    place: 'Beauty Studio Rose',
-    date: '10 Apr 2026',
-    time: '11:15',
-    status: 'cancelled',
-    image:
-      'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=600&q=80',
-    price: '£32',
-  },
-];
-
 function getTexts(language: AppLanguage) {
   return pageTexts[language as keyof typeof pageTexts] || pageTexts.EN;
+}
+
+function formatPrice(price: number) {
+  return `£${price.toFixed(2)}`;
 }
 
 function getStatusMeta(status: BookingStatus, text: ReturnType<typeof getTexts>) {
@@ -218,7 +213,7 @@ function getStatusMeta(status: BookingStatus, text: ReturnType<typeof getTexts>)
     };
   }
 
-  if (status === 'confirmed') {
+  if (status === 'upcoming') {
     return {
       label: text.confirmed,
       bg: '#dff2e3',
@@ -243,34 +238,54 @@ function getStatusMeta(status: BookingStatus, text: ReturnType<typeof getTexts>)
 
 export default function BookingsPage() {
   const router = useRouter();
-  const [language, setLanguage] = useState<AppLanguage>('EN');
+
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [activeTab, setActiveTab] = useState<BookingTab>('upcoming');
+  const [bookings, setBookings] = useState<BookingItem[]>(getBookings());
+  const [menuBookingId, setMenuBookingId] = useState<string | null>(null);
 
   useEffect(() => {
-    setLanguage(getSavedLanguage());
+    const syncLanguage = () => {
+      setLanguage(getSavedLanguage());
+    };
 
-    const unsubscribe = subscribeToLanguageChange((nextLanguage) => {
+    const syncBookings = () => {
+      setBookings(getBookings());
+    };
+
+    syncLanguage();
+    syncBookings();
+
+    const unsubscribeLanguage = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
 
-    return () => unsubscribe();
+    const unsubscribeBookings = subscribeToBookingsStore(syncBookings);
+
+    window.addEventListener('focus', syncLanguage);
+
+    return () => {
+      unsubscribeLanguage();
+      unsubscribeBookings();
+      window.removeEventListener('focus', syncLanguage);
+    };
   }, []);
 
   const text = useMemo(() => getTexts(language), [language]);
 
   const filteredBookings = useMemo(() => {
     if (activeTab === 'upcoming') {
-      return demoBookings.filter(
-        (item) => item.status === 'pending' || item.status === 'confirmed'
+      return bookings.filter(
+        (item) => item.status === 'pending' || item.status === 'upcoming'
       );
     }
 
     if (activeTab === 'completed') {
-      return demoBookings.filter((item) => item.status === 'completed');
+      return bookings.filter((item) => item.status === 'completed');
     }
 
-    return demoBookings.filter((item) => item.status === 'cancelled');
-  }, [activeTab]);
+    return bookings.filter((item) => item.status === 'cancelled');
+  }, [activeTab, bookings]);
 
   const emptyText =
     activeTab === 'upcoming'
@@ -279,454 +294,597 @@ export default function BookingsPage() {
       ? text.emptyCompleted
       : text.emptyCancelled;
 
-  const activeNowCount = demoBookings.filter(
-    (item) => item.status === 'pending' || item.status === 'confirmed'
+  const activeNowCount = bookings.filter(
+    (item) => item.status === 'pending' || item.status === 'upcoming'
   ).length;
 
+  const selectedMenuBooking =
+    bookings.find((item) => item.id === menuBookingId) ?? null;
+
+  const handleOpenBookingDetails = (booking: BookingItem) => {
+    router.push(`/profile/bookings?booking=${booking.id}`);
+  };
+
+  const handleCancelBooking = (booking: BookingItem) => {
+    updateBookingStatus(booking.id, 'cancelled');
+    setMenuBookingId(null);
+  };
+
+  const handleRebook = (booking: BookingItem) => {
+    router.push(`/booking/${booking.masterId}`);
+  };
+
+  const handleOpenProfile = (booking: BookingItem) => {
+    router.push(`/master/${booking.masterId}`);
+  };
+
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        background: '#ffffff',
-        color: '#17130f',
-        paddingBottom: 110,
-        fontFamily: 'Arial, sans-serif',
-      }}
-    >
-      <div style={{ maxWidth: 430, margin: '0 auto', padding: '20px 16px 110px' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '54px 1fr 54px',
-            alignItems: 'center',
-            gap: 12,
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => router.back()}
-            aria-label={text.back}
-            style={{
-              width: 54,
-              height: 54,
-              borderRadius: 999,
-              border: '2px solid #111111',
-              background: '#fff',
-              fontSize: 26,
-              color: '#17130f',
-              fontWeight: 900,
-              cursor: 'pointer',
-            }}
-          >
-            ←
-          </button>
-
-          <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                fontSize: 22,
-                fontWeight: 900,
-                color: '#17130f',
-                lineHeight: 1.15,
-              }}
-            >
-              {text.title}
-            </div>
-            <div
-              style={{
-                marginTop: 4,
-                fontSize: 13,
-                color: '#7b7268',
-                fontWeight: 700,
-                lineHeight: 1.35,
-              }}
-            >
-              {text.subtitle}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => router.push('/')}
-            aria-label={text.home}
-            style={{
-              width: 54,
-              height: 54,
-              borderRadius: 999,
-              border: '2px solid #111111',
-              background: '#fff',
-              fontSize: 22,
-              color: '#17130f',
-              fontWeight: 900,
-              cursor: 'pointer',
-            }}
-          >
-            ⌂
-          </button>
-        </div>
-
-        <section style={{ marginTop: 18 }}>
+    <>
+      <main
+        style={{
+          minHeight: '100vh',
+          background: '#ffffff',
+          color: '#17130f',
+          paddingBottom: 110,
+          fontFamily: 'Arial, sans-serif',
+        }}
+      >
+        <div style={{ maxWidth: 430, margin: '0 auto', padding: '20px 16px 110px' }}>
           <div
             style={{
-              borderRadius: 30,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
+              display: 'grid',
+              gridTemplateColumns: '54px 1fr 54px',
+              alignItems: 'center',
+              gap: 12,
             }}
           >
+            <button
+              type="button"
+              onClick={() => router.back()}
+              aria-label={text.back}
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 999,
+                border: '2px solid #111111',
+                background: '#fff',
+                fontSize: 26,
+                color: '#17130f',
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              ←
+            </button>
+
+            <div style={{ textAlign: 'center' }}>
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: '#17130f',
+                  lineHeight: 1.15,
+                }}
+              >
+                {text.title}
+              </div>
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 13,
+                  color: '#7b7268',
+                  fontWeight: 700,
+                  lineHeight: 1.35,
+                }}
+              >
+                {text.subtitle}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => router.push('/')}
+              aria-label={text.home}
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 999,
+                border: '2px solid #111111',
+                background: '#fff',
+                fontSize: 22,
+                color: '#17130f',
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              ⌂
+            </button>
+          </div>
+
+          <section style={{ marginTop: 18 }}>
             <div
               style={{
-                borderRadius: 24,
+                borderRadius: 30,
                 border: '2px solid #111111',
-                background: '#2f241c',
-                color: '#fff',
+                background: '#fff',
                 padding: 18,
               }}
             >
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '56px 1fr',
-                  gap: 14,
-                  alignItems: 'center',
+                  borderRadius: 24,
+                  border: '2px solid #111111',
+                  background: '#2f241c',
+                  color: '#fff',
+                  padding: 18,
                 }}
               >
                 <div
                   style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: '#fff1f7',
-                    color: '#ff4fa0',
+                    display: 'grid',
+                    gridTemplateColumns: '56px 1fr',
+                    gap: 14,
+                    alignItems: 'center',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 18,
+                      border: '2px solid #111111',
+                      background: '#fff1f7',
+                      color: '#ff4fa0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 26,
+                    }}
+                  >
+                    📅
+                  </div>
+
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 20,
+                        fontWeight: 900,
+                        color: '#ffffff',
+                      }}
+                    >
+                      {text.bookingOverview}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 6,
+                        fontSize: 14,
+                        lineHeight: 1.5,
+                        color: '#ddd2c6',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {text.title}
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 14,
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 26,
+                    flexWrap: 'wrap',
+                    gap: 10,
                   }}
                 >
-                  📅
-                </div>
-
-                <div>
                   <div
                     style={{
-                      fontSize: 20,
+                      minHeight: 40,
+                      padding: '0 14px',
+                      borderRadius: 999,
+                      border: '2px solid #111111',
+                      background: '#dff2e3',
+                      color: '#1d7a38',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      fontSize: 13,
                       fontWeight: 900,
-                      color: '#ffffff',
                     }}
                   >
-                    {text.bookingOverview}
+                    {text.activeNow}: {activeNowCount}
                   </div>
+
                   <div
                     style={{
-                      marginTop: 6,
-                      fontSize: 14,
-                      lineHeight: 1.5,
-                      color: '#ddd2c6',
-                      fontWeight: 700,
+                      minHeight: 40,
+                      padding: '0 14px',
+                      borderRadius: 999,
+                      border: '2px solid #111111',
+                      background: '#fff',
+                      color: '#17130f',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      fontSize: 13,
+                      fontWeight: 900,
                     }}
                   >
-                    {text.title}
+                    {text.total}: {bookings.length}
                   </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  marginTop: 14,
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 10,
-                }}
-              >
-                <div
-                  style={{
-                    minHeight: 40,
-                    padding: '0 14px',
-                    borderRadius: 999,
-                    border: '2px solid #111111',
-                    background: '#dff2e3',
-                    color: '#1d7a38',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    fontSize: 13,
-                    fontWeight: 900,
-                  }}
-                >
-                  {text.activeNow}: {activeNowCount}
-                </div>
-
-                <div
-                  style={{
-                    minHeight: 40,
-                    padding: '0 14px',
-                    borderRadius: 999,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    color: '#17130f',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    fontSize: 13,
-                    fontWeight: 900,
-                  }}
-                >
-                  {text.total}: {demoBookings.length}
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section style={{ marginTop: 16 }}>
+          <section style={{ marginTop: 16 }}>
+            <div
+              style={{
+                background: '#fff',
+                border: '2px solid #111111',
+                borderRadius: 26,
+                padding: 8,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: 8,
+              }}
+            >
+              {([
+                ['upcoming', text.upcoming],
+                ['completed', text.completed],
+                ['cancelled', text.cancelled],
+              ] as const).map(([tabKey, label]) => {
+                const active = activeTab === tabKey;
+
+                return (
+                  <button
+                    key={tabKey}
+                    type="button"
+                    onClick={() => setActiveTab(tabKey)}
+                    style={{
+                      minHeight: 52,
+                      borderRadius: 18,
+                      border: '2px solid #111111',
+                      background: active ? '#17130f' : '#fff',
+                      color: active ? '#fff' : '#17130f',
+                      fontSize: 15,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section style={{ marginTop: 18 }}>
+            {filteredBookings.length === 0 ? (
+              <div
+                style={{
+                  background: '#fff',
+                  border: '2px solid #111111',
+                  borderRadius: 28,
+                  padding: '28px 20px',
+                  textAlign: 'center',
+                  fontSize: 16,
+                  fontWeight: 800,
+                  color: '#6f7882',
+                }}
+              >
+                {emptyText}
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gap: 16 }}>
+                {filteredBookings.map((booking) => {
+                  const statusMeta = getStatusMeta(booking.status, text);
+                  const showCancelButton =
+                    booking.status === 'pending' || booking.status === 'upcoming';
+
+                  return (
+                    <article
+                      key={booking.id}
+                      style={{
+                        background: '#fff',
+                        border: '2px solid #111111',
+                        borderRadius: 30,
+                        padding: 18,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          gap: 12,
+                          marginBottom: 16,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            minHeight: 42,
+                            padding: '0 16px',
+                            borderRadius: 999,
+                            border: '2px solid #111111',
+                            background: statusMeta.bg,
+                            color: statusMeta.color,
+                            fontSize: 13,
+                            fontWeight: 900,
+                          }}
+                        >
+                          {statusMeta.label}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setMenuBookingId(booking.id)}
+                          style={{
+                            border: '2px solid #111111',
+                            background: '#fff',
+                            color: '#17130f',
+                            width: 42,
+                            height: 42,
+                            borderRadius: 999,
+                            fontSize: 20,
+                            lineHeight: 1,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          ⋯
+                        </button>
+                      </div>
+
+                      <div
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: '96px 1fr',
+                          gap: 16,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <img
+                          src={
+                            booking.masterAvatar ||
+                            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80'
+                          }
+                          alt={booking.masterName}
+                          style={{
+                            width: 96,
+                            height: 96,
+                            objectFit: 'cover',
+                            borderRadius: 22,
+                            border: '2px solid #111111',
+                            display: 'block',
+                          }}
+                        />
+
+                        <div>
+                          <div
+                            style={{
+                              fontSize: 20,
+                              fontWeight: 900,
+                              color: '#17130f',
+                              lineHeight: 1.2,
+                            }}
+                          >
+                            {booking.serviceName}
+                          </div>
+
+                          <div
+                            style={{
+                              marginTop: 8,
+                              fontSize: 15,
+                              fontWeight: 700,
+                              color: '#6d6d6d',
+                              lineHeight: 1.35,
+                            }}
+                          >
+                            {booking.masterName}
+                          </div>
+
+                          <div
+                            style={{
+                              marginTop: 8,
+                              fontSize: 15,
+                              fontWeight: 700,
+                              color: '#5c6470',
+                              lineHeight: 1.35,
+                            }}
+                          >
+                            {booking.dateLabel}
+                          </div>
+
+                          <div
+                            style={{
+                              marginTop: 8,
+                              fontSize: 17,
+                              fontWeight: 900,
+                              color: '#17130f',
+                            }}
+                          >
+                            {formatPrice(booking.price)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gap: 12, marginTop: 18 }}>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenBookingDetails(booking)}
+                          style={{
+                            minHeight: 56,
+                            borderRadius: 22,
+                            border: '2px solid #111111',
+                            background: '#ffffff',
+                            color: '#17130f',
+                            fontSize: 16,
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {text.serviceDetails}
+                        </button>
+
+                        {showCancelButton ? (
+                          <button
+                            type="button"
+                            onClick={() => handleCancelBooking(booking)}
+                            style={{
+                              minHeight: 56,
+                              borderRadius: 22,
+                              border: '2px solid #111111',
+                              background: '#fdeaea',
+                              color: '#c74343',
+                              fontSize: 16,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {text.cancelBooking}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleRebook(booking)}
+                            style={{
+                              minHeight: 56,
+                              borderRadius: 22,
+                              border: '2px solid #111111',
+                              background: '#eaf2ff',
+                              color: '#1f4fa8',
+                              fontSize: 16,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {text.rebook}
+                          </button>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
+
+        <BottomNav />
+      </main>
+
+      {selectedMenuBooking ? (
+        <div
+          onClick={() => setMenuBookingId(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(17,17,17,0.22)',
+            zIndex: 200,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+          }}
+        >
           <div
+            onClick={(e) => e.stopPropagation()}
             style={{
-              background: '#fff',
-              border: '2px solid #111111',
-              borderRadius: 26,
-              padding: 8,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              gap: 8,
+              width: '100%',
+              maxWidth: 430,
+              padding: '0 16px calc(18px + env(safe-area-inset-bottom))',
+              boxSizing: 'border-box',
             }}
           >
-            {([
-              ['upcoming', text.upcoming],
-              ['completed', text.completed],
-              ['cancelled', text.cancelled],
-            ] as const).map(([tabKey, label]) => {
-              const active = activeTab === tabKey;
-
-              return (
-                <button
-                  key={tabKey}
-                  type="button"
-                  onClick={() => setActiveTab(tabKey)}
-                  style={{
-                    minHeight: 52,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: active ? '#17130f' : '#fff',
-                    color: active ? '#fff' : '#17130f',
-                    fontSize: 15,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        <section style={{ marginTop: 18 }}>
-          {filteredBookings.length === 0 ? (
             <div
               style={{
                 background: '#fff',
                 border: '2px solid #111111',
                 borderRadius: 28,
-                padding: '28px 20px',
-                textAlign: 'center',
-                fontSize: 16,
-                fontWeight: 800,
-                color: '#6f7882',
+                padding: 14,
+                display: 'grid',
+                gap: 10,
+                boxShadow: '0 20px 40px rgba(0,0,0,0.18)',
               }}
             >
-              {emptyText}
+              <button
+                type="button"
+                onClick={() => {
+                  handleOpenBookingDetails(selectedMenuBooking);
+                  setMenuBookingId(null);
+                }}
+                style={{
+                  minHeight: 54,
+                  borderRadius: 20,
+                  border: '2px solid #111111',
+                  background: '#ffffff',
+                  color: '#17130f',
+                  fontSize: 16,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.serviceDetails}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  handleOpenProfile(selectedMenuBooking);
+                  setMenuBookingId(null);
+                }}
+                style={{
+                  minHeight: 54,
+                  borderRadius: 20,
+                  border: '2px solid #111111',
+                  background: '#eef3ff',
+                  color: '#2959b7',
+                  fontSize: 16,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.menuOpenProfile}
+              </button>
+
+              {(selectedMenuBooking.status === 'pending' ||
+                selectedMenuBooking.status === 'upcoming') && (
+                <button
+                  type="button"
+                  onClick={() => handleCancelBooking(selectedMenuBooking)}
+                  style={{
+                    minHeight: 54,
+                    borderRadius: 20,
+                    border: '2px solid #111111',
+                    background: '#fdeaea',
+                    color: '#c74343',
+                    fontSize: 16,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.menuCancel}
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setMenuBookingId(null)}
+                style={{
+                  minHeight: 54,
+                  borderRadius: 20,
+                  border: '2px solid #111111',
+                  background: '#17130f',
+                  color: '#ffffff',
+                  fontSize: 16,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.menuClose}
+              </button>
             </div>
-          ) : (
-            <div style={{ display: 'grid', gap: 16 }}>
-              {filteredBookings.map((booking) => {
-                const statusMeta = getStatusMeta(booking.status, text);
-                const showCancelButton =
-                  booking.status === 'pending' || booking.status === 'confirmed';
-
-                return (
-                  <article
-                    key={booking.id}
-                    style={{
-                      background: '#fff',
-                      border: '2px solid #111111',
-                      borderRadius: 30,
-                      padding: 18,
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        gap: 12,
-                        marginBottom: 16,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          minHeight: 42,
-                          padding: '0 16px',
-                          borderRadius: 999,
-                          border: '2px solid #111111',
-                          background: statusMeta.bg,
-                          color: statusMeta.color,
-                          fontSize: 13,
-                          fontWeight: 900,
-                        }}
-                      >
-                        {statusMeta.label}
-                      </div>
-
-                      <button
-                        type="button"
-                        style={{
-                          border: '2px solid #111111',
-                          background: '#fff',
-                          color: '#17130f',
-                          width: 42,
-                          height: 42,
-                          borderRadius: 999,
-                          fontSize: 20,
-                          lineHeight: 1,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        ⋯
-                      </button>
-                    </div>
-
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '96px 1fr',
-                        gap: 16,
-                        alignItems: 'center',
-                      }}
-                    >
-                      <img
-                        src={booking.image}
-                        alt={booking.title}
-                        style={{
-                          width: 96,
-                          height: 96,
-                          objectFit: 'cover',
-                          borderRadius: 22,
-                          border: '2px solid #111111',
-                          display: 'block',
-                        }}
-                      />
-
-                      <div>
-                        <div
-                          style={{
-                            fontSize: 20,
-                            fontWeight: 900,
-                            color: '#17130f',
-                            lineHeight: 1.2,
-                          }}
-                        >
-                          {booking.title}
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: 8,
-                            fontSize: 15,
-                            fontWeight: 700,
-                            color: '#6d6d6d',
-                            lineHeight: 1.35,
-                          }}
-                        >
-                          {booking.place}
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: 8,
-                            fontSize: 15,
-                            fontWeight: 700,
-                            color: '#5c6470',
-                            lineHeight: 1.35,
-                          }}
-                        >
-                          {booking.date} • {booking.time}
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: 8,
-                            fontSize: 17,
-                            fontWeight: 900,
-                            color: '#17130f',
-                          }}
-                        >
-                          {booking.price}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gap: 12, marginTop: 18 }}>
-                      <button
-                        type="button"
-                        style={{
-                          minHeight: 56,
-                          borderRadius: 22,
-                          border: '2px solid #111111',
-                          background: '#ffffff',
-                          color: '#17130f',
-                          fontSize: 16,
-                          fontWeight: 900,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {text.serviceDetails}
-                      </button>
-
-                      {showCancelButton ? (
-                        <button
-                          type="button"
-                          style={{
-                            minHeight: 56,
-                            borderRadius: 22,
-                            border: '2px solid #111111',
-                            background: '#fdeaea',
-                            color: '#c74343',
-                            fontSize: 16,
-                            fontWeight: 900,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          {text.cancelBooking}
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          style={{
-                            minHeight: 56,
-                            borderRadius: 22,
-                            border: '2px solid #111111',
-                            background: '#eaf2ff',
-                            color: '#1f4fa8',
-                            fontSize: 16,
-                            fontWeight: 900,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          {text.rebook}
-                        </button>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      </div>
-
-      <BottomNav active="profile" />
-    </main>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
