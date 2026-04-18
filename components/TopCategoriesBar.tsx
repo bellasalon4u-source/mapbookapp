@@ -706,7 +706,7 @@ export default function TopCategoriesBar({
                 <div
                   style={{
                     minHeight: 0,
-                    background: '#f7f4ee',
+                    background: '#ffffff',
                     borderRadius: 24,
                     border: '2px solid #111111',
                     padding: 10,
@@ -749,13 +749,13 @@ export default function TopCategoriesBar({
                             onClearSubcategory();
                           }}
                           style={{
-                            border: '2px solid #111111',
+                            border: '1.5px solid #111111',
                             cursor: 'pointer',
                             textAlign: 'left',
                             borderRadius: 16,
                             padding: '10px 8px',
-                            background: active ? '#ffffff' : '#fdfaf5',
-                            boxShadow: active ? `0 0 0 2px ${color} inset` : 'none',
+                            background: active ? '#f8f8f8' : '#ffffff',
+                            boxShadow: active ? `inset 0 0 0 2px ${color}` : 'none',
                             display: 'flex',
                             alignItems: 'center',
                             gap: 8,
@@ -772,7 +772,7 @@ export default function TopCategoriesBar({
                               overflow: 'hidden',
                               flexShrink: 0,
                               background: '#fff',
-                              border: `2px solid ${color}`,
+                              border: '1.5px solid #111111',
                             }}
                           >
                             <img
@@ -807,7 +807,7 @@ export default function TopCategoriesBar({
                 <div
                   style={{
                     minHeight: 0,
-                    background: '#f7f4ee',
+                    background: '#ffffff',
                     borderRadius: 24,
                     border: '2px solid #111111',
                     padding: 14,
@@ -851,7 +851,7 @@ export default function TopCategoriesBar({
                               setMenuOpen(false);
                             }}
                             style={{
-                              border: '2px solid #111111',
+                              border: '1.5px solid #111111',
                               background: active ? color : '#ffffff',
                               color: active ? '#ffffff' : '#17130f',
                               borderRadius: 999,
@@ -891,8 +891,6 @@ export default function TopCategoriesBar({
                         }}
                       >
                         {allOtherCategories.map((item) => {
-                          const color = colorMap[item.id] || '#43d94d';
-
                           return (
                             <button
                               key={item.id}
@@ -903,7 +901,7 @@ export default function TopCategoriesBar({
                                 onClearSubcategory();
                               }}
                               style={{
-                                border: '2px solid #111111',
+                                border: '1.5px solid #111111',
                                 background: '#ffffff',
                                 color: '#17130f',
                                 borderRadius: 999,
@@ -911,7 +909,6 @@ export default function TopCategoriesBar({
                                 fontSize: 11,
                                 fontWeight: 900,
                                 cursor: 'pointer',
-                                boxShadow: `inset 0 0 0 2px ${color}33`,
                               }}
                             >
                               {translateCategoryLabel(item.id, language, item.shortLabel || item.label)}
@@ -934,6 +931,7 @@ export default function TopCategoriesBar({
       style={{
         position: 'relative',
         zIndex: 120,
+        background: '#ffffff',
       }}
     >
       <div
@@ -941,15 +939,16 @@ export default function TopCategoriesBar({
           display: 'grid',
           gridTemplateColumns: '64px 1fr',
           gap: 10,
-          padding: '0 10px',
+          padding: '0 10px 2px',
           alignItems: 'start',
+          background: '#ffffff',
         }}
       >
         <div
           style={{
             position: 'sticky',
             left: 0,
-            background: '#f7f3eb',
+            background: '#ffffff',
             zIndex: 3,
             paddingTop: 2,
           }}
@@ -966,7 +965,7 @@ export default function TopCategoriesBar({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 8,
+              gap: 7,
             }}
           >
             <div
@@ -974,9 +973,9 @@ export default function TopCategoriesBar({
                 width: 52,
                 height: 72,
                 borderRadius: 18,
-                background: '#fff',
-                boxShadow: '0 8px 18px rgba(15,34,56,0.12)',
-                border: '1.5px solid rgba(220,220,220,0.95)',
+                background: '#ffffff',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                border: '1.5px solid #111111',
                 overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',
@@ -1018,12 +1017,13 @@ export default function TopCategoriesBar({
             msOverflowStyle: 'none',
             paddingBottom: 6,
             paddingRight: 10,
+            background: '#ffffff',
           }}
         >
           <div
             style={{
               display: 'flex',
-              gap: 12,
+              gap: 10,
               minWidth: 'max-content',
               paddingRight: 20,
               alignItems: 'flex-start',
@@ -1050,25 +1050,26 @@ export default function TopCategoriesBar({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 8,
-                    minWidth: 78,
+                    gap: 7,
+                    minWidth: 74,
                     flexShrink: 0,
-                    transform: isActive ? 'scale(1.06)' : 'scale(1)',
-                    transition: 'transform 0.18s ease',
                   }}
                 >
                   <div
                     style={{
-                      width: isActive ? 78 : 72,
-                      height: isActive ? 78 : 72,
+                      width: 72,
+                      height: 72,
                       borderRadius: 20,
-                      background: '#fff',
-                      border: isActive ? `2.5px solid ${color}` : '1.5px solid rgba(220,220,220,0.95)',
-                      boxShadow: isActive ? `0 8px 20px ${color}22` : '0 5px 14px rgba(0,0,0,0.06)',
+                      background: '#ffffff',
+                      border: '1.5px solid #111111',
+                      boxShadow: isActive
+                        ? `0 6px 16px ${color}33`
+                        : '0 4px 12px rgba(0,0,0,0.06)',
                       overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      position: 'relative',
                     }}
                   >
                     <img
@@ -1079,13 +1080,26 @@ export default function TopCategoriesBar({
                         height: '100%',
                         objectFit: 'cover',
                         display: 'block',
+                        filter: isActive ? 'saturate(1.08) contrast(1.04)' : 'saturate(1.02)',
                       }}
                     />
+
+                    {isActive ? (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          borderRadius: 20,
+                          boxShadow: `inset 0 0 0 2px ${color}`,
+                          pointerEvents: 'none',
+                        }}
+                      />
+                    ) : null}
                   </div>
 
                   <div
                     style={{
-                      fontSize: isActive ? 12 : 11,
+                      fontSize: 11,
                       fontWeight: 900,
                       color: '#111111',
                       lineHeight: 1,
@@ -1094,17 +1108,6 @@ export default function TopCategoriesBar({
                   >
                     {translateCategoryLabel(item.id, language, item.shortLabel || item.label)}
                   </div>
-
-                  <div
-                    style={{
-                      width: isActive ? 46 : 0,
-                      height: 6,
-                      borderRadius: 999,
-                      background: isActive ? color : 'transparent',
-                      boxShadow: isActive ? `0 5px 12px ${color}55` : 'none',
-                      transition: 'all 0.18s ease',
-                    }}
-                  />
                 </button>
               );
             })}
