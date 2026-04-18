@@ -89,7 +89,7 @@ const searchAliases = [
       'pet hotel',
       'dog boarding',
       'hotel para perros',
-      'perro hotel',
+      'perро hotel',
       'отель для собак',
       'psí hotel',
       'hundehotel',
@@ -1555,6 +1555,7 @@ export default function HomePage() {
               borderRadius: 28,
               background: '#fff',
               padding: 12,
+              boxShadow: '0 2px 0 rgba(0,0,0,0.08)',
             }}
           >
             <div
@@ -1576,7 +1577,10 @@ export default function HomePage() {
                       ? '3px solid #111111'
                       : '2px solid #111111',
                   borderRadius: 22,
-                  background: '#3d6dcc',
+                  background:
+                    likedFilterMode === 'category'
+                      ? 'linear-gradient(180deg, #4f82ee 0%, #3568d8 100%)'
+                      : 'linear-gradient(180deg, #4879e3 0%, #3d6dcc 100%)',
                   color: '#fff',
                   cursor: 'pointer',
                   display: 'grid',
@@ -1586,8 +1590,8 @@ export default function HomePage() {
                   padding: '0 10px 0 12px',
                   boxShadow:
                     likedFilterMode === 'category'
-                      ? 'inset 0 0 0 2px rgba(255,255,255,0.35)'
-                      : 'none',
+                      ? 'inset 0 2px 0 rgba(255,255,255,0.32), 0 2px 0 rgba(0,0,0,0.12)'
+                      : 'inset 0 1px 0 rgba(255,255,255,0.18)',
                 }}
               >
                 <div
@@ -1598,6 +1602,7 @@ export default function HomePage() {
                     minWidth: 0,
                     fontSize: 13,
                     fontWeight: 900,
+                    textShadow: '0 1px 0 rgba(0,0,0,0.16)',
                   }}
                 >
                   <span style={{ color: '#ff3355', fontSize: 18 }}>♥</span>
@@ -1626,6 +1631,7 @@ export default function HomePage() {
                     fontSize: 15,
                     fontWeight: 900,
                     flexShrink: 0,
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9)',
                   }}
                 >
                   {likedInCategoryCount}
@@ -1646,8 +1652,8 @@ export default function HomePage() {
                   borderRadius: 22,
                   background:
                     dealFilterMode === 'category'
-                      ? 'linear-gradient(180deg, #ffe84a 0%, #f5d412 100%)'
-                      : 'linear-gradient(180deg, #f5de5a 0%, #e9cf49 100%)',
+                      ? 'linear-gradient(180deg, #fff04a 0%, #f3d103 48%, #e1b800 100%)'
+                      : 'linear-gradient(180deg, #ffe97a 0%, #f0d13f 55%, #ddb321 100%)',
                   color: '#111111',
                   cursor: 'pointer',
                   display: 'grid',
@@ -1657,8 +1663,8 @@ export default function HomePage() {
                   padding: '0 10px 0 12px',
                   boxShadow:
                     dealFilterMode === 'category'
-                      ? 'inset 0 0 0 2px rgba(255,255,255,0.45)'
-                      : 'none',
+                      ? 'inset 0 2px 0 rgba(255,255,255,0.6), 0 2px 0 rgba(0,0,0,0.12)'
+                      : 'inset 0 1px 0 rgba(255,255,255,0.35)',
                 }}
               >
                 <div
@@ -1669,6 +1675,7 @@ export default function HomePage() {
                     minWidth: 0,
                     fontSize: 13,
                     fontWeight: 900,
+                    textShadow: '0 1px 0 rgba(255,255,255,0.35)',
                   }}
                 >
                   <span style={{ fontSize: 17 }}>🪙</span>
@@ -1689,7 +1696,7 @@ export default function HomePage() {
                     height: 38,
                     borderRadius: 999,
                     border: '2px solid #111111',
-                    background: '#fff',
+                    background: '#fffbea',
                     color: '#111111',
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -1697,6 +1704,7 @@ export default function HomePage() {
                     fontSize: 15,
                     fontWeight: 900,
                     flexShrink: 0,
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.95)',
                   }}
                 >
                   {categoryDealsCount}
@@ -1713,7 +1721,10 @@ export default function HomePage() {
                   border:
                     likedFilterMode === 'all' ? '3px solid #111111' : '2px solid #111111',
                   borderRadius: 22,
-                  background: '#3d6dcc',
+                  background:
+                    likedFilterMode === 'all'
+                      ? 'linear-gradient(180deg, #4f82ee 0%, #3568d8 100%)'
+                      : 'linear-gradient(180deg, #4879e3 0%, #3d6dcc 100%)',
                   color: '#fff',
                   cursor: 'pointer',
                   display: 'grid',
@@ -1723,8 +1734,8 @@ export default function HomePage() {
                   padding: '0 10px 0 12px',
                   boxShadow:
                     likedFilterMode === 'all'
-                      ? 'inset 0 0 0 2px rgba(255,255,255,0.35)'
-                      : 'none',
+                      ? 'inset 0 2px 0 rgba(255,255,255,0.32), 0 2px 0 rgba(0,0,0,0.12)'
+                      : 'inset 0 1px 0 rgba(255,255,255,0.18)',
                 }}
               >
                 <div
@@ -1735,6 +1746,7 @@ export default function HomePage() {
                     minWidth: 0,
                     fontSize: 13,
                     fontWeight: 900,
+                    textShadow: '0 1px 0 rgba(0,0,0,0.16)',
                   }}
                 >
                   <span style={{ color: '#ff3355', fontSize: 18 }}>♥</span>
@@ -1763,6 +1775,7 @@ export default function HomePage() {
                     fontSize: 15,
                     fontWeight: 900,
                     flexShrink: 0,
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9)',
                   }}
                 >
                   {likedAllCount}
@@ -1781,8 +1794,8 @@ export default function HomePage() {
                   borderRadius: 22,
                   background:
                     dealFilterMode === 'all'
-                      ? 'linear-gradient(180deg, #ffe84a 0%, #f5d412 100%)'
-                      : 'linear-gradient(180deg, #f5de5a 0%, #e9cf49 100%)',
+                      ? 'linear-gradient(180deg, #fff04a 0%, #f3d103 48%, #e1b800 100%)'
+                      : 'linear-gradient(180deg, #ffe97a 0%, #f0d13f 55%, #ddb321 100%)',
                   color: '#111111',
                   cursor: 'pointer',
                   display: 'grid',
@@ -1792,8 +1805,8 @@ export default function HomePage() {
                   padding: '0 10px 0 12px',
                   boxShadow:
                     dealFilterMode === 'all'
-                      ? 'inset 0 0 0 2px rgba(255,255,255,0.45)'
-                      : 'none',
+                      ? 'inset 0 2px 0 rgba(255,255,255,0.6), 0 2px 0 rgba(0,0,0,0.12)'
+                      : 'inset 0 1px 0 rgba(255,255,255,0.35)',
                 }}
               >
                 <div
@@ -1804,6 +1817,7 @@ export default function HomePage() {
                     minWidth: 0,
                     fontSize: 13,
                     fontWeight: 900,
+                    textShadow: '0 1px 0 rgba(255,255,255,0.35)',
                   }}
                 >
                   <span style={{ fontSize: 17 }}>🪙</span>
@@ -1824,7 +1838,7 @@ export default function HomePage() {
                     height: 38,
                     borderRadius: 999,
                     border: '2px solid #111111',
-                    background: '#fff',
+                    background: '#fffbea',
                     color: '#111111',
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -1832,6 +1846,7 @@ export default function HomePage() {
                     fontSize: 15,
                     fontWeight: 900,
                     flexShrink: 0,
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.95)',
                   }}
                 >
                   {allDealsCount}
