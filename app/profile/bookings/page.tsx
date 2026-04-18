@@ -11,6 +11,10 @@ import {
 import {
   getBookings,
   subscribeToBookingsStore,
+  canShowExactAddress,
+  canShowDirectContacts,
+  getVisibleBookingLocation,
+  getProtectedBookingContact,
   type BookingItem,
   type BookingStatus,
 } from '../../services/bookingsStore';
@@ -32,7 +36,8 @@ const bookingsTexts = {
     total: 'Total',
     dateTime: 'Date & time',
     contactAndAddress: 'Contact and address',
-    hiddenUntilPaid: 'Exact address, route and direct contact are available after payment',
+    hiddenUntilPaid:
+      'Exact address, route and direct contact are available only after payment confirmation and paid promotion',
     writeSeller: 'Write to seller',
     callSeller: 'Call seller',
     routeToMaster: 'Route to master',
@@ -41,10 +46,17 @@ const bookingsTexts = {
     secureBooking: 'Secure booking',
     providerPhone: 'Phone',
     providerEmail: 'Email',
-    routeLocked: 'Route after payment',
+    routeLocked: 'Route after unlock',
     bookingAccess: 'Booking access',
     provider: 'Provider',
-    paymentProtected: 'Protected booking details',
+    paymentProtected: 'Protected details',
+    directContactLocked: 'Direct contacts are locked',
+    addressLocked: 'Exact address is locked',
+    area: 'Area',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+    rebook: 'Book again',
   },
   ES: {
     title: 'Mis reservas',
@@ -62,7 +74,8 @@ const bookingsTexts = {
     total: 'Total',
     dateTime: 'Fecha y hora',
     contactAndAddress: 'Contacto y dirección',
-    hiddenUntilPaid: 'La dirección exacta, la ruta y el contacto directo estarán disponibles después del pago',
+    hiddenUntilPaid:
+      'La dirección exacta, la ruta y el contacto directo están disponibles solo después de confirmar el pago y la promoción pagada',
     writeSeller: 'Escribir al profesional',
     callSeller: 'Llamar al profesional',
     routeToMaster: 'Ruta al profesional',
@@ -71,10 +84,17 @@ const bookingsTexts = {
     secureBooking: 'Reserva segura',
     providerPhone: 'Teléfono',
     providerEmail: 'Email',
-    routeLocked: 'Ruta después del pago',
+    routeLocked: 'Ruta después del desbloqueo',
     bookingAccess: 'Acceso a la reserva',
     provider: 'Profesional',
-    paymentProtected: 'Datos protegidos de la reserva',
+    paymentProtected: 'Datos protegidos',
+    directContactLocked: 'Los contactos directos están bloqueados',
+    addressLocked: 'La dirección exacta está bloqueada',
+    area: 'Zona',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+    rebook: 'Reservar otra vez',
   },
   RU: {
     title: 'Мои бронирования',
@@ -92,7 +112,8 @@ const bookingsTexts = {
     total: 'Итого',
     dateTime: 'Дата и время',
     contactAndAddress: 'Контакты и адрес',
-    hiddenUntilPaid: 'Точный адрес, маршрут и прямой контакт доступны только после оплаты',
+    hiddenUntilPaid:
+      'Точный адрес, маршрут и прямой контакт доступны только после подтверждённой оплаты и оплаченной рекламы мастера',
     writeSeller: 'Написать мастеру',
     callSeller: 'Позвонить мастеру',
     routeToMaster: 'Маршрут к мастеру',
@@ -101,10 +122,55 @@ const bookingsTexts = {
     secureBooking: 'Безопасное бронирование',
     providerPhone: 'Телефон',
     providerEmail: 'Email',
-    routeLocked: 'Маршрут после оплаты',
+    routeLocked: 'Маршрут после открытия',
     bookingAccess: 'Доступ к бронированию',
     provider: 'Исполнитель',
-    paymentProtected: 'Защищённые данные бронирования',
+    paymentProtected: 'Защищённые данные',
+    directContactLocked: 'Прямые контакты скрыты',
+    addressLocked: 'Точный адрес скрыт',
+    area: 'Район',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+    rebook: 'Забронировать снова',
+  },
+  UA: {
+    title: 'Мої бронювання',
+    subtitle: 'Майбутні візити, завершені послуги та доступ до бронювання',
+    upcoming: 'Майбутні',
+    completed: 'Завершені',
+    cancelled: 'Скасовані',
+    pending: 'Очікує підтвердження',
+    unlockPaid: 'Unlock оплачено',
+    welcomeBonus: 'Використано Welcome Bonus',
+    referralUsed: 'Використано безкоштовне бронювання',
+    empty: 'У цьому розділі поки немає бронювань',
+    serviceDetails: 'Деталі послуги',
+    bookingSummary: 'Підсумок бронювання',
+    total: 'Разом',
+    dateTime: 'Дата і час',
+    contactAndAddress: 'Контакти та адреса',
+    hiddenUntilPaid:
+      'Точна адреса, маршрут і прямий контакт доступні лише після підтвердженої оплати та оплаченої реклами майстра',
+    writeSeller: 'Написати майстру',
+    callSeller: 'Подзвонити майстру',
+    routeToMaster: 'Маршрут до майстра',
+    exactAddress: 'Точна адреса',
+    detailsUnlocked: 'Доступ відкрито',
+    secureBooking: 'Безпечне бронювання',
+    providerPhone: 'Телефон',
+    providerEmail: 'Email',
+    routeLocked: 'Маршрут після відкриття',
+    bookingAccess: 'Доступ до бронювання',
+    provider: 'Виконавець',
+    paymentProtected: 'Захищені дані',
+    directContactLocked: 'Прямі контакти приховані',
+    addressLocked: 'Точну адресу приховано',
+    area: 'Район',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+    rebook: 'Забронювати знову',
   },
   CZ: {
     title: 'Moje rezervace',
@@ -122,7 +188,8 @@ const bookingsTexts = {
     total: 'Celkem',
     dateTime: 'Datum a čas',
     contactAndAddress: 'Kontakt a adresa',
-    hiddenUntilPaid: 'Přesná adresa, trasa a přímý kontakt jsou dostupné až po zaplacení',
+    hiddenUntilPaid:
+      'Přesná adresa, trasa a přímý kontakt jsou dostupné až po potvrzené platbě a zaplacené propagaci',
     writeSeller: 'Napsat specialistovi',
     callSeller: 'Zavolat specialistovi',
     routeToMaster: 'Trasa ke specialistovi',
@@ -131,10 +198,17 @@ const bookingsTexts = {
     secureBooking: 'Bezpečná rezervace',
     providerPhone: 'Telefon',
     providerEmail: 'Email',
-    routeLocked: 'Trasa po zaplacení',
+    routeLocked: 'Trasa po odemčení',
     bookingAccess: 'Přístup k rezervaci',
     provider: 'Poskytovatel',
-    paymentProtected: 'Chráněné údaje rezervace',
+    paymentProtected: 'Chráněné údaje',
+    directContactLocked: 'Přímé kontakty jsou skryté',
+    addressLocked: 'Přesná adresa je skrytá',
+    area: 'Oblast',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+    rebook: 'Rezervovat znovu',
   },
   DE: {
     title: 'Meine Buchungen',
@@ -152,7 +226,8 @@ const bookingsTexts = {
     total: 'Gesamt',
     dateTime: 'Datum & Uhrzeit',
     contactAndAddress: 'Kontakt und Adresse',
-    hiddenUntilPaid: 'Genaue Adresse, Route und direkter Kontakt sind erst nach der Zahlung verfügbar',
+    hiddenUntilPaid:
+      'Genaue Adresse, Route und direkter Kontakt sind erst nach bestätigter Zahlung und bezahlter Promotion verfügbar',
     writeSeller: 'Dem Anbieter schreiben',
     callSeller: 'Anbieter anrufen',
     routeToMaster: 'Route zum Anbieter',
@@ -161,10 +236,17 @@ const bookingsTexts = {
     secureBooking: 'Sichere Buchung',
     providerPhone: 'Telefon',
     providerEmail: 'E-Mail',
-    routeLocked: 'Route nach Zahlung',
+    routeLocked: 'Route nach Freischaltung',
     bookingAccess: 'Buchungszugriff',
     provider: 'Anbieter',
-    paymentProtected: 'Geschützte Buchungsdaten',
+    paymentProtected: 'Geschützte Daten',
+    directContactLocked: 'Direkte Kontakte sind gesperrt',
+    addressLocked: 'Genaue Adresse ist gesperrt',
+    area: 'Bereich',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+    rebook: 'Erneut buchen',
   },
   PL: {
     title: 'Moje rezerwacje',
@@ -182,7 +264,8 @@ const bookingsTexts = {
     total: 'Łącznie',
     dateTime: 'Data i godzina',
     contactAndAddress: 'Kontakt i adres',
-    hiddenUntilPaid: 'Dokładny adres, trasa i bezpośredni kontakt są dostępne dopiero po opłacie',
+    hiddenUntilPaid:
+      'Dokładny adres, trasa i bezpośredni kontakt są dostępne dopiero po potwierdzonej płatności i opłaconej promocji',
     writeSeller: 'Napisz do specjalisty',
     callSeller: 'Zadzwoń do specjalisty',
     routeToMaster: 'Trasa do specjalisty',
@@ -191,10 +274,17 @@ const bookingsTexts = {
     secureBooking: 'Bezpieczna rezerwacja',
     providerPhone: 'Telefon',
     providerEmail: 'Email',
-    routeLocked: 'Trasa po płatności',
+    routeLocked: 'Trasa po odblokowaniu',
     bookingAccess: 'Dostęp do rezerwacji',
     provider: 'Wykonawca',
-    paymentProtected: 'Chronione dane rezerwacji',
+    paymentProtected: 'Chronione dane',
+    directContactLocked: 'Bezpośrednie kontakty są ukryte',
+    addressLocked: 'Dokładny adres jest ukryty',
+    area: 'Obszar',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+    rebook: 'Zarezerwuj ponownie',
   },
 } as const;
 
@@ -249,9 +339,13 @@ export default function ProfileBookingsPage() {
     const unsubBookings = subscribeToBookingsStore(syncBookings);
 
     window.addEventListener('focus', syncLanguage);
+    window.addEventListener('pageshow', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
 
     return () => {
       window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('pageshow', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
       unsubLanguage();
       unsubBookings();
     };
@@ -406,8 +500,13 @@ export default function ProfileBookingsPage() {
           )}
 
           {filteredBookings.map((booking) => {
-            const detailsUnlocked =
-              booking.unlockFeePaid || booking.usedWelcomeBonus || booking.usedReferralCredit;
+            const exactAddressUnlocked = canShowExactAddress(booking);
+            const directContactsUnlocked = canShowDirectContacts(booking);
+            const protectedContact = getProtectedBookingContact(booking);
+            const visibleLocation = getVisibleBookingLocation(booking);
+            const publicArea = booking.areaLabel || booking.location;
+            const showRebookButton =
+              booking.status === 'completed' || booking.status === 'cancelled';
 
             return (
               <div
@@ -656,7 +755,7 @@ export default function ProfileBookingsPage() {
                     style={{
                       marginTop: 12,
                       borderRadius: 18,
-                      background: detailsUnlocked ? '#ecfdf3' : '#fff4db',
+                      background: exactAddressUnlocked ? '#ecfdf3' : '#fff4db',
                       padding: 12,
                       border: '2px solid #111111',
                     }}
@@ -665,24 +764,24 @@ export default function ProfileBookingsPage() {
                       style={{
                         fontSize: 13,
                         fontWeight: 900,
-                        color: detailsUnlocked ? '#15803d' : '#b7791f',
+                        color: exactAddressUnlocked ? '#15803d' : '#b7791f',
                         marginBottom: 6,
                       }}
                     >
-                      {detailsUnlocked ? text.detailsUnlocked : text.secureBooking}
+                      {exactAddressUnlocked ? text.detailsUnlocked : text.secureBooking}
                     </div>
 
                     <div
                       style={{
                         fontSize: 13,
                         lineHeight: 1.5,
-                        color: detailsUnlocked ? '#166534' : '#8d6c24',
+                        color: exactAddressUnlocked ? '#166534' : '#8d6c24',
                         fontWeight: 700,
                       }}
                     >
-                      {detailsUnlocked
-                        ? `${text.exactAddress}: ${booking.location}`
-                        : text.hiddenUntilPaid}
+                      {exactAddressUnlocked
+                        ? `${text.exactAddress}: ${visibleLocation}`
+                        : `${text.area}: ${publicArea}`}
                     </div>
                   </div>
                 </div>
@@ -720,14 +819,14 @@ export default function ProfileBookingsPage() {
                         borderRadius: 999,
                         border: '2px solid #111111',
                         padding: '8px 10px',
-                        background: detailsUnlocked ? '#ecfdf3' : '#fff4db',
-                        color: detailsUnlocked ? '#15803d' : '#b7791f',
+                        background: directContactsUnlocked ? '#ecfdf3' : '#fff4db',
+                        color: directContactsUnlocked ? '#15803d' : '#b7791f',
                         fontSize: 11,
                         fontWeight: 900,
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {detailsUnlocked ? text.bookingAccess : text.paymentProtected}
+                      {directContactsUnlocked ? text.bookingAccess : text.paymentProtected}
                     </span>
                   </div>
 
@@ -754,10 +853,10 @@ export default function ProfileBookingsPage() {
                         style={{
                           fontSize: 15,
                           fontWeight: 900,
-                          color: detailsUnlocked ? '#17130f' : '#a19488',
+                          color: directContactsUnlocked ? '#17130f' : '#a19488',
                         }}
                       >
-                        {detailsUnlocked ? '+44 7700 123456' : '••••••••••'}
+                        {protectedContact.phone || '••••••••••'}
                       </div>
                     </div>
 
@@ -783,10 +882,10 @@ export default function ProfileBookingsPage() {
                         style={{
                           fontSize: 15,
                           fontWeight: 900,
-                          color: detailsUnlocked ? '#17130f' : '#a19488',
+                          color: directContactsUnlocked ? '#17130f' : '#a19488',
                         }}
                       >
-                        {detailsUnlocked ? 'master@mapbook.app' : '••••••••••'}
+                        {protectedContact.email || '••••••••••'}
                       </div>
                     </div>
 
@@ -806,17 +905,104 @@ export default function ProfileBookingsPage() {
                           marginBottom: 6,
                         }}
                       >
-                        {text.exactAddress}
+                        {text.whatsapp}
                       </div>
                       <div
                         style={{
                           fontSize: 15,
                           fontWeight: 900,
-                          color: detailsUnlocked ? '#17130f' : '#a19488',
+                          color: directContactsUnlocked ? '#17130f' : '#a19488',
+                        }}
+                      >
+                        {protectedContact.whatsapp || '••••••••••'}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        borderRadius: 18,
+                        background: '#fff',
+                        padding: 12,
+                        border: '2px solid #111111',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#877d73',
+                          fontWeight: 800,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {text.telegram}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 900,
+                          color: directContactsUnlocked ? '#17130f' : '#a19488',
+                        }}
+                      >
+                        {protectedContact.telegram || '••••••••••'}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        borderRadius: 18,
+                        background: '#fff',
+                        padding: 12,
+                        border: '2px solid #111111',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#877d73',
+                          fontWeight: 800,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {text.instagram}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 900,
+                          color: directContactsUnlocked ? '#17130f' : '#a19488',
+                        }}
+                      >
+                        {protectedContact.instagram || '••••••••••'}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        borderRadius: 18,
+                        background: '#fff',
+                        padding: 12,
+                        border: '2px solid #111111',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: '#877d73',
+                          fontWeight: 800,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {exactAddressUnlocked ? text.exactAddress : text.area}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 900,
+                          color: exactAddressUnlocked ? '#17130f' : '#a19488',
                           lineHeight: 1.45,
                         }}
                       >
-                        {detailsUnlocked ? booking.location : '••••••••••'}
+                        {exactAddressUnlocked ? visibleLocation : publicArea}
                       </div>
                     </div>
                   </div>
@@ -831,16 +1017,16 @@ export default function ProfileBookingsPage() {
                   >
                     <button
                       type="button"
-                      disabled={!detailsUnlocked}
+                      disabled={!directContactsUnlocked}
                       style={{
                         height: 52,
                         borderRadius: 18,
                         border: '2px solid #111111',
-                        background: detailsUnlocked ? '#eef4ff' : '#f2f1ef',
-                        color: detailsUnlocked ? '#2563eb' : '#b0a79e',
+                        background: directContactsUnlocked ? '#eef4ff' : '#f2f1ef',
+                        color: directContactsUnlocked ? '#2563eb' : '#b0a79e',
                         fontSize: 15,
                         fontWeight: 900,
-                        cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
+                        cursor: directContactsUnlocked ? 'pointer' : 'not-allowed',
                       }}
                     >
                       {text.writeSeller}
@@ -848,16 +1034,16 @@ export default function ProfileBookingsPage() {
 
                     <button
                       type="button"
-                      disabled={!detailsUnlocked}
+                      disabled={!directContactsUnlocked}
                       style={{
                         height: 52,
                         borderRadius: 18,
                         border: '2px solid #111111',
-                        background: detailsUnlocked ? '#ecfdf3' : '#f2f1ef',
-                        color: detailsUnlocked ? '#15803d' : '#b0a79e',
+                        background: directContactsUnlocked ? '#ecfdf3' : '#f2f1ef',
+                        color: directContactsUnlocked ? '#15803d' : '#b0a79e',
                         fontSize: 15,
                         fontWeight: 900,
-                        cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
+                        cursor: directContactsUnlocked ? 'pointer' : 'not-allowed',
                       }}
                     >
                       {text.callSeller}
@@ -866,42 +1052,61 @@ export default function ProfileBookingsPage() {
 
                   <button
                     type="button"
-                    disabled={!detailsUnlocked}
+                    disabled={!exactAddressUnlocked}
                     style={{
                       marginTop: 10,
                       width: '100%',
                       height: 54,
                       borderRadius: 20,
                       border: '2px solid #111111',
-                      background: detailsUnlocked ? '#ff4fa0' : '#f2f1ef',
-                      color: detailsUnlocked ? '#fff' : '#b0a79e',
+                      background: exactAddressUnlocked ? '#ff4fa0' : '#f2f1ef',
+                      color: exactAddressUnlocked ? '#fff' : '#b0a79e',
                       fontSize: 16,
                       fontWeight: 900,
-                      cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
+                      cursor: exactAddressUnlocked ? 'pointer' : 'not-allowed',
                     }}
                   >
-                    {detailsUnlocked ? text.routeToMaster : text.routeLocked}
+                    {exactAddressUnlocked ? text.routeToMaster : text.routeLocked}
                   </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => router.push(`/master/${booking.masterId}`)}
-                  style={{
-                    marginTop: 14,
-                    width: '100%',
-                    height: 56,
-                    borderRadius: 22,
-                    border: '2px solid #111111',
-                    background: '#2f241c',
-                    color: '#fff',
-                    fontSize: 16,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {text.serviceDetails}
-                </button>
+                <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/master/${booking.masterId}`)}
+                    style={{
+                      width: '100%',
+                      height: 56,
+                      borderRadius: 22,
+                      border: '2px solid #111111',
+                      background: '#2f241c',
+                      color: '#fff',
+                      fontSize: 16,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {text.serviceDetails}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/booking/${booking.masterId}`)}
+                    style={{
+                      width: '100%',
+                      height: 56,
+                      borderRadius: 22,
+                      border: '2px solid #111111',
+                      background: '#eaf2ff',
+                      color: '#1f4fa8',
+                      fontSize: 16,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {text.rebook}
+                  </button>
+                </div>
               </div>
             );
           })}
