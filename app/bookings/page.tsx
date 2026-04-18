@@ -195,63 +195,6 @@ const pageTexts = {
     noMessageAction: 'Контакт недоступен',
     noRouteAction: 'Адрес скрыт',
   },
-  UA: {
-    title: 'Мої бронювання',
-    subtitle: 'Майбутні візити, завершені послуги та доступ до бронювання',
-    upcoming: 'Майбутні',
-    completed: 'Завершені',
-    cancelled: 'Скасовані',
-    pending: 'Очікує підтвердження',
-    confirmed: 'Майбутнє',
-    completedStatus: 'Завершено',
-    cancelledStatus: 'Скасовано',
-    serviceDetails: 'Деталі послуги',
-    cancelBooking: 'Скасувати бронювання',
-    rebook: 'Забронювати знову',
-    emptyUpcoming: 'Поки немає майбутніх бронювань',
-    emptyCompleted: 'Поки немає завершених бронювань',
-    emptyCancelled: 'Поки немає скасованих бронювань',
-    back: 'Назад',
-    home: 'Головна',
-    total: 'Усього',
-    bookingOverview: 'Огляд бронювань',
-    activeNow: 'Активно зараз',
-    menuClose: 'Закрити',
-    menuCancel: 'Скасувати бронювання',
-    menuOpenProfile: 'Відкрити профіль',
-    provider: 'Майстер',
-    bookingSummary: 'Підсумок бронювання',
-    dateTime: 'Дата і час',
-    detailsUnlocked: 'Деталі відкрито',
-    detailsLocked: 'Деталі приховано',
-    exactAddress: 'Точна адреса',
-    area: 'Район',
-    contactAndAddress: 'Контакти та адреса',
-    bookingAccess: 'Доступ до бронювання',
-    phone: 'Телефон',
-    email: 'Email',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    instagram: 'Instagram',
-    writeSeller: 'Написати майстру',
-    callSeller: 'Подзвонити майстру',
-    routeToMaster: 'Маршрут до майстра',
-    contactsHiddenTitle: 'Контакти приховано',
-    contactsHiddenText:
-      'Прямі контакти та точна адреса відкриються лише після надходження оплати та оплаченої реклами майстром.',
-    waitingMaster: 'Очікує підтвердження майстра',
-    waitingPayment: 'Очікує оплату',
-    waitingPromotion: 'Реклама не оплачена',
-    unlockPaid: 'Unlock оплачено',
-    welcomeBonus: 'Використано Welcome Bonus',
-    referralUsed: 'Використано реферальне бронювання',
-    lockedValue: 'Приховано',
-    todayAt: 'Сьогодні о',
-    tomorrowAt: 'Завтра о',
-    noPhoneAction: 'Номер недоступний',
-    noMessageAction: 'Контакт недоступний',
-    noRouteAction: 'Адресу приховано',
-  },
   CZ: {
     title: 'Moje rezervace',
     subtitle: 'Nadcházející návštěvy, dokončené služby a přístup k rezervaci',
@@ -430,7 +373,6 @@ const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
     EN: 'Manicure',
     ES: 'Manicura',
     RU: 'Маникюр',
-    UA: 'Манікюр',
     CZ: 'Manikúra',
     DE: 'Maniküre',
     PL: 'Manicure',
@@ -439,7 +381,6 @@ const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
     EN: 'Haircut',
     ES: 'Corte de pelo',
     RU: 'Стрижка',
-    UA: 'Стрижка',
     CZ: 'Střih',
     DE: 'Haarschnitt',
     PL: 'Strzyżenie',
@@ -448,7 +389,6 @@ const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
     EN: 'Massage',
     ES: 'Masaje',
     RU: 'Массаж',
-    UA: 'Масаж',
     CZ: 'Masáž',
     DE: 'Massage',
     PL: 'Masaż',
@@ -457,7 +397,6 @@ const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
     EN: 'Makeup',
     ES: 'Maquillaje',
     RU: 'Визаж',
-    UA: 'Візаж',
     CZ: 'Make-up',
     DE: 'Make-up',
     PL: 'Makijaż',
@@ -466,7 +405,6 @@ const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
     EN: 'Phone repair',
     ES: 'Reparación de teléfono',
     RU: 'Ремонт телефона',
-    UA: 'Ремонт телефону',
     CZ: 'Oprava telefonu',
     DE: 'Handy-Reparatur',
     PL: 'Naprawa telefonu',
@@ -474,18 +412,18 @@ const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
 };
 
 const monthMap: Record<string, Record<AppLanguage, string>> = {
-  'января': { EN: 'January', ES: 'enero', RU: 'января', UA: 'січня', CZ: 'ledna', DE: 'Januar', PL: 'stycznia' },
-  'февраля': { EN: 'February', ES: 'febrero', RU: 'февраля', UA: 'лютого', CZ: 'února', DE: 'Februar', PL: 'lutego' },
-  'марта': { EN: 'March', ES: 'marzo', RU: 'марта', UA: 'березня', CZ: 'března', DE: 'März', PL: 'marca' },
-  'апреля': { EN: 'April', ES: 'abril', RU: 'апреля', UA: 'квітня', CZ: 'dubna', DE: 'April', PL: 'kwietnia' },
-  'мая': { EN: 'May', ES: 'mayo', RU: 'мая', UA: 'травня', CZ: 'května', DE: 'Mai', PL: 'maja' },
-  'июня': { EN: 'June', ES: 'junio', RU: 'июня', UA: 'червня', CZ: 'června', DE: 'Juni', PL: 'czerwca' },
-  'июля': { EN: 'July', ES: 'julio', RU: 'июля', UA: 'липня', CZ: 'července', DE: 'Juli', PL: 'lipca' },
-  'августа': { EN: 'August', ES: 'agosto', RU: 'августа', UA: 'серпня', CZ: 'srpna', DE: 'August', PL: 'sierpnia' },
-  'сентября': { EN: 'September', ES: 'septiembre', RU: 'сентября', UA: 'вересня', CZ: 'září', DE: 'September', PL: 'września' },
-  'октября': { EN: 'October', ES: 'octubre', RU: 'октября', UA: 'жовтня', CZ: 'října', DE: 'Oktober', PL: 'października' },
-  'ноября': { EN: 'November', ES: 'noviembre', RU: 'ноября', UA: 'листопада', CZ: 'listopadu', DE: 'November', PL: 'listopada' },
-  'декабря': { EN: 'December', ES: 'diciembre', RU: 'декабря', UA: 'грудня', CZ: 'prosince', DE: 'Dezember', PL: 'grudnia' },
+  'января': { EN: 'January', ES: 'enero', RU: 'января', CZ: 'ledna', DE: 'Januar', PL: 'stycznia' },
+  'февраля': { EN: 'February', ES: 'febrero', RU: 'февраля', CZ: 'února', DE: 'Februar', PL: 'lutego' },
+  'марта': { EN: 'March', ES: 'marzo', RU: 'марта', CZ: 'března', DE: 'März', PL: 'marca' },
+  'апреля': { EN: 'April', ES: 'abril', RU: 'апреля', CZ: 'dubna', DE: 'April', PL: 'kwietnia' },
+  'мая': { EN: 'May', ES: 'mayo', RU: 'мая', CZ: 'května', DE: 'Mai', PL: 'maja' },
+  'июня': { EN: 'June', ES: 'junio', RU: 'июня', CZ: 'června', DE: 'Juni', PL: 'czerwca' },
+  'июля': { EN: 'July', ES: 'julio', RU: 'июля', CZ: 'července', DE: 'Juli', PL: 'lipca' },
+  'августа': { EN: 'August', ES: 'agosto', RU: 'августа', CZ: 'srpna', DE: 'August', PL: 'sierpnia' },
+  'сентября': { EN: 'September', ES: 'septiembre', RU: 'сентября', CZ: 'září', DE: 'September', PL: 'września' },
+  'октября': { EN: 'October', ES: 'octubre', RU: 'октября', CZ: 'října', DE: 'Oktober', PL: 'października' },
+  'ноября': { EN: 'November', ES: 'noviembre', RU: 'ноября', CZ: 'listopadu', DE: 'November', PL: 'listopada' },
+  'декабря': { EN: 'December', ES: 'diciembre', RU: 'декабря', CZ: 'prosince', DE: 'Dezember', PL: 'grudnia' },
 };
 
 function getTexts(language: AppLanguage) {
@@ -1600,7 +1538,12 @@ export default function BookingsPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (!protectedContacts.whatsapp && !protectedContacts.telegram && !protectedContacts.instagram && !protectedContacts.email) {
+                          if (
+                            !protectedContacts.whatsapp &&
+                            !protectedContacts.telegram &&
+                            !protectedContacts.instagram &&
+                            !protectedContacts.email
+                          ) {
                             return;
                           }
                         }}
@@ -1663,7 +1606,10 @@ export default function BookingsPage() {
                       onClick={() => {
                         if (!detailsUnlocked) return;
                         const destination = encodeURIComponent(visibleAddress);
-                        window.open(`https://www.google.com/maps/search/?api=1&query=${destination}`, '_blank');
+                        window.open(
+                          `https://www.google.com/maps/search/?api=1&query=${destination}`,
+                          '_blank'
+                        );
                       }}
                       style={{
                         marginTop: 12,
