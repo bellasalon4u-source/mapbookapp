@@ -240,7 +240,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
 
   if (!found) return 'Service';
 
-  const map: Record<string, Record<AppLanguage, string>> = {
+  const map: Record<string, Partial<Record<AppLanguage, string>>> = {
     beauty: {
       EN: 'Beauty',
       ES: 'Belleza',
