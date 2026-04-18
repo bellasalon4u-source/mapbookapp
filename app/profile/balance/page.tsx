@@ -43,6 +43,9 @@ const balanceTexts = {
     protected: 'Protected',
     quickActions: 'Quick actions',
     balanceCardHint: 'Available for payments and bookings',
+    quickTopUpTitle: 'Quick top up',
+    quickTopUpSub: 'Generate a payment barcode and let the buyer transfer balance instantly',
+    openQuickTopUp: 'Open quick top up',
   },
   ES: {
     title: 'Saldo MapBook',
@@ -71,6 +74,9 @@ const balanceTexts = {
     protected: 'Protegido',
     quickActions: 'Acciones rápidas',
     balanceCardHint: 'Disponible para pagos y reservas',
+    quickTopUpTitle: 'Recarga rápida',
+    quickTopUpSub: 'Genera un código de pago y permite al comprador transferir saldo al instante',
+    openQuickTopUp: 'Abrir recarga rápida',
   },
   RU: {
     title: 'Баланс MapBook',
@@ -99,6 +105,9 @@ const balanceTexts = {
     protected: 'Защищено',
     quickActions: 'Быстрые действия',
     balanceCardHint: 'Доступно для оплат и бронирований',
+    quickTopUpTitle: 'Быстрое пополнение',
+    quickTopUpSub: 'Создайте платёжный код и дайте покупателю мгновенно перевести сумму на баланс',
+    openQuickTopUp: 'Открыть быстрое пополнение',
   },
   CZ: {
     title: 'Zůstatek MapBook',
@@ -127,6 +136,9 @@ const balanceTexts = {
     protected: 'Chráněno',
     quickActions: 'Rychlé akce',
     balanceCardHint: 'Dostupné pro platby a rezervace',
+    quickTopUpTitle: 'Rychlé dobití',
+    quickTopUpSub: 'Vytvořte platební kód a nechte kupujícího okamžitě převést částku na zůstatek',
+    openQuickTopUp: 'Otevřít rychlé dobití',
   },
   DE: {
     title: 'MapBook Guthaben',
@@ -155,6 +167,9 @@ const balanceTexts = {
     protected: 'Geschützt',
     quickActions: 'Schnellaktionen',
     balanceCardHint: 'Verfügbar für Zahlungen und Buchungen',
+    quickTopUpTitle: 'Schnell aufladen',
+    quickTopUpSub: 'Erstelle einen Zahlungscode und lasse den Käufer sofort Guthaben überweisen',
+    openQuickTopUp: 'Schnellaufladung öffnen',
   },
   PL: {
     title: 'Saldo MapBook',
@@ -183,6 +198,9 @@ const balanceTexts = {
     protected: 'Chronione',
     quickActions: 'Szybkie akcje',
     balanceCardHint: 'Dostępne do płatności i rezerwacji',
+    quickTopUpTitle: 'Szybkie doładowanie',
+    quickTopUpSub: 'Wygeneruj kod płatności i pozwól kupującemu natychmiast przelać środki na saldo',
+    openQuickTopUp: 'Otwórz szybkie doładowanie',
   },
 } as const;
 
@@ -520,6 +538,85 @@ export default function BalancePage() {
         </section>
 
         <section style={{ marginTop: 16 }}>
+          <button
+            type="button"
+            onClick={() => router.push('/profile/top-up')}
+            style={{
+              width: '100%',
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff4db',
+              padding: 18,
+              textAlign: 'left',
+              cursor: 'pointer',
+            }}
+          >
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '54px 1fr auto',
+                gap: 14,
+                alignItems: 'center',
+              }}
+            >
+              <div
+                style={{
+                  width: 54,
+                  height: 54,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#ffffff',
+                  color: '#17130f',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 24,
+                  fontWeight: 900,
+                }}
+              >
+                🏦
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {text.quickTopUpTitle}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 13,
+                    lineHeight: 1.45,
+                    color: '#6e655b',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.quickTopUpSub}
+                </div>
+              </div>
+
+              <span
+                style={{
+                  fontSize: 18,
+                  fontWeight: 900,
+                  color: '#17130f',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {text.openQuickTopUp} ›
+              </span>
+            </div>
+          </button>
+        </section>
+
+        <section style={{ marginTop: 16 }}>
           <div
             style={{
               borderRadius: 30,
@@ -548,6 +645,7 @@ export default function BalancePage() {
             >
               <button
                 type="button"
+                onClick={() => router.push('/profile/top-up')}
                 style={{
                   border: '2px solid #111111',
                   borderRadius: 24,
