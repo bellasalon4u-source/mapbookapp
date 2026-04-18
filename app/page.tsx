@@ -815,12 +815,6 @@ export default function HomePage() {
     return [...listingMasters, ...baseMasters];
   }, [listingMasters, baseMasters]);
 
-  const promotionsInCategory = useMemo(() => {
-    return promotions.filter(
-      (promo) => String(promo.categoryId || '').toLowerCase().trim() === activeCategory
-    );
-  }, [promotions, activeCategory]);
-
   const promotionBadgeTextByMasterId = useMemo(() => {
     const map: Record<string, string> = {};
 
@@ -1103,7 +1097,7 @@ export default function HomePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f3eb',
+        background: '#ffffff',
         fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
         paddingBottom: 118,
@@ -1113,10 +1107,10 @@ export default function HomePage() {
         style={{
           maxWidth: 430,
           margin: '0 auto',
-          background: '#f7f3eb',
+          background: '#ffffff',
           borderTop: '5px solid transparent',
           borderImage: `${borderGradient} 1`,
-          boxShadow: '0 0 0 1px rgba(226,218,205,0.35)',
+          boxShadow: '0 0 0 1px rgba(17,17,17,0.06)',
         }}
       >
         <section style={{ padding: '12px 14px 0' }}>
@@ -1124,10 +1118,10 @@ export default function HomePage() {
             <div
               style={{
                 background: '#ffffff',
-                borderRadius: 24,
+                borderRadius: 26,
                 padding: 10,
-                boxShadow: '0 6px 18px rgba(0,0,0,0.07)',
-                border: '1px solid #111111',
+                boxShadow: '0 8px 20px rgba(0,0,0,0.05)',
+                border: '1.5px solid #111111',
               }}
             >
               <div
@@ -1144,14 +1138,14 @@ export default function HomePage() {
                     alignItems: 'center',
                     gap: 10,
                     minWidth: 0,
-                    height: 46,
-                    padding: '0 4px 0 2px',
-                    border: '1px solid #111111',
-                    borderRadius: 18,
-                    background: '#fff',
+                    height: 48,
+                    padding: '0 8px 0 6px',
+                    border: '1.5px solid #111111',
+                    borderRadius: 999,
+                    background: '#ffffff',
                   }}
                 >
-                  <span style={{ fontSize: 20, color: '#111111', paddingLeft: 8 }}>🔎</span>
+                  <span style={{ fontSize: 21, color: '#111111', paddingLeft: 6 }}>🔎</span>
                   <input
                     value={search}
                     onFocus={() => setSearchOpen(true)}
@@ -1184,6 +1178,7 @@ export default function HomePage() {
                       outline: 'none',
                       background: 'transparent',
                       fontSize: 15,
+                      fontWeight: 700,
                       color: '#2b2f36',
                     }}
                   />
@@ -1211,32 +1206,34 @@ export default function HomePage() {
                 <button
                   onClick={() => router.push('/profile/language-region')}
                   style={{
-                    border: '1px solid #111111',
-                    background: '#fff',
-                    color: '#1f2430',
+                    border: '1.5px solid #111111',
+                    background: '#ffffff',
+                    color: '#111111',
                     borderRadius: 999,
-                    minWidth: 74,
-                    height: 46,
-                    padding: '0 10px',
-                    fontSize: 14,
+                    minWidth: 86,
+                    height: 48,
+                    padding: '0 14px',
+                    fontSize: 16,
                     fontWeight: 900,
-                    boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
+                    boxShadow: 'none',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 5,
+                    gap: 8,
                     cursor: 'pointer',
                   }}
                 >
-                  <span style={{ fontSize: 18 }}>{languageFlag(language)}</span>
-                  <span>{languageCode(language)}</span>
+                  <span style={{ fontSize: 20, lineHeight: 1 }}>{languageFlag(language)}</span>
+                  <span style={{ fontSize: 15, fontWeight: 900, letterSpacing: 0.2 }}>
+                    {languageCode(language)}
+                  </span>
                 </button>
               </div>
 
               <div
                 style={{
                   marginTop: 8,
-                  padding: '4px 2px 0',
+                  padding: '6px 2px 2px',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto auto auto',
                   alignItems: 'center',
@@ -1250,7 +1247,7 @@ export default function HomePage() {
                     gap: 6,
                     fontSize: 13,
                     fontWeight: 900,
-                    color: '#4f5b68',
+                    color: '#222222',
                     minWidth: 0,
                   }}
                 >
@@ -1300,7 +1297,7 @@ export default function HomePage() {
                     lineHeight: 1,
                   }}
                 >
-                  <span style={{ color: '#19b44a', fontSize: 15 }}>👁</span>
+                  <span style={{ color: '#111111', fontSize: 15 }}>👁</span>
                   <span style={{ color: '#ff3b30' }}>{adViews}</span>
                 </button>
 
@@ -1639,10 +1636,10 @@ export default function HomePage() {
         <section style={{ padding: '8px 14px 0' }}>
           <div
             style={{
-              border: '1px solid #111111',
-              borderRadius: 24,
-              background: '#fff',
-              padding: 10,
+              border: '1.5px solid #111111',
+              borderRadius: 28,
+              background: '#ffffff',
+              padding: 12,
             }}
           >
             <div
@@ -1659,10 +1656,10 @@ export default function HomePage() {
                   )
                 }
                 style={{
-                  border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-category' ? '#173f88' : '#2c63c7',
+                  border: '1.5px solid #111111',
+                  background: homeFilterMode === 'liked-category' ? '#2557b8' : '#3768c7',
                   color: '#ffffff',
-                  borderRadius: 18,
+                  borderRadius: 22,
                   minHeight: 56,
                   padding: '10px 12px',
                   fontSize: 14,
@@ -1707,10 +1704,10 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    minWidth: 28,
-                    height: 28,
+                    minWidth: 34,
+                    height: 34,
                     borderRadius: 999,
-                    border: '1px solid #111111',
+                    border: '1.5px solid #111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1732,10 +1729,10 @@ export default function HomePage() {
                   )
                 }
                 style={{
-                  border: '1px solid #111111',
-                  background: homeFilterMode === 'deals-category' ? '#f0d57a' : '#f6e3a3',
+                  border: '1.5px solid #111111',
+                  background: homeFilterMode === 'deals-category' ? '#ecd978' : '#f2e099',
                   color: '#1f2430',
-                  borderRadius: 18,
+                  borderRadius: 22,
                   minHeight: 56,
                   padding: '10px 12px',
                   fontSize: 14,
@@ -1779,10 +1776,10 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    minWidth: 28,
-                    height: 28,
+                    minWidth: 34,
+                    height: 34,
                     borderRadius: 999,
-                    border: '1px solid #111111',
+                    border: '1.5px solid #111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1802,10 +1799,10 @@ export default function HomePage() {
                   setHomeFilterMode((prev) => (prev === 'liked-all' ? 'none' : 'liked-all'))
                 }
                 style={{
-                  border: '1px solid #111111',
-                  background: homeFilterMode === 'liked-all' ? '#173f88' : '#2c63c7',
+                  border: '1.5px solid #111111',
+                  background: homeFilterMode === 'liked-all' ? '#2557b8' : '#3768c7',
                   color: '#ffffff',
-                  borderRadius: 18,
+                  borderRadius: 22,
                   minHeight: 56,
                   padding: '10px 12px',
                   fontSize: 14,
@@ -1850,10 +1847,10 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    minWidth: 28,
-                    height: 28,
+                    minWidth: 34,
+                    height: 34,
                     borderRadius: 999,
-                    border: '1px solid #111111',
+                    border: '1.5px solid #111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -1873,10 +1870,10 @@ export default function HomePage() {
                   setHomeFilterMode((prev) => (prev === 'deals-all' ? 'none' : 'deals-all'))
                 }
                 style={{
-                  border: '1px solid #111111',
-                  background: homeFilterMode === 'deals-all' ? '#f0d57a' : '#f6e3a3',
+                  border: '1.5px solid #111111',
+                  background: homeFilterMode === 'deals-all' ? '#ecd978' : '#f2e099',
                   color: '#1f2430',
-                  borderRadius: 18,
+                  borderRadius: 22,
                   minHeight: 56,
                   padding: '10px 12px',
                   fontSize: 14,
@@ -1920,10 +1917,10 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    minWidth: 28,
-                    height: 28,
+                    minWidth: 34,
+                    height: 34,
                     borderRadius: 999,
-                    border: '1px solid #111111',
+                    border: '1.5px solid #111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
