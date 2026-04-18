@@ -567,7 +567,7 @@ export default function ProfilePage() {
 
             <button
               type="button"
-              onClick={() => router.push('/profile/balance')}
+              onClick={() => router.push('/profile/top-up')}
               style={yellowTopUpButtonStyle}
             >
               <span style={{ fontSize: 18, lineHeight: 1 }}>🏦</span>
