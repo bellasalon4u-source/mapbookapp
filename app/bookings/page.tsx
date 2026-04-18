@@ -35,6 +35,7 @@ const pageTexts = {
     completedStatus: 'Completed',
     cancelledStatus: 'Cancelled',
     serviceDetails: 'Service details',
+    closeDetails: 'Close',
     cancelBooking: 'Cancel booking',
     rebook: 'Book again',
     emptyUpcoming: 'No upcoming bookings yet',
@@ -92,6 +93,7 @@ const pageTexts = {
     completedStatus: 'Completada',
     cancelledStatus: 'Cancelada',
     serviceDetails: 'Detalles del servicio',
+    closeDetails: 'Cerrar',
     cancelBooking: 'Cancelar reserva',
     rebook: 'Reservar otra vez',
     emptyUpcoming: 'Aún no hay reservas próximas',
@@ -149,6 +151,7 @@ const pageTexts = {
     completedStatus: 'Завершено',
     cancelledStatus: 'Отменено',
     serviceDetails: 'Детали услуги',
+    closeDetails: 'Закрыть',
     cancelBooking: 'Отменить бронь',
     rebook: 'Повторить бронь',
     emptyUpcoming: 'Пока нет предстоящих бронирований',
@@ -206,6 +209,7 @@ const pageTexts = {
     completedStatus: 'Dokončeno',
     cancelledStatus: 'Zrušeno',
     serviceDetails: 'Detail služby',
+    closeDetails: 'Zavřít',
     cancelBooking: 'Zrušit rezervaci',
     rebook: 'Rezervovat znovu',
     emptyUpcoming: 'Zatím žádné nadcházející rezervace',
@@ -263,6 +267,7 @@ const pageTexts = {
     completedStatus: 'Abgeschlossen',
     cancelledStatus: 'Storniert',
     serviceDetails: 'Servicedetails',
+    closeDetails: 'Schließen',
     cancelBooking: 'Buchung stornieren',
     rebook: 'Erneut buchen',
     emptyUpcoming: 'Noch keine bevorstehenden Buchungen',
@@ -320,6 +325,7 @@ const pageTexts = {
     completedStatus: 'Zakończone',
     cancelledStatus: 'Anulowane',
     serviceDetails: 'Szczegóły usługi',
+    closeDetails: 'Zamknij',
     cancelBooking: 'Anuluj rezerwację',
     rebook: 'Zarezerwuj ponownie',
     emptyUpcoming: 'Brak nadchodzących rezerwacji',
@@ -369,7 +375,7 @@ const pageTexts = {
 } as const;
 
 const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
-  'Маникюр': {
+  Маникюр: {
     EN: 'Manicure',
     ES: 'Manicura',
     RU: 'Маникюр',
@@ -377,7 +383,7 @@ const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
     DE: 'Maniküre',
     PL: 'Manicure',
   },
-  'Стрижка': {
+  Стрижка: {
     EN: 'Haircut',
     ES: 'Corte de pelo',
     RU: 'Стрижка',
@@ -385,7 +391,7 @@ const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
     DE: 'Haarschnitt',
     PL: 'Strzyżenie',
   },
-  'Массаж': {
+  Массаж: {
     EN: 'Massage',
     ES: 'Masaje',
     RU: 'Массаж',
@@ -393,7 +399,7 @@ const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
     DE: 'Massage',
     PL: 'Masaż',
   },
-  'Визаж': {
+  Визаж: {
     EN: 'Makeup',
     ES: 'Maquillaje',
     RU: 'Визаж',
@@ -412,22 +418,22 @@ const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
 };
 
 const monthMap: Record<string, Record<AppLanguage, string>> = {
-  'января': { EN: 'January', ES: 'enero', RU: 'января', CZ: 'ledna', DE: 'Januar', PL: 'stycznia' },
-  'февраля': { EN: 'February', ES: 'febrero', RU: 'февраля', CZ: 'února', DE: 'Februar', PL: 'lutego' },
-  'марта': { EN: 'March', ES: 'marzo', RU: 'марта', CZ: 'března', DE: 'März', PL: 'marca' },
-  'апреля': { EN: 'April', ES: 'abril', RU: 'апреля', CZ: 'dubna', DE: 'April', PL: 'kwietnia' },
-  'мая': { EN: 'May', ES: 'mayo', RU: 'мая', CZ: 'května', DE: 'Mai', PL: 'maja' },
-  'июня': { EN: 'June', ES: 'junio', RU: 'июня', CZ: 'června', DE: 'Juni', PL: 'czerwca' },
-  'июля': { EN: 'July', ES: 'julio', RU: 'июля', CZ: 'července', DE: 'Juli', PL: 'lipca' },
-  'августа': { EN: 'August', ES: 'agosto', RU: 'августа', CZ: 'srpna', DE: 'August', PL: 'sierpnia' },
-  'сентября': { EN: 'September', ES: 'septiembre', RU: 'сентября', CZ: 'září', DE: 'September', PL: 'września' },
-  'октября': { EN: 'October', ES: 'octubre', RU: 'октября', CZ: 'října', DE: 'Oktober', PL: 'października' },
-  'ноября': { EN: 'November', ES: 'noviembre', RU: 'ноября', CZ: 'listopadu', DE: 'November', PL: 'listopada' },
-  'декабря': { EN: 'December', ES: 'diciembre', RU: 'декабря', CZ: 'prosince', DE: 'Dezember', PL: 'grudnia' },
+  января: { EN: 'January', ES: 'enero', RU: 'января', CZ: 'ledna', DE: 'Januar', PL: 'stycznia' },
+  февраля: { EN: 'February', ES: 'febrero', RU: 'февраля', CZ: 'února', DE: 'Februar', PL: 'lutego' },
+  марта: { EN: 'March', ES: 'marzo', RU: 'марта', CZ: 'března', DE: 'März', PL: 'marca' },
+  апреля: { EN: 'April', ES: 'abril', RU: 'апреля', CZ: 'dubna', DE: 'April', PL: 'kwietnia' },
+  мая: { EN: 'May', ES: 'mayo', RU: 'мая', CZ: 'května', DE: 'Mai', PL: 'maja' },
+  июня: { EN: 'June', ES: 'junio', RU: 'июня', CZ: 'června', DE: 'Juni', PL: 'czerwca' },
+  июля: { EN: 'July', ES: 'julio', RU: 'июля', CZ: 'července', DE: 'Juli', PL: 'lipca' },
+  августа: { EN: 'August', ES: 'agosto', RU: 'августа', CZ: 'srpna', DE: 'August', PL: 'sierpnia' },
+  сентября: { EN: 'September', ES: 'septiembre', RU: 'сентября', CZ: 'září', DE: 'September', PL: 'września' },
+  октября: { EN: 'October', ES: 'octubre', RU: 'октября', CZ: 'října', DE: 'Oktober', PL: 'października' },
+  ноября: { EN: 'November', ES: 'noviembre', RU: 'ноября', CZ: 'listopadu', DE: 'November', PL: 'listopada' },
+  декабря: { EN: 'December', ES: 'diciembre', RU: 'декабря', CZ: 'prosince', DE: 'Dezember', PL: 'grudnia' },
 };
 
 function getTexts(language: AppLanguage) {
-  return pageTexts[language as keyof typeof pageTexts] || pageTexts.EN;
+  return pageTexts[language] || pageTexts.EN;
 }
 
 function formatPrice(price: number) {
@@ -438,7 +444,11 @@ function translateServiceName(value: string, language: AppLanguage) {
   return serviceNameMap[value]?.[language] || value;
 }
 
-function translateDateLabel(value: string, language: AppLanguage, text: ReturnType<typeof getTexts>) {
+function translateDateLabel(
+  value: string,
+  language: AppLanguage,
+  text: ReturnType<typeof getTexts>
+) {
   const source = String(value || '').trim();
   if (!source) return source;
 
@@ -1056,7 +1066,7 @@ export default function BookingsPage() {
           </section>
         </div>
 
-        <BottomNav />
+        <BottomNav active="bookings" />
       </main>
 
       {selectedMenuBooking ? (
@@ -1167,512 +1177,514 @@ export default function BookingsPage() {
         </div>
       ) : null}
 
-      {selectedDetailsBooking ? (() => {
-        const detailsUnlocked = canShowExactAddress(selectedDetailsBooking);
-        const contactsUnlocked = canShowDirectContacts(selectedDetailsBooking);
-        const visibleAddress = getVisibleBookingLocation(selectedDetailsBooking);
-        const safeArea = getPublicBookingLocation(selectedDetailsBooking);
-        const protectedContacts = getProtectedBookingContact(selectedDetailsBooking);
+      {selectedDetailsBooking
+        ? (() => {
+            const detailsUnlocked = canShowExactAddress(selectedDetailsBooking);
+            const contactsUnlocked = canShowDirectContacts(selectedDetailsBooking);
+            const visibleAddress = getVisibleBookingLocation(selectedDetailsBooking);
+            const safeArea = getPublicBookingLocation(selectedDetailsBooking);
+            const protectedContacts = getProtectedBookingContact(selectedDetailsBooking);
 
-        return (
-          <div
-            onClick={() => setDetailsBookingId(null)}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(17,17,17,0.22)',
-              zIndex: 220,
-              display: 'flex',
-              alignItems: 'flex-end',
-              justifyContent: 'center',
-            }}
-          >
-            <div
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                width: '100%',
-                maxWidth: 430,
-                maxHeight: '88vh',
-                overflowY: 'auto',
-                padding: '0 16px calc(18px + env(safe-area-inset-bottom))',
-                boxSizing: 'border-box',
-              }}
-            >
+            return (
               <div
+                onClick={() => setDetailsBookingId(null)}
                 style={{
-                  background: '#fff',
-                  border: '2px solid #111111',
-                  borderRadius: 30,
-                  padding: 18,
-                  boxShadow: '0 22px 44px rgba(0,0,0,0.2)',
+                  position: 'fixed',
+                  inset: 0,
+                  background: 'rgba(17,17,17,0.22)',
+                  zIndex: 220,
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'center',
                 }}
               >
                 <div
+                  onClick={(e) => e.stopPropagation()}
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: '96px 1fr auto',
-                    gap: 14,
-                    alignItems: 'center',
+                    width: '100%',
+                    maxWidth: 430,
+                    maxHeight: '88vh',
+                    overflowY: 'auto',
+                    padding: '0 16px calc(18px + env(safe-area-inset-bottom))',
+                    boxSizing: 'border-box',
                   }}
                 >
-                  <img
-                    src={
-                      selectedDetailsBooking.masterAvatar ||
-                      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80'
-                    }
-                    alt={selectedDetailsBooking.masterName}
-                    style={{
-                      width: 96,
-                      height: 96,
-                      objectFit: 'cover',
-                      borderRadius: 22,
-                      border: '2px solid #111111',
-                    }}
-                  />
-
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: '#9a9086' }}>
-                      {text.provider}
-                    </div>
-                    <div style={{ marginTop: 4, fontSize: 20, fontWeight: 900, color: '#17130f' }}>
-                      {selectedDetailsBooking.masterName}
-                    </div>
-                    <div style={{ marginTop: 6, fontSize: 15, fontWeight: 700, color: '#6d6d6d' }}>
-                      {translateServiceName(selectedDetailsBooking.serviceName, language)}
-                    </div>
-                  </div>
-
-                  <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
-                    {formatPrice(selectedDetailsBooking.price)}
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gap: 14, marginTop: 18 }}>
                   <div
                     style={{
-                      border: '2px solid #111111',
-                      borderRadius: 28,
-                      padding: 16,
                       background: '#fff',
+                      border: '2px solid #111111',
+                      borderRadius: 30,
+                      padding: 18,
+                      boxShadow: '0 22px 44px rgba(0,0,0,0.2)',
                     }}
                   >
-                    <div style={{ fontSize: 17, fontWeight: 900, color: '#17130f' }}>
-                      {text.bookingSummary}
-                    </div>
-
                     <div
                       style={{
-                        marginTop: 14,
                         display: 'grid',
-                        gridTemplateColumns: '1fr 1fr',
+                        gridTemplateColumns: '96px 1fr auto',
                         gap: 14,
-                      }}
-                    >
-                      <div
-                        style={{
-                          minHeight: 118,
-                          border: '2px solid #111111',
-                          borderRadius: 24,
-                          padding: 16,
-                          background: '#fff',
-                        }}
-                      >
-                        <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
-                          {text.dateTime}
-                        </div>
-                        <div
-                          style={{
-                            marginTop: 12,
-                            fontSize: 18,
-                            lineHeight: 1.4,
-                            fontWeight: 900,
-                            color: '#17130f',
-                          }}
-                        >
-                          {translateDateLabel(selectedDetailsBooking.dateLabel, language, text)}
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          minHeight: 118,
-                          border: '2px solid #111111',
-                          borderRadius: 24,
-                          padding: 16,
-                          background: '#fff',
-                        }}
-                      >
-                        <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
-                          {text.total}
-                        </div>
-                        <div
-                          style={{
-                            marginTop: 12,
-                            fontSize: 18,
-                            lineHeight: 1.4,
-                            fontWeight: 900,
-                            color: '#17130f',
-                          }}
-                        >
-                          {formatPrice(selectedDetailsBooking.price)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: 14,
-                        border: '2px solid #111111',
-                        borderRadius: 24,
-                        padding: 16,
-                        background: detailsUnlocked ? '#dff0e7' : '#f4f0ea',
-                        color: detailsUnlocked ? '#1f7b47' : '#7b7268',
-                      }}
-                    >
-                      <div style={{ fontSize: 16, fontWeight: 900 }}>
-                        {detailsUnlocked ? text.detailsUnlocked : text.detailsLocked}
-                      </div>
-                      <div style={{ marginTop: 10, fontSize: 15, fontWeight: 800, lineHeight: 1.45 }}>
-                        {detailsUnlocked
-                          ? `${text.exactAddress}: ${visibleAddress}`
-                          : `${text.area}: ${safeArea}`}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      border: '2px solid #111111',
-                      borderRadius: 28,
-                      padding: 16,
-                      background: '#fff',
-                      position: 'relative',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
                         alignItems: 'center',
-                        gap: 10,
                       }}
                     >
-                      <div style={{ fontSize: 17, fontWeight: 900, color: '#17130f' }}>
-                        {text.contactAndAddress}
+                      <img
+                        src={
+                          selectedDetailsBooking.masterAvatar ||
+                          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80'
+                        }
+                        alt={selectedDetailsBooking.masterName}
+                        style={{
+                          width: 96,
+                          height: 96,
+                          objectFit: 'cover',
+                          borderRadius: 22,
+                          border: '2px solid #111111',
+                        }}
+                      />
+
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 800, color: '#9a9086' }}>
+                          {text.provider}
+                        </div>
+                        <div style={{ marginTop: 4, fontSize: 20, fontWeight: 900, color: '#17130f' }}>
+                          {selectedDetailsBooking.masterName}
+                        </div>
+                        <div style={{ marginTop: 6, fontSize: 15, fontWeight: 700, color: '#6d6d6d' }}>
+                          {translateServiceName(selectedDetailsBooking.serviceName, language)}
+                        </div>
                       </div>
 
-                      <div
-                        style={{
-                          minHeight: 40,
-                          padding: '0 14px',
-                          borderRadius: 999,
-                          border: '2px solid #111111',
-                          background: '#dff0e7',
-                          color: '#1f7b47',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          fontSize: 13,
-                          fontWeight: 900,
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {text.bookingAccess}
+                      <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
+                        {formatPrice(selectedDetailsBooking.price)}
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
+                    <div style={{ display: 'grid', gap: 14, marginTop: 18 }}>
                       <div
                         style={{
                           border: '2px solid #111111',
-                          borderRadius: 22,
-                          padding: 14,
+                          borderRadius: 28,
+                          padding: 16,
                           background: '#fff',
-                          opacity: contactsUnlocked ? 1 : 0.45,
                         }}
                       >
-                        <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
-                          {text.phone}
+                        <div style={{ fontSize: 17, fontWeight: 900, color: '#17130f' }}>
+                          {text.bookingSummary}
                         </div>
-                        <div style={{ marginTop: 10, fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                          {protectedContacts.phone || text.lockedValue}
-                        </div>
-                      </div>
 
-                      <div
-                        style={{
-                          border: '2px solid #111111',
-                          borderRadius: 22,
-                          padding: 14,
-                          background: '#fff',
-                          opacity: contactsUnlocked ? 1 : 0.45,
-                        }}
-                      >
-                        <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
-                          {text.email}
-                        </div>
-                        <div style={{ marginTop: 10, fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                          {protectedContacts.email || text.lockedValue}
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          border: '2px solid #111111',
-                          borderRadius: 22,
-                          padding: 14,
-                          background: '#fff',
-                          opacity: detailsUnlocked ? 1 : 0.45,
-                        }}
-                      >
-                        <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
-                          {detailsUnlocked ? text.exactAddress : text.area}
-                        </div>
-                        <div style={{ marginTop: 10, fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                          {detailsUnlocked ? visibleAddress : safeArea}
-                        </div>
-                      </div>
-                    </div>
-
-                    {!contactsUnlocked ? (
-                      <div
-                        style={{
-                          marginTop: 14,
-                          border: '2px dashed #111111',
-                          borderRadius: 22,
-                          padding: 14,
-                          background: '#faf7f2',
-                        }}
-                      >
-                        <div style={{ fontSize: 15, fontWeight: 900, color: '#17130f' }}>
-                          {text.contactsHiddenTitle}
-                        </div>
                         <div
                           style={{
-                            marginTop: 8,
-                            fontSize: 13,
-                            lineHeight: 1.45,
-                            fontWeight: 700,
-                            color: '#6f675f',
+                            marginTop: 14,
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: 14,
                           }}
                         >
-                          {text.contactsHiddenText}
+                          <div
+                            style={{
+                              minHeight: 118,
+                              border: '2px solid #111111',
+                              borderRadius: 24,
+                              padding: 16,
+                              background: '#fff',
+                            }}
+                          >
+                            <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
+                              {text.dateTime}
+                            </div>
+                            <div
+                              style={{
+                                marginTop: 12,
+                                fontSize: 18,
+                                lineHeight: 1.4,
+                                fontWeight: 900,
+                                color: '#17130f',
+                              }}
+                            >
+                              {translateDateLabel(selectedDetailsBooking.dateLabel, language, text)}
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              minHeight: 118,
+                              border: '2px solid #111111',
+                              borderRadius: 24,
+                              padding: 16,
+                              background: '#fff',
+                            }}
+                          >
+                            <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
+                              {text.total}
+                            </div>
+                            <div
+                              style={{
+                                marginTop: 12,
+                                fontSize: 18,
+                                lineHeight: 1.4,
+                                fontWeight: 900,
+                                color: '#17130f',
+                              }}
+                            >
+                              {formatPrice(selectedDetailsBooking.price)}
+                            </div>
+                          </div>
                         </div>
 
                         <div
                           style={{
-                            marginTop: 10,
+                            marginTop: 14,
+                            border: '2px solid #111111',
+                            borderRadius: 24,
+                            padding: 16,
+                            background: detailsUnlocked ? '#dff0e7' : '#f4f0ea',
+                            color: detailsUnlocked ? '#1f7b47' : '#7b7268',
+                          }}
+                        >
+                          <div style={{ fontSize: 16, fontWeight: 900 }}>
+                            {detailsUnlocked ? text.detailsUnlocked : text.detailsLocked}
+                          </div>
+                          <div style={{ marginTop: 10, fontSize: 15, fontWeight: 800, lineHeight: 1.45 }}>
+                            {detailsUnlocked
+                              ? `${text.exactAddress}: ${visibleAddress}`
+                              : `${text.area}: ${safeArea}`}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          border: '2px solid #111111',
+                          borderRadius: 28,
+                          padding: 16,
+                          background: '#fff',
+                          position: 'relative',
+                        }}
+                      >
+                        <div
+                          style={{
                             display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 8,
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            gap: 10,
                           }}
                         >
-                          {!selectedDetailsBooking.bookingConfirmedByMaster ? (
-                            <span
-                              style={{
-                                minHeight: 36,
-                                padding: '0 12px',
-                                borderRadius: 999,
-                                border: '2px solid #111111',
-                                background: '#fff0da',
-                                color: '#c07a00',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                fontSize: 12,
-                                fontWeight: 900,
-                              }}
-                            >
-                              {text.waitingMaster}
-                            </span>
-                          ) : null}
+                          <div style={{ fontSize: 17, fontWeight: 900, color: '#17130f' }}>
+                            {text.contactAndAddress}
+                          </div>
 
-                          {!selectedDetailsBooking.clientPaid ||
-                          !selectedDetailsBooking.paymentReceivedByPlatform ? (
-                            <span
-                              style={{
-                                minHeight: 36,
-                                padding: '0 12px',
-                                borderRadius: 999,
-                                border: '2px solid #111111',
-                                background: '#eef3ff',
-                                color: '#2959b7',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                fontSize: 12,
-                                fontWeight: 900,
-                              }}
-                            >
-                              {text.waitingPayment}
-                            </span>
-                          ) : null}
-
-                          {!selectedDetailsBooking.promotionPaidByMaster ? (
-                            <span
-                              style={{
-                                minHeight: 36,
-                                padding: '0 12px',
-                                borderRadius: 999,
-                                border: '2px solid #111111',
-                                background: '#fdeaea',
-                                color: '#c74343',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                fontSize: 12,
-                                fontWeight: 900,
-                              }}
-                            >
-                              {text.waitingPromotion}
-                            </span>
-                          ) : null}
+                          <div
+                            style={{
+                              minHeight: 40,
+                              padding: '0 14px',
+                              borderRadius: 999,
+                              border: '2px solid #111111',
+                              background: '#dff0e7',
+                              color: '#1f7b47',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              fontSize: 13,
+                              fontWeight: 900,
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {text.bookingAccess}
+                          </div>
                         </div>
+
+                        <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
+                          <div
+                            style={{
+                              border: '2px solid #111111',
+                              borderRadius: 22,
+                              padding: 14,
+                              background: '#fff',
+                              opacity: contactsUnlocked ? 1 : 0.45,
+                            }}
+                          >
+                            <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
+                              {text.phone}
+                            </div>
+                            <div style={{ marginTop: 10, fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                              {protectedContacts.phone || text.lockedValue}
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              border: '2px solid #111111',
+                              borderRadius: 22,
+                              padding: 14,
+                              background: '#fff',
+                              opacity: contactsUnlocked ? 1 : 0.45,
+                            }}
+                          >
+                            <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
+                              {text.email}
+                            </div>
+                            <div style={{ marginTop: 10, fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                              {protectedContacts.email || text.lockedValue}
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              border: '2px solid #111111',
+                              borderRadius: 22,
+                              padding: 14,
+                              background: '#fff',
+                              opacity: detailsUnlocked ? 1 : 0.45,
+                            }}
+                          >
+                            <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
+                              {detailsUnlocked ? text.exactAddress : text.area}
+                            </div>
+                            <div style={{ marginTop: 10, fontSize: 16, fontWeight: 900, color: '#17130f' }}>
+                              {detailsUnlocked ? visibleAddress : safeArea}
+                            </div>
+                          </div>
+                        </div>
+
+                        {!contactsUnlocked ? (
+                          <div
+                            style={{
+                              marginTop: 14,
+                              border: '2px dashed #111111',
+                              borderRadius: 22,
+                              padding: 14,
+                              background: '#faf7f2',
+                            }}
+                          >
+                            <div style={{ fontSize: 15, fontWeight: 900, color: '#17130f' }}>
+                              {text.contactsHiddenTitle}
+                            </div>
+                            <div
+                              style={{
+                                marginTop: 8,
+                                fontSize: 13,
+                                lineHeight: 1.45,
+                                fontWeight: 700,
+                                color: '#6f675f',
+                              }}
+                            >
+                              {text.contactsHiddenText}
+                            </div>
+
+                            <div
+                              style={{
+                                marginTop: 10,
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: 8,
+                              }}
+                            >
+                              {!selectedDetailsBooking.bookingConfirmedByMaster ? (
+                                <span
+                                  style={{
+                                    minHeight: 36,
+                                    padding: '0 12px',
+                                    borderRadius: 999,
+                                    border: '2px solid #111111',
+                                    background: '#fff0da',
+                                    color: '#c07a00',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    fontSize: 12,
+                                    fontWeight: 900,
+                                  }}
+                                >
+                                  {text.waitingMaster}
+                                </span>
+                              ) : null}
+
+                              {!selectedDetailsBooking.clientPaid ||
+                              !selectedDetailsBooking.paymentReceivedByPlatform ? (
+                                <span
+                                  style={{
+                                    minHeight: 36,
+                                    padding: '0 12px',
+                                    borderRadius: 999,
+                                    border: '2px solid #111111',
+                                    background: '#eef3ff',
+                                    color: '#2959b7',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    fontSize: 12,
+                                    fontWeight: 900,
+                                  }}
+                                >
+                                  {text.waitingPayment}
+                                </span>
+                              ) : null}
+
+                              {!selectedDetailsBooking.promotionPaidByMaster ? (
+                                <span
+                                  style={{
+                                    minHeight: 36,
+                                    padding: '0 12px',
+                                    borderRadius: 999,
+                                    border: '2px solid #111111',
+                                    background: '#fdeaea',
+                                    color: '#c74343',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    fontSize: 12,
+                                    fontWeight: 900,
+                                  }}
+                                >
+                                  {text.waitingPromotion}
+                                </span>
+                              ) : null}
+                            </div>
+                          </div>
+                        ) : null}
+
+                        <div
+                          style={{
+                            marginTop: 14,
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: 12,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (
+                                !protectedContacts.whatsapp &&
+                                !protectedContacts.telegram &&
+                                !protectedContacts.instagram &&
+                                !protectedContacts.email
+                              ) {
+                                return;
+                              }
+                            }}
+                            style={{
+                              minHeight: 54,
+                              borderRadius: 20,
+                              border: '2px solid #111111',
+                              background: '#eef3ff',
+                              color: '#2959b7',
+                              fontSize: 16,
+                              fontWeight: 900,
+                              cursor:
+                                protectedContacts.whatsapp ||
+                                protectedContacts.telegram ||
+                                protectedContacts.instagram ||
+                                protectedContacts.email
+                                  ? 'pointer'
+                                  : 'not-allowed',
+                              opacity:
+                                protectedContacts.whatsapp ||
+                                protectedContacts.telegram ||
+                                protectedContacts.instagram ||
+                                protectedContacts.email
+                                  ? 1
+                                  : 0.55,
+                            }}
+                          >
+                            {protectedContacts.whatsapp ||
+                            protectedContacts.telegram ||
+                            protectedContacts.instagram ||
+                            protectedContacts.email
+                              ? text.writeSeller
+                              : text.noMessageAction}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!protectedContacts.phone) return;
+                              window.location.href = `tel:${protectedContacts.phone}`;
+                            }}
+                            style={{
+                              minHeight: 54,
+                              borderRadius: 20,
+                              border: '2px solid #111111',
+                              background: '#dff0e7',
+                              color: '#1f7b47',
+                              fontSize: 16,
+                              fontWeight: 900,
+                              cursor: protectedContacts.phone ? 'pointer' : 'not-allowed',
+                              opacity: protectedContacts.phone ? 1 : 0.55,
+                            }}
+                          >
+                            {protectedContacts.phone ? text.callSeller : text.noPhoneAction}
+                          </button>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!detailsUnlocked) return;
+                            const destination = encodeURIComponent(visibleAddress);
+                            window.open(
+                              `https://www.google.com/maps/search/?api=1&query=${destination}`,
+                              '_blank'
+                            );
+                          }}
+                          style={{
+                            marginTop: 12,
+                            width: '100%',
+                            minHeight: 58,
+                            borderRadius: 22,
+                            border: '2px solid #111111',
+                            background: '#f94ca0',
+                            color: '#ffffff',
+                            fontSize: 17,
+                            fontWeight: 900,
+                            cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
+                            opacity: detailsUnlocked ? 1 : 0.55,
+                          }}
+                        >
+                          {detailsUnlocked ? text.routeToMaster : text.noRouteAction}
+                        </button>
                       </div>
-                    ) : null}
-
-                    <div
-                      style={{
-                        marginTop: 14,
-                        display: 'grid',
-                        gridTemplateColumns: '1fr 1fr',
-                        gap: 12,
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (
-                            !protectedContacts.whatsapp &&
-                            !protectedContacts.telegram &&
-                            !protectedContacts.instagram &&
-                            !protectedContacts.email
-                          ) {
-                            return;
-                          }
-                        }}
-                        style={{
-                          minHeight: 54,
-                          borderRadius: 20,
-                          border: '2px solid #111111',
-                          background: '#eef3ff',
-                          color: '#2959b7',
-                          fontSize: 16,
-                          fontWeight: 900,
-                          cursor:
-                            protectedContacts.whatsapp ||
-                            protectedContacts.telegram ||
-                            protectedContacts.instagram ||
-                            protectedContacts.email
-                              ? 'pointer'
-                              : 'not-allowed',
-                          opacity:
-                            protectedContacts.whatsapp ||
-                            protectedContacts.telegram ||
-                            protectedContacts.instagram ||
-                            protectedContacts.email
-                              ? 1
-                              : 0.55,
-                        }}
-                      >
-                        {protectedContacts.whatsapp ||
-                        protectedContacts.telegram ||
-                        protectedContacts.instagram ||
-                        protectedContacts.email
-                          ? text.writeSeller
-                          : text.noMessageAction}
-                      </button>
 
                       <button
                         type="button"
-                        onClick={() => {
-                          if (!protectedContacts.phone) return;
-                          window.location.href = `tel:${protectedContacts.phone}`;
-                        }}
+                        onClick={() => setDetailsBookingId(null)}
                         style={{
-                          minHeight: 54,
-                          borderRadius: 20,
+                          minHeight: 58,
+                          width: '100%',
+                          borderRadius: 22,
                           border: '2px solid #111111',
-                          background: '#dff0e7',
-                          color: '#1f7b47',
-                          fontSize: 16,
+                          background: '#2f241c',
+                          color: '#ffffff',
+                          fontSize: 18,
                           fontWeight: 900,
-                          cursor: protectedContacts.phone ? 'pointer' : 'not-allowed',
-                          opacity: protectedContacts.phone ? 1 : 0.55,
+                          cursor: 'pointer',
                         }}
                       >
-                        {protectedContacts.phone ? text.callSeller : text.noPhoneAction}
+                        {text.closeDetails}
                       </button>
+
+                      {(selectedDetailsBooking.status === 'completed' ||
+                        selectedDetailsBooking.status === 'cancelled') && (
+                        <button
+                          type="button"
+                          onClick={() => handleRebook(selectedDetailsBooking)}
+                          style={{
+                            minHeight: 58,
+                            width: '100%',
+                            borderRadius: 22,
+                            border: '2px solid #111111',
+                            background: '#eaf2ff',
+                            color: '#1f4fa8',
+                            fontSize: 17,
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {text.rebook}
+                        </button>
+                      )}
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!detailsUnlocked) return;
-                        const destination = encodeURIComponent(visibleAddress);
-                        window.open(
-                          `https://www.google.com/maps/search/?api=1&query=${destination}`,
-                          '_blank'
-                        );
-                      }}
-                      style={{
-                        marginTop: 12,
-                        width: '100%',
-                        minHeight: 58,
-                        borderRadius: 22,
-                        border: '2px solid #111111',
-                        background: '#f94ca0',
-                        color: '#ffffff',
-                        fontSize: 17,
-                        fontWeight: 900,
-                        cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
-                        opacity: detailsUnlocked ? 1 : 0.55,
-                      }}
-                    >
-                      {detailsUnlocked ? text.routeToMaster : text.noRouteAction}
-                    </button>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setDetailsBookingId(null)}
-                    style={{
-                      minHeight: 58,
-                      width: '100%',
-                      borderRadius: 22,
-                      border: '2px solid #111111',
-                      background: '#2f241c',
-                      color: '#ffffff',
-                      fontSize: 18,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {text.serviceDetails}
-                  </button>
-
-                  {(selectedDetailsBooking.status === 'completed' ||
-                    selectedDetailsBooking.status === 'cancelled') && (
-                    <button
-                      type="button"
-                      onClick={() => handleRebook(selectedDetailsBooking)}
-                      style={{
-                        minHeight: 58,
-                        width: '100%',
-                        borderRadius: 22,
-                        border: '2px solid #111111',
-                        background: '#eaf2ff',
-                        color: '#1f4fa8',
-                        fontSize: 17,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {text.rebook}
-                    </button>
-                  )}
                 </div>
               </div>
-            </div>
-          </div>
-        );
-      })() : null}
+            );
+          })()
+        : null}
     </>
   );
 }
