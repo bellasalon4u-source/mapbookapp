@@ -89,6 +89,23 @@ function getTexts(language: AppLanguage) {
     };
   }
 
+  if (language === 'UA') {
+    return {
+      notFound: 'Спеціаліста не знайдено',
+      chooseServices: 'Оберіть послуги',
+      services: 'Послуги',
+      totalDuration: 'Загальна тривалість',
+      totalPrice: 'Загальна ціна',
+      continue: 'Продовжити',
+      from: 'від',
+      providerFallback: 'Спеціаліст',
+      serviceProviderFallback: 'Виконавець послуг',
+      serviceFallback: 'Основна послуга',
+      premiumOption: 'Преміум варіант',
+      zeroMinutes: '0хв',
+    };
+  }
+
   if (language === 'ES') {
     return {
       notFound: 'Profesional no encontrado',
@@ -180,11 +197,35 @@ export default function BookingServicePage() {
   const id = String(params.id);
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
   const text = useMemo(() => getTexts(language), [language]);
 
   const allMasters = getAllMasters() as any[];
   const listings = getListings() as ListingLike[];
+
+  useEffect(() => {
+    const syncLanguage = () => {
+      setLanguage(getSavedLanguage());
+    };
+
+    syncLanguage();
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    window.addEventListener('focus', syncLanguage);
+    window.addEventListener('pageshow', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
+
+    return () => {
+      unsubLanguage();
+      window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('pageshow', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
+    };
+  }, []);
 
   const master = useMemo(() => {
     const builtInMaster = getMasterById(id);
@@ -193,6 +234,7 @@ export default function BookingServicePage() {
     const listingIndex = listings.findIndex((item) => String(item.id) === id);
     if (listingIndex !== -1) {
       const mapped = listingToMasterShape(listings[listingIndex], listingIndex);
+
       return {
         ...mapped,
         name: listings[listingIndex].title || text.providerFallback,
@@ -207,9 +249,7 @@ export default function BookingServicePage() {
             duration: listings[listingIndex].hours || '1h',
             price:
               Number(String(listings[listingIndex].price || '').replace(/[^\d.]/g, '')) || 45,
-            image:
-              mapped.services?.[0]?.image ||
-              mapped.avatar,
+            image: mapped.services?.[0]?.image || mapped.avatar,
           },
           {
             slug: 'premium-service',
@@ -219,9 +259,7 @@ export default function BookingServicePage() {
               (Number(String(listings[listingIndex].price || '').replace(/[^\d.]/g, '')) || 45) +
               20,
             image:
-              mapped.services?.[1]?.image ||
-              mapped.services?.[0]?.image ||
-              mapped.avatar,
+              mapped.services?.[1]?.image || mapped.services?.[0]?.image || mapped.avatar,
           },
         ],
       };
@@ -234,27 +272,12 @@ export default function BookingServicePage() {
   }, [id, listings, allMasters, text]);
 
   const preselectedService = searchParams.get('service') || '';
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-
-  useEffect(() => {
-    setLanguage(getSavedLanguage());
-
-    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
-      setLanguage(nextLanguage);
-    });
-
-    return () => {
-      unsubLanguage();
-    };
-  }, []);
 
   useEffect(() => {
     if (!master) return;
     if (!preselectedService) return;
 
-    const exists = master.services.some(
-      (service: any) => service.slug === preselectedService
-    );
+    const exists = master.services.some((service: any) => service.slug === preselectedService);
 
     if (exists) {
       setSelectedServices([preselectedService]);
@@ -275,10 +298,7 @@ export default function BookingServicePage() {
     selectedServices.includes(service.slug)
   );
 
-  const totalPrice = selectedItems.reduce(
-    (sum: number, item: any) => sum + item.price,
-    0
-  );
+  const totalPrice = selectedItems.reduce((sum: number, item: any) => sum + item.price, 0);
 
   const parseDurationToMinutes = (value: string) => {
     const hourMatch = value.match(/(\d+)\s*h/i);
@@ -303,6 +323,12 @@ export default function BookingServicePage() {
       if (h > 0 && m > 0) return `${h}ч ${m}м`;
       if (h > 0) return `${h}ч`;
       return `${m}м`;
+    }
+
+    if (language === 'UA') {
+      if (h > 0 && m > 0) return `${h}г ${m}хв`;
+      if (h > 0) return `${h}г`;
+      return `${m}хв`;
     }
 
     if (language === 'ES') {
