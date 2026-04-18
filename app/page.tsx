@@ -307,7 +307,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       RU: 'Питомцы',
       CZ: 'Mazlíčci',
       DE: 'Haustiere',
-      PL: 'Zwierzęта',
+      PL: 'Zwierzęta',
       UA: 'Улюбленці',
     },
     fashion: {
@@ -410,7 +410,10 @@ function saveRecentSearch(value: string) {
 
   const key = 'mapbook_recent_searches';
   const current = JSON.parse(window.localStorage.getItem(key) || '[]') as string[];
-  const next = [trimmed, ...current.filter((item) => item.toLowerCase() !== trimmed.toLowerCase())].slice(0, 6);
+  const next = [
+    trimmed,
+    ...current.filter((item) => item.toLowerCase() !== trimmed.toLowerCase()),
+  ].slice(0, 6);
   window.localStorage.setItem(key, JSON.stringify(next));
 }
 
@@ -445,7 +448,7 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
   const titleWords = normalizedTitle.split(' ').filter((word) => word.length > 2);
 
   const exactByMasterId = masters.find(
-    (master: any) => String(master.id) === String(promo.masterId)
+    (master: any) => String(master.id) === String((promo as any).masterId)
   );
 
   if (exactByMasterId) return exactByMasterId;
@@ -480,6 +483,65 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
   if (best && best.score > 0) return best.master;
 
   return sameCategory[0] || null;
+}
+
+function isPromotionInCategory(promo: PromotionItem, categoryId: string) {
+  return String((promo as any).categoryId || '')
+    .toLowerCase()
+    .trim() === String(categoryId || '').toLowerCase().trim();
+}
+
+function extractPromotionDiscountBadge(promo: PromotionItem) {
+  const anyPromo = promo as any;
+
+  const rawCandidates = [
+    anyPromo.discountBadge,
+    anyPromo.badgeText,
+    anyPromo.discountText,
+    anyPromo.discountLabel,
+    anyPromo.discount,
+  ];
+
+  for (const candidate of rawCandidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      const value = candidate.trim();
+      if (value.includes('%')) {
+        return value.startsWith('-') ? value : `-${value.replace(/^-/, '')}`;
+      }
+      return value;
+    }
+  }
+
+  const numericCandidates = [
+    anyPromo.discountPercent,
+    anyPromo.discount_percentage,
+    anyPromo.percentOff,
+    anyPromo.salePercent,
+  ];
+
+  for (const candidate of numericCandidates) {
+    if (typeof candidate === 'number' && Number.isFinite(candidate)) {
+      return `-${candidate}%`;
+    }
+
+    if (typeof candidate === 'string' && candidate.trim()) {
+      const parsed = Number(candidate.replace('%', '').trim());
+      if (Number.isFinite(parsed)) {
+        return `-${parsed}%`;
+      }
+    }
+  }
+
+  const subtitle = String(anyPromo.subtitle || '');
+  const title = String(anyPromo.title || '');
+  const combined = `${title} ${subtitle}`;
+  const match = combined.match(/(\d{1,2})\s?%/);
+
+  if (match) {
+    return `-${match[1]}%`;
+  }
+
+  return '';
 }
 
 export default function HomePage() {
@@ -772,6 +834,76 @@ export default function HomePage() {
     });
   }, [allMasters, activeCategory, activeSubcategory, search, likedMasterIds, likedFilterMode]);
 
+  const categoryDealsCount = useMemo(() => {
+    return promotions.filter((promo) => isPromotionInCategory(promo, activeCategory)).length;
+  }, [promotions, activeCategory]);
+
+  const allDealsCount = promotions.length;
+
+  const filteredPromotions = useMemo(() => {
+    if (dealFilterMode === 'category') {
+      return promotions.filter((promo) => isPromotionInCategory(promo, activeCategory));
+    }
+
+    if (dealFilterMode === 'all') {
+      return promotions;
+    }
+
+    return promotions;
+  }, [promotions, dealFilterMode, activeCategory]);
+
+  const promotionMasters = useMemo(() => {
+    if (dealFilterMode === 'none') return [] as any[];
+
+    const sourcePromotions =
+      dealFilterMode === 'category'
+        ? promotions.filter((promo) => isPromotionInCategory(promo, activeCategory))
+        : promotions;
+
+    const uniqueMasters = new Map<string, any>();
+
+    sourcePromotions.forEach((promo) => {
+      const matchedMaster = findPromotionMaster(promo, allMasters);
+      if (!matchedMaster) return;
+
+      const masterId = String(matchedMaster.id);
+      const discountBadge = extractPromotionDiscountBadge(promo);
+
+      if (!uniqueMasters.has(masterId)) {
+        uniqueMasters.set(masterId, {
+          ...matchedMaster,
+          discountBadge,
+        });
+        return;
+      }
+
+      const existing = uniqueMasters.get(masterId);
+      if (!existing.discountBadge && discountBadge) {
+        uniqueMasters.set(masterId, {
+          ...existing,
+          discountBadge,
+        });
+      }
+    });
+
+    return Array.from(uniqueMasters.values());
+  }, [dealFilterMode, promotions, activeCategory, allMasters]);
+
+  const promotionBadgeTextByMasterId = useMemo(() => {
+    const entries = promotionMasters.map((master) => [
+      String(master.id),
+      String(master.discountBadge || ''),
+    ]);
+    return Object.fromEntries(entries);
+  }, [promotionMasters]);
+
+  const mapMasters = useMemo(() => {
+    if (dealFilterMode !== 'none') {
+      return promotionMasters;
+    }
+    return filteredMasters;
+  }, [dealFilterMode, promotionMasters, filteredMasters]);
+
   useEffect(() => {
     setSelectedMaster(null);
   }, [activeCategory, activeSubcategory, search, likedFilterMode, dealFilterMode]);
@@ -787,26 +919,6 @@ export default function HomePage() {
 
   const likedAllCount = likedMasterIds.length;
 
-  const categoryDealsCount = promotions.filter(
-    (promo) => String(promo.categoryId || '').toLowerCase().trim() === activeCategory
-  ).length;
-
-  const allDealsCount = promotions.length;
-
-  const filteredPromotions = useMemo(() => {
-    if (dealFilterMode === 'category') {
-      return promotions.filter(
-        (promo) => String(promo.categoryId || '').toLowerCase().trim() === activeCategory
-      );
-    }
-
-    if (dealFilterMode === 'all') {
-      return promotions;
-    }
-
-    return promotions;
-  }, [promotions, dealFilterMode, activeCategory]);
-
   const hasAnyResults =
     smartResults.length > 0 ||
     categoryResults.length > 0 ||
@@ -818,6 +930,7 @@ export default function HomePage() {
       setActiveCategory(result.categoryId);
       setActiveSubcategory(result.subcategory);
       setLikedFilterMode('none');
+      setDealFilterMode('none');
       setSearch(result.label);
       setSearchOpen(false);
       saveRecentSearch(result.label);
@@ -829,6 +942,7 @@ export default function HomePage() {
       setActiveCategory(result.categoryId);
       setActiveSubcategory('');
       setLikedFilterMode('none');
+      setDealFilterMode('none');
       setSearch(result.label);
       setSearchOpen(false);
       saveRecentSearch(result.label);
@@ -840,6 +954,7 @@ export default function HomePage() {
       setActiveCategory(result.categoryId);
       setActiveSubcategory(result.label);
       setLikedFilterMode('none');
+      setDealFilterMode('none');
       setSearch(result.label);
       setSearchOpen(false);
       saveRecentSearch(result.label);
@@ -850,6 +965,7 @@ export default function HomePage() {
     setActiveCategory(String(result.master.category || 'beauty'));
     setActiveSubcategory(result.master.subcategory || '');
     setLikedFilterMode('none');
+    setDealFilterMode('none');
     setSelectedMaster(result.master);
     setSearch(result.label);
     setSearchOpen(false);
@@ -879,9 +995,10 @@ export default function HomePage() {
       return;
     }
 
-    setActiveCategory(String(promo.categoryId || 'beauty'));
+    setActiveCategory(String((promo as any).categoryId || 'beauty'));
     setActiveSubcategory('');
     setLikedFilterMode('none');
+    setDealFilterMode('none');
     setSearch(promo.title);
     setSearchOpen(false);
     saveRecentSearch(promo.title);
@@ -1465,52 +1582,56 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '8px 10px 0' }}>
+        <section style={{ padding: '8px 12px 0' }}>
           <div
             style={{
               border: '2px solid #111111',
-              borderRadius: 28,
-              background: '#ffffff',
-              padding: 10,
+              borderRadius: 30,
+              background: '#fff',
+              padding: 14,
             }}
           >
             <div
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: 10,
+                gap: 12,
               }}
             >
               <button
-                onClick={() =>
-                  setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))
-                }
+                onClick={() => {
+                  setDealFilterMode('none');
+                  setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
+                }}
                 style={{
-                  minHeight: 70,
-                  border: '2px solid #111111',
+                  minHeight: 66,
+                  border: likedFilterMode === 'category' ? '3px solid #111111' : '2px solid #111111',
                   borderRadius: 24,
-                  background: '#3f70d2',
-                  color: '#ffffff',
+                  background: '#3d6dcc',
+                  color: '#fff',
                   cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 6,
-                  padding: '0 10px 0 12px',
+                  gap: 8,
+                  padding: '0 14px',
+                  boxShadow:
+                    likedFilterMode === 'category'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.35)'
+                      : 'none',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 8,
                     minWidth: 0,
-                    fontSize: 12.5,
+                    fontSize: 14,
                     fontWeight: 900,
-                    lineHeight: 1.05,
                   }}
                 >
-                  <span style={{ color: '#ff3355', fontSize: 17 }}>♥</span>
+                  <span style={{ color: '#ff3355', fontSize: 20 }}>♥</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1524,16 +1645,16 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: 42,
+                    height: 42,
                     borderRadius: 999,
                     border: '2px solid #111111',
-                    background: '#ffffff',
+                    background: '#fff',
                     color: '#111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: 900,
                     flexShrink: 0,
                   }}
@@ -1543,35 +1664,39 @@ export default function HomePage() {
               </button>
 
               <button
-                onClick={() =>
-                  setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))
-                }
+                onClick={() => {
+                  setLikedFilterMode('none');
+                  setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
+                }}
                 style={{
-                  minHeight: 70,
-                  border: '2px solid #111111',
+                  minHeight: 66,
+                  border: dealFilterMode === 'category' ? '3px solid #111111' : '2px solid #111111',
                   borderRadius: 24,
-                  background: '#f0dc32',
+                  background: dealFilterMode === 'category' ? '#f2d532' : '#ead35f',
                   color: '#111111',
                   cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 6,
-                  padding: '0 10px 0 12px',
+                  gap: 8,
+                  padding: '0 14px',
+                  boxShadow:
+                    dealFilterMode === 'category'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.45)'
+                      : 'none',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 8,
                     minWidth: 0,
-                    fontSize: 12.5,
+                    fontSize: 14,
                     fontWeight: 900,
-                    lineHeight: 1.05,
                   }}
                 >
-                  <span style={{ fontSize: 15 }}>🪙</span>
+                  <span style={{ fontSize: 18 }}>🪙</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1579,26 +1704,22 @@ export default function HomePage() {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {language === 'RU'
-                      ? 'Today deals'
-                      : language === 'ES'
-                      ? 'Ofertas del día'
-                      : 'Today deals'}
+                    {language === 'ES' ? 'Ofertas del día' : 'Today deals'}
                   </span>
                 </div>
 
                 <span
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: 42,
+                    height: 42,
                     borderRadius: 999,
                     border: '2px solid #111111',
-                    background: '#ffffff',
+                    background: '#fff',
                     color: '#111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: 900,
                     flexShrink: 0,
                   }}
@@ -1608,33 +1729,39 @@ export default function HomePage() {
               </button>
 
               <button
-                onClick={() => setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
+                onClick={() => {
+                  setDealFilterMode('none');
+                  setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
+                }}
                 style={{
-                  minHeight: 70,
-                  border: '2px solid #111111',
+                  minHeight: 66,
+                  border: likedFilterMode === 'all' ? '3px solid #111111' : '2px solid #111111',
                   borderRadius: 24,
-                  background: '#3f70d2',
-                  color: '#ffffff',
+                  background: '#3d6dcc',
+                  color: '#fff',
                   cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 6,
-                  padding: '0 10px 0 12px',
+                  gap: 8,
+                  padding: '0 14px',
+                  boxShadow:
+                    likedFilterMode === 'all'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.35)'
+                      : 'none',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 8,
                     minWidth: 0,
-                    fontSize: 12.5,
+                    fontSize: 14,
                     fontWeight: 900,
-                    lineHeight: 1.05,
                   }}
                 >
-                  <span style={{ color: '#ff3355', fontSize: 17 }}>♥</span>
+                  <span style={{ color: '#ff3355', fontSize: 20 }}>♥</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1642,26 +1769,22 @@ export default function HomePage() {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {language === 'RU'
-                      ? 'All liked'
-                      : language === 'ES'
-                      ? 'Todos favoritos'
-                      : 'All liked'}
+                    {language === 'ES' ? 'Todos favoritos' : 'All liked'}
                   </span>
                 </div>
 
                 <span
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: 42,
+                    height: 42,
                     borderRadius: 999,
                     border: '2px solid #111111',
-                    background: '#ffffff',
+                    background: '#fff',
                     color: '#111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: 900,
                     flexShrink: 0,
                   }}
@@ -1671,33 +1794,39 @@ export default function HomePage() {
               </button>
 
               <button
-                onClick={() => setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
+                onClick={() => {
+                  setLikedFilterMode('none');
+                  setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
+                }}
                 style={{
-                  minHeight: 70,
-                  border: '2px solid #111111',
+                  minHeight: 66,
+                  border: dealFilterMode === 'all' ? '3px solid #111111' : '2px solid #111111',
                   borderRadius: 24,
-                  background: '#f0dc32',
+                  background: dealFilterMode === 'all' ? '#f2d532' : '#ead35f',
                   color: '#111111',
                   cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 6,
-                  padding: '0 10px 0 12px',
+                  gap: 8,
+                  padding: '0 14px',
+                  boxShadow:
+                    dealFilterMode === 'all'
+                      ? 'inset 0 0 0 2px rgba(255,255,255,0.45)'
+                      : 'none',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6,
+                    gap: 8,
                     minWidth: 0,
-                    fontSize: 12.5,
+                    fontSize: 14,
                     fontWeight: 900,
-                    lineHeight: 1.05,
                   }}
                 >
-                  <span style={{ fontSize: 15 }}>🪙</span>
+                  <span style={{ fontSize: 18 }}>🪙</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1705,26 +1834,22 @@ export default function HomePage() {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {language === 'RU'
-                      ? 'All today deals'
-                      : language === 'ES'
-                      ? 'Todas ofertas'
-                      : 'All today deals'}
+                    {language === 'ES' ? 'Todas ofertas' : 'All today deals'}
                   </span>
                 </div>
 
                 <span
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: 42,
+                    height: 42,
                     borderRadius: 999,
                     border: '2px solid #111111',
-                    background: '#ffffff',
+                    background: '#fff',
                     color: '#111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: 900,
                     flexShrink: 0,
                   }}
@@ -1746,13 +1871,14 @@ export default function HomePage() {
           >
             <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
               <RealMap
-                masters={filteredMasters}
+                masters={mapMasters}
                 mapMode={mapMode}
                 activeCategory={activeCategory}
                 selectedMasterId={selectedMaster?.id ?? null}
                 likedMasterIds={likedMasterIds}
                 recenterToUserTrigger={recenterToUserTrigger}
                 language={language}
+                promotionBadgeTextByMasterId={promotionBadgeTextByMasterId}
                 onMasterSelect={(master) => {
                   setSelectedMaster(master);
                 }}
@@ -1799,9 +1925,7 @@ export default function HomePage() {
                     color: '#21324a',
                   }}
                 >
-                  {language === 'RU'
-                    ? `Hot offers near ${locationLabel}`
-                    : language === 'ES'
+                  {language === 'ES'
                     ? `Ofertas cerca de ${locationLabel}`
                     : `Hot offers near ${locationLabel}`}
                 </h2>
@@ -1914,9 +2038,7 @@ export default function HomePage() {
                           }}
                         >
                           {promo.subtitle ||
-                            (language === 'RU'
-                              ? 'Специальное предложение рядом с вами'
-                              : language === 'ES'
+                            (language === 'ES'
                               ? 'Oferta especial cerca de ti'
                               : 'Special offer near you')}
                         </div>
@@ -1929,11 +2051,7 @@ export default function HomePage() {
                             color: '#ff4f93',
                           }}
                         >
-                          {language === 'RU'
-                            ? `Views: ${promo.views}`
-                            : language === 'ES'
-                            ? `Vistas: ${promo.views}`
-                            : `Views: ${promo.views}`}
+                          {language === 'ES' ? `Vistas: ${promo.views}` : `Views: ${promo.views}`}
                         </div>
                       </div>
                     </button>
@@ -1959,7 +2077,7 @@ export default function HomePage() {
                           cursor: 'pointer',
                         }}
                       >
-                        {language === 'RU' ? 'Open' : language === 'ES' ? 'Abrir' : 'Open'}
+                        {language === 'ES' ? 'Abrir' : 'Open'}
                       </button>
 
                       <button
@@ -1975,7 +2093,7 @@ export default function HomePage() {
                           cursor: 'pointer',
                         }}
                       >
-                        {language === 'RU' ? 'Book' : language === 'ES' ? 'Reservar' : 'Book'}
+                        {language === 'ES' ? 'Reservar' : 'Book'}
                       </button>
                     </div>
                   </div>
