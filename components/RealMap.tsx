@@ -420,7 +420,6 @@ function buildMarkerIcon(
   const photoSize = isSelected ? 58 : 54;
   const likeBadgeSize = isSelected ? 30 : 28;
   const statusBadgeSize = isSelected ? 20 : 18;
-
   const rightBadgeOffset = hasDiscount ? 44 : 4;
 
   return L.divIcon({
@@ -480,7 +479,7 @@ function buildMarkerIcon(
             min-width:58px;
             height:34px;
             padding:0 12px;
-            background:linear-gradient(180deg,#ffeaa6 0%,#ffd87a 100%);
+            background:linear-gradient(180deg,#ffe66d 0%,#ffd12d 100%);
             border:3px solid #111111;
             border-radius:999px;
             box-shadow:0 6px 12px rgba(0,0,0,0.18);
@@ -684,7 +683,9 @@ export default function RealMap({
     effectiveLocation.lng || londonCenter[1],
   ];
 
-  const [currentDetectedLocation, setCurrentDetectedLocation] = useState<[number, number] | null>(null);
+  const [currentDetectedLocation, setCurrentDetectedLocation] = useState<[number, number] | null>(
+    null
+  );
   const [focusLocation, setFocusLocation] = useState<[number, number]>(initialFocusLocation);
 
   const tr = t(language);
@@ -1048,6 +1049,23 @@ export default function RealMap({
             >
               {getCategoryBadgeLabel(selectedMaster.category, language)}
             </div>
+
+            {getPromotionBadgeText(selectedMaster, promotionBadgeTextByMasterId) ? (
+              <div
+                style={{
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  background: '#ffd12d',
+                  color: '#1f2430',
+                  padding: '6px 10px',
+                  fontSize: 12,
+                  fontWeight: 900,
+                  lineHeight: 1,
+                }}
+              >
+                {getPromotionBadgeText(selectedMaster, promotionBadgeTextByMasterId)}
+              </div>
+            ) : null}
           </div>
 
           {selectedMaster.description ? (
