@@ -9,7 +9,11 @@ import {
   type AppLanguage,
 } from '../services/i18n';
 
-export default function BottomNav() {
+type BottomNavProps = {
+  active?: 'home' | 'messages' | 'add' | 'bookings' | 'profile';
+};
+
+export default function BottomNav({ active }: BottomNavProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -235,12 +239,19 @@ export default function BottomNav() {
     };
   }, [language]);
 
-  const isHome = pathname === '/';
-  const isMessages = pathname.startsWith('/messages');
+  const isHome = active === 'home' || pathname === '/';
+  const isMessages = active === 'messages' || pathname.startsWith('/messages');
   const isBookings =
-    pathname.startsWith('/bookings') || pathname.startsWith('/profile/bookings');
-  const isProfile = pathname.startsWith('/profile');
+    active === 'bookings' ||
+    pathname.startsWith('/bookings') ||
+    pathname.startsWith('/profile/bookings');
+  const isProfile =
+    active === 'profile' ||
+    pathname === '/profile' ||
+    pathname.startsWith('/profile/') ||
+    pathname.startsWith('/account');
   const isAdd =
+    active === 'add' ||
     pathname.startsWith('/add') ||
     pathname.startsWith('/profile/promotions/new') ||
     pathname.startsWith('/profile/deals/new');
@@ -263,9 +274,6 @@ export default function BottomNav() {
     router.push('/profile/deals/new');
   };
 
-  const itemColor = '#6e7b8a';
-  const activeColor = '#17130f';
-
   return (
     <>
       {showAddMenu ? (
@@ -286,14 +294,14 @@ export default function BottomNav() {
             style={{
               width: '100%',
               maxWidth: 430,
-              padding: '0 14px calc(100px + env(safe-area-inset-bottom))',
+              padding: '0 14px calc(92px + env(safe-area-inset-bottom))',
               boxSizing: 'border-box',
             }}
           >
             <div
               style={{
                 border: '2px solid #111111',
-                borderRadius: 26,
+                borderRadius: 24,
                 background: '#ffffff',
                 boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
                 overflow: 'hidden',
@@ -471,24 +479,20 @@ export default function BottomNav() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'transparent',
+          background: 'rgba(247,244,238,0.98)',
+          borderTop: '1px solid #e3ddd5',
+          backdropFilter: 'blur(10px)',
           zIndex: 80,
-          padding: '0 8px calc(8px + env(safe-area-inset-bottom))',
-          boxSizing: 'border-box',
         }}
       >
         <div
           style={{
             maxWidth: 430,
             margin: '0 auto',
-            background: '#ffffff',
-            border: '1.5px solid #111111',
-            borderRadius: 28,
-            boxShadow: '0 10px 24px rgba(0,0,0,0.10)',
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr 96px 1fr 1fr',
+            gridTemplateColumns: '1fr 1fr 92px 1fr 1fr',
             alignItems: 'end',
-            padding: '10px 8px 12px',
+            padding: '10px 8px calc(10px + env(safe-area-inset-bottom))',
             boxSizing: 'border-box',
           }}
         >
@@ -501,29 +505,13 @@ export default function BottomNav() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'flex-end',
               gap: 5,
-              color: isHome ? activeColor : itemColor,
+              color: isHome ? '#1f5d99' : '#6e7b8a',
               cursor: 'pointer',
-              minHeight: 58,
             }}
           >
-            <div
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 14,
-                border: '1.5px solid #111111',
-                background: isHome ? '#f4f4f4' : '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: isHome ? '0 4px 10px rgba(0,0,0,0.08)' : 'none',
-              }}
-            >
-              <span style={{ fontSize: 24, lineHeight: 1, fontWeight: 700 }}>⌂</span>
-            </div>
-            <span style={{ fontSize: 11, fontWeight: 900 }}>{navText.home}</span>
+            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>⌂</span>
+            <span style={{ fontSize: 12, fontWeight: 800 }}>{navText.home}</span>
           </button>
 
           <button
@@ -535,36 +523,21 @@ export default function BottomNav() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'flex-end',
               gap: 5,
-              color: isMessages ? activeColor : itemColor,
+              color: isMessages ? '#1f5d99' : '#6e7b8a',
               position: 'relative',
               cursor: 'pointer',
-              minHeight: 58,
             }}
           >
-            <div
-              style={{
-                position: 'relative',
-                width: 38,
-                height: 38,
-                borderRadius: 14,
-                border: '1.5px solid #111111',
-                background: isMessages ? '#f4f4f4' : '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: isMessages ? '0 4px 10px rgba(0,0,0,0.08)' : 'none',
-              }}
-            >
-              <span style={{ fontSize: 23, lineHeight: 1, fontWeight: 700 }}>✉</span>
+            <div style={{ position: 'relative' }}>
+              <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>✉</span>
 
               {unreadMessages > 0 ? (
                 <span
                   style={{
                     position: 'absolute',
                     top: -6,
-                    right: -8,
+                    right: -10,
                     minWidth: 18,
                     height: 18,
                     padding: '0 5px',
@@ -577,7 +550,7 @@ export default function BottomNav() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     boxShadow: '0 3px 8px rgba(229,57,53,0.35)',
-                    border: '2px solid #ffffff',
+                    border: '2px solid #f7f4ee',
                   }}
                 >
                   {unreadMessages > 9 ? '9+' : unreadMessages}
@@ -585,7 +558,7 @@ export default function BottomNav() {
               ) : null}
             </div>
 
-            <span style={{ fontSize: 11, fontWeight: 900 }}>{navText.messages}</span>
+            <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.messages}</span>
           </button>
 
           <div
@@ -602,7 +575,7 @@ export default function BottomNav() {
                 width: 78,
                 height: 78,
                 borderRadius: 999,
-                border: '3px solid #111111',
+                border: '4px solid #45c63d',
                 background: isAdd ? '#45c63d' : '#ffffff',
                 color: isAdd ? '#ffffff' : '#45c63d',
                 boxShadow: '0 10px 24px rgba(0,0,0,0.14)',
@@ -616,7 +589,7 @@ export default function BottomNav() {
               title={navText.add}
             >
               <span style={{ fontSize: 36, lineHeight: 1, fontWeight: 400 }}>+</span>
-              <span style={{ fontSize: 11, fontWeight: 900 }}>{navText.add}</span>
+              <span style={{ fontSize: 11, fontWeight: 800 }}>{navText.add}</span>
             </button>
           </div>
 
@@ -629,29 +602,13 @@ export default function BottomNav() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'flex-end',
               gap: 5,
-              color: isBookings ? activeColor : itemColor,
+              color: isBookings ? '#1f5d99' : '#6e7b8a',
               cursor: 'pointer',
-              minHeight: 58,
             }}
           >
-            <div
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 14,
-                border: '1.5px solid #111111',
-                background: isBookings ? '#f4f4f4' : '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: isBookings ? '0 4px 10px rgba(0,0,0,0.08)' : 'none',
-              }}
-            >
-              <span style={{ fontSize: 23, lineHeight: 1, fontWeight: 700 }}>▤</span>
-            </div>
-            <span style={{ fontSize: 11, fontWeight: 900 }}>{navText.bookings}</span>
+            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>▤</span>
+            <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.bookings}</span>
           </button>
 
           <button
@@ -663,29 +620,13 @@ export default function BottomNav() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'flex-end',
               gap: 5,
-              color: isProfile ? activeColor : itemColor,
+              color: isProfile ? '#1f5d99' : '#6e7b8a',
               cursor: 'pointer',
-              minHeight: 58,
             }}
           >
-            <div
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: 14,
-                border: '1.5px solid #111111',
-                background: isProfile ? '#f4f4f4' : '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: isProfile ? '0 4px 10px rgba(0,0,0,0.08)' : 'none',
-              }}
-            >
-              <span style={{ fontSize: 23, lineHeight: 1, fontWeight: 700 }}>◉</span>
-            </div>
-            <span style={{ fontSize: 11, fontWeight: 900 }}>{navText.profile}</span>
+            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>◉</span>
+            <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.profile}</span>
           </button>
         </div>
       </nav>
