@@ -307,7 +307,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       RU: 'Питомцы',
       CZ: 'Mazlíčci',
       DE: 'Haustiere',
-      PL: 'Zwierzęta',
+      PL: 'Zwierzęта',
       UA: 'Улюбленці',
     },
     fashion: {
@@ -1465,20 +1465,20 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '8px 12px 0' }}>
+        <section style={{ padding: '8px 10px 0' }}>
           <div
             style={{
               border: '2px solid #111111',
-              borderRadius: 30,
-              background: '#fff',
-              padding: 14,
+              borderRadius: 28,
+              background: '#ffffff',
+              padding: 10,
             }}
           >
             <div
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: 12,
+                gap: 10,
               }}
             >
               <button
@@ -1486,30 +1486,31 @@ export default function HomePage() {
                   setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))
                 }
                 style={{
-                  minHeight: 66,
+                  minHeight: 70,
                   border: '2px solid #111111',
                   borderRadius: 24,
-                  background: '#3d6dcc',
-                  color: '#fff',
+                  background: '#3f70d2',
+                  color: '#ffffff',
                   cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '0 14px',
+                  gap: 6,
+                  padding: '0 10px 0 12px',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 8,
+                    gap: 6,
                     minWidth: 0,
-                    fontSize: 14,
+                    fontSize: 12.5,
                     fontWeight: 900,
+                    lineHeight: 1.05,
                   }}
                 >
-                  <span style={{ color: '#ff3355', fontSize: 20 }}>♥</span>
+                  <span style={{ color: '#ff3355', fontSize: 17 }}>♥</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1523,16 +1524,16 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    width: 42,
-                    height: 42,
+                    width: 36,
+                    height: 36,
                     borderRadius: 999,
                     border: '2px solid #111111',
-                    background: '#fff',
+                    background: '#ffffff',
                     color: '#111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 900,
                     flexShrink: 0,
                   }}
@@ -1546,30 +1547,31 @@ export default function HomePage() {
                   setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))
                 }
                 style={{
-                  minHeight: 66,
+                  minHeight: 70,
                   border: '2px solid #111111',
                   borderRadius: 24,
-                  background: '#ead98d',
+                  background: '#f0dc32',
                   color: '#111111',
                   cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '0 14px',
+                  gap: 6,
+                  padding: '0 10px 0 12px',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 8,
+                    gap: 6,
                     minWidth: 0,
-                    fontSize: 14,
+                    fontSize: 12.5,
                     fontWeight: 900,
+                    lineHeight: 1.05,
                   }}
                 >
-                  <span style={{ fontSize: 18 }}>🪙</span>
+                  <span style={{ fontSize: 15 }}>🪙</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1587,16 +1589,16 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    width: 42,
-                    height: 42,
+                    width: 36,
+                    height: 36,
                     borderRadius: 999,
                     border: '2px solid #111111',
-                    background: '#fff',
+                    background: '#ffffff',
                     color: '#111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 900,
                     flexShrink: 0,
                   }}
@@ -1608,30 +1610,31 @@ export default function HomePage() {
               <button
                 onClick={() => setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
                 style={{
-                  minHeight: 66,
+                  minHeight: 70,
                   border: '2px solid #111111',
                   borderRadius: 24,
-                  background: '#3d6dcc',
-                  color: '#fff',
+                  background: '#3f70d2',
+                  color: '#ffffff',
                   cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '0 14px',
+                  gap: 6,
+                  padding: '0 10px 0 12px',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 8,
+                    gap: 6,
                     minWidth: 0,
-                    fontSize: 14,
+                    fontSize: 12.5,
                     fontWeight: 900,
+                    lineHeight: 1.05,
                   }}
                 >
-                  <span style={{ color: '#ff3355', fontSize: 20 }}>♥</span>
+                  <span style={{ color: '#ff3355', fontSize: 17 }}>♥</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1649,16 +1652,16 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    width: 42,
-                    height: 42,
+                    width: 36,
+                    height: 36,
                     borderRadius: 999,
                     border: '2px solid #111111',
-                    background: '#fff',
+                    background: '#ffffff',
                     color: '#111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 900,
                     flexShrink: 0,
                   }}
@@ -1670,30 +1673,31 @@ export default function HomePage() {
               <button
                 onClick={() => setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
                 style={{
-                  minHeight: 66,
+                  minHeight: 70,
                   border: '2px solid #111111',
                   borderRadius: 24,
-                  background: '#ead98d',
+                  background: '#f0dc32',
                   color: '#111111',
                   cursor: 'pointer',
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '0 14px',
+                  gap: 6,
+                  padding: '0 10px 0 12px',
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 8,
+                    gap: 6,
                     minWidth: 0,
-                    fontSize: 14,
+                    fontSize: 12.5,
                     fontWeight: 900,
+                    lineHeight: 1.05,
                   }}
                 >
-                  <span style={{ fontSize: 18 }}>🪙</span>
+                  <span style={{ fontSize: 15 }}>🪙</span>
                   <span
                     style={{
                       overflow: 'hidden',
@@ -1711,16 +1715,16 @@ export default function HomePage() {
 
                 <span
                   style={{
-                    width: 42,
-                    height: 42,
+                    width: 36,
+                    height: 36,
                     borderRadius: 999,
                     border: '2px solid #111111',
-                    background: '#fff',
+                    background: '#ffffff',
                     color: '#111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: 900,
                     flexShrink: 0,
                   }}
