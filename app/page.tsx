@@ -388,19 +388,10 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
 }
 
 function getDealButtonLabel(language: AppLanguage, mode: 'category' | 'all') {
-  if (language === 'RU') {
-    return mode === 'category' ? 'Скидки категории' : 'Все скидки';
-  }
-
-  if (language === 'ES') {
-    return mode === 'category' ? 'Ofertas categoría' : 'Todas ofertas';
-  }
-
-  if (language === 'UA') {
-    return mode === 'category' ? 'Знижки категорії' : 'Усі знижки';
-  }
-
-  return mode === 'category' ? 'Category deals' : 'All deals';
+  if (language === 'RU') return mode === 'category' ? 'Скидки кат.' : 'Все скидки';
+  if (language === 'ES') return mode === 'category' ? 'Deals cat.' : 'All deals';
+  if (language === 'UA') return mode === 'category' ? 'Знижки кат.' : 'Усі знижки';
+  return mode === 'category' ? 'Cat deals' : 'All deals';
 }
 
 function normalizeText(value: string) {
@@ -463,7 +454,7 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
   const normalizedCategory = String(anyPromo.categoryId || '').toLowerCase().trim();
   const normalizedTitle = normalizeText(anyPromo.title);
   const normalizedSubtitle = normalizeText(anyPromo.subtitle || '');
-  const titleWords = `${normalizedTitle} ${normalizedSubtitle}`
+  const words = `${normalizedTitle} ${normalizedSubtitle}`
     .split(' ')
     .filter((word) => word.length > 2);
 
@@ -492,7 +483,7 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
     if (normalizedTitle && haystack.includes(normalizedTitle)) score += 120;
     if (normalizedSubtitle && haystack.includes(normalizedSubtitle)) score += 80;
 
-    titleWords.forEach((word) => {
+    words.forEach((word) => {
       if (haystack.includes(word)) score += 18;
     });
 
@@ -506,25 +497,11 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
     return score;
   };
 
-  const bestSameCategory = masters
-    .filter(
-      (master: any) =>
-        String(master.category || '').toLowerCase().trim() === normalizedCategory
-    )
+  const best = masters
     .map((master: any) => ({ master, score: scoreMaster(master) }))
     .sort((a, b) => b.score - a.score)[0];
 
-  if (bestSameCategory && bestSameCategory.score > 0) {
-    return bestSameCategory.master;
-  }
-
-  const bestGlobal = masters
-    .map((master: any) => ({ master, score: scoreMaster(master) }))
-    .sort((a, b) => b.score - a.score)[0];
-
-  if (bestGlobal && bestGlobal.score > 0) {
-    return bestGlobal.master;
-  }
+  if (best && best.score > 0) return best.master;
 
   return null;
 }
@@ -552,7 +529,7 @@ function extractPromotionDiscountBadge(promo: PromotionItem) {
       if (value.includes('%')) {
         return value.startsWith('-') ? value : `-${value.replace(/^-/, '')}`;
       }
-      return value;
+      if (value.toUpperCase() === 'SALE') return 'SALE';
     }
   }
 
@@ -585,7 +562,7 @@ function extractPromotionDiscountBadge(promo: PromotionItem) {
     return `-${match[1]}%`;
   }
 
-  return '';
+  return 'SALE';
 }
 
 export default function HomePage() {
@@ -913,22 +890,10 @@ export default function HomePage() {
       const masterId = String(matchedMaster.id);
       const discountBadge = extractPromotionDiscountBadge(promo);
 
-      if (!uniqueMasters.has(masterId)) {
-        uniqueMasters.set(masterId, {
-          ...matchedMaster,
-          discountBadge,
-        });
-        return;
-      }
-
-      const existing = uniqueMasters.get(masterId);
-
-      if (!existing.discountBadge && discountBadge) {
-        uniqueMasters.set(masterId, {
-          ...existing,
-          discountBadge,
-        });
-      }
+      uniqueMasters.set(masterId, {
+        ...matchedMaster,
+        discountBadge,
+      });
     });
 
     return Array.from(uniqueMasters.values());
@@ -937,15 +902,13 @@ export default function HomePage() {
   const promotionBadgeTextByMasterId = useMemo(() => {
     const entries = promotionMasters.map((master) => [
       String(master.id),
-      String(master.discountBadge || ''),
+      String(master.discountBadge || 'SALE'),
     ]);
     return Object.fromEntries(entries);
   }, [promotionMasters]);
 
   const mapMasters = useMemo(() => {
-    if (dealFilterMode !== 'none') {
-      return promotionMasters;
-    }
+    if (dealFilterMode !== 'none') return promotionMasters;
     return filteredMasters;
   }, [dealFilterMode, promotionMasters, filteredMasters]);
 
@@ -1044,9 +1007,9 @@ export default function HomePage() {
     setActiveSubcategory('');
     setLikedFilterMode('none');
     setDealFilterMode('none');
-    setSearch(promo.title);
+    setSearch((promo as any).title || '');
     setSearchOpen(false);
-    saveRecentSearch(promo.title);
+    saveRecentSearch((promo as any).title || '');
     setRecentSearches(readRecentSearches());
   };
 
@@ -1428,22 +1391,10 @@ export default function HomePage() {
                                 cursor: 'pointer',
                               }}
                             >
-                              <span
-                                style={{
-                                  fontSize: 14,
-                                  fontWeight: 900,
-                                  color: '#263545',
-                                }}
-                              >
+                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
                                 {item.label}
                               </span>
-                              <span
-                                style={{
-                                  fontSize: 12,
-                                  color: '#7d8691',
-                                  fontWeight: 700,
-                                }}
-                              >
+                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
                                 {getCategoryLabel(item.categoryId, language)} • {item.subcategory}
                               </span>
                             </button>
@@ -1481,13 +1432,7 @@ export default function HomePage() {
                                 cursor: 'pointer',
                               }}
                             >
-                              <span
-                                style={{
-                                  fontSize: 14,
-                                  fontWeight: 900,
-                                  color: '#263545',
-                                }}
-                              >
+                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
                                 {item.label}
                               </span>
                             </button>
@@ -1525,22 +1470,10 @@ export default function HomePage() {
                                 cursor: 'pointer',
                               }}
                             >
-                              <span
-                                style={{
-                                  fontSize: 14,
-                                  fontWeight: 900,
-                                  color: '#263545',
-                                }}
-                              >
+                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
                                 {item.label}
                               </span>
-                              <span
-                                style={{
-                                  fontSize: 12,
-                                  color: '#7d8691',
-                                  fontWeight: 700,
-                                }}
-                              >
+                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
                                 {getCategoryLabel(item.categoryId, language)}
                               </span>
                             </button>
@@ -1578,22 +1511,10 @@ export default function HomePage() {
                                 cursor: 'pointer',
                               }}
                             >
-                              <span
-                                style={{
-                                  fontSize: 14,
-                                  fontWeight: 900,
-                                  color: '#263545',
-                                }}
-                              >
+                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
                                 {item.label}
                               </span>
-                              <span
-                                style={{
-                                  fontSize: 12,
-                                  color: '#7d8691',
-                                  fontWeight: 700,
-                                }}
-                              >
+                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
                                 {getCategoryLabel(item.categoryId, language)}
                               </span>
                             </button>
@@ -2048,8 +1969,8 @@ export default function HomePage() {
                     >
                       <div style={{ position: 'relative' }}>
                         <img
-                          src={promo.image}
-                          alt={promo.title}
+                          src={(promo as any).image}
+                          alt={(promo as any).title}
                           style={{
                             width: '100%',
                             height: 190,
@@ -2084,7 +2005,7 @@ export default function HomePage() {
                             lineHeight: 1.2,
                           }}
                         >
-                          {promo.title}
+                          {(promo as any).title}
                         </div>
 
                         <div
@@ -2096,7 +2017,7 @@ export default function HomePage() {
                             lineHeight: 1.45,
                           }}
                         >
-                          {promo.subtitle ||
+                          {(promo as any).subtitle ||
                             (language === 'ES'
                               ? 'Oferta especial cerca de ti'
                               : 'Special offer near you')}
@@ -2110,7 +2031,9 @@ export default function HomePage() {
                             color: '#ff4f93',
                           }}
                         >
-                          {language === 'ES' ? `Vistas: ${promo.views}` : `Views: ${promo.views}`}
+                          {language === 'ES'
+                            ? `Vistas: ${(promo as any).views}`
+                            : `Views: ${(promo as any).views}`}
                         </div>
                       </div>
                     </button>
