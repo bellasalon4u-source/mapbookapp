@@ -23,7 +23,66 @@ import {
 
 type BookingTab = 'upcoming' | 'completed' | 'cancelled';
 
-const pageTexts = {
+const pageTexts: Record<
+  AppLanguage,
+  {
+    title: string;
+    subtitle: string;
+    upcoming: string;
+    completed: string;
+    cancelled: string;
+    pending: string;
+    confirmed: string;
+    completedStatus: string;
+    cancelledStatus: string;
+    serviceDetails: string;
+    closeDetails: string;
+    cancelBooking: string;
+    rebook: string;
+    emptyUpcoming: string;
+    emptyCompleted: string;
+    emptyCancelled: string;
+    back: string;
+    home: string;
+    total: string;
+    bookingOverview: string;
+    activeNow: string;
+    menuClose: string;
+    menuCancel: string;
+    menuOpenProfile: string;
+    provider: string;
+    bookingSummary: string;
+    dateTime: string;
+    detailsUnlocked: string;
+    detailsLocked: string;
+    exactAddress: string;
+    area: string;
+    contactAndAddress: string;
+    bookingAccess: string;
+    phone: string;
+    email: string;
+    whatsapp: string;
+    telegram: string;
+    instagram: string;
+    writeSeller: string;
+    callSeller: string;
+    routeToMaster: string;
+    contactsHiddenTitle: string;
+    contactsHiddenText: string;
+    waitingMaster: string;
+    waitingPayment: string;
+    waitingPromotion: string;
+    unlockPaid: string;
+    welcomeBonus: string;
+    referralUsed: string;
+    lockedValue: string;
+    todayAt: string;
+    tomorrowAt: string;
+    noPhoneAction: string;
+    noMessageAction: string;
+    noRouteAction: string;
+  }
+> = {
   EN: {
     title: 'My bookings',
     subtitle: 'Upcoming visits, completed services and booking access',
@@ -372,7 +431,239 @@ const pageTexts = {
     noMessageAction: 'Kontakt niedostępny',
     noRouteAction: 'Adres ukryty',
   },
-} as const;
+  UA: {
+    title: 'Мої бронювання',
+    subtitle: 'Майбутні візити, завершені послуги та доступ до бронювання',
+    upcoming: 'Майбутні',
+    completed: 'Завершені',
+    cancelled: 'Скасовані',
+    pending: 'Очікує підтвердження',
+    confirmed: 'Майбутнє',
+    completedStatus: 'Завершено',
+    cancelledStatus: 'Скасовано',
+    serviceDetails: 'Деталі послуги',
+    closeDetails: 'Закрити',
+    cancelBooking: 'Скасувати бронювання',
+    rebook: 'Забронювати знову',
+    emptyUpcoming: 'Поки немає майбутніх бронювань',
+    emptyCompleted: 'Поки немає завершених бронювань',
+    emptyCancelled: 'Поки немає скасованих бронювань',
+    back: 'Назад',
+    home: 'Головна',
+    total: 'Усього',
+    bookingOverview: 'Огляд бронювань',
+    activeNow: 'Активно зараз',
+    menuClose: 'Закрити',
+    menuCancel: 'Скасувати бронювання',
+    menuOpenProfile: 'Відкрити профіль',
+    provider: 'Спеціаліст',
+    bookingSummary: 'Підсумок бронювання',
+    dateTime: 'Дата і час',
+    detailsUnlocked: 'Деталі відкрито',
+    detailsLocked: 'Деталі приховано',
+    exactAddress: 'Точна адреса',
+    area: 'Район',
+    contactAndAddress: 'Контакти та адреса',
+    bookingAccess: 'Доступ до бронювання',
+    phone: 'Телефон',
+    email: 'Email',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+    writeSeller: 'Написати майстру',
+    callSeller: 'Подзвонити майстру',
+    routeToMaster: 'Маршрут до майстра',
+    contactsHiddenTitle: 'Контакти приховано',
+    contactsHiddenText:
+      'Прямі контакти і точна адреса відкриються тільки після надходження оплати та оплаченої реклами майстром.',
+    waitingMaster: 'Очікує підтвердження майстра',
+    waitingPayment: 'Очікує оплату',
+    waitingPromotion: 'Реклама не оплачена',
+    unlockPaid: 'Unlock оплачено',
+    welcomeBonus: 'Використано Welcome Bonus',
+    referralUsed: 'Використано реферальне бронювання',
+    lockedValue: 'Приховано',
+    todayAt: 'Сьогодні о',
+    tomorrowAt: 'Завтра о',
+    noPhoneAction: 'Номер недоступний',
+    noMessageAction: 'Контакт недоступний',
+    noRouteAction: 'Адресу приховано',
+  },
+  IT: {
+    title: 'Le mie prenotazioni',
+    subtitle: 'Prossime visite, servizi completati e accesso alla prenotazione',
+    upcoming: 'In arrivo',
+    completed: 'Completate',
+    cancelled: 'Annullate',
+    pending: 'In attesa di conferma',
+    confirmed: 'In arrivo',
+    completedStatus: 'Completata',
+    cancelledStatus: 'Annullata',
+    serviceDetails: 'Dettagli del servizio',
+    closeDetails: 'Chiudi',
+    cancelBooking: 'Annulla prenotazione',
+    rebook: 'Prenota di nuovo',
+    emptyUpcoming: 'Nessuna prenotazione imminente',
+    emptyCompleted: 'Nessuna prenotazione completata',
+    emptyCancelled: 'Nessuna prenotazione annullata',
+    back: 'Indietro',
+    home: 'Home',
+    total: 'Totale',
+    bookingOverview: 'Panoramica prenotazioni',
+    activeNow: 'Attive ora',
+    menuClose: 'Chiudi',
+    menuCancel: 'Annulla prenotazione',
+    menuOpenProfile: 'Apri profilo',
+    provider: 'Specialista',
+    bookingSummary: 'Riepilogo prenotazione',
+    dateTime: 'Data e ora',
+    detailsUnlocked: 'Dettagli sbloccati',
+    detailsLocked: 'Dettagli bloccati',
+    exactAddress: 'Indirizzo esatto',
+    area: 'Zona',
+    contactAndAddress: 'Contatti e indirizzo',
+    bookingAccess: 'Accesso prenotazione',
+    phone: 'Telefono',
+    email: 'Email',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+    writeSeller: 'Scrivi al venditore',
+    callSeller: 'Chiama il venditore',
+    routeToMaster: 'Percorso verso il professionista',
+    contactsHiddenTitle: 'Contatti nascosti',
+    contactsHiddenText:
+      'I contatti diretti e l’indirizzo esatto appariranno solo dopo la ricezione del pagamento e il pagamento della promozione da parte del professionista.',
+    waitingMaster: 'In attesa di conferma del professionista',
+    waitingPayment: 'In attesa del pagamento',
+    waitingPromotion: 'Promozione non pagata',
+    unlockPaid: 'Unlock pagato',
+    welcomeBonus: 'Welcome Bonus usato',
+    referralUsed: 'Prenotazione referral usata',
+    lockedValue: 'Bloccato',
+    todayAt: 'Oggi alle',
+    tomorrowAt: 'Domani alle',
+    noPhoneAction: 'Numero non disponibile',
+    noMessageAction: 'Contatto non disponibile',
+    noRouteAction: 'Indirizzo bloccato',
+  },
+  FR: {
+    title: 'Mes réservations',
+    subtitle: 'Visites à venir, services terminés et accès à la réservation',
+    upcoming: 'À venir',
+    completed: 'Terminées',
+    cancelled: 'Annulées',
+    pending: 'En attente de confirmation',
+    confirmed: 'À venir',
+    completedStatus: 'Terminée',
+    cancelledStatus: 'Annulée',
+    serviceDetails: 'Détails du service',
+    closeDetails: 'Fermer',
+    cancelBooking: 'Annuler la réservation',
+    rebook: 'Réserver à nouveau',
+    emptyUpcoming: 'Aucune réservation à venir',
+    emptyCompleted: 'Aucune réservation terminée',
+    emptyCancelled: 'Aucune réservation annulée',
+    back: 'Retour',
+    home: 'Accueil',
+    total: 'Total',
+    bookingOverview: 'Aperçu des réservations',
+    activeNow: 'Actives maintenant',
+    menuClose: 'Fermer',
+    menuCancel: 'Annuler la réservation',
+    menuOpenProfile: 'Ouvrir le profil',
+    provider: 'Professionnel',
+    bookingSummary: 'Résumé de réservation',
+    dateTime: 'Date et heure',
+    detailsUnlocked: 'Détails débloqués',
+    detailsLocked: 'Détails verrouillés',
+    exactAddress: 'Adresse exacte',
+    area: 'Zone',
+    contactAndAddress: 'Contact et adresse',
+    bookingAccess: 'Accès réservation',
+    phone: 'Téléphone',
+    email: 'Email',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+    writeSeller: 'Écrire au vendeur',
+    callSeller: 'Appeler le vendeur',
+    routeToMaster: 'Itinéraire vers le professionnel',
+    contactsHiddenTitle: 'Contacts masqués',
+    contactsHiddenText:
+      'Les contacts directs et l’adresse exacte apparaîtront seulement après réception du paiement et paiement de la promotion par le professionnel.',
+    waitingMaster: 'En attente de confirmation du professionnel',
+    waitingPayment: 'En attente du paiement',
+    waitingPromotion: 'Promotion non payée',
+    unlockPaid: 'Unlock payé',
+    welcomeBonus: 'Welcome Bonus utilisé',
+    referralUsed: 'Réservation parrainage utilisée',
+    lockedValue: 'Verrouillé',
+    todayAt: 'Aujourd’hui à',
+    tomorrowAt: 'Demain à',
+    noPhoneAction: 'Numéro indisponible',
+    noMessageAction: 'Contact indisponible',
+    noRouteAction: 'Adresse verrouillée',
+  },
+  AR: {
+    title: 'حجوزاتي',
+    subtitle: 'الزيارات القادمة والخدمات المكتملة والوصول إلى الحجز',
+    upcoming: 'القادمة',
+    completed: 'المكتملة',
+    cancelled: 'الملغاة',
+    pending: 'بانتظار التأكيد',
+    confirmed: 'قادمة',
+    completedStatus: 'مكتملة',
+    cancelledStatus: 'ملغاة',
+    serviceDetails: 'تفاصيل الخدمة',
+    closeDetails: 'إغلاق',
+    cancelBooking: 'إلغاء الحجز',
+    rebook: 'إعادة الحجز',
+    emptyUpcoming: 'لا توجد حجوزات قادمة',
+    emptyCompleted: 'لا توجد حجوزات مكتملة',
+    emptyCancelled: 'لا توجد حجوزات ملغاة',
+    back: 'رجوع',
+    home: 'الرئيسية',
+    total: 'الإجمالي',
+    bookingOverview: 'نظرة على الحجوزات',
+    activeNow: 'نشطة الآن',
+    menuClose: 'إغلاق',
+    menuCancel: 'إلغاء الحجز',
+    menuOpenProfile: 'فتح الملف',
+    provider: 'المتخصص',
+    bookingSummary: 'ملخص الحجز',
+    dateTime: 'التاريخ والوقت',
+    detailsUnlocked: 'تم فتح التفاصيل',
+    detailsLocked: 'التفاصيل مخفية',
+    exactAddress: 'العنوان الدقيق',
+    area: 'المنطقة',
+    contactAndAddress: 'التواصل والعنوان',
+    bookingAccess: 'الوصول إلى الحجز',
+    phone: 'الهاتف',
+    email: 'البريد الإلكتروني',
+    whatsapp: 'واتساب',
+    telegram: 'تيليجرام',
+    instagram: 'إنستغرام',
+    writeSeller: 'مراسلة البائع',
+    callSeller: 'الاتصال بالبائع',
+    routeToMaster: 'الطريق إلى المختص',
+    contactsHiddenTitle: 'جهات الاتصال مخفية',
+    contactsHiddenText:
+      'ستظهر جهات الاتصال المباشرة والعنوان الدقيق فقط بعد استلام الدفع ودفع الترويج من قبل المختص.',
+    waitingMaster: 'بانتظار تأكيد المختص',
+    waitingPayment: 'بانتظار الدفع',
+    waitingPromotion: 'الترويج غير مدفوع',
+    unlockPaid: 'تم دفع Unlock',
+    welcomeBonus: 'تم استخدام Welcome Bonus',
+    referralUsed: 'تم استخدام حجز الإحالة',
+    lockedValue: 'مخفي',
+    todayAt: 'اليوم الساعة',
+    tomorrowAt: 'غدًا الساعة',
+    noPhoneAction: 'الرقم غير متاح',
+    noMessageAction: 'جهة الاتصال غير متاحة',
+    noRouteAction: 'العنوان مخفي',
+  },
+};
 
 const serviceNameMap: Record<string, Partial<Record<AppLanguage, string>>> = {
   Маникюр: {
@@ -382,6 +673,10 @@ const serviceNameMap: Record<string, Partial<Record<AppLanguage, string>>> = {
     CZ: 'Manikúra',
     DE: 'Maniküre',
     PL: 'Manicure',
+    UA: 'Манікюр',
+    IT: 'Manicure',
+    FR: 'Manucure',
+    AR: 'مانيكير',
   },
   Стрижка: {
     EN: 'Haircut',
@@ -390,6 +685,10 @@ const serviceNameMap: Record<string, Partial<Record<AppLanguage, string>>> = {
     CZ: 'Střih',
     DE: 'Haarschnitt',
     PL: 'Strzyżenie',
+    UA: 'Стрижка',
+    IT: 'Taglio di capelli',
+    FR: 'Coupe de cheveux',
+    AR: 'قص شعر',
   },
   Массаж: {
     EN: 'Massage',
@@ -398,6 +697,10 @@ const serviceNameMap: Record<string, Partial<Record<AppLanguage, string>>> = {
     CZ: 'Masáž',
     DE: 'Massage',
     PL: 'Masaż',
+    UA: 'Масаж',
+    IT: 'Massaggio',
+    FR: 'Massage',
+    AR: 'تدليك',
   },
   Визаж: {
     EN: 'Makeup',
@@ -406,6 +709,10 @@ const serviceNameMap: Record<string, Partial<Record<AppLanguage, string>>> = {
     CZ: 'Make-up',
     DE: 'Make-up',
     PL: 'Makijaż',
+    UA: 'Візаж',
+    IT: 'Trucco',
+    FR: 'Maquillage',
+    AR: 'مكياج',
   },
   'Ремонт телефона': {
     EN: 'Phone repair',
@@ -414,22 +721,26 @@ const serviceNameMap: Record<string, Partial<Record<AppLanguage, string>>> = {
     CZ: 'Oprava telefonu',
     DE: 'Handy-Reparatur',
     PL: 'Naprawa telefonu',
+    UA: 'Ремонт телефону',
+    IT: 'Riparazione telefono',
+    FR: 'Réparation téléphone',
+    AR: 'إصلاح الهاتف',
   },
 };
 
 const monthMap: Record<string, Partial<Record<AppLanguage, string>>> = {
-  января: { EN: 'January', ES: 'enero', RU: 'января', CZ: 'ledna', DE: 'Januar', PL: 'stycznia' },
-  февраля: { EN: 'February', ES: 'febrero', RU: 'февраля', CZ: 'února', DE: 'Februar', PL: 'lutego' },
-  марта: { EN: 'March', ES: 'marzo', RU: 'марта', CZ: 'března', DE: 'März', PL: 'marca' },
-  апреля: { EN: 'April', ES: 'abril', RU: 'апреля', CZ: 'dubna', DE: 'April', PL: 'kwietnia' },
-  мая: { EN: 'May', ES: 'mayo', RU: 'мая', CZ: 'května', DE: 'Mai', PL: 'maja' },
-  июня: { EN: 'June', ES: 'junio', RU: 'июня', CZ: 'června', DE: 'Juni', PL: 'czerwca' },
-  июля: { EN: 'July', ES: 'julio', RU: 'июля', CZ: 'července', DE: 'Juli', PL: 'lipca' },
-  августа: { EN: 'August', ES: 'agosto', RU: 'августа', CZ: 'srpna', DE: 'August', PL: 'sierpnia' },
-  сентября: { EN: 'September', ES: 'septiembre', RU: 'сентября', CZ: 'září', DE: 'September', PL: 'września' },
-  октября: { EN: 'October', ES: 'octubre', RU: 'октября', CZ: 'října', DE: 'Oktober', PL: 'października' },
-  ноября: { EN: 'November', ES: 'noviembre', RU: 'ноября', CZ: 'listopadu', DE: 'November', PL: 'listopada' },
-  декабря: { EN: 'December', ES: 'diciembre', RU: 'декабря', CZ: 'prosince', DE: 'Dezember', PL: 'grudnia' },
+  января: { EN: 'January', ES: 'enero', RU: 'января', CZ: 'ledna', DE: 'Januar', PL: 'stycznia', UA: 'січня', IT: 'gennaio', FR: 'janvier', AR: 'يناير' },
+  февраля: { EN: 'February', ES: 'febrero', RU: 'февраля', CZ: 'února', DE: 'Februar', PL: 'lutego', UA: 'лютого', IT: 'febbraio', FR: 'février', AR: 'فبراير' },
+  марта: { EN: 'March', ES: 'marzo', RU: 'марта', CZ: 'března', DE: 'März', PL: 'marca', UA: 'березня', IT: 'marzo', FR: 'mars', AR: 'مارس' },
+  апреля: { EN: 'April', ES: 'abril', RU: 'апреля', CZ: 'dubna', DE: 'April', PL: 'kwietnia', UA: 'квітня', IT: 'aprile', FR: 'avril', AR: 'أبريل' },
+  мая: { EN: 'May', ES: 'mayo', RU: 'мая', CZ: 'května', DE: 'Mai', PL: 'maja', UA: 'травня', IT: 'maggio', FR: 'mai', AR: 'مايو' },
+  июня: { EN: 'June', ES: 'junio', RU: 'июня', CZ: 'června', DE: 'Juni', PL: 'czerwca', UA: 'червня', IT: 'giugno', FR: 'juin', AR: 'يونيو' },
+  июля: { EN: 'July', ES: 'julio', RU: 'июля', CZ: 'července', DE: 'Juli', PL: 'lipca', UA: 'липня', IT: 'luglio', FR: 'juillet', AR: 'يوليو' },
+  августа: { EN: 'August', ES: 'agosto', RU: 'августа', CZ: 'srpna', DE: 'August', PL: 'sierpnia', UA: 'серпня', IT: 'agosto', FR: 'août', AR: 'أغسطس' },
+  сентября: { EN: 'September', ES: 'septiembre', RU: 'сентября', CZ: 'září', DE: 'September', PL: 'września', UA: 'вересня', IT: 'settembre', FR: 'septembre', AR: 'سبتمبر' },
+  октября: { EN: 'October', ES: 'octubre', RU: 'октября', CZ: 'října', DE: 'Oktober', PL: 'października', UA: 'жовтня', IT: 'ottobre', FR: 'octobre', AR: 'أكتوبر' },
+  ноября: { EN: 'November', ES: 'noviembre', RU: 'ноября', CZ: 'listopadu', DE: 'November', PL: 'listopada', UA: 'листопада', IT: 'novembre', FR: 'novembre', AR: 'نوفمبر' },
+  декабря: { EN: 'December', ES: 'diciembre', RU: 'декабря', CZ: 'prosince', DE: 'Dezember', PL: 'grudnia', UA: 'грудня', IT: 'dicembre', FR: 'décembre', AR: 'ديسمبر' },
 };
 
 function getTexts(language: AppLanguage) {
