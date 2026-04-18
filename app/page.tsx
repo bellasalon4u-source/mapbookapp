@@ -76,6 +76,8 @@ type CategorySearchResult = Extract<SearchResult, { type: 'category' }>;
 type SubcategorySearchResult = Extract<SearchResult, { type: 'subcategory' }>;
 type MasterSearchResult = Extract<SearchResult, { type: 'master' }>;
 
+type DealFilterMode = 'none' | 'category' | 'all';
+
 const searchAliases = [
   {
     label: 'Dog hotel',
@@ -159,8 +161,6 @@ const searchAliases = [
     ],
   },
 ];
-
-type DealFilterMode = 'none' | 'category' | 'all';
 
 function mapCategoryToId(category: string) {
   const normalized = (category || '').toLowerCase().trim();
@@ -255,9 +255,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Beauty',
       PL: 'Uroda',
       UA: 'Краса',
-      IT: 'Bellezza',
-      FR: 'Beauté',
-      AR: 'الجمال',
     },
     barber: {
       EN: 'Barber',
@@ -267,9 +264,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Barber',
       PL: 'Barber',
       UA: 'Барбер',
-      IT: 'Barbiere',
-      FR: 'Barbier',
-      AR: 'حلاق',
     },
     wellness: {
       EN: 'Wellness',
@@ -279,9 +273,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Wellness',
       PL: 'Wellness',
       UA: 'Велнес',
-      IT: 'Benessere',
-      FR: 'Bien-être',
-      AR: 'العافية',
     },
     home: {
       EN: 'Home',
@@ -291,9 +282,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Zuhause',
       PL: 'Dom',
       UA: 'Дім',
-      IT: 'Casa',
-      FR: 'Maison',
-      AR: 'المنزل',
     },
     repairs: {
       EN: 'Repairs',
@@ -303,9 +291,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Reparaturen',
       PL: 'Naprawy',
       UA: 'Ремонт',
-      IT: 'Riparazioni',
-      FR: 'Réparations',
-      AR: 'إصلاحات',
     },
     tech: {
       EN: 'Tech',
@@ -315,9 +300,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Technik',
       PL: 'Technika',
       UA: 'Техніка',
-      IT: 'Tech',
-      FR: 'Tech',
-      AR: 'تقنية',
     },
     pets: {
       EN: 'Pets',
@@ -327,9 +309,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Haustiere',
       PL: 'Zwierzęta',
       UA: 'Улюбленці',
-      IT: 'Animali',
-      FR: 'Animaux',
-      AR: 'الحيوانات',
     },
     fashion: {
       EN: 'Fashion',
@@ -339,9 +318,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Mode',
       PL: 'Moda',
       UA: 'Мода',
-      IT: 'Moda',
-      FR: 'Mode',
-      AR: 'الموضة',
     },
     auto: {
       EN: 'Auto',
@@ -351,9 +327,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Auto',
       PL: 'Auto',
       UA: 'Авто',
-      IT: 'Auto',
-      FR: 'Auto',
-      AR: 'السيارات',
     },
     moving: {
       EN: 'Moving',
@@ -363,9 +336,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Umzug',
       PL: 'Przeprowadzka',
       UA: 'Переїзд',
-      IT: 'Trasloco',
-      FR: 'Déménagement',
-      AR: 'الانتقال',
     },
     fitness: {
       EN: 'Fitness',
@@ -375,9 +345,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Fitness',
       PL: 'Fitness',
       UA: 'Фітнес',
-      IT: 'Fitness',
-      FR: 'Fitness',
-      AR: 'لياقة',
     },
     education: {
       EN: 'Education',
@@ -387,9 +354,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Bildung',
       PL: 'Edukacja',
       UA: 'Освіта',
-      IT: 'Educazione',
-      FR: 'Éducation',
-      AR: 'التعليم',
     },
     events: {
       EN: 'Events',
@@ -399,9 +363,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Events',
       PL: 'Wydarzenia',
       UA: 'Події',
-      IT: 'Eventi',
-      FR: 'Événements',
-      AR: 'الفعاليات',
     },
     activities: {
       EN: 'Activities',
@@ -411,9 +372,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Aktivitäten',
       PL: 'Aktywności',
       UA: 'Активності',
-      IT: 'Attività',
-      FR: 'Activités',
-      AR: 'الأنشطة',
     },
     creative: {
       EN: 'Creative',
@@ -423,9 +381,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       DE: 'Kreativ',
       PL: 'Kreatywne',
       UA: 'Креатив',
-      IT: 'Creativo',
-      FR: 'Créatif',
-      AR: 'إبداعي',
     },
   };
 
@@ -937,7 +892,7 @@ export default function HomePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f6f1e8',
+        background: '#f7f3eb',
         fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
         paddingBottom: 118,
@@ -947,17 +902,18 @@ export default function HomePage() {
         style={{
           maxWidth: 430,
           margin: '0 auto',
-          background: '#f6f1e8',
+          background: '#f7f3eb',
           borderTop: '5px solid transparent',
           borderImage: `${borderGradient} 1`,
+          boxShadow: '0 0 0 1px rgba(226,218,205,0.35)',
         }}
       >
-        <section style={{ padding: '10px 12px 0' }}>
+        <section style={{ padding: '12px 12px 0' }}>
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
                 background: '#ffffff',
-                borderRadius: 28,
+                borderRadius: 30,
                 padding: 12,
                 border: '2px solid #111111',
               }}
@@ -972,7 +928,7 @@ export default function HomePage() {
               >
                 <div
                   style={{
-                    height: 48,
+                    height: 52,
                     borderRadius: 999,
                     border: '2px solid #111111',
                     background: '#fff',
@@ -1044,13 +1000,13 @@ export default function HomePage() {
                 <button
                   onClick={() => router.push('/profile/language-region')}
                   style={{
-                    height: 48,
+                    height: 52,
                     borderRadius: 999,
                     border: '2px solid #111111',
                     background: '#fff',
                     color: '#111111',
-                    padding: '0 16px',
-                    fontSize: 16,
+                    padding: '0 18px',
+                    fontSize: 15,
                     fontWeight: 900,
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -1078,7 +1034,7 @@ export default function HomePage() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 8,
+                    gap: 6,
                     minWidth: 0,
                     fontSize: 12,
                     fontWeight: 900,
@@ -1141,8 +1097,8 @@ export default function HomePage() {
                   <button
                     onClick={() => router.push('/profile')}
                     style={{
-                      width: 38,
-                      height: 38,
+                      width: 40,
+                      height: 40,
                       borderRadius: 999,
                       border: '2px solid #111111',
                       background: '#fff',
@@ -1170,8 +1126,8 @@ export default function HomePage() {
                         position: 'absolute',
                         top: 1,
                         right: 1,
-                        width: 9,
-                        height: 9,
+                        width: 10,
+                        height: 10,
                         borderRadius: '50%',
                         background: '#ff3b30',
                         border: '2px solid #ffffff',
@@ -1509,11 +1465,11 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '10px 12px 0' }}>
+        <section style={{ padding: '8px 12px 0' }}>
           <div
             style={{
               border: '2px solid #111111',
-              borderRadius: 28,
+              borderRadius: 30,
               background: '#fff',
               padding: 14,
             }}
@@ -1530,7 +1486,7 @@ export default function HomePage() {
                   setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))
                 }
                 style={{
-                  minHeight: 64,
+                  minHeight: 66,
                   border: '2px solid #111111',
                   borderRadius: 24,
                   background: '#3d6dcc',
@@ -1590,7 +1546,7 @@ export default function HomePage() {
                   setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))
                 }
                 style={{
-                  minHeight: 64,
+                  minHeight: 66,
                   border: '2px solid #111111',
                   borderRadius: 24,
                   background: '#ead98d',
@@ -1622,7 +1578,7 @@ export default function HomePage() {
                     }}
                   >
                     {language === 'RU'
-                      ? 'Скидки дня'
+                      ? 'Today deals'
                       : language === 'ES'
                       ? 'Ofertas del día'
                       : 'Today deals'}
@@ -1652,7 +1608,7 @@ export default function HomePage() {
               <button
                 onClick={() => setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
                 style={{
-                  minHeight: 64,
+                  minHeight: 66,
                   border: '2px solid #111111',
                   borderRadius: 24,
                   background: '#3d6dcc',
@@ -1684,7 +1640,7 @@ export default function HomePage() {
                     }}
                   >
                     {language === 'RU'
-                      ? 'Все лайки'
+                      ? 'All liked'
                       : language === 'ES'
                       ? 'Todos favoritos'
                       : 'All liked'}
@@ -1714,7 +1670,7 @@ export default function HomePage() {
               <button
                 onClick={() => setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
                 style={{
-                  minHeight: 64,
+                  minHeight: 66,
                   border: '2px solid #111111',
                   borderRadius: 24,
                   background: '#ead98d',
@@ -1746,7 +1702,7 @@ export default function HomePage() {
                     }}
                   >
                     {language === 'RU'
-                      ? 'Все скидки дня'
+                      ? 'All today deals'
                       : language === 'ES'
                       ? 'Todas ofertas'
                       : 'All today deals'}
@@ -1776,7 +1732,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '10px 0 0' }}>
+        <section style={{ padding: '8px 0 0' }}>
           <div
             style={{
               background: '#ffffff',
@@ -1834,13 +1790,13 @@ export default function HomePage() {
                 <h2
                   style={{
                     margin: 0,
-                    fontSize: 17,
+                    fontSize: 16,
                     fontWeight: 900,
                     color: '#21324a',
                   }}
                 >
                   {language === 'RU'
-                    ? `Горячие предложения рядом с ${locationLabel}`
+                    ? `Hot offers near ${locationLabel}`
                     : language === 'ES'
                     ? `Ofertas cerca de ${locationLabel}`
                     : `Hot offers near ${locationLabel}`}
@@ -1882,9 +1838,9 @@ export default function HomePage() {
                     }}
                     data-promo-id={promo.id}
                     style={{
-                      minWidth: 260,
-                      maxWidth: 260,
-                      borderRadius: 28,
+                      minWidth: 300,
+                      maxWidth: 300,
+                      borderRadius: 30,
                       border: '2px solid #111111',
                       background: '#fff',
                       overflow: 'hidden',
@@ -1909,7 +1865,7 @@ export default function HomePage() {
                           alt={promo.title}
                           style={{
                             width: '100%',
-                            height: 170,
+                            height: 190,
                             objectFit: 'cover',
                             display: 'block',
                           }}
@@ -1926,7 +1882,6 @@ export default function HomePage() {
                             padding: '8px 14px',
                             fontSize: 12,
                             fontWeight: 900,
-                            border: '2px solid #111111',
                           }}
                         >
                           Sponsored
@@ -1936,7 +1891,7 @@ export default function HomePage() {
                       <div style={{ padding: '14px 16px 8px' }}>
                         <div
                           style={{
-                            fontSize: 16,
+                            fontSize: 17,
                             fontWeight: 900,
                             color: '#1f2430',
                             lineHeight: 1.2,
@@ -1971,7 +1926,7 @@ export default function HomePage() {
                           }}
                         >
                           {language === 'RU'
-                            ? `Просмотры: ${promo.views}`
+                            ? `Views: ${promo.views}`
                             : language === 'ES'
                             ? `Vistas: ${promo.views}`
                             : `Views: ${promo.views}`}
@@ -1990,7 +1945,7 @@ export default function HomePage() {
                       <button
                         onClick={() => openPromotionView(promo)}
                         style={{
-                          height: 48,
+                          height: 50,
                           borderRadius: 18,
                           border: '2px solid #111111',
                           background: '#1f4da8',
@@ -2000,13 +1955,13 @@ export default function HomePage() {
                           cursor: 'pointer',
                         }}
                       >
-                        {language === 'RU' ? 'Открыть' : language === 'ES' ? 'Abrir' : 'Open'}
+                        {language === 'RU' ? 'Open' : language === 'ES' ? 'Abrir' : 'Open'}
                       </button>
 
                       <button
                         onClick={() => openPromotionBooking(promo)}
                         style={{
-                          height: 48,
+                          height: 50,
                           borderRadius: 18,
                           border: '2px solid #111111',
                           background: '#ff5252',
@@ -2016,7 +1971,7 @@ export default function HomePage() {
                           cursor: 'pointer',
                         }}
                       >
-                        {language === 'RU' ? 'Бронь' : language === 'ES' ? 'Reservar' : 'Book'}
+                        {language === 'RU' ? 'Book' : language === 'ES' ? 'Reservar' : 'Book'}
                       </button>
                     </div>
                   </div>
