@@ -49,10 +49,18 @@ export default function BottomNav() {
           ? 'Inicio'
           : language === 'RU'
           ? 'Главная'
+          : language === 'UA'
+          ? 'Головна'
           : language === 'CZ'
           ? 'Domů'
           : language === 'DE'
           ? 'Start'
+          : language === 'IT'
+          ? 'Home'
+          : language === 'FR'
+          ? 'Accueil'
+          : language === 'AR'
+          ? 'الرئيسية'
           : language === 'PL'
           ? 'Start'
           : 'Home',
@@ -62,10 +70,18 @@ export default function BottomNav() {
           ? 'Mensajes'
           : language === 'RU'
           ? 'Сообщения'
+          : language === 'UA'
+          ? 'Повідомлення'
           : language === 'CZ'
           ? 'Zprávy'
           : language === 'DE'
           ? 'Nachrichten'
+          : language === 'IT'
+          ? 'Messaggi'
+          : language === 'FR'
+          ? 'Messages'
+          : language === 'AR'
+          ? 'الرسائل'
           : language === 'PL'
           ? 'Wiadomości'
           : 'Messages',
@@ -75,10 +91,18 @@ export default function BottomNav() {
           ? 'Añadir'
           : language === 'RU'
           ? 'Добавить'
+          : language === 'UA'
+          ? 'Додати'
           : language === 'CZ'
           ? 'Přidat'
           : language === 'DE'
           ? 'Hinzufügen'
+          : language === 'IT'
+          ? 'Aggiungi'
+          : language === 'FR'
+          ? 'Ajouter'
+          : language === 'AR'
+          ? 'إضافة'
           : language === 'PL'
           ? 'Dodaj'
           : 'Add',
@@ -88,10 +112,18 @@ export default function BottomNav() {
           ? 'Reservas'
           : language === 'RU'
           ? 'Брони'
+          : language === 'UA'
+          ? 'Броні'
           : language === 'CZ'
           ? 'Rezervace'
           : language === 'DE'
           ? 'Buchungen'
+          : language === 'IT'
+          ? 'Prenotazioni'
+          : language === 'FR'
+          ? 'Réservations'
+          : language === 'AR'
+          ? 'الحجوزات'
           : language === 'PL'
           ? 'Rezerwacje'
           : 'Bookings',
@@ -101,10 +133,18 @@ export default function BottomNav() {
           ? 'Perfil'
           : language === 'RU'
           ? 'Профиль'
+          : language === 'UA'
+          ? 'Профіль'
           : language === 'CZ'
           ? 'Profil'
           : language === 'DE'
           ? 'Profil'
+          : language === 'IT'
+          ? 'Profilo'
+          : language === 'FR'
+          ? 'Profil'
+          : language === 'AR'
+          ? 'الملف'
           : language === 'PL'
           ? 'Profil'
           : 'Profile',
@@ -114,10 +154,18 @@ export default function BottomNav() {
           ? 'Publicidad'
           : language === 'RU'
           ? 'Реклама'
+          : language === 'UA'
+          ? 'Реклама'
           : language === 'CZ'
           ? 'Reklama'
           : language === 'DE'
           ? 'Werbung'
+          : language === 'IT'
+          ? 'Pubblicità'
+          : language === 'FR'
+          ? 'Pub'
+          : language === 'AR'
+          ? 'إعلان'
           : language === 'PL'
           ? 'Reklama'
           : 'Ad',
@@ -127,10 +175,18 @@ export default function BottomNav() {
           ? 'Servicio'
           : language === 'RU'
           ? 'Услуга'
+          : language === 'UA'
+          ? 'Послуга'
           : language === 'CZ'
           ? 'Služba'
           : language === 'DE'
           ? 'Service'
+          : language === 'IT'
+          ? 'Servizio'
+          : language === 'FR'
+          ? 'Service'
+          : language === 'AR'
+          ? 'خدمة'
           : language === 'PL'
           ? 'Usługa'
           : 'Service',
@@ -140,10 +196,18 @@ export default function BottomNav() {
           ? 'Descuento'
           : language === 'RU'
           ? 'Скидка'
+          : language === 'UA'
+          ? 'Знижка'
           : language === 'CZ'
           ? 'Sleva'
           : language === 'DE'
           ? 'Rabatt'
+          : language === 'IT'
+          ? 'Sconto'
+          : language === 'FR'
+          ? 'Réduc.'
+          : language === 'AR'
+          ? 'خصم'
           : language === 'PL'
           ? 'Zniżka'
           : 'Deal',
@@ -153,10 +217,18 @@ export default function BottomNav() {
           ? 'Cerrar'
           : language === 'RU'
           ? 'Закрыть'
+          : language === 'UA'
+          ? 'Закрити'
           : language === 'CZ'
           ? 'Zavřít'
           : language === 'DE'
           ? 'Schließen'
+          : language === 'IT'
+          ? 'Chiudi'
+          : language === 'FR'
+          ? 'Fermer'
+          : language === 'AR'
+          ? 'إغلاق'
           : language === 'PL'
           ? 'Zamknij'
           : 'Close',
@@ -165,7 +237,8 @@ export default function BottomNav() {
 
   const isHome = pathname === '/';
   const isMessages = pathname.startsWith('/messages');
-  const isBookings = pathname.startsWith('/bookings');
+  const isBookings =
+    pathname.startsWith('/bookings') || pathname.startsWith('/profile/bookings');
   const isProfile = pathname.startsWith('/profile');
   const isAdd =
     pathname.startsWith('/add') ||
@@ -190,6 +263,9 @@ export default function BottomNav() {
     router.push('/profile/deals/new');
   };
 
+  const itemColor = '#6e7b8a';
+  const activeColor = '#17130f';
+
   return (
     <>
       {showAddMenu ? (
@@ -210,14 +286,14 @@ export default function BottomNav() {
             style={{
               width: '100%',
               maxWidth: 430,
-              padding: '0 14px calc(92px + env(safe-area-inset-bottom))',
+              padding: '0 14px calc(100px + env(safe-area-inset-bottom))',
               boxSizing: 'border-box',
             }}
           >
             <div
               style={{
                 border: '2px solid #111111',
-                borderRadius: 24,
+                borderRadius: 26,
                 background: '#ffffff',
                 boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
                 overflow: 'hidden',
@@ -395,20 +471,24 @@ export default function BottomNav() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(247,244,238,0.98)',
-          borderTop: '1px solid #e3ddd5',
-          backdropFilter: 'blur(10px)',
+          background: 'transparent',
           zIndex: 80,
+          padding: '0 8px calc(8px + env(safe-area-inset-bottom))',
+          boxSizing: 'border-box',
         }}
       >
         <div
           style={{
             maxWidth: 430,
             margin: '0 auto',
+            background: '#ffffff',
+            border: '1.5px solid #111111',
+            borderRadius: 28,
+            boxShadow: '0 10px 24px rgba(0,0,0,0.10)',
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr 92px 1fr 1fr',
+            gridTemplateColumns: '1fr 1fr 96px 1fr 1fr',
             alignItems: 'end',
-            padding: '10px 8px calc(10px + env(safe-area-inset-bottom))',
+            padding: '10px 8px 12px',
             boxSizing: 'border-box',
           }}
         >
@@ -421,13 +501,29 @@ export default function BottomNav() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'flex-end',
               gap: 5,
-              color: isHome ? '#1f5d99' : '#6e7b8a',
+              color: isHome ? activeColor : itemColor,
               cursor: 'pointer',
+              minHeight: 58,
             }}
           >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>⌂</span>
-            <span style={{ fontSize: 12, fontWeight: 800 }}>{navText.home}</span>
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 14,
+                border: '1.5px solid #111111',
+                background: isHome ? '#f4f4f4' : '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: isHome ? '0 4px 10px rgba(0,0,0,0.08)' : 'none',
+              }}
+            >
+              <span style={{ fontSize: 24, lineHeight: 1, fontWeight: 700 }}>⌂</span>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 900 }}>{navText.home}</span>
           </button>
 
           <button
@@ -439,21 +535,36 @@ export default function BottomNav() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'flex-end',
               gap: 5,
-              color: isMessages ? '#1f5d99' : '#6e7b8a',
+              color: isMessages ? activeColor : itemColor,
               position: 'relative',
               cursor: 'pointer',
+              minHeight: 58,
             }}
           >
-            <div style={{ position: 'relative' }}>
-              <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>✉</span>
+            <div
+              style={{
+                position: 'relative',
+                width: 38,
+                height: 38,
+                borderRadius: 14,
+                border: '1.5px solid #111111',
+                background: isMessages ? '#f4f4f4' : '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: isMessages ? '0 4px 10px rgba(0,0,0,0.08)' : 'none',
+              }}
+            >
+              <span style={{ fontSize: 23, lineHeight: 1, fontWeight: 700 }}>✉</span>
 
               {unreadMessages > 0 ? (
                 <span
                   style={{
                     position: 'absolute',
                     top: -6,
-                    right: -10,
+                    right: -8,
                     minWidth: 18,
                     height: 18,
                     padding: '0 5px',
@@ -466,7 +577,7 @@ export default function BottomNav() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     boxShadow: '0 3px 8px rgba(229,57,53,0.35)',
-                    border: '2px solid #f7f4ee',
+                    border: '2px solid #ffffff',
                   }}
                 >
                   {unreadMessages > 9 ? '9+' : unreadMessages}
@@ -474,7 +585,7 @@ export default function BottomNav() {
               ) : null}
             </div>
 
-            <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.messages}</span>
+            <span style={{ fontSize: 11, fontWeight: 900 }}>{navText.messages}</span>
           </button>
 
           <div
@@ -491,7 +602,7 @@ export default function BottomNav() {
                 width: 78,
                 height: 78,
                 borderRadius: 999,
-                border: '4px solid #45c63d',
+                border: '3px solid #111111',
                 background: isAdd ? '#45c63d' : '#ffffff',
                 color: isAdd ? '#ffffff' : '#45c63d',
                 boxShadow: '0 10px 24px rgba(0,0,0,0.14)',
@@ -505,26 +616,42 @@ export default function BottomNav() {
               title={navText.add}
             >
               <span style={{ fontSize: 36, lineHeight: 1, fontWeight: 400 }}>+</span>
-              <span style={{ fontSize: 11, fontWeight: 800 }}>{navText.add}</span>
+              <span style={{ fontSize: 11, fontWeight: 900 }}>{navText.add}</span>
             </button>
           </div>
 
           <button
             type="button"
-            onClick={() => router.push('/bookings')}
+            onClick={() => router.push('/profile/bookings')}
             style={{
               border: 'none',
               background: 'transparent',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'flex-end',
               gap: 5,
-              color: isBookings ? '#1f5d99' : '#6e7b8a',
+              color: isBookings ? activeColor : itemColor,
               cursor: 'pointer',
+              minHeight: 58,
             }}
           >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>▤</span>
-            <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.bookings}</span>
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 14,
+                border: '1.5px solid #111111',
+                background: isBookings ? '#f4f4f4' : '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: isBookings ? '0 4px 10px rgba(0,0,0,0.08)' : 'none',
+              }}
+            >
+              <span style={{ fontSize: 23, lineHeight: 1, fontWeight: 700 }}>▤</span>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 900 }}>{navText.bookings}</span>
           </button>
 
           <button
@@ -536,13 +663,29 @@ export default function BottomNav() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'flex-end',
               gap: 5,
-              color: isProfile ? '#1f5d99' : '#6e7b8a',
+              color: isProfile ? activeColor : itemColor,
               cursor: 'pointer',
+              minHeight: 58,
             }}
           >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>◉</span>
-            <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.profile}</span>
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 14,
+                border: '1.5px solid #111111',
+                background: isProfile ? '#f4f4f4' : '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: isProfile ? '0 4px 10px rgba(0,0,0,0.08)' : 'none',
+              }}
+            >
+              <span style={{ fontSize: 23, lineHeight: 1, fontWeight: 700 }}>◉</span>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 900 }}>{navText.profile}</span>
           </button>
         </div>
       </nav>
