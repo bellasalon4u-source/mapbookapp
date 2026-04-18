@@ -374,7 +374,7 @@ const pageTexts = {
   },
 } as const;
 
-const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
+const serviceNameMap: Record<string, Partial<Record<AppLanguage, string>>> = {
   Маникюр: {
     EN: 'Manicure',
     ES: 'Manicura',
@@ -417,7 +417,7 @@ const serviceNameMap: Record<string, Record<AppLanguage, string>> = {
   },
 };
 
-const monthMap: Record<string, Record<AppLanguage, string>> = {
+const monthMap: Record<string, Partial<Record<AppLanguage, string>>> = {
   января: { EN: 'January', ES: 'enero', RU: 'января', CZ: 'ledna', DE: 'Januar', PL: 'stycznia' },
   февраля: { EN: 'February', ES: 'febrero', RU: 'февраля', CZ: 'února', DE: 'Februar', PL: 'lutego' },
   марта: { EN: 'March', ES: 'marzo', RU: 'марта', CZ: 'března', DE: 'März', PL: 'marca' },
@@ -441,7 +441,7 @@ function formatPrice(price: number) {
 }
 
 function translateServiceName(value: string, language: AppLanguage) {
-  return serviceNameMap[value]?.[language] || value;
+  return serviceNameMap[value]?.[language] || serviceNameMap[value]?.EN || value;
 }
 
 function translateDateLabel(
@@ -467,7 +467,7 @@ function translateDateLabel(
     const [, day, rawMonth, time] = match;
     const month = monthMap[rawMonth.toLowerCase()];
     if (month) {
-      return `${day} ${month[language] || month.EN}, ${time}`;
+      return `${day} ${month[language] || month.EN || rawMonth}, ${time}`;
     }
   }
 
