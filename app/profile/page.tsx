@@ -25,6 +25,7 @@ type ProfileTextShape = {
   verified: string;
   active: string;
   editProfile: string;
+  quickTopUp: string;
   balanceAvailable: string;
   quickActions: string;
   activity: string;
@@ -53,6 +54,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     verified: 'Verified',
     active: 'Profile active',
     editProfile: 'Edit profile',
+    quickTopUp: 'Quick top up',
     balanceAvailable: 'Available balance',
     quickActions: 'Quick actions',
     activity: 'Activity',
@@ -79,6 +81,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     verified: 'Verificado',
     active: 'Perfil activo',
     editProfile: 'Editar perfil',
+    quickTopUp: 'Recarga rápida',
     balanceAvailable: 'Saldo disponible',
     quickActions: 'Acciones rápidas',
     activity: 'Actividad',
@@ -105,6 +108,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     verified: 'Проверено',
     active: 'Профиль активен',
     editProfile: 'Редактировать профиль',
+    quickTopUp: 'Быстрое пополнение',
     balanceAvailable: 'Доступный баланс',
     quickActions: 'Быстрые действия',
     activity: 'Активность',
@@ -131,6 +135,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     verified: 'Ověřeno',
     active: 'Profil aktivní',
     editProfile: 'Upravit profil',
+    quickTopUp: 'Rychlé dobití',
     balanceAvailable: 'Dostupný zůstatek',
     quickActions: 'Rychlé akce',
     activity: 'Aktivita',
@@ -157,6 +162,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     verified: 'Verifiziert',
     active: 'Profil aktiv',
     editProfile: 'Profil bearbeiten',
+    quickTopUp: 'Schnell aufladen',
     balanceAvailable: 'Verfügbares Guthaben',
     quickActions: 'Schnellzugriff',
     activity: 'Aktivität',
@@ -183,6 +189,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     verified: 'Zweryfikowano',
     active: 'Profil aktywny',
     editProfile: 'Edytuj profil',
+    quickTopUp: 'Szybkie doładowanie',
     balanceAvailable: 'Dostępne saldo',
     quickActions: 'Szybkie akcje',
     activity: 'Aktywność',
@@ -209,6 +216,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     verified: 'Перевірено',
     active: 'Профіль активний',
     editProfile: 'Редагувати профіль',
+    quickTopUp: 'Швидке поповнення',
     balanceAvailable: 'Доступний баланс',
     quickActions: 'Швидкі дії',
     activity: 'Активність',
@@ -235,6 +243,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     verified: 'Verificato',
     active: 'Profilo attivo',
     editProfile: 'Modifica profilo',
+    quickTopUp: 'Ricarica veloce',
     balanceAvailable: 'Saldo disponibile',
     quickActions: 'Azioni rapide',
     activity: 'Attività',
@@ -261,6 +270,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     verified: 'Vérifié',
     active: 'Profil actif',
     editProfile: 'Modifier le profil',
+    quickTopUp: 'Recharge rapide',
     balanceAvailable: 'Solde disponible',
     quickActions: 'Actions rapides',
     activity: 'Activité',
@@ -287,6 +297,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     verified: 'موثّق',
     active: 'الملف نشط',
     editProfile: 'تعديل الملف',
+    quickTopUp: 'شحن سريع',
     balanceAvailable: 'الرصيد المتاح',
     quickActions: 'إجراءات سريعة',
     activity: 'النشاط',
@@ -342,6 +353,24 @@ const greenActionButtonStyle = {
   fontWeight: 900,
   cursor: 'pointer',
   boxShadow: '0 2px 0 rgba(0,0,0,0.08)',
+} as const;
+
+const yellowTopUpButtonStyle = {
+  minHeight: 54,
+  borderRadius: 999,
+  border: '2px solid #111111',
+  background: '#f4d84b',
+  color: '#17130f',
+  padding: '0 16px',
+  fontSize: 13,
+  fontWeight: 900,
+  cursor: 'pointer',
+  boxShadow: '0 2px 0 rgba(0,0,0,0.08)',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 8,
+  whiteSpace: 'nowrap',
 } as const;
 
 export default function ProfilePage() {
@@ -491,8 +520,7 @@ export default function ProfilePage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            alignItems: 'start',
+            gridTemplateColumns: '1fr',
             gap: 12,
             marginBottom: 18,
           }}
@@ -522,13 +550,30 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => router.push('/profile/edit')}
-            style={greenActionButtonStyle}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 10,
+            }}
           >
-            {text.editProfile}
-          </button>
+            <button
+              type="button"
+              onClick={() => router.push('/profile/edit')}
+              style={greenActionButtonStyle}
+            >
+              {text.editProfile}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push('/profile/balance')}
+              style={yellowTopUpButtonStyle}
+            >
+              <span style={{ fontSize: 18, lineHeight: 1 }}>🏦</span>
+              <span>{text.quickTopUp}</span>
+            </button>
+          </div>
         </div>
 
         <section>
