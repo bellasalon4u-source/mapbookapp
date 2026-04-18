@@ -160,6 +160,8 @@ const searchAliases = [
   },
 ];
 
+type DealFilterMode = 'none' | 'category' | 'all';
+
 function mapCategoryToId(category: string) {
   const normalized = (category || '').toLowerCase().trim();
 
@@ -231,6 +233,10 @@ function getLanguageBorder(language: AppLanguage) {
     return 'linear-gradient(90deg, #ffffff 0%, #ffffff 50%, #dc143c 50%, #dc143c 100%)';
   }
 
+  if (language === 'UA') {
+    return 'linear-gradient(90deg, #1f57d6 0%, #1f57d6 50%, #ffd84a 50%, #ffd84a 100%)';
+  }
+
   return 'linear-gradient(90deg, #1f57d6 0%, #1f57d6 40%, #ffffff 40%, #ffffff 60%, #e53e4f 60%, #e53e4f 100%)';
 }
 
@@ -248,6 +254,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Krása',
       DE: 'Beauty',
       PL: 'Uroda',
+      UA: 'Краса',
     },
     barber: {
       EN: 'Barber',
@@ -256,6 +263,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Barber',
       DE: 'Barber',
       PL: 'Barber',
+      UA: 'Барбер',
     },
     wellness: {
       EN: 'Wellness',
@@ -264,6 +272,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Wellness',
       DE: 'Wellness',
       PL: 'Wellness',
+      UA: 'Велнес',
     },
     home: {
       EN: 'Home',
@@ -272,6 +281,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Domov',
       DE: 'Zuhause',
       PL: 'Dom',
+      UA: 'Дім',
     },
     repairs: {
       EN: 'Repairs',
@@ -280,6 +290,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Opravy',
       DE: 'Reparaturen',
       PL: 'Naprawy',
+      UA: 'Ремонт',
     },
     tech: {
       EN: 'Tech',
@@ -288,6 +299,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Technika',
       DE: 'Technik',
       PL: 'Technika',
+      UA: 'Техніка',
     },
     pets: {
       EN: 'Pets',
@@ -296,6 +308,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Mazlíčci',
       DE: 'Haustiere',
       PL: 'Zwierzęta',
+      UA: 'Улюбленці',
     },
     fashion: {
       EN: 'Fashion',
@@ -304,6 +317,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Móda',
       DE: 'Mode',
       PL: 'Moda',
+      UA: 'Мода',
     },
     auto: {
       EN: 'Auto',
@@ -312,6 +326,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Auto',
       DE: 'Auto',
       PL: 'Auto',
+      UA: 'Авто',
     },
     moving: {
       EN: 'Moving',
@@ -320,6 +335,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Stěhování',
       DE: 'Umzug',
       PL: 'Przeprowadzka',
+      UA: 'Переїзд',
     },
     fitness: {
       EN: 'Fitness',
@@ -328,6 +344,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Fitness',
       DE: 'Fitness',
       PL: 'Fitness',
+      UA: 'Фітнес',
     },
     education: {
       EN: 'Education',
@@ -336,6 +353,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Vzdělání',
       DE: 'Bildung',
       PL: 'Edukacja',
+      UA: 'Освіта',
     },
     events: {
       EN: 'Events',
@@ -344,6 +362,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Události',
       DE: 'Events',
       PL: 'Wydarzenia',
+      UA: 'Події',
     },
     activities: {
       EN: 'Activities',
@@ -352,6 +371,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Aktivity',
       DE: 'Aktivitäten',
       PL: 'Aktywności',
+      UA: 'Активності',
     },
     creative: {
       EN: 'Creative',
@@ -360,6 +380,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
       CZ: 'Kreativa',
       DE: 'Kreativ',
       PL: 'Kreatywne',
+      UA: 'Креатив',
     },
   };
 
@@ -404,6 +425,10 @@ function languageFlag(language: AppLanguage) {
   if (language === 'CZ') return '🇨🇿';
   if (language === 'DE') return '🇩🇪';
   if (language === 'PL') return '🇵🇱';
+  if (language === 'UA') return '🇺🇦';
+  if (language === 'IT') return '🇮🇹';
+  if (language === 'FR') return '🇫🇷';
+  if (language === 'AR') return '🇦🇪';
   return '🇬🇧';
 }
 
@@ -474,6 +499,7 @@ export default function HomePage() {
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
   const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
   const [likedFilterMode, setLikedFilterMode] = useState<'none' | 'category' | 'all'>('none');
+  const [dealFilterMode, setDealFilterMode] = useState<DealFilterMode>('none');
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [promotions, setPromotions] = useState<PromotionItem[]>([]);
   const [recenterToUserTrigger] = useState(0);
@@ -748,7 +774,7 @@ export default function HomePage() {
 
   useEffect(() => {
     setSelectedMaster(null);
-  }, [activeCategory, activeSubcategory, search, likedFilterMode]);
+  }, [activeCategory, activeSubcategory, search, likedFilterMode, dealFilterMode]);
 
   const borderGradient = getLanguageBorder(language);
   const currentCategoryLabel = getCategoryLabel(activeCategory, language);
@@ -760,6 +786,26 @@ export default function HomePage() {
   ).length;
 
   const likedAllCount = likedMasterIds.length;
+
+  const categoryDealsCount = promotions.filter(
+    (promo) => String(promo.categoryId || '').toLowerCase().trim() === activeCategory
+  ).length;
+
+  const allDealsCount = promotions.length;
+
+  const filteredPromotions = useMemo(() => {
+    if (dealFilterMode === 'category') {
+      return promotions.filter(
+        (promo) => String(promo.categoryId || '').toLowerCase().trim() === activeCategory
+      );
+    }
+
+    if (dealFilterMode === 'all') {
+      return promotions;
+    }
+
+    return promotions;
+  }, [promotions, dealFilterMode, activeCategory]);
 
   const hasAnyResults =
     smartResults.length > 0 ||
@@ -846,7 +892,7 @@ export default function HomePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f3eb',
+        background: '#f6f1e8',
         fontFamily: 'Arial, sans-serif',
         color: '#1f2430',
         paddingBottom: 118,
@@ -856,42 +902,43 @@ export default function HomePage() {
         style={{
           maxWidth: 430,
           margin: '0 auto',
-          background: '#f7f3eb',
+          background: '#f6f1e8',
           borderTop: '5px solid transparent',
           borderImage: `${borderGradient} 1`,
-          boxShadow: '0 0 0 1px rgba(226,218,205,0.35)',
         }}
       >
-        <section style={{ padding: '12px 14px 0' }}>
+        <section style={{ padding: '16px 12px 0' }}>
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
                 background: '#ffffff',
-                borderRadius: 24,
-                padding: 10,
-                boxShadow: '0 6px 18px rgba(0,0,0,0.07)',
-                border: '1px solid #ece7df',
+                borderRadius: 34,
+                padding: 14,
+                border: '2px solid #111111',
               }}
             >
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr auto auto',
-                  gap: 8,
+                  gridTemplateColumns: '1fr auto',
+                  gap: 12,
                   alignItems: 'center',
                 }}
               >
                 <div
                   style={{
+                    height: 54,
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: '#fff',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 10,
+                    padding: '0 14px',
                     minWidth: 0,
-                    height: 46,
-                    padding: '0 4px 0 2px',
                   }}
                 >
-                  <span style={{ fontSize: 20, color: '#111111' }}>🔎</span>
+                  <span style={{ fontSize: 28, lineHeight: 1 }}>🔎</span>
                   <input
                     value={search}
                     onFocus={() => setSearchOpen(true)}
@@ -925,6 +972,7 @@ export default function HomePage() {
                       background: 'transparent',
                       fontSize: 15,
                       color: '#2b2f36',
+                      fontWeight: 700,
                     }}
                   />
 
@@ -951,39 +999,110 @@ export default function HomePage() {
                 <button
                   onClick={() => router.push('/profile/language-region')}
                   style={{
-                    border: 'none',
-                    background: '#fff',
-                    color: '#1f2430',
+                    height: 54,
                     borderRadius: 999,
-                    minWidth: 82,
-                    height: 46,
-                    padding: '0 12px',
-                    fontSize: 15,
-                    fontWeight: 800,
-                    boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
-                    display: 'flex',
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#111111',
+                    padding: '0 18px',
+                    fontSize: 18,
+                    fontWeight: 900,
+                    display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 6,
+                    gap: 10,
                     cursor: 'pointer',
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  <span style={{ fontSize: 20 }}>{languageFlag(language)}</span>
+                  <span style={{ fontSize: 24 }}>{languageFlag(language)}</span>
                   <span>{language}</span>
+                </button>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto auto auto',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    minWidth: 0,
+                    fontSize: 13,
+                    fontWeight: 900,
+                    color: '#1f2430',
+                  }}
+                >
+                  <span style={{ color: '#ff4d4f' }}>📍</span>
+                  <span
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {locationLabel}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => router.push('/profile')}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    padding: 0,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    cursor: 'pointer',
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#ff4d4f',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <span>⏱</span>
+                  <span>{formatAdTime(adSecondsLeft)}</span>
+                </button>
+
+                <button
+                  onClick={() => router.push('/profile')}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    padding: 0,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    cursor: 'pointer',
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#ff4d4f',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <span style={{ color: '#4a5568' }}>👁</span>
+                  <span>{adViews}</span>
                 </button>
 
                 <div style={{ position: 'relative' }}>
                   <button
                     onClick={() => router.push('/profile')}
                     style={{
-                      border: '2px solid #fff',
-                      background: '#f4efe7',
+                      width: 42,
+                      height: 42,
                       borderRadius: 999,
-                      width: 46,
-                      height: 46,
-                      padding: 0,
+                      border: '2px solid #111111',
+                      background: '#fff',
                       overflow: 'hidden',
-                      boxShadow: '0 3px 10px rgba(0,0,0,0.07)',
+                      padding: 0,
                       cursor: 'pointer',
                       display: 'block',
                     }}
@@ -1004,83 +1123,16 @@ export default function HomePage() {
                     <span
                       style={{
                         position: 'absolute',
-                        top: 2,
-                        right: 2,
-                        width: 11,
-                        height: 11,
+                        top: 1,
+                        right: 1,
+                        width: 10,
+                        height: 10,
                         borderRadius: '50%',
                         background: '#ff3b30',
                         border: '2px solid #ffffff',
-                        boxShadow: '0 2px 6px rgba(255,59,48,0.35)',
                       }}
                     />
                   ) : null}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  marginTop: 8,
-                  padding: '4px 2px 0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 12,
-                  flexWrap: 'wrap',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontSize: 13,
-                    fontWeight: 900,
-                    color: '#4f5b68',
-                  }}
-                >
-                  <span style={{ color: '#2f63d8' }}>📍</span>
-                  <span>{locationLabel}</span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <button
-                    onClick={() => router.push('/profile')}
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      padding: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      cursor: 'pointer',
-                      fontWeight: 900,
-                      fontSize: 16,
-                      lineHeight: 1,
-                    }}
-                  >
-                    <span style={{ color: '#ff3b30', fontSize: 14 }}>⏱</span>
-                    <span style={{ color: '#ff3b30' }}>{formatAdTime(adSecondsLeft)}</span>
-                  </button>
-
-                  <button
-                    onClick={() => router.push('/profile')}
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      padding: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      cursor: 'pointer',
-                      fontWeight: 900,
-                      fontSize: 16,
-                      lineHeight: 1,
-                    }}
-                  >
-                    <span style={{ color: '#19b44a', fontSize: 16 }}>👁</span>
-                    <span style={{ color: '#ff3b30' }}>{adViews}</span>
-                  </button>
                 </div>
               </div>
             </div>
@@ -1093,8 +1145,8 @@ export default function HomePage() {
                   right: 0,
                   top: 'calc(100% + 8px)',
                   background: 'rgba(255,255,255,0.98)',
-                  border: '1px solid #ece4d8',
-                  borderRadius: 20,
+                  border: '2px solid #111111',
+                  borderRadius: 24,
                   boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
                   padding: 12,
                   maxHeight: 380,
@@ -1105,7 +1157,14 @@ export default function HomePage() {
                   <>
                     {recentSearches.length > 0 ? (
                       <div style={{ marginBottom: 14 }}>
-                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
                           {tr.recentSearches}
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -1114,7 +1173,7 @@ export default function HomePage() {
                               key={item}
                               onClick={() => runQuickSearch(item)}
                               style={{
-                                border: '1px solid #e7ddd0',
+                                border: '2px solid #111111',
                                 background: '#fff',
                                 borderRadius: 999,
                                 padding: '8px 12px',
@@ -1132,7 +1191,14 @@ export default function HomePage() {
                     ) : null}
 
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 900,
+                          color: '#6c7480',
+                          marginBottom: 8,
+                        }}
+                      >
                         {tr.popularSearches}
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -1141,7 +1207,7 @@ export default function HomePage() {
                             key={item}
                             onClick={() => runQuickSearch(item)}
                             style={{
-                              border: '1px solid #e7ddd0',
+                              border: '2px solid #111111',
                               background: '#fff8f8',
                               borderRadius: 999,
                               padding: '8px 12px',
@@ -1158,14 +1224,28 @@ export default function HomePage() {
                     </div>
                   </>
                 ) : !hasAnyResults ? (
-                  <div style={{ padding: '12px 6px', fontSize: 14, fontWeight: 800, color: '#74808c' }}>
+                  <div
+                    style={{
+                      padding: '12px 6px',
+                      fontSize: 14,
+                      fontWeight: 800,
+                      color: '#74808c',
+                    }}
+                  >
                     {tr.noResultsFound}
                   </div>
                 ) : (
                   <>
                     {smartResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
                           {tr.smartMatches}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1174,7 +1254,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: 'none',
+                                border: '2px solid #111111',
                                 background: '#fff6f9',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1183,13 +1263,24 @@ export default function HomePage() {
                                 alignItems: 'flex-start',
                                 gap: 2,
                                 cursor: 'pointer',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                               }}
                             >
-                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
+                              <span
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: 900,
+                                  color: '#263545',
+                                }}
+                              >
                                 {item.label}
                               </span>
-                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
+                              <span
+                                style={{
+                                  fontSize: 12,
+                                  color: '#7d8691',
+                                  fontWeight: 700,
+                                }}
+                              >
                                 {getCategoryLabel(item.categoryId, language)} • {item.subcategory}
                               </span>
                             </button>
@@ -1200,7 +1291,14 @@ export default function HomePage() {
 
                     {categoryResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
                           {tr.categories}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1209,7 +1307,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: 'none',
+                                border: '2px solid #111111',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1218,10 +1316,15 @@ export default function HomePage() {
                                 alignItems: 'flex-start',
                                 gap: 2,
                                 cursor: 'pointer',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                               }}
                             >
-                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
+                              <span
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: 900,
+                                  color: '#263545',
+                                }}
+                              >
                                 {item.label}
                               </span>
                             </button>
@@ -1232,7 +1335,14 @@ export default function HomePage() {
 
                     {subcategoryResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
                           {tr.services}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1241,7 +1351,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: 'none',
+                                border: '2px solid #111111',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1250,13 +1360,24 @@ export default function HomePage() {
                                 alignItems: 'flex-start',
                                 gap: 2,
                                 cursor: 'pointer',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                               }}
                             >
-                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
+                              <span
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: 900,
+                                  color: '#263545',
+                                }}
+                              >
                                 {item.label}
                               </span>
-                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
+                              <span
+                                style={{
+                                  fontSize: 12,
+                                  color: '#7d8691',
+                                  fontWeight: 700,
+                                }}
+                              >
                                 {getCategoryLabel(item.categoryId, language)}
                               </span>
                             </button>
@@ -1267,7 +1388,14 @@ export default function HomePage() {
 
                     {proResults.length > 0 && (
                       <div>
-                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
                           {tr.pros}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -1276,7 +1404,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: 'none',
+                                border: '2px solid #111111',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1285,13 +1413,24 @@ export default function HomePage() {
                                 alignItems: 'flex-start',
                                 gap: 2,
                                 cursor: 'pointer',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                               }}
                             >
-                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
+                              <span
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: 900,
+                                  color: '#263545',
+                                }}
+                              >
                                 {item.label}
                               </span>
-                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
+                              <span
+                                style={{
+                                  fontSize: 12,
+                                  color: '#7d8691',
+                                  fontWeight: 700,
+                                }}
+                              >
                                 {getCategoryLabel(item.categoryId, language)}
                               </span>
                             </button>
@@ -1306,7 +1445,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '10px 0 0' }}>
+        <section style={{ padding: '12px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1314,6 +1453,7 @@ export default function HomePage() {
             onSelectCategory={(category) => {
               setActiveCategory(category);
               setLikedFilterMode('none');
+              setDealFilterMode('none');
             }}
             onSelectSubcategory={(subcategory) => {
               setActiveSubcategory(subcategory);
@@ -1324,99 +1464,281 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '8px 14px 0' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
-            <button
-              onClick={() => setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))}
-              style={{
-                border: likedFilterMode === 'category' ? '3px solid #ff2020' : '1px solid #dadada',
-                background: '#fff',
-                color: '#1f2430',
-                borderRadius: 999,
-                padding: likedFilterMode === 'category' ? '12px 16px' : '10px 14px',
-                fontSize: likedFilterMode === 'category' ? 16 : 15,
-                fontWeight: likedFilterMode === 'category' ? 900 : 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-              }}
-            >
-              <span style={{ color: '#ff2020', fontSize: 18 }}>♥</span>
-              <span>{currentCategoryLabel}</span>
-              <span
-                style={{
-                  minWidth: 28,
-                  height: 28,
-                  borderRadius: 999,
-                  border: '1px solid #e4e4e4',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  background: '#fff',
-                }}
-              >
-                {likedInCategoryCount}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
-              style={{
-                border: likedFilterMode === 'all' ? '3px solid #ff2020' : '1px solid #dadada',
-                background: '#fff',
-                color: '#1f2430',
-                borderRadius: 999,
-                padding: likedFilterMode === 'all' ? '12px 16px' : '10px 14px',
-                fontSize: likedFilterMode === 'all' ? 16 : 15,
-                fontWeight: likedFilterMode === 'all' ? 900 : 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-              }}
-            >
-              <span style={{ color: '#ff2020', fontSize: 18 }}>♥</span>
-              <span>{tr.allLiked}</span>
-              <span
-                style={{
-                  minWidth: 28,
-                  height: 28,
-                  borderRadius: 999,
-                  border: '1px solid #e4e4e4',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  background: '#fff',
-                }}
-              >
-                {likedAllCount}
-              </span>
-            </button>
-
+        <section style={{ padding: '12px 12px 0' }}>
+          <div
+            style={{
+              border: '2px solid #111111',
+              borderRadius: 34,
+              background: '#fff',
+              padding: 18,
+            }}
+          >
             <div
               style={{
-                marginLeft: 'auto',
-                border: '1px solid #d9ecd7',
-                background: '#eefbe9',
-                color: '#2f9c47',
-                borderRadius: 999,
-                padding: '9px 13px',
-                fontSize: 13,
-                fontWeight: 900,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 14,
               }}
             >
-              {filteredMasters.filter((item: any) => item.availableNow).length} {tr.prosAvailableNow}
+              <button
+                onClick={() =>
+                  setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))
+                }
+                style={{
+                  minHeight: 78,
+                  border: '2px solid #111111',
+                  borderRadius: 28,
+                  background: likedFilterMode === 'category' ? '#3d6dcc' : '#3d6dcc',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '0 16px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    minWidth: 0,
+                    fontSize: 16,
+                    fontWeight: 900,
+                  }}
+                >
+                  <span style={{ color: '#ff3355', fontSize: 24 }}>♥</span>
+                  <span
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {currentCategoryLabel}
+                  </span>
+                </div>
+
+                <span
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#111111',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 18,
+                    fontWeight: 900,
+                    flexShrink: 0,
+                  }}
+                >
+                  {likedInCategoryCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() =>
+                  setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'))
+                }
+                style={{
+                  minHeight: 78,
+                  border: '2px solid #111111',
+                  borderRadius: 28,
+                  background: '#ead98d',
+                  color: '#111111',
+                  cursor: 'pointer',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '0 16px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    minWidth: 0,
+                    fontSize: 16,
+                    fontWeight: 900,
+                  }}
+                >
+                  <span style={{ fontSize: 22 }}>🪙</span>
+                  <span
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {language === 'RU'
+                      ? 'Скидки дня'
+                      : language === 'ES'
+                      ? 'Ofertas del día'
+                      : 'Today deals'}
+                  </span>
+                </div>
+
+                <span
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#111111',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 18,
+                    fontWeight: 900,
+                    flexShrink: 0,
+                  }}
+                >
+                  {categoryDealsCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
+                style={{
+                  minHeight: 78,
+                  border: '2px solid #111111',
+                  borderRadius: 28,
+                  background: '#3d6dcc',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '0 16px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    minWidth: 0,
+                    fontSize: 16,
+                    fontWeight: 900,
+                  }}
+                >
+                  <span style={{ color: '#ff3355', fontSize: 24 }}>♥</span>
+                  <span
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {language === 'RU'
+                      ? 'Все лайки'
+                      : language === 'ES'
+                      ? 'Todos favoritos'
+                      : 'All liked'}
+                  </span>
+                </div>
+
+                <span
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#111111',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 18,
+                    fontWeight: 900,
+                    flexShrink: 0,
+                  }}
+                >
+                  {likedAllCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'))}
+                style={{
+                  minHeight: 78,
+                  border: '2px solid #111111',
+                  borderRadius: 28,
+                  background: '#ead98d',
+                  color: '#111111',
+                  cursor: 'pointer',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '0 16px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    minWidth: 0,
+                    fontSize: 16,
+                    fontWeight: 900,
+                  }}
+                >
+                  <span style={{ fontSize: 22 }}>🪙</span>
+                  <span
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {language === 'RU'
+                      ? 'Все скидки дня'
+                      : language === 'ES'
+                      ? 'Todas ofertas'
+                      : 'All today deals'}
+                  </span>
+                </div>
+
+                <span
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#111111',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 18,
+                    fontWeight: 900,
+                    flexShrink: 0,
+                  }}
+                >
+                  {allDealsCount}
+                </span>
+              </button>
             </div>
           </div>
         </section>
 
-        <section style={{ padding: '8px 0 0' }}>
-          <div style={{ background: '#ffffff', borderTop: '1px solid #e7e1d8', borderBottom: '1px solid #e7e1d8' }}>
+        <section style={{ padding: '10px 0 0' }}>
+          <div
+            style={{
+              background: '#ffffff',
+              borderTop: '2px solid #111111',
+              borderBottom: '2px solid #111111',
+            }}
+          >
             <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={filteredMasters}
@@ -1446,15 +1768,22 @@ export default function HomePage() {
           </div>
         </section>
 
-        {promotions.length > 0 && (
-          <section style={{ padding: '12px 14px 0' }}>
-            <div style={{ marginBottom: 18 }}>
+        {filteredPromotions.length > 0 && (
+          <section style={{ padding: '14px 0 0' }}>
+            <div
+              style={{
+                background: '#ece7dd',
+                borderTop: '2px solid rgba(0,0,0,0.08)',
+                padding: '0 0 14px',
+              }}
+            >
               <div
                 style={{
+                  padding: '14px 14px 0',
                   display: 'flex',
-                  justifyContent: 'space-between',
                   alignItems: 'center',
-                  marginBottom: 12,
+                  justifyContent: 'space-between',
+                  gap: 10,
                 }}
               >
                 <h2
@@ -1462,7 +1791,7 @@ export default function HomePage() {
                     margin: 0,
                     fontSize: 17,
                     fontWeight: 900,
-                    color: '#223145',
+                    color: '#21324a',
                   }}
                 >
                   {language === 'RU'
@@ -1476,10 +1805,11 @@ export default function HomePage() {
                   style={{
                     border: 'none',
                     background: 'transparent',
-                    fontSize: 24,
-                    color: '#9aa0a8',
+                    fontSize: 26,
+                    color: '#8d918f',
                     lineHeight: 1,
                     cursor: 'pointer',
+                    padding: 0,
                   }}
                 >
                   ›
@@ -1488,17 +1818,18 @@ export default function HomePage() {
 
               <div
                 style={{
+                  marginTop: 12,
                   display: 'flex',
-                  gap: 12,
+                  gap: 14,
                   overflowX: 'auto',
                   overflowY: 'hidden',
-                  paddingBottom: 6,
+                  padding: '0 14px 6px',
                   WebkitOverflowScrolling: 'touch',
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none',
                 }}
               >
-                {promotions.map((promo) => (
+                {filteredPromotions.map((promo) => (
                   <div
                     key={promo.id}
                     ref={(node) => {
@@ -1506,12 +1837,12 @@ export default function HomePage() {
                     }}
                     data-promo-id={promo.id}
                     style={{
+                      minWidth: 320,
+                      maxWidth: 320,
+                      borderRadius: 34,
+                      border: '2px solid #111111',
                       background: '#fff',
-                      borderRadius: 26,
                       overflow: 'hidden',
-                      minWidth: 250,
-                      maxWidth: 250,
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
                       flexShrink: 0,
                     }}
                   >
@@ -1521,10 +1852,10 @@ export default function HomePage() {
                         border: 'none',
                         background: 'transparent',
                         padding: 0,
+                        width: '100%',
                         textAlign: 'left',
                         cursor: 'pointer',
                         display: 'block',
-                        width: '100%',
                       }}
                     >
                       <div style={{ position: 'relative' }}>
@@ -1533,7 +1864,7 @@ export default function HomePage() {
                           alt={promo.title}
                           style={{
                             width: '100%',
-                            height: 170,
+                            height: 210,
                             objectFit: 'cover',
                             display: 'block',
                           }}
@@ -1542,25 +1873,25 @@ export default function HomePage() {
                         <div
                           style={{
                             position: 'absolute',
-                            top: 12,
-                            left: 12,
-                            background: '#ffffff',
+                            top: 14,
+                            left: 14,
+                            background: '#fff',
                             color: '#ff4f93',
                             borderRadius: 999,
-                            padding: '8px 14px',
+                            padding: '10px 16px',
                             fontSize: 12,
                             fontWeight: 900,
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+                            border: '2px solid #111111',
                           }}
                         >
                           Sponsored
                         </div>
                       </div>
 
-                      <div style={{ padding: '14px 16px 8px' }}>
+                      <div style={{ padding: '16px 16px 10px' }}>
                         <div
                           style={{
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: 900,
                             color: '#1f2430',
                             lineHeight: 1.2,
@@ -1571,10 +1902,11 @@ export default function HomePage() {
 
                         <div
                           style={{
-                            marginTop: 8,
-                            fontSize: 13,
+                            marginTop: 10,
+                            fontSize: 14,
                             fontWeight: 700,
                             color: '#6b7280',
+                            lineHeight: 1.45,
                           }}
                         >
                           {promo.subtitle ||
@@ -1587,9 +1919,9 @@ export default function HomePage() {
 
                         <div
                           style={{
-                            marginTop: 10,
-                            fontSize: 12,
-                            fontWeight: 800,
+                            marginTop: 12,
+                            fontSize: 13,
+                            fontWeight: 900,
                             color: '#ff4f93',
                           }}
                         >
@@ -1606,38 +1938,37 @@ export default function HomePage() {
                       style={{
                         display: 'grid',
                         gridTemplateColumns: '1fr 1fr',
-                        gap: 10,
-                        padding: '0 16px 16px',
+                        gap: 14,
+                        padding: '0 16px 18px',
                       }}
                     >
                       <button
                         onClick={() => openPromotionView(promo)}
                         style={{
-                          height: 42,
-                          borderRadius: 14,
-                          border: '1px solid #e6ded2',
-                          background: '#fff',
-                          color: '#223145',
-                          fontSize: 14,
+                          height: 54,
+                          borderRadius: 20,
+                          border: '2px solid #111111',
+                          background: '#1f4da8',
+                          color: '#fff',
+                          fontSize: 16,
                           fontWeight: 900,
                           cursor: 'pointer',
                         }}
                       >
-                        {language === 'RU' ? 'Открыть' : language === 'ES' ? 'Ver' : 'View'}
+                        {language === 'RU' ? 'Открыть' : language === 'ES' ? 'Abrir' : 'Open'}
                       </button>
 
                       <button
                         onClick={() => openPromotionBooking(promo)}
                         style={{
-                          height: 42,
-                          border: 'none',
-                          borderRadius: 14,
-                          background: '#ff4f93',
+                          height: 54,
+                          borderRadius: 20,
+                          border: '2px solid #111111',
+                          background: '#ff5252',
                           color: '#fff',
-                          fontSize: 14,
+                          fontSize: 16,
                           fontWeight: 900,
                           cursor: 'pointer',
-                          boxShadow: '0 6px 14px rgba(255,79,147,0.25)',
                         }}
                       >
                         {language === 'RU' ? 'Бронь' : language === 'ES' ? 'Reservar' : 'Book'}
