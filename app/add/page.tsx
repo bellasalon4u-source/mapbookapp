@@ -1457,7 +1457,9 @@ export default function AddServicePage() {
     return () => {
       photos.forEach((item) => URL.revokeObjectURL(item.preview));
     };
-  }, [photos]);
+    // cleanup only on unmount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const text = textByLanguage[language] || textByLanguage.EN;
   const categories = categoriesByLanguage[language] || categoriesByLanguage.EN;
