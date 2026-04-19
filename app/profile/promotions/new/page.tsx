@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -71,7 +72,24 @@ type PromotionTexts = {
   firstAdBonus: string;
   removePhoto: string;
   photosCount: string;
+  adjustPhoto: string;
+  photoEditorHint: string;
+  resetPhoto: string;
+  applyPhoto: string;
+  cancel: string;
 };
+
+type PhotoItem = {
+  id: string;
+  name: string;
+  preview: string;
+  scale: number;
+  offsetX: number;
+  offsetY: number;
+};
+
+const MIN_SCALE = 1;
+const MAX_SCALE = 3;
 
 const textByLanguage: Record<AppLanguage, PromotionTexts> = {
   EN: {
@@ -120,6 +138,11 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     firstAdBonus: 'First ad can be free for 7 days for new users',
     removePhoto: 'Remove',
     photosCount: 'Photos',
+    adjustPhoto: 'Adjust photo',
+    photoEditorHint: 'Move with one finger. Zoom with slider.',
+    resetPhoto: 'Reset',
+    applyPhoto: 'Apply',
+    cancel: 'Cancel',
   },
   RU: {
     pageTitle: 'Добавить рекламу',
@@ -167,6 +190,11 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     firstAdBonus: 'Первая реклама может быть бесплатной на 7 дней для новых пользователей',
     removePhoto: 'Удалить',
     photosCount: 'Фото',
+    adjustPhoto: 'Настроить фото',
+    photoEditorHint: 'Перемещай одним пальцем. Увеличивай ползунком.',
+    resetPhoto: 'Сбросить',
+    applyPhoto: 'Применить',
+    cancel: 'Отмена',
   },
   ES: {
     pageTitle: 'Añadir publicidad',
@@ -214,6 +242,11 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     firstAdBonus: 'El primer anuncio puede ser gratis durante 7 días para nuevos usuarios',
     removePhoto: 'Eliminar',
     photosCount: 'Fotos',
+    adjustPhoto: 'Ajustar foto',
+    photoEditorHint: 'Mueve con un dedo. Haz zoom con el control.',
+    resetPhoto: 'Restablecer',
+    applyPhoto: 'Aplicar',
+    cancel: 'Cancelar',
   },
   CZ: {
     pageTitle: 'Přidat reklamu',
@@ -261,6 +294,11 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     firstAdBonus: 'První reklama může být pro nové uživatele zdarma na 7 dní',
     removePhoto: 'Odstranit',
     photosCount: 'Fotky',
+    adjustPhoto: 'Upravit fotku',
+    photoEditorHint: 'Posuňte jedním prstem. Přibližte posuvníkem.',
+    resetPhoto: 'Resetovat',
+    applyPhoto: 'Použít',
+    cancel: 'Zrušit',
   },
   DE: {
     pageTitle: 'Werbung hinzufügen',
@@ -308,6 +346,11 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     firstAdBonus: 'Die erste Werbung kann für neue Nutzer 7 Tage kostenlos sein',
     removePhoto: 'Entfernen',
     photosCount: 'Fotos',
+    adjustPhoto: 'Foto anpassen',
+    photoEditorHint: 'Mit einem Finger verschieben. Mit dem Regler zoomen.',
+    resetPhoto: 'Zurücksetzen',
+    applyPhoto: 'Anwenden',
+    cancel: 'Abbrechen',
   },
   PL: {
     pageTitle: 'Dodaj reklamę',
@@ -355,6 +398,11 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     firstAdBonus: 'Pierwsza reklama może być darmowa na 7 dni dla nowych użytkowników',
     removePhoto: 'Usuń',
     photosCount: 'Zdjęcia',
+    adjustPhoto: 'Dopasuj zdjęcie',
+    photoEditorHint: 'Przesuwaj jednym palcem. Powiększaj suwakiem.',
+    resetPhoto: 'Resetuj',
+    applyPhoto: 'Zastosuj',
+    cancel: 'Anuluj',
   },
   UA: {} as PromotionTexts,
   IT: {} as PromotionTexts,
@@ -407,6 +455,14 @@ const radiusOptionsByLanguage: Record<AppLanguage, RadiusOption[]> = {
   radiusOptionsByLanguage[lang] = radiusOptionsByLanguage.EN;
 });
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function getSafeScale(value: number) {
+  return clamp(Number.isFinite(value) ? value : 1, MIN_SCALE, MAX_SCALE);
+}
+
 export default function NewPromotionPage() {
   const router = useRouter();
 
@@ -424,8 +480,26 @@ export default function NewPromotionPage() {
   const [radius, setRadius] = useState<RadiusOption['id']>('10');
   const [layout, setLayout] = useState<PhotoLayout>('single');
   const [showPhotoSourceMenu, setShowPhotoSourceMenu] = useState(false);
-  const [photos, setPhotos] = useState<{ name: string; preview: string }[]>([]);
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const [editorPhotoId, setEditorPhotoId] = useState<string | null>(null);
+  const [editorScale, setEditorScale] = useState(1);
+  const [editorOffsetX, setEditorOffsetX] = useState(0);
+  const [editorOffsetY, setEditorOffsetY] = useState(0);
+  const dragRef = useRef<{
+    pointerId: number | null;
+    startX: number;
+    startY: number;
+    startOffsetX: number;
+    startOffsetY: number;
+  }>({
+    pointerId: null,
+    startX: 0,
+    startY: 0,
+    startOffsetX: 0,
+    startOffsetY: 0,
+  });
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -465,6 +539,82 @@ export default function NewPromotionPage() {
     [selectedRadius.pricePerDay, days]
   );
 
+  const editorPhoto = useMemo(
+    () => photos.find((photo) => photo.id === editorPhotoId) || null,
+    [photos, editorPhotoId]
+  );
+
+  const openEditor = (photoId: string) => {
+    const current = photos.find((photo) => photo.id === photoId);
+    if (!current) return;
+
+    setEditorPhotoId(photoId);
+    setEditorScale(getSafeScale(current.scale));
+    setEditorOffsetX(current.offsetX || 0);
+    setEditorOffsetY(current.offsetY || 0);
+  };
+
+  const closeEditor = () => {
+    dragRef.current = {
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      startOffsetX: 0,
+      startOffsetY: 0,
+    };
+    setEditorPhotoId(null);
+  };
+
+  const applyEditor = () => {
+    if (!editorPhotoId) return;
+
+    setPhotos((prev) =>
+      prev.map((photo) =>
+        photo.id === editorPhotoId
+          ? {
+              ...photo,
+              scale: getSafeScale(editorScale),
+              offsetX: editorOffsetX,
+              offsetY: editorOffsetY,
+            }
+          : photo
+      )
+    );
+
+    closeEditor();
+  };
+
+  const resetEditor = () => {
+    setEditorScale(1);
+    setEditorOffsetX(0);
+    setEditorOffsetY(0);
+  };
+
+  const handleEditorPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startOffsetX: editorOffsetX,
+      startOffsetY: editorOffsetY,
+    };
+  };
+
+  const handleEditorPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragRef.current.pointerId !== event.pointerId) return;
+
+    const deltaX = event.clientX - dragRef.current.startX;
+    const deltaY = event.clientY - dragRef.current.startY;
+
+    setEditorOffsetX(dragRef.current.startOffsetX + deltaX);
+    setEditorOffsetY(dragRef.current.startOffsetY + deltaY);
+  };
+
+  const handleEditorPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragRef.current.pointerId !== event.pointerId) return;
+    dragRef.current.pointerId = null;
+  };
+
   const handleFilesSelected = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
@@ -472,9 +622,13 @@ export default function NewPromotionPage() {
     const remainingSlots = Math.max(0, 9 - photos.length);
     const selected = files.slice(0, remainingSlots);
 
-    const nextPhotos = selected.map((file) => ({
+    const nextPhotos: PhotoItem[] = selected.map((file, index) => ({
+      id: `${file.name}-${file.size}-${Date.now()}-${index}`,
       name: file.name,
       preview: URL.createObjectURL(file),
+      scale: 1,
+      offsetX: 0,
+      offsetY: 0,
     }));
 
     setPhotos((prev) => [...prev, ...nextPhotos]);
@@ -482,14 +636,18 @@ export default function NewPromotionPage() {
     setShowPhotoSourceMenu(false);
   };
 
-  const handleRemovePhoto = (index: number) => {
+  const handleRemovePhoto = (id: string) => {
     setPhotos((prev) => {
-      const current = prev[index];
-      if (current?.preview) {
-        URL.revokeObjectURL(current.preview);
+      const found = prev.find((photo) => photo.id === id);
+      if (found?.preview) {
+        URL.revokeObjectURL(found.preview);
       }
-      return prev.filter((_, i) => i !== index);
+      return prev.filter((photo) => photo.id !== id);
     });
+
+    if (editorPhotoId === id) {
+      closeEditor();
+    }
   };
 
   const handleContinueToPayment = () => {
@@ -1175,12 +1333,12 @@ export default function NewPromotionPage() {
                     gap: 10,
                   }}
                 >
-                  {(layout === 'single' ? [photos[0]] : photos).map((photo, index) => {
+                  {(layout === 'single' ? [photos[0]] : photos).map((photo) => {
                     if (!photo) return null;
 
                     return (
                       <div
-                        key={`${photo.name}-${index}`}
+                        key={photo.id}
                         style={{
                           borderRadius: 22,
                           border: '1.5px solid #111111',
@@ -1189,51 +1347,118 @@ export default function NewPromotionPage() {
                           position: 'relative',
                         }}
                       >
-                        <img
-                          src={photo.preview}
-                          alt={photo.name}
+                        <div
                           style={{
                             width: '100%',
                             height: layout === 'single' ? 220 : 150,
-                            objectFit: 'cover',
-                            display: 'block',
+                            overflow: 'hidden',
+                            position: 'relative',
+                            background: '#f4f1ea',
                           }}
-                        />
+                        >
+                          <img
+                            src={photo.preview}
+                            alt={photo.name}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              display: 'block',
+                              transform: `translate(${photo.offsetX}px, ${photo.offsetY}px) scale(${photo.scale})`,
+                              transformOrigin: 'center center',
+                            }}
+                          />
+                        </div>
 
-                        <button
-                          type="button"
-                          onClick={() => handleRemovePhoto(index)}
+                        <div
                           style={{
                             position: 'absolute',
                             top: 10,
                             right: 10,
-                            minWidth: 34,
-                            height: 34,
-                            borderRadius: 999,
-                            border: '1.5px solid #111111',
-                            background: '#ffffff',
-                            color: '#17130f',
-                            fontSize: 18,
-                            fontWeight: 900,
-                            cursor: 'pointer',
-                            padding: '0 10px',
+                            display: 'flex',
+                            gap: 8,
                           }}
                         >
-                          ×
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => openEditor(photo.id)}
+                            style={{
+                              minWidth: 34,
+                              height: 34,
+                              borderRadius: 999,
+                              border: '1.5px solid #111111',
+                              background: '#ffffff',
+                              color: '#17130f',
+                              fontSize: 12,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                              padding: '0 10px',
+                            }}
+                          >
+                            ↔
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePhoto(photo.id)}
+                            style={{
+                              minWidth: 34,
+                              height: 34,
+                              borderRadius: 999,
+                              border: '1.5px solid #111111',
+                              background: '#ffffff',
+                              color: '#17130f',
+                              fontSize: 18,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                              padding: '0 10px',
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
 
                         <div
                           style={{
                             padding: '10px 12px',
-                            fontSize: 13,
-                            color: '#7b7268',
-                            fontWeight: 700,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 10,
                           }}
                         >
-                          {photo.name}
+                          <div
+                            style={{
+                              fontSize: 13,
+                              color: '#7b7268',
+                              fontWeight: 700,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              flex: 1,
+                            }}
+                          >
+                            {photo.name}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => openEditor(photo.id)}
+                            style={{
+                              height: 34,
+                              borderRadius: 12,
+                              border: '1.5px solid #111111',
+                              background: '#fff',
+                              color: '#17130f',
+                              padding: '0 10px',
+                              fontSize: 12,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {text.adjustPhoto}
+                          </button>
                         </div>
                       </div>
                     );
@@ -1476,6 +1701,170 @@ export default function NewPromotionPage() {
               >
                 ✕ {text.close}
               </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {editorPhoto ? (
+        <div
+          onClick={closeEditor}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(17,17,17,0.42)',
+            zIndex: 300,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: 430,
+              padding: '0 14px calc(20px + env(safe-area-inset-bottom))',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div
+              style={{
+                border: '2px solid #111111',
+                borderRadius: 26,
+                background: '#ffffff',
+                boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  padding: '16px 16px 8px',
+                  fontSize: 18,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {text.adjustPhoto}
+              </div>
+
+              <div
+                style={{
+                  padding: '0 16px 14px',
+                  fontSize: 14,
+                  lineHeight: 1.45,
+                  color: '#7b7268',
+                  fontWeight: 700,
+                }}
+              >
+                {text.photoEditorHint}
+              </div>
+
+              <div style={{ padding: '0 16px 14px' }}>
+                <div
+                  onPointerDown={handleEditorPointerDown}
+                  onPointerMove={handleEditorPointerMove}
+                  onPointerUp={handleEditorPointerUp}
+                  onPointerCancel={handleEditorPointerUp}
+                  style={{
+                    width: '100%',
+                    aspectRatio: '1 / 1',
+                    borderRadius: 22,
+                    border: '2px solid #111111',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    background: '#f4f1ea',
+                    touchAction: 'none',
+                  }}
+                >
+                  <img
+                    src={editorPhoto.preview}
+                    alt={editorPhoto.name}
+                    draggable={false}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                      userSelect: 'none',
+                      transform: `translate(${editorOffsetX}px, ${editorOffsetY}px) scale(${editorScale})`,
+                      transformOrigin: 'center center',
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginTop: 14 }}>
+                  <input
+                    type="range"
+                    min={MIN_SCALE}
+                    max={MAX_SCALE}
+                    step={0.01}
+                    value={editorScale}
+                    onChange={(e) => setEditorScale(getSafeScale(Number(e.target.value)))}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gap: 10,
+                  padding: '0 16px 16px',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={resetEditor}
+                  style={{
+                    height: 50,
+                    borderRadius: 16,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#17130f',
+                    fontSize: 15,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.resetPhoto}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={closeEditor}
+                  style={{
+                    height: 50,
+                    borderRadius: 16,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#17130f',
+                    fontSize: 15,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.cancel}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={applyEditor}
+                  style={{
+                    height: 50,
+                    borderRadius: 16,
+                    border: '2px solid #111111',
+                    background: '#17130f',
+                    color: '#fff',
+                    fontSize: 15,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.applyPhoto}
+                </button>
+              </div>
             </div>
           </div>
         </div>
