@@ -77,6 +77,14 @@ type PromotionTexts = {
   resetPhoto: string;
   applyPhoto: string;
   cancel: string;
+  miniVideo: string;
+  miniVideoHint: string;
+  addMiniVideo: string;
+  replaceMiniVideo: string;
+  miniVideoAdded: string;
+  removeMiniVideo: string;
+  videoTooLong: string;
+  invalidVideo: string;
 };
 
 type PhotoItem = {
@@ -88,8 +96,14 @@ type PhotoItem = {
   offsetY: number;
 };
 
+type VideoItem = {
+  name: string;
+  preview: string;
+};
+
 const MIN_SCALE = 1;
 const MAX_SCALE = 3;
+const MAX_VIDEO_SECONDS = 5;
 
 const textByLanguage: Record<AppLanguage, PromotionTexts> = {
   EN: {
@@ -143,6 +157,14 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     resetPhoto: 'Reset',
     applyPhoto: 'Apply',
     cancel: 'Cancel',
+    miniVideo: 'Mini video',
+    miniVideoHint: 'Optional. Add 1 short loop video up to 5 seconds.',
+    addMiniVideo: 'Add mini video',
+    replaceMiniVideo: 'Replace video',
+    miniVideoAdded: 'Mini video added',
+    removeMiniVideo: 'Remove video',
+    videoTooLong: 'Mini video must be 5 seconds or shorter',
+    invalidVideo: 'Please choose a valid video file',
   },
   RU: {
     pageTitle: 'Добавить рекламу',
@@ -195,6 +217,14 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     resetPhoto: 'Сбросить',
     applyPhoto: 'Применить',
     cancel: 'Отмена',
+    miniVideo: 'Мини видео',
+    miniVideoHint: 'Необязательно. Добавьте 1 короткое зацикленное видео до 5 секунд.',
+    addMiniVideo: 'Добавить мини видео',
+    replaceMiniVideo: 'Заменить видео',
+    miniVideoAdded: 'Мини видео добавлено',
+    removeMiniVideo: 'Удалить видео',
+    videoTooLong: 'Мини видео должно быть не длиннее 5 секунд',
+    invalidVideo: 'Пожалуйста, выберите корректный видеофайл',
   },
   ES: {
     pageTitle: 'Añadir publicidad',
@@ -247,6 +277,14 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     resetPhoto: 'Restablecer',
     applyPhoto: 'Aplicar',
     cancel: 'Cancelar',
+    miniVideo: 'Mini video',
+    miniVideoHint: 'Opcional. Añade 1 video corto en bucle de hasta 5 segundos.',
+    addMiniVideo: 'Añadir mini video',
+    replaceMiniVideo: 'Reemplazar video',
+    miniVideoAdded: 'Mini video añadido',
+    removeMiniVideo: 'Eliminar video',
+    videoTooLong: 'El mini video debe durar 5 segundos o menos',
+    invalidVideo: 'Elige un archivo de video válido',
   },
   CZ: {
     pageTitle: 'Přidat reklamu',
@@ -299,6 +337,14 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     resetPhoto: 'Resetovat',
     applyPhoto: 'Použít',
     cancel: 'Zrušit',
+    miniVideo: 'Mini video',
+    miniVideoHint: 'Volitelné. Přidejte 1 krátké smyčkové video do 5 sekund.',
+    addMiniVideo: 'Přidat mini video',
+    replaceMiniVideo: 'Nahradit video',
+    miniVideoAdded: 'Mini video přidáno',
+    removeMiniVideo: 'Odstranit video',
+    videoTooLong: 'Mini video musí být dlouhé maximálně 5 sekund',
+    invalidVideo: 'Vyberte prosím platný video soubor',
   },
   DE: {
     pageTitle: 'Werbung hinzufügen',
@@ -351,6 +397,14 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     resetPhoto: 'Zurücksetzen',
     applyPhoto: 'Anwenden',
     cancel: 'Abbrechen',
+    miniVideo: 'Mini-Video',
+    miniVideoHint: 'Optional. Fügen Sie 1 kurzes Loop-Video bis 5 Sekunden hinzu.',
+    addMiniVideo: 'Mini-Video hinzufügen',
+    replaceMiniVideo: 'Video ersetzen',
+    miniVideoAdded: 'Mini-Video hinzugefügt',
+    removeMiniVideo: 'Video entfernen',
+    videoTooLong: 'Das Mini-Video darf höchstens 5 Sekunden lang sein',
+    invalidVideo: 'Bitte wählen Sie eine gültige Videodatei',
   },
   PL: {
     pageTitle: 'Dodaj reklamę',
@@ -403,6 +457,14 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     resetPhoto: 'Resetuj',
     applyPhoto: 'Zastosuj',
     cancel: 'Anuluj',
+    miniVideo: 'Mini video',
+    miniVideoHint: 'Opcjonalnie. Dodaj 1 krótkie zapętlone video do 5 sekund.',
+    addMiniVideo: 'Dodaj mini video',
+    replaceMiniVideo: 'Zamień video',
+    miniVideoAdded: 'Mini video dodane',
+    removeMiniVideo: 'Usuń video',
+    videoTooLong: 'Mini video musi mieć maksymalnie 5 sekund',
+    invalidVideo: 'Wybierz poprawny plik video',
   },
   UA: {} as PromotionTexts,
   IT: {} as PromotionTexts,
@@ -469,6 +531,9 @@ export default function NewPromotionPage() {
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const filesInputRef = useRef<HTMLInputElement | null>(null);
+  const galleryVideoInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraVideoInputRef = useRef<HTMLInputElement | null>(null);
+  const filesVideoInputRef = useRef<HTMLInputElement | null>(null);
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [categoryId, setCategoryId] = useState('');
@@ -480,7 +545,9 @@ export default function NewPromotionPage() {
   const [radius, setRadius] = useState<RadiusOption['id']>('10');
   const [layout, setLayout] = useState<PhotoLayout>('single');
   const [showPhotoSourceMenu, setShowPhotoSourceMenu] = useState(false);
+  const [showVideoSourceMenu, setShowVideoSourceMenu] = useState(false);
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [miniVideo, setMiniVideo] = useState<VideoItem | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const [editorPhotoId, setEditorPhotoId] = useState<string | null>(null);
@@ -520,8 +587,12 @@ export default function NewPromotionPage() {
           URL.revokeObjectURL(photo.preview);
         }
       });
+
+      if (miniVideo?.preview) {
+        URL.revokeObjectURL(miniVideo.preview);
+      }
     };
-  }, [photos]);
+  }, [photos, miniVideo]);
 
   const text = textByLanguage[language] || textByLanguage.EN;
   const radiusOptions = radiusOptionsByLanguage[language] || radiusOptionsByLanguage.EN;
@@ -636,6 +707,49 @@ export default function NewPromotionPage() {
     setShowPhotoSourceMenu(false);
   };
 
+  const handleVideoSelected = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('video/')) {
+      alert(text.invalidVideo);
+      event.target.value = '';
+      return;
+    }
+
+    const preview = URL.createObjectURL(file);
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.src = preview;
+
+    video.onloadedmetadata = () => {
+      if (video.duration > MAX_VIDEO_SECONDS) {
+        URL.revokeObjectURL(preview);
+        alert(text.videoTooLong);
+        event.target.value = '';
+        return;
+      }
+
+      if (miniVideo?.preview) {
+        URL.revokeObjectURL(miniVideo.preview);
+      }
+
+      setMiniVideo({
+        name: file.name,
+        preview,
+      });
+
+      setShowVideoSourceMenu(false);
+      event.target.value = '';
+    };
+
+    video.onerror = () => {
+      URL.revokeObjectURL(preview);
+      alert(text.invalidVideo);
+      event.target.value = '';
+    };
+  };
+
   const handleRemovePhoto = (id: string) => {
     setPhotos((prev) => {
       const found = prev.find((photo) => photo.id === id);
@@ -648,6 +762,13 @@ export default function NewPromotionPage() {
     if (editorPhotoId === id) {
       closeEditor();
     }
+  };
+
+  const handleRemoveVideo = () => {
+    if (miniVideo?.preview) {
+      URL.revokeObjectURL(miniVideo.preview);
+    }
+    setMiniVideo(null);
   };
 
   const handleContinueToPayment = () => {
@@ -749,6 +870,564 @@ export default function NewPromotionPage() {
 
           <div
             style={{
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 18,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 8,
+              }}
+            >
+              {text.photo} <span style={{ color: '#ef4444' }}>*</span>
+            </div>
+
+            <div
+              style={{
+                fontSize: 14,
+                lineHeight: 1.5,
+                color: '#7b7268',
+                fontWeight: 700,
+                marginBottom: 14,
+              }}
+            >
+              {text.photoHint}
+            </div>
+
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 12,
+              }}
+            >
+              {text.layout}
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
+                marginBottom: 14,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setLayout('single')}
+                style={{
+                  minHeight: 54,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: layout === 'single' ? '#17130f' : '#fff',
+                  color: layout === 'single' ? '#fff' : '#17130f',
+                  fontSize: 15,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.layoutSingle}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setLayout('grid')}
+                style={{
+                  minHeight: 54,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: layout === 'grid' ? '#17130f' : '#fff',
+                  color: layout === 'grid' ? '#fff' : '#17130f',
+                  fontSize: 15,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.layoutGrid}
+              </button>
+            </div>
+
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFilesSelected}
+              style={{ display: 'none' }}
+            />
+
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              multiple
+              onChange={handleFilesSelected}
+              style={{ display: 'none' }}
+            />
+
+            <input
+              ref={filesInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFilesSelected}
+              style={{ display: 'none' }}
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPhotoSourceMenu(true)}
+              style={{
+                width: '100%',
+                minHeight: 92,
+                borderRadius: 22,
+                border: '1.5px solid #111111',
+                background: '#fff',
+                padding: 14,
+                display: 'grid',
+                gridTemplateColumns: '72px 1fr',
+                gap: 14,
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left',
+              }}
+            >
+              <div
+                style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: 22,
+                  border: '2px solid #c69212',
+                  background: '#fff7d6',
+                  color: '#c69212',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 42,
+                  fontWeight: 700,
+                }}
+              >
+                +
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
+                  {text.addPhoto}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 14,
+                    color: '#7b7268',
+                    fontWeight: 700,
+                  }}
+                >
+                  JPG / PNG / WEBP · max 9
+                </div>
+              </div>
+            </button>
+
+            {photos.length > 0 ? (
+              <>
+                <div
+                  style={{
+                    marginTop: 14,
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
+                  {text.photoAdded}: {photos.length}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 12,
+                    display: 'grid',
+                    gridTemplateColumns: layout === 'single' ? '1fr' : '1fr 1fr',
+                    gap: 10,
+                  }}
+                >
+                  {(layout === 'single' ? [photos[0]] : photos).map((photo) => {
+                    if (!photo) return null;
+
+                    return (
+                      <div
+                        key={photo.id}
+                        style={{
+                          borderRadius: 22,
+                          border: '1.5px solid #111111',
+                          overflow: 'hidden',
+                          background: '#fff',
+                          position: 'relative',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '100%',
+                            height: layout === 'single' ? 220 : 150,
+                            overflow: 'hidden',
+                            position: 'relative',
+                            background: '#f4f1ea',
+                          }}
+                        >
+                          <img
+                            src={photo.preview}
+                            alt={photo.name}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              display: 'block',
+                              transform: `translate(${photo.offsetX}px, ${photo.offsetY}px) scale(${photo.scale})`,
+                              transformOrigin: 'center center',
+                            }}
+                          />
+                        </div>
+
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 10,
+                            right: 10,
+                            display: 'flex',
+                            gap: 8,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => openEditor(photo.id)}
+                            style={{
+                              minWidth: 34,
+                              height: 34,
+                              borderRadius: 999,
+                              border: '1.5px solid #111111',
+                              background: '#ffffff',
+                              color: '#17130f',
+                              fontSize: 12,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                              padding: '0 10px',
+                            }}
+                          >
+                            ↔
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePhoto(photo.id)}
+                            style={{
+                              minWidth: 34,
+                              height: 34,
+                              borderRadius: 999,
+                              border: '1.5px solid #111111',
+                              background: '#ffffff',
+                              color: '#17130f',
+                              fontSize: 18,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                              padding: '0 10px',
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+
+                        <div
+                          style={{
+                            padding: '10px 12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 10,
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: 13,
+                              color: '#7b7268',
+                              fontWeight: 700,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              flex: 1,
+                            }}
+                          >
+                            {photo.name}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => openEditor(photo.id)}
+                            style={{
+                              height: 34,
+                              borderRadius: 12,
+                              border: '1.5px solid #111111',
+                              background: '#fff',
+                              color: '#17130f',
+                              padding: '0 10px',
+                              fontSize: 12,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {text.adjustPhoto}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : null}
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 18,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 8,
+              }}
+            >
+              {text.miniVideo}
+            </div>
+
+            <div
+              style={{
+                fontSize: 14,
+                lineHeight: 1.5,
+                color: '#7b7268',
+                fontWeight: 700,
+                marginBottom: 14,
+              }}
+            >
+              {text.miniVideoHint}
+            </div>
+
+            <input
+              ref={galleryVideoInputRef}
+              type="file"
+              accept="video/*"
+              onChange={handleVideoSelected}
+              style={{ display: 'none' }}
+            />
+
+            <input
+              ref={cameraVideoInputRef}
+              type="file"
+              accept="video/*"
+              capture="environment"
+              onChange={handleVideoSelected}
+              style={{ display: 'none' }}
+            />
+
+            <input
+              ref={filesVideoInputRef}
+              type="file"
+              accept="video/*"
+              onChange={handleVideoSelected}
+              style={{ display: 'none' }}
+            />
+
+            {!miniVideo ? (
+              <button
+                type="button"
+                onClick={() => setShowVideoSourceMenu(true)}
+                style={{
+                  width: '100%',
+                  minHeight: 92,
+                  borderRadius: 22,
+                  border: '1.5px solid #111111',
+                  background: '#fff',
+                  padding: 14,
+                  display: 'grid',
+                  gridTemplateColumns: '72px 1fr',
+                  gap: 14,
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 22,
+                    border: '2px solid #2f7cf6',
+                    background: '#edf4ff',
+                    color: '#2f7cf6',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 34,
+                    fontWeight: 700,
+                  }}
+                >
+                  ▶
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
+                    {text.addMiniVideo}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 14,
+                      color: '#7b7268',
+                      fontWeight: 700,
+                    }}
+                  >
+                    MP4 / MOV / WEBM · max 5 sec
+                  </div>
+                </div>
+              </button>
+            ) : (
+              <div
+                style={{
+                  borderRadius: 22,
+                  border: '1.5px solid #111111',
+                  overflow: 'hidden',
+                  background: '#fff',
+                }}
+              >
+                <video
+                  src={miniVideo.preview}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  controls={false}
+                  style={{
+                    width: '100%',
+                    height: 220,
+                    objectFit: 'cover',
+                    display: 'block',
+                    background: '#000',
+                  }}
+                />
+
+                <div
+                  style={{
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 10,
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 900,
+                        color: '#17130f',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {text.miniVideoAdded}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 4,
+                        fontSize: 13,
+                        color: '#7b7268',
+                        fontWeight: 700,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {miniVideo.name}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 8,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setShowVideoSourceMenu(true)}
+                      style={{
+                        height: 40,
+                        borderRadius: 14,
+                        border: '1.5px solid #111111',
+                        background: '#ffffff',
+                        color: '#17130f',
+                        padding: '0 14px',
+                        fontSize: 14,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {text.replaceMiniVideo}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleRemoveVideo}
+                      style={{
+                        height: 40,
+                        borderRadius: 14,
+                        border: '1.5px solid #111111',
+                        background: '#ffffff',
+                        color: '#17130f',
+                        padding: '0 14px',
+                        fontSize: 14,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {text.removeMiniVideo}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
               borderRadius: 30,
               border: '2px solid #111111',
               background: '#fff',
@@ -1141,336 +1820,6 @@ export default function NewPromotionPage() {
           <div
             style={{
               marginTop: 16,
-              borderRadius: 30,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 8,
-              }}
-            >
-              {text.photo} <span style={{ color: '#ef4444' }}>*</span>
-            </div>
-
-            <div
-              style={{
-                fontSize: 14,
-                lineHeight: 1.5,
-                color: '#7b7268',
-                fontWeight: 700,
-                marginBottom: 14,
-              }}
-            >
-              {text.photoHint}
-            </div>
-
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 12,
-              }}
-            >
-              {text.layout}
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-                marginBottom: 14,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setLayout('single')}
-                style={{
-                  minHeight: 54,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: layout === 'single' ? '#17130f' : '#fff',
-                  color: layout === 'single' ? '#fff' : '#17130f',
-                  fontSize: 15,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.layoutSingle}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setLayout('grid')}
-                style={{
-                  minHeight: 54,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: layout === 'grid' ? '#17130f' : '#fff',
-                  color: layout === 'grid' ? '#fff' : '#17130f',
-                  fontSize: 15,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.layoutGrid}
-              </button>
-            </div>
-
-            <input
-              ref={galleryInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFilesSelected}
-              style={{ display: 'none' }}
-            />
-
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              multiple
-              onChange={handleFilesSelected}
-              style={{ display: 'none' }}
-            />
-
-            <input
-              ref={filesInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFilesSelected}
-              style={{ display: 'none' }}
-            />
-
-            <button
-              type="button"
-              onClick={() => setShowPhotoSourceMenu(true)}
-              style={{
-                width: '100%',
-                minHeight: 92,
-                borderRadius: 22,
-                border: '1.5px solid #111111',
-                background: '#fff',
-                padding: 14,
-                display: 'grid',
-                gridTemplateColumns: '72px 1fr',
-                gap: 14,
-                alignItems: 'center',
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              <div
-                style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: 22,
-                  border: '2px solid #c69212',
-                  background: '#fff7d6',
-                  color: '#c69212',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 42,
-                  fontWeight: 700,
-                }}
-              >
-                +
-              </div>
-
-              <div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 900,
-                    color: '#17130f',
-                  }}
-                >
-                  {text.addPhoto}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 6,
-                    fontSize: 14,
-                    color: '#7b7268',
-                    fontWeight: 700,
-                  }}
-                >
-                  JPG / PNG / WEBP · max 9
-                </div>
-              </div>
-            </button>
-
-            {photos.length > 0 ? (
-              <>
-                <div
-                  style={{
-                    marginTop: 14,
-                    fontSize: 16,
-                    fontWeight: 900,
-                    color: '#17130f',
-                  }}
-                >
-                  {text.photoAdded}: {photos.length}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 12,
-                    display: 'grid',
-                    gridTemplateColumns: layout === 'single' ? '1fr' : '1fr 1fr',
-                    gap: 10,
-                  }}
-                >
-                  {(layout === 'single' ? [photos[0]] : photos).map((photo) => {
-                    if (!photo) return null;
-
-                    return (
-                      <div
-                        key={photo.id}
-                        style={{
-                          borderRadius: 22,
-                          border: '1.5px solid #111111',
-                          overflow: 'hidden',
-                          background: '#fff',
-                          position: 'relative',
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: '100%',
-                            height: layout === 'single' ? 220 : 150,
-                            overflow: 'hidden',
-                            position: 'relative',
-                            background: '#f4f1ea',
-                          }}
-                        >
-                          <img
-                            src={photo.preview}
-                            alt={photo.name}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                              display: 'block',
-                              transform: `translate(${photo.offsetX}px, ${photo.offsetY}px) scale(${photo.scale})`,
-                              transformOrigin: 'center center',
-                            }}
-                          />
-                        </div>
-
-                        <div
-                          style={{
-                            position: 'absolute',
-                            top: 10,
-                            right: 10,
-                            display: 'flex',
-                            gap: 8,
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => openEditor(photo.id)}
-                            style={{
-                              minWidth: 34,
-                              height: 34,
-                              borderRadius: 999,
-                              border: '1.5px solid #111111',
-                              background: '#ffffff',
-                              color: '#17130f',
-                              fontSize: 12,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                              padding: '0 10px',
-                            }}
-                          >
-                            ↔
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleRemovePhoto(photo.id)}
-                            style={{
-                              minWidth: 34,
-                              height: 34,
-                              borderRadius: 999,
-                              border: '1.5px solid #111111',
-                              background: '#ffffff',
-                              color: '#17130f',
-                              fontSize: 18,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                              padding: '0 10px',
-                            }}
-                          >
-                            ×
-                          </button>
-                        </div>
-
-                        <div
-                          style={{
-                            padding: '10px 12px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: 10,
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: 13,
-                              color: '#7b7268',
-                              fontWeight: 700,
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              flex: 1,
-                            }}
-                          >
-                            {photo.name}
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => openEditor(photo.id)}
-                            style={{
-                              height: 34,
-                              borderRadius: 12,
-                              border: '1.5px solid #111111',
-                              background: '#fff',
-                              color: '#17130f',
-                              padding: '0 10px',
-                              fontSize: 12,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                              flexShrink: 0,
-                            }}
-                          >
-                            {text.adjustPhoto}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            ) : null}
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
               borderRadius: 24,
               border: '2px solid #111111',
               background: selectedRadius.bg,
@@ -1514,6 +1863,9 @@ export default function NewPromotionPage() {
               </div>
               <div>
                 {text.photosCount}: {photos.length}
+              </div>
+              <div>
+                {text.miniVideo}: {miniVideo ? '1' : '0'}
               </div>
               <div
                 style={{
@@ -1687,6 +2039,129 @@ export default function NewPromotionPage() {
               <button
                 type="button"
                 onClick={() => setShowPhotoSourceMenu(false)}
+                style={{
+                  width: '100%',
+                  height: 54,
+                  border: 'none',
+                  borderTop: '2px solid #111111',
+                  background: '#ffffff',
+                  color: '#17130f',
+                  fontSize: 16,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                ✕ {text.close}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showVideoSourceMenu ? (
+        <div
+          onClick={() => setShowVideoSourceMenu(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(20,20,20,0.18)',
+            zIndex: 130,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: 430,
+              padding: '0 14px calc(24px + env(safe-area-inset-bottom))',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div
+              style={{
+                border: '2px solid #111111',
+                borderRadius: 26,
+                background: '#ffffff',
+                boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  padding: '16px 16px 10px',
+                  fontSize: 18,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {text.photoSource}
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gap: 10,
+                  padding: '0 14px 14px',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => galleryVideoInputRef.current?.click()}
+                  style={{
+                    minHeight: 54,
+                    borderRadius: 18,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#17130f',
+                    fontSize: 16,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  🖼 {text.gallery}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => cameraVideoInputRef.current?.click()}
+                  style={{
+                    minHeight: 54,
+                    borderRadius: 18,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#17130f',
+                    fontSize: 16,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  📷 {text.camera}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => filesVideoInputRef.current?.click()}
+                  style={{
+                    minHeight: 54,
+                    borderRadius: 18,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#17130f',
+                    fontSize: 16,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  📁 {text.files}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowVideoSourceMenu(false)}
                 style={{
                   width: '100%',
                   height: 54,
