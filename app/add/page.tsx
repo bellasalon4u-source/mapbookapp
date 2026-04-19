@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type CSSProperties,
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
@@ -925,7 +926,7 @@ function normalizeWebsite(value: string) {
   return `https://${trimmed}`;
 }
 
-function inputBaseStyle(): React.CSSProperties {
+function inputBaseStyle(): CSSProperties {
   return {
     width: '100%',
     border: '1.5px solid #111111',
@@ -1492,13 +1493,19 @@ export default function AddServicePage() {
     const imageFiles = nextFiles.filter((file) => file.type.startsWith('image/'));
     if (!imageFiles.length) return;
 
-    const mapped = imageFiles.map((file, index) => ({
+    const availableSlots = Math.max(0, 20 - photos.length);
+    if (!availableSlots) {
+      event.target.value = '';
+      return;
+    }
+
+    const mapped = imageFiles.slice(0, availableSlots).map((file, index) => ({
       id: `${file.name}-${file.size}-${Date.now()}-${index}`,
       file,
       preview: URL.createObjectURL(file),
     }));
 
-    setPhotos((prev) => [...prev, ...mapped].slice(0, 8));
+    setPhotos((prev) => [...prev, ...mapped]);
     event.target.value = '';
   };
 
@@ -1767,6 +1774,16 @@ export default function AddServicePage() {
                   }}
                 >
                   {text.uploadPhotos}
+                </div>
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 13,
+                    color: '#7a8490',
+                    fontWeight: 700,
+                  }}
+                >
+                  {photos.length}/20
                 </div>
               </div>
             </button>
