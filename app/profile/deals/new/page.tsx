@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -70,7 +71,22 @@ type DealTexts = {
   close: string;
   paymentHint: string;
   summary: string;
+  adjustPhoto: string;
+  photoEditorHint: string;
+  resetPhoto: string;
+  applyPhoto: string;
 };
+
+type DealPhotoState = {
+  name: string;
+  preview: string;
+  scale: number;
+  offsetX: number;
+  offsetY: number;
+};
+
+const MIN_SCALE = 1;
+const MAX_SCALE = 3;
 
 const textByLanguage: Record<AppLanguage, DealTexts> = {
   EN: {
@@ -119,6 +135,10 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
     close: 'Close',
     paymentHint: 'The day deal is published only after payment.',
     summary: 'Day deal summary',
+    adjustPhoto: 'Adjust photo',
+    photoEditorHint: 'Move with one finger. Zoom with slider.',
+    resetPhoto: 'Reset',
+    applyPhoto: 'Apply',
   },
   RU: {
     pageTitle: 'Добавить скидку дня',
@@ -166,6 +186,10 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
     close: 'Закрыть',
     paymentHint: 'Скидка дня публикуется только после оплаты.',
     summary: 'Итог скидки дня',
+    adjustPhoto: 'Настроить фото',
+    photoEditorHint: 'Перемещай одним пальцем. Увеличивай ползунком.',
+    resetPhoto: 'Сбросить',
+    applyPhoto: 'Применить',
   },
   ES: {
     pageTitle: 'Añadir descuento',
@@ -213,6 +237,10 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
     close: 'Cerrar',
     paymentHint: 'La oferta se publica solo después del pago.',
     summary: 'Resumen del descuento',
+    adjustPhoto: 'Ajustar foto',
+    photoEditorHint: 'Mueve con un dedo. Haz zoom con el control.',
+    resetPhoto: 'Restablecer',
+    applyPhoto: 'Aplicar',
   },
   CZ: {
     pageTitle: 'Přidat slevu dne',
@@ -260,6 +288,10 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
     close: 'Zavřít',
     paymentHint: 'Sleva dne bude publikována až po platbě.',
     summary: 'Shrnutí slevy dne',
+    adjustPhoto: 'Upravit fotku',
+    photoEditorHint: 'Posuňte jedním prstem. Přibližte posuvníkem.',
+    resetPhoto: 'Resetovat',
+    applyPhoto: 'Použít',
   },
   DE: {
     pageTitle: 'Tagesrabatt hinzufügen',
@@ -307,6 +339,10 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
     close: 'Schließen',
     paymentHint: 'Der Tagesrabatt wird erst nach Zahlung veröffentlicht.',
     summary: 'Tagesrabatt Übersicht',
+    adjustPhoto: 'Foto anpassen',
+    photoEditorHint: 'Mit einem Finger verschieben. Mit dem Regler zoomen.',
+    resetPhoto: 'Zurücksetzen',
+    applyPhoto: 'Anwenden',
   },
   PL: {
     pageTitle: 'Dodaj zniżkę dnia',
@@ -354,6 +390,10 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
     close: 'Zamknij',
     paymentHint: 'Zniżka dnia zostanie opublikowana dopiero po płatności.',
     summary: 'Podsumowanie zniżki dnia',
+    adjustPhoto: 'Dopasuj zdjęcie',
+    photoEditorHint: 'Przesuwaj jednym palcem. Powiększaj suwakiem.',
+    resetPhoto: 'Resetuj',
+    applyPhoto: 'Zastosuj',
   },
   UA: {} as DealTexts,
   IT: {} as DealTexts,
@@ -440,6 +480,14 @@ function getDayWord(days: number, language: AppLanguage, text: DealTexts) {
   return days === 1 ? text.day : text.days;
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function getSafeScale(value: number) {
+  return clamp(Number.isFinite(value) ? value : 1, MIN_SCALE, MAX_SCALE);
+}
+
 export default function NewDealPage() {
   const router = useRouter();
 
@@ -459,8 +507,26 @@ export default function NewDealPage() {
   const [showPhotoSourceMenu, setShowPhotoSourceMenu] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<string>('card');
-  const [photoName, setPhotoName] = useState('');
-  const [photoPreview, setPhotoPreview] = useState('');
+  const [photo, setPhoto] = useState<DealPhotoState | null>(null);
+
+  const [showPhotoEditor, setShowPhotoEditor] = useState(false);
+  const [editorScale, setEditorScale] = useState(1);
+  const [editorOffsetX, setEditorOffsetX] = useState(0);
+  const [editorOffsetY, setEditorOffsetY] = useState(0);
+
+  const dragRef = useRef<{
+    pointerId: number | null;
+    startX: number;
+    startY: number;
+    startOffsetX: number;
+    startOffsetY: number;
+  }>({
+    pointerId: null,
+    startX: 0,
+    startY: 0,
+    startOffsetX: 0,
+    startOffsetY: 0,
+  });
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -476,11 +542,11 @@ export default function NewDealPage() {
 
   useEffect(() => {
     return () => {
-      if (photoPreview) {
-        URL.revokeObjectURL(photoPreview);
+      if (photo?.preview) {
+        URL.revokeObjectURL(photo.preview);
       }
     };
-  }, [photoPreview]);
+  }, [photo]);
 
   const text = textByLanguage[language] || textByLanguage.EN;
   const paymentMethods = paymentMethodsByLanguage[language] || paymentMethodsByLanguage.EN;
@@ -499,23 +565,95 @@ export default function NewDealPage() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (photoPreview) {
-      URL.revokeObjectURL(photoPreview);
+    if (photo?.preview) {
+      URL.revokeObjectURL(photo.preview);
     }
 
     const preview = URL.createObjectURL(file);
-    setPhotoName(file.name);
-    setPhotoPreview(preview);
+
+    setPhoto({
+      name: file.name,
+      preview,
+      scale: 1,
+      offsetX: 0,
+      offsetY: 0,
+    });
+
     event.target.value = '';
     setShowPhotoSourceMenu(false);
   };
 
   const handleRemovePhoto = () => {
-    if (photoPreview) {
-      URL.revokeObjectURL(photoPreview);
+    if (photo?.preview) {
+      URL.revokeObjectURL(photo.preview);
     }
-    setPhotoPreview('');
-    setPhotoName('');
+    setPhoto(null);
+    setShowPhotoEditor(false);
+  };
+
+  const openPhotoEditor = () => {
+    if (!photo) return;
+
+    setEditorScale(getSafeScale(photo.scale));
+    setEditorOffsetX(photo.offsetX || 0);
+    setEditorOffsetY(photo.offsetY || 0);
+    setShowPhotoEditor(true);
+  };
+
+  const closePhotoEditor = () => {
+    dragRef.current = {
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      startOffsetX: 0,
+      startOffsetY: 0,
+    };
+    setShowPhotoEditor(false);
+  };
+
+  const applyPhotoEditor = () => {
+    setPhoto((prev) =>
+      prev
+        ? {
+            ...prev,
+            scale: getSafeScale(editorScale),
+            offsetX: editorOffsetX,
+            offsetY: editorOffsetY,
+          }
+        : prev
+    );
+    closePhotoEditor();
+  };
+
+  const resetPhotoEditor = () => {
+    setEditorScale(1);
+    setEditorOffsetX(0);
+    setEditorOffsetY(0);
+  };
+
+  const handleEditorPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startOffsetX: editorOffsetX,
+      startOffsetY: editorOffsetY,
+    };
+  };
+
+  const handleEditorPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragRef.current.pointerId !== event.pointerId) return;
+
+    const deltaX = event.clientX - dragRef.current.startX;
+    const deltaY = event.clientY - dragRef.current.startY;
+
+    setEditorOffsetX(dragRef.current.startOffsetX + deltaX);
+    setEditorOffsetY(dragRef.current.startOffsetY + deltaY);
+  };
+
+  const handleEditorPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragRef.current.pointerId !== event.pointerId) return;
+    dragRef.current.pointerId = null;
   };
 
   const handleOpenPayment = () => {
@@ -544,7 +682,7 @@ export default function NewDealPage() {
       return;
     }
 
-    if (!photoName.trim()) {
+    if (!photo?.name.trim()) {
       alert(text.addPhotoAlert);
       return;
     }
@@ -682,7 +820,7 @@ export default function NewDealPage() {
               style={{ display: 'none' }}
             />
 
-            {!photoPreview ? (
+            {!photo ? (
               <button
                 type="button"
                 onClick={() => setShowPhotoSourceMenu(true)}
@@ -752,38 +890,74 @@ export default function NewDealPage() {
                   background: '#fff',
                 }}
               >
-                <div style={{ position: 'relative' }}>
+                <div
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: 220,
+                    overflow: 'hidden',
+                    background: '#f4f1ea',
+                  }}
+                >
                   <img
-                    src={photoPreview}
-                    alt={photoName || 'deal-photo'}
+                    src={photo.preview}
+                    alt={photo.name || 'deal-photo'}
                     style={{
                       width: '100%',
-                      height: 220,
+                      height: '100%',
                       objectFit: 'cover',
                       display: 'block',
+                      transform: `translate(${photo.offsetX}px, ${photo.offsetY}px) scale(${photo.scale})`,
+                      transformOrigin: 'center center',
                     }}
                   />
 
-                  <button
-                    type="button"
-                    onClick={handleRemovePhoto}
+                  <div
                     style={{
                       position: 'absolute',
                       top: 10,
                       right: 10,
-                      width: 34,
-                      height: 34,
-                      borderRadius: 999,
-                      border: '1.5px solid #111111',
-                      background: '#ffffff',
-                      color: '#17130f',
-                      fontSize: 20,
-                      fontWeight: 900,
-                      cursor: 'pointer',
+                      display: 'flex',
+                      gap: 8,
                     }}
                   >
-                    ×
-                  </button>
+                    <button
+                      type="button"
+                      onClick={openPhotoEditor}
+                      style={{
+                        minWidth: 34,
+                        height: 34,
+                        borderRadius: 999,
+                        border: '1.5px solid #111111',
+                        background: '#ffffff',
+                        color: '#17130f',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                        padding: '0 10px',
+                      }}
+                    >
+                      ↔
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleRemovePhoto}
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: 999,
+                        border: '1.5px solid #111111',
+                        background: '#ffffff',
+                        color: '#17130f',
+                        fontSize: 20,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
 
                 <div
@@ -820,28 +994,47 @@ export default function NewDealPage() {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {photoName}
+                      {photo.name}
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setShowPhotoSourceMenu(true)}
-                    style={{
-                      height: 40,
-                      borderRadius: 14,
-                      border: '1.5px solid #111111',
-                      background: '#ffffff',
-                      color: '#17130f',
-                      padding: '0 14px',
-                      fontSize: 14,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {text.replacePhoto}
-                  </button>
+                  <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                    <button
+                      type="button"
+                      onClick={openPhotoEditor}
+                      style={{
+                        height: 40,
+                        borderRadius: 14,
+                        border: '1.5px solid #111111',
+                        background: '#ffffff',
+                        color: '#17130f',
+                        padding: '0 12px',
+                        fontSize: 13,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {text.adjustPhoto}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPhotoSourceMenu(true)}
+                      style={{
+                        height: 40,
+                        borderRadius: 14,
+                        border: '1.5px solid #111111',
+                        background: '#ffffff',
+                        color: '#17130f',
+                        padding: '0 14px',
+                        fontSize: 14,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {text.replacePhoto}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -1466,6 +1659,170 @@ export default function NewDealPage() {
               >
                 ✕ {text.close}
               </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showPhotoEditor && photo ? (
+        <div
+          onClick={closePhotoEditor}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(17,17,17,0.42)',
+            zIndex: 300,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: 430,
+              padding: '0 14px calc(20px + env(safe-area-inset-bottom))',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div
+              style={{
+                border: '2px solid #111111',
+                borderRadius: 26,
+                background: '#ffffff',
+                boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  padding: '16px 16px 8px',
+                  fontSize: 18,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {text.adjustPhoto}
+              </div>
+
+              <div
+                style={{
+                  padding: '0 16px 14px',
+                  fontSize: 14,
+                  lineHeight: 1.45,
+                  color: '#7b7268',
+                  fontWeight: 700,
+                }}
+              >
+                {text.photoEditorHint}
+              </div>
+
+              <div style={{ padding: '0 16px 14px' }}>
+                <div
+                  onPointerDown={handleEditorPointerDown}
+                  onPointerMove={handleEditorPointerMove}
+                  onPointerUp={handleEditorPointerUp}
+                  onPointerCancel={handleEditorPointerUp}
+                  style={{
+                    width: '100%',
+                    aspectRatio: '1 / 1',
+                    borderRadius: 22,
+                    border: '2px solid #111111',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    background: '#f4f1ea',
+                    touchAction: 'none',
+                  }}
+                >
+                  <img
+                    src={photo.preview}
+                    alt={photo.name}
+                    draggable={false}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                      userSelect: 'none',
+                      transform: `translate(${editorOffsetX}px, ${editorOffsetY}px) scale(${editorScale})`,
+                      transformOrigin: 'center center',
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginTop: 14 }}>
+                  <input
+                    type="range"
+                    min={MIN_SCALE}
+                    max={MAX_SCALE}
+                    step={0.01}
+                    value={editorScale}
+                    onChange={(e) => setEditorScale(getSafeScale(Number(e.target.value)))}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gap: 10,
+                  padding: '0 16px 16px',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={resetPhotoEditor}
+                  style={{
+                    height: 50,
+                    borderRadius: 16,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#17130f',
+                    fontSize: 15,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.resetPhoto}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={closePhotoEditor}
+                  style={{
+                    height: 50,
+                    borderRadius: 16,
+                    border: '2px solid #111111',
+                    background: '#fff',
+                    color: '#17130f',
+                    fontSize: 15,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.cancel}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={applyPhotoEditor}
+                  style={{
+                    height: 50,
+                    borderRadius: 16,
+                    border: '2px solid #111111',
+                    background: '#17130f',
+                    color: '#fff',
+                    fontSize: 15,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.applyPhoto}
+                </button>
+              </div>
             </div>
           </div>
         </div>
