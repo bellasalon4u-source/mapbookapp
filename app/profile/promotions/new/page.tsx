@@ -28,6 +28,13 @@ type RadiusOption = {
 type PhotoLayout = 'single' | 'grid';
 type BadgeMode = 'none' | 'discount' | 'top' | 'new';
 
+type PaymentMethod = {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: string;
+};
+
 type PromotionTexts = {
   pageTitle: string;
   pageSubtitle: string;
@@ -40,7 +47,6 @@ type PromotionTexts = {
   description: string;
   descriptionPlaceholder: string;
   badgeText: string;
-  badgePlaceholder: string;
   badgeNone: string;
   badgeDiscount: string;
   badgeTop: string;
@@ -77,7 +83,6 @@ type PromotionTexts = {
   close: string;
   paymentHint: string;
   firstAdBonus: string;
-  removePhoto: string;
   photosCount: string;
   adjustPhoto: string;
   photoEditorHint: string;
@@ -95,9 +100,12 @@ type PromotionTexts = {
   livePreview: string;
   sponsored: string;
   openAd: string;
-  onlyPhotosOrVideo: string;
   removeVideoFirst: string;
   removePhotosFirst: string;
+  choosePaymentMethod: string;
+  paymentMethodsHint: string;
+  selectedPaymentMethod: string;
+  confirmPayment: string;
 };
 
 type PhotoItem = {
@@ -130,7 +138,6 @@ const enTexts: PromotionTexts = {
   description: 'Description',
   descriptionPlaceholder: 'Enter ad description...',
   badgeText: 'Badge / promo text',
-  badgePlaceholder: 'For example: -20% / TOP / NEW',
   badgeNone: 'None',
   badgeDiscount: 'Discount',
   badgeTop: 'TOP',
@@ -168,7 +175,6 @@ const enTexts: PromotionTexts = {
   close: 'Close',
   paymentHint: 'Publication goes live only after payment.',
   firstAdBonus: 'First ad can be free for 7 days for new users',
-  removePhoto: 'Remove',
   photosCount: 'Photos',
   adjustPhoto: 'Adjust photo',
   photoEditorHint: 'Move with one finger. Zoom with slider.',
@@ -186,9 +192,12 @@ const enTexts: PromotionTexts = {
   livePreview: 'Live preview',
   sponsored: 'Sponsored',
   openAd: 'Open ad',
-  onlyPhotosOrVideo: 'Use photos or video, not both',
   removeVideoFirst: 'Remove the mini video first',
   removePhotosFirst: 'Remove photos first',
+  choosePaymentMethod: 'Choose payment method',
+  paymentMethodsHint: 'Select one method to continue payment',
+  selectedPaymentMethod: 'Selected method',
+  confirmPayment: 'Pay now',
 };
 
 const textByLanguage: Record<AppLanguage, PromotionTexts> = {
@@ -243,7 +252,6 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     close: 'Закрыть',
     paymentHint: 'Публикация выйдет только после оплаты.',
     firstAdBonus: 'Первая реклама может быть бесплатной на 7 дней для новых пользователей',
-    removePhoto: 'Удалить',
     photosCount: 'Фото',
     adjustPhoto: 'Настроить фото',
     photoEditorHint: 'Перемещай одним пальцем. Увеличивай ползунком.',
@@ -261,9 +269,12 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     livePreview: 'Предварительный просмотр',
     sponsored: 'Реклама',
     openAd: 'Открыть',
-    onlyPhotosOrVideo: 'Можно использовать фото или видео, но не вместе',
     removeVideoFirst: 'Сначала удалите мини видео',
     removePhotosFirst: 'Сначала удалите фото',
+    choosePaymentMethod: 'Выберите способ оплаты',
+    paymentMethodsHint: 'Выберите один способ для продолжения оплаты',
+    selectedPaymentMethod: 'Выбранный способ',
+    confirmPayment: 'Оплатить',
   },
   ES: enTexts,
   CZ: enTexts,
@@ -328,6 +339,99 @@ const radiusOptionsByLanguage: Record<AppLanguage, RadiusOption[]> = {
   ],
 };
 
+const paymentMethodsByLanguage: Record<AppLanguage, PaymentMethod[]> = {
+  EN: [
+    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
+    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
+    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
+    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
+    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
+    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
+    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
+  ],
+  RU: [
+    { id: 'card', title: 'Банковская карта', subtitle: 'Visa / Mastercard', icon: '💳' },
+    { id: 'wallet', title: 'Баланс MapBook', subtitle: 'Оплата со счёта приложения', icon: '👛' },
+    { id: 'paypal', title: 'PayPal', subtitle: 'Быстрая оплата', icon: '🅿️' },
+    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Мгновенная оплата', icon: '' },
+    { id: 'google-pay', title: 'Google Pay', subtitle: 'Мгновенная оплата', icon: 'G' },
+    { id: 'crypto', title: 'Криптокошелёк', subtitle: 'USDT / USDC', icon: '₿' },
+    { id: 'bank', title: 'Банковский перевод', subtitle: 'Ручной перевод', icon: '🏦' },
+  ],
+  ES: [
+    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
+    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
+    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
+    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
+    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
+    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
+    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
+  ],
+  CZ: [
+    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
+    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
+    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
+    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
+    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
+    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
+    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
+  ],
+  DE: [
+    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
+    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
+    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
+    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
+    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
+    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
+    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
+  ],
+  PL: [
+    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
+    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
+    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
+    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
+    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
+    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
+    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
+  ],
+  UA: [
+    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
+    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
+    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
+    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
+    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
+    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
+    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
+  ],
+  IT: [
+    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
+    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
+    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
+    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
+    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
+    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
+    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
+  ],
+  FR: [
+    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
+    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
+    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
+    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
+    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
+    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
+    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
+  ],
+  AR: [
+    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
+    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
+    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
+    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
+    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
+    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
+    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
+  ],
+};
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
@@ -368,6 +472,8 @@ export default function NewPromotionPage() {
   const [layout, setLayout] = useState<PhotoLayout>('single');
   const [showPhotoSourceMenu, setShowPhotoSourceMenu] = useState(false);
   const [showVideoSourceMenu, setShowVideoSourceMenu] = useState(false);
+  const [showPaymentSheet, setShowPaymentSheet] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState('card');
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [miniVideo, setMiniVideo] = useState<VideoItem | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -412,10 +518,14 @@ export default function NewPromotionPage() {
 
   const text = textByLanguage[language] || textByLanguage.EN;
   const radiusOptions = radiusOptionsByLanguage[language] || radiusOptionsByLanguage.EN;
+  const paymentMethods = paymentMethodsByLanguage[language] || paymentMethodsByLanguage.EN;
+
   const selectedRadius =
     radiusOptions.find((item) => item.id === radius) || radiusOptions[0];
+
   const currentCategory =
     categories.find((item) => item.id === categoryId) || null;
+
   const subcategoryOptions = currentCategory?.subcategories || [];
 
   const totalPrice = useMemo(
@@ -427,6 +537,9 @@ export default function NewPromotionPage() {
     () => photos.find((photo) => photo.id === editorPhotoId) || null,
     [photos, editorPhotoId]
   );
+
+  const selectedPaymentMethod =
+    paymentMethods.find((item) => item.id === selectedPayment) || paymentMethods[0];
 
   const previewBadge = getBadgeLabel(badgeMode, badgeDiscountValue, text);
 
@@ -613,7 +726,13 @@ export default function NewPromotionPage() {
       return;
     }
 
+    setShowPaymentSheet(true);
+  };
+
+  const handleConfirmPayment = () => {
+    setShowPaymentSheet(false);
     setIsSuccess(true);
+
     setTimeout(() => {
       router.push('/profile/payments');
     }, 700);
@@ -2278,6 +2397,239 @@ export default function NewPromotionPage() {
                 }}
               >
                 ✕ {text.close}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showPaymentSheet ? (
+        <div
+          onClick={() => setShowPaymentSheet(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(17,17,17,0.38)',
+            zIndex: 500,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            padding: 12,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: 430,
+              borderRadius: 28,
+              border: '2px solid #111111',
+              background: '#ffffff',
+              padding: 18,
+              boxSizing: 'border-box',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 24,
+                fontWeight: 900,
+                color: '#17130f',
+                textAlign: 'center',
+              }}
+            >
+              {text.choosePaymentMethod}
+            </div>
+
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 14,
+                lineHeight: 1.45,
+                color: '#7b7268',
+                fontWeight: 700,
+                textAlign: 'center',
+              }}
+            >
+              {text.paymentMethodsHint}
+            </div>
+
+            <div
+              style={{
+                marginTop: 16,
+                borderRadius: 18,
+                border: '1.5px solid #111111',
+                background: '#fff',
+                overflow: 'hidden',
+              }}
+            >
+              {paymentMethods.map((method, index) => {
+                const active = selectedPayment === method.id;
+
+                return (
+                  <button
+                    key={method.id}
+                    type="button"
+                    onClick={() => setSelectedPayment(method.id)}
+                    style={{
+                      width: '100%',
+                      minHeight: 68,
+                      border: 'none',
+                      borderBottom:
+                        index === paymentMethods.length - 1 ? 'none' : '1px solid #111111',
+                      background: active ? '#f8f7f3' : '#fff',
+                      padding: '0 16px',
+                      display: 'grid',
+                      gridTemplateColumns: '32px 1fr 22px',
+                      gap: 14,
+                      alignItems: 'center',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 22,
+                        fontWeight: 900,
+                        color: '#17130f',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {method.icon}
+                    </div>
+
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 900,
+                          color: '#17130f',
+                        }}
+                      >
+                        {method.title}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: 2,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          color: '#7b7268',
+                        }}
+                      >
+                        {method.subtitle}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 999,
+                        border: '2px solid #111111',
+                        background: active ? '#17130f' : '#fff',
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 12,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {active ? '✓' : ''}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div
+              style={{
+                marginTop: 14,
+                borderRadius: 16,
+                border: '1.5px solid #111111',
+                background: '#fff',
+                padding: '12px 14px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: 10,
+                alignItems: 'center',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: '#7b7268',
+                  }}
+                >
+                  {text.selectedPaymentMethod}
+                </div>
+                <div
+                  style={{
+                    marginTop: 2,
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
+                  {selectedPaymentMethod?.title}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                £{totalPrice}
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: 14,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setShowPaymentSheet(false)}
+                style={{
+                  height: 54,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#fff',
+                  color: '#17130f',
+                  fontSize: 16,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.cancel}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleConfirmPayment}
+                style={{
+                  height: 54,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#17130f',
+                  color: '#fff',
+                  fontSize: 16,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.confirmPayment} · £{totalPrice}
               </button>
             </div>
           </div>
