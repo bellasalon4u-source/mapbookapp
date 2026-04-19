@@ -474,6 +474,14 @@ export default function NewDealPage() {
     };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (photoPreview) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
+
   const text = textByLanguage[language] || textByLanguage.EN;
   const paymentMethods = paymentMethodsByLanguage[language] || paymentMethodsByLanguage.EN;
   const totalPrice = useMemo(() => days * 1, [days]);
@@ -628,6 +636,219 @@ export default function NewDealPage() {
           >
             <div
               style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 8,
+              }}
+            >
+              {text.photo} <span style={{ color: '#ef4444' }}>*</span>
+            </div>
+
+            <div
+              style={{
+                fontSize: 14,
+                lineHeight: 1.5,
+                color: '#7b7268',
+                fontWeight: 700,
+                marginBottom: 14,
+              }}
+            >
+              {text.photoHint}
+            </div>
+
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoSelected}
+              style={{ display: 'none' }}
+            />
+
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handlePhotoSelected}
+              style={{ display: 'none' }}
+            />
+
+            <input
+              ref={filesInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoSelected}
+              style={{ display: 'none' }}
+            />
+
+            {!photoPreview ? (
+              <button
+                type="button"
+                onClick={() => setShowPhotoSourceMenu(true)}
+                style={{
+                  width: '100%',
+                  minHeight: 96,
+                  borderRadius: 22,
+                  border: '1.5px solid #111111',
+                  background: '#fff',
+                  padding: 14,
+                  display: 'grid',
+                  gridTemplateColumns: '72px 1fr',
+                  gap: 14,
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 22,
+                    border: '2px solid #2f8c67',
+                    background: '#f5fff8',
+                    color: '#2f8c67',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 42,
+                    fontWeight: 700,
+                  }}
+                >
+                  +
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 900,
+                      color: '#2f8c67',
+                    }}
+                  >
+                    {text.addPhoto}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 14,
+                      color: '#7b7268',
+                      fontWeight: 700,
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    JPG / PNG / WEBP
+                  </div>
+                </div>
+              </button>
+            ) : (
+              <div
+                style={{
+                  borderRadius: 22,
+                  border: '1.5px solid #111111',
+                  overflow: 'hidden',
+                  background: '#fff',
+                }}
+              >
+                <div style={{ position: 'relative' }}>
+                  <img
+                    src={photoPreview}
+                    alt={photoName || 'deal-photo'}
+                    style={{
+                      width: '100%',
+                      height: 220,
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    style={{
+                      position: 'absolute',
+                      top: 10,
+                      right: 10,
+                      width: 34,
+                      height: 34,
+                      borderRadius: 999,
+                      border: '1.5px solid #111111',
+                      background: '#ffffff',
+                      color: '#17130f',
+                      fontSize: 20,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 10,
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 900,
+                        color: '#17130f',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {text.photoAdded}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 4,
+                        fontSize: 13,
+                        color: '#7b7268',
+                        fontWeight: 700,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {photoName}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPhotoSourceMenu(true)}
+                    style={{
+                      height: 40,
+                      borderRadius: 14,
+                      border: '1.5px solid #111111',
+                      background: '#ffffff',
+                      color: '#17130f',
+                      padding: '0 14px',
+                      fontSize: 14,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {text.replacePhoto}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div
+              style={{
+                marginTop: 18,
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
                 gap: 12,
@@ -1004,228 +1225,6 @@ export default function NewDealPage() {
                 </div>
               </div>
             ) : null}
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
-              borderRadius: 30,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 8,
-              }}
-            >
-              {text.photo} <span style={{ color: '#ef4444' }}>*</span>
-            </div>
-
-            <div
-              style={{
-                fontSize: 14,
-                lineHeight: 1.5,
-                color: '#7b7268',
-                fontWeight: 700,
-                marginBottom: 14,
-              }}
-            >
-              {text.photoHint}
-            </div>
-
-            <input
-              ref={galleryInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoSelected}
-              style={{ display: 'none' }}
-            />
-
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handlePhotoSelected}
-              style={{ display: 'none' }}
-            />
-
-            <input
-              ref={filesInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoSelected}
-              style={{ display: 'none' }}
-            />
-
-            {!photoPreview ? (
-              <button
-                type="button"
-                onClick={() => setShowPhotoSourceMenu(true)}
-                style={{
-                  width: '100%',
-                  minHeight: 96,
-                  borderRadius: 22,
-                  border: '1.5px solid #111111',
-                  background: '#fff',
-                  padding: 14,
-                  display: 'grid',
-                  gridTemplateColumns: '72px 1fr',
-                  gap: 14,
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                <div
-                  style={{
-                    width: 72,
-                    height: 72,
-                    borderRadius: 22,
-                    border: '2px solid #2f8c67',
-                    background: '#f5fff8',
-                    color: '#2f8c67',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 42,
-                    fontWeight: 700,
-                  }}
-                >
-                  +
-                </div>
-
-                <div>
-                  <div
-                    style={{
-                      fontSize: 18,
-                      fontWeight: 900,
-                      color: '#2f8c67',
-                    }}
-                  >
-                    {text.addPhoto}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 6,
-                      fontSize: 14,
-                      color: '#7b7268',
-                      fontWeight: 700,
-                      wordBreak: 'break-word',
-                    }}
-                  >
-                    JPG / PNG / WEBP
-                  </div>
-                </div>
-              </button>
-            ) : (
-              <div
-                style={{
-                  borderRadius: 22,
-                  border: '1.5px solid #111111',
-                  overflow: 'hidden',
-                  background: '#fff',
-                }}
-              >
-                <div style={{ position: 'relative' }}>
-                  <img
-                    src={photoPreview}
-                    alt={photoName || 'deal-photo'}
-                    style={{
-                      width: '100%',
-                      height: 220,
-                      objectFit: 'cover',
-                      display: 'block',
-                    }}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={handleRemovePhoto}
-                    style={{
-                      position: 'absolute',
-                      top: 10,
-                      right: 10,
-                      width: 34,
-                      height: 34,
-                      borderRadius: 999,
-                      border: '1.5px solid #111111',
-                      background: '#ffffff',
-                      color: '#17130f',
-                      fontSize: 20,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
-
-                <div
-                  style={{
-                    padding: '12px 14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 10,
-                  }}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 900,
-                        color: '#17130f',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {text.photoAdded}
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: 4,
-                        fontSize: 13,
-                        color: '#7b7268',
-                        fontWeight: 700,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {photoName}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowPhotoSourceMenu(true)}
-                    style={{
-                      height: 40,
-                      borderRadius: 14,
-                      border: '1.5px solid #111111',
-                      background: '#ffffff',
-                      color: '#17130f',
-                      padding: '0 14px',
-                      fontSize: 14,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {text.replacePhoto}
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           <div
