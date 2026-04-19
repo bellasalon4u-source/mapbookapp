@@ -274,7 +274,7 @@ export default function BottomNav({ active }: BottomNavProps) {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(20,20,20,0.18)',
+            background: 'rgba(20,20,20,0.16)',
             zIndex: 120,
             display: 'flex',
             alignItems: 'flex-end',
@@ -292,8 +292,8 @@ export default function BottomNav({ active }: BottomNavProps) {
           >
             <div
               style={{
-                border: '2px solid #111111',
-                borderRadius: 24,
+                border: '3px solid #111111',
+                borderRadius: 28,
                 background: '#ffffff',
                 boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
                 overflow: 'hidden',
@@ -309,26 +309,26 @@ export default function BottomNav({ active }: BottomNavProps) {
                   type="button"
                   onClick={handleGoToAdvertisement}
                   style={{
-                    minHeight: 114,
+                    minHeight: 112,
                     border: 'none',
-                    borderRight: '2px solid #111111',
-                    background: '#45c63d',
+                    borderRight: '3px solid #111111',
+                    background: '#f1dc4c',
                     padding: '14px 10px 12px',
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 8,
+                    gap: 10,
                   }}
                 >
-                  <span style={{ fontSize: 30, lineHeight: 1, color: '#ffffff' }}>📣</span>
+                  <span style={{ fontSize: 34, lineHeight: 1 }}>📣</span>
                   <span
                     style={{
                       fontSize: 13,
                       lineHeight: 1.15,
                       fontWeight: 900,
-                      color: '#ffffff',
+                      color: '#17130f',
                       textAlign: 'center',
                     }}
                   >
@@ -340,20 +340,29 @@ export default function BottomNav({ active }: BottomNavProps) {
                   type="button"
                   onClick={handleGoToService}
                   style={{
-                    minHeight: 114,
+                    minHeight: 112,
                     border: 'none',
-                    borderRight: '2px solid #111111',
-                    background: '#45c63d',
+                    borderRight: '3px solid #111111',
+                    background: '#4acb39',
                     padding: '14px 10px 12px',
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 8,
+                    gap: 10,
                   }}
                 >
-                  <span style={{ fontSize: 30, lineHeight: 1, color: '#ffffff' }}>✚</span>
+                  <span
+                    style={{
+                      fontSize: 42,
+                      lineHeight: 1,
+                      color: '#ffffff',
+                      fontWeight: 900,
+                    }}
+                  >
+                    +
+                  </span>
                   <span
                     style={{
                       fontSize: 13,
@@ -371,19 +380,52 @@ export default function BottomNav({ active }: BottomNavProps) {
                   type="button"
                   onClick={handleGoToDeal}
                   style={{
-                    minHeight: 114,
+                    minHeight: 112,
                     border: 'none',
-                    background: '#45c63d',
+                    background: '#ff5252',
                     padding: '14px 10px 12px',
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 8,
+                    gap: 10,
+                    position: 'relative',
                   }}
                 >
-                  <span style={{ fontSize: 30, lineHeight: 1, color: '#ffffff' }}>%</span>
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: 10,
+                      right: 10,
+                      minWidth: 42,
+                      height: 34,
+                      padding: '0 10px',
+                      borderRadius: 999,
+                      border: '3px solid #111111',
+                      background: '#ffffff',
+                      color: '#b13a3a',
+                      fontSize: 18,
+                      fontWeight: 900,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    £1
+                  </span>
+
+                  <span
+                    style={{
+                      fontSize: 38,
+                      lineHeight: 1,
+                      color: '#ffffff',
+                      fontWeight: 900,
+                    }}
+                  >
+                    %
+                  </span>
                   <span
                     style={{
                       fontSize: 13,
@@ -403,12 +445,12 @@ export default function BottomNav({ active }: BottomNavProps) {
                 onClick={handleCloseAddMenu}
                 style={{
                   width: '100%',
-                  height: 48,
+                  height: 56,
                   border: 'none',
-                  borderTop: '2px solid #111111',
+                  borderTop: '3px solid #111111',
                   background: '#ffffff',
                   color: '#17130f',
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: 900,
                   cursor: 'pointer',
                 }}
