@@ -1,6 +1,7 @@
 import { getSavedLanguage, type AppLanguage } from './i18n';
 
 export type PromotionStatus = 'draft' | 'active' | 'expired' | 'paused';
+export type PromotionLayout = 'single' | 'grid';
 
 type LocalizedText = string | Partial<Record<AppLanguage, string>>;
 type LocalizedList = string[] | Partial<Record<AppLanguage, string[]>>;
@@ -11,7 +12,11 @@ export type PromotionRecord = {
   title: LocalizedText;
   subtitle?: LocalizedText;
   image: string;
+  images?: string[];
+  layout?: PromotionLayout;
+  badgeText?: LocalizedText;
   categoryId: string;
+  subcategory?: string;
   centerLat: number;
   centerLng: number;
   radiusKm: number;
@@ -36,7 +41,11 @@ export type PromotionItem = {
   title: string;
   subtitle?: string;
   image: string;
+  images: string[];
+  layout: PromotionLayout;
+  badgeText?: string;
   categoryId: string;
+  subcategory?: string;
   centerLat: number;
   centerLng: number;
   radiusKm: number;
@@ -89,9 +98,27 @@ const defaultPromotions: PromotionRecord[] = [
       AR: 'خصم 20٪ هذا الأسبوع',
       PL: '20% zniżki w tym tygodniu',
     },
+    badgeText: {
+      EN: '-20%',
+      ES: '-20%',
+      RU: '-20%',
+      UA: '-20%',
+      CZ: '-20%',
+      DE: '-20%',
+      IT: '-20%',
+      FR: '-20%',
+      AR: '-20%',
+      PL: '-20%',
+    },
     image:
       'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1200&q=80',
+    ],
+    layout: 'grid',
     categoryId: 'beauty',
+    subcategory: 'Hair',
     centerLat: 51.5074,
     centerLng: -0.1278,
     radiusKm: 15,
@@ -262,9 +289,26 @@ const defaultPromotions: PromotionRecord[] = [
       AR: 'ابتداءً من £25 اليوم',
       PL: 'Od £25 dzisiaj',
     },
+    badgeText: {
+      EN: 'TODAY',
+      ES: 'HOY',
+      RU: 'СЕГОДНЯ',
+      UA: 'СЬОГОДНІ',
+      CZ: 'DNES',
+      DE: 'HEUTE',
+      IT: 'OGGI',
+      FR: 'AUJOURD’HUI',
+      AR: 'اليوم',
+      PL: 'DZISIAJ',
+    },
     image:
       'https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=1200&q=80',
+    ],
+    layout: 'single',
     categoryId: 'barber',
+    subcategory: 'Barber',
     centerLat: 51.5154,
     centerLng: -0.141,
     radiusKm: 10,
@@ -375,9 +419,26 @@ const defaultPromotions: PromotionRecord[] = [
       AR: 'ترقية مجانية إلى العلاج العطري',
       PL: 'Darmowe ulepszenie do aromaterapii',
     },
+    badgeText: {
+      EN: 'FREE UPGRADE',
+      ES: 'MEJORA GRATIS',
+      RU: 'БЕСПЛАТНЫЙ АПГРЕЙД',
+      UA: 'БЕЗКОШТОВНЕ ПОКРАЩЕННЯ',
+      CZ: 'ZDARMA UPGRADE',
+      DE: 'KOSTENLOSES UPGRADE',
+      IT: 'UPGRADE GRATIS',
+      FR: 'UPGRADE OFFERT',
+      AR: 'ترقية مجانية',
+      PL: 'DARMOWE ULEPSZENIE',
+    },
     image:
       'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80',
+    ],
+    layout: 'single',
     categoryId: 'wellness',
+    subcategory: 'Massage',
     centerLat: 51.5099,
     centerLng: -0.1181,
     radiusKm: 8,
@@ -578,8 +639,20 @@ function pickLocalizedList(value: LocalizedList | undefined, language: AppLangua
 }
 
 function normalizePromotionRecord(item: PromotionRecord): PromotionRecord {
+  const normalizedImages =
+    Array.isArray(item.images) && item.images.length > 0
+      ? item.images.filter(Boolean)
+      : item.image
+      ? [item.image]
+      : [];
+
+  const primaryImage = normalizedImages[0] || item.image || '';
+
   return {
     ...item,
+    image: primaryImage,
+    images: normalizedImages,
+    layout: item.layout === 'grid' ? 'grid' : 'single',
     subtitle: item.subtitle || '',
     description: item.description || '',
     included: item.included || [],
@@ -589,33 +662,41 @@ function normalizePromotionRecord(item: PromotionRecord): PromotionRecord {
     area: item.area || '',
     address: item.address || '',
     distance: item.distance || '',
+    badgeText: item.badgeText || '',
+    subcategory: item.subcategory || '',
   };
 }
 
 function localizePromotion(item: PromotionRecord, language: AppLanguage): PromotionItem {
+  const normalized = normalizePromotionRecord(item);
+
   return {
-    id: item.id,
-    masterId: item.masterId,
-    title: pickLocalizedText(item.title, language),
-    subtitle: pickLocalizedText(item.subtitle, language),
-    image: item.image,
-    categoryId: item.categoryId,
-    centerLat: item.centerLat,
-    centerLng: item.centerLng,
-    radiusKm: item.radiusKm,
-    startAt: item.startAt,
-    endAt: item.endAt,
-    createdAt: item.createdAt,
-    status: item.status,
-    views: item.views,
-    description: pickLocalizedText(item.description, language),
-    included: pickLocalizedList(item.included, language),
-    oldPrice: item.oldPrice || '',
-    newPrice: item.newPrice || '',
-    validUntil: pickLocalizedText(item.validUntil, language),
-    area: pickLocalizedText(item.area, language),
-    address: pickLocalizedText(item.address, language),
-    distance: pickLocalizedText(item.distance, language),
+    id: normalized.id,
+    masterId: normalized.masterId,
+    title: pickLocalizedText(normalized.title, language),
+    subtitle: pickLocalizedText(normalized.subtitle, language),
+    image: normalized.image,
+    images: normalized.images || [normalized.image].filter(Boolean),
+    layout: normalized.layout || 'single',
+    badgeText: pickLocalizedText(normalized.badgeText, language),
+    categoryId: normalized.categoryId,
+    subcategory: normalized.subcategory || '',
+    centerLat: normalized.centerLat,
+    centerLng: normalized.centerLng,
+    radiusKm: normalized.radiusKm,
+    startAt: normalized.startAt,
+    endAt: normalized.endAt,
+    createdAt: normalized.createdAt,
+    status: normalized.status,
+    views: normalized.views,
+    description: pickLocalizedText(normalized.description, language),
+    included: pickLocalizedList(normalized.included, language),
+    oldPrice: normalized.oldPrice || '',
+    newPrice: normalized.newPrice || '',
+    validUntil: pickLocalizedText(normalized.validUntil, language),
+    area: pickLocalizedText(normalized.area, language),
+    address: pickLocalizedText(normalized.address, language),
+    distance: pickLocalizedText(normalized.distance, language),
   };
 }
 
@@ -627,7 +708,10 @@ function readStore(): PromotionRecord[] {
   const raw = window.localStorage.getItem(STORAGE_KEY);
 
   if (!raw) {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPromotions));
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(defaultPromotions.map(normalizePromotionRecord))
+    );
     return defaultPromotions.map(normalizePromotionRecord);
   }
 
@@ -635,20 +719,29 @@ function readStore(): PromotionRecord[] {
     const parsed = JSON.parse(raw) as PromotionRecord[];
 
     if (!Array.isArray(parsed) || parsed.length === 0) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPromotions));
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(defaultPromotions.map(normalizePromotionRecord))
+      );
       return defaultPromotions.map(normalizePromotionRecord);
     }
 
     return parsed.map(normalizePromotionRecord);
   } catch {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPromotions));
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(defaultPromotions.map(normalizePromotionRecord))
+    );
     return defaultPromotions.map(normalizePromotionRecord);
   }
 }
 
 function writeStore(items: PromotionRecord[]) {
   if (!canUseStorage()) return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  window.localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(items.map(normalizePromotionRecord))
+  );
   emitChange();
 }
 
@@ -721,6 +814,7 @@ export function getVisiblePromotionsForLocation(
   language: AppLanguage = getCurrentLanguage()
 ) {
   const normalizedCategory = String(categoryId || '').toLowerCase().trim();
+
   const activeRaw = readStore()
     .filter((item) => isPromotionLive(item, Date.now()))
     .sort((a, b) => toTime(b.createdAt) - toTime(a.createdAt));
