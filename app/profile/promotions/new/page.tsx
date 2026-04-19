@@ -26,6 +26,7 @@ type RadiusOption = {
 };
 
 type PhotoLayout = 'single' | 'grid';
+type BadgePreset = 'none' | 'discount' | 'top' | 'new';
 
 type PromotionTexts = {
   pageTitle: string;
@@ -39,7 +40,13 @@ type PromotionTexts = {
   description: string;
   descriptionPlaceholder: string;
   badgeText: string;
-  badgePlaceholder: string;
+  badgeNone: string;
+  badgeDiscount: string;
+  badgeTop: string;
+  badgeNew: string;
+  badgeHint: string;
+  preview: string;
+  previewHint: string;
   visibility: string;
   visibilityHint: string;
   radius: string;
@@ -67,6 +74,7 @@ type PromotionTexts = {
   enterTitle: string;
   enterDescription: string;
   addPhotoAlert: string;
+  addMediaAlert: string;
   close: string;
   paymentHint: string;
   firstAdBonus: string;
@@ -85,6 +93,9 @@ type PromotionTexts = {
   removeMiniVideo: string;
   videoTooLong: string;
   invalidVideo: string;
+  mediaRule: string;
+  mediaTypePhoto: string;
+  mediaTypeVideo: string;
 };
 
 type PhotoItem = {
@@ -105,68 +116,81 @@ const MIN_SCALE = 1;
 const MAX_SCALE = 3;
 const MAX_VIDEO_SECONDS = 5;
 
+const baseEn: PromotionTexts = {
+  pageTitle: 'Add advertisement',
+  pageSubtitle: 'Create a bright ad to get more views and clients.',
+  category: 'Category',
+  subcategory: 'Subcategory',
+  chooseCategory: 'Choose category',
+  chooseSubcategory: 'Choose subcategory',
+  title: 'Ad title',
+  titlePlaceholder: 'Enter ad title',
+  description: 'Description',
+  descriptionPlaceholder: 'Enter ad description...',
+  badgeText: 'Badge / promo text',
+  badgeNone: 'Nothing',
+  badgeDiscount: 'Discount',
+  badgeTop: 'TOP',
+  badgeNew: 'NEW',
+  badgeHint: 'Choose one badge for the ad card.',
+  preview: 'Ad preview',
+  previewHint: 'This is how clients will see your advertisement.',
+  visibility: 'Ad visibility',
+  visibilityHint:
+    'The ad will be shown inside the selected radius from the current search point.',
+  radius: 'Radius',
+  perDay: 'per day',
+  duration: 'Ad duration',
+  durationHint: 'From 10 to 30 days',
+  days: 'Days',
+  photo: 'Photos',
+  photoHint: 'Add one or several photos for the ad.',
+  addPhoto: 'Add photos',
+  photoAdded: 'Photos added',
+  photoSource: 'Photo source',
+  gallery: 'Gallery',
+  camera: 'Camera',
+  files: 'Files',
+  layout: 'Display layout',
+  layoutSingle: '1 photo',
+  layoutGrid: 'Grid 2–9',
+  summary: 'Ad summary',
+  total: 'Total',
+  continueToPayment: 'Continue to payment',
+  done: 'Done',
+  enterCategory: 'Choose category',
+  enterSubcategory: 'Choose subcategory',
+  enterTitle: 'Enter ad title',
+  enterDescription: 'Enter ad description',
+  addPhotoAlert: 'Add at least one photo for the ad',
+  addMediaAlert: 'Add at least one photo or one mini video',
+  close: 'Close',
+  paymentHint: 'Publication goes live only after payment.',
+  firstAdBonus: 'First ad can be free for 7 days for new users',
+  removePhoto: 'Remove',
+  photosCount: 'Photos',
+  adjustPhoto: 'Adjust photo',
+  photoEditorHint: 'Move with one finger. Zoom with slider.',
+  resetPhoto: 'Reset',
+  applyPhoto: 'Apply',
+  cancel: 'Cancel',
+  miniVideo: 'Mini video',
+  miniVideoHint: 'Optional. Add 1 short loop video up to 5 seconds.',
+  addMiniVideo: 'Add mini video',
+  replaceMiniVideo: 'Replace video',
+  miniVideoAdded: 'Mini video added',
+  removeMiniVideo: 'Remove video',
+  videoTooLong: 'Mini video must be 5 seconds or shorter',
+  invalidVideo: 'Please choose a valid video file',
+  mediaRule: 'Use photos or 1 mini video. Not both at the same time.',
+  mediaTypePhoto: 'Photo',
+  mediaTypeVideo: 'Video',
+};
+
 const textByLanguage: Record<AppLanguage, PromotionTexts> = {
-  EN: {
-    pageTitle: 'Add advertisement',
-    pageSubtitle: 'Create a bright ad to get more views and clients.',
-    category: 'Category',
-    subcategory: 'Subcategory',
-    chooseCategory: 'Choose category',
-    chooseSubcategory: 'Choose subcategory',
-    title: 'Ad title',
-    titlePlaceholder: 'Enter ad title',
-    description: 'Description',
-    descriptionPlaceholder: 'Enter ad description...',
-    badgeText: 'Badge / promo text',
-    badgePlaceholder: 'For example: -20% / TOP / NEW',
-    visibility: 'Ad visibility',
-    visibilityHint:
-      'The ad will be shown inside the selected radius from the current search point.',
-    radius: 'Radius',
-    perDay: 'per day',
-    duration: 'Ad duration',
-    durationHint: 'From 10 to 30 days',
-    days: 'Days',
-    photo: 'Photos',
-    photoHint: 'Add one or several photos for the ad.',
-    addPhoto: 'Add photos',
-    photoAdded: 'Photos added',
-    photoSource: 'Photo source',
-    gallery: 'Gallery',
-    camera: 'Camera',
-    files: 'Files',
-    layout: 'Display layout',
-    layoutSingle: '1 photo',
-    layoutGrid: 'Grid 2–9',
-    summary: 'Ad summary',
-    total: 'Total',
-    continueToPayment: 'Continue to payment',
-    done: 'Done',
-    enterCategory: 'Choose category',
-    enterSubcategory: 'Choose subcategory',
-    enterTitle: 'Enter ad title',
-    enterDescription: 'Enter ad description',
-    addPhotoAlert: 'Add at least one photo for the ad',
-    close: 'Close',
-    paymentHint: 'Publication goes live only after payment.',
-    firstAdBonus: 'First ad can be free for 7 days for new users',
-    removePhoto: 'Remove',
-    photosCount: 'Photos',
-    adjustPhoto: 'Adjust photo',
-    photoEditorHint: 'Move with one finger. Zoom with slider.',
-    resetPhoto: 'Reset',
-    applyPhoto: 'Apply',
-    cancel: 'Cancel',
-    miniVideo: 'Mini video',
-    miniVideoHint: 'Optional. Add 1 short loop video up to 5 seconds.',
-    addMiniVideo: 'Add mini video',
-    replaceMiniVideo: 'Replace video',
-    miniVideoAdded: 'Mini video added',
-    removeMiniVideo: 'Remove video',
-    videoTooLong: 'Mini video must be 5 seconds or shorter',
-    invalidVideo: 'Please choose a valid video file',
-  },
+  EN: baseEn,
   RU: {
+    ...baseEn,
     pageTitle: 'Добавить рекламу',
     pageSubtitle: 'Создайте яркую рекламу, чтобы получить больше просмотров и клиентов.',
     category: 'Категория',
@@ -178,7 +202,13 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     description: 'Описание',
     descriptionPlaceholder: 'Введите описание рекламы...',
     badgeText: 'Бейдж / промо текст',
-    badgePlaceholder: 'Например: -20% / TOP / NEW',
+    badgeNone: 'Ничего',
+    badgeDiscount: 'Скидка',
+    badgeTop: 'TOP',
+    badgeNew: 'NEW',
+    badgeHint: 'Выберите один бейдж для карточки рекламы.',
+    preview: 'Превью рекламы',
+    previewHint: 'Так рекламу увидит клиент.',
     visibility: 'Видимость рекламы',
     visibilityHint:
       'Реклама будет показываться в выбранном радиусе от текущей точки поиска услуг.',
@@ -207,6 +237,7 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     enterTitle: 'Введите название рекламы',
     enterDescription: 'Введите описание рекламы',
     addPhotoAlert: 'Добавьте хотя бы одно фото для рекламы',
+    addMediaAlert: 'Добавьте хотя бы одно фото или одно мини видео',
     close: 'Закрыть',
     paymentHint: 'Публикация выйдет только после оплаты.',
     firstAdBonus: 'Первая реклама может быть бесплатной на 7 дней для новых пользователей',
@@ -225,256 +256,19 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     removeMiniVideo: 'Удалить видео',
     videoTooLong: 'Мини видео должно быть не длиннее 5 секунд',
     invalidVideo: 'Пожалуйста, выберите корректный видеофайл',
+    mediaRule: 'Используй или фото, или 1 мини видео. Одновременно нельзя.',
+    mediaTypePhoto: 'Фото',
+    mediaTypeVideo: 'Видео',
   },
-  ES: {
-    pageTitle: 'Añadir publicidad',
-    pageSubtitle: 'Crea un anuncio atractivo para conseguir más vistas y clientes.',
-    category: 'Categoría',
-    subcategory: 'Subcategoría',
-    chooseCategory: 'Elige categoría',
-    chooseSubcategory: 'Elige subcategoría',
-    title: 'Título del anuncio',
-    titlePlaceholder: 'Introduce el título del anuncio',
-    description: 'Descripción',
-    descriptionPlaceholder: 'Introduce la descripción del anuncio...',
-    badgeText: 'Texto del badge / promo',
-    badgePlaceholder: 'Por ejemplo: -20% / TOP / NEW',
-    visibility: 'Visibilidad del anuncio',
-    visibilityHint:
-      'El anuncio se mostrará dentro del radio seleccionado desde el punto actual de búsqueda.',
-    radius: 'Radio',
-    perDay: 'por día',
-    duration: 'Duración del anuncio',
-    durationHint: 'De 10 a 30 días',
-    days: 'Días',
-    photo: 'Fotos',
-    photoHint: 'Añade una o varias fotos para el anuncio.',
-    addPhoto: 'Añadir fotos',
-    photoAdded: 'Fotos añadidas',
-    photoSource: 'Origen de foto',
-    gallery: 'Galería',
-    camera: 'Cámara',
-    files: 'Archivos',
-    layout: 'Diseño',
-    layoutSingle: '1 foto',
-    layoutGrid: 'Cuadrícula 2–9',
-    summary: 'Resumen del anuncio',
-    total: 'Total',
-    continueToPayment: 'Continuar al pago',
-    done: 'Hecho',
-    enterCategory: 'Elige categoría',
-    enterSubcategory: 'Elige subcategoría',
-    enterTitle: 'Introduce el título del anuncio',
-    enterDescription: 'Introduce la descripción del anuncio',
-    addPhotoAlert: 'Añade al menos una foto para el anuncio',
-    close: 'Cerrar',
-    paymentHint: 'La publicación se activa solo después del pago.',
-    firstAdBonus: 'El primer anuncio puede ser gratis durante 7 días para nuevos usuarios',
-    removePhoto: 'Eliminar',
-    photosCount: 'Fotos',
-    adjustPhoto: 'Ajustar foto',
-    photoEditorHint: 'Mueve con un dedo. Haz zoom con el control.',
-    resetPhoto: 'Restablecer',
-    applyPhoto: 'Aplicar',
-    cancel: 'Cancelar',
-    miniVideo: 'Mini video',
-    miniVideoHint: 'Opcional. Añade 1 video corto en bucle de hasta 5 segundos.',
-    addMiniVideo: 'Añadir mini video',
-    replaceMiniVideo: 'Reemplazar video',
-    miniVideoAdded: 'Mini video añadido',
-    removeMiniVideo: 'Eliminar video',
-    videoTooLong: 'El mini video debe durar 5 segundos o menos',
-    invalidVideo: 'Elige un archivo de video válido',
-  },
-  CZ: {
-    pageTitle: 'Přidat reklamu',
-    pageSubtitle: 'Vytvořte výraznou reklamu pro více zobrazení a klientů.',
-    category: 'Kategorie',
-    subcategory: 'Podkategorie',
-    chooseCategory: 'Vyberte kategorii',
-    chooseSubcategory: 'Vyberte podkategorii',
-    title: 'Název reklamy',
-    titlePlaceholder: 'Zadejte název reklamy',
-    description: 'Popis',
-    descriptionPlaceholder: 'Zadejte popis reklamy...',
-    badgeText: 'Badge / promo text',
-    badgePlaceholder: 'Například: -20% / TOP / NEW',
-    visibility: 'Viditelnost reklamy',
-    visibilityHint:
-      'Reklama se bude zobrazovat ve zvoleném okruhu od aktuálního bodu vyhledávání.',
-    radius: 'Okruh',
-    perDay: 'za den',
-    duration: 'Doba reklamy',
-    durationHint: 'Od 10 do 30 dnů',
-    days: 'Dny',
-    photo: 'Fotky',
-    photoHint: 'Přidejte jednu nebo více fotek pro reklamu.',
-    addPhoto: 'Přidat fotky',
-    photoAdded: 'Fotky přidány',
-    photoSource: 'Zdroj fotky',
-    gallery: 'Galerie',
-    camera: 'Kamera',
-    files: 'Soubory',
-    layout: 'Rozložení',
-    layoutSingle: '1 fotka',
-    layoutGrid: 'Mřížka 2–9',
-    summary: 'Shrnutí reklamy',
-    total: 'Celkem',
-    continueToPayment: 'Pokračovat k platbě',
-    done: 'Hotovo',
-    enterCategory: 'Vyberte kategorii',
-    enterSubcategory: 'Vyberte podkategorii',
-    enterTitle: 'Zadejte název reklamy',
-    enterDescription: 'Zadejte popis reklamy',
-    addPhotoAlert: 'Přidejte alespoň jednu fotku pro reklamu',
-    close: 'Zavřít',
-    paymentHint: 'Publikace bude aktivní až po platbě.',
-    firstAdBonus: 'První reklama může být pro nové uživatele zdarma na 7 dní',
-    removePhoto: 'Odstranit',
-    photosCount: 'Fotky',
-    adjustPhoto: 'Upravit fotku',
-    photoEditorHint: 'Posuňte jedním prstem. Přibližte posuvníkem.',
-    resetPhoto: 'Resetovat',
-    applyPhoto: 'Použít',
-    cancel: 'Zrušit',
-    miniVideo: 'Mini video',
-    miniVideoHint: 'Volitelné. Přidejte 1 krátké smyčkové video do 5 sekund.',
-    addMiniVideo: 'Přidat mini video',
-    replaceMiniVideo: 'Nahradit video',
-    miniVideoAdded: 'Mini video přidáno',
-    removeMiniVideo: 'Odstranit video',
-    videoTooLong: 'Mini video musí být dlouhé maximálně 5 sekund',
-    invalidVideo: 'Vyberte prosím platný video soubor',
-  },
-  DE: {
-    pageTitle: 'Werbung hinzufügen',
-    pageSubtitle: 'Erstellen Sie eine auffällige Werbung für mehr Aufrufe und Kunden.',
-    category: 'Kategorie',
-    subcategory: 'Unterkategorie',
-    chooseCategory: 'Kategorie wählen',
-    chooseSubcategory: 'Unterkategorie wählen',
-    title: 'Werbetitel',
-    titlePlaceholder: 'Werbetitel eingeben',
-    description: 'Beschreibung',
-    descriptionPlaceholder: 'Werbebeschreibung eingeben...',
-    badgeText: 'Badge / Promo-Text',
-    badgePlaceholder: 'Zum Beispiel: -20% / TOP / NEW',
-    visibility: 'Sichtbarkeit der Werbung',
-    visibilityHint:
-      'Die Werbung wird im gewählten Radius vom aktuellen Suchpunkt angezeigt.',
-    radius: 'Radius',
-    perDay: 'pro Tag',
-    duration: 'Laufzeit der Werbung',
-    durationHint: 'Von 10 bis 30 Tagen',
-    days: 'Tage',
-    photo: 'Fotos',
-    photoHint: 'Fügen Sie ein oder mehrere Fotos hinzu.',
-    addPhoto: 'Fotos hinzufügen',
-    photoAdded: 'Fotos hinzugefügt',
-    photoSource: 'Fotoquelle',
-    gallery: 'Galerie',
-    camera: 'Kamera',
-    files: 'Dateien',
-    layout: 'Anzeigeformat',
-    layoutSingle: '1 Foto',
-    layoutGrid: 'Raster 2–9',
-    summary: 'Werbeübersicht',
-    total: 'Gesamt',
-    continueToPayment: 'Weiter zur Zahlung',
-    done: 'Fertig',
-    enterCategory: 'Kategorie wählen',
-    enterSubcategory: 'Unterkategorie wählen',
-    enterTitle: 'Werbetitel eingeben',
-    enterDescription: 'Werbebeschreibung eingeben',
-    addPhotoAlert: 'Fügen Sie mindestens ein Foto hinzu',
-    close: 'Schließen',
-    paymentHint: 'Veröffentlichung erfolgt erst nach Zahlung.',
-    firstAdBonus: 'Die erste Werbung kann für neue Nutzer 7 Tage kostenlos sein',
-    removePhoto: 'Entfernen',
-    photosCount: 'Fotos',
-    adjustPhoto: 'Foto anpassen',
-    photoEditorHint: 'Mit einem Finger verschieben. Mit dem Regler zoomen.',
-    resetPhoto: 'Zurücksetzen',
-    applyPhoto: 'Anwenden',
-    cancel: 'Abbrechen',
-    miniVideo: 'Mini-Video',
-    miniVideoHint: 'Optional. Fügen Sie 1 kurzes Loop-Video bis 5 Sekunden hinzu.',
-    addMiniVideo: 'Mini-Video hinzufügen',
-    replaceMiniVideo: 'Video ersetzen',
-    miniVideoAdded: 'Mini-Video hinzugefügt',
-    removeMiniVideo: 'Video entfernen',
-    videoTooLong: 'Das Mini-Video darf höchstens 5 Sekunden lang sein',
-    invalidVideo: 'Bitte wählen Sie eine gültige Videodatei',
-  },
-  PL: {
-    pageTitle: 'Dodaj reklamę',
-    pageSubtitle: 'Stwórz atrakcyjną reklamę, aby zdobyć więcej wyświetleń i klientów.',
-    category: 'Kategoria',
-    subcategory: 'Podkategoria',
-    chooseCategory: 'Wybierz kategorię',
-    chooseSubcategory: 'Wybierz podkategorię',
-    title: 'Tytuł reklamy',
-    titlePlaceholder: 'Wpisz tytuł reklamy',
-    description: 'Opis',
-    descriptionPlaceholder: 'Wpisz opis reklamy...',
-    badgeText: 'Badge / tekst promo',
-    badgePlaceholder: 'Na przykład: -20% / TOP / NEW',
-    visibility: 'Widoczność reklamy',
-    visibilityHint:
-      'Reklama będzie wyświetlana w wybranym promieniu od aktualnego punktu wyszukiwania.',
-    radius: 'Promień',
-    perDay: 'za dzień',
-    duration: 'Czas reklamy',
-    durationHint: 'Od 10 do 30 dni',
-    days: 'Dni',
-    photo: 'Zdjęcia',
-    photoHint: 'Dodaj jedno lub kilka zdjęć do reklamy.',
-    addPhoto: 'Dodaj zdjęcia',
-    photoAdded: 'Zdjęcia dodane',
-    photoSource: 'Źródło zdjęcia',
-    gallery: 'Galeria',
-    camera: 'Kamera',
-    files: 'Pliki',
-    layout: 'Układ',
-    layoutSingle: '1 zdjęcie',
-    layoutGrid: 'Siatka 2–9',
-    summary: 'Podsumowanie reklamy',
-    total: 'Razem',
-    continueToPayment: 'Przejdź do płatności',
-    done: 'Gotowe',
-    enterCategory: 'Wybierz kategorię',
-    enterSubcategory: 'Wybierz podkategorię',
-    enterTitle: 'Wpisz tytuł reklamy',
-    enterDescription: 'Wpisz opis reklamy',
-    addPhotoAlert: 'Dodaj co najmniej jedno zdjęcie',
-    close: 'Zamknij',
-    paymentHint: 'Publikacja będzie aktywna dopiero po płatności.',
-    firstAdBonus: 'Pierwsza reklama może być darmowa na 7 dni dla nowych użytkowników',
-    removePhoto: 'Usuń',
-    photosCount: 'Zdjęcia',
-    adjustPhoto: 'Dopasuj zdjęcie',
-    photoEditorHint: 'Przesuwaj jednym palcem. Powiększaj suwakiem.',
-    resetPhoto: 'Resetuj',
-    applyPhoto: 'Zastosuj',
-    cancel: 'Anuluj',
-    miniVideo: 'Mini video',
-    miniVideoHint: 'Opcjonalnie. Dodaj 1 krótkie zapętlone video do 5 sekund.',
-    addMiniVideo: 'Dodaj mini video',
-    replaceMiniVideo: 'Zamień video',
-    miniVideoAdded: 'Mini video dodane',
-    removeMiniVideo: 'Usuń video',
-    videoTooLong: 'Mini video musi mieć maksymalnie 5 sekund',
-    invalidVideo: 'Wybierz poprawny plik video',
-  },
-  UA: {} as PromotionTexts,
-  IT: {} as PromotionTexts,
-  FR: {} as PromotionTexts,
-  AR: {} as PromotionTexts,
+  ES: baseEn,
+  CZ: baseEn,
+  DE: baseEn,
+  PL: baseEn,
+  UA: baseEn,
+  IT: baseEn,
+  FR: baseEn,
+  AR: baseEn,
 };
-
-(['UA', 'IT', 'FR', 'AR'] as AppLanguage[]).forEach((lang) => {
-  textByLanguage[lang] = textByLanguage.EN;
-});
 
 const radiusOptionsByLanguage: Record<AppLanguage, RadiusOption[]> = {
   EN: [
@@ -507,15 +301,27 @@ const radiusOptionsByLanguage: Record<AppLanguage, RadiusOption[]> = {
     { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
     { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
   ],
-  UA: [] as RadiusOption[],
-  IT: [] as RadiusOption[],
-  FR: [] as RadiusOption[],
-  AR: [] as RadiusOption[],
+  UA: [
+    { id: '10', label: '10 km', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
+    { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
+    { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
+  ],
+  IT: [
+    { id: '10', label: '10 km', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
+    { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
+    { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
+  ],
+  FR: [
+    { id: '10', label: '10 km', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
+    { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
+    { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
+  ],
+  AR: [
+    { id: '10', label: '10 km', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
+    { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
+    { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
+  ],
 };
-
-(['UA', 'IT', 'FR', 'AR'] as AppLanguage[]).forEach((lang) => {
-  radiusOptionsByLanguage[lang] = radiusOptionsByLanguage.EN;
-});
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -525,12 +331,20 @@ function getSafeScale(value: number) {
   return clamp(Number.isFinite(value) ? value : 1, MIN_SCALE, MAX_SCALE);
 }
 
+function getBadgeText(badge: BadgePreset, text: PromotionTexts) {
+  if (badge === 'discount') return text.badgeDiscount;
+  if (badge === 'top') return text.badgeTop;
+  if (badge === 'new') return text.badgeNew;
+  return '';
+}
+
 export default function NewPromotionPage() {
   const router = useRouter();
 
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const filesInputRef = useRef<HTMLInputElement | null>(null);
+
   const galleryVideoInputRef = useRef<HTMLInputElement | null>(null);
   const cameraVideoInputRef = useRef<HTMLInputElement | null>(null);
   const filesVideoInputRef = useRef<HTMLInputElement | null>(null);
@@ -540,7 +354,7 @@ export default function NewPromotionPage() {
   const [subcategory, setSubcategory] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [discountText, setDiscountText] = useState('');
+  const [badgePreset, setBadgePreset] = useState<BadgePreset>('none');
   const [days, setDays] = useState(10);
   const [radius, setRadius] = useState<RadiusOption['id']>('10');
   const [layout, setLayout] = useState<PhotoLayout>('single');
@@ -554,6 +368,7 @@ export default function NewPromotionPage() {
   const [editorScale, setEditorScale] = useState(1);
   const [editorOffsetX, setEditorOffsetX] = useState(0);
   const [editorOffsetY, setEditorOffsetY] = useState(0);
+
   const dragRef = useRef<{
     pointerId: number | null;
     startX: number;
@@ -570,11 +385,9 @@ export default function NewPromotionPage() {
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
-
     const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
-
     return () => {
       unsubLanguage();
     };
@@ -583,14 +396,9 @@ export default function NewPromotionPage() {
   useEffect(() => {
     return () => {
       photos.forEach((photo) => {
-        if (photo.preview) {
-          URL.revokeObjectURL(photo.preview);
-        }
+        if (photo.preview) URL.revokeObjectURL(photo.preview);
       });
-
-      if (miniVideo?.preview) {
-        URL.revokeObjectURL(miniVideo.preview);
-      }
+      if (miniVideo?.preview) URL.revokeObjectURL(miniVideo.preview);
     };
   }, [photos, miniVideo]);
 
@@ -600,9 +408,7 @@ export default function NewPromotionPage() {
   const selectedRadius =
     radiusOptions.find((item) => item.id === radius) || radiusOptions[0];
 
-  const currentCategory =
-    categories.find((item) => item.id === categoryId) || null;
-
+  const currentCategory = categories.find((item) => item.id === categoryId) || null;
   const subcategoryOptions = currentCategory?.subcategories || [];
 
   const totalPrice = useMemo(
@@ -614,6 +420,8 @@ export default function NewPromotionPage() {
     () => photos.find((photo) => photo.id === editorPhotoId) || null,
     [photos, editorPhotoId]
   );
+
+  const badgeText = getBadgeText(badgePreset, text);
 
   const openEditor = (photoId: string) => {
     const current = photos.find((photo) => photo.id === photoId);
@@ -686,9 +494,29 @@ export default function NewPromotionPage() {
     dragRef.current.pointerId = null;
   };
 
+  const clearAllPhotos = () => {
+    setPhotos((prev) => {
+      prev.forEach((photo) => {
+        if (photo.preview) URL.revokeObjectURL(photo.preview);
+      });
+      return [];
+    });
+  };
+
+  const clearMiniVideo = () => {
+    setMiniVideo((prev) => {
+      if (prev?.preview) URL.revokeObjectURL(prev.preview);
+      return null;
+    });
+  };
+
   const handleFilesSelected = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
+
+    if (miniVideo) {
+      clearMiniVideo();
+    }
 
     const remainingSlots = Math.max(0, 9 - photos.length);
     const selected = files.slice(0, remainingSlots);
@@ -715,6 +543,10 @@ export default function NewPromotionPage() {
       alert(text.invalidVideo);
       event.target.value = '';
       return;
+    }
+
+    if (photos.length > 0) {
+      clearAllPhotos();
     }
 
     const preview = URL.createObjectURL(file);
@@ -753,9 +585,7 @@ export default function NewPromotionPage() {
   const handleRemovePhoto = (id: string) => {
     setPhotos((prev) => {
       const found = prev.find((photo) => photo.id === id);
-      if (found?.preview) {
-        URL.revokeObjectURL(found.preview);
-      }
+      if (found?.preview) URL.revokeObjectURL(found.preview);
       return prev.filter((photo) => photo.id !== id);
     });
 
@@ -792,8 +622,8 @@ export default function NewPromotionPage() {
       return;
     }
 
-    if (photos.length === 0) {
-      alert(text.addPhotoAlert);
+    if (photos.length === 0 && !miniVideo) {
+      alert(text.addMediaAlert);
       return;
     }
 
@@ -884,7 +714,7 @@ export default function NewPromotionPage() {
                 marginBottom: 8,
               }}
             >
-              {text.photo} <span style={{ color: '#ef4444' }}>*</span>
+              {text.photo}
             </div>
 
             <div
@@ -893,10 +723,22 @@ export default function NewPromotionPage() {
                 lineHeight: 1.5,
                 color: '#7b7268',
                 fontWeight: 700,
-                marginBottom: 14,
+                marginBottom: 10,
               }}
             >
               {text.photoHint}
+            </div>
+
+            <div
+              style={{
+                fontSize: 13,
+                lineHeight: 1.45,
+                color: '#2f7cf6',
+                fontWeight: 800,
+                marginBottom: 14,
+              }}
+            >
+              {text.mediaRule}
             </div>
 
             <div
@@ -997,7 +839,9 @@ export default function NewPromotionPage() {
                 alignItems: 'center',
                 cursor: 'pointer',
                 textAlign: 'left',
+                opacity: miniVideo ? 0.55 : 1,
               }}
+              disabled={!!miniVideo}
             >
               <div
                 style={{
@@ -1223,10 +1067,22 @@ export default function NewPromotionPage() {
                 lineHeight: 1.5,
                 color: '#7b7268',
                 fontWeight: 700,
-                marginBottom: 14,
+                marginBottom: 10,
               }}
             >
               {text.miniVideoHint}
+            </div>
+
+            <div
+              style={{
+                fontSize: 13,
+                lineHeight: 1.45,
+                color: '#2f7cf6',
+                fontWeight: 800,
+                marginBottom: 14,
+              }}
+            >
+              {text.mediaRule}
             </div>
 
             <input
@@ -1271,7 +1127,9 @@ export default function NewPromotionPage() {
                   alignItems: 'center',
                   cursor: 'pointer',
                   textAlign: 'left',
+                  opacity: photos.length > 0 ? 0.55 : 1,
                 }}
+                disabled={photos.length > 0}
               >
                 <div
                   style={{
@@ -1591,29 +1449,269 @@ export default function NewPromotionPage() {
                 fontSize: 18,
                 fontWeight: 900,
                 color: '#17130f',
-                marginBottom: 12,
+                marginBottom: 10,
               }}
             >
               {text.badgeText}
             </div>
 
-            <input
-              value={discountText}
-              onChange={(e) => setDiscountText(e.target.value)}
-              placeholder={text.badgePlaceholder}
+            <div
               style={{
-                width: '100%',
-                height: 58,
-                borderRadius: 18,
-                border: '1.5px solid #111111',
-                background: '#fff',
-                padding: '0 16px',
-                fontSize: 16,
-                color: '#17130f',
-                outline: 'none',
-                boxSizing: 'border-box',
+                fontSize: 14,
+                lineHeight: 1.45,
+                color: '#7b7268',
+                fontWeight: 700,
+                marginBottom: 12,
               }}
-            />
+            >
+              {text.badgeHint}
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: 10,
+              }}
+            >
+              {[
+                { id: 'none' as BadgePreset, label: text.badgeNone },
+                { id: 'discount' as BadgePreset, label: text.badgeDiscount },
+                { id: 'top' as BadgePreset, label: text.badgeTop },
+                { id: 'new' as BadgePreset, label: text.badgeNew },
+              ].map((item) => {
+                const active = badgePreset === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setBadgePreset(item.id)}
+                    style={{
+                      minHeight: 52,
+                      borderRadius: 16,
+                      border: '2px solid #111111',
+                      background: active ? '#17130f' : '#fff',
+                      color: active ? '#fff' : '#17130f',
+                      fontSize: 15,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 18,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 8,
+              }}
+            >
+              {text.preview}
+            </div>
+
+            <div
+              style={{
+                fontSize: 14,
+                lineHeight: 1.5,
+                color: '#7b7268',
+                fontWeight: 700,
+                marginBottom: 14,
+              }}
+            >
+              {text.previewHint}
+            </div>
+
+            <div
+              style={{
+                borderRadius: 24,
+                border: '2px solid #111111',
+                overflow: 'hidden',
+                background: '#fff',
+              }}
+            >
+              <div
+                style={{
+                  position: 'relative',
+                  height: 220,
+                  background: '#f2eee7',
+                }}
+              >
+                {miniVideo ? (
+                  <video
+                    src={miniVideo.preview}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
+                  />
+                ) : photos.length > 0 ? (
+                  <img
+                    src={photos[0].preview}
+                    alt={title || 'preview'}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                      transform: `translate(${photos[0].offsetX}px, ${photos[0].offsetY}px) scale(${photos[0].scale})`,
+                      transformOrigin: 'center center',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#9a9287',
+                      fontSize: 16,
+                      fontWeight: 800,
+                    }}
+                  >
+                    {text.preview}
+                  </div>
+                )}
+
+                {badgeText ? (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 12,
+                      left: 12,
+                      borderRadius: 999,
+                      border: '1.5px solid #111111',
+                      background: '#ffe44d',
+                      color: '#17130f',
+                      padding: '8px 12px',
+                      fontSize: 13,
+                      fontWeight: 900,
+                    }}
+                  >
+                    {badgeText}
+                  </div>
+                ) : null}
+
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 12,
+                    bottom: 12,
+                    borderRadius: 999,
+                    border: '1.5px solid #111111',
+                    background: '#ffffff',
+                    color: '#17130f',
+                    padding: '7px 10px',
+                    fontSize: 12,
+                    fontWeight: 900,
+                  }}
+                >
+                  {miniVideo ? text.mediaTypeVideo : text.mediaTypePhoto}
+                </div>
+              </div>
+
+              <div style={{ padding: 14 }}>
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    lineHeight: 1.25,
+                  }}
+                >
+                  {title.trim() || text.titlePlaceholder}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 14,
+                    color: '#6f675f',
+                    fontWeight: 700,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {description.trim() || text.descriptionPlaceholder}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 12,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 8,
+                  }}
+                >
+                  {currentCategory?.label ? (
+                    <span
+                      style={{
+                        borderRadius: 999,
+                        border: '1.5px solid #111111',
+                        background: '#fff',
+                        padding: '7px 10px',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        color: '#17130f',
+                      }}
+                    >
+                      {currentCategory.label}
+                    </span>
+                  ) : null}
+
+                  {subcategory ? (
+                    <span
+                      style={{
+                        borderRadius: 999,
+                        border: '1.5px solid #111111',
+                        background: '#fff',
+                        padding: '7px 10px',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        color: '#17130f',
+                      }}
+                    >
+                      {subcategory}
+                    </span>
+                  ) : null}
+
+                  <span
+                    style={{
+                      borderRadius: 999,
+                      border: '1.5px solid #111111',
+                      background: selectedRadius.bg,
+                      color: selectedRadius.color,
+                      padding: '7px 10px',
+                      fontSize: 12,
+                      fontWeight: 900,
+                    }}
+                  >
+                    {selectedRadius.label}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div
@@ -1846,27 +1944,14 @@ export default function NewPromotionPage() {
                 color: '#17130f',
               }}
             >
-              <div>
-                {text.category}: {currentCategory?.label || '—'}
-              </div>
-              <div>
-                {text.subcategory}: {subcategory || '—'}
-              </div>
-              <div>
-                {text.radius}: {selectedRadius.label}
-              </div>
-              <div>
-                {text.duration}: {days}
-              </div>
-              <div>
-                £{selectedRadius.pricePerDay} / {text.perDay}
-              </div>
-              <div>
-                {text.photosCount}: {photos.length}
-              </div>
-              <div>
-                {text.miniVideo}: {miniVideo ? '1' : '0'}
-              </div>
+              <div>{text.category}: {currentCategory?.label || '—'}</div>
+              <div>{text.subcategory}: {subcategory || '—'}</div>
+              <div>{text.radius}: {selectedRadius.label}</div>
+              <div>{text.duration}: {days}</div>
+              <div>£{selectedRadius.pricePerDay} / {text.perDay}</div>
+              <div>{text.photosCount}: {photos.length}</div>
+              <div>{text.miniVideo}: {miniVideo ? '1' : '0'}</div>
+              <div>{text.badgeText}: {badgeText || text.badgeNone}</div>
               <div
                 style={{
                   color: selectedRadius.color,
