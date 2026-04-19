@@ -15,15 +15,9 @@ import {
   type AppLanguage,
 } from '../../../../services/i18n';
 import { categories } from '../../../../services/categories';
-
-type PaymentMethod = {
-  id: string;
-  title: string;
-  subtitle: string;
-  icon: string;
-  accentBg: string;
-  accentColor: string;
-};
+import PaymentMethodSheet, {
+  type PaymentSheetMethod,
+} from '../../../../components/payments/PaymentMethodSheet';
 
 type DealTexts = {
   pageTitle: string;
@@ -114,7 +108,7 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
     files: 'Files',
     totalToPay: 'Total to pay',
     choosePaymentMethod: 'Choose payment method',
-    paymentMethodsHint: 'All MapBook payment methods are available',
+    paymentMethodsHint: 'Select how you want to pay',
     selected: 'Selected',
     cancel: 'Cancel',
     pay: 'Pay',
@@ -165,7 +159,7 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
     files: 'Файлы',
     totalToPay: 'Итого к оплате',
     choosePaymentMethod: 'Выберите способ оплаты',
-    paymentMethodsHint: 'Доступны все способы оплаты MapBook',
+    paymentMethodsHint: 'Выберите, как хотите оплатить',
     selected: 'Выбрано',
     cancel: 'Отмена',
     pay: 'Оплатить',
@@ -216,7 +210,7 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
     files: 'Archivos',
     totalToPay: 'Total a pagar',
     choosePaymentMethod: 'Elige método de pago',
-    paymentMethodsHint: 'Todos los métodos de pago de MapBook están disponibles',
+    paymentMethodsHint: 'Selecciona cómo quieres pagar',
     selected: 'Seleccionado',
     cancel: 'Cancelar',
     pay: 'Pagar',
@@ -267,7 +261,7 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
     files: 'Soubory',
     totalToPay: 'Celkem k platbě',
     choosePaymentMethod: 'Vyberte způsob platby',
-    paymentMethodsHint: 'K dispozici jsou všechny platební metody MapBook',
+    paymentMethodsHint: 'Vyberte, jak chcete zaplatit',
     selected: 'Vybráno',
     cancel: 'Zrušit',
     pay: 'Zaplatit',
@@ -318,7 +312,7 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
     files: 'Dateien',
     totalToPay: 'Gesamtbetrag',
     choosePaymentMethod: 'Zahlungsmethode wählen',
-    paymentMethodsHint: 'Alle MapBook-Zahlungsmethoden sind verfügbar',
+    paymentMethodsHint: 'Wählen Sie, wie Sie bezahlen möchten',
     selected: 'Ausgewählt',
     cancel: 'Abbrechen',
     pay: 'Bezahlen',
@@ -369,7 +363,7 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
     files: 'Pliki',
     totalToPay: 'Razem do zapłaty',
     choosePaymentMethod: 'Wybierz metodę płatności',
-    paymentMethodsHint: 'Dostępne są wszystkie metody płatności MapBook',
+    paymentMethodsHint: 'Wybierz, jak chcesz zapłacić',
     selected: 'Wybrano',
     cancel: 'Anuluj',
     pay: 'Zapłać',
@@ -405,7 +399,7 @@ const textByLanguage: Record<AppLanguage, DealTexts> = {
   textByLanguage[lang] = textByLanguage.EN;
 });
 
-const paymentMethodsByLanguage: Record<AppLanguage, PaymentMethod[]> = {
+const paymentMethodsByLanguage: Record<AppLanguage, PaymentSheetMethod[]> = {
   EN: [
     { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳', accentBg: '#edf4ff', accentColor: '#2f7cf6' },
     { id: 'paypal', title: 'PayPal', subtitle: 'Fast payment', icon: '🅿️', accentBg: '#eef5ff', accentColor: '#2563eb' },
@@ -460,10 +454,10 @@ const paymentMethodsByLanguage: Record<AppLanguage, PaymentMethod[]> = {
     { id: 'crypto', title: 'Portfel krypto', subtitle: 'USDT / USDC', icon: '₿', accentBg: '#fff6e8', accentColor: '#d68612' },
     { id: 'bank', title: 'Przelew bankowy', subtitle: 'Przelew ręczny', icon: '🏦', accentBg: '#f3efff', accentColor: '#7a5af8' },
   ],
-  UA: [] as PaymentMethod[],
-  IT: [] as PaymentMethod[],
-  FR: [] as PaymentMethod[],
-  AR: [] as PaymentMethod[],
+  UA: [] as PaymentSheetMethod[],
+  IT: [] as PaymentSheetMethod[],
+  FR: [] as PaymentSheetMethod[],
+  AR: [] as PaymentSheetMethod[],
 };
 
 (['UA', 'IT', 'FR', 'AR'] as AppLanguage[]).forEach((lang) => {
@@ -552,7 +546,6 @@ export default function NewDealPage() {
   const paymentMethods = paymentMethodsByLanguage[language] || paymentMethodsByLanguage.EN;
   const totalPrice = useMemo(() => days * 1, [days]);
   const daysOptions = Array.from({ length: 100 }, (_, index) => index + 1);
-  const selectedPaymentData = paymentMethods.find((item) => item.id === selectedPayment);
   const currentCategory = categories.find((item) => item.id === categoryId) || null;
   const subcategoryOptions = currentCategory?.subcategories || [];
 
@@ -1828,244 +1821,23 @@ export default function NewDealPage() {
         </div>
       ) : null}
 
-      {showPaymentSheet ? (
-        <div
-          onClick={() => setShowPaymentSheet(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(17,17,17,0.38)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-            padding: 12,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              borderRadius: 28,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
-              maxHeight: '86vh',
-              overflowY: 'auto',
-            }}
-          >
-            <div
-              style={{
-                textAlign: 'center',
-                fontSize: 24,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.choosePaymentMethod}
-            </div>
-
-            <div
-              style={{
-                marginTop: 8,
-                textAlign: 'center',
-                fontSize: 14,
-                color: '#7b7268',
-                fontWeight: 700,
-                lineHeight: 1.5,
-              }}
-            >
-              {text.paymentMethodsHint}
-            </div>
-
-            <div
-              style={{
-                marginTop: 16,
-                borderRadius: 20,
-                border: '2px solid #111111',
-                background: '#f8fbff',
-                padding: '14px 16px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 12,
-                alignItems: 'center',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 16,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.totalToPay}
-              </div>
-
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 900,
-                  color: '#2f8c67',
-                }}
-              >
-                £{totalPrice}
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 16,
-                display: 'grid',
-                gap: 12,
-              }}
-            >
-              {paymentMethods.map((method) => {
-                const active = selectedPayment === method.id;
-
-                return (
-                  <button
-                    key={method.id}
-                    type="button"
-                    onClick={() => setSelectedPayment(method.id)}
-                    style={{
-                      width: '100%',
-                      borderRadius: 22,
-                      border: '2px solid #111111',
-                      background: active ? '#fcfaf6' : '#fff',
-                      padding: 14,
-                      display: 'grid',
-                      gridTemplateColumns: '54px 1fr auto',
-                      gap: 12,
-                      alignItems: 'center',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 54,
-                        height: 54,
-                        borderRadius: 18,
-                        background: method.accentBg,
-                        color: method.accentColor,
-                        border: '2px solid #111111',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 24,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {method.icon}
-                    </div>
-
-                    <div>
-                      <div
-                        style={{
-                          fontSize: 16,
-                          fontWeight: 900,
-                          color: '#17130f',
-                        }}
-                      >
-                        {method.title}
-                      </div>
-
-                      <div
-                        style={{
-                          marginTop: 4,
-                          fontSize: 13,
-                          lineHeight: 1.45,
-                          color: '#7b7268',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {method.subtitle}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: 999,
-                        border: '2px solid #111111',
-                        background: active ? '#2f8c67' : '#fff',
-                        color: '#fff',
-                        fontSize: 14,
-                        fontWeight: 900,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      {active ? '✓' : ''}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div
-              style={{
-                marginTop: 16,
-                borderRadius: 20,
-                border: '2px solid #111111',
-                background: selectedPaymentData?.accentBg || '#edf4ff',
-                padding: '14px 16px',
-                fontSize: 14,
-                color: selectedPaymentData?.accentColor || '#2f7cf6',
-                fontWeight: 900,
-              }}
-            >
-              {text.selected}: {selectedPaymentData?.title}
-            </div>
-
-            <div
-              style={{
-                marginTop: 16,
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setShowPaymentSheet(false)}
-                style={{
-                  height: 54,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#fff',
-                  color: '#17130f',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.cancel}
-              </button>
-
-              <button
-                type="button"
-                onClick={handlePay}
-                style={{
-                  height: 54,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#2f8c67',
-                  color: '#fff',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.pay} £{totalPrice}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <PaymentMethodSheet
+        open={showPaymentSheet}
+        amount={totalPrice}
+        methods={paymentMethods}
+        selectedMethodId={selectedPayment}
+        texts={{
+          title: text.choosePaymentMethod,
+          subtitle: text.paymentMethodsHint,
+          total: text.totalToPay,
+          selected: text.selected,
+          cancel: text.cancel,
+          pay: text.pay,
+        }}
+        onClose={() => setShowPaymentSheet(false)}
+        onSelect={setSelectedPayment}
+        onPay={handlePay}
+      />
     </>
   );
 }
