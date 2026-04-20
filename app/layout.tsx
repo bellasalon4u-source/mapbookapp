@@ -1,8 +1,8 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'MapBook',
-  description: 'MapBook service booking map app',
+  title: 'Olamep',
+  description: 'Olamep — Explore services around you',
 };
 
 export default function RootLayout({
