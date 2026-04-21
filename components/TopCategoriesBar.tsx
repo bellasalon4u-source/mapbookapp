@@ -328,10 +328,6 @@ export default function TopCategoriesBar({
       .filter(Boolean) as typeof categories;
   }, []);
 
-  const allOtherCategories = useMemo(() => {
-    return categories.filter((item) => !horizontalOrder.includes(item.id));
-  }, []);
-
   const expanded = categories.find((item) => item.id === expandedCategory);
 
   const overlay =
@@ -361,7 +357,7 @@ export default function TopCategoriesBar({
                   position: 'absolute',
                   left: 10,
                   right: 10,
-                  top: 14,
+                  top: 12,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -375,7 +371,7 @@ export default function TopCategoriesBar({
                 <div>
                   <div
                     style={{
-                      fontSize: 21,
+                      fontSize: 20,
                       fontWeight: 900,
                       color: '#17130f',
                       lineHeight: 1.1,
@@ -399,12 +395,12 @@ export default function TopCategoriesBar({
                   type="button"
                   onClick={() => setMenuOpen(false)}
                   style={{
-                    width: 42,
-                    height: 42,
+                    width: 40,
+                    height: 40,
                     borderRadius: 999,
                     border: '2px solid #111111',
                     background: '#ffffff',
-                    fontSize: 22,
+                    fontSize: 20,
                     cursor: 'pointer',
                     flexShrink: 0,
                     color: '#17130f',
@@ -420,7 +416,7 @@ export default function TopCategoriesBar({
                   position: 'absolute',
                   left: 10,
                   right: 10,
-                  top: 104,
+                  top: 96,
                   bottom: 14,
                   display: 'grid',
                   gridTemplateColumns: '36% 64%',
@@ -434,7 +430,7 @@ export default function TopCategoriesBar({
                     background: '#ffffff',
                     borderRadius: 22,
                     border: '2px solid #111111',
-                    padding: 10,
+                    padding: 8,
                     overflowY: 'auto',
                     overflowX: 'hidden',
                   }}
@@ -444,7 +440,7 @@ export default function TopCategoriesBar({
                       fontSize: 12,
                       fontWeight: 900,
                       color: '#17130f',
-                      marginBottom: 10,
+                      marginBottom: 8,
                       paddingLeft: 4,
                     }}
                   >
@@ -455,7 +451,7 @@ export default function TopCategoriesBar({
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: 8,
+                      gap: 7,
                       paddingBottom: 4,
                     }}
                   >
@@ -478,12 +474,12 @@ export default function TopCategoriesBar({
                             cursor: 'pointer',
                             textAlign: 'left',
                             borderRadius: 14,
-                            padding: '8px 7px',
+                            padding: '7px 7px',
                             background: active ? '#f8f8f8' : '#ffffff',
                             boxShadow: active ? `inset 0 0 0 2px ${color}` : 'none',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 8,
+                            gap: 7,
                             fontWeight: 800,
                             fontSize: 11,
                             minWidth: 0,
@@ -491,9 +487,9 @@ export default function TopCategoriesBar({
                         >
                           <div
                             style={{
-                              width: 30,
-                              height: 30,
-                              borderRadius: 9,
+                              width: 28,
+                              height: 28,
+                              borderRadius: 8,
                               overflow: 'hidden',
                               flexShrink: 0,
                               background: '#fff',
@@ -592,57 +588,6 @@ export default function TopCategoriesBar({
                       })}
                     </div>
                   ) : null}
-
-                  {allOtherCategories.length > 0 ? (
-                    <>
-                      <div
-                        style={{
-                          marginTop: 16,
-                          fontSize: 11,
-                          fontWeight: 800,
-                          color: '#6a7480',
-                        }}
-                      >
-                        {tr.extraCategories}
-                      </div>
-
-                      <div
-                        style={{
-                          marginTop: 10,
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: 8,
-                          paddingBottom: 4,
-                        }}
-                      >
-                        {allOtherCategories.map((item) => {
-                          return (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => {
-                                setExpandedCategory(item.id);
-                                onSelectCategory(item.id);
-                                onClearSubcategory();
-                              }}
-                              style={{
-                                border: '1.5px solid #111111',
-                                background: '#ffffff',
-                                color: '#17130f',
-                                borderRadius: 999,
-                                padding: '7px 10px',
-                                fontSize: 11,
-                                fontWeight: 900,
-                                cursor: 'pointer',
-                              }}
-                            >
-                              {translateCategoryLabel(item.id, language, item.shortLabel || item.label)}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </>
-                  ) : null}
                 </div>
               </div>
             </div>
@@ -662,7 +607,7 @@ export default function TopCategoriesBar({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '54px 1fr',
+          gridTemplateColumns: '50px 1fr',
           gap: 8,
           padding: '0 8px 2px',
           alignItems: 'start',
@@ -685,19 +630,19 @@ export default function TopCategoriesBar({
               border: 'none',
               background: 'transparent',
               padding: 0,
-              width: 48,
+              width: 44,
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 5,
+              gap: 4,
             }}
           >
             <div
               style={{
-                width: 46,
-                height: 60,
-                borderRadius: 16,
+                width: 44,
+                height: 56,
+                borderRadius: 15,
                 background: '#ffffff',
                 boxShadow: '0 3px 10px rgba(0,0,0,0.05)',
                 border: '1.5px solid #111111',
@@ -775,15 +720,15 @@ export default function TopCategoriesBar({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 5,
-                    minWidth: 62,
+                    gap: 4,
+                    minWidth: 58,
                     flexShrink: 0,
                   }}
                 >
                   <div
                     style={{
-                      width: 60,
-                      height: 60,
+                      width: 56,
+                      height: 56,
                       borderRadius: 16,
                       background: '#ffffff',
                       border: '1.5px solid #111111',
