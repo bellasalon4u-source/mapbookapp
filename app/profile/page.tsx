@@ -343,25 +343,25 @@ function accentStyles(accent: ProfileCard['accent']) {
 }
 
 const greenActionButtonStyle = {
-  minHeight: 54,
-  borderRadius: 999,
+  minHeight: 50,
+  borderRadius: 18,
   border: '2px solid #111111',
   background: '#31b44b',
   color: '#fff',
-  padding: '0 20px',
-  fontSize: 14,
+  padding: '0 16px',
+  fontSize: 13,
   fontWeight: 900,
   cursor: 'pointer',
   boxShadow: '0 2px 0 rgba(0,0,0,0.08)',
 } as const;
 
 const yellowTopUpButtonStyle = {
-  minHeight: 54,
-  borderRadius: 999,
+  minHeight: 50,
+  borderRadius: 18,
   border: '2px solid #111111',
   background: '#f4d84b',
   color: '#17130f',
-  padding: '0 16px',
+  padding: '0 14px',
   fontSize: 13,
   fontWeight: 900,
   cursor: 'pointer',
@@ -477,18 +477,25 @@ export default function ProfilePage() {
 
   const preferenceCards: ProfileCard[] = [
     {
-      id: 'languageRegion',
-      title: text.languageRegion,
-      route: '/profile/language-region',
-      icon: '🌍',
-      accent: 'green',
-    },
-    {
       id: 'settings',
       title: text.settings,
       route: '/profile/settings',
       icon: '⚙️',
       accent: 'neutral',
+    },
+    {
+      id: 'payments',
+      title: text.payments,
+      route: '/profile/payments',
+      icon: '💳',
+      accent: 'blue',
+    },
+    {
+      id: 'notifications',
+      title: text.notifications,
+      route: '/profile/notifications',
+      icon: '🔔',
+      accent: 'orange',
     },
     {
       id: 'legal',
@@ -504,6 +511,13 @@ export default function ProfilePage() {
       icon: '💬',
       accent: 'pink',
     },
+    {
+      id: 'languageRegion',
+      title: text.languageRegion,
+      route: '/profile/language-region',
+      icon: '🌍',
+      accent: 'green',
+    },
   ];
 
   return (
@@ -516,13 +530,13 @@ export default function ProfilePage() {
         fontFamily: 'Arial, sans-serif',
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto', padding: '20px 16px 110px' }}>
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '16px 14px 110px' }}>
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr',
-            gap: 12,
-            marginBottom: 18,
+            gap: 10,
+            marginBottom: 16,
           }}
         >
           <div>
@@ -539,7 +553,7 @@ export default function ProfilePage() {
 
             <div
               style={{
-                marginTop: 6,
+                marginTop: 5,
                 fontSize: 13,
                 color: '#7b7268',
                 fontWeight: 700,
@@ -570,7 +584,7 @@ export default function ProfilePage() {
               onClick={() => router.push('/profile/top-up')}
               style={yellowTopUpButtonStyle}
             >
-              <span style={{ fontSize: 18, lineHeight: 1 }}>🏦</span>
+              <span style={{ fontSize: 17, lineHeight: 1 }}>🏦</span>
               <span>{text.quickTopUp}</span>
             </button>
           </div>
@@ -579,26 +593,26 @@ export default function ProfilePage() {
         <section>
           <div
             style={{
-              borderRadius: 30,
+              borderRadius: 28,
               border: '2px solid #111111',
               background: '#fff',
-              padding: 18,
+              padding: 14,
             }}
           >
             <div
               style={{
                 borderRadius: 24,
                 border: '2px solid #111111',
-                background: '#2f241c',
-                color: '#fff',
-                padding: 18,
+                background: '#ffffff',
+                color: '#17130f',
+                padding: 14,
               }}
             >
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '84px 1fr',
-                  gap: 14,
+                  gridTemplateColumns: '72px 1fr',
+                  gap: 12,
                   alignItems: 'center',
                 }}
               >
@@ -606,9 +620,9 @@ export default function ProfilePage() {
                   src={profile.avatar}
                   alt={profile.fullName}
                   style={{
-                    width: 84,
-                    height: 84,
-                    borderRadius: 24,
+                    width: 72,
+                    height: 72,
+                    borderRadius: 20,
                     objectFit: 'cover',
                     display: 'block',
                     border: '2px solid #111111',
@@ -619,9 +633,9 @@ export default function ProfilePage() {
                 <div style={{ minWidth: 0 }}>
                   <div
                     style={{
-                      fontSize: 22,
+                      fontSize: 19,
                       fontWeight: 900,
-                      color: '#fff',
+                      color: '#17130f',
                       lineHeight: 1.1,
                       wordBreak: 'break-word',
                     }}
@@ -631,9 +645,9 @@ export default function ProfilePage() {
 
                   <div
                     style={{
-                      marginTop: 6,
-                      fontSize: 14,
-                      color: '#ddd2c6',
+                      marginTop: 5,
+                      fontSize: 13,
+                      color: '#7b7268',
                       fontWeight: 700,
                       wordBreak: 'break-word',
                     }}
@@ -643,7 +657,7 @@ export default function ProfilePage() {
 
                   <div
                     style={{
-                      marginTop: 10,
+                      marginTop: 8,
                       display: 'flex',
                       flexWrap: 'wrap',
                       gap: 8,
@@ -652,11 +666,11 @@ export default function ProfilePage() {
                     <span
                       style={{
                         borderRadius: 999,
-                        padding: '8px 12px',
+                        padding: '7px 10px',
                         border: '2px solid #111111',
                         background: '#ecfdf3',
                         color: '#15803d',
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: 900,
                       }}
                     >
@@ -667,11 +681,11 @@ export default function ProfilePage() {
                       <span
                         style={{
                           borderRadius: 999,
-                          padding: '8px 12px',
+                          padding: '7px 10px',
                           border: '2px solid #111111',
                           background: '#eef4ff',
                           color: '#2563eb',
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: 900,
                         }}
                       >
@@ -684,18 +698,18 @@ export default function ProfilePage() {
 
               <div
                 style={{
-                  marginTop: 16,
+                  marginTop: 12,
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
-                  gap: 12,
+                  gap: 10,
                   alignItems: 'end',
                 }}
               >
                 <div>
                   <div
                     style={{
-                      fontSize: 12,
-                      color: '#d9cdbd',
+                      fontSize: 11,
+                      color: '#7b7268',
                       fontWeight: 800,
                     }}
                   >
@@ -704,11 +718,11 @@ export default function ProfilePage() {
 
                   <div
                     style={{
-                      marginTop: 8,
-                      fontSize: 32,
+                      marginTop: 6,
+                      fontSize: 26,
                       fontWeight: 900,
                       lineHeight: 1,
-                      color: '#fff',
+                      color: '#17130f',
                     }}
                   >
                     £{wallet.availableBalance.toFixed(2)}
@@ -717,15 +731,15 @@ export default function ProfilePage() {
 
                 <div
                   style={{
-                    minHeight: 38,
+                    minHeight: 36,
                     padding: '0 12px',
                     borderRadius: 999,
                     border: '2px solid #111111',
-                    background: '#fff',
+                    background: '#f4d84b',
                     color: '#17130f',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: 900,
                     whiteSpace: 'nowrap',
                   }}
@@ -737,13 +751,13 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        <section style={{ marginTop: 18 }}>
+        <section style={{ marginTop: 16 }}>
           <div
             style={{
               fontSize: 18,
               fontWeight: 900,
               color: '#17130f',
-              marginBottom: 12,
+              marginBottom: 10,
             }}
           >
             {text.quickActions}
@@ -753,7 +767,7 @@ export default function ProfilePage() {
             style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
-              gap: 12,
+              gap: 10,
             }}
           >
             {quickCards.map((card) => {
@@ -766,24 +780,24 @@ export default function ProfilePage() {
                   onClick={() => router.push(card.route)}
                   style={{
                     border: '2px solid #111111',
-                    borderRadius: 28,
+                    borderRadius: 22,
                     background: '#fff',
-                    padding: 16,
+                    padding: 12,
                     textAlign: 'left',
                     cursor: 'pointer',
-                    minHeight: 150,
+                    minHeight: 118,
                   }}
                 >
                   <div
                     style={{
-                      width: 50,
-                      height: 50,
-                      borderRadius: 18,
+                      width: 42,
+                      height: 42,
+                      borderRadius: 14,
                       border: '2px solid #111111',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 22,
+                      fontSize: 19,
                       background: accent.background,
                       color: accent.color,
                     }}
@@ -793,11 +807,11 @@ export default function ProfilePage() {
 
                   <div
                     style={{
-                      marginTop: 14,
-                      fontSize: 15,
+                      marginTop: 10,
+                      fontSize: 14,
                       fontWeight: 900,
                       color: '#17130f',
-                      lineHeight: 1.25,
+                      lineHeight: 1.2,
                     }}
                   >
                     {card.title}
@@ -806,11 +820,11 @@ export default function ProfilePage() {
                   {card.subtitle ? (
                     <div
                       style={{
-                        marginTop: 6,
-                        fontSize: 12,
+                        marginTop: 4,
+                        fontSize: 11,
                         color: '#7b7268',
                         fontWeight: 700,
-                        lineHeight: 1.4,
+                        lineHeight: 1.35,
                       }}
                     >
                       {card.subtitle}
@@ -822,13 +836,13 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        <section style={{ marginTop: 18 }}>
+        <section style={{ marginTop: 16 }}>
           <div
             style={{
               fontSize: 18,
               fontWeight: 900,
               color: '#17130f',
-              marginBottom: 12,
+              marginBottom: 10,
             }}
           >
             {text.activity}
@@ -837,7 +851,7 @@ export default function ProfilePage() {
           <div
             style={{
               overflow: 'hidden',
-              borderRadius: 30,
+              borderRadius: 24,
               border: '2px solid #111111',
               background: '#fff',
             }}
@@ -853,10 +867,10 @@ export default function ProfilePage() {
                   style={{
                     width: '100%',
                     display: 'grid',
-                    gridTemplateColumns: '46px 1fr auto',
-                    gap: 14,
+                    gridTemplateColumns: '42px 1fr auto',
+                    gap: 12,
                     alignItems: 'center',
-                    padding: '16px 18px',
+                    padding: '13px 14px',
                     textAlign: 'left',
                     border: 'none',
                     borderTop: index !== 0 ? '2px solid #111111' : 'none',
@@ -866,14 +880,14 @@ export default function ProfilePage() {
                 >
                   <div
                     style={{
-                      width: 46,
-                      height: 46,
-                      borderRadius: 16,
+                      width: 42,
+                      height: 42,
+                      borderRadius: 14,
                       border: '2px solid #111111',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 20,
+                      fontSize: 18,
                       background: accent.background,
                       color: accent.color,
                     }}
@@ -883,7 +897,7 @@ export default function ProfilePage() {
 
                   <div
                     style={{
-                      fontSize: 15,
+                      fontSize: 14,
                       fontWeight: 900,
                       color: '#17130f',
                     }}
@@ -893,7 +907,7 @@ export default function ProfilePage() {
 
                   <span
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       color: '#17130f',
                       fontWeight: 900,
                     }}
@@ -906,13 +920,13 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        <section style={{ marginTop: 18 }}>
+        <section style={{ marginTop: 16 }}>
           <div
             style={{
               fontSize: 18,
               fontWeight: 900,
               color: '#17130f',
-              marginBottom: 12,
+              marginBottom: 10,
             }}
           >
             {text.preferences}
@@ -921,7 +935,7 @@ export default function ProfilePage() {
           <div
             style={{
               overflow: 'hidden',
-              borderRadius: 30,
+              borderRadius: 24,
               border: '2px solid #111111',
               background: '#fff',
             }}
@@ -937,10 +951,10 @@ export default function ProfilePage() {
                   style={{
                     width: '100%',
                     display: 'grid',
-                    gridTemplateColumns: '46px 1fr auto',
-                    gap: 14,
+                    gridTemplateColumns: '42px 1fr auto',
+                    gap: 12,
                     alignItems: 'center',
-                    padding: '16px 18px',
+                    padding: '13px 14px',
                     textAlign: 'left',
                     border: 'none',
                     borderTop: index !== 0 ? '2px solid #111111' : 'none',
@@ -950,14 +964,14 @@ export default function ProfilePage() {
                 >
                   <div
                     style={{
-                      width: 46,
-                      height: 46,
-                      borderRadius: 16,
+                      width: 42,
+                      height: 42,
+                      borderRadius: 14,
                       border: '2px solid #111111',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 20,
+                      fontSize: 18,
                       background: accent.background,
                       color: accent.color,
                     }}
@@ -967,7 +981,7 @@ export default function ProfilePage() {
 
                   <div
                     style={{
-                      fontSize: 15,
+                      fontSize: 14,
                       fontWeight: 900,
                       color: '#17130f',
                     }}
@@ -977,7 +991,7 @@ export default function ProfilePage() {
 
                   <span
                     style={{
-                      fontSize: 16,
+                      fontSize: 14,
                       color: '#17130f',
                       fontWeight: 900,
                     }}
