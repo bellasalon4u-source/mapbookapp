@@ -42,6 +42,10 @@ export default function BottomNav({ active }: BottomNavProps) {
     };
   }, []);
 
+  useEffect(() => {
+    setShowAddMenu(false);
+  }, [pathname]);
+
   const navText = useMemo(() => {
     return {
       home:
