@@ -1024,7 +1024,6 @@ export default function HomePage() {
     setSelectedMaster(null);
   }, [activeCategory, activeSubcategory, search, likedFilterMode, dealFilterMode]);
 
-  const currentCategoryLabel = getCategoryLabel(activeCategory, language);
   const borderGradient = getLanguageBorder(language);
   const currencySymbol = getCurrencySymbolForLocation(locationLabel);
 
@@ -1618,11 +1617,7 @@ export default function HomePage() {
                   setDealFilterMode('none');
                   setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
                 }}
-                icon={
-                  <span style={{ fontSize: 24, color: '#ff3b58', lineHeight: 1 }}>
-                    ♥
-                  </span>
-                }
+                icon={<span style={{ fontSize: 24, color: '#ff3b58', lineHeight: 1 }}>♥</span>}
                 title="Favourite"
                 count={likedInCategoryCount}
               />
