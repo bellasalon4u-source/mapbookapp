@@ -119,6 +119,32 @@ function getCurrentLocationLabel(language: AppLanguage) {
   return 'Current location';
 }
 
+function getShareLabel(language: AppLanguage) {
+  if (language === 'ES') return 'Compartir';
+  if (language === 'RU') return 'Поделиться';
+  if (language === 'UA') return 'Поділитися';
+  if (language === 'CZ') return 'Sdílet';
+  if (language === 'DE') return 'Teilen';
+  if (language === 'IT') return 'Condividi';
+  if (language === 'FR') return 'Partager';
+  if (language === 'AR') return 'مشاركة';
+  if (language === 'PL') return 'Udostępnij';
+  return 'Share';
+}
+
+function getCopiedLabel(language: AppLanguage) {
+  if (language === 'ES') return 'Enlace copiado';
+  if (language === 'RU') return 'Ссылка скопирована';
+  if (language === 'UA') return 'Посилання скопійовано';
+  if (language === 'CZ') return 'Odkaz zkopírován';
+  if (language === 'DE') return 'Link kopiert';
+  if (language === 'IT') return 'Link copiato';
+  if (language === 'FR') return 'Lien copié';
+  if (language === 'AR') return 'تم نسخ الرابط';
+  if (language === 'PL') return 'Skopiowano link';
+  return 'Link copied';
+}
+
 function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') {
   const normalized = String(category || '').toLowerCase();
 
@@ -737,6 +763,40 @@ export default function RealMap({
     window.open(url, '_blank');
   };
 
+  const shareMaster = async (master: MasterItem) => {
+    if (typeof window === 'undefined') return;
+
+    const lat = typeof master.lat === 'number' ? master.lat : focusLocation[0];
+    const lng = typeof master.lng === 'number' ? master.lng : focusLocation[1];
+    const name = getSelectedMasterName(master, language);
+    const shareUrl =
+      window.location.origin +
+      `/master/${master.id}?lat=${encodeURIComponent(String(lat))}&lng=${encodeURIComponent(
+        String(lng)
+      )}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: name,
+          text: `${getShareLabel(language)}: ${name}`,
+          url: shareUrl,
+        });
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        window.alert(getCopiedLabel(language));
+        return;
+      }
+
+      window.prompt(getShareLabel(language), shareUrl);
+    } catch {
+      // no-op
+    }
+  };
+
   const locationDot = useMemo<[number, number]>(() => {
     if (focusLocation) return focusLocation;
     if (currentDetectedLocation) return currentDetectedLocation;
@@ -772,10 +832,7 @@ export default function RealMap({
         }}
         zoomControl
       >
-        <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url={getTileUrl(mapMode)}
-        />
+        <TileLayer attribution="&copy; OpenStreetMap contributors" url={getTileUrl(mapMode)} />
 
         <UserLocationLayer language={language} onLocationFound={setCurrentDetectedLocation} />
         <FitBoundsLayer masters={safeMasters} focusLocation={focusLocation} />
@@ -947,8 +1004,36 @@ export default function RealMap({
                   cursor: 'pointer',
                   fontWeight: 900,
                 }}
+                aria-label="Close"
               >
                 ×
+              </button>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  shareMaster(selectedMaster);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: 54,
+                  right: 6,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 999,
+                  border: '3px solid #111111',
+                  background: '#ffffff',
+                  color: '#111111',
+                  fontSize: 18,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+                aria-label={getShareLabel(language)}
+                title={getShareLabel(language)}
+              >
+                ↗
               </button>
 
               <button
@@ -961,7 +1046,7 @@ export default function RealMap({
                 style={{
                   position: 'absolute',
                   top: 54,
-                  right: 6,
+                  right: 52,
                   width: 40,
                   height: 40,
                   borderRadius: 999,
@@ -972,6 +1057,7 @@ export default function RealMap({
                   fontWeight: 900,
                   cursor: 'pointer',
                 }}
+                aria-label="Favourite"
               >
                 ♥
               </button>
