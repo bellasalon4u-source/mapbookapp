@@ -286,14 +286,14 @@ export default function BottomNav({ active }: BottomNavProps) {
             style={{
               width: '100%',
               maxWidth: 430,
-              padding: '0 14px calc(88px + env(safe-area-inset-bottom))',
+              padding: '0 14px calc(92px + env(safe-area-inset-bottom))',
               boxSizing: 'border-box',
             }}
           >
             <div
               style={{
                 border: '3px solid #111111',
-                borderRadius: 26,
+                borderRadius: 28,
                 background: '#ffffff',
                 boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
                 overflow: 'hidden',
@@ -309,7 +309,7 @@ export default function BottomNav({ active }: BottomNavProps) {
                   type="button"
                   onClick={handleGoToAdvertisement}
                   style={{
-                    minHeight: 108,
+                    minHeight: 112,
                     border: 'none',
                     borderRight: '3px solid #111111',
                     background: '#f1dc4c',
@@ -322,7 +322,7 @@ export default function BottomNav({ active }: BottomNavProps) {
                     gap: 10,
                   }}
                 >
-                  <span style={{ fontSize: 32, lineHeight: 1 }}>📣</span>
+                  <span style={{ fontSize: 34, lineHeight: 1 }}>📣</span>
                   <span
                     style={{
                       fontSize: 13,
@@ -340,7 +340,7 @@ export default function BottomNav({ active }: BottomNavProps) {
                   type="button"
                   onClick={handleGoToService}
                   style={{
-                    minHeight: 108,
+                    minHeight: 112,
                     border: 'none',
                     borderRight: '3px solid #111111',
                     background: '#4acb39',
@@ -355,7 +355,7 @@ export default function BottomNav({ active }: BottomNavProps) {
                 >
                   <span
                     style={{
-                      fontSize: 40,
+                      fontSize: 42,
                       lineHeight: 1,
                       color: '#ffffff',
                       fontWeight: 900,
@@ -380,7 +380,7 @@ export default function BottomNav({ active }: BottomNavProps) {
                   type="button"
                   onClick={handleGoToDeal}
                   style={{
-                    minHeight: 108,
+                    minHeight: 112,
                     border: 'none',
                     background: '#ff5252',
                     padding: '14px 10px 12px',
@@ -398,14 +398,14 @@ export default function BottomNav({ active }: BottomNavProps) {
                       position: 'absolute',
                       top: 10,
                       right: 10,
-                      minWidth: 40,
-                      height: 32,
+                      minWidth: 42,
+                      height: 34,
                       padding: '0 10px',
                       borderRadius: 999,
                       border: '3px solid #111111',
                       background: '#ffffff',
                       color: '#b13a3a',
-                      fontSize: 17,
+                      fontSize: 18,
                       fontWeight: 900,
                       display: 'flex',
                       alignItems: 'center',
@@ -418,7 +418,7 @@ export default function BottomNav({ active }: BottomNavProps) {
 
                   <span
                     style={{
-                      fontSize: 36,
+                      fontSize: 38,
                       lineHeight: 1,
                       color: '#ffffff',
                       fontWeight: 900,
@@ -445,7 +445,7 @@ export default function BottomNav({ active }: BottomNavProps) {
                 onClick={handleCloseAddMenu}
                 style={{
                   width: '100%',
-                  height: 54,
+                  height: 56,
                   border: 'none',
                   borderTop: '3px solid #111111',
                   background: '#ffffff',
@@ -468,155 +468,167 @@ export default function BottomNav({ active }: BottomNavProps) {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(247,244,238,0.98)',
-          borderTop: '1px solid #e3ddd5',
-          backdropFilter: 'blur(10px)',
           zIndex: 80,
+          background: 'transparent',
+          paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
         }}
       >
         <div
           style={{
             maxWidth: 430,
             margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr 86px 1fr 1fr',
-            alignItems: 'end',
-            padding: '8px 8px calc(8px + env(safe-area-inset-bottom))',
+            padding: '0 12px',
             boxSizing: 'border-box',
           }}
         >
-          <button
-            type="button"
-            onClick={() => router.push('/')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 4,
-              color: isHome ? '#45c63d' : '#6e7b8a',
-              cursor: 'pointer',
-            }}
-          >
-            <span style={{ fontSize: 28, lineHeight: 1, fontWeight: 700 }}>⌂</span>
-            <span style={{ fontSize: 11, fontWeight: 800 }}>{navText.home}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push('/messages')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 4,
-              color: isMessages ? '#45c63d' : '#6e7b8a',
-              position: 'relative',
-              cursor: 'pointer',
-            }}
-          >
-            <div style={{ position: 'relative' }}>
-              <span style={{ fontSize: 28, lineHeight: 1, fontWeight: 700 }}>✉</span>
-
-              {unreadMessages > 0 ? (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: -6,
-                    right: -10,
-                    minWidth: 18,
-                    height: 18,
-                    padding: '0 5px',
-                    borderRadius: 999,
-                    background: '#e53935',
-                    color: '#fff',
-                    fontSize: 11,
-                    fontWeight: 800,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 3px 8px rgba(229,57,53,0.35)',
-                    border: '2px solid #f7f4ee',
-                  }}
-                >
-                  {unreadMessages > 9 ? '9+' : unreadMessages}
-                </span>
-              ) : null}
-            </div>
-
-            <span style={{ fontSize: 11, fontWeight: 700 }}>{navText.messages}</span>
-          </button>
-
           <div
             style={{
-              display: 'flex',
-              justifyContent: 'center',
-              transform: 'translateY(-16px)',
+              height: 88,
+              background: '#f7f4ee',
+              borderRadius: 28,
+              border: '1.5px solid #e3ddd5',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 88px 1fr 1fr',
+              alignItems: 'center',
+              padding: '0 6px',
             }}
           >
             <button
               type="button"
-              onClick={handleOpenAddMenu}
+              onClick={() => router.push('/')}
               style={{
-                width: 72,
-                height: 72,
-                borderRadius: 999,
-                border: '4px solid #45c63d',
-                background: isAdd ? '#45c63d' : '#ffffff',
-                color: isAdd ? '#ffffff' : '#45c63d',
-                boxShadow: '0 10px 24px rgba(0,0,0,0.14)',
+                border: 'none',
+                background: 'transparent',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 1,
+                gap: 6,
+                color: isHome ? '#36c84a' : '#2b2f36',
                 cursor: 'pointer',
               }}
-              title={navText.add}
             >
-              <span style={{ fontSize: 34, lineHeight: 1, fontWeight: 400 }}>+</span>
-              <span style={{ fontSize: 10, fontWeight: 800 }}>{navText.add}</span>
+              <span style={{ fontSize: 28, lineHeight: 1 }}>⌂</span>
+              <span style={{ fontSize: 11, fontWeight: 700 }}>{navText.home}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push('/profile/bookings')}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                color: isBookings ? '#36c84a' : '#2b2f36',
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{ fontSize: 28, lineHeight: 1 }}>▤</span>
+              <span style={{ fontSize: 11, fontWeight: 700 }}>{navText.bookings}</span>
+            </button>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                transform: 'translateY(-18px)',
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleOpenAddMenu}
+                style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: 999,
+                  border: '4px solid #36c84a',
+                  background: '#36c84a',
+                  color: '#ffffff',
+                  boxShadow: '0 10px 24px rgba(0,0,0,0.14)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 1,
+                  cursor: 'pointer',
+                }}
+                title={navText.add}
+              >
+                <span style={{ fontSize: 34, lineHeight: 1, fontWeight: 500 }}>+</span>
+                <span style={{ fontSize: 11, fontWeight: 800 }}>{navText.add}</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => router.push('/messages')}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                color: isMessages ? '#36c84a' : '#2b2f36',
+                position: 'relative',
+                cursor: 'pointer',
+              }}
+            >
+              <div style={{ position: 'relative' }}>
+                <span style={{ fontSize: 28, lineHeight: 1 }}>◌</span>
+
+                {unreadMessages > 0 ? (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: -4,
+                      right: -8,
+                      minWidth: 16,
+                      height: 16,
+                      padding: '0 4px',
+                      borderRadius: 999,
+                      background: '#e53935',
+                      color: '#fff',
+                      fontSize: 10,
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '2px solid #f7f4ee',
+                    }}
+                  >
+                    {unreadMessages > 9 ? '9+' : unreadMessages}
+                  </span>
+                ) : null}
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 700 }}>{navText.messages}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push('/profile')}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                color: isProfile ? '#36c84a' : '#2b2f36',
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{ fontSize: 28, lineHeight: 1 }}>◯</span>
+              <span style={{ fontSize: 11, fontWeight: 700 }}>{navText.profile}</span>
             </button>
           </div>
-
-          <button
-            type="button"
-            onClick={() => router.push('/profile/bookings')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 4,
-              color: isBookings ? '#45c63d' : '#6e7b8a',
-              cursor: 'pointer',
-            }}
-          >
-            <span style={{ fontSize: 28, lineHeight: 1, fontWeight: 700 }}>▤</span>
-            <span style={{ fontSize: 11, fontWeight: 700 }}>{navText.bookings}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push('/profile')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 4,
-              color: isProfile ? '#45c63d' : '#6e7b8a',
-              cursor: 'pointer',
-            }}
-          >
-            <span style={{ fontSize: 28, lineHeight: 1, fontWeight: 700 }}>◉</span>
-            <span style={{ fontSize: 11, fontWeight: 700 }}>{navText.profile}</span>
-          </button>
         </div>
       </nav>
     </>
