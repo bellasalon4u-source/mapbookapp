@@ -14,23 +14,7 @@ type TopCategoriesBarProps = {
   onClearSubcategory: () => void;
 };
 
-const horizontalOrder = [
-  'beauty',
-  'barber',
-  'wellness',
-  'home',
-  'repairs',
-  'tech',
-  'pets',
-  'fashion',
-  'auto',
-  'moving',
-  'fitness',
-  'education',
-  'events',
-  'activities',
-  'creative',
-];
+const visibleCategoryIds = ['beauty', 'barber', 'wellness', 'home', 'repairs'];
 
 const iconSrcMap: Record<string, string> = {
   more: '/ui/categories/more.png',
@@ -49,25 +33,6 @@ const iconSrcMap: Record<string, string> = {
   events: '/ui/categories/events.png',
   activities: '/ui/categories/activities.png',
   creative: '/ui/categories/creative.png',
-};
-
-const colorMap: Record<string, string> = {
-  beauty: '#ff4f93',
-  barber: '#2d98ff',
-  wellness: '#32c957',
-  home: '#ff9f1a',
-  repairs: '#f4b400',
-  tech: '#9b5cff',
-  pets: '#28c7d9',
-  fashion: '#43d94d',
-  auto: '#43d94d',
-  moving: '#43d94d',
-  fitness: '#43d94d',
-  education: '#7d52ff',
-  events: '#43d94d',
-  activities: '#43d94d',
-  creative: '#43d94d',
-  more: '#173552',
 };
 
 function translateCategoryLabel(categoryId: string, language: AppLanguage, fallback?: string) {
@@ -322,8 +287,8 @@ export default function TopCategoriesBar({
 
   const tr = t(language);
 
-  const visibleTopItems = useMemo(() => {
-    return horizontalOrder
+  const visibleItems = useMemo(() => {
+    return visibleCategoryIds
       .map((id) => categories.find((item) => item.id === id))
       .filter(Boolean) as typeof categories;
   }, []);
@@ -357,7 +322,7 @@ export default function TopCategoriesBar({
                   position: 'absolute',
                   left: 10,
                   right: 10,
-                  top: 12,
+                  top: 14,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -371,7 +336,7 @@ export default function TopCategoriesBar({
                 <div>
                   <div
                     style={{
-                      fontSize: 20,
+                      fontSize: 21,
                       fontWeight: 900,
                       color: '#17130f',
                       lineHeight: 1.1,
@@ -395,12 +360,12 @@ export default function TopCategoriesBar({
                   type="button"
                   onClick={() => setMenuOpen(false)}
                   style={{
-                    width: 40,
-                    height: 40,
+                    width: 42,
+                    height: 42,
                     borderRadius: 999,
                     border: '2px solid #111111',
                     background: '#ffffff',
-                    fontSize: 20,
+                    fontSize: 22,
                     cursor: 'pointer',
                     flexShrink: 0,
                     color: '#17130f',
@@ -416,7 +381,7 @@ export default function TopCategoriesBar({
                   position: 'absolute',
                   left: 10,
                   right: 10,
-                  top: 96,
+                  top: 104,
                   bottom: 14,
                   display: 'grid',
                   gridTemplateColumns: '36% 64%',
@@ -430,9 +395,8 @@ export default function TopCategoriesBar({
                     background: '#ffffff',
                     borderRadius: 22,
                     border: '2px solid #111111',
-                    padding: 8,
+                    padding: 10,
                     overflowY: 'auto',
-                    overflowX: 'hidden',
                   }}
                 >
                   <div
@@ -440,7 +404,7 @@ export default function TopCategoriesBar({
                       fontSize: 12,
                       fontWeight: 900,
                       color: '#17130f',
-                      marginBottom: 8,
+                      marginBottom: 10,
                       paddingLeft: 4,
                     }}
                   >
@@ -451,14 +415,12 @@ export default function TopCategoriesBar({
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: 7,
-                      paddingBottom: 4,
+                      gap: 8,
                     }}
                   >
                     {categories.map((item) => {
                       const active = expandedCategory === item.id;
                       const src = iconSrcMap[item.id] || iconSrcMap.beauty;
-                      const color = colorMap[item.id] || '#43d94d';
 
                       return (
                         <button
@@ -474,22 +436,20 @@ export default function TopCategoriesBar({
                             cursor: 'pointer',
                             textAlign: 'left',
                             borderRadius: 14,
-                            padding: '7px 7px',
-                            background: active ? '#f8f8f8' : '#ffffff',
-                            boxShadow: active ? `inset 0 0 0 2px ${color}` : 'none',
+                            padding: '8px 7px',
+                            background: active ? '#f3efe7' : '#ffffff',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 7,
+                            gap: 8,
                             fontWeight: 800,
                             fontSize: 11,
-                            minWidth: 0,
                           }}
                         >
                           <div
                             style={{
-                              width: 28,
-                              height: 28,
-                              borderRadius: 8,
+                              width: 30,
+                              height: 30,
+                              borderRadius: 9,
                               overflow: 'hidden',
                               flexShrink: 0,
                               background: '#fff',
@@ -533,7 +493,6 @@ export default function TopCategoriesBar({
                     border: '2px solid #111111',
                     padding: 12,
                     overflowY: 'auto',
-                    overflowX: 'hidden',
                   }}
                 >
                   <div
@@ -555,12 +514,10 @@ export default function TopCategoriesBar({
                         display: 'flex',
                         flexWrap: 'wrap',
                         gap: 8,
-                        paddingBottom: 4,
                       }}
                     >
                       {expanded.subcategories.map((sub) => {
                         const active = activeSubcategory === sub;
-                        const color = colorMap[expanded.id] || '#43d94d';
 
                         return (
                           <button
@@ -573,7 +530,7 @@ export default function TopCategoriesBar({
                             }}
                             style={{
                               border: '1.5px solid #111111',
-                              background: active ? color : '#ffffff',
+                              background: active ? '#17130f' : '#ffffff',
                               color: active ? '#ffffff' : '#17130f',
                               borderRadius: 999,
                               padding: '9px 12px',
@@ -601,188 +558,134 @@ export default function TopCategoriesBar({
       style={{
         position: 'relative',
         zIndex: 120,
-        background: '#ffffff',
+        background: '#f7f4ee',
       }}
     >
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '50px 1fr',
-          gap: 8,
-          padding: '0 8px 2px',
+          gridTemplateColumns: '98px repeat(5, 1fr)',
+          gap: 12,
+          padding: '0 12px',
           alignItems: 'start',
-          background: '#ffffff',
         }}
       >
-        <div
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
           style={{
-            position: 'sticky',
-            left: 0,
-            background: '#ffffff',
-            zIndex: 3,
-            paddingTop: 1,
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setMenuOpen((prev) => !prev)}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              padding: 0,
-              width: 44,
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 4,
-            }}
-          >
-            <div
-              style={{
-                width: 44,
-                height: 56,
-                borderRadius: 15,
-                background: '#ffffff',
-                boxShadow: '0 3px 10px rgba(0,0,0,0.05)',
-                border: '1.5px solid #111111',
-                overflow: 'hidden',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <img
-                src={iconSrcMap.more}
-                alt={tr.more}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  display: 'block',
-                }}
-              />
-            </div>
-
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 900,
-                color: '#111111',
-                lineHeight: 1,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {tr.more}
-            </div>
-          </button>
-        </div>
-
-        <div
-          style={{
-            overflowX: 'auto',
-            overflowY: 'hidden',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            paddingBottom: 4,
-            paddingRight: 8,
-            background: '#ffffff',
+            border: 'none',
+            background: 'transparent',
+            padding: 0,
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 8,
           }}
         >
           <div
             style={{
+              width: 100,
+              height: 100,
+              borderRadius: 24,
+              background: '#ffffff',
+              border: '2px solid #111111',
+              overflow: 'hidden',
               display: 'flex',
-              gap: 8,
-              minWidth: 'max-content',
-              paddingRight: 12,
-              alignItems: 'flex-start',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
             }}
           >
-            {visibleTopItems.map((item) => {
-              const isActive = activeCategory === item.id;
-              const src = iconSrcMap[item.id];
-              const color = colorMap[item.id] || '#43d94d';
-
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    onSelectCategory(item.id);
-                    onClearSubcategory();
-                  }}
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    padding: 0,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 4,
-                    minWidth: 58,
-                    flexShrink: 0,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 16,
-                      background: '#ffffff',
-                      border: '1.5px solid #111111',
-                      boxShadow: isActive
-                        ? `0 5px 14px ${color}33`
-                        : '0 3px 10px rgba(0,0,0,0.05)',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'relative',
-                    }}
-                  >
-                    <img
-                      src={src}
-                      alt={translateCategoryLabel(item.id, language, item.label)}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        display: 'block',
-                        filter: isActive ? 'saturate(1.08) contrast(1.04)' : 'saturate(1.02)',
-                      }}
-                    />
-
-                    {isActive ? (
-                      <span
-                        style={{
-                          position: 'absolute',
-                          inset: 0,
-                          borderRadius: 16,
-                          boxShadow: `inset 0 0 0 2px ${color}`,
-                          pointerEvents: 'none',
-                        }}
-                      />
-                    ) : null}
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 900,
-                      color: '#111111',
-                      lineHeight: 1,
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {translateCategoryLabel(item.id, language, item.shortLabel || item.label)}
-                  </div>
-                </button>
-              );
-            })}
+            <img
+              src={iconSrcMap.more}
+              alt={tr.more}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
           </div>
-        </div>
+
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 900,
+              color: '#111111',
+              lineHeight: 1,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {tr.more}
+          </div>
+        </button>
+
+        {visibleItems.map((item) => {
+          const isActive = activeCategory === item.id;
+          const src = iconSrcMap[item.id];
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => {
+                onSelectCategory(item.id);
+                onClearSubcategory();
+              }}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                padding: 0,
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <div
+                style={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: 24,
+                  background: '#ffffff',
+                  border: isActive ? '3px solid #111111' : '2px solid #bdb8b0',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                }}
+              >
+                <img
+                  src={src}
+                  alt={translateCategoryLabel(item.id, language, item.label)}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
+                />
+              </div>
+
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 900,
+                  color: '#111111',
+                  lineHeight: 1,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {translateCategoryLabel(item.id, language, item.shortLabel || item.label)}
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {overlay}
