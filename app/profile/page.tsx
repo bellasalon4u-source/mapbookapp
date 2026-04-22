@@ -44,6 +44,7 @@ type ProfileTextShape = {
   help: string;
   open: string;
   walletReady: string;
+  profileOverview: string;
 };
 
 const profileTexts: Record<string, ProfileTextShape> = {
@@ -72,6 +73,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     help: 'Help Centre',
     open: 'Open',
     walletReady: 'Wallet ready',
+    profileOverview: 'Profile overview',
   },
   ES: {
     title: 'Perfil',
@@ -98,6 +100,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     help: 'Centro de ayuda',
     open: 'Abrir',
     walletReady: 'Billetera lista',
+    profileOverview: 'Resumen del perfil',
   },
   RU: {
     title: 'Профиль',
@@ -124,6 +127,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     help: 'Центр помощи',
     open: 'Открыть',
     walletReady: 'Кошелёк готов',
+    profileOverview: 'Обзор профиля',
   },
   CZ: {
     title: 'Profil',
@@ -150,6 +154,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     help: 'Centrum pomoci',
     open: 'Otevřít',
     walletReady: 'Peněženka připravena',
+    profileOverview: 'Přehled profilu',
   },
   DE: {
     title: 'Profil',
@@ -176,6 +181,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     help: 'Hilfezentrum',
     open: 'Öffnen',
     walletReady: 'Wallet bereit',
+    profileOverview: 'Profilübersicht',
   },
   PL: {
     title: 'Profil',
@@ -202,6 +208,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     help: 'Centrum pomocy',
     open: 'Otwórz',
     walletReady: 'Portfel gotowy',
+    profileOverview: 'Przegląd profilu',
   },
   UA: {
     title: 'Профіль',
@@ -228,6 +235,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     help: 'Центр допомоги',
     open: 'Відкрити',
     walletReady: 'Гаманець готовий',
+    profileOverview: 'Огляд профілю',
   },
   IT: {
     title: 'Profilo',
@@ -254,6 +262,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     help: 'Centro assistenza',
     open: 'Apri',
     walletReady: 'Wallet pronto',
+    profileOverview: 'Panoramica profilo',
   },
   FR: {
     title: 'Profil',
@@ -280,6 +289,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     help: 'Centre d’aide',
     open: 'Ouvrir',
     walletReady: 'Portefeuille prêt',
+    profileOverview: 'Vue du profil',
   },
   AR: {
     title: 'الملف الشخصي',
@@ -306,6 +316,7 @@ const profileTexts: Record<string, ProfileTextShape> = {
     help: 'مركز المساعدة',
     open: 'فتح',
     walletReady: 'المحفظة جاهزة',
+    profileOverview: 'نظرة عامة',
   },
 };
 
