@@ -376,7 +376,7 @@ function BrandMark() {
       src="/ui/logo/logo.png"
       alt="Olamep"
       style={{
-        height: 60,
+        height: 76,
         width: 'auto',
         display: 'block',
       }}
@@ -399,14 +399,14 @@ function ActionCountButton({
     <button
       onClick={onClick}
       style={{
-        minHeight: 54,
+        minHeight: 52,
         border: '2px solid #111111',
         borderRadius: 18,
         background: '#ffffff',
         color: '#111111',
         cursor: 'pointer',
         display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 36px',
+        gridTemplateColumns: 'minmax(0, 1fr) 34px',
         alignItems: 'center',
         gap: 8,
         padding: '0 8px 0 10px',
@@ -418,7 +418,7 @@ function ActionCountButton({
           alignItems: 'center',
           gap: 8,
           minWidth: 0,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: 900,
         }}
       >
@@ -438,8 +438,8 @@ function ActionCountButton({
 
       <span
         style={{
-          width: 36,
-          height: 36,
+          width: 34,
+          height: 34,
           borderRadius: 999,
           border: '2px solid #111111',
           background: '#ffffff',
@@ -447,7 +447,7 @@ function ActionCountButton({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: 900,
           flexShrink: 0,
         }}
@@ -895,7 +895,7 @@ export default function HomePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f4ee',
+        background: '#f6f4ef',
         fontFamily: 'Arial, sans-serif',
         color: '#17130f',
         paddingBottom: 118,
@@ -905,10 +905,10 @@ export default function HomePage() {
         style={{
           maxWidth: 430,
           margin: '0 auto',
-          background: '#f7f4ee',
+          background: '#f6f4ef',
         }}
       >
-        <section style={{ padding: '12px 12px 0' }}>
+        <section style={{ padding: '16px 12px 0' }}>
           <div
             style={{
               display: 'flex',
@@ -923,25 +923,25 @@ export default function HomePage() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 48px 48px 48px',
-                gap: 6,
+                gridTemplateColumns: '1fr 58px 58px 58px',
+                gap: 8,
                 alignItems: 'center',
               }}
             >
               <div
                 style={{
-                  height: 54,
-                  borderRadius: 20,
+                  height: 56,
+                  borderRadius: 18,
                   border: '2px solid #111111',
                   background: '#fff',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '0 12px',
+                  gap: 10,
+                  padding: '0 14px',
                   minWidth: 0,
                 }}
               >
-                <span style={{ fontSize: 20, lineHeight: 1, color: '#111111' }}>⌕</span>
+                <span style={{ fontSize: 22, lineHeight: 1, color: '#111111' }}>⌕</span>
                 <input
                   value={search}
                   onFocus={() => setSearchOpen(true)}
@@ -1002,14 +1002,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 48,
-                  height: 54,
+                  width: 58,
+                  height: 56,
                   borderRadius: 16,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 10,
+                  fontSize: 12,
                   fontWeight: 900,
                   display: 'inline-flex',
                   flexDirection: 'column',
@@ -1019,21 +1019,21 @@ export default function HomePage() {
                   cursor: 'pointer',
                 }}
               >
-                <span style={{ fontSize: 18, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 20, lineHeight: 1 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 48,
-                  height: 54,
+                  width: 58,
+                  height: 56,
                   borderRadius: 16,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 22,
+                  fontSize: 24,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1047,14 +1047,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 48,
-                  height: 54,
+                  width: 58,
+                  height: 56,
                   borderRadius: 16,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 20,
+                  fontSize: 22,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1354,111 +1354,103 @@ export default function HomePage() {
         <section style={{ padding: '8px 12px 0' }}>
           <div
             style={{
-              border: '2px solid #111111',
-              borderRadius: 24,
-              background: '#f4f1eb',
-              padding: 8,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 8,
             }}
           >
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 8,
+            <ActionCountButton
+              onClick={() => {
+                setDealFilterMode('none');
+                setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
               }}
-            >
-              <ActionCountButton
-                onClick={() => {
-                  setDealFilterMode('none');
-                  setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
-                }}
-                icon={<span style={{ fontSize: 22, color: '#ff3b58', lineHeight: 1 }}>♥</span>}
-                title="Favourite"
-                count={likedInCategoryCount}
-              />
+              icon={<span style={{ fontSize: 22, color: '#ff3b58', lineHeight: 1 }}>♥</span>}
+              title="Favourite"
+              count={likedInCategoryCount}
+            />
 
-              <ActionCountButton
-                onClick={() => {
-                  setLikedFilterMode('none');
-                  setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
-                }}
-                icon={
-                  <span
-                    style={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
-                      background: '#ffd84a',
-                      color: '#111111',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 15,
-                      fontWeight: 900,
-                      lineHeight: 1,
-                    }}
-                  >
-                    %
-                  </span>
-                }
-                title="Hot offers"
-                count={categoryDealsCount}
-              />
+            <ActionCountButton
+              onClick={() => {
+                setLikedFilterMode('none');
+                setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
+              }}
+              icon={
+                <span
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: '50%',
+                    background: '#ffd84a',
+                    color: '#111111',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 15,
+                    fontWeight: 900,
+                    lineHeight: 1,
+                  }}
+                >
+                  %
+                </span>
+              }
+              title="Hot offers"
+              count={categoryDealsCount}
+            />
 
-              <ActionCountButton
-                onClick={() => {
-                  setDealFilterMode('none');
-                  setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
-                }}
-                icon={
-                  <span style={{ display: 'inline-flex', gap: 1, color: '#ff3b58' }}>
-                    <span style={{ fontSize: 16, lineHeight: 1 }}>♥</span>
-                    <span style={{ fontSize: 14, lineHeight: 1 }}>♥</span>
-                    <span style={{ fontSize: 12, lineHeight: 1 }}>♥</span>
-                  </span>
-                }
-                title="All favourite"
-                count={likedAllCount}
-              />
+            <ActionCountButton
+              onClick={() => {
+                setDealFilterMode('none');
+                setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
+              }}
+              icon={
+                <span style={{ display: 'inline-flex', gap: 1, color: '#ff3b58' }}>
+                  <span style={{ fontSize: 16, lineHeight: 1 }}>♥</span>
+                  <span style={{ fontSize: 14, lineHeight: 1 }}>♥</span>
+                  <span style={{ fontSize: 12, lineHeight: 1 }}>♥</span>
+                </span>
+              }
+              title="All favourite"
+              count={likedAllCount}
+            />
 
-              <ActionCountButton
-                onClick={() => {
-                  setLikedFilterMode('none');
-                  setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
-                }}
-                icon={
-                  <span
-                    style={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
-                      background: '#ffd84a',
-                      color: '#111111',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 15,
-                      fontWeight: 900,
-                      lineHeight: 1,
-                    }}
-                  >
-                    %
-                  </span>
-                }
-                title="All hot offers"
-                count={allDealsCount}
-              />
-            </div>
+            <ActionCountButton
+              onClick={() => {
+                setLikedFilterMode('none');
+                setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
+              }}
+              icon={
+                <span
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: '50%',
+                    background: '#ffd84a',
+                    color: '#111111',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 15,
+                    fontWeight: 900,
+                    lineHeight: 1,
+                  }}
+                >
+                  %
+                </span>
+              }
+              title="All hot offers"
+              count={allDealsCount}
+            />
           </div>
         </section>
 
-        <section style={{ padding: '8px 12px 0' }}>
+        <section style={{ padding: '10px 12px 0' }}>
           <div
             style={{
-              borderRadius: 28,
+              borderRadius: 32,
               overflow: 'hidden',
-              border: '2px solid #e2ddd6',
+              border: '1.5px solid #ded8cf',
               background: '#ffffff',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
             }}
           >
             <div style={{ height: 470, position: 'relative', overflow: 'hidden' }}>
