@@ -245,7 +245,11 @@ export default function BottomNav({ active }: BottomNavProps) {
     active === 'bookings' ||
     pathname.startsWith('/bookings') ||
     pathname.startsWith('/profile/bookings');
-  const isProfile = active === 'profile' || pathname.startsWith('/profile');
+  const isProfile =
+    active === 'profile' ||
+    pathname === '/profile' ||
+    pathname.startsWith('/profile/') ||
+    pathname.startsWith('/account');
   const isAdd =
     active === 'add' ||
     pathname.startsWith('/add') ||
