@@ -42,10 +42,6 @@ export default function BottomNav({ active }: BottomNavProps) {
     };
   }, []);
 
-  useEffect(() => {
-    setShowAddMenu(false);
-  }, [pathname]);
-
   const navText = useMemo(() => {
     return {
       home:
@@ -245,11 +241,7 @@ export default function BottomNav({ active }: BottomNavProps) {
     active === 'bookings' ||
     pathname.startsWith('/bookings') ||
     pathname.startsWith('/profile/bookings');
-  const isProfile =
-    active === 'profile' ||
-    pathname === '/profile' ||
-    pathname.startsWith('/profile/') ||
-    pathname.startsWith('/account');
+  const isProfile = active === 'profile' || pathname.startsWith('/profile');
   const isAdd =
     active === 'add' ||
     pathname.startsWith('/add') ||
@@ -294,14 +286,14 @@ export default function BottomNav({ active }: BottomNavProps) {
             style={{
               width: '100%',
               maxWidth: 430,
-              padding: '0 14px calc(92px + env(safe-area-inset-bottom))',
+              padding: '0 14px calc(88px + env(safe-area-inset-bottom))',
               boxSizing: 'border-box',
             }}
           >
             <div
               style={{
                 border: '3px solid #111111',
-                borderRadius: 28,
+                borderRadius: 26,
                 background: '#ffffff',
                 boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
                 overflow: 'hidden',
@@ -317,7 +309,7 @@ export default function BottomNav({ active }: BottomNavProps) {
                   type="button"
                   onClick={handleGoToAdvertisement}
                   style={{
-                    minHeight: 112,
+                    minHeight: 108,
                     border: 'none',
                     borderRight: '3px solid #111111',
                     background: '#f1dc4c',
@@ -330,7 +322,7 @@ export default function BottomNav({ active }: BottomNavProps) {
                     gap: 10,
                   }}
                 >
-                  <span style={{ fontSize: 34, lineHeight: 1 }}>📣</span>
+                  <span style={{ fontSize: 32, lineHeight: 1 }}>📣</span>
                   <span
                     style={{
                       fontSize: 13,
@@ -348,7 +340,7 @@ export default function BottomNav({ active }: BottomNavProps) {
                   type="button"
                   onClick={handleGoToService}
                   style={{
-                    minHeight: 112,
+                    minHeight: 108,
                     border: 'none',
                     borderRight: '3px solid #111111',
                     background: '#4acb39',
@@ -363,7 +355,7 @@ export default function BottomNav({ active }: BottomNavProps) {
                 >
                   <span
                     style={{
-                      fontSize: 42,
+                      fontSize: 40,
                       lineHeight: 1,
                       color: '#ffffff',
                       fontWeight: 900,
@@ -388,7 +380,7 @@ export default function BottomNav({ active }: BottomNavProps) {
                   type="button"
                   onClick={handleGoToDeal}
                   style={{
-                    minHeight: 112,
+                    minHeight: 108,
                     border: 'none',
                     background: '#ff5252',
                     padding: '14px 10px 12px',
@@ -406,14 +398,14 @@ export default function BottomNav({ active }: BottomNavProps) {
                       position: 'absolute',
                       top: 10,
                       right: 10,
-                      minWidth: 42,
-                      height: 34,
+                      minWidth: 40,
+                      height: 32,
                       padding: '0 10px',
                       borderRadius: 999,
                       border: '3px solid #111111',
                       background: '#ffffff',
                       color: '#b13a3a',
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: 900,
                       display: 'flex',
                       alignItems: 'center',
@@ -426,7 +418,7 @@ export default function BottomNav({ active }: BottomNavProps) {
 
                   <span
                     style={{
-                      fontSize: 38,
+                      fontSize: 36,
                       lineHeight: 1,
                       color: '#ffffff',
                       fontWeight: 900,
@@ -453,7 +445,7 @@ export default function BottomNav({ active }: BottomNavProps) {
                 onClick={handleCloseAddMenu}
                 style={{
                   width: '100%',
-                  height: 56,
+                  height: 54,
                   border: 'none',
                   borderTop: '3px solid #111111',
                   background: '#ffffff',
@@ -487,9 +479,9 @@ export default function BottomNav({ active }: BottomNavProps) {
             maxWidth: 430,
             margin: '0 auto',
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr 92px 1fr 1fr',
+            gridTemplateColumns: '1fr 1fr 86px 1fr 1fr',
             alignItems: 'end',
-            padding: '10px 8px calc(10px + env(safe-area-inset-bottom))',
+            padding: '8px 8px calc(8px + env(safe-area-inset-bottom))',
             boxSizing: 'border-box',
           }}
         >
@@ -502,13 +494,13 @@ export default function BottomNav({ active }: BottomNavProps) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 5,
+              gap: 4,
               color: isHome ? '#45c63d' : '#6e7b8a',
               cursor: 'pointer',
             }}
           >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>⌂</span>
-            <span style={{ fontSize: 12, fontWeight: 800 }}>{navText.home}</span>
+            <span style={{ fontSize: 28, lineHeight: 1, fontWeight: 700 }}>⌂</span>
+            <span style={{ fontSize: 11, fontWeight: 800 }}>{navText.home}</span>
           </button>
 
           <button
@@ -520,14 +512,14 @@ export default function BottomNav({ active }: BottomNavProps) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 5,
+              gap: 4,
               color: isMessages ? '#45c63d' : '#6e7b8a',
               position: 'relative',
               cursor: 'pointer',
             }}
           >
             <div style={{ position: 'relative' }}>
-              <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>✉</span>
+              <span style={{ fontSize: 28, lineHeight: 1, fontWeight: 700 }}>✉</span>
 
               {unreadMessages > 0 ? (
                 <span
@@ -555,22 +547,22 @@ export default function BottomNav({ active }: BottomNavProps) {
               ) : null}
             </div>
 
-            <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.messages}</span>
+            <span style={{ fontSize: 11, fontWeight: 700 }}>{navText.messages}</span>
           </button>
 
           <div
             style={{
               display: 'flex',
               justifyContent: 'center',
-              transform: 'translateY(-18px)',
+              transform: 'translateY(-16px)',
             }}
           >
             <button
               type="button"
               onClick={handleOpenAddMenu}
               style={{
-                width: 78,
-                height: 78,
+                width: 72,
+                height: 72,
                 borderRadius: 999,
                 border: '4px solid #45c63d',
                 background: isAdd ? '#45c63d' : '#ffffff',
@@ -580,13 +572,13 @@ export default function BottomNav({ active }: BottomNavProps) {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 2,
+                gap: 1,
                 cursor: 'pointer',
               }}
               title={navText.add}
             >
-              <span style={{ fontSize: 36, lineHeight: 1, fontWeight: 400 }}>+</span>
-              <span style={{ fontSize: 11, fontWeight: 800 }}>{navText.add}</span>
+              <span style={{ fontSize: 34, lineHeight: 1, fontWeight: 400 }}>+</span>
+              <span style={{ fontSize: 10, fontWeight: 800 }}>{navText.add}</span>
             </button>
           </div>
 
@@ -599,13 +591,13 @@ export default function BottomNav({ active }: BottomNavProps) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 5,
+              gap: 4,
               color: isBookings ? '#45c63d' : '#6e7b8a',
               cursor: 'pointer',
             }}
           >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>▤</span>
-            <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.bookings}</span>
+            <span style={{ fontSize: 28, lineHeight: 1, fontWeight: 700 }}>▤</span>
+            <span style={{ fontSize: 11, fontWeight: 700 }}>{navText.bookings}</span>
           </button>
 
           <button
@@ -617,13 +609,13 @@ export default function BottomNav({ active }: BottomNavProps) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 5,
+              gap: 4,
               color: isProfile ? '#45c63d' : '#6e7b8a',
               cursor: 'pointer',
             }}
           >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>◉</span>
-            <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.profile}</span>
+            <span style={{ fontSize: 28, lineHeight: 1, fontWeight: 700 }}>◉</span>
+            <span style={{ fontSize: 11, fontWeight: 700 }}>{navText.profile}</span>
           </button>
         </div>
       </nav>
