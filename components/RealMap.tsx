@@ -375,11 +375,11 @@ function normalizePaymentMethods(value: string[] | string | undefined): string[]
 }
 
 function paymentBadge(method: string, language: AppLanguage) {
-  const tr = t(language);
+  const trObj = t(language);
   const normalized = String(method).toLowerCase();
 
-  if (normalized === 'cash') return { icon: '💵', label: tr.cash };
-  if (normalized === 'card') return { icon: '💳', label: tr.card };
+  if (normalized === 'cash') return { icon: '💵', label: trObj.cash };
+  if (normalized === 'card') return { icon: '💳', label: trObj.card };
   if (normalized === 'wallet') return { icon: '📲', label: 'Google Wallet' };
 
   return { icon: '•', label: String(method) };
@@ -425,10 +425,56 @@ function getCardGallery(master: MasterItem) {
   return [avatar, firstGallery, secondGallery];
 }
 
-function buildMarkerIcon(
+function buildGenericPinIcon(): DivIcon {
+  return L.divIcon({
+    className: 'custom-generic-pin',
+    html: `
+      <div style="position:relative;width:54px;height:72px;">
+        <div style="
+          position:absolute;
+          left:50%;
+          top:20px;
+          transform:translateX(-50%);
+          width:0;
+          height:0;
+          border-left:15px solid transparent;
+          border-right:15px solid transparent;
+          border-top:24px solid #44c55a;
+          filter:drop-shadow(0 6px 8px rgba(0,0,0,0.18));
+        "></div>
+
+        <div style="
+          position:absolute;
+          left:50%;
+          top:0;
+          transform:translateX(-50%);
+          width:44px;
+          height:44px;
+          border-radius:999px;
+          background:#44c55a;
+          border:4px solid #ffffff;
+          box-shadow:0 7px 16px rgba(0,0,0,0.16);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+        ">
+          <div style="
+            width:16px;
+            height:16px;
+            border-radius:999px;
+            background:#ffffff;
+          "></div>
+        </div>
+      </div>
+    `,
+    iconSize: [54, 72],
+    iconAnchor: [27, 66],
+  });
+}
+
+function buildSelectedMarkerIcon(
   master: MasterItem,
   language: AppLanguage,
-  isSelected: boolean,
   isLiked: boolean,
   promotionBadgeTextByMasterId?: Record<string, string>
 ): DivIcon {
@@ -441,27 +487,26 @@ function buildMarkerIcon(
   const discountText = getPromotionBadgeText(master, promotionBadgeTextByMasterId);
   const hasDiscount = Boolean(discountText);
 
-  const outerRing = isSelected ? 6 : 5;
-  const size = isSelected ? 78 : 72;
-  const photoSize = isSelected ? 58 : 54;
-  const likeBadgeSize = isSelected ? 30 : 28;
-  const statusBadgeSize = isSelected ? 20 : 18;
-  const rightBadgeOffset = hasDiscount ? 44 : 4;
+  const size = 82;
+  const photoSize = 60;
+  const likeBadgeSize = 30;
+  const statusBadgeSize = 18;
+  const rightBadgeOffset = hasDiscount ? 48 : 6;
 
   return L.divIcon({
-    className: 'custom-master-pin',
+    className: 'custom-selected-master-pin',
     html: `
-      <div style="position:relative;width:${hasDiscount ? size + 52 : size}px;height:${size + 22}px;">
+      <div style="position:relative;width:${hasDiscount ? size + 56 : size}px;height:${size + 22}px;">
         <div style="
           position:absolute;
           left:${size / 2}px;
-          top:${size - 4}px;
+          top:${size - 6}px;
           transform:translateX(-50%);
           width:0;
           height:0;
-          border-left:14px solid transparent;
-          border-right:14px solid transparent;
-          border-top:19px solid ${accent};
+          border-left:15px solid transparent;
+          border-right:15px solid transparent;
+          border-top:22px solid ${accent};
           filter:drop-shadow(0 5px 8px rgba(0,0,0,0.16));
         "></div>
 
@@ -474,8 +519,8 @@ function buildMarkerIcon(
           height:${size}px;
           border-radius:999px;
           background:#fff;
-          border:${outerRing}px solid ${accent};
-          box-shadow:0 7px 18px rgba(0,0,0,0.16);
+          border:6px solid ${accent};
+          box-shadow:0 8px 18px rgba(0,0,0,0.16);
           overflow:hidden;
         ">
           <img
@@ -501,7 +546,7 @@ function buildMarkerIcon(
           <div style="
             position:absolute;
             right:0;
-            top:${size * 0.50}px;
+            top:${size * 0.49}px;
             min-width:58px;
             height:34px;
             padding:0 12px;
@@ -529,7 +574,7 @@ function buildMarkerIcon(
           style="
             position:absolute;
             right:${rightBadgeOffset}px;
-            top:${size * 0.60}px;
+            top:${size * 0.62}px;
             width:${likeBadgeSize + 10}px;
             height:${likeBadgeSize + 10}px;
             background:#ffffff;
@@ -540,7 +585,7 @@ function buildMarkerIcon(
             align-items:center;
             justify-content:center;
             color:#ff295f;
-            font-size:${isLiked ? 17 : 0}px;
+            font-size:${isLiked ? 18 : 0}px;
             font-weight:900;
             line-height:1;
             cursor:pointer;
@@ -551,8 +596,8 @@ function buildMarkerIcon(
 
         <div style="
           position:absolute;
-          right:${hasDiscount ? 94 : likeBadgeSize + 20}px;
-          top:${size * 0.52}px;
+          right:${hasDiscount ? 98 : likeBadgeSize + 24}px;
+          top:${size * 0.54}px;
           width:${statusBadgeSize + 10}px;
           height:${statusBadgeSize + 10}px;
           background:#fff;
@@ -562,7 +607,7 @@ function buildMarkerIcon(
         "></div>
       </div>
     `,
-    iconSize: [hasDiscount ? size + 52 : size, size + 22],
+    iconSize: [hasDiscount ? size + 56 : size, size + 22],
     iconAnchor: [size / 2, size + 12],
   });
 }
@@ -590,9 +635,11 @@ function MapEventsLayer({
 function FitBoundsLayer({
   masters,
   focusLocation,
+  selectedMasterId,
 }: {
   masters: MasterItem[];
   focusLocation: [number, number];
+  selectedMasterId?: string | number | null;
 }) {
   const map = useMap();
 
@@ -601,28 +648,35 @@ function FitBoundsLayer({
       map.invalidateSize();
     }, 80);
 
-    const points: [number, number][] = masters.map((item) => [
-      item.lat || focusLocation[0],
-      item.lng || focusLocation[1],
-    ]);
+    const selected =
+      selectedMasterId !== null && selectedMasterId !== undefined
+        ? masters.find((item) => String(item.id) === String(selectedMasterId))
+        : null;
 
-    points.push(focusLocation);
-
-    if (!points.length) {
-      map.setView(focusLocation, 11);
+    if (selected && typeof selected.lat === 'number' && typeof selected.lng === 'number') {
+      map.setView([selected.lat, selected.lng], 12, { animate: true });
       return () => window.clearTimeout(id);
     }
 
-    if (points.length === 1) {
-      map.setView(points[0], 11);
+    const validPoints: [number, number][] = masters
+      .filter((item) => typeof item.lat === 'number' && typeof item.lng === 'number')
+      .map((item) => [item.lat as number, item.lng as number]);
+
+    if (validPoints.length === 0) {
+      map.setView(focusLocation, 11, { animate: true });
       return () => window.clearTimeout(id);
     }
 
-    const bounds = L.latLngBounds(points);
-    map.fitBounds(bounds.pad(0.22), { animate: true });
+    if (validPoints.length === 1) {
+      map.setView(validPoints[0], 11, { animate: true });
+      return () => window.clearTimeout(id);
+    }
+
+    const bounds = L.latLngBounds(validPoints);
+    map.fitBounds(bounds.pad(0.2), { animate: true });
 
     return () => window.clearTimeout(id);
-  }, [map, masters, focusLocation]);
+  }, [map, masters, focusLocation, selectedMasterId]);
 
   return null;
 }
@@ -682,7 +736,7 @@ function RecenterToUserLayer({
 
   useEffect(() => {
     if (!recenterToUserTrigger) return;
-    map.setView(targetLocation, 14, { animate: true });
+    map.setView(targetLocation, 13, { animate: true });
   }, [map, targetLocation, recenterToUserTrigger]);
 
   return null;
@@ -714,7 +768,7 @@ export default function RealMap({
   );
   const [focusLocation, setFocusLocation] = useState<[number, number]>(initialFocusLocation);
 
-  const tr = t(language);
+  const trObj = t(language);
 
   useEffect(() => {
     const next = getEffectiveSearchLocation();
@@ -725,8 +779,8 @@ export default function RealMap({
     return (masters || []).map((item, index) => ({
       ...item,
       id: item.id ?? String(index),
-      lat: typeof item.lat === 'number' ? item.lat : focusLocation[0],
-      lng: typeof item.lng === 'number' ? item.lng : focusLocation[1],
+      lat: typeof item.lat === 'number' ? item.lat : undefined,
+      lng: typeof item.lng === 'number' ? item.lng : undefined,
       rating: item.rating ?? 4.7,
       price: item.price ?? '45',
       availableNow:
@@ -743,7 +797,7 @@ export default function RealMap({
           ? item.discountBadge
           : promotionBadgeTextByMasterId[String(item.id)] || '',
     }));
-  }, [masters, focusLocation, promotionBadgeTextByMasterId]);
+  }, [masters, promotionBadgeTextByMasterId]);
 
   const selectedMaster = useMemo(() => {
     if (selectedMasterId === null || selectedMasterId === undefined) return null;
@@ -803,6 +857,19 @@ export default function RealMap({
     return londonCenter;
   }, [focusLocation, currentDetectedLocation]);
 
+  const visibleMasters = useMemo(() => {
+    return safeMasters.filter(
+      (item) => typeof item.lat === 'number' && typeof item.lng === 'number'
+    );
+  }, [safeMasters]);
+
+  const selectedIdString =
+    selectedMasterId === null || selectedMasterId === undefined ? null : String(selectedMasterId);
+
+  const selectedLikeState = selectedMaster
+    ? likedMasterIds.includes(String(selectedMaster.id))
+    : false;
+
   return (
     <div
       style={{
@@ -835,7 +902,11 @@ export default function RealMap({
         <TileLayer attribution="&copy; OpenStreetMap contributors" url={getTileUrl(mapMode)} />
 
         <UserLocationLayer language={language} onLocationFound={setCurrentDetectedLocation} />
-        <FitBoundsLayer masters={safeMasters} focusLocation={focusLocation} />
+        <FitBoundsLayer
+          masters={visibleMasters}
+          focusLocation={focusLocation}
+          selectedMasterId={selectedMasterId}
+        />
         <RecenterToUserLayer
           targetLocation={focusLocation}
           recenterToUserTrigger={recenterToUserTrigger}
@@ -869,21 +940,20 @@ export default function RealMap({
           />
         </>
 
-        {safeMasters.map((master) => {
-          const isSelected = String(master.id) === String(selectedMasterId);
+        {visibleMasters.map((master, index) => {
+          const isSelected = String(master.id) === selectedIdString;
           const isLiked = likedMasterIds.includes(String(master.id));
+
+          const icon =
+            isSelected || index === 0
+              ? buildSelectedMarkerIcon(master, language, isLiked, promotionBadgeTextByMasterId)
+              : buildGenericPinIcon();
 
           return (
             <Marker
               key={String(master.id)}
               position={[master.lat as number, master.lng as number]}
-              icon={buildMarkerIcon(
-                master,
-                language,
-                isSelected,
-                isLiked,
-                promotionBadgeTextByMasterId
-              )}
+              icon={icon}
               eventHandlers={{
                 mousedown: () => {
                   ignoreNextMapClickRef.current = true;
@@ -1059,7 +1129,7 @@ export default function RealMap({
                 }}
                 aria-label="Favourite"
               >
-                ♥
+                {selectedLikeState ? '♥' : '♡'}
               </button>
             </div>
           </div>
@@ -1082,7 +1152,7 @@ export default function RealMap({
               boxSizing: 'border-box',
             }}
           >
-            {getVerifiedCardLabel(language, tr)}
+            {getVerifiedCardLabel(language, trObj)}
           </div>
 
           <div
@@ -1123,7 +1193,7 @@ export default function RealMap({
                 color: selectedMaster.availableNow ? '#23a33f' : '#d56688',
               }}
             >
-              {selectedMaster.availableNow ? tr.availableNow : tr.unavailableToday}
+              {selectedMaster.availableNow ? trObj.availableNow : trObj.unavailableToday}
             </div>
 
             <div
@@ -1176,7 +1246,7 @@ export default function RealMap({
               color: '#1f2430',
             }}
           >
-            {formatPrice(selectedMaster.price, tr)}
+            {formatPrice(selectedMaster.price, trObj)}
           </div>
 
           <div
@@ -1253,7 +1323,7 @@ export default function RealMap({
                 whiteSpace: 'nowrap',
               }}
             >
-              {tr.view}
+              {trObj.view}
             </button>
 
             <button
@@ -1275,7 +1345,7 @@ export default function RealMap({
                 whiteSpace: 'nowrap',
               }}
             >
-              {tr.route}
+              {trObj.route}
             </button>
 
             <button
@@ -1297,7 +1367,7 @@ export default function RealMap({
                 whiteSpace: 'nowrap',
               }}
             >
-              {tr.bookNow}
+              {trObj.bookNow}
             </button>
           </div>
         </div>
