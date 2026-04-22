@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getAllMasters } from '../services/masters';
@@ -376,7 +376,7 @@ function BrandMark() {
       src="/ui/logo/logo.png"
       alt="Olamep"
       style={{
-        height: 76,
+        height: 102,
         width: 'auto',
         display: 'block',
       }}
@@ -390,7 +390,7 @@ function ActionCountButton({
   count,
   onClick,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   count: number;
   onClick: () => void;
@@ -399,17 +399,17 @@ function ActionCountButton({
     <button
       onClick={onClick}
       style={{
-        minHeight: 52,
+        minHeight: 54,
         border: '2px solid #111111',
-        borderRadius: 18,
+        borderRadius: 20,
         background: '#ffffff',
         color: '#111111',
         cursor: 'pointer',
         display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 34px',
+        gridTemplateColumns: 'minmax(0, 1fr) 38px',
         alignItems: 'center',
         gap: 8,
-        padding: '0 8px 0 10px',
+        padding: '0 10px 0 12px',
       }}
     >
       <div
@@ -418,7 +418,7 @@ function ActionCountButton({
           alignItems: 'center',
           gap: 8,
           minWidth: 0,
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: 900,
         }}
       >
@@ -438,8 +438,8 @@ function ActionCountButton({
 
       <span
         style={{
-          width: 34,
-          height: 34,
+          width: 38,
+          height: 38,
           borderRadius: 999,
           border: '2px solid #111111',
           background: '#ffffff',
@@ -447,7 +447,7 @@ function ActionCountButton({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: 900,
           flexShrink: 0,
         }}
@@ -898,7 +898,7 @@ export default function HomePage() {
         background: '#f6f4ef',
         fontFamily: 'Arial, sans-serif',
         color: '#17130f',
-        paddingBottom: 118,
+        paddingBottom: 128,
       }}
     >
       <div
@@ -908,12 +908,12 @@ export default function HomePage() {
           background: '#f6f4ef',
         }}
       >
-        <section style={{ padding: '16px 12px 0' }}>
+        <section style={{ padding: '22px 12px 0' }}>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              padding: '0 0 10px',
+              padding: '0 0 12px 2px',
             }}
           >
             <BrandMark />
@@ -923,15 +923,15 @@ export default function HomePage() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 58px 58px 58px',
+                gridTemplateColumns: '1fr 54px 54px 54px',
                 gap: 8,
                 alignItems: 'center',
               }}
             >
               <div
                 style={{
-                  height: 56,
-                  borderRadius: 18,
+                  height: 58,
+                  borderRadius: 20,
                   border: '2px solid #111111',
                   background: '#fff',
                   display: 'flex',
@@ -973,7 +973,7 @@ export default function HomePage() {
                     border: 'none',
                     outline: 'none',
                     background: 'transparent',
-                    fontSize: 13,
+                    fontSize: 12,
                     color: '#2b2f36',
                     fontWeight: 700,
                   }}
@@ -1002,14 +1002,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 58,
-                  height: 56,
+                  width: 54,
+                  height: 54,
                   borderRadius: 16,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 900,
                   display: 'inline-flex',
                   flexDirection: 'column',
@@ -1019,21 +1019,21 @@ export default function HomePage() {
                   cursor: 'pointer',
                 }}
               >
-                <span style={{ fontSize: 20, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 18, lineHeight: 1 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 58,
-                  height: 56,
+                  width: 54,
+                  height: 54,
                   borderRadius: 16,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 24,
+                  fontSize: 22,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1047,14 +1047,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 58,
-                  height: 56,
+                  width: 54,
+                  height: 54,
                   borderRadius: 16,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 22,
+                  fontSize: 20,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1332,7 +1332,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '8px 0 0' }}>
+        <section style={{ padding: '10px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1351,12 +1351,12 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '8px 12px 0' }}>
+        <section style={{ padding: '10px 12px 0' }}>
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
-              gap: 8,
+              gap: 10,
             }}
           >
             <ActionCountButton
@@ -1364,7 +1364,7 @@ export default function HomePage() {
                 setDealFilterMode('none');
                 setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
               }}
-              icon={<span style={{ fontSize: 22, color: '#ff3b58', lineHeight: 1 }}>♥</span>}
+              icon={<span style={{ fontSize: 24, color: '#ff3b58', lineHeight: 1 }}>♥</span>}
               title="Favourite"
               count={likedInCategoryCount}
             />
@@ -1404,9 +1404,9 @@ export default function HomePage() {
               }}
               icon={
                 <span style={{ display: 'inline-flex', gap: 1, color: '#ff3b58' }}>
-                  <span style={{ fontSize: 16, lineHeight: 1 }}>♥</span>
-                  <span style={{ fontSize: 14, lineHeight: 1 }}>♥</span>
-                  <span style={{ fontSize: 12, lineHeight: 1 }}>♥</span>
+                  <span style={{ fontSize: 18, lineHeight: 1 }}>♥</span>
+                  <span style={{ fontSize: 15, lineHeight: 1 }}>♥</span>
+                  <span style={{ fontSize: 13, lineHeight: 1 }}>♥</span>
                 </span>
               }
               title="All favourite"
@@ -1443,17 +1443,17 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '10px 12px 0' }}>
+        <section style={{ padding: '12px 12px 0' }}>
           <div
             style={{
-              borderRadius: 32,
+              borderRadius: 34,
               overflow: 'hidden',
-              border: '1.5px solid #ded8cf',
+              border: '1.5px solid #ddd7ce',
               background: '#ffffff',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.05)',
             }}
           >
-            <div style={{ height: 470, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ height: 500, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={mapMasters}
                 mapMode={mapMode}
