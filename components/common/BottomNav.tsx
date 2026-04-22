@@ -19,7 +19,6 @@ export default function BottomNav({ active }: BottomNavProps) {
 
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
-  const [showAddMenu, setShowAddMenu] = useState(false);
 
   useEffect(() => {
     const loadUnread = () => {
@@ -41,10 +40,6 @@ export default function BottomNav({ active }: BottomNavProps) {
       unsubLanguage();
     };
   }, []);
-
-  useEffect(() => {
-    setShowAddMenu(false);
-  }, [pathname]);
 
   const navText = useMemo(() => {
     return {
@@ -69,48 +64,6 @@ export default function BottomNav({ active }: BottomNavProps) {
           ? 'Start'
           : 'Home',
 
-      messages:
-        language === 'ES'
-          ? 'Mensajes'
-          : language === 'RU'
-          ? 'Сообщения'
-          : language === 'UA'
-          ? 'Повідомлення'
-          : language === 'CZ'
-          ? 'Zprávy'
-          : language === 'DE'
-          ? 'Nachrichten'
-          : language === 'IT'
-          ? 'Messaggi'
-          : language === 'FR'
-          ? 'Messages'
-          : language === 'AR'
-          ? 'الرسائل'
-          : language === 'PL'
-          ? 'Wiadomości'
-          : 'Messages',
-
-      add:
-        language === 'ES'
-          ? 'Añadir'
-          : language === 'RU'
-          ? 'Добавить'
-          : language === 'UA'
-          ? 'Додати'
-          : language === 'CZ'
-          ? 'Přidat'
-          : language === 'DE'
-          ? 'Hinzufügen'
-          : language === 'IT'
-          ? 'Aggiungi'
-          : language === 'FR'
-          ? 'Ajouter'
-          : language === 'AR'
-          ? 'إضافة'
-          : language === 'PL'
-          ? 'Dodaj'
-          : 'Add',
-
       bookings:
         language === 'ES'
           ? 'Reservas'
@@ -132,6 +85,48 @@ export default function BottomNav({ active }: BottomNavProps) {
           ? 'Rezerwacje'
           : 'Bookings',
 
+      explore:
+        language === 'ES'
+          ? 'Explorar'
+          : language === 'RU'
+          ? 'Обзор'
+          : language === 'UA'
+          ? 'Огляд'
+          : language === 'CZ'
+          ? 'Objevovat'
+          : language === 'DE'
+          ? 'Entdecken'
+          : language === 'IT'
+          ? 'Esplora'
+          : language === 'FR'
+          ? 'Explorer'
+          : language === 'AR'
+          ? 'استكشاف'
+          : language === 'PL'
+          ? 'Odkrywaj'
+          : 'Explore',
+
+      messages:
+        language === 'ES'
+          ? 'Mensajes'
+          : language === 'RU'
+          ? 'Сообщения'
+          : language === 'UA'
+          ? 'Повідомлення'
+          : language === 'CZ'
+          ? 'Zprávy'
+          : language === 'DE'
+          ? 'Nachrichten'
+          : language === 'IT'
+          ? 'Messaggi'
+          : language === 'FR'
+          ? 'Messages'
+          : language === 'AR'
+          ? 'الرسائل'
+          : language === 'PL'
+          ? 'Wiadomości'
+          : 'Messages',
+
       profile:
         language === 'ES'
           ? 'Perfil'
@@ -152,90 +147,6 @@ export default function BottomNav({ active }: BottomNavProps) {
           : language === 'PL'
           ? 'Profil'
           : 'Profile',
-
-      addAdvertisementShort:
-        language === 'ES'
-          ? 'Publicidad'
-          : language === 'RU'
-          ? 'Реклама'
-          : language === 'UA'
-          ? 'Реклама'
-          : language === 'CZ'
-          ? 'Reklama'
-          : language === 'DE'
-          ? 'Werbung'
-          : language === 'IT'
-          ? 'Pubblicità'
-          : language === 'FR'
-          ? 'Pub'
-          : language === 'AR'
-          ? 'إعلان'
-          : language === 'PL'
-          ? 'Reklama'
-          : 'Ad',
-
-      addServiceShort:
-        language === 'ES'
-          ? 'Servicio'
-          : language === 'RU'
-          ? 'Услуга'
-          : language === 'UA'
-          ? 'Послуга'
-          : language === 'CZ'
-          ? 'Služba'
-          : language === 'DE'
-          ? 'Service'
-          : language === 'IT'
-          ? 'Servizio'
-          : language === 'FR'
-          ? 'Service'
-          : language === 'AR'
-          ? 'خدمة'
-          : language === 'PL'
-          ? 'Usługa'
-          : 'Service',
-
-      addDealShort:
-        language === 'ES'
-          ? 'Descuento'
-          : language === 'RU'
-          ? 'Скидка'
-          : language === 'UA'
-          ? 'Знижка'
-          : language === 'CZ'
-          ? 'Sleva'
-          : language === 'DE'
-          ? 'Rabatt'
-          : language === 'IT'
-          ? 'Sconto'
-          : language === 'FR'
-          ? 'Réduc.'
-          : language === 'AR'
-          ? 'خصم'
-          : language === 'PL'
-          ? 'Zniżka'
-          : 'Deal',
-
-      close:
-        language === 'ES'
-          ? 'Cerrar'
-          : language === 'RU'
-          ? 'Закрыть'
-          : language === 'UA'
-          ? 'Закрити'
-          : language === 'CZ'
-          ? 'Zavřít'
-          : language === 'DE'
-          ? 'Schließen'
-          : language === 'IT'
-          ? 'Chiudi'
-          : language === 'FR'
-          ? 'Fermer'
-          : language === 'AR'
-          ? 'إغلاق'
-          : language === 'PL'
-          ? 'Zamknij'
-          : 'Close',
     };
   }, [language]);
 
@@ -246,383 +157,176 @@ export default function BottomNav({ active }: BottomNavProps) {
     pathname.startsWith('/bookings') ||
     pathname.startsWith('/profile/bookings');
   const isProfile = active === 'profile' || pathname.startsWith('/profile');
-  const isAdd =
-    active === 'add' ||
-    pathname.startsWith('/add') ||
-    pathname.startsWith('/profile/promotions/new') ||
-    pathname.startsWith('/profile/deals/new');
+  const isExplore = active === 'add' || pathname.startsWith('/add');
 
-  const handleOpenAddMenu = () => setShowAddMenu(true);
-  const handleCloseAddMenu = () => setShowAddMenu(false);
-
-  const handleGoToAdvertisement = () => {
-    setShowAddMenu(false);
-    router.push('/profile/promotions/new');
-  };
-
-  const handleGoToService = () => {
-    setShowAddMenu(false);
-    router.push('/add');
-  };
-
-  const handleGoToDeal = () => {
-    setShowAddMenu(false);
-    router.push('/profile/deals/new');
-  };
+  const activeColor = '#45c63d';
+  const inactiveColor = '#2b2f36';
 
   return (
-    <>
-      {showAddMenu ? (
-        <div
-          onClick={handleCloseAddMenu}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(20,20,20,0.16)',
-            zIndex: 120,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              padding: '0 14px calc(92px + env(safe-area-inset-bottom))',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                border: '3px solid #111111',
-                borderRadius: 28,
-                background: '#ffffff',
-                boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 1fr',
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={handleGoToAdvertisement}
-                  style={{
-                    minHeight: 112,
-                    border: 'none',
-                    borderRight: '3px solid #111111',
-                    background: '#f1dc4c',
-                    padding: '14px 10px 12px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 10,
-                  }}
-                >
-                  <span style={{ fontSize: 34, lineHeight: 1 }}>📣</span>
-                  <span
-                    style={{
-                      fontSize: 13,
-                      lineHeight: 1.15,
-                      fontWeight: 900,
-                      color: '#17130f',
-                      textAlign: 'center',
-                    }}
-                  >
-                    {navText.addAdvertisementShort}
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleGoToService}
-                  style={{
-                    minHeight: 112,
-                    border: 'none',
-                    borderRight: '3px solid #111111',
-                    background: '#4acb39',
-                    padding: '14px 10px 12px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 10,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 42,
-                      lineHeight: 1,
-                      color: '#ffffff',
-                      fontWeight: 900,
-                    }}
-                  >
-                    +
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 13,
-                      lineHeight: 1.15,
-                      fontWeight: 900,
-                      color: '#ffffff',
-                      textAlign: 'center',
-                    }}
-                  >
-                    {navText.addServiceShort}
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleGoToDeal}
-                  style={{
-                    minHeight: 112,
-                    border: 'none',
-                    background: '#ff5252',
-                    padding: '14px 10px 12px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 10,
-                    position: 'relative',
-                  }}
-                >
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: 10,
-                      right: 10,
-                      minWidth: 42,
-                      height: 34,
-                      padding: '0 10px',
-                      borderRadius: 999,
-                      border: '3px solid #111111',
-                      background: '#ffffff',
-                      color: '#b13a3a',
-                      fontSize: 18,
-                      fontWeight: 900,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxSizing: 'border-box',
-                    }}
-                  >
-                    £1
-                  </span>
-
-                  <span
-                    style={{
-                      fontSize: 38,
-                      lineHeight: 1,
-                      color: '#ffffff',
-                      fontWeight: 900,
-                    }}
-                  >
-                    %
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 13,
-                      lineHeight: 1.15,
-                      fontWeight: 900,
-                      color: '#ffffff',
-                      textAlign: 'center',
-                    }}
-                  >
-                    {navText.addDealShort}
-                  </span>
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleCloseAddMenu}
-                style={{
-                  width: '100%',
-                  height: 56,
-                  border: 'none',
-                  borderTop: '3px solid #111111',
-                  background: '#ffffff',
-                  color: '#17130f',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                ✕ {navText.close}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      <nav
+    <nav
+      style={{
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 90,
+        background: 'transparent',
+        padding: '0 12px calc(12px + env(safe-area-inset-bottom))',
+      }}
+    >
+      <div
         style={{
-          position: 'fixed',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(247,244,238,0.98)',
-          borderTop: '1px solid #e3ddd5',
-          backdropFilter: 'blur(10px)',
-          zIndex: 80,
+          maxWidth: 430,
+          margin: '0 auto',
+          background: '#f7f4ee',
+          border: '1.5px solid #e6e0d8',
+          borderRadius: 28,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
+          alignItems: 'end',
+          padding: '10px 6px 8px',
         }}
       >
-        <div
+        <button
+          type="button"
+          onClick={() => router.push('/')}
           style={{
-            maxWidth: 430,
-            margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr 92px 1fr 1fr',
-            alignItems: 'end',
-            padding: '10px 8px calc(10px + env(safe-area-inset-bottom))',
-            boxSizing: 'border-box',
+            border: 'none',
+            background: 'transparent',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 5,
+            color: isHome ? activeColor : inactiveColor,
+            cursor: 'pointer',
+            padding: '4px 0',
           }}
         >
-          <button
-            type="button"
-            onClick={() => router.push('/')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-              color: isHome ? '#45c63d' : '#6e7b8a',
-              cursor: 'pointer',
-            }}
-          >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>⌂</span>
-            <span style={{ fontSize: 12, fontWeight: 800 }}>{navText.home}</span>
-          </button>
+          <span style={{ fontSize: 31, lineHeight: 1 }}>⌂</span>
+          <span style={{ fontSize: 11, fontWeight: 800 }}>{navText.home}</span>
+        </button>
 
-          <button
-            type="button"
-            onClick={() => router.push('/messages')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-              color: isMessages ? '#45c63d' : '#6e7b8a',
-              position: 'relative',
-              cursor: 'pointer',
-            }}
-          >
-            <div style={{ position: 'relative' }}>
-              <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>✉</span>
+        <button
+          type="button"
+          onClick={() => router.push('/profile/bookings')}
+          style={{
+            border: 'none',
+            background: 'transparent',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 5,
+            color: isBookings ? activeColor : inactiveColor,
+            cursor: 'pointer',
+            padding: '4px 0',
+          }}
+        >
+          <span style={{ fontSize: 28, lineHeight: 1 }}>▤</span>
+          <span style={{ fontSize: 11, fontWeight: 800 }}>{navText.bookings}</span>
+        </button>
 
-              {unreadMessages > 0 ? (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: -6,
-                    right: -10,
-                    minWidth: 18,
-                    height: 18,
-                    padding: '0 5px',
-                    borderRadius: 999,
-                    background: '#e53935',
-                    color: '#fff',
-                    fontSize: 11,
-                    fontWeight: 800,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 3px 8px rgba(229,57,53,0.35)',
-                    border: '2px solid #f7f4ee',
-                  }}
-                >
-                  {unreadMessages > 9 ? '9+' : unreadMessages}
-                </span>
-              ) : null}
-            </div>
-
-            <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.messages}</span>
-          </button>
-
+        <button
+          type="button"
+          onClick={() => router.push('/')}
+          style={{
+            border: 'none',
+            background: 'transparent',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 5,
+            color: isExplore ? activeColor : inactiveColor,
+            cursor: 'pointer',
+            padding: '0',
+          }}
+        >
           <div
             style={{
+              width: 54,
+              height: 54,
+              borderRadius: 999,
+              background: activeColor,
+              color: '#ffffff',
               display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
-              transform: 'translateY(-18px)',
+              fontSize: 30,
+              fontWeight: 900,
+              boxShadow: '0 8px 18px rgba(69,198,61,0.28)',
             }}
           >
-            <button
-              type="button"
-              onClick={handleOpenAddMenu}
-              style={{
-                width: 78,
-                height: 78,
-                borderRadius: 999,
-                border: '4px solid #45c63d',
-                background: isAdd ? '#45c63d' : '#ffffff',
-                color: isAdd ? '#ffffff' : '#45c63d',
-                boxShadow: '0 10px 24px rgba(0,0,0,0.14)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 2,
-                cursor: 'pointer',
-              }}
-              title={navText.add}
-            >
-              <span style={{ fontSize: 36, lineHeight: 1, fontWeight: 400 }}>+</span>
-              <span style={{ fontSize: 11, fontWeight: 800 }}>{navText.add}</span>
-            </button>
+            ✦
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 800, marginTop: 1 }}>{navText.explore}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => router.push('/messages')}
+          style={{
+            border: 'none',
+            background: 'transparent',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 5,
+            color: isMessages ? activeColor : inactiveColor,
+            cursor: 'pointer',
+            padding: '4px 0',
+            position: 'relative',
+          }}
+        >
+          <div style={{ position: 'relative' }}>
+            <span style={{ fontSize: 28, lineHeight: 1 }}>⌁</span>
+
+            {unreadMessages > 0 ? (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: -6,
+                  right: -10,
+                  minWidth: 18,
+                  height: 18,
+                  padding: '0 5px',
+                  borderRadius: 999,
+                  background: '#e53935',
+                  color: '#fff',
+                  fontSize: 11,
+                  fontWeight: 800,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid #f7f4ee',
+                }}
+              >
+                {unreadMessages > 9 ? '9+' : unreadMessages}
+              </span>
+            ) : null}
           </div>
 
-          <button
-            type="button"
-            onClick={() => router.push('/profile/bookings')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-              color: isBookings ? '#45c63d' : '#6e7b8a',
-              cursor: 'pointer',
-            }}
-          >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>▤</span>
-            <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.bookings}</span>
-          </button>
+          <span style={{ fontSize: 11, fontWeight: 800 }}>{navText.messages}</span>
+        </button>
 
-          <button
-            type="button"
-            onClick={() => router.push('/profile')}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 5,
-              color: isProfile ? '#45c63d' : '#6e7b8a',
-              cursor: 'pointer',
-            }}
-          >
-            <span style={{ fontSize: 31, lineHeight: 1, fontWeight: 700 }}>◉</span>
-            <span style={{ fontSize: 12, fontWeight: 700 }}>{navText.profile}</span>
-          </button>
-        </div>
-      </nav>
-    </>
+        <button
+          type="button"
+          onClick={() => router.push('/profile')}
+          style={{
+            border: 'none',
+            background: 'transparent',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 5,
+            color: isProfile ? activeColor : inactiveColor,
+            cursor: 'pointer',
+            padding: '4px 0',
+          }}
+        >
+          <span style={{ fontSize: 28, lineHeight: 1 }}>◯</span>
+          <span style={{ fontSize: 11, fontWeight: 800 }}>{navText.profile}</span>
+        </button>
+      </div>
+    </nav>
   );
 }
