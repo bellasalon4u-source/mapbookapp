@@ -184,4 +184,173 @@ function getCurrencyOptions(text: PageTextShape): CurrencyOption[] {
     { value: 'CZK', symbol: 'Kč', title: 'CZK', subtitle: text.czechKoruna },
     { value: 'UAH', symbol: '₴', title: 'UAH', subtitle: text.ukrainianHryvnia },
     { value: 'AED', symbol: 'AED', title: 'AED', subtitle: text.uaeDirham },
-    { value: 'CNY', symbol: 'CN¥', title: 'C
+    { value: 'CNY', symbol: 'CN¥', title: 'CNY', subtitle: text.chineseYuan },
+    { value: 'SEK', symbol: 'SEK', title: 'SEK', subtitle: text.swedishKrona },
+    { value: 'DKK', symbol: 'DKK', title: 'DKK', subtitle: text.danishKrone },
+  ];
+}
+
+function CheckMark({ checked }: { checked: boolean }) {
+  return (
+    <div
+      style={{
+        width: 28,
+        height: 28,
+        borderRadius: 999,
+        border: '2px solid #111111',
+        background: checked ? '#35c94a' : '#ffffff',
+        color: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 16,
+        fontWeight: 900,
+        flexShrink: 0,
+      }}
+    >
+      {checked ? '✓' : ''}
+    </div>
+  );
+}
+
+export default function CurrencyPage() {
+  const router = useRouter();
+  const language = getSavedLanguage();
+  const text = pageTexts[language] || pageTexts.EN;
+  const initialCurrency = getAppRegionSettings().currency;
+  const [selectedCurrency, setSelectedCurrency] = useState<AppCurrency>(initialCurrency);
+
+  const currencyOptions = useMemo(() => getCurrencyOptions(text), [text]);
+
+  const applyCurrency = (nextCurrency: AppCurrency) => {
+    setSelectedCurrency(nextCurrency);
+    updateAppRegionSettings({
+      currency: nextCurrency,
+    });
+  };
+
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#f6f4ef',
+        padding: '16px 14px 120px',
+        fontFamily: 'Arial, sans-serif',
+      }}
+    >
+      <div style={{ maxWidth: 430, margin: '0 auto' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '52px 1fr',
+            alignItems: 'center',
+            gap: 12,
+            marginBottom: 16,
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => router.back()}
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: 18,
+              border: '2px solid #111111',
+              background: '#fff',
+              fontSize: 24,
+              fontWeight: 900,
+              color: '#17130f',
+              cursor: 'pointer',
+            }}
+          >
+            ←
+          </button>
+
+          <div>
+            <h1
+              style={{
+                fontSize: 24,
+                fontWeight: 900,
+                color: '#17130f',
+                margin: 0,
+                lineHeight: 1.05,
+              }}
+            >
+              {text.title}
+            </h1>
+            <div
+              style={{
+                marginTop: 6,
+                fontSize: 13,
+                color: '#7b7268',
+                fontWeight: 700,
+                lineHeight: 1.35,
+              }}
+            >
+              {text.subtitle}
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            background: '#ffffff',
+            borderRadius: 26,
+            padding: 14,
+            border: '2px solid #111111',
+            display: 'grid',
+            gap: 10,
+          }}
+        >
+          {currencyOptions.map((option) => {
+            const checked = selectedCurrency === option.value;
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => applyCurrency(option.value)}
+                style={{
+                  width: '100%',
+                  display: 'grid',
+                  gridTemplateColumns: '62px 1fr auto',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: '14px 12px',
+                  background: checked ? '#f7f1e7' : '#fff',
+                  border: '2px solid #111111',
+                  textAlign: 'left',
+                  borderRadius: 18,
+                  cursor: 'pointer',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
+                  {option.symbol}
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 900, color: '#17130f' }}>
+                    {option.title}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#7c746a', fontWeight: 700 }}>
+                    {option.subtitle}
+                  </div>
+                </div>
+
+                <CheckMark checked={checked} />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <BottomNav active="profile" />
+    </main>
+  );
+}
