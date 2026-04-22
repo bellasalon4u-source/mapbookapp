@@ -67,15 +67,6 @@ function getCategoryAccent(category?: string) {
   if (normalized === 'repairs') return '#f4b400';
   if (normalized === 'tech') return '#9b5cff';
   if (normalized === 'pets') return '#28c7d9';
-  if (normalized === 'transport') return '#2f7df6';
-  if (normalized === 'education') return '#7d52ff';
-  if (normalized === 'fashion') return '#ff6fb5';
-  if (normalized === 'auto') return '#44c067';
-  if (normalized === 'moving') return '#ff9f1a';
-  if (normalized === 'fitness') return '#ff5b5b';
-  if (normalized === 'events') return '#9b5cff';
-  if (normalized === 'activities') return '#00b8d9';
-  if (normalized === 'creative') return '#ff7a59';
 
   return '#ff4f93';
 }
@@ -233,102 +224,6 @@ function getCategoryBadgeLabel(category?: string, language: AppLanguage = 'EN') 
       AR: 'حيوانات',
       PL: 'Zwierzęta',
     },
-    fashion: {
-      EN: 'Fashion',
-      ES: 'Moda',
-      RU: 'Мода',
-      UA: 'Мода',
-      CZ: 'Móda',
-      DE: 'Mode',
-      IT: 'Moda',
-      FR: 'Mode',
-      AR: 'موضة',
-      PL: 'Moda',
-    },
-    auto: {
-      EN: 'Auto',
-      ES: 'Auto',
-      RU: 'Авто',
-      UA: 'Авто',
-      CZ: 'Auto',
-      DE: 'Auto',
-      IT: 'Auto',
-      FR: 'Auto',
-      AR: 'سيارات',
-      PL: 'Auto',
-    },
-    moving: {
-      EN: 'Moving',
-      ES: 'Mudanza',
-      RU: 'Переезд',
-      UA: 'Переїзд',
-      CZ: 'Stěhování',
-      DE: 'Umzug',
-      IT: 'Trasloco',
-      FR: 'Déménagement',
-      AR: 'نقل',
-      PL: 'Przeprowadzka',
-    },
-    fitness: {
-      EN: 'Fitness',
-      ES: 'Fitness',
-      RU: 'Фитнес',
-      UA: 'Фітнес',
-      CZ: 'Fitness',
-      DE: 'Fitness',
-      IT: 'Fitness',
-      FR: 'Fitness',
-      AR: 'لياقة',
-      PL: 'Fitness',
-    },
-    education: {
-      EN: 'Education',
-      ES: 'Educación',
-      RU: 'Обучение',
-      UA: 'Навчання',
-      CZ: 'Vzdělání',
-      DE: 'Bildung',
-      IT: 'Educazione',
-      FR: 'Éducation',
-      AR: 'تعليم',
-      PL: 'Edukacja',
-    },
-    events: {
-      EN: 'Events',
-      ES: 'Eventos',
-      RU: 'События',
-      UA: 'Події',
-      CZ: 'Události',
-      DE: 'Events',
-      IT: 'Eventi',
-      FR: 'Événements',
-      AR: 'فعاليات',
-      PL: 'Wydarzenia',
-    },
-    activities: {
-      EN: 'Activities',
-      ES: 'Actividades',
-      RU: 'Активности',
-      UA: 'Активності',
-      CZ: 'Aktivity',
-      DE: 'Aktivitäten',
-      IT: 'Attività',
-      FR: 'Activités',
-      AR: 'أنشطة',
-      PL: 'Aktywności',
-    },
-    creative: {
-      EN: 'Creative',
-      ES: 'Creativo',
-      RU: 'Креатив',
-      UA: 'Креатив',
-      CZ: 'Kreativa',
-      DE: 'Kreativ',
-      IT: 'Creativo',
-      FR: 'Créatif',
-      AR: 'إبداعي',
-      PL: 'Kreatywne',
-    },
   };
 
   return (
@@ -429,18 +324,18 @@ function buildGenericPinIcon(): DivIcon {
   return L.divIcon({
     className: 'custom-generic-pin',
     html: `
-      <div style="position:relative;width:54px;height:72px;">
+      <div style="position:relative;width:42px;height:58px;">
         <div style="
           position:absolute;
           left:50%;
-          top:20px;
+          top:16px;
           transform:translateX(-50%);
           width:0;
           height:0;
-          border-left:15px solid transparent;
-          border-right:15px solid transparent;
-          border-top:24px solid #44c55a;
-          filter:drop-shadow(0 6px 8px rgba(0,0,0,0.18));
+          border-left:12px solid transparent;
+          border-right:12px solid transparent;
+          border-top:20px solid #44c55a;
+          filter:drop-shadow(0 4px 6px rgba(0,0,0,0.16));
         "></div>
 
         <div style="
@@ -448,27 +343,27 @@ function buildGenericPinIcon(): DivIcon {
           left:50%;
           top:0;
           transform:translateX(-50%);
-          width:44px;
-          height:44px;
+          width:34px;
+          height:34px;
           border-radius:999px;
           background:#44c55a;
           border:4px solid #ffffff;
-          box-shadow:0 7px 16px rgba(0,0,0,0.16);
+          box-shadow:0 5px 12px rgba(0,0,0,0.14);
           display:flex;
           align-items:center;
           justify-content:center;
         ">
           <div style="
-            width:16px;
-            height:16px;
+            width:12px;
+            height:12px;
             border-radius:999px;
             background:#ffffff;
           "></div>
         </div>
       </div>
     `,
-    iconSize: [54, 72],
-    iconAnchor: [27, 66],
+    iconSize: [42, 58],
+    iconAnchor: [21, 53],
   });
 }
 
@@ -487,26 +382,26 @@ function buildSelectedMarkerIcon(
   const discountText = getPromotionBadgeText(master, promotionBadgeTextByMasterId);
   const hasDiscount = Boolean(discountText);
 
-  const size = 82;
-  const photoSize = 60;
-  const likeBadgeSize = 30;
-  const statusBadgeSize = 18;
-  const rightBadgeOffset = hasDiscount ? 48 : 6;
+  const size = 66;
+  const photoSize = 46;
+  const likeBadgeSize = 24;
+  const statusBadgeSize = 16;
+  const rightBadgeOffset = hasDiscount ? 42 : 4;
 
   return L.divIcon({
     className: 'custom-selected-master-pin',
     html: `
-      <div style="position:relative;width:${hasDiscount ? size + 56 : size}px;height:${size + 22}px;">
+      <div style="position:relative;width:${hasDiscount ? size + 50 : size}px;height:${size + 18}px;">
         <div style="
           position:absolute;
           left:${size / 2}px;
-          top:${size - 6}px;
+          top:${size - 5}px;
           transform:translateX(-50%);
           width:0;
           height:0;
-          border-left:15px solid transparent;
-          border-right:15px solid transparent;
-          border-top:22px solid ${accent};
+          border-left:12px solid transparent;
+          border-right:12px solid transparent;
+          border-top:18px solid ${accent};
           filter:drop-shadow(0 5px 8px rgba(0,0,0,0.16));
         "></div>
 
@@ -519,8 +414,8 @@ function buildSelectedMarkerIcon(
           height:${size}px;
           border-radius:999px;
           background:#fff;
-          border:6px solid ${accent};
-          box-shadow:0 8px 18px rgba(0,0,0,0.16);
+          border:5px solid ${accent};
+          box-shadow:0 7px 16px rgba(0,0,0,0.16);
           overflow:hidden;
         ">
           <img
@@ -546,19 +441,19 @@ function buildSelectedMarkerIcon(
           <div style="
             position:absolute;
             right:0;
-            top:${size * 0.49}px;
-            min-width:58px;
-            height:34px;
-            padding:0 12px;
+            top:${size * 0.46}px;
+            min-width:52px;
+            height:30px;
+            padding:0 10px;
             background:linear-gradient(180deg,#ffe66d 0%,#ffd12d 100%);
             border:3px solid #111111;
             border-radius:999px;
-            box-shadow:0 6px 12px rgba(0,0,0,0.18);
+            box-shadow:0 5px 10px rgba(0,0,0,0.18);
             display:flex;
             align-items:center;
             justify-content:center;
             color:#2a2115;
-            font-size:16px;
+            font-size:14px;
             font-weight:900;
             line-height:1;
             white-space:nowrap;
@@ -574,7 +469,7 @@ function buildSelectedMarkerIcon(
           style="
             position:absolute;
             right:${rightBadgeOffset}px;
-            top:${size * 0.62}px;
+            top:${size * 0.60}px;
             width:${likeBadgeSize + 10}px;
             height:${likeBadgeSize + 10}px;
             background:#ffffff;
@@ -585,7 +480,7 @@ function buildSelectedMarkerIcon(
             align-items:center;
             justify-content:center;
             color:#ff295f;
-            font-size:${isLiked ? 18 : 0}px;
+            font-size:${isLiked ? 15 : 0}px;
             font-weight:900;
             line-height:1;
             cursor:pointer;
@@ -596,10 +491,10 @@ function buildSelectedMarkerIcon(
 
         <div style="
           position:absolute;
-          right:${hasDiscount ? 98 : likeBadgeSize + 24}px;
-          top:${size * 0.54}px;
-          width:${statusBadgeSize + 10}px;
-          height:${statusBadgeSize + 10}px;
+          right:${hasDiscount ? 86 : likeBadgeSize + 18}px;
+          top:${size * 0.52}px;
+          width:${statusBadgeSize + 8}px;
+          height:${statusBadgeSize + 8}px;
           background:#fff;
           border:4px solid ${availabilityColor};
           border-radius:999px;
@@ -607,8 +502,8 @@ function buildSelectedMarkerIcon(
         "></div>
       </div>
     `,
-    iconSize: [hasDiscount ? size + 56 : size, size + 22],
-    iconAnchor: [size / 2, size + 12],
+    iconSize: [hasDiscount ? size + 50 : size, size + 18],
+    iconAnchor: [size / 2, size + 8],
   });
 }
 
@@ -673,7 +568,7 @@ function FitBoundsLayer({
     }
 
     const bounds = L.latLngBounds(validPoints);
-    map.fitBounds(bounds.pad(0.2), { animate: true });
+    map.fitBounds(bounds.pad(0.18), { animate: true });
 
     return () => window.clearTimeout(id);
   }, [map, masters, focusLocation, selectedMasterId]);
@@ -987,7 +882,7 @@ export default function RealMap({
             position: 'absolute',
             left: 12,
             right: 12,
-            bottom: 16,
+            bottom: 14,
             zIndex: 1200,
             background: '#ffffff',
             borderRadius: 34,
@@ -1247,54 +1142,6 @@ export default function RealMap({
             }}
           >
             {formatPrice(selectedMaster.price, trObj)}
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              gap: 8,
-              marginBottom: 10,
-            }}
-          >
-            {normalizePaymentMethods(selectedMaster.paymentMethods)
-              .slice(0, 3)
-              .map((method) => {
-                const badge = paymentBadge(method, language);
-
-                return (
-                  <div
-                    key={method}
-                    style={{
-                      border: '3px solid #111111',
-                      background: '#ffffff',
-                      borderRadius: 999,
-                      padding: '10px 8px',
-                      fontSize: 11,
-                      fontWeight: 900,
-                      color: '#2b3745',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6,
-                      textAlign: 'center',
-                      minHeight: 46,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <span style={{ flexShrink: 0 }}>{badge.icon}</span>
-                    <span
-                      style={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {badge.label}
-                    </span>
-                  </div>
-                );
-              })}
           </div>
 
           <div
