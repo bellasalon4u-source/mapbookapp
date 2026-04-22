@@ -1,4 +1,4 @@
-'use client';
+l'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -262,7 +262,7 @@ function translateSubcategory(value: string, language: AppLanguage) {
     Hair: { EN: 'Hair', ES: 'Cabello', RU: 'Волосы', UA: 'Волосся', CZ: 'Vlasy', DE: 'Haare', IT: 'Capelli', FR: 'Cheveux', AR: 'الشعر', PL: 'Włosy' },
     'Brows & Lashes': { EN: 'Brows & Lashes', ES: 'Cejas y pestañas', RU: 'Брови и ресницы', UA: 'Брови та вії', CZ: 'Obočí a řasy', DE: 'Augenbrauen & Wimpern', IT: 'Sopracciglia e ciglia', FR: 'Sourcils et cils', AR: 'الحواجب والرموش', PL: 'Brwi i rzęsy' },
     Nails: { EN: 'Nails', ES: 'Uñas', RU: 'Ногти', UA: 'Нігті', CZ: 'Nehty', DE: 'Nägel', IT: 'Unghie', FR: 'Ongles', AR: 'الأظافر', PL: 'Paznokcie' },
-    Makeup: { EN: 'Makeup', ES: 'Maquillaje', RU: 'Макияж', UA: 'Макіяж', CZ: 'Make-up', DE: 'Make-up', IT: 'Make-up', FR: 'Maquillage', AR: 'مكياج', PL: 'Makijaż' },
+    Makeup: { EN: 'Makeup', ES: 'Maquillaje', RU: 'Макияж', UA: 'Макіяж', CZ: 'Make-up', DE: 'Make-up', IT: 'Make-up', FR: 'Maquillage', AR: 'مكياж', PL: 'Makijaż' },
     Skincare: { EN: 'Skincare', ES: 'Cuidado de la piel', RU: 'Уход за кожей', UA: 'Догляд за шкірою', CZ: 'Péče o pleť', DE: 'Hautpflege', IT: 'Cura della pelle', FR: 'Soin de la peau', AR: 'العناية بالبشرة', PL: 'Pielęgnacja skóry' },
     Aesthetics: { EN: 'Aesthetics', ES: 'Estética', RU: 'Эстетика', UA: 'Естетика', CZ: 'Estetika', DE: 'Ästhetik', IT: 'Estetica', FR: 'Esthétique', AR: 'التجميل', PL: 'Estetyka' },
     Haircut: { EN: 'Haircut', ES: 'Corte de pelo', RU: 'Стрижка', UA: 'Стрижка', CZ: 'Střih', DE: 'Haarschnitt', IT: 'Taglio', FR: 'Coupe', AR: 'قص الشعر', PL: 'Strzyżenie' },
@@ -656,24 +656,24 @@ export default function TopCategoriesBar({
       style={{
         position: 'relative',
         zIndex: 120,
-        background: '#ffffff',
+        background: '#f6f4ef',
       }}
     >
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '54px 1fr',
+          gridTemplateColumns: '66px 1fr',
           gap: 8,
-          padding: '0 8px 2px',
+          padding: '0 12px 2px',
           alignItems: 'start',
-          background: '#ffffff',
+          background: '#f6f4ef',
         }}
       >
         <div
           style={{
             position: 'sticky',
             left: 0,
-            background: '#ffffff',
+            background: '#f6f4ef',
             zIndex: 3,
             paddingTop: 1,
           }}
@@ -685,22 +685,22 @@ export default function TopCategoriesBar({
               border: 'none',
               background: 'transparent',
               padding: 0,
-              width: 48,
+              width: 62,
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 5,
+              gap: 6,
             }}
           >
             <div
               style={{
-                width: 46,
-                height: 60,
-                borderRadius: 16,
+                width: 62,
+                height: 92,
+                borderRadius: 22,
                 background: '#ffffff',
-                boxShadow: '0 3px 10px rgba(0,0,0,0.05)',
-                border: '1.5px solid #111111',
+                boxShadow: '0 1px 0 rgba(0,0,0,0.04)',
+                border: '1.5px solid #bdb7af',
                 overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',
@@ -722,7 +722,7 @@ export default function TopCategoriesBar({
             <div
               style={{
                 fontSize: 10,
-                fontWeight: 900,
+                fontWeight: 800,
                 color: '#111111',
                 lineHeight: 1,
                 whiteSpace: 'nowrap',
@@ -742,7 +742,7 @@ export default function TopCategoriesBar({
             msOverflowStyle: 'none',
             paddingBottom: 4,
             paddingRight: 8,
-            background: '#ffffff',
+            background: '#f6f4ef',
           }}
         >
           <div
@@ -775,21 +775,19 @@ export default function TopCategoriesBar({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 5,
-                    minWidth: 62,
+                    gap: 6,
+                    minWidth: 92,
                     flexShrink: 0,
                   }}
                 >
                   <div
                     style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: 16,
+                      width: 92,
+                      height: 92,
+                      borderRadius: 24,
                       background: '#ffffff',
-                      border: '1.5px solid #111111',
-                      boxShadow: isActive
-                        ? `0 5px 14px ${color}33`
-                        : '0 3px 10px rgba(0,0,0,0.05)',
+                      border: isActive ? `2px solid ${color}` : '1.5px solid #bdb7af',
+                      boxShadow: '0 1px 0 rgba(0,0,0,0.04)',
                       overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
@@ -805,27 +803,14 @@ export default function TopCategoriesBar({
                         height: '100%',
                         objectFit: 'cover',
                         display: 'block',
-                        filter: isActive ? 'saturate(1.08) contrast(1.04)' : 'saturate(1.02)',
                       }}
                     />
-
-                    {isActive ? (
-                      <span
-                        style={{
-                          position: 'absolute',
-                          inset: 0,
-                          borderRadius: 16,
-                          boxShadow: `inset 0 0 0 2px ${color}`,
-                          pointerEvents: 'none',
-                        }}
-                      />
-                    ) : null}
                   </div>
 
                   <div
                     style={{
                       fontSize: 10,
-                      fontWeight: 900,
+                      fontWeight: 800,
                       color: '#111111',
                       lineHeight: 1,
                       whiteSpace: 'nowrap',
