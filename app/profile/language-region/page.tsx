@@ -44,7 +44,6 @@ type PageTextShape = {
   czechKoruna: string;
   ukrainianHryvnia: string;
   uaeDirham: string;
-  close: string;
 };
 
 const pageTexts: Record<AppLanguage, PageTextShape> = {
@@ -70,7 +69,6 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     czechKoruna: 'Czech Koruna',
     ukrainianHryvnia: 'Ukrainian Hryvnia',
     uaeDirham: 'UAE Dirham',
-    close: 'Close',
   },
   ES: {
     title: 'Idioma y región',
@@ -94,7 +92,6 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     czechKoruna: 'Corona checa',
     ukrainianHryvnia: 'Grivna ucraniana',
     uaeDirham: 'Dirham de EAU',
-    close: 'Cerrar',
   },
   RU: {
     title: 'Язык и регион',
@@ -118,7 +115,6 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     czechKoruna: 'Чешская крона',
     ukrainianHryvnia: 'Украинская гривна',
     uaeDirham: 'Дирхам ОАЭ',
-    close: 'Закрыть',
   },
   UA: {
     title: 'Мова і регіон',
@@ -142,7 +138,6 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     czechKoruna: 'Чеська крона',
     ukrainianHryvnia: 'Українська гривня',
     uaeDirham: 'Дирхам ОАЕ',
-    close: 'Закрити',
   },
   CZ: {
     title: 'Jazyk a region',
@@ -166,7 +161,6 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     czechKoruna: 'Česká koruna',
     ukrainianHryvnia: 'Ukrajinská hřivna',
     uaeDirham: 'Dirham SAE',
-    close: 'Zavřít',
   },
   DE: {
     title: 'Sprache & Region',
@@ -190,7 +184,6 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     czechKoruna: 'Tschechische Krone',
     ukrainianHryvnia: 'Ukrainische Hrywnja',
     uaeDirham: 'VAE-Dirham',
-    close: 'Schließen',
   },
   IT: {
     title: 'Lingua e regione',
@@ -214,7 +207,6 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     czechKoruna: 'Corona ceca',
     ukrainianHryvnia: 'Grivnia ucraina',
     uaeDirham: 'Dirham EAU',
-    close: 'Chiudi',
   },
   FR: {
     title: 'Langue et région',
@@ -238,7 +230,6 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     czechKoruna: 'Couronne tchèque',
     ukrainianHryvnia: 'Hryvnia ukrainienne',
     uaeDirham: 'Dirham EAU',
-    close: 'Fermer',
   },
   AR: {
     title: 'اللغة والمنطقة',
@@ -262,7 +253,6 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     czechKoruna: 'الكرونة التشيكية',
     ukrainianHryvnia: 'الهريفنيا الأوكرانية',
     uaeDirham: 'الدرهم الإماراتي',
-    close: 'إغلاق',
   },
   PL: {
     title: 'Język i region',
@@ -286,7 +276,6 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
     czechKoruna: 'Korona czeska',
     ukrainianHryvnia: 'Hrywna ukraińska',
     uaeDirham: 'Dirham ZEA',
-    close: 'Zamknij',
   },
 };
 
