@@ -1,4 +1,4 @@
-l'use client';
+'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -262,7 +262,7 @@ function translateSubcategory(value: string, language: AppLanguage) {
     Hair: { EN: 'Hair', ES: 'Cabello', RU: 'Волосы', UA: 'Волосся', CZ: 'Vlasy', DE: 'Haare', IT: 'Capelli', FR: 'Cheveux', AR: 'الشعر', PL: 'Włosy' },
     'Brows & Lashes': { EN: 'Brows & Lashes', ES: 'Cejas y pestañas', RU: 'Брови и ресницы', UA: 'Брови та вії', CZ: 'Obočí a řasy', DE: 'Augenbrauen & Wimpern', IT: 'Sopracciglia e ciglia', FR: 'Sourcils et cils', AR: 'الحواجب والرموش', PL: 'Brwi i rzęsy' },
     Nails: { EN: 'Nails', ES: 'Uñas', RU: 'Ногти', UA: 'Нігті', CZ: 'Nehty', DE: 'Nägel', IT: 'Unghie', FR: 'Ongles', AR: 'الأظافر', PL: 'Paznokcie' },
-    Makeup: { EN: 'Makeup', ES: 'Maquillaje', RU: 'Макияж', UA: 'Макіяж', CZ: 'Make-up', DE: 'Make-up', IT: 'Make-up', FR: 'Maquillage', AR: 'مكياж', PL: 'Makijaż' },
+    Makeup: { EN: 'Makeup', ES: 'Maquillaje', RU: 'Макияж', UA: 'Макіяж', CZ: 'Make-up', DE: 'Make-up', IT: 'Make-up', FR: 'Maquillage', AR: 'مكياج', PL: 'Makijaż' },
     Skincare: { EN: 'Skincare', ES: 'Cuidado de la piel', RU: 'Уход за кожей', UA: 'Догляд за шкірою', CZ: 'Péče o pleť', DE: 'Hautpflege', IT: 'Cura della pelle', FR: 'Soin de la peau', AR: 'العناية بالبشرة', PL: 'Pielęgnacja skóry' },
     Aesthetics: { EN: 'Aesthetics', ES: 'Estética', RU: 'Эстетика', UA: 'Естетика', CZ: 'Estetika', DE: 'Ästhetik', IT: 'Estetica', FR: 'Esthétique', AR: 'التجميل', PL: 'Estetyka' },
     Haircut: { EN: 'Haircut', ES: 'Corte de pelo', RU: 'Стрижка', UA: 'Стрижка', CZ: 'Střih', DE: 'Haarschnitt', IT: 'Taglio', FR: 'Coupe', AR: 'قص الشعر', PL: 'Strzyżenie' },
