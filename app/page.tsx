@@ -1009,7 +1009,7 @@ export default function HomePage() {
               </div>
 
               <button
-                onClick={() => router.push('/profile/language-region')}
+                onClick={() => router.push('/profile/language')}
                 style={{
                   width: 46,
                   height: 54,
@@ -1033,7 +1033,7 @@ export default function HomePage() {
               </button>
 
               <button
-                onClick={() => router.push('/profile/language-region')}
+                onClick={() => router.push('/profile/currency')}
                 style={{
                   width: 46,
                   height: 54,
@@ -1054,7 +1054,7 @@ export default function HomePage() {
               </button>
 
               <button
-                onClick={() => router.push('/profile/language-region')}
+                onClick={() => router.push('/profile/location')}
                 style={{
                   width: 46,
                   height: 54,
