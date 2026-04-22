@@ -27,7 +27,7 @@ import {
   subscribeToAppRegionSettings,
 } from '../services/appRegionStore';
 import { refreshLiveCurrencyRates } from '../services/currencyDisplay';
-import BottomNav from '../components/BottomNav';
+import BottomNav from '../components/common/BottomNav';
 import TopCategoriesBar from '../components/TopCategoriesBar';
 
 const RealMap = dynamic(() => import('../components/RealMap'), {
@@ -230,4 +230,1474 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
       String(master.id) === String(anyPromo.listingId)
   );
 
-  if (exactByMasterId) return
+  if (exactByMasterId) return exactByMasterId;
+
+  const scoreMaster = (master: any) => {
+    const haystack = normalizeText(
+      [
+        master.name || '',
+        master.title || '',
+        master.subcategory || '',
+        master.description || '',
+        master.category || '',
+        master.city || '',
+      ].join(' ')
+    );
+
+    let score = 0;
+
+    if (normalizedTitle && haystack.includes(normalizedTitle)) score += 120;
+    if (normalizedSubtitle && haystack.includes(normalizedSubtitle)) score += 80;
+
+    words.forEach((word) => {
+      if (haystack.includes(word)) score += 18;
+    });
+
+    if (
+      normalizedCategory &&
+      String(master.category || '').toLowerCase().trim() === normalizedCategory
+    ) {
+      score += 35;
+    }
+
+    return score;
+  };
+
+  const best = masters
+    .map((master: any) => ({ master, score: scoreMaster(master) }))
+    .sort((a, b) => b.score - a.score)[0];
+
+  if (best && best.score > 0) return best.master;
+
+  return null;
+}
+
+function isPromotionInCategory(promo: PromotionItem, categoryId: string) {
+  return String((promo as any).categoryId || '')
+    .toLowerCase()
+    .trim() === String(categoryId || '').toLowerCase().trim();
+}
+
+function extractPromotionDiscountBadge(promo: PromotionItem) {
+  const anyPromo = promo as any;
+
+  const rawCandidates = [
+    anyPromo.discountBadge,
+    anyPromo.badgeText,
+    anyPromo.discountText,
+    anyPromo.discountLabel,
+    anyPromo.discount,
+  ];
+
+  for (const candidate of rawCandidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      const value = candidate.trim();
+      if (value.includes('%')) {
+        return value.startsWith('-') ? value : `-${value.replace(/^-/, '')}`;
+      }
+      if (value.toUpperCase() === 'SALE') return 'SALE';
+    }
+  }
+
+  const numericCandidates = [
+    anyPromo.discountPercent,
+    anyPromo.discount_percentage,
+    anyPromo.percentOff,
+    anyPromo.salePercent,
+  ];
+
+  for (const candidate of numericCandidates) {
+    if (typeof candidate === 'number' && Number.isFinite(candidate)) {
+      return `-${candidate}%`;
+    }
+
+    if (typeof candidate === 'string' && candidate.trim()) {
+      const parsed = Number(candidate.replace('%', '').trim());
+      if (Number.isFinite(parsed)) {
+        return `-${parsed}%`;
+      }
+    }
+  }
+
+  const subtitle = String(anyPromo.subtitle || '');
+  const title = String(anyPromo.title || '');
+  const combined = `${title} ${subtitle}`;
+  const match = combined.match(/(\d{1,2})\s?%/);
+
+  if (match) {
+    return `-${match[1]}%`;
+  }
+
+  return 'SALE';
+}
+
+function getCurrencySymbolForLocation(label: string) {
+  const lower = String(label || '').toLowerCase();
+
+  if (lower.includes('prague') || lower.includes('czech')) return 'Kč';
+  if (lower.includes('warsaw') || lower.includes('poland')) return 'zł';
+  if (lower.includes('kyiv') || lower.includes('ukraine')) return '₴';
+  if (lower.includes('madrid') || lower.includes('spain')) return '€';
+  if (lower.includes('berlin') || lower.includes('germany')) return '€';
+
+  return '£';
+}
+
+function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
+  const normalized = String(category || '').toLowerCase();
+  const found = categories.find((item) => item.id === normalized);
+
+  if (!found) return 'Service';
+
+  const map: Record<string, Partial<Record<AppLanguage, string>>> = {
+    beauty: { EN: 'Beauty', ES: 'Belleza', RU: 'Красота', CZ: 'Krása', DE: 'Beauty', PL: 'Uroda', UA: 'Краса' },
+    barber: { EN: 'Barber', ES: 'Barbero', RU: 'Барбер', CZ: 'Barber', DE: 'Barber', PL: 'Barber', UA: 'Барбер' },
+    wellness: { EN: 'Wellness', ES: 'Bienestar', RU: 'Велнес', CZ: 'Wellness', DE: 'Wellness', PL: 'Wellness', UA: 'Велнес' },
+    home: { EN: 'Home', ES: 'Hogar', RU: 'Дом', CZ: 'Domov', DE: 'Zuhause', PL: 'Dom', UA: 'Дім' },
+    repairs: { EN: 'Repairs', ES: 'Reparaciones', RU: 'Ремонт', CZ: 'Opravy', DE: 'Reparaturen', PL: 'Naprawy', UA: 'Ремонт' },
+    tech: { EN: 'Tech', ES: 'Tecnología', RU: 'Техника', CZ: 'Technika', DE: 'Technik', PL: 'Technika', UA: 'Техніка' },
+    pets: { EN: 'Pets', ES: 'Mascotas', RU: 'Питомцы', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęta', UA: 'Тварини' },
+    fashion: { EN: 'Fashion', ES: 'Moda', RU: 'Мода', CZ: 'Móda', DE: 'Mode', PL: 'Moda', UA: 'Мода' },
+    auto: { EN: 'Auto', ES: 'Auto', RU: 'Авто', CZ: 'Auto', DE: 'Auto', PL: 'Auto', UA: 'Авто' },
+    moving: { EN: 'Moving', ES: 'Mudanza', RU: 'Переезд', CZ: 'Stěhování', DE: 'Umzug', PL: 'Przeprowadzka', UA: 'Переїзд' },
+    fitness: { EN: 'Fitness', ES: 'Fitness', RU: 'Фитнес', CZ: 'Fitness', DE: 'Fitness', PL: 'Fitness', UA: 'Фітнес' },
+    education: { EN: 'Education', ES: 'Educación', RU: 'Обучение', CZ: 'Vzdělání', DE: 'Bildung', PL: 'Edukacja', UA: 'Освіта' },
+    events: { EN: 'Events', ES: 'Eventos', RU: 'События', CZ: 'Události', DE: 'Events', PL: 'Wydarzenia', UA: 'Події' },
+    activities: { EN: 'Activities', ES: 'Actividades', RU: 'Активности', CZ: 'Aktivity', DE: 'Aktivitäten', PL: 'Aktywności', UA: 'Активності' },
+    creative: { EN: 'Creative', ES: 'Creativo', RU: 'Креатив', CZ: 'Kreativa', DE: 'Kreativ', PL: 'Kreatywne', UA: 'Креатив' },
+  };
+
+  return map[normalized]?.[language] || found.shortLabel || found.label;
+}
+
+function BrandMark() {
+  return (
+    <img
+      src="/brand/olamep-logo.png"
+      alt="Olamep"
+      style={{
+        height: 60,
+        width: 'auto',
+        display: 'block',
+      }}
+    />
+  );
+}
+
+function ActionCountButton({
+  icon,
+  title,
+  count,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  count: number;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        minHeight: 54,
+        border: '2px solid #111111',
+        borderRadius: 18,
+        background: '#ffffff',
+        color: '#111111',
+        cursor: 'pointer',
+        display: 'grid',
+        gridTemplateColumns: 'minmax(0, 1fr) 36px',
+        alignItems: 'center',
+        gap: 8,
+        padding: '0 8px 0 10px',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          minWidth: 0,
+          fontSize: 12,
+          fontWeight: 900,
+        }}
+      >
+        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          {icon}
+        </span>
+        <span
+          style={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {title}
+        </span>
+      </div>
+
+      <span
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 999,
+          border: '2px solid #111111',
+          background: '#ffffff',
+          color: '#111111',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 14,
+          fontWeight: 900,
+          flexShrink: 0,
+        }}
+      >
+        {count}
+      </span>
+    </button>
+  );
+}
+
+export default function HomePage() {
+  const router = useRouter();
+  const baseMasters = getAllMasters();
+  const searchWrapperRef = useRef<HTMLDivElement | null>(null);
+  const promotionCardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const seenPromotionIdsRef = useRef<Set<string>>(new Set());
+
+  const [search, setSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [activeCategory, setActiveCategory] = useState('beauty');
+  const [activeSubcategory, setActiveSubcategory] = useState('');
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [mapMode] = useState<'map' | 'satellite'>('map');
+  const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
+  const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
+  const [likedFilterMode, setLikedFilterMode] = useState<'none' | 'category' | 'all'>('none');
+  const [dealFilterMode, setDealFilterMode] = useState<DealFilterMode>('none');
+  const [listings, setListings] = useState<ListingItem[]>([]);
+  const [promotions, setPromotions] = useState<PromotionItem[]>([]);
+  const [recenterToUserTrigger] = useState(0);
+  const [searchLocation, setSearchLocation] = useState(getEffectiveSearchLocation());
+  const [locationLabel, setLocationLabel] = useState(getEffectiveSearchLocation().label);
+  const [regionVersion, setRegionVersion] = useState(0);
+  const [currencyVersion, setCurrencyVersion] = useState(0);
+
+  const tr = t(language);
+
+  useEffect(() => {
+    setRecentSearches(readRecentSearches());
+  }, []);
+
+  useEffect(() => {
+    const syncAppContext = () => {
+      setLanguage(getSavedLanguage());
+
+      const effective = getEffectiveSearchLocation();
+      setSearchLocation(effective);
+      setLocationLabel(effective.label);
+
+      setRegionVersion((prev) => prev + 1);
+    };
+
+    syncAppContext();
+
+    window.addEventListener('focus', syncAppContext);
+    window.addEventListener('storage', syncAppContext);
+
+    const unsubscribe = subscribeToAppRegionSettings(syncAppContext);
+
+    return () => {
+      window.removeEventListener('focus', syncAppContext);
+      window.removeEventListener('storage', syncAppContext);
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    refreshLiveCurrencyRates().finally(() => {
+      setCurrencyVersion((prev) => prev + 1);
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleOutside = (event: MouseEvent | TouchEvent) => {
+      if (!searchWrapperRef.current) return;
+      if (searchWrapperRef.current.contains(event.target as Node)) return;
+      setSearchOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('touchstart', handleOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('touchstart', handleOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const loadListings = () => setListings(getListings());
+    loadListings();
+    return subscribeToListingsStore(loadListings);
+  }, []);
+
+  useEffect(() => {
+    const loadLiked = () => setLikedMasterIds(getLikedMasterIds().map(String));
+    loadLiked();
+    return subscribeToLikedMasters(loadLiked);
+  }, []);
+
+  useEffect(() => {
+    const loadPromotions = () => {
+      setPromotions(
+        getVisiblePromotionsForLocation(
+          searchLocation.lat,
+          searchLocation.lng,
+          undefined,
+          language
+        )
+      );
+    };
+
+    loadPromotions();
+    const unsubscribe = subscribeToPromotionsStore(loadPromotions);
+
+    return () => {
+      unsubscribe();
+    };
+  }, [searchLocation.lat, searchLocation.lng, language, regionVersion, currencyVersion]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (promotions.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          const element = entry.target as HTMLElement;
+          const promoId = element.dataset.promoId;
+
+          if (!promoId) return;
+          if (seenPromotionIdsRef.current.has(promoId)) return;
+
+          seenPromotionIdsRef.current.add(promoId);
+          incrementPromotionViews(promoId);
+        });
+      },
+      { threshold: 0.7 }
+    );
+
+    promotions.forEach((promo) => {
+      const node = promotionCardRefs.current[promo.id];
+      if (node) observer.observe(node);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [promotions]);
+
+  const listingMasters = useMemo(() => {
+    return listings.map((item, index) => listingToMaster(item, index));
+  }, [listings]);
+
+  const allMasters = useMemo(() => {
+    return [...listingMasters, ...baseMasters];
+  }, [listingMasters, baseMasters]);
+
+  const smartResults = useMemo(() => {
+    const q = search.trim();
+    if (!q) return [] as SmartSearchResult[];
+
+    return searchAliases
+      .map((item) => ({
+        item,
+        score: Math.max(...item.keywords.map((keyword) => scoreTextMatch(q, keyword))),
+      }))
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8)
+      .map(({ item }) => ({
+        type: 'smart' as const,
+        id: `smart-${item.categoryId}-${item.subcategory}-${item.label}`,
+        label: item.label,
+        categoryId: item.categoryId,
+        subcategory: item.subcategory,
+      }));
+  }, [search]);
+
+  const categoryResults = useMemo(() => {
+    const q = search.trim();
+    if (!q) return [] as CategorySearchResult[];
+
+    return categories
+      .map((item) => ({
+        item,
+        score: Math.max(
+          scoreTextMatch(q, item.label),
+          scoreTextMatch(q, item.shortLabel || ''),
+          scoreTextMatch(q, item.id)
+        ),
+      }))
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6)
+      .map(({ item }) => ({
+        type: 'category' as const,
+        id: `category-${item.id}`,
+        label: getCategoryLabel(item.id, language),
+        categoryId: item.id,
+      }));
+  }, [search, language]);
+
+  const subcategoryResults = useMemo(() => {
+    const q = search.trim();
+    if (!q) return [] as SubcategorySearchResult[];
+
+    return categories
+      .flatMap((item) =>
+        item.subcategories.map((sub) => ({
+          sub,
+          categoryId: item.id,
+          score: scoreTextMatch(q, sub),
+        }))
+      )
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8)
+      .map((item) => ({
+        type: 'subcategory' as const,
+        id: `subcategory-${item.categoryId}-${item.sub}`,
+        label: item.sub,
+        categoryId: item.categoryId,
+      }));
+  }, [search]);
+
+  const proResults = useMemo(() => {
+    const q = search.trim();
+    if (!q) return [] as MasterSearchResult[];
+
+    return allMasters
+      .map((master: any) => {
+        const score =
+          scoreTextMatch(q, String(master.name || master.title || '')) * 1.5 +
+          scoreTextMatch(q, String(master.subcategory || '')) * 1.3 +
+          scoreTextMatch(q, String(master.description || '')) * 1.2 +
+          scoreTextMatch(q, String(master.city || '')) +
+          scoreTextMatch(q, String(master.category || ''));
+
+        return { master, score };
+      })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6)
+      .map(({ master }) => ({
+        type: 'master' as const,
+        id: `master-${master.id}`,
+        label: master.name || master.title || 'Pro',
+        categoryId: String(master.category || 'beauty'),
+        master,
+      }));
+  }, [search, allMasters]);
+
+  const filteredMasters = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    return allMasters.filter((master: any) => {
+      const masterCategory = String(master.category || '').toLowerCase().trim();
+      const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
+
+      const categoryMatch = likedFilterMode === 'all' ? true : masterCategory === activeCategory;
+
+      const subcategoryMatch =
+        likedFilterMode === 'all'
+          ? true
+          : !activeSubcategory || masterSubcategory === activeSubcategory.toLowerCase().trim();
+
+      const searchMatch =
+        !q ||
+        String(master.name || '').toLowerCase().includes(q) ||
+        String(master.title || '').toLowerCase().includes(q) ||
+        String(master.city || '').toLowerCase().includes(q) ||
+        String(master.subcategory || '').toLowerCase().includes(q) ||
+        String(master.description || '').toLowerCase().includes(q) ||
+        String(master.category || '').toLowerCase().includes(q);
+
+      const likedMatch =
+        likedFilterMode === 'none' ? true : likedMasterIds.includes(String(master.id));
+
+      return categoryMatch && subcategoryMatch && searchMatch && likedMatch;
+    });
+  }, [allMasters, activeCategory, activeSubcategory, search, likedMasterIds, likedFilterMode]);
+
+  const categoryDealsCount = useMemo(() => {
+    return promotions.filter((promo) => isPromotionInCategory(promo, activeCategory)).length;
+  }, [promotions, activeCategory]);
+
+  const allDealsCount = promotions.length;
+
+  const filteredPromotions = useMemo(() => {
+    if (dealFilterMode === 'category') {
+      return promotions.filter((promo) => isPromotionInCategory(promo, activeCategory));
+    }
+
+    if (dealFilterMode === 'all') {
+      return promotions;
+    }
+
+    return promotions;
+  }, [promotions, dealFilterMode, activeCategory]);
+
+  const promotionMasters = useMemo(() => {
+    if (dealFilterMode === 'none') return [] as any[];
+
+    const sourcePromotions =
+      dealFilterMode === 'category'
+        ? promotions.filter((promo) => isPromotionInCategory(promo, activeCategory))
+        : promotions;
+
+    const uniqueMasters = new Map<string, any>();
+
+    sourcePromotions.forEach((promo) => {
+      const matchedMaster = findPromotionMaster(promo, allMasters);
+      if (!matchedMaster) return;
+
+      const masterId = String(matchedMaster.id);
+      const discountBadge = extractPromotionDiscountBadge(promo);
+
+      uniqueMasters.set(masterId, {
+        ...matchedMaster,
+        discountBadge,
+      });
+    });
+
+    return Array.from(uniqueMasters.values());
+  }, [dealFilterMode, promotions, activeCategory, allMasters]);
+
+  const promotionBadgeTextByMasterId = useMemo(() => {
+    const entries = promotionMasters.map((master) => [
+      String(master.id),
+      String(master.discountBadge || 'SALE'),
+    ]);
+    return Object.fromEntries(entries);
+  }, [promotionMasters]);
+
+  const mapMasters = useMemo(() => {
+    if (dealFilterMode !== 'none') return promotionMasters;
+    return filteredMasters;
+  }, [dealFilterMode, promotionMasters, filteredMasters]);
+
+  useEffect(() => {
+    setSelectedMaster(null);
+  }, [activeCategory, activeSubcategory, search, likedFilterMode, dealFilterMode]);
+
+  const likedInCategoryCount = allMasters.filter(
+    (master: any) =>
+      String(master.category || '').toLowerCase().trim() === activeCategory &&
+      likedMasterIds.includes(String(master.id))
+  ).length;
+
+  const likedAllCount = likedMasterIds.length;
+
+  const hasAnyResults =
+    smartResults.length > 0 ||
+    categoryResults.length > 0 ||
+    subcategoryResults.length > 0 ||
+    proResults.length > 0;
+
+  const currencySymbol = getCurrencySymbolForLocation(locationLabel);
+
+  const selectSearchResult = (result: SearchResult) => {
+    if (result.type === 'smart') {
+      setActiveCategory(result.categoryId);
+      setActiveSubcategory(result.subcategory);
+      setLikedFilterMode('none');
+      setDealFilterMode('none');
+      setSearch(result.label);
+      setSearchOpen(false);
+      saveRecentSearch(result.label);
+      setRecentSearches(readRecentSearches());
+      return;
+    }
+
+    if (result.type === 'category') {
+      setActiveCategory(result.categoryId);
+      setActiveSubcategory('');
+      setLikedFilterMode('none');
+      setDealFilterMode('none');
+      setSearch(result.label);
+      setSearchOpen(false);
+      saveRecentSearch(result.label);
+      setRecentSearches(readRecentSearches());
+      return;
+    }
+
+    if (result.type === 'subcategory') {
+      setActiveCategory(result.categoryId);
+      setActiveSubcategory(result.label);
+      setLikedFilterMode('none');
+      setDealFilterMode('none');
+      setSearch(result.label);
+      setSearchOpen(false);
+      saveRecentSearch(result.label);
+      setRecentSearches(readRecentSearches());
+      return;
+    }
+
+    setActiveCategory(String(result.master.category || 'beauty'));
+    setActiveSubcategory(result.master.subcategory || '');
+    setLikedFilterMode('none');
+    setDealFilterMode('none');
+    setSelectedMaster(result.master);
+    setSearch(result.label);
+    setSearchOpen(false);
+    saveRecentSearch(result.label);
+    setRecentSearches(readRecentSearches());
+  };
+
+  const runQuickSearch = (value: string) => {
+    setSearch(value);
+    setSearchOpen(true);
+    saveRecentSearch(value);
+    setRecentSearches(readRecentSearches());
+  };
+
+  const openPromotionView = (promo: PromotionItem) => {
+    incrementPromotionViews(promo.id);
+    router.push(`/promotion/${promo.id}`);
+  };
+
+  const openPromotionBooking = (promo: PromotionItem) => {
+    incrementPromotionViews(promo.id);
+
+    const matchedMaster = findPromotionMaster(promo, allMasters);
+
+    if (matchedMaster) {
+      router.push(`/booking/${matchedMaster.id}`);
+      return;
+    }
+
+    setActiveCategory(String((promo as any).categoryId || 'beauty'));
+    setActiveSubcategory('');
+    setLikedFilterMode('none');
+    setDealFilterMode('none');
+    setSearch((promo as any).title || '');
+    setSearchOpen(false);
+    saveRecentSearch((promo as any).title || '');
+    setRecentSearches(readRecentSearches());
+  };
+
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#f7f4ee',
+        fontFamily: 'Arial, sans-serif',
+        color: '#17130f',
+        paddingBottom: 118,
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 430,
+          margin: '0 auto',
+          background: '#f7f4ee',
+        }}
+      >
+        <section style={{ padding: '12px 12px 0' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 0 10px',
+            }}
+          >
+            <BrandMark />
+          </div>
+
+          <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 48px 48px 48px',
+                gap: 6,
+                alignItems: 'center',
+              }}
+            >
+              <div
+                style={{
+                  height: 54,
+                  borderRadius: 20,
+                  border: '2px solid #111111',
+                  background: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '0 12px',
+                  minWidth: 0,
+                }}
+              >
+                <span style={{ fontSize: 20, lineHeight: 1, color: '#111111' }}>⌕</span>
+                <input
+                  value={search}
+                  onFocus={() => setSearchOpen(true)}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setSearchOpen(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const first =
+                        smartResults[0] ||
+                        subcategoryResults[0] ||
+                        categoryResults[0] ||
+                        proResults[0];
+
+                      if (first) {
+                        selectSearchResult(first);
+                      } else if (search.trim()) {
+                        saveRecentSearch(search);
+                        setRecentSearches(readRecentSearches());
+                        setSearchOpen(false);
+                      }
+                    }
+                  }}
+                  placeholder={tr.searchPlaceholder}
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontSize: 13,
+                    color: '#2b2f36',
+                    fontWeight: 700,
+                  }}
+                />
+
+                {search ? (
+                  <button
+                    onClick={() => {
+                      setSearch('');
+                      setSearchOpen(false);
+                    }}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      fontSize: 18,
+                      color: '#85909c',
+                      cursor: 'pointer',
+                      padding: 0,
+                    }}
+                  >
+                    ✕
+                  </button>
+                ) : null}
+              </div>
+
+              <button
+                onClick={() => router.push('/profile/language-region')}
+                style={{
+                  width: 48,
+                  height: 54,
+                  borderRadius: 16,
+                  border: '2px solid #111111',
+                  background: '#fff',
+                  color: '#111111',
+                  padding: 0,
+                  fontSize: 10,
+                  fontWeight: 900,
+                  display: 'inline-flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 1,
+                  cursor: 'pointer',
+                }}
+              >
+                <span style={{ fontSize: 18, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span>{language}</span>
+              </button>
+
+              <button
+                onClick={() => router.push('/profile/language-region')}
+                style={{
+                  width: 48,
+                  height: 54,
+                  borderRadius: 16,
+                  border: '2px solid #111111',
+                  background: '#fff',
+                  color: '#111111',
+                  padding: 0,
+                  fontSize: 22,
+                  fontWeight: 900,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                }}
+              >
+                {currencySymbol}
+              </button>
+
+              <button
+                onClick={() => router.push('/profile/language-region')}
+                style={{
+                  width: 48,
+                  height: 54,
+                  borderRadius: 16,
+                  border: '2px solid #111111',
+                  background: '#fff',
+                  color: '#111111',
+                  padding: 0,
+                  fontSize: 20,
+                  fontWeight: 900,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                }}
+              >
+                ⌖
+              </button>
+            </div>
+
+            {searchOpen ? (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  top: 'calc(100% + 8px)',
+                  background: 'rgba(255,255,255,0.98)',
+                  border: '2px solid #111111',
+                  borderRadius: 22,
+                  boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
+                  padding: 12,
+                  maxHeight: 380,
+                  overflowY: 'auto',
+                }}
+              >
+                {!search.trim() ? (
+                  <>
+                    {recentSearches.length > 0 ? (
+                      <div style={{ marginBottom: 14 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
+                          {tr.recentSearches}
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                          {recentSearches.map((item) => (
+                            <button
+                              key={item}
+                              onClick={() => runQuickSearch(item)}
+                              style={{
+                                border: '2px solid #111111',
+                                background: '#fff',
+                                borderRadius: 999,
+                                padding: '8px 12px',
+                                fontSize: 13,
+                                fontWeight: 800,
+                                color: '#2a3442',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {item}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 900,
+                          color: '#6c7480',
+                          marginBottom: 8,
+                        }}
+                      >
+                        {tr.popularSearches}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {popularSearches.map((item) => (
+                          <button
+                            key={item}
+                            onClick={() => runQuickSearch(item)}
+                            style={{
+                              border: '2px solid #111111',
+                              background: '#fff8f8',
+                              borderRadius: 999,
+                              padding: '8px 12px',
+                              fontSize: 13,
+                              fontWeight: 900,
+                              color: '#ff4f93',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : !hasAnyResults ? (
+                  <div
+                    style={{
+                      padding: '12px 6px',
+                      fontSize: 14,
+                      fontWeight: 800,
+                      color: '#74808c',
+                    }}
+                  >
+                    {tr.noResultsFound}
+                  </div>
+                ) : (
+                  <>
+                    {smartResults.length > 0 && (
+                      <div style={{ marginBottom: 12 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
+                          {tr.smartMatches}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {smartResults.map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() => selectSearchResult(item)}
+                              style={{
+                                border: '2px solid #111111',
+                                background: '#fff6f9',
+                                borderRadius: 14,
+                                padding: '10px 12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start',
+                                gap: 2,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
+                                {item.label}
+                              </span>
+                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
+                                {getCategoryLabel(item.categoryId, language)} • {item.subcategory}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {categoryResults.length > 0 && (
+                      <div style={{ marginBottom: 12 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
+                          {tr.categories}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {categoryResults.map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() => selectSearchResult(item)}
+                              style={{
+                                border: '2px solid #111111',
+                                background: '#fff',
+                                borderRadius: 14,
+                                padding: '10px 12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start',
+                                gap: 2,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
+                                {item.label}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {subcategoryResults.length > 0 && (
+                      <div style={{ marginBottom: 12 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
+                          {tr.services}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {subcategoryResults.map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() => selectSearchResult(item)}
+                              style={{
+                                border: '2px solid #111111',
+                                background: '#fff',
+                                borderRadius: 14,
+                                padding: '10px 12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start',
+                                gap: 2,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
+                                {item.label}
+                              </span>
+                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
+                                {getCategoryLabel(item.categoryId, language)}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {proResults.length > 0 && (
+                      <div>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#6c7480',
+                            marginBottom: 8,
+                          }}
+                        >
+                          {tr.pros}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {proResults.map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() => selectSearchResult(item)}
+                              style={{
+                                border: '2px solid #111111',
+                                background: '#fff',
+                                borderRadius: 14,
+                                padding: '10px 12px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-start',
+                                gap: 2,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
+                                {item.label}
+                              </span>
+                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
+                                {getCategoryLabel(item.categoryId, language)}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ) : null}
+          </div>
+        </section>
+
+        <section style={{ padding: '8px 0 0' }}>
+          <TopCategoriesBar
+            language={language}
+            activeCategory={activeCategory}
+            activeSubcategory={activeSubcategory}
+            onSelectCategory={(category) => {
+              setActiveCategory(category);
+              setLikedFilterMode('none');
+              setDealFilterMode('none');
+            }}
+            onSelectSubcategory={(subcategory) => {
+              setActiveSubcategory(subcategory);
+            }}
+            onClearSubcategory={() => {
+              setActiveSubcategory('');
+            }}
+          />
+        </section>
+
+        <section style={{ padding: '8px 12px 0' }}>
+          <div
+            style={{
+              border: '2px solid #111111',
+              borderRadius: 24,
+              background: '#f4f1eb',
+              padding: 8,
+            }}
+          >
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 8,
+              }}
+            >
+              <ActionCountButton
+                onClick={() => {
+                  setDealFilterMode('none');
+                  setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
+                }}
+                icon={<span style={{ fontSize: 22, color: '#ff3b58', lineHeight: 1 }}>♥</span>}
+                title="Favourite"
+                count={likedInCategoryCount}
+              />
+
+              <ActionCountButton
+                onClick={() => {
+                  setLikedFilterMode('none');
+                  setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
+                }}
+                icon={
+                  <span
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      background: '#ffd84a',
+                      color: '#111111',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 15,
+                      fontWeight: 900,
+                      lineHeight: 1,
+                    }}
+                  >
+                    %
+                  </span>
+                }
+                title="Hot offers"
+                count={categoryDealsCount}
+              />
+
+              <ActionCountButton
+                onClick={() => {
+                  setDealFilterMode('none');
+                  setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
+                }}
+                icon={
+                  <span style={{ display: 'inline-flex', gap: 1, color: '#ff3b58' }}>
+                    <span style={{ fontSize: 16, lineHeight: 1 }}>♥</span>
+                    <span style={{ fontSize: 14, lineHeight: 1 }}>♥</span>
+                    <span style={{ fontSize: 12, lineHeight: 1 }}>♥</span>
+                  </span>
+                }
+                title="All favourite"
+                count={likedAllCount}
+              />
+
+              <ActionCountButton
+                onClick={() => {
+                  setLikedFilterMode('none');
+                  setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
+                }}
+                icon={
+                  <span
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      background: '#ffd84a',
+                      color: '#111111',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 15,
+                      fontWeight: 900,
+                      lineHeight: 1,
+                    }}
+                  >
+                    %
+                  </span>
+                }
+                title="All hot offers"
+                count={allDealsCount}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section style={{ padding: '8px 12px 0' }}>
+          <div
+            style={{
+              borderRadius: 28,
+              overflow: 'hidden',
+              border: '2px solid #e2ddd6',
+              background: '#ffffff',
+            }}
+          >
+            <div style={{ height: 470, position: 'relative', overflow: 'hidden' }}>
+              <RealMap
+                masters={mapMasters}
+                mapMode={mapMode}
+                activeCategory={activeCategory}
+                selectedMasterId={selectedMaster?.id ?? null}
+                likedMasterIds={likedMasterIds}
+                recenterToUserTrigger={recenterToUserTrigger}
+                language={language}
+                promotionBadgeTextByMasterId={promotionBadgeTextByMasterId}
+                onMasterSelect={(master) => {
+                  setSelectedMaster(master);
+                }}
+                onMapBackgroundClick={() => {
+                  setSelectedMaster(null);
+                }}
+                onToggleLike={(master) => {
+                  toggleLikedMaster(String(master.id));
+                }}
+                onViewMaster={(master) => {
+                  router.push(`/master/${master.id}`);
+                }}
+                onBookMaster={(master) => {
+                  router.push(`/booking/${master.id}`);
+                }}
+              />
+            </div>
+          </div>
+        </section>
+
+        {filteredPromotions.length > 0 && (
+          <section style={{ padding: '14px 0 0' }}>
+            <div
+              style={{
+                background: '#ece7dd',
+                padding: '0 0 12px',
+              }}
+            >
+              <div
+                style={{
+                  padding: '0 14px 0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 10,
+                }}
+              >
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#21324a',
+                  }}
+                >
+                  {language === 'ES'
+                    ? `Ofertas cerca de ${locationLabel}`
+                    : `Hot offers near ${locationLabel}`}
+                </h2>
+
+                <button
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    fontSize: 24,
+                    color: '#8d918f',
+                    lineHeight: 1,
+                    cursor: 'pointer',
+                    padding: 0,
+                  }}
+                >
+                  ›
+                </button>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 12,
+                  display: 'flex',
+                  gap: 12,
+                  overflowX: 'auto',
+                  overflowY: 'hidden',
+                  padding: '0 14px 6px',
+                  WebkitOverflowScrolling: 'touch',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                }}
+              >
+                {filteredPromotions.map((promo) => (
+                  <div
+                    key={promo.id}
+                    ref={(node) => {
+                      promotionCardRefs.current[promo.id] = node;
+                    }}
+                    data-promo-id={promo.id}
+                    style={{
+                      minWidth: 300,
+                      maxWidth: 300,
+                      borderRadius: 30,
+                      border: '2px solid #111111',
+                      background: '#fff',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <button
+                      onClick={() => openPromotionView(promo)}
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        padding: 0,
+                        width: '100%',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        display: 'block',
+                      }}
+                    >
+                      <div style={{ position: 'relative' }}>
+                        <img
+                          src={(promo as any).image}
+                          alt={(promo as any).title}
+                          style={{
+                            width: '100%',
+                            height: 190,
+                            objectFit: 'cover',
+                            display: 'block',
+                          }}
+                        />
+
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 12,
+                            left: 12,
+                            background: '#fff',
+                            color: '#ff4f93',
+                            borderRadius: 999,
+                            padding: '8px 14px',
+                            fontSize: 12,
+                            fontWeight: 900,
+                          }}
+                        >
+                          Sponsored
+                        </div>
+                      </div>
+
+                      <div style={{ padding: '14px 16px 8px' }}>
+                        <div
+                          style={{
+                            fontSize: 17,
+                            fontWeight: 900,
+                            color: '#1f2430',
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          {(promo as any).title}
+                        </div>
+
+                        <div
+                          style={{
+                            marginTop: 8,
+                            fontSize: 13,
+                            fontWeight: 700,
+                            color: '#6b7280',
+                            lineHeight: 1.45,
+                          }}
+                        >
+                          {(promo as any).subtitle ||
+                            (language === 'ES'
+                              ? 'Oferta especial cerca de ti'
+                              : 'Special offer near you')}
+                        </div>
+
+                        <div
+                          style={{
+                            marginTop: 10,
+                            fontSize: 12,
+                            fontWeight: 900,
+                            color: '#ff4f93',
+                          }}
+                        >
+                          {language === 'ES'
+                            ? `Vistas: ${(promo as any).views}`
+                            : `Views: ${(promo as any).views}`}
+                        </div>
+                      </div>
+                    </button>
+
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: 12,
+                        padding: '0 16px 16px',
+                      }}
+                    >
+                      <button
+                        onClick={() => openPromotionView(promo)}
+                        style={{
+                          height: 50,
+                          borderRadius: 18,
+                          border: '2px solid #111111',
+                          background: '#1f4da8',
+                          color: '#fff',
+                          fontSize: 15,
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {language === 'ES' ? 'Abrir' : 'Open'}
+                      </button>
+
+                      <button
+                        onClick={() => openPromotionBooking(promo)}
+                        style={{
+                          height: 50,
+                          borderRadius: 18,
+                          border: '2px solid #111111',
+                          background: '#ff5252',
+                          color: '#fff',
+                          fontSize: 15,
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {language === 'ES' ? 'Reservar' : 'Book'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+      </div>
+
+      <BottomNav />
+    </main>
+  );
+}
