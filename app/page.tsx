@@ -356,7 +356,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
     home: { EN: 'Home', ES: 'Hogar', RU: 'Дом', CZ: 'Domov', DE: 'Zuhause', PL: 'Dom', UA: 'Дім' },
     repairs: { EN: 'Repairs', ES: 'Reparaciones', RU: 'Ремонт', CZ: 'Opravy', DE: 'Reparaturen', PL: 'Naprawy', UA: 'Ремонт' },
     tech: { EN: 'Tech', ES: 'Tecnología', RU: 'Техника', CZ: 'Technika', DE: 'Technik', PL: 'Technika', UA: 'Техніка' },
-    pets: { EN: 'Pets', ES: 'Mascotas', RU: 'Питомцы', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęта', UA: 'Тварини' },
+    pets: { EN: 'Pets', ES: 'Mascotas', RU: 'Питомцы', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęta', UA: 'Тварини' },
     fashion: { EN: 'Fashion', ES: 'Moda', RU: 'Мода', CZ: 'Móda', DE: 'Mode', PL: 'Moda', UA: 'Мода' },
     auto: { EN: 'Auto', ES: 'Auto', RU: 'Авто', CZ: 'Auto', DE: 'Auto', PL: 'Auto', UA: 'Авто' },
     moving: { EN: 'Moving', ES: 'Mudanza', RU: 'Переезд', CZ: 'Stěhování', DE: 'Umzug', PL: 'Przeprowadzka', UA: 'Переїзд' },
@@ -372,15 +372,24 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
 
 function BrandMark() {
   return (
-    <img
-      src="/ui/logo/logo.png"
-      alt="Olamep"
+    <div
       style={{
-        height: 116,
-        width: 'auto',
-        display: 'block',
+        height: 52,
+        display: 'flex',
+        alignItems: 'center',
       }}
-    />
+    >
+      <img
+        src="/ui/logo/logo.png"
+        alt="Olamep"
+        style={{
+          height: 44,
+          width: 'auto',
+          maxWidth: 190,
+          display: 'block',
+        }}
+      />
+    </div>
   );
 }
 
@@ -908,7 +917,7 @@ export default function HomePage() {
           background: '#f6f4ef',
         }}
       >
-        <section style={{ padding: '18px 12px 0' }}>
+        <section style={{ padding: '12px 12px 0' }}>
           <div
             style={{
               display: 'flex',
@@ -923,15 +932,15 @@ export default function HomePage() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 52px 52px 52px',
-                gap: 8,
+                gridTemplateColumns: 'minmax(0, 1fr) 46px 46px 46px',
+                gap: 6,
                 alignItems: 'center',
               }}
             >
               <div
                 style={{
-                  height: 58,
-                  borderRadius: 22,
+                  height: 54,
+                  borderRadius: 18,
                   border: '2px solid #111111',
                   background: '#fff',
                   display: 'flex',
@@ -941,7 +950,7 @@ export default function HomePage() {
                   minWidth: 0,
                 }}
               >
-                <span style={{ fontSize: 21, lineHeight: 1, color: '#111111' }}>⌕</span>
+                <span style={{ fontSize: 20, lineHeight: 1, color: '#111111' }}>⌕</span>
                 <input
                   value={search}
                   onFocus={() => setSearchOpen(true)}
@@ -973,7 +982,7 @@ export default function HomePage() {
                     border: 'none',
                     outline: 'none',
                     background: 'transparent',
-                    fontSize: 11,
+                    fontSize: 13,
                     color: '#2b2f36',
                     fontWeight: 700,
                   }}
@@ -988,7 +997,7 @@ export default function HomePage() {
                     style={{
                       border: 'none',
                       background: 'transparent',
-                      fontSize: 18,
+                      fontSize: 16,
                       color: '#85909c',
                       cursor: 'pointer',
                       padding: 0,
@@ -1002,9 +1011,9 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 16,
+                  width: 46,
+                  height: 54,
+                  borderRadius: 14,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
@@ -1019,21 +1028,21 @@ export default function HomePage() {
                   cursor: 'pointer',
                 }}
               >
-                <span style={{ fontSize: 18, lineHeight: 1 }}>{languageFlag(language)}</span>
-                <span>{language}</span>
+                <span style={{ fontSize: 16, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 10, lineHeight: 1 }}>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 16,
+                  width: 46,
+                  height: 54,
+                  borderRadius: 14,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 21,
+                  fontSize: 18,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1047,14 +1056,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 16,
+                  width: 46,
+                  height: 54,
+                  borderRadius: 14,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 19,
+                  fontSize: 18,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
