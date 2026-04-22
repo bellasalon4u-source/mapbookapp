@@ -83,82 +83,37 @@ const searchAliases = [
     label: 'Dog hotel',
     categoryId: 'pets',
     subcategory: 'Pet Sitting',
-    keywords: [
-      'dog hotel',
-      'hotel for dogs',
-      'pet hotel',
-      'dog boarding',
-      'hotel para perros',
-      'perро hotel',
-      'отель для собак',
-      'psí hotel',
-      'hundehotel',
-      'hotel dla psów',
-    ],
+    keywords: ['dog hotel', 'hotel for dogs', 'pet hotel', 'dog boarding'],
   },
   {
     label: 'Carpet cleaning',
     categoryId: 'home',
     subcategory: 'Deep Cleaning',
-    keywords: [
-      'carpet cleaning',
-      'clean carpet',
-      'wash carpet',
-      'limpiar alfombra',
-      'alfombra limpieza',
-      'почистить ковёр',
-      'čištění koberce',
-      'teppichreinigung',
-      'czyszczenie dywanu',
-    ],
+    keywords: ['carpet cleaning', 'clean carpet', 'wash carpet'],
   },
   {
     label: 'Phone repair',
     categoryId: 'tech',
     subcategory: 'Phone Repair',
-    keywords: [
-      'phone repair',
-      'fix phone',
-      'reparar telefono',
-      'ремонт телефона',
-      'oprava telefonu',
-      'handy reparatur',
-      'naprawa telefonu',
-    ],
+    keywords: ['phone repair', 'fix phone'],
   },
   {
     label: 'Hair extensions',
     categoryId: 'beauty',
     subcategory: 'Hair',
-    keywords: [
-      'hair extensions',
-      'hairextensions',
-      'extensiones de cabello',
-      'наращивание волос',
-      'prodloužení vlasů',
-      'haarverlängerung',
-      'przedłużanie włosów',
-    ],
+    keywords: ['hair extensions', 'hairextensions'],
   },
   {
     label: 'Massage',
     categoryId: 'wellness',
     subcategory: 'Massage',
-    keywords: ['massage', 'masaje', 'массаж', 'masáž', 'massage de', 'masaż'],
+    keywords: ['massage'],
   },
   {
     label: 'Moving',
     categoryId: 'moving',
     subcategory: 'Small Moves',
-    keywords: [
-      'moving',
-      'move house',
-      'mudanza',
-      'переезд',
-      'stěhování',
-      'umzug',
-      'przeprowadzka',
-    ],
+    keywords: ['moving', 'move house'],
   },
 ];
 
@@ -210,181 +165,6 @@ function listingToMaster(listing: ListingItem, index: number) {
     paymentMethods: listing.paymentMethods as ('cash' | 'card' | 'wallet')[],
     hours: listing.hours,
   };
-}
-
-function getLanguageBorder(language: AppLanguage) {
-  if (language === 'ES') {
-    return 'linear-gradient(90deg, #c60b1e 0%, #c60b1e 25%, #ffc400 25%, #ffc400 75%, #c60b1e 75%, #c60b1e 100%)';
-  }
-
-  if (language === 'RU') {
-    return 'linear-gradient(90deg, #ffffff 0%, #ffffff 33%, #2f6fff 33%, #2f6fff 66%, #ff5252 66%, #ff5252 100%)';
-  }
-
-  if (language === 'CZ') {
-    return 'linear-gradient(90deg, #ffffff 0%, #ffffff 50%, #11457e 50%, #11457e 75%, #d7141a 75%, #d7141a 100%)';
-  }
-
-  if (language === 'DE') {
-    return 'linear-gradient(90deg, #000000 0%, #000000 33%, #dd0000 33%, #dd0000 66%, #ffce00 66%, #ffce00 100%)';
-  }
-
-  if (language === 'PL') {
-    return 'linear-gradient(90deg, #ffffff 0%, #ffffff 50%, #dc143c 50%, #dc143c 100%)';
-  }
-
-  if (language === 'UA') {
-    return 'linear-gradient(90deg, #1f57d6 0%, #1f57d6 50%, #ffd84a 50%, #ffd84a 100%)';
-  }
-
-  return 'linear-gradient(90deg, #1f57d6 0%, #1f57d6 40%, #ffffff 40%, #ffffff 60%, #e53e4f 60%, #e53e4f 100%)';
-}
-
-function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
-  const normalized = String(category || '').toLowerCase();
-  const found = categories.find((item) => item.id === normalized);
-
-  if (!found) return 'Service';
-
-  const map: Record<string, Partial<Record<AppLanguage, string>>> = {
-    beauty: {
-      EN: 'Beauty',
-      ES: 'Belleza',
-      RU: 'Красота',
-      CZ: 'Krása',
-      DE: 'Beauty',
-      PL: 'Uroda',
-      UA: 'Краса',
-    },
-    barber: {
-      EN: 'Barber',
-      ES: 'Barbero',
-      RU: 'Барбер',
-      CZ: 'Barber',
-      DE: 'Barber',
-      PL: 'Barber',
-      UA: 'Барбер',
-    },
-    wellness: {
-      EN: 'Wellness',
-      ES: 'Bienestar',
-      RU: 'Велнес',
-      CZ: 'Wellness',
-      DE: 'Wellness',
-      PL: 'Wellness',
-      UA: 'Велнес',
-    },
-    home: {
-      EN: 'Home',
-      ES: 'Hogar',
-      RU: 'Дом',
-      CZ: 'Domov',
-      DE: 'Zuhause',
-      PL: 'Dom',
-      UA: 'Дім',
-    },
-    repairs: {
-      EN: 'Repairs',
-      ES: 'Reparaciones',
-      RU: 'Ремонт',
-      CZ: 'Opravy',
-      DE: 'Reparaturen',
-      PL: 'Naprawy',
-      UA: 'Ремонт',
-    },
-    tech: {
-      EN: 'Tech',
-      ES: 'Tecnología',
-      RU: 'Техника',
-      CZ: 'Technika',
-      DE: 'Technik',
-      PL: 'Technika',
-      UA: 'Техніка',
-    },
-    pets: {
-      EN: 'Pets',
-      ES: 'Mascotas',
-      RU: 'Питомцы',
-      CZ: 'Mazlíčci',
-      DE: 'Haustiere',
-      PL: 'Zwierzęta',
-      UA: 'Улюбленці',
-    },
-    fashion: {
-      EN: 'Fashion',
-      ES: 'Moda',
-      RU: 'Мода',
-      CZ: 'Móda',
-      DE: 'Mode',
-      PL: 'Moda',
-      UA: 'Мода',
-    },
-    auto: {
-      EN: 'Auto',
-      ES: 'Auto',
-      RU: 'Авто',
-      CZ: 'Auto',
-      DE: 'Auto',
-      PL: 'Auto',
-      UA: 'Авто',
-    },
-    moving: {
-      EN: 'Moving',
-      ES: 'Mudanza',
-      RU: 'Переезд',
-      CZ: 'Stěhování',
-      DE: 'Umzug',
-      PL: 'Przeprowadzka',
-      UA: 'Переїзд',
-    },
-    fitness: {
-      EN: 'Fitness',
-      ES: 'Fitness',
-      RU: 'Фитнес',
-      CZ: 'Fitness',
-      DE: 'Fitness',
-      PL: 'Fitness',
-      UA: 'Фітнес',
-    },
-    education: {
-      EN: 'Education',
-      ES: 'Educación',
-      RU: 'Обучение',
-      CZ: 'Vzdělání',
-      DE: 'Bildung',
-      PL: 'Edukacja',
-      UA: 'Освіта',
-    },
-    events: {
-      EN: 'Events',
-      ES: 'Eventos',
-      RU: 'События',
-      CZ: 'Události',
-      DE: 'Events',
-      PL: 'Wydarzenia',
-      UA: 'Події',
-    },
-    activities: {
-      EN: 'Activities',
-      ES: 'Actividades',
-      RU: 'Активности',
-      CZ: 'Aktivity',
-      DE: 'Aktivitäten',
-      PL: 'Aktywności',
-      UA: 'Активності',
-    },
-    creative: {
-      EN: 'Creative',
-      ES: 'Creativo',
-      RU: 'Креатив',
-      CZ: 'Kreativa',
-      DE: 'Kreativ',
-      PL: 'Kreatywne',
-      UA: 'Креатив',
-    },
-  };
-
-  return map[normalized]?.[language] || found.shortLabel || found.label;
 }
 
 function normalizeText(value: string) {
@@ -563,6 +343,47 @@ function getCurrencySymbolForLocation(label: string) {
   return '£';
 }
 
+function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
+  const normalized = String(category || '').toLowerCase();
+  const found = categories.find((item) => item.id === normalized);
+
+  if (!found) return 'Service';
+
+  const map: Record<string, Partial<Record<AppLanguage, string>>> = {
+    beauty: { EN: 'Beauty', ES: 'Belleza', RU: 'Красота', CZ: 'Krása', DE: 'Beauty', PL: 'Uroda', UA: 'Краса' },
+    barber: { EN: 'Barber', ES: 'Barbero', RU: 'Барбер', CZ: 'Barber', DE: 'Barber', PL: 'Barber', UA: 'Барбер' },
+    wellness: { EN: 'Wellness', ES: 'Bienestar', RU: 'Велнес', CZ: 'Wellness', DE: 'Wellness', PL: 'Wellness', UA: 'Велнес' },
+    home: { EN: 'Home', ES: 'Hogar', RU: 'Дом', CZ: 'Domov', DE: 'Zuhause', PL: 'Dom', UA: 'Дім' },
+    repairs: { EN: 'Repairs', ES: 'Reparaciones', RU: 'Ремонт', CZ: 'Opravy', DE: 'Reparaturen', PL: 'Naprawy', UA: 'Ремонт' },
+    tech: { EN: 'Tech', ES: 'Tecnología', RU: 'Техника', CZ: 'Technika', DE: 'Technik', PL: 'Technika', UA: 'Техніка' },
+    pets: { EN: 'Pets', ES: 'Mascotas', RU: 'Питомцы', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęta', UA: 'Тварини' },
+    fashion: { EN: 'Fashion', ES: 'Moda', RU: 'Мода', CZ: 'Móda', DE: 'Mode', PL: 'Moda', UA: 'Мода' },
+    auto: { EN: 'Auto', ES: 'Auto', RU: 'Авто', CZ: 'Auto', DE: 'Auto', PL: 'Auto', UA: 'Авто' },
+    moving: { EN: 'Moving', ES: 'Mudanza', RU: 'Переезд', CZ: 'Stěhování', DE: 'Umzug', PL: 'Przeprowadzka', UA: 'Переїзд' },
+    fitness: { EN: 'Fitness', ES: 'Fitness', RU: 'Фитнес', CZ: 'Fitness', DE: 'Fitness', PL: 'Fitness', UA: 'Фітнес' },
+    education: { EN: 'Education', ES: 'Educación', RU: 'Обучение', CZ: 'Vzdělání', DE: 'Bildung', PL: 'Edukacja', UA: 'Освіта' },
+    events: { EN: 'Events', ES: 'Eventos', RU: 'События', CZ: 'Události', DE: 'Events', PL: 'Wydarzenia', UA: 'Події' },
+    activities: { EN: 'Activities', ES: 'Actividades', RU: 'Активности', CZ: 'Aktivity', DE: 'Aktivitäten', PL: 'Aktywności', UA: 'Активності' },
+    creative: { EN: 'Creative', ES: 'Creativo', RU: 'Креатив', CZ: 'Kreativa', DE: 'Kreativ', PL: 'Kreatywne', UA: 'Креатив' },
+  };
+
+  return map[normalized]?.[language] || found.shortLabel || found.label;
+}
+
+function BrandMark() {
+  return (
+    <img
+      src="/brand/olamep-logo.png"
+      alt="Olamep"
+      style={{
+        height: 44,
+        width: 'auto',
+        display: 'block',
+      }}
+    />
+  );
+}
+
 function ActionCountButton({
   icon,
   title,
@@ -578,18 +399,17 @@ function ActionCountButton({
     <button
       onClick={onClick}
       style={{
-        minHeight: 60,
+        minHeight: 58,
         border: '2px solid #111111',
-        borderRadius: 22,
+        borderRadius: 20,
         background: '#ffffff',
         color: '#111111',
         cursor: 'pointer',
         display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 38px',
+        gridTemplateColumns: 'minmax(0, 1fr) 40px',
         alignItems: 'center',
         gap: 8,
         padding: '0 10px 0 12px',
-        boxShadow: '0 2px 0 rgba(0,0,0,0.05)',
       }}
     >
       <div
@@ -598,7 +418,7 @@ function ActionCountButton({
           alignItems: 'center',
           gap: 10,
           minWidth: 0,
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: 900,
         }}
       >
@@ -618,8 +438,8 @@ function ActionCountButton({
 
       <span
         style={{
-          width: 38,
-          height: 38,
+          width: 40,
+          height: 40,
           borderRadius: 999,
           border: '2px solid #111111',
           background: '#ffffff',
@@ -635,53 +455,6 @@ function ActionCountButton({
         {count}
       </span>
     </button>
-  );
-}
-
-function BrandMark() {
-  return (
-    <div
-      style={{
-        position: 'relative',
-        width: 46,
-        height: 46,
-        flexShrink: 0,
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          borderRadius: '50% 50% 50% 6px',
-          transform: 'rotate(45deg)',
-          background:
-            'linear-gradient(135deg, #ff4d6d 0%, #ffb548 34%, #36c96a 64%, #2f73ff 100%)',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: 9,
-          top: 9,
-          width: 20,
-          height: 20,
-          borderRadius: '50%',
-          background: '#ffffff',
-          border: '2px solid #111111',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: 19,
-          top: 19,
-          width: 6,
-          height: 6,
-          borderRadius: '50%',
-          background: '#111111',
-        }}
-      />
-    </div>
   );
 }
 
@@ -815,9 +588,7 @@ export default function HomePage() {
           incrementPromotionViews(promoId);
         });
       },
-      {
-        threshold: 0.7,
-      }
+      { threshold: 0.7 }
     );
 
     promotions.forEach((promo) => {
@@ -1024,9 +795,6 @@ export default function HomePage() {
     setSelectedMaster(null);
   }, [activeCategory, activeSubcategory, search, likedFilterMode, dealFilterMode]);
 
-  const borderGradient = getLanguageBorder(language);
-  const currencySymbol = getCurrencySymbolForLocation(locationLabel);
-
   const likedInCategoryCount = allMasters.filter(
     (master: any) =>
       String(master.category || '').toLowerCase().trim() === activeCategory &&
@@ -1040,6 +808,8 @@ export default function HomePage() {
     categoryResults.length > 0 ||
     subcategoryResults.length > 0 ||
     proResults.length > 0;
+
+  const currencySymbol = getCurrencySymbolForLocation(locationLabel);
 
   const selectSearchResult = (result: SearchResult) => {
     if (result.type === 'smart') {
@@ -1125,9 +895,9 @@ export default function HomePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f7f3eb',
+        background: '#f7f4ee',
         fontFamily: 'Arial, sans-serif',
-        color: '#1f2430',
+        color: '#17130f',
         paddingBottom: 118,
       }}
     >
@@ -1135,39 +905,26 @@ export default function HomePage() {
         style={{
           maxWidth: 430,
           margin: '0 auto',
-          background: '#f7f3eb',
-          borderTop: '5px solid transparent',
-          borderImage: `${borderGradient} 1`,
-          boxShadow: '0 0 0 1px rgba(226,218,205,0.35)',
+          background: '#f7f4ee',
         }}
       >
-        <section style={{ padding: '10px 12px 0' }}>
+        <section style={{ padding: '14px 12px 0' }}>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 12,
-              padding: '2px 4px 8px',
+              gap: 10,
+              padding: '0 0 10px',
             }}
           >
             <BrandMark />
-            <div
-              style={{
-                fontSize: 28,
-                fontWeight: 900,
-                color: '#0d2465',
-                letterSpacing: '-0.03em',
-              }}
-            >
-              Olamep
-            </div>
           </div>
 
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr auto auto auto',
+                gridTemplateColumns: '1fr 58px 58px 58px',
                 gap: 8,
                 alignItems: 'center',
               }}
@@ -1175,7 +932,7 @@ export default function HomePage() {
               <div
                 style={{
                   height: 56,
-                  borderRadius: 22,
+                  borderRadius: 20,
                   border: '2px solid #111111',
                   background: '#fff',
                   display: 'flex',
@@ -1217,7 +974,7 @@ export default function HomePage() {
                     border: 'none',
                     outline: 'none',
                     background: 'transparent',
-                    fontSize: 14,
+                    fontSize: 13,
                     color: '#2b2f36',
                     fontWeight: 700,
                   }}
@@ -1270,7 +1027,7 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 56,
+                  width: 58,
                   height: 56,
                   borderRadius: 18,
                   border: '2px solid #111111',
@@ -1291,7 +1048,7 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 56,
+                  width: 58,
                   height: 56,
                   borderRadius: 18,
                   border: '2px solid #111111',
@@ -1576,7 +1333,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '6px 0 0' }}>
+        <section style={{ padding: '8px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1595,14 +1352,13 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '6px 12px 0' }}>
+        <section style={{ padding: '10px 12px 0' }}>
           <div
             style={{
               border: '2px solid #111111',
               borderRadius: 28,
-              background: '#fff',
+              background: '#f4f1eb',
               padding: 10,
-              boxShadow: '0 2px 0 rgba(0,0,0,0.08)',
             }}
           >
             <div
@@ -1697,15 +1453,16 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '8px 0 0' }}>
+        <section style={{ padding: '10px 12px 0' }}>
           <div
             style={{
+              borderRadius: 30,
+              overflow: 'hidden',
+              border: '2px solid #e2ddd6',
               background: '#ffffff',
-              borderTop: '1px solid #e7e1d8',
-              borderBottom: '1px solid #e7e1d8',
             }}
           >
-            <div style={{ height: 500, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ height: 470, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={mapMasters}
                 mapMode={mapMode}
@@ -1736,17 +1493,16 @@ export default function HomePage() {
         </section>
 
         {filteredPromotions.length > 0 && (
-          <section style={{ padding: '12px 0 0' }}>
+          <section style={{ padding: '14px 0 0' }}>
             <div
               style={{
                 background: '#ece7dd',
-                borderTop: '1px solid rgba(0,0,0,0.08)',
                 padding: '0 0 12px',
               }}
             >
               <div
                 style={{
-                  padding: '12px 14px 0',
+                  padding: '0 14px 0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
