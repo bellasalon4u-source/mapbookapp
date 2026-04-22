@@ -373,7 +373,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
 function BrandMark() {
   return (
     <img
-      src="/brand/olamep-logo.png"
+      src="/ui/logo/logo.png"
       alt="Olamep"
       style={{
         height: 60,
