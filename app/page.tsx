@@ -356,7 +356,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
     home: { EN: 'Home', ES: 'Hogar', RU: 'Дом', CZ: 'Domov', DE: 'Zuhause', PL: 'Dom', UA: 'Дім' },
     repairs: { EN: 'Repairs', ES: 'Reparaciones', RU: 'Ремонт', CZ: 'Opravy', DE: 'Reparaturen', PL: 'Naprawy', UA: 'Ремонт' },
     tech: { EN: 'Tech', ES: 'Tecnología', RU: 'Техника', CZ: 'Technika', DE: 'Technik', PL: 'Technika', UA: 'Техніка' },
-    pets: { EN: 'Pets', ES: 'Mascotas', RU: 'Питомцы', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęta', UA: 'Тварини' },
+    pets: { EN: 'Pets', ES: 'Mascotas', RU: 'Питомцы', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęта', UA: 'Тварини' },
     fashion: { EN: 'Fashion', ES: 'Moda', RU: 'Мода', CZ: 'Móda', DE: 'Mode', PL: 'Moda', UA: 'Мода' },
     auto: { EN: 'Auto', ES: 'Auto', RU: 'Авто', CZ: 'Auto', DE: 'Auto', PL: 'Auto', UA: 'Авто' },
     moving: { EN: 'Moving', ES: 'Mudanza', RU: 'Переезд', CZ: 'Stěhování', DE: 'Umzug', PL: 'Przeprowadzka', UA: 'Переїзд' },
@@ -376,7 +376,7 @@ function BrandMark() {
       src="/ui/logo/logo.png"
       alt="Olamep"
       style={{
-        height: 102,
+        height: 116,
         width: 'auto',
         display: 'block',
       }}
@@ -399,16 +399,16 @@ function ActionCountButton({
     <button
       onClick={onClick}
       style={{
-        minHeight: 54,
+        minHeight: 56,
         border: '2px solid #111111',
-        borderRadius: 20,
+        borderRadius: 22,
         background: '#ffffff',
         color: '#111111',
         cursor: 'pointer',
         display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 38px',
+        gridTemplateColumns: 'minmax(0, 1fr) 40px',
         alignItems: 'center',
-        gap: 8,
+        gap: 6,
         padding: '0 10px 0 12px',
       }}
     >
@@ -416,9 +416,9 @@ function ActionCountButton({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
+          gap: 7,
           minWidth: 0,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: 900,
         }}
       >
@@ -438,8 +438,8 @@ function ActionCountButton({
 
       <span
         style={{
-          width: 38,
-          height: 38,
+          width: 40,
+          height: 40,
           borderRadius: 999,
           border: '2px solid #111111',
           background: '#ffffff',
@@ -898,7 +898,7 @@ export default function HomePage() {
         background: '#f6f4ef',
         fontFamily: 'Arial, sans-serif',
         color: '#17130f',
-        paddingBottom: 128,
+        paddingBottom: 120,
       }}
     >
       <div
@@ -908,12 +908,12 @@ export default function HomePage() {
           background: '#f6f4ef',
         }}
       >
-        <section style={{ padding: '22px 12px 0' }}>
+        <section style={{ padding: '18px 12px 0' }}>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              padding: '0 0 12px 2px',
+              padding: '0 0 8px 2px',
             }}
           >
             <BrandMark />
@@ -923,7 +923,7 @@ export default function HomePage() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 54px 54px 54px',
+                gridTemplateColumns: '1fr 52px 52px 52px',
                 gap: 8,
                 alignItems: 'center',
               }}
@@ -931,7 +931,7 @@ export default function HomePage() {
               <div
                 style={{
                   height: 58,
-                  borderRadius: 20,
+                  borderRadius: 22,
                   border: '2px solid #111111',
                   background: '#fff',
                   display: 'flex',
@@ -941,7 +941,7 @@ export default function HomePage() {
                   minWidth: 0,
                 }}
               >
-                <span style={{ fontSize: 22, lineHeight: 1, color: '#111111' }}>⌕</span>
+                <span style={{ fontSize: 21, lineHeight: 1, color: '#111111' }}>⌕</span>
                 <input
                   value={search}
                   onFocus={() => setSearchOpen(true)}
@@ -973,7 +973,7 @@ export default function HomePage() {
                     border: 'none',
                     outline: 'none',
                     background: 'transparent',
-                    fontSize: 12,
+                    fontSize: 11,
                     color: '#2b2f36',
                     fontWeight: 700,
                   }}
@@ -1002,14 +1002,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 54,
-                  height: 54,
+                  width: 52,
+                  height: 52,
                   borderRadius: 16,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: 900,
                   display: 'inline-flex',
                   flexDirection: 'column',
@@ -1026,14 +1026,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 54,
-                  height: 54,
+                  width: 52,
+                  height: 52,
                   borderRadius: 16,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 22,
+                  fontSize: 21,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1047,14 +1047,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language-region')}
                 style={{
-                  width: 54,
-                  height: 54,
+                  width: 52,
+                  height: 52,
                   borderRadius: 16,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 20,
+                  fontSize: 19,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1332,7 +1332,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '10px 0 0' }}>
+        <section style={{ padding: '8px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1364,7 +1364,7 @@ export default function HomePage() {
                 setDealFilterMode('none');
                 setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
               }}
-              icon={<span style={{ fontSize: 24, color: '#ff3b58', lineHeight: 1 }}>♥</span>}
+              icon={<span style={{ fontSize: 23, color: '#ff3b58', lineHeight: 1 }}>♥</span>}
               title="Favourite"
               count={likedInCategoryCount}
             />
@@ -1404,9 +1404,9 @@ export default function HomePage() {
               }}
               icon={
                 <span style={{ display: 'inline-flex', gap: 1, color: '#ff3b58' }}>
-                  <span style={{ fontSize: 18, lineHeight: 1 }}>♥</span>
-                  <span style={{ fontSize: 15, lineHeight: 1 }}>♥</span>
-                  <span style={{ fontSize: 13, lineHeight: 1 }}>♥</span>
+                  <span style={{ fontSize: 16, lineHeight: 1 }}>♥</span>
+                  <span style={{ fontSize: 14, lineHeight: 1 }}>♥</span>
+                  <span style={{ fontSize: 12, lineHeight: 1 }}>♥</span>
                 </span>
               }
               title="All favourite"
