@@ -17,7 +17,7 @@ type NavItem = {
 
 const items: NavItem[] = [
   { key: 'home', label: 'Home', icon: '⌂', href: '/' },
-  { key: 'bookings', label: 'Bookings', icon: '◫', href: '/bookings' },
+  { key: 'bookings', label: 'Bookings', icon: '⌑', href: '/bookings' },
   { key: 'add', label: 'Add', icon: '+', href: '/profile/promotions/new', accent: true },
   { key: 'messages', label: 'Messages', icon: '◌', href: '/messages', badge: 2 },
   { key: 'profile', label: 'Profile', icon: '◎', href: '/account' },
@@ -40,10 +40,10 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       style={{
         position: 'fixed',
         left: '50%',
-        bottom: 16,
+        bottom: 14,
         transform: 'translateX(-50%)',
-        width: 'calc(100% - 28px)',
-        maxWidth: 402,
+        width: 'calc(100% - 32px)',
+        maxWidth: 404,
         zIndex: 1200,
       }}
     >
@@ -51,13 +51,13 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
         style={{
           background: '#f7f4ef',
           border: '1.2px solid #ddd6cb',
-          borderRadius: 24,
-          boxShadow: '0 8px 28px rgba(15,23,42,0.10)',
-          padding: '10px 12px 12px',
+          borderRadius: 26,
+          boxShadow: '0 8px 26px rgba(15,23,42,0.10)',
+          padding: '10px 10px 12px',
           display: 'grid',
           gridTemplateColumns: 'repeat(5, 1fr)',
           alignItems: 'end',
-          gap: 8,
+          gap: 4,
         }}
       >
         {items.map((item) => {
@@ -77,23 +77,23 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'flex-end',
-                  gap: 6,
+                  gap: 4,
                 }}
               >
                 <span
                   style={{
-                    width: 72,
-                    height: 72,
+                    width: 68,
+                    height: 68,
                     borderRadius: '50%',
-                    background: '#51c35d',
+                    background: '#55c75f',
                     color: '#ffffff',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 42,
+                    fontSize: 40,
                     fontWeight: 500,
                     lineHeight: 1,
-                    boxShadow: '0 10px 24px rgba(79,193,90,0.30)',
+                    boxShadow: '0 10px 22px rgba(85,199,95,0.28)',
                     transform: 'translateY(-14px)',
                   }}
                 >
@@ -127,15 +127,16 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'flex-end',
-                gap: 6,
+                gap: 4,
                 position: 'relative',
+                minHeight: 62,
               }}
             >
               <span
                 style={{
-                  fontSize: 30,
+                  fontSize: 28,
                   lineHeight: 1,
-                  color: isActive ? '#51c35d' : '#3f3f3f',
+                  color: isActive ? '#55c75f' : '#4a4a4a',
                   fontWeight: isActive ? 800 : 500,
                 }}
               >
@@ -146,15 +147,15 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 <span
                   style={{
                     position: 'absolute',
-                    top: 0,
-                    right: '20%',
-                    minWidth: 20,
-                    height: 20,
+                    top: 2,
+                    right: '18%',
+                    minWidth: 19,
+                    height: 19,
                     padding: '0 5px',
                     borderRadius: 999,
                     background: '#ff3f7f',
                     color: '#ffffff',
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: 900,
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -168,9 +169,9 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
 
               <span
                 style={{
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: isActive ? 800 : 700,
-                  color: isActive ? '#51c35d' : '#303030',
+                  color: isActive ? '#55c75f' : '#303030',
                 }}
               >
                 {item.label}
