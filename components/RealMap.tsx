@@ -38,15 +38,15 @@ type RealMapProps = {
   onBookMaster?: (master: MasterItem) => void;
 };
 
-const LONDON_CENTER: [number, number] = [51.5074, -0.1278];
+const LONDON_CENTER: [number, number] = [51.5078, -0.1278];
 
 const DEMO_MASTERS: MasterItem[] = [
   {
     id: 'demo-1',
     name: 'Anna',
     category: 'beauty',
-    lat: 51.533,
-    lng: -0.164,
+    lat: 51.536,
+    lng: -0.186,
     avatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
   },
@@ -54,7 +54,7 @@ const DEMO_MASTERS: MasterItem[] = [
     id: 'demo-2',
     name: 'Mark',
     category: 'barber',
-    lat: 51.498,
+    lat: 51.493,
     lng: -0.183,
     avatar:
       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
@@ -64,7 +64,7 @@ const DEMO_MASTERS: MasterItem[] = [
     name: 'Oksana',
     category: 'beauty',
     lat: 51.507,
-    lng: -0.109,
+    lng: -0.112,
     avatar:
       'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=300&q=80',
   },
@@ -72,8 +72,8 @@ const DEMO_MASTERS: MasterItem[] = [
     id: 'demo-4',
     name: 'David',
     category: 'pets',
-    lat: 51.54,
-    lng: -0.045,
+    lat: 51.539,
+    lng: -0.052,
     avatar:
       'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80',
   },
@@ -81,8 +81,8 @@ const DEMO_MASTERS: MasterItem[] = [
     id: 'demo-5',
     name: 'Mila',
     category: 'wellness',
-    lat: 51.484,
-    lng: -0.02,
+    lat: 51.487,
+    lng: -0.028,
     avatar:
       'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
   },
@@ -111,25 +111,11 @@ function MapEvents({
 
 function RecenterMap({
   trigger,
-  selectedMaster,
 }: {
   trigger?: number;
-  selectedMaster?: MasterItem | null;
 }) {
   const map = useMap();
   const prevTrigger = useRef(trigger);
-
-  useEffect(() => {
-    if (
-      selectedMaster &&
-      Number.isFinite(selectedMaster.lat) &&
-      Number.isFinite(selectedMaster.lng)
-    ) {
-      map.flyTo([selectedMaster.lat, selectedMaster.lng], 10, {
-        duration: 0.7,
-      });
-    }
-  }, [map, selectedMaster]);
 
   useEffect(() => {
     if (prevTrigger.current === trigger) return;
@@ -143,13 +129,13 @@ function RecenterMap({
           });
         },
         () => {
-          map.flyTo(LONDON_CENTER, 10, { duration: 0.8 });
+          map.flyTo(LONDON_CENTER, 11, { duration: 0.8 });
         }
       );
       return;
     }
 
-    map.flyTo(LONDON_CENTER, 10, { duration: 0.8 });
+    map.flyTo(LONDON_CENTER, 11, { duration: 0.8 });
   }, [map, trigger]);
 
   return null;
@@ -325,13 +311,11 @@ export default function RealMap({
   }, [masters]);
 
   const selectedMaster = useMemo(() => {
-    if (selectedMasterId !== null && selectedMasterId !== undefined) {
-      return (
-        safeMasters.find((master) => String(master.id) === String(selectedMasterId)) || null
-      );
-    }
+    if (selectedMasterId === null || selectedMasterId === undefined) return null;
 
-    return safeMasters[2] || DEMO_MASTERS[2];
+    return (
+      safeMasters.find((master) => String(master.id) === String(selectedMasterId)) || null
+    );
   }, [safeMasters, selectedMasterId]);
 
   const tileUrl =
@@ -350,7 +334,7 @@ export default function RealMap({
     >
       <MapContainer
         center={LONDON_CENTER}
-        zoom={10}
+        zoom={11}
         minZoom={9}
         zoomControl={false}
         style={{
@@ -364,7 +348,7 @@ export default function RealMap({
         <ZoomControl position="topleft" />
 
         <MapEvents onMapBackgroundClick={onMapBackgroundClick} />
-        <RecenterMap trigger={recenterToUserTrigger} selectedMaster={selectedMaster} />
+        <RecenterMap trigger={recenterToUserTrigger} />
 
         {safeMasters.map((master) => {
           const isSelected =
@@ -374,7 +358,7 @@ export default function RealMap({
             <Marker
               key={String(master.id)}
               position={[master.lat, master.lng]}
-              icon={createMasterPin(master, isSelected)}
+              icon={createMasterPin(master, Boolean(isSelected))}
               eventHandlers={{
                 click: () => {
                   onMasterSelect?.(master);
