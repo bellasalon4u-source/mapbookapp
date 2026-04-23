@@ -35,26 +35,29 @@ function getCategoryLabel(category: any, language: AppLanguage) {
   return map[String(category.id || '').toLowerCase()]?.[language] || category.shortLabel || category.label;
 }
 
-function getCategoryEmoji(categoryId: string) {
-  const id = String(categoryId || '').toLowerCase();
+function getCategoryVisual(category: any) {
+  const id = String(category?.id || '').toLowerCase();
 
-  if (id === 'more') return '🟩🟦🟥🟨';
-  if (id === 'beauty') return '🪞';
-  if (id === 'barber') return '💈';
-  if (id === 'wellness') return '🪷';
-  if (id === 'home') return '🏠';
-  if (id === 'repairs' || id === 'tech') return '🛠️';
-  if (id === 'pets') return '🐶';
-  if (id === 'fitness') return '🏋️';
-  if (id === 'fashion') return '👜';
-  if (id === 'auto') return '🚗';
-  if (id === 'moving') return '📦';
-  if (id === 'education') return '🎓';
-  if (id === 'events') return '🎉';
-  if (id === 'activities') return '🎯';
-  if (id === 'creative') return '🎨';
+  const visualMap: Record<string, string> = {
+    more: '🟩🟦🟥🟨',
+    beauty: '🪞',
+    barber: '💈',
+    wellness: '🪷',
+    home: '🏠',
+    repairs: '🛠️',
+    tech: '🛠️',
+    pets: '🐶',
+    fitness: '🏋️',
+    fashion: '👜',
+    auto: '🚗',
+    moving: '📦',
+    education: '🎓',
+    events: '🎉',
+    activities: '🎯',
+    creative: '🎨',
+  };
 
-  return '✨';
+  return visualMap[id] || '✨';
 }
 
 export default function TopCategoriesBar({
@@ -65,11 +68,11 @@ export default function TopCategoriesBar({
   const visibleCategories = categories.slice(0, 8);
 
   return (
-    <div style={{ padding: '0 12px' }}>
+    <div style={{ padding: '0 16px' }}>
       <div
         style={{
           display: 'flex',
-          gap: 12,
+          gap: 16,
           overflowX: 'auto',
           overflowY: 'hidden',
           padding: '0 2px 2px',
@@ -79,18 +82,19 @@ export default function TopCategoriesBar({
         }}
       >
         {visibleCategories.map((category) => {
-          const isActive = activeCategory === String(category.id);
+          const categoryId = String(category.id);
+          const isActive = activeCategory === categoryId;
 
           return (
             <button
-              key={String(category.id)}
-              onClick={() => onSelectCategory(String(category.id))}
+              key={categoryId}
+              onClick={() => onSelectCategory(categoryId)}
               style={{
                 border: 'none',
                 background: 'transparent',
                 padding: 0,
                 cursor: 'pointer',
-                minWidth: 76,
+                minWidth: 102,
                 flexShrink: 0,
                 display: 'flex',
                 flexDirection: 'column',
@@ -99,33 +103,33 @@ export default function TopCategoriesBar({
             >
               <div
                 style={{
-                  width: 76,
-                  height: 76,
-                  borderRadius: 22,
-                  border: isActive ? '1.5px solid #ef7db1' : '1.2px solid #ddd8d2',
+                  width: 102,
+                  height: 102,
+                  borderRadius: 26,
+                  border: isActive ? '2px solid #ef7db1' : '1.6px solid #cfc8be',
                   background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: isActive
-                    ? '0 0 0 3px rgba(239,125,177,0.18), 0 2px 10px rgba(0,0,0,0.03)'
-                    : '0 2px 10px rgba(0,0,0,0.03)',
+                    ? '0 0 0 5px rgba(239,125,177,0.16), 0 2px 8px rgba(0,0,0,0.03)'
+                    : '0 2px 8px rgba(0,0,0,0.03)',
                 }}
               >
                 <span
                   style={{
-                    fontSize: 40,
+                    fontSize: 54,
                     lineHeight: 1,
                   }}
                 >
-                  {getCategoryEmoji(String(category.id))}
+                  {getCategoryVisual(category)}
                 </span>
               </div>
 
               <span
                 style={{
-                  marginTop: 8,
-                  fontSize: 13,
+                  marginTop: 10,
+                  fontSize: 15,
                   fontWeight: isActive ? 900 : 700,
                   color: '#1f2937',
                   textAlign: 'center',
