@@ -1102,8 +1102,8 @@ export default function HomePage() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0,1fr) 46px 46px 46px',
-                gap: 7,
+                gridTemplateColumns: 'minmax(0,1fr) 44px 44px 44px',
+                gap: 6,
                 alignItems: 'center',
               }}
             >
@@ -1183,14 +1183,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language')}
                 style={{
-                  width: 46,
+                  width: 44,
                   height: 48,
                   borderRadius: 15,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 8.5,
+                  fontSize: 8,
                   fontWeight: 900,
                   display: 'inline-flex',
                   flexDirection: 'column',
@@ -1201,21 +1201,21 @@ export default function HomePage() {
                   boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 }}
               >
-                <span style={{ fontSize: 16, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 15, lineHeight: 1 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/currency')}
                 style={{
-                  width: 46,
+                  width: 44,
                   height: 48,
                   borderRadius: 15,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 20,
+                  fontSize: 19,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1230,14 +1230,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/location')}
                 style={{
-                  width: 46,
+                  width: 44,
                   height: 48,
                   borderRadius: 15,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 17,
+                  fontSize: 16,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1520,7 +1520,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '6px 0 0' }}>
+        <section style={{ padding: '4px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
