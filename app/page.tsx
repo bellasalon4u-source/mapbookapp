@@ -1097,31 +1097,31 @@ export default function HomePage() {
           background: '#f6f4ef',
         }}
       >
-        <section style={{ padding: '10px 12px 0' }}>
+        <section style={{ padding: '8px 12px 0' }}>
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0,1fr) 50px 50px 50px',
-                gap: 8,
+                gridTemplateColumns: 'minmax(0,1fr) 46px 46px 46px',
+                gap: 7,
                 alignItems: 'center',
               }}
             >
               <div
                 style={{
-                  height: 50,
-                  borderRadius: 20,
+                  height: 48,
+                  borderRadius: 19,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  padding: '0 14px',
+                  padding: '0 13px',
                   minWidth: 0,
                   boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 }}
               >
-                <span style={{ fontSize: 20, lineHeight: 1, color: '#9ca3af' }}>⌕</span>
+                <span style={{ fontSize: 18, lineHeight: 1, color: '#9ca3af' }}>⌕</span>
 
                 <input
                   value={search}
@@ -1154,7 +1154,7 @@ export default function HomePage() {
                     border: 'none',
                     outline: 'none',
                     background: 'transparent',
-                    fontSize: 11,
+                    fontSize: 10.5,
                     color: '#2b2f36',
                     fontWeight: 600,
                   }}
@@ -1169,7 +1169,7 @@ export default function HomePage() {
                     style={{
                       border: 'none',
                       background: 'transparent',
-                      fontSize: 15,
+                      fontSize: 14,
                       color: '#85909c',
                       cursor: 'pointer',
                       padding: 0,
@@ -1183,14 +1183,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language')}
                 style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 16,
+                  width: 46,
+                  height: 48,
+                  borderRadius: 15,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 9,
+                  fontSize: 8.5,
                   fontWeight: 900,
                   display: 'inline-flex',
                   flexDirection: 'column',
@@ -1201,21 +1201,21 @@ export default function HomePage() {
                   boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 }}
               >
-                <span style={{ fontSize: 17, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 16, lineHeight: 1 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/currency')}
                 style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 16,
+                  width: 46,
+                  height: 48,
+                  borderRadius: 15,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 22,
+                  fontSize: 20,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1230,14 +1230,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/location')}
                 style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 16,
+                  width: 46,
+                  height: 48,
+                  borderRadius: 15,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 19,
+                  fontSize: 17,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1250,7 +1250,7 @@ export default function HomePage() {
               </button>
             </div>
 
-            <div style={{ marginTop: 10 }}>
+            <div style={{ marginTop: 8 }}>
               <BrightTicker language={language} />
             </div>
 
@@ -1520,7 +1520,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '8px 0 0' }}>
+        <section style={{ padding: '6px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1673,7 +1673,7 @@ export default function HomePage() {
                 style={{
                   position: 'absolute',
                   left: '50%',
-                  bottom: 92,
+                  bottom: 98,
                   transform: 'translateX(-50%)',
                   border: '1.2px solid #d7d1c7',
                   background: '#ffffff',
