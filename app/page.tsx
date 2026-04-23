@@ -145,13 +145,13 @@ function mapCategoryToId(category: string) {
 function listingToMaster(listing: ListingItem, index: number) {
   const fallbackCoords: [number, number][] = [
     [51.5074, -0.1278],
-    [51.5330, -0.1640],
-    [51.4980, -0.1830],
-    [51.5400, -0.0450],
-    [51.4840, -0.0200],
+    [51.533, -0.164],
+    [51.498, -0.183],
+    [51.54, -0.045],
+    [51.484, -0.02],
     [51.5202, -0.1028],
     [51.5159, -0.1426],
-    [51.5098, -0.1180],
+    [51.5098, -0.118],
   ];
 
   const coords = fallbackCoords[index % fallbackCoords.length];
@@ -197,6 +197,7 @@ function scoreTextMatch(query: string, target: string) {
 
 function saveRecentSearch(value: string) {
   if (typeof window === 'undefined') return;
+
   const trimmed = value.trim();
   if (!trimmed) return;
 
@@ -206,6 +207,7 @@ function saveRecentSearch(value: string) {
     trimmed,
     ...current.filter((item) => item.toLowerCase() !== trimmed.toLowerCase()),
   ].slice(0, 6);
+
   window.localStorage.setItem(key, JSON.stringify(next));
 }
 
@@ -474,9 +476,17 @@ function ActionCountButton({
           minWidth: 0,
         }}
       >
-        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
           {icon}
         </span>
+
         <span
           style={{
             overflow: 'hidden',
@@ -574,13 +584,20 @@ function BrightTicker({ language }: { language: AppLanguage }) {
           }}
         >
           {messages.map((item, index) => (
-            <span key={`${item}-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            <span
+              key={`${item}-${index}`}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}
+            >
               <span>{item}</span>
               <span style={{ color: '#d6b500', fontSize: 8 }}>●</span>
             </span>
           ))}
+
           {messages.map((item, index) => (
-            <span key={`${item}-repeat-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            <span
+              key={`${item}-repeat-${index}`}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}
+            >
               <span>{item}</span>
               <span style={{ color: '#d6b500', fontSize: 8 }}>●</span>
             </span>
@@ -1029,6 +1046,7 @@ export default function HomePage() {
   ).length;
 
   const likedAllCount = likedMasterIds.length;
+
   const hasAnyResults =
     smartResults.length > 0 ||
     categoryResults.length > 0 ||
@@ -1317,6 +1335,7 @@ export default function HomePage() {
                         >
                           {tr.recentSearches}
                         </div>
+
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                           {recentSearches.map((item) => (
                             <button
@@ -1351,6 +1370,7 @@ export default function HomePage() {
                       >
                         {tr.popularSearches}
                       </div>
+
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                         {popularSearches.map((item) => (
                           <button
@@ -1398,6 +1418,7 @@ export default function HomePage() {
                         >
                           {tr.smartMatches}
                         </div>
+
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {smartResults.map((item) => (
                             <button
@@ -1439,6 +1460,7 @@ export default function HomePage() {
                         >
                           {tr.categories}
                         </div>
+
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {categoryResults.map((item) => (
                             <button
@@ -1477,6 +1499,7 @@ export default function HomePage() {
                         >
                           {tr.services}
                         </div>
+
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {subcategoryResults.map((item) => (
                             <button
@@ -1518,6 +1541,7 @@ export default function HomePage() {
                         >
                           {tr.pros}
                         </div>
+
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {proResults.map((item) => (
                             <button
