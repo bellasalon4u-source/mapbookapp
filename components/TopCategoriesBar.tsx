@@ -20,7 +20,7 @@ function getCategoryLabel(category: any, language: AppLanguage) {
     wellness: { EN: 'Wellness', ES: 'Wellness', RU: 'Велнес', UA: 'Велнес', CZ: 'Wellness', DE: 'Wellness', PL: 'Wellness' },
     home: { EN: 'Home', ES: 'Home', RU: 'Дом', UA: 'Дім', CZ: 'Home', DE: 'Home', PL: 'Home' },
     repairs: { EN: 'Repairs', ES: 'Repairs', RU: 'Ремонт', UA: 'Ремонт', CZ: 'Repairs', DE: 'Repairs', PL: 'Repairs' },
-    tech: { EN: 'Tech', ES: 'Tech', RU: 'Техника', UA: 'Техніка', CZ: 'Tech', DE: 'Tech', PL: 'Tech' },
+    tech: { EN: 'Repairs', ES: 'Repairs', RU: 'Ремонт', UA: 'Ремонт', CZ: 'Repairs', DE: 'Repairs', PL: 'Repairs' },
     pets: { EN: 'Pets', ES: 'Pets', RU: 'Питомцы', UA: 'Тварини', CZ: 'Pets', DE: 'Pets', PL: 'Pets' },
     fitness: { EN: 'Fitness', ES: 'Fitness', RU: 'Фитнес', UA: 'Фітнес', CZ: 'Fitness', DE: 'Fitness', PL: 'Fitness' },
     fashion: { EN: 'Fashion', ES: 'Fashion', RU: 'Мода', UA: 'Мода', CZ: 'Fashion', DE: 'Fashion', PL: 'Fashion' },
@@ -84,38 +84,84 @@ function getCategoryVisual(category: any): { type: 'image' | 'emoji'; value: str
   return null;
 }
 
+function getLanguageAccent(language: AppLanguage) {
+  switch (language) {
+    case 'EN':
+      return {
+        border: '#c8102e',
+        glow: 'rgba(200,16,46,0.16)',
+      };
+    case 'RU':
+      return {
+        border: '#0039a6',
+        glow: 'rgba(0,57,166,0.16)',
+      };
+    case 'CZ':
+      return {
+        border: '#d7141a',
+        glow: 'rgba(215,20,26,0.16)',
+      };
+    case 'DE':
+      return {
+        border: '#ffce00',
+        glow: 'rgba(255,206,0,0.18)',
+      };
+    case 'PL':
+      return {
+        border: '#dc143c',
+        glow: 'rgba(220,20,60,0.16)',
+      };
+    case 'UA':
+      return {
+        border: '#0057b7',
+        glow: 'rgba(0,87,183,0.16)',
+      };
+    case 'ES':
+      return {
+        border: '#c60b1e',
+        glow: 'rgba(198,11,30,0.16)',
+      };
+    case 'FR':
+      return {
+        border: '#0055a4',
+        glow: 'rgba(0,85,164,0.16)',
+      };
+    case 'IT':
+      return {
+        border: '#009246',
+        glow: 'rgba(0,146,70,0.16)',
+      };
+    case 'AR':
+      return {
+        border: '#007a3d',
+        glow: 'rgba(0,122,61,0.16)',
+      };
+    default:
+      return {
+        border: '#ef7db1',
+        glow: 'rgba(239,125,177,0.14)',
+      };
+  }
+}
+
 export default function TopCategoriesBar({
   activeCategory,
   language,
   onSelectCategory,
 }: TopCategoriesBarProps) {
-  const orderedCategoryIds = [
-    'more',
-    'beauty',
-    'barber',
-    'wellness',
-    'home',
-    'repairs',
-    'pets',
-    'fitness',
+  const visibleCategories = [
+    { id: 'more', label: 'More', shortLabel: 'More' },
+    ...categories.slice(0, 7),
   ];
 
-  const visibleCategories = orderedCategoryIds
-    .map((id) => {
-      if (id === 'more') {
-        return { id: 'more', label: 'More', shortLabel: 'More' };
-      }
-
-      return categories.find((item) => item.id === id);
-    })
-    .filter(Boolean) as any[];
+  const accent = getLanguageAccent(language);
 
   return (
     <div style={{ padding: '0 12px' }}>
       <div
         style={{
           display: 'flex',
-          gap: 8,
+          gap: 10,
           overflowX: 'auto',
           overflowY: 'hidden',
           padding: '0 1px 2px',
@@ -139,7 +185,7 @@ export default function TopCategoriesBar({
                 background: 'transparent',
                 padding: 0,
                 cursor: 'pointer',
-                minWidth: 68,
+                minWidth: 74,
                 flexShrink: 0,
                 display: 'flex',
                 flexDirection: 'column',
@@ -148,16 +194,16 @@ export default function TopCategoriesBar({
             >
               <div
                 style={{
-                  width: 68,
-                  height: 68,
-                  borderRadius: 20,
-                  border: isActive ? '1.8px solid #ef7db1' : '1.2px solid #cfc8be',
+                  width: 74,
+                  height: 74,
+                  borderRadius: 22,
+                  border: isActive ? `1.8px solid ${accent.border}` : '1.2px solid #cfc8be',
                   background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: isActive
-                    ? '0 0 0 4px rgba(239,125,177,0.12), 0 2px 8px rgba(0,0,0,0.03)'
+                    ? `0 0 0 4px ${accent.glow}, 0 2px 8px rgba(0,0,0,0.03)`
                     : '0 2px 8px rgba(0,0,0,0.03)',
                   overflow: 'hidden',
                 }}
@@ -167,8 +213,8 @@ export default function TopCategoriesBar({
                     src={visual.value}
                     alt={label}
                     style={{
-                      width: '74%',
-                      height: '74%',
+                      width: '76%',
+                      height: '76%',
                       objectFit: 'contain',
                       display: 'block',
                     }}
@@ -176,7 +222,7 @@ export default function TopCategoriesBar({
                 ) : visual?.type === 'emoji' ? (
                   <span
                     style={{
-                      fontSize: 34,
+                      fontSize: 38,
                       lineHeight: 1,
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -188,7 +234,7 @@ export default function TopCategoriesBar({
                 ) : (
                   <span
                     style={{
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: 800,
                       color: '#6b7280',
                       textAlign: 'center',
@@ -202,8 +248,8 @@ export default function TopCategoriesBar({
 
               <span
                 style={{
-                  marginTop: 7,
-                  fontSize: 10.5,
+                  marginTop: 8,
+                  fontSize: 11,
                   fontWeight: isActive ? 900 : 700,
                   color: '#1f2937',
                   textAlign: 'center',
