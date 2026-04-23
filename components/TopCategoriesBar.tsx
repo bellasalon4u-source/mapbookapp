@@ -87,60 +87,27 @@ function getCategoryVisual(category: any): { type: 'image' | 'emoji'; value: str
 function getLanguageAccent(language: AppLanguage) {
   switch (language) {
     case 'EN':
-      return {
-        border: '#c8102e',
-        glow: 'rgba(200,16,46,0.16)',
-      };
+      return { border: '#c8102e', glow: 'rgba(200,16,46,0.15)' };
     case 'RU':
-      return {
-        border: '#0039a6',
-        glow: 'rgba(0,57,166,0.16)',
-      };
+      return { border: '#0039a6', glow: 'rgba(0,57,166,0.15)' };
     case 'CZ':
-      return {
-        border: '#d7141a',
-        glow: 'rgba(215,20,26,0.16)',
-      };
+      return { border: '#d7141a', glow: 'rgba(215,20,26,0.15)' };
     case 'DE':
-      return {
-        border: '#ffce00',
-        glow: 'rgba(255,206,0,0.18)',
-      };
+      return { border: '#ffce00', glow: 'rgba(255,206,0,0.17)' };
     case 'PL':
-      return {
-        border: '#dc143c',
-        glow: 'rgba(220,20,60,0.16)',
-      };
+      return { border: '#dc143c', glow: 'rgba(220,20,60,0.15)' };
     case 'UA':
-      return {
-        border: '#0057b7',
-        glow: 'rgba(0,87,183,0.16)',
-      };
+      return { border: '#0057b7', glow: 'rgba(0,87,183,0.15)' };
     case 'ES':
-      return {
-        border: '#c60b1e',
-        glow: 'rgba(198,11,30,0.16)',
-      };
+      return { border: '#c60b1e', glow: 'rgba(198,11,30,0.15)' };
     case 'FR':
-      return {
-        border: '#0055a4',
-        glow: 'rgba(0,85,164,0.16)',
-      };
+      return { border: '#0055a4', glow: 'rgba(0,85,164,0.15)' };
     case 'IT':
-      return {
-        border: '#009246',
-        glow: 'rgba(0,146,70,0.16)',
-      };
+      return { border: '#009246', glow: 'rgba(0,146,70,0.15)' };
     case 'AR':
-      return {
-        border: '#007a3d',
-        glow: 'rgba(0,122,61,0.16)',
-      };
+      return { border: '#007a3d', glow: 'rgba(0,122,61,0.15)' };
     default:
-      return {
-        border: '#ef7db1',
-        glow: 'rgba(239,125,177,0.14)',
-      };
+      return { border: '#ef7db1', glow: 'rgba(239,125,177,0.14)' };
   }
 }
 
@@ -149,9 +116,10 @@ export default function TopCategoriesBar({
   language,
   onSelectCategory,
 }: TopCategoriesBarProps) {
+  const filteredCategories = categories.filter((item: any) => String(item.id).toLowerCase() !== 'more');
   const visibleCategories = [
     { id: 'more', label: 'More', shortLabel: 'More' },
-    ...categories.slice(0, 7),
+    ...filteredCategories.slice(0, 7),
   ];
 
   const accent = getLanguageAccent(language);
