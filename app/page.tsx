@@ -482,17 +482,17 @@ function ActionCountButton({
     <button
       onClick={onClick}
       style={{
-        minHeight: 56,
+        minHeight: 52,
         border: '1.2px solid #d8d2c8',
         borderRadius: 18,
         background: '#ffffff',
         color: '#151515',
         cursor: 'pointer',
         display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 34px',
+        gridTemplateColumns: 'minmax(0, 1fr) 32px',
         alignItems: 'center',
         gap: 8,
-        padding: '0 12px',
+        padding: '0 10px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
       }}
     >
@@ -514,7 +514,7 @@ function ActionCountButton({
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            fontSize: 13,
+            fontSize: 11,
             fontWeight: 800,
           }}
         >
@@ -524,8 +524,8 @@ function ActionCountButton({
 
       <span
         style={{
-          width: 34,
-          height: 34,
+          width: 32,
+          height: 32,
           borderRadius: 999,
           border: '1.2px solid #cbc5bc',
           background: '#ffffff',
@@ -533,7 +533,7 @@ function ActionCountButton({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 13,
+          fontSize: 12,
           fontWeight: 900,
           flexShrink: 0,
         }}
@@ -551,14 +551,14 @@ function BrightTicker({ language }: { language: AppLanguage }) {
   return (
     <div
       style={{
-        height: 46,
+        height: 38,
         borderRadius: 14,
         border: '1px solid rgba(22,28,45,0.08)',
         background: getTickerBackground(language),
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 12px',
+        padding: '0 10px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
       }}
     >
@@ -566,10 +566,10 @@ function BrightTicker({ language }: { language: AppLanguage }) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
+          gap: 6,
           flexShrink: 0,
-          marginRight: 12,
-          padding: '4px 8px',
+          marginRight: 10,
+          padding: '3px 7px',
           borderRadius: 999,
           background: 'rgba(255,255,255,0.92)',
           boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
@@ -579,8 +579,8 @@ function BrightTicker({ language }: { language: AppLanguage }) {
           src={logo}
           alt="Olamep"
           style={{
-            width: 26,
-            height: 26,
+            width: 22,
+            height: 22,
             objectFit: 'contain',
             display: 'block',
             flexShrink: 0,
@@ -588,7 +588,7 @@ function BrightTicker({ language }: { language: AppLanguage }) {
         />
         <span
           style={{
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: 900,
             color: '#16306b',
             lineHeight: 1,
@@ -611,7 +611,7 @@ function BrightTicker({ language }: { language: AppLanguage }) {
             display: 'inline-block',
             whiteSpace: 'nowrap',
             color: '#394150',
-            fontSize: 13,
+            fontSize: 11,
             fontWeight: 700,
             paddingLeft: '100%',
             animation: 'olamepTickerMove 19s linear infinite',
@@ -639,8 +639,8 @@ function PromoCard({
     <button
       onClick={onOpen}
       style={{
-        minWidth: 146,
-        maxWidth: 146,
+        minWidth: 136,
+        maxWidth: 136,
         border: '1.2px solid #d8d2c8',
         borderRadius: 16,
         background: '#ffffff',
@@ -658,7 +658,7 @@ function PromoCard({
           alt={anyPromo.title}
           style={{
             width: '100%',
-            height: 94,
+            height: 86,
             objectFit: 'cover',
             display: 'block',
           }}
@@ -685,7 +685,7 @@ function PromoCard({
       <div style={{ padding: '10px 10px 12px' }}>
         <div
           style={{
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: 800,
             color: '#151515',
             lineHeight: 1.2,
@@ -1180,26 +1180,26 @@ export default function HomePage() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 72px 66px 66px',
-                gap: 10,
+                gridTemplateColumns: 'minmax(0,1fr) 60px 56px 56px',
+                gap: 8,
                 alignItems: 'center',
               }}
             >
               <div
                 style={{
-                  height: 66,
-                  borderRadius: 22,
+                  height: 58,
+                  borderRadius: 20,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 10,
-                  padding: '0 16px',
+                  padding: '0 14px',
                   minWidth: 0,
                   boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
                 }}
               >
-                <span style={{ fontSize: 24, lineHeight: 1, color: '#6b7280' }}>⌕</span>
+                <span style={{ fontSize: 20, lineHeight: 1, color: '#6b7280' }}>⌕</span>
 
                 <input
                   value={search}
@@ -1232,7 +1232,7 @@ export default function HomePage() {
                     border: 'none',
                     outline: 'none',
                     background: 'transparent',
-                    fontSize: 15,
+                    fontSize: 13,
                     color: '#2b2f36',
                     fontWeight: 700,
                   }}
@@ -1261,14 +1261,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language')}
                 style={{
-                  width: 72,
-                  height: 66,
-                  borderRadius: 20,
+                  width: 60,
+                  height: 58,
+                  borderRadius: 18,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 12,
+                  fontSize: 10,
                   fontWeight: 900,
                   display: 'inline-flex',
                   flexDirection: 'column',
@@ -1279,21 +1279,21 @@ export default function HomePage() {
                   boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
                 }}
               >
-                <span style={{ fontSize: 26, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 21, lineHeight: 1 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/currency')}
                 style={{
-                  width: 66,
-                  height: 66,
-                  borderRadius: 20,
+                  width: 56,
+                  height: 58,
+                  borderRadius: 18,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1308,14 +1308,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/location')}
                 style={{
-                  width: 66,
-                  height: 66,
-                  borderRadius: 20,
+                  width: 56,
+                  height: 58,
+                  borderRadius: 18,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1622,7 +1622,7 @@ export default function HomePage() {
             style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
-              gap: 10,
+              gap: 8,
             }}
           >
             <ActionCountButton
@@ -1719,7 +1719,7 @@ export default function HomePage() {
               boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
             }}
           >
-            <div style={{ height: 492, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ height: 470, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={mapMasters}
                 mapMode={mapMode}
@@ -1756,13 +1756,13 @@ export default function HomePage() {
                   border: '1px solid #e1ddd7',
                   background: '#ffffff',
                   borderRadius: 999,
-                  padding: '12px 22px',
-                  fontSize: 15,
+                  padding: '10px 20px',
+                  fontSize: 14,
                   fontWeight: 800,
                   color: '#334155',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 7,
                   boxShadow: '0 8px 20px rgba(15,23,42,0.10)',
                   cursor: 'pointer',
                   zIndex: 500,
