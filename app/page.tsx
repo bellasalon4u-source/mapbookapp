@@ -383,26 +383,55 @@ function extractPromotionDiscountBadge(promo: PromotionItem) {
   return 'SALE';
 }
 
+function getAppBackground(language: AppLanguage) {
+  switch (language) {
+    case 'EN':
+      return 'linear-gradient(180deg, #eef4ff 0%, #ffffff 38%, #fff1f4 100%)';
+    case 'RU':
+      return 'linear-gradient(180deg, #f3f7ff 0%, #ffffff 48%, #fff2f2 100%)';
+    case 'CZ':
+      return 'linear-gradient(180deg, #eef4ff 0%, #ffffff 45%, #fff0f0 100%)';
+    case 'DE':
+      return 'linear-gradient(180deg, #fafafa 0%, #fffdf2 100%)';
+    case 'PL':
+      return 'linear-gradient(180deg, #ffffff 0%, #fff1f5 100%)';
+    case 'UA':
+      return 'linear-gradient(180deg, #eef6ff 0%, #fffbea 100%)';
+    case 'ES':
+      return 'linear-gradient(180deg, #fff8f0 0%, #fff3d9 100%)';
+    case 'FR':
+      return 'linear-gradient(180deg, #eef5ff 0%, #ffffff 45%, #fff1f1 100%)';
+    case 'IT':
+      return 'linear-gradient(180deg, #eefbf3 0%, #ffffff 45%, #fff2f2 100%)';
+    case 'AR':
+      return 'linear-gradient(180deg, #eef8f1 0%, #ffffff 55%, #fff4f4 100%)';
+    default:
+      return '#f6f4ef';
+  }
+}
+
 function getTickerBackground(language: AppLanguage) {
   switch (language) {
     case 'EN':
-      return 'linear-gradient(90deg, rgba(1,33,105,0.05) 0%, rgba(255,255,255,1) 36%, rgba(200,16,46,0.05) 100%)';
+      return 'linear-gradient(90deg, rgba(1,33,105,0.14) 0%, rgba(255,255,255,0.98) 42%, rgba(200,16,46,0.14) 100%)';
     case 'RU':
-      return 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(0,57,166,0.05) 55%, rgba(213,43,30,0.05) 100%)';
+      return 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(0,57,166,0.12) 55%, rgba(213,43,30,0.14) 100%)';
     case 'CZ':
-      return 'linear-gradient(90deg, rgba(17,69,126,0.05) 0%, rgba(255,255,255,1) 45%, rgba(215,20,26,0.05) 100%)';
+      return 'linear-gradient(90deg, rgba(17,69,126,0.14) 0%, rgba(255,255,255,0.98) 45%, rgba(215,20,26,0.14) 100%)';
     case 'DE':
-      return 'linear-gradient(90deg, rgba(0,0,0,0.03) 0%, rgba(221,0,0,0.03) 55%, rgba(255,206,0,0.05) 100%)';
+      return 'linear-gradient(90deg, rgba(0,0,0,0.08) 0%, rgba(255,255,255,0.98) 50%, rgba(255,206,0,0.18) 100%)';
     case 'PL':
-      return 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(220,20,60,0.05) 100%)';
+      return 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(220,20,60,0.14) 100%)';
     case 'ES':
-      return 'linear-gradient(90deg, rgba(198,0,43,0.04) 0%, rgba(255,204,0,0.07) 50%, rgba(198,0,43,0.04) 100%)';
+      return 'linear-gradient(90deg, rgba(198,0,43,0.12) 0%, rgba(255,204,0,0.20) 52%, rgba(198,0,43,0.12) 100%)';
     case 'UA':
-      return 'linear-gradient(90deg, rgba(0,87,183,0.05) 0%, rgba(255,213,0,0.09) 100%)';
+      return 'linear-gradient(90deg, rgba(0,87,183,0.14) 0%, rgba(255,213,0,0.20) 100%)';
     case 'FR':
-      return 'linear-gradient(90deg, rgba(0,85,164,0.05) 0%, rgba(255,255,255,1) 50%, rgba(239,65,53,0.05) 100%)';
+      return 'linear-gradient(90deg, rgba(0,85,164,0.14) 0%, rgba(255,255,255,0.98) 50%, rgba(239,65,53,0.14) 100%)';
     case 'IT':
-      return 'linear-gradient(90deg, rgba(0,146,70,0.05) 0%, rgba(255,255,255,1) 50%, rgba(206,43,55,0.05) 100%)';
+      return 'linear-gradient(90deg, rgba(0,146,70,0.14) 0%, rgba(255,255,255,0.98) 50%, rgba(206,43,55,0.14) 100%)';
+    case 'AR':
+      return 'linear-gradient(90deg, rgba(0,122,61,0.14) 0%, rgba(255,255,255,0.98) 55%, rgba(206,17,38,0.12) 100%)';
     default:
       return 'linear-gradient(90deg, #ffffff 0%, #fffdf9 100%)';
   }
@@ -492,13 +521,14 @@ function BrightTicker({ language }: { language: AppLanguage }) {
     <div
       style={{
         height: 34,
-        borderTop: '1px solid #e8e1d7',
-        borderBottom: '1px solid #e8e1d7',
+        borderTop: '1px solid rgba(0,0,0,0.05)',
+        borderBottom: '1px solid rgba(0,0,0,0.05)',
         background: getTickerBackground(language),
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
         padding: '0 8px',
+        borderRadius: 10,
       }}
     >
       <div
@@ -510,7 +540,7 @@ function BrightTicker({ language }: { language: AppLanguage }) {
           marginRight: 12,
         }}
       >
-        <span style={{ fontSize: 13, lineHeight: 1 }}>{flag}</span>
+        <span style={{ fontSize: 14, lineHeight: 1 }}>{flag}</span>
         <img
           src={logo}
           alt="Olamep"
@@ -538,7 +568,7 @@ function BrightTicker({ language }: { language: AppLanguage }) {
             whiteSpace: 'nowrap',
             color: '#151515',
             fontSize: 11,
-            fontWeight: 500,
+            fontWeight: 600,
             paddingLeft: '100%',
             animation: 'olamepTickerMove 18s linear infinite',
           }}
@@ -546,13 +576,13 @@ function BrightTicker({ language }: { language: AppLanguage }) {
           {messages.map((item, index) => (
             <span key={`${item}-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
               <span>{item}</span>
-              <span style={{ color: '#f0cf22', fontSize: 8 }}>●</span>
+              <span style={{ color: '#d6b500', fontSize: 8 }}>●</span>
             </span>
           ))}
           {messages.map((item, index) => (
             <span key={`${item}-repeat-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
               <span>{item}</span>
-              <span style={{ color: '#f0cf22', fontSize: 8 }}>●</span>
+              <span style={{ color: '#d6b500', fontSize: 8 }}>●</span>
             </span>
           ))}
         </div>
@@ -690,13 +720,14 @@ export default function HomePage() {
   const [dealFilterMode, setDealFilterMode] = useState<DealFilterMode>('none');
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [promotions, setPromotions] = useState<PromotionItem[]>([]);
-  const [recenterToUserTrigger, setRecenterToUserTrigger] = useState(0);
+  const [recenterToUserTrigger] = useState(0);
   const [searchLocation, setSearchLocation] = useState(getEffectiveSearchLocation());
   const [locationLabel, setLocationLabel] = useState(getEffectiveSearchLocation().label);
   const [regionVersion, setRegionVersion] = useState(0);
   const [currencyVersion, setCurrencyVersion] = useState(0);
 
   const tr = t(language);
+  const pageBackground = getAppBackground(language);
 
   useEffect(() => {
     setRecentSearches(readRecentSearches());
@@ -1075,7 +1106,7 @@ export default function HomePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#f6f4ef',
+        background: pageBackground,
         fontFamily: 'Arial, sans-serif',
         color: '#17130f',
         paddingBottom: 128,
@@ -1096,7 +1127,7 @@ export default function HomePage() {
         style={{
           maxWidth: 430,
           margin: '0 auto',
-          background: '#f6f4ef',
+          background: pageBackground,
         }}
       >
         <section style={{ padding: '8px 12px 0' }}>
@@ -1230,10 +1261,7 @@ export default function HomePage() {
               </button>
 
               <button
-                onClick={() => {
-                  router.push('/profile/location');
-                  setRecenterToUserTrigger((prev) => prev + 1);
-                }}
+                onClick={() => router.push('/profile/location')}
                 style={{
                   width: 46,
                   height: 48,
@@ -1680,7 +1708,7 @@ export default function HomePage() {
           <section style={{ padding: '20px 0 0' }}>
             <div
               style={{
-                background: '#f6f4ef',
+                background: pageBackground,
                 padding: '0 0 12px',
               }}
             >
