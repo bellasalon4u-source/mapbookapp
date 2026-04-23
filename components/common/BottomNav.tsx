@@ -82,7 +82,7 @@ const items: NavItem[] = [
   { key: 'bookings', label: 'Bookings', href: '/bookings' },
   { key: 'add', label: 'Add', href: '/profile/promotions/new', accent: true },
   { key: 'messages', label: 'Messages', href: '/messages', badge: 2 },
-  { key: 'profile', label: 'Profile', href: '/account' },
+  { key: 'profile', label: 'Profile', href: '/profile' },
 ];
 
 export default function BottomNav({ active: activeProp }: BottomNavProps) {
@@ -93,7 +93,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
     if (activeProp) return activeProp === key;
 
     if (href === '/') return pathname === '/';
-    if (href === '/account') return pathname === '/account' || pathname?.startsWith('/profile');
+    if (href === '/profile') return pathname === '/profile' || pathname?.startsWith('/profile');
     return pathname?.startsWith(href);
   };
 
