@@ -114,8 +114,8 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
           background: '#f7f4ef',
           border: '1px solid #171717',
           borderRadius: 30,
-          boxShadow: '0 8px 20px rgba(15,23,42,0.06)',
-          padding: '12px 12px 16px',
+          boxShadow: '0 8px 18px rgba(15,23,42,0.06)',
+          padding: '11px 12px 15px',
           display: 'grid',
           gridTemplateColumns: 'repeat(5, 1fr)',
           alignItems: 'end',
@@ -144,19 +144,19 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
               >
                 <span
                   style={{
-                    width: 68,
-                    height: 68,
+                    width: 66,
+                    height: 66,
                     borderRadius: '50%',
                     background: '#55c75f',
                     color: '#ffffff',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 40,
+                    fontSize: 38,
                     fontWeight: 500,
                     lineHeight: 1,
-                    boxShadow: '0 10px 18px rgba(85,199,95,0.20)',
-                    transform: 'translateY(-16px)',
+                    boxShadow: '0 8px 16px rgba(85,199,95,0.18)',
+                    transform: 'translateY(-15px)',
                   }}
                 >
                   +
@@ -191,7 +191,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 justifyContent: 'flex-end',
                 gap: 5,
                 position: 'relative',
-                minHeight: 64,
+                minHeight: 62,
               }}
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -207,8 +207,8 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                     position: 'absolute',
                     top: 3,
                     right: '20%',
-                    minWidth: 19,
-                    height: 19,
+                    minWidth: 18,
+                    height: 18,
                     padding: '0 5px',
                     borderRadius: 999,
                     background: '#ff3f7f',
@@ -218,7 +218,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 2px 6px rgba(255,63,127,0.26)',
+                    boxShadow: '0 2px 5px rgba(255,63,127,0.24)',
                   }}
                 >
                   {item.badge}
