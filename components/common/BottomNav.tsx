@@ -6,13 +6,22 @@ type BottomNavProps = {
   active?: 'home' | 'bookings' | 'add' | 'messages' | 'profile';
 };
 
-const items = [
+type NavItem = {
+  key: 'home' | 'bookings' | 'add' | 'messages' | 'profile';
+  label: string;
+  icon: string;
+  href: string;
+  accent?: boolean;
+  badge?: number;
+};
+
+const items: NavItem[] = [
   { key: 'home', label: 'Home', icon: '⌂', href: '/' },
   { key: 'bookings', label: 'Bookings', icon: '◫', href: '/bookings' },
   { key: 'add', label: 'Add', icon: '+', href: '/profile/promotions/new', accent: true },
   { key: 'messages', label: 'Messages', icon: '◌', href: '/messages', badge: 2 },
   { key: 'profile', label: 'Profile', icon: '◎', href: '/account' },
-] as const;
+];
 
 export default function BottomNav({ active: activeProp }: BottomNavProps) {
   const router = useRouter();
@@ -22,7 +31,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
     if (activeProp) return activeProp === key;
 
     if (href === '/') return pathname === '/';
-    if (href === '/account') return pathname === '/account' || pathname === '/profile';
+    if (href === '/account') return pathname === '/account' || pathname?.startsWith('/profile');
     return pathname?.startsWith(href);
   };
 
@@ -52,7 +61,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
         }}
       >
         {items.map((item) => {
-          const active = getIsActive(item.key, item.href);
+          const isActive = getIsActive(item.key, item.href);
 
           if (item.accent) {
             return (
@@ -90,6 +99,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 >
                   +
                 </span>
+
                 <span
                   style={{
                     marginTop: -8,
@@ -125,14 +135,14 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 style={{
                   fontSize: 30,
                   lineHeight: 1,
-                  color: active ? '#4fc15a' : '#5b5b5b',
-                  fontWeight: active ? 800 : 500,
+                  color: isActive ? '#4fc15a' : '#5b5b5b',
+                  fontWeight: isActive ? 800 : 500,
                 }}
               >
                 {item.icon}
               </span>
 
-              {item.badge ? (
+              {typeof item.badge === 'number' ? (
                 <span
                   style={{
                     position: 'absolute',
@@ -159,8 +169,8 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
               <span
                 style={{
                   fontSize: 12,
-                  fontWeight: active ? 800 : 700,
-                  color: active ? '#4fc15a' : '#303030',
+                  fontWeight: isActive ? 800 : 700,
+                  color: isActive ? '#4fc15a' : '#303030',
                 }}
               >
                 {item.label}
