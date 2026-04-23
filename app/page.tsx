@@ -43,104 +43,6 @@ const popularSearches = [
   'Moving help',
 ];
 
-const tickerMessages: Record<AppLanguage, string[]> = {
-  EN: [
-    'Olamep • Explore services around you',
-    'Verified specialists nearby',
-    'Hot offers updated today',
-    'Fast local booking',
-  ],
-  ES: [
-    'Olamep • Explora servicios cerca de ti',
-    'Especialistas verificados cerca',
-    'Ofertas actualizadas hoy',
-    'Reserva local rápida',
-  ],
-  RU: [
-    'Olamep • Исследуй услуги рядом с собой',
-    'Проверенные специалисты рядом',
-    'Горячие предложения обновлены сегодня',
-    'Быстрое локальное бронирование',
-  ],
-  UA: [
-    'Olamep • Досліджуй послуги поруч',
-    'Перевірені спеціалісти поруч',
-    'Гарячі пропозиції оновлено сьогодні',
-    'Швидке локальне бронювання',
-  ],
-  CZ: [
-    'Olamep • Objevujte služby ve vašem okolí',
-    'Ověření specialisté poblíž',
-    'Akční nabídky aktualizovány dnes',
-    'Rychlá lokální rezervace',
-  ],
-  DE: [
-    'Olamep • Entdecke Services in deiner Nähe',
-    'Verifizierte Profis in der Nähe',
-    'Angebote heute aktualisiert',
-    'Schnelle lokale Buchung',
-  ],
-  IT: [
-    'Olamep • Scopri servizi vicino a te',
-    'Specialisti verificati nelle vicinanze',
-    'Offerte aggiornate oggi',
-    'Prenotazione locale veloce',
-  ],
-  FR: [
-    'Olamep • Découvrez des services autour de vous',
-    'Spécialistes vérifiés à proximité',
-    'Offres mises à jour aujourd’hui',
-    'Réservation locale rapide',
-  ],
-  AR: [
-    'Olamep • اكتشف الخدمات من حولك',
-    'متخصصون موثّقون بالقرب منك',
-    'عروض محدثة اليوم',
-    'حجز محلي سريع',
-  ],
-  PL: [
-    'Olamep • Odkrywaj usługi w pobliżu',
-    'Zweryfikowani specjaliści blisko Ciebie',
-    'Oferty zaktualizowane dzisiaj',
-    'Szybka lokalna rezerwacja',
-  ],
-};
-
-type SearchResult =
-  | {
-      type: 'smart';
-      id: string;
-      label: string;
-      categoryId: string;
-      subcategory: string;
-    }
-  | {
-      type: 'category';
-      id: string;
-      label: string;
-      categoryId: string;
-    }
-  | {
-      type: 'subcategory';
-      id: string;
-      label: string;
-      categoryId: string;
-    }
-  | {
-      type: 'master';
-      id: string;
-      label: string;
-      categoryId: string;
-      master: any;
-    };
-
-type SmartSearchResult = Extract<SearchResult, { type: 'smart' }>;
-type CategorySearchResult = Extract<SearchResult, { type: 'category' }>;
-type SubcategorySearchResult = Extract<SearchResult, { type: 'subcategory' }>;
-type MasterSearchResult = Extract<SearchResult, { type: 'master' }>;
-
-type DealFilterMode = 'none' | 'category' | 'all';
-
 const searchAliases = [
   {
     label: 'Dog hotel',
@@ -179,6 +81,113 @@ const searchAliases = [
     keywords: ['moving', 'move house'],
   },
 ];
+
+const tickerMessages: Record<AppLanguage, string[]> = {
+  EN: [
+    'Hot offers near you',
+    'New masters added today',
+    'Verified specialists',
+    'Instant booking',
+    'Explore services around you',
+  ],
+  ES: [
+    'Ofertas cerca de ti',
+    'Nuevos especialistas hoy',
+    'Especialistas verificados',
+    'Reserva instantánea',
+    'Explora servicios cerca de ti',
+  ],
+  RU: [
+    'Горячие предложения рядом',
+    'Новые мастера сегодня',
+    'Проверенные специалисты',
+    'Мгновенное бронирование',
+    'Исследуй услуги рядом',
+  ],
+  UA: [
+    'Гарячі пропозиції поруч',
+    'Нові майстри сьогодні',
+    'Перевірені спеціалісти',
+    'Миттєве бронювання',
+    'Досліджуй послуги поруч',
+  ],
+  CZ: [
+    'Akční nabídky poblíž',
+    'Noví specialisté dnes',
+    'Ověření specialisté',
+    'Okamžitá rezervace',
+    'Objevujte služby poblíž',
+  ],
+  DE: [
+    'Angebote in deiner Nähe',
+    'Neue Profis heute',
+    'Verifizierte Spezialisten',
+    'Sofort buchen',
+    'Entdecke Services in deiner Nähe',
+  ],
+  IT: [
+    'Offerte vicino a te',
+    'Nuovi specialisti oggi',
+    'Specialisti verificati',
+    'Prenotazione immediata',
+    'Scopri servizi vicino a te',
+  ],
+  FR: [
+    'Offres près de vous',
+    'Nouveaux pros aujourd’hui',
+    'Spécialistes vérifiés',
+    'Réservation instantanée',
+    'Découvrez des services autour de vous',
+  ],
+  AR: [
+    'عروض قريبة منك',
+    'متخصصون جدد اليوم',
+    'متخصصون موثّقون',
+    'حجز فوري',
+    'اكتشف الخدمات من حولك',
+  ],
+  PL: [
+    'Oferty blisko Ciebie',
+    'Nowi specjaliści dziś',
+    'Zweryfikowani specjaliści',
+    'Natychmiastowa rezerwacja',
+    'Odkrywaj usługi w pobliżu',
+  ],
+};
+
+type SearchResult =
+  | {
+      type: 'smart';
+      id: string;
+      label: string;
+      categoryId: string;
+      subcategory: string;
+    }
+  | {
+      type: 'category';
+      id: string;
+      label: string;
+      categoryId: string;
+    }
+  | {
+      type: 'subcategory';
+      id: string;
+      label: string;
+      categoryId: string;
+    }
+  | {
+      type: 'master';
+      id: string;
+      label: string;
+      categoryId: string;
+      master: any;
+    };
+
+type SmartSearchResult = Extract<SearchResult, { type: 'smart' }>;
+type CategorySearchResult = Extract<SearchResult, { type: 'category' }>;
+type SubcategorySearchResult = Extract<SearchResult, { type: 'subcategory' }>;
+type MasterSearchResult = Extract<SearchResult, { type: 'master' }>;
+type DealFilterMode = 'none' | 'category' | 'all';
 
 function mapCategoryToId(category: string) {
   const normalized = (category || '').toLowerCase().trim();
@@ -278,8 +287,43 @@ function languageFlag(language: AppLanguage) {
   return '🇬🇧';
 }
 
-function getSmallLogo() {
-  return '/ui/logo/logo.png';
+function getCurrencySymbolForLocation(label: string) {
+  const lower = String(label || '').toLowerCase();
+
+  if (lower.includes('prague') || lower.includes('czech')) return 'Kč';
+  if (lower.includes('warsaw') || lower.includes('poland')) return 'zł';
+  if (lower.includes('kyiv') || lower.includes('ukraine')) return '₴';
+  if (lower.includes('madrid') || lower.includes('spain')) return '€';
+  if (lower.includes('berlin') || lower.includes('germany')) return '€';
+
+  return '£';
+}
+
+function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
+  const normalized = String(category || '').toLowerCase();
+  const found = categories.find((item) => item.id === normalized);
+
+  if (!found) return 'Service';
+
+  const map: Record<string, Partial<Record<AppLanguage, string>>> = {
+    beauty: { EN: 'Beauty', ES: 'Belleza', RU: 'Красота', CZ: 'Krása', DE: 'Beauty', PL: 'Uroda', UA: 'Краса' },
+    barber: { EN: 'Barber', ES: 'Barbero', RU: 'Барбер', CZ: 'Barber', DE: 'Barber', PL: 'Barber', UA: 'Барбер' },
+    wellness: { EN: 'Wellness', ES: 'Bienestar', RU: 'Велнес', CZ: 'Wellness', DE: 'Wellness', PL: 'Wellness', UA: 'Велнес' },
+    home: { EN: 'Home', ES: 'Hogar', RU: 'Дом', CZ: 'Domov', DE: 'Zuhause', PL: 'Dom', UA: 'Дім' },
+    repairs: { EN: 'Repairs', ES: 'Reparaciones', RU: 'Ремонт', CZ: 'Opravy', DE: 'Reparaturen', PL: 'Naprawy', UA: 'Ремонт' },
+    tech: { EN: 'Tech', ES: 'Tecnología', RU: 'Техника', CZ: 'Technika', DE: 'Technik', PL: 'Technika', UA: 'Техніка' },
+    pets: { EN: 'Pets', ES: 'Mascotas', RU: 'Питомцы', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęta', UA: 'Тварини' },
+    fashion: { EN: 'Fashion', ES: 'Moda', RU: 'Мода', CZ: 'Móda', DE: 'Mode', PL: 'Moda', UA: 'Мода' },
+    auto: { EN: 'Auto', ES: 'Auto', RU: 'Авто', CZ: 'Auto', DE: 'Auto', PL: 'Auto', UA: 'Авто' },
+    moving: { EN: 'Moving', ES: 'Mudanza', RU: 'Переезд', CZ: 'Stěhování', DE: 'Umzug', PL: 'Przeprowadzka', UA: 'Переїзд' },
+    fitness: { EN: 'Fitness', ES: 'Fitness', RU: 'Фитнес', CZ: 'Fitness', DE: 'Fitness', PL: 'Fitness', UA: 'Фітнес' },
+    education: { EN: 'Education', ES: 'Educación', RU: 'Обучение', CZ: 'Vzdělání', DE: 'Bildung', PL: 'Edukacja', UA: 'Освіта' },
+    events: { EN: 'Events', ES: 'Eventos', RU: 'События', CZ: 'Události', DE: 'Events', PL: 'Wydarzenia', UA: 'Події' },
+    activities: { EN: 'Activities', ES: 'Actividades', RU: 'Активности', CZ: 'Aktivity', DE: 'Aktivitäten', PL: 'Aktywności', UA: 'Активності' },
+    creative: { EN: 'Creative', ES: 'Creativo', RU: 'Креатив', CZ: 'Kreativa', DE: 'Kreativ', PL: 'Kreatywne', UA: 'Креатив' },
+  };
+
+  return map[normalized]?.[language] || found.shortLabel || found.label;
 }
 
 function findPromotionMaster(promo: PromotionItem, masters: any[]) {
@@ -398,45 +442,6 @@ function extractPromotionDiscountBadge(promo: PromotionItem) {
   return 'SALE';
 }
 
-function getCurrencySymbolForLocation(label: string) {
-  const lower = String(label || '').toLowerCase();
-
-  if (lower.includes('prague') || lower.includes('czech')) return 'Kč';
-  if (lower.includes('warsaw') || lower.includes('poland')) return 'zł';
-  if (lower.includes('kyiv') || lower.includes('ukraine')) return '₴';
-  if (lower.includes('madrid') || lower.includes('spain')) return '€';
-  if (lower.includes('berlin') || lower.includes('germany')) return '€';
-
-  return '£';
-}
-
-function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
-  const normalized = String(category || '').toLowerCase();
-  const found = categories.find((item) => item.id === normalized);
-
-  if (!found) return 'Service';
-
-  const map: Record<string, Partial<Record<AppLanguage, string>>> = {
-    beauty: { EN: 'Beauty', ES: 'Belleza', RU: 'Красота', CZ: 'Krása', DE: 'Beauty', PL: 'Uroda', UA: 'Краса' },
-    barber: { EN: 'Barber', ES: 'Barbero', RU: 'Барбер', CZ: 'Barber', DE: 'Barber', PL: 'Barber', UA: 'Барбер' },
-    wellness: { EN: 'Wellness', ES: 'Bienestar', RU: 'Велнес', CZ: 'Wellness', DE: 'Wellness', PL: 'Wellness', UA: 'Велнес' },
-    home: { EN: 'Home', ES: 'Hogar', RU: 'Дом', CZ: 'Domov', DE: 'Zuhause', PL: 'Dom', UA: 'Дім' },
-    repairs: { EN: 'Repairs', ES: 'Reparaciones', RU: 'Ремонт', CZ: 'Opravy', DE: 'Reparaturen', PL: 'Naprawy', UA: 'Ремонт' },
-    tech: { EN: 'Tech', ES: 'Tecnología', RU: 'Техника', CZ: 'Technika', DE: 'Technik', PL: 'Technika', UA: 'Техніка' },
-    pets: { EN: 'Pets', ES: 'Mascotas', RU: 'Питомцы', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęta', UA: 'Тварини' },
-    fashion: { EN: 'Fashion', ES: 'Moda', RU: 'Мода', CZ: 'Móda', DE: 'Mode', PL: 'Moda', UA: 'Мода' },
-    auto: { EN: 'Auto', ES: 'Auto', RU: 'Авто', CZ: 'Auto', DE: 'Auto', PL: 'Auto', UA: 'Авто' },
-    moving: { EN: 'Moving', ES: 'Mudanza', RU: 'Переезд', CZ: 'Stěhování', DE: 'Umzug', PL: 'Przeprowadzka', UA: 'Переїзд' },
-    fitness: { EN: 'Fitness', ES: 'Fitness', RU: 'Фитнес', CZ: 'Fitness', DE: 'Fitness', PL: 'Fitness', UA: 'Фітнес' },
-    education: { EN: 'Education', ES: 'Educación', RU: 'Обучение', CZ: 'Vzdělání', DE: 'Bildung', PL: 'Edukacja', UA: 'Освіта' },
-    events: { EN: 'Events', ES: 'Eventos', RU: 'События', CZ: 'Události', DE: 'Events', PL: 'Wydarzenia', UA: 'Події' },
-    activities: { EN: 'Activities', ES: 'Actividades', RU: 'Активности', CZ: 'Aktivity', DE: 'Aktivitäten', PL: 'Aktywności', UA: 'Активності' },
-    creative: { EN: 'Creative', ES: 'Creativo', RU: 'Креатив', CZ: 'Kreativa', DE: 'Kreativ', PL: 'Kreatywne', UA: 'Креатив' },
-  };
-
-  return map[normalized]?.[language] || found.shortLabel || found.label;
-}
-
 function ActionCountButton({
   icon,
   title,
@@ -452,17 +457,18 @@ function ActionCountButton({
     <button
       onClick={onClick}
       style={{
-        minHeight: 52,
-        border: '2px solid #111111',
+        minHeight: 44,
+        border: '1.5px solid #bfb9ae',
         borderRadius: 18,
         background: '#ffffff',
-        color: '#111111',
+        color: '#151515',
         cursor: 'pointer',
         display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 34px',
+        gridTemplateColumns: 'minmax(0, 1fr) 36px',
         alignItems: 'center',
         gap: 8,
-        padding: '0 8px 0 10px',
+        padding: '0 12px',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
       }}
     >
       <div
@@ -471,8 +477,8 @@ function ActionCountButton({
           alignItems: 'center',
           gap: 8,
           minWidth: 0,
-          fontSize: 11,
-          fontWeight: 900,
+          fontSize: 10,
+          fontWeight: 800,
         }}
       >
         <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -491,12 +497,12 @@ function ActionCountButton({
 
       <span
         style={{
-          width: 34,
-          height: 34,
+          width: 36,
+          height: 36,
           borderRadius: 999,
-          border: '2px solid #111111',
+          border: '1.5px solid #151515',
           background: '#ffffff',
-          color: '#111111',
+          color: '#151515',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -511,36 +517,51 @@ function ActionCountButton({
   );
 }
 
-function CompactTicker({ language }: { language: AppLanguage }) {
-  const items = tickerMessages[language] || tickerMessages.EN;
-  const line = items.join('   •   ');
+function BrightTicker({ language }: { language: AppLanguage }) {
+  const logo = '/ui/logo/logo.png';
+  const line = (tickerMessages[language] || tickerMessages.EN).join('   ●   ');
 
   return (
     <div
       style={{
-        height: 28,
-        borderRadius: 999,
-        border: '1.5px solid #111111',
-        background: '#fffdf7',
+        height: 38,
+        borderRadius: 18,
+        border: '1.5px solid #d7d0c6',
+        background:
+          'linear-gradient(90deg, #fffdf9 0%, #ffffff 30%, #fffdf8 60%, #fff8e9 100%)',
         overflow: 'hidden',
-        position: 'relative',
         display: 'flex',
         alignItems: 'center',
-        paddingLeft: 8,
+        padding: '0 10px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
       }}
     >
-      <img
-        src={getSmallLogo()}
-        alt="Olamep"
+      <div
         style={{
-          width: 18,
-          height: 18,
-          objectFit: 'contain',
+          width: 30,
+          height: 30,
+          borderRadius: 999,
+          background:
+            'radial-gradient(circle at 30% 30%, #ffffff 0%, #fff5cf 30%, #ffe98d 55%, #ffffff 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           flexShrink: 0,
-          display: 'block',
-          marginRight: 8,
+          boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+          marginRight: 10,
         }}
-      />
+      >
+        <img
+          src={logo}
+          alt="Olamep"
+          style={{
+            width: 24,
+            height: 24,
+            objectFit: 'contain',
+            display: 'block',
+          }}
+        />
+      </div>
 
       <div
         style={{
@@ -553,17 +574,127 @@ function CompactTicker({ language }: { language: AppLanguage }) {
           style={{
             display: 'inline-block',
             whiteSpace: 'nowrap',
-            color: '#17233c',
-            fontSize: 11,
-            fontWeight: 800,
+            color: '#1d2a45',
+            fontSize: 12,
+            fontWeight: 900,
             paddingLeft: '100%',
-            animation: 'olamepTicker 18s linear infinite',
+            animation: 'olamepTickerMove 19s linear infinite',
           }}
         >
-          {line}   •   {line}
+          {line}   ●   {line}
         </div>
       </div>
     </div>
+  );
+}
+
+function PromoCard({
+  promo,
+  language,
+  onOpen,
+}: {
+  promo: PromotionItem;
+  language: AppLanguage;
+  onOpen: () => void;
+}) {
+  const anyPromo = promo as any;
+  const discountBadge = extractPromotionDiscountBadge(promo);
+
+  return (
+    <button
+      onClick={onOpen}
+      style={{
+        minWidth: 168,
+        maxWidth: 168,
+        border: '1.5px solid #cfc8be',
+        borderRadius: 18,
+        background: '#ffffff',
+        overflow: 'hidden',
+        flexShrink: 0,
+        padding: 0,
+        textAlign: 'left',
+        cursor: 'pointer',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+      }}
+    >
+      <div style={{ position: 'relative' }}>
+        <img
+          src={anyPromo.image}
+          alt={anyPromo.title}
+          style={{
+            width: '100%',
+            height: 114,
+            objectFit: 'cover',
+            display: 'block',
+          }}
+        />
+
+        <div
+          style={{
+            position: 'absolute',
+            top: 8,
+            left: 8,
+            background: '#ffffff',
+            color: '#ff4f93',
+            borderRadius: 999,
+            padding: '5px 10px',
+            fontSize: 10,
+            fontWeight: 900,
+            boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+          }}
+        >
+          Sponsored
+        </div>
+      </div>
+
+      <div style={{ padding: '10px 10px 12px' }}>
+        <div
+          style={{
+            fontSize: 14,
+            fontWeight: 900,
+            color: '#151515',
+            lineHeight: 1.2,
+            minHeight: 34,
+          }}
+        >
+          {anyPromo.title}
+        </div>
+
+        <div
+          style={{
+            marginTop: 8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 8,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 900,
+              color: '#ff4f93',
+            }}
+          >
+            {discountBadge}
+          </div>
+
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 800,
+              color: '#151515',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            <span style={{ fontSize: 13 }}>◉</span>
+            <span>{anyPromo.views || 0}</span>
+          </div>
+        </div>
+      </div>
+    </button>
   );
 }
 
@@ -862,29 +993,31 @@ export default function HomePage() {
   }, [promotions, dealFilterMode, activeCategory]);
 
   const promotionMasters = useMemo(() => {
-    if (dealFilterMode === 'none') return [] as any[];
+    if (dealFilterMode !== 'none') {
+      const sourcePromotions =
+        dealFilterMode === 'category'
+          ? promotions.filter((promo) => isPromotionInCategory(promo, activeCategory))
+          : promotions;
 
-    const sourcePromotions =
-      dealFilterMode === 'category'
-        ? promotions.filter((promo) => isPromotionInCategory(promo, activeCategory))
-        : promotions;
+      const uniqueMasters = new Map<string, any>();
 
-    const uniqueMasters = new Map<string, any>();
+      sourcePromotions.forEach((promo) => {
+        const matchedMaster = findPromotionMaster(promo, allMasters);
+        if (!matchedMaster) return;
 
-    sourcePromotions.forEach((promo) => {
-      const matchedMaster = findPromotionMaster(promo, allMasters);
-      if (!matchedMaster) return;
+        const masterId = String(matchedMaster.id);
+        const discountBadge = extractPromotionDiscountBadge(promo);
 
-      const masterId = String(matchedMaster.id);
-      const discountBadge = extractPromotionDiscountBadge(promo);
-
-      uniqueMasters.set(masterId, {
-        ...matchedMaster,
-        discountBadge,
+        uniqueMasters.set(masterId, {
+          ...matchedMaster,
+          discountBadge,
+        });
       });
-    });
 
-    return Array.from(uniqueMasters.values());
+      return Array.from(uniqueMasters.values());
+    }
+
+    return [] as any[];
   }, [dealFilterMode, promotions, activeCategory, allMasters]);
 
   const promotionBadgeTextByMasterId = useMemo(() => {
@@ -911,7 +1044,6 @@ export default function HomePage() {
   ).length;
 
   const likedAllCount = likedMasterIds.length;
-
   const hasAnyResults =
     smartResults.length > 0 ||
     categoryResults.length > 0 ||
@@ -980,26 +1112,6 @@ export default function HomePage() {
     router.push(`/promotion/${promo.id}`);
   };
 
-  const openPromotionBooking = (promo: PromotionItem) => {
-    incrementPromotionViews(promo.id);
-
-    const matchedMaster = findPromotionMaster(promo, allMasters);
-
-    if (matchedMaster) {
-      router.push(`/booking/${matchedMaster.id}`);
-      return;
-    }
-
-    setActiveCategory(String((promo as any).categoryId || 'beauty'));
-    setActiveSubcategory('');
-    setLikedFilterMode('none');
-    setDealFilterMode('none');
-    setSearch((promo as any).title || '');
-    setSearchOpen(false);
-    saveRecentSearch((promo as any).title || '');
-    setRecentSearches(readRecentSearches());
-  };
-
   return (
     <main
       style={{
@@ -1011,7 +1123,7 @@ export default function HomePage() {
       }}
     >
       <style jsx global>{`
-        @keyframes olamepTicker {
+        @keyframes olamepTickerMove {
           0% {
             transform: translateX(0);
           }
@@ -1033,25 +1145,27 @@ export default function HomePage() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 50px 50px 50px',
-                gap: 6,
+                gridTemplateColumns: '1fr 52px 52px 52px',
+                gap: 8,
                 alignItems: 'center',
               }}
             >
               <div
                 style={{
-                  height: 50,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#fff',
+                  height: 54,
+                  borderRadius: 20,
+                  border: '1.8px solid #111111',
+                  background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 9,
-                  padding: '0 12px',
+                  gap: 10,
+                  padding: '0 14px',
                   minWidth: 0,
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 }}
               >
-                <span style={{ fontSize: 21, lineHeight: 1, color: '#111111' }}>⌕</span>
+                <span style={{ fontSize: 22, lineHeight: 1, color: '#111111' }}>⌕</span>
+
                 <input
                   value={search}
                   onFocus={() => setSearchOpen(true)}
@@ -1112,11 +1226,11 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language')}
                 style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 16,
-                  border: '2px solid #111111',
-                  background: '#fff',
+                  width: 52,
+                  height: 54,
+                  borderRadius: 18,
+                  border: '1.8px solid #111111',
+                  background: '#ffffff',
                   color: '#111111',
                   padding: 0,
                   fontSize: 10,
@@ -1127,28 +1241,30 @@ export default function HomePage() {
                   justifyContent: 'center',
                   gap: 1,
                   cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 }}
               >
-                <span style={{ fontSize: 17, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 18, lineHeight: 1 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/currency')}
                 style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 16,
-                  border: '2px solid #111111',
-                  background: '#fff',
+                  width: 52,
+                  height: 54,
+                  borderRadius: 18,
+                  border: '1.8px solid #111111',
+                  background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 22,
+                  fontSize: 23,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 }}
               >
                 {currencySymbol}
@@ -1157,27 +1273,28 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/location')}
                 style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 16,
-                  border: '2px solid #111111',
-                  background: '#fff',
+                  width: 52,
+                  height: 54,
+                  borderRadius: 18,
+                  border: '1.8px solid #111111',
+                  background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 20,
+                  fontSize: 22,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 }}
               >
                 ⌖
               </button>
             </div>
 
-            <div style={{ marginTop: 6 }}>
-              <CompactTicker language={language} />
+            <div style={{ marginTop: 10 }}>
+              <BrightTicker language={language} />
             </div>
 
             {searchOpen ? (
@@ -1188,7 +1305,7 @@ export default function HomePage() {
                   right: 0,
                   top: 'calc(100% + 8px)',
                   background: 'rgba(255,255,255,0.98)',
-                  border: '2px solid #111111',
+                  border: '1.8px solid #cfc8be',
                   borderRadius: 22,
                   boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
                   padding: 12,
@@ -1216,7 +1333,7 @@ export default function HomePage() {
                               key={item}
                               onClick={() => runQuickSearch(item)}
                               style={{
-                                border: '2px solid #111111',
+                                border: '1.5px solid #d0c8bd',
                                 background: '#fff',
                                 borderRadius: 999,
                                 padding: '8px 12px',
@@ -1250,7 +1367,7 @@ export default function HomePage() {
                             key={item}
                             onClick={() => runQuickSearch(item)}
                             style={{
-                              border: '2px solid #111111',
+                              border: '1.5px solid #d0c8bd',
                               background: '#fff8f8',
                               borderRadius: 999,
                               padding: '8px 12px',
@@ -1297,7 +1414,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '2px solid #111111',
+                                border: '1.5px solid #d0c8bd',
                                 background: '#fff6f9',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1338,7 +1455,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '2px solid #111111',
+                                border: '1.5px solid #d0c8bd',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1376,7 +1493,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '2px solid #111111',
+                                border: '1.5px solid #d0c8bd',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1417,7 +1534,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '2px solid #111111',
+                                border: '1.5px solid #d0c8bd',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1446,7 +1563,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '6px 0 0' }}>
+        <section style={{ padding: '8px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1560,14 +1677,14 @@ export default function HomePage() {
         <section style={{ padding: '8px 12px 0' }}>
           <div
             style={{
-              borderRadius: 30,
+              borderRadius: 28,
               overflow: 'hidden',
-              border: '1.5px solid #ded8cf',
+              border: '1.5px solid #d8d2c8',
               background: '#ffffff',
               boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
             }}
           >
-            <div style={{ height: 540, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={mapMasters}
                 mapMode={mapMode}
@@ -1598,10 +1715,10 @@ export default function HomePage() {
         </section>
 
         {filteredPromotions.length > 0 && (
-          <section style={{ padding: '12px 0 0' }}>
+          <section style={{ padding: '18px 0 0' }}>
             <div
               style={{
-                background: '#ece7dd',
+                background: '#f6f4ef',
                 padding: '0 0 12px',
               }}
             >
@@ -1619,37 +1736,37 @@ export default function HomePage() {
                     margin: 0,
                     fontSize: 15,
                     fontWeight: 900,
-                    color: '#21324a',
+                    color: '#111111',
                   }}
                 >
-                  {language === 'ES'
-                    ? `Ofertas cerca de ${locationLabel}`
-                    : `Hot offers near ${locationLabel}`}
+                  {language === 'ES' ? 'Ofertas cerca de ti' : 'Hot offers near you'}
                 </h2>
 
                 <button
+                  onClick={() => router.push('/explore')}
                   style={{
                     border: 'none',
                     background: 'transparent',
-                    fontSize: 22,
-                    color: '#8d918f',
+                    fontSize: 14,
+                    color: '#ff4f93',
+                    fontWeight: 900,
                     lineHeight: 1,
                     cursor: 'pointer',
                     padding: 0,
                   }}
                 >
-                  ›
+                  {language === 'ES' ? 'Ver todo ›' : 'See all ›'}
                 </button>
               </div>
 
               <div
                 style={{
-                  marginTop: 10,
+                  marginTop: 12,
                   display: 'flex',
                   gap: 10,
                   overflowX: 'auto',
                   overflowY: 'hidden',
-                  padding: '0 14px 6px',
+                  padding: '0 14px 4px',
                   WebkitOverflowScrolling: 'touch',
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none',
@@ -1662,139 +1779,12 @@ export default function HomePage() {
                       promotionCardRefs.current[promo.id] = node;
                     }}
                     data-promo-id={promo.id}
-                    style={{
-                      minWidth: 248,
-                      maxWidth: 248,
-                      borderRadius: 24,
-                      border: '2px solid #111111',
-                      background: '#fff',
-                      overflow: 'hidden',
-                      flexShrink: 0,
-                    }}
                   >
-                    <button
-                      onClick={() => openPromotionView(promo)}
-                      style={{
-                        border: 'none',
-                        background: 'transparent',
-                        padding: 0,
-                        width: '100%',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        display: 'block',
-                      }}
-                    >
-                      <div style={{ position: 'relative' }}>
-                        <img
-                          src={(promo as any).image}
-                          alt={(promo as any).title}
-                          style={{
-                            width: '100%',
-                            height: 182,
-                            objectFit: 'cover',
-                            display: 'block',
-                          }}
-                        />
-
-                        <div
-                          style={{
-                            position: 'absolute',
-                            top: 10,
-                            left: 10,
-                            background: '#fff',
-                            color: '#ff4f93',
-                            borderRadius: 999,
-                            padding: '7px 12px',
-                            fontSize: 11,
-                            fontWeight: 900,
-                          }}
-                        >
-                          Sponsored
-                        </div>
-                      </div>
-
-                      <div style={{ padding: '10px 12px 6px' }}>
-                        <div
-                          style={{
-                            fontSize: 15,
-                            fontWeight: 900,
-                            color: '#1f2430',
-                            lineHeight: 1.2,
-                          }}
-                        >
-                          {(promo as any).title}
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: 6,
-                            fontSize: 12,
-                            fontWeight: 700,
-                            color: '#6b7280',
-                            lineHeight: 1.35,
-                          }}
-                        >
-                          {(promo as any).subtitle ||
-                            (language === 'ES'
-                              ? 'Oferta especial cerca de ti'
-                              : 'Special offer near you')}
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: 8,
-                            fontSize: 11,
-                            fontWeight: 900,
-                            color: '#ff4f93',
-                          }}
-                        >
-                          {language === 'ES'
-                            ? `Vistas: ${(promo as any).views}`
-                            : `Views: ${(promo as any).views}`}
-                        </div>
-                      </div>
-                    </button>
-
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1fr 1fr',
-                        gap: 8,
-                        padding: '0 12px 12px',
-                      }}
-                    >
-                      <button
-                        onClick={() => openPromotionView(promo)}
-                        style={{
-                          height: 42,
-                          borderRadius: 16,
-                          border: '2px solid #111111',
-                          background: '#1f4da8',
-                          color: '#fff',
-                          fontSize: 14,
-                          fontWeight: 900,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {language === 'ES' ? 'Abrir' : 'Open'}
-                      </button>
-
-                      <button
-                        onClick={() => openPromotionBooking(promo)}
-                        style={{
-                          height: 42,
-                          borderRadius: 16,
-                          border: '2px solid #111111',
-                          background: '#ff5252',
-                          color: '#fff',
-                          fontSize: 14,
-                          fontWeight: 900,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {language === 'ES' ? 'Reservar' : 'Book'}
-                      </button>
-                    </div>
+                    <PromoCard
+                      promo={promo}
+                      language={language}
+                      onOpen={() => openPromotionView(promo)}
+                    />
                   </div>
                 ))}
               </div>
