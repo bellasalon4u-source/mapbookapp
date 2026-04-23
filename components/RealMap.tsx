@@ -1,8 +1,16 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import L from 'leaflet';
-import { MapContainer, Marker, TileLayer, ZoomControl, useMap, CircleMarker } from 'react-leaflet';
+import L, { type DivIcon } from 'leaflet';
+import {
+  CircleMarker,
+  MapContainer,
+  Marker,
+  TileLayer,
+  useMap,
+  useMapEvents,
+  ZoomControl,
+} from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 type MasterItem = {
@@ -20,6 +28,7 @@ type MasterItem = {
   avatar?: string;
   description?: string;
   price?: string | number;
+  discountBadge?: string;
 };
 
 type RealMapProps = {
@@ -45,286 +54,76 @@ const DEMO_MASTERS: MasterItem[] = [
     id: 'demo-1',
     name: 'Anna',
     category: 'beauty',
+    subcategory: 'Hair',
     lat: 51.5238,
     lng: -0.165,
     avatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
     availableNow: false,
+    rating: 4.8,
+    price: '£45',
+    city: 'Marylebone',
   },
   {
     id: 'demo-2',
     name: 'Mark',
     category: 'barber',
+    subcategory: 'Fade',
     lat: 51.5105,
     lng: -0.146,
     avatar:
       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
     availableNow: true,
+    rating: 4.9,
+    price: '£25',
+    city: 'Soho',
   },
   {
     id: 'demo-3',
     name: 'Oksana',
     category: 'beauty',
+    subcategory: 'Nails',
     lat: 51.5052,
     lng: -0.118,
     avatar:
       'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=300&q=80',
     availableNow: false,
+    rating: 4.7,
+    price: '£35',
+    city: 'Holborn',
   },
   {
     id: 'demo-4',
     name: 'David',
     category: 'pets',
+    subcategory: 'Grooming',
     lat: 51.5195,
     lng: -0.091,
     avatar:
       'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80',
     availableNow: true,
+    rating: 4.8,
+    price: '£30',
+    city: 'Shoreditch',
   },
   {
     id: 'demo-5',
     name: 'Mila',
     category: 'wellness',
+    subcategory: 'Massage',
     lat: 51.4965,
     lng: -0.084,
     avatar:
       'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
     availableNow: false,
+    rating: 5,
+    price: '£60',
+    city: 'Bermondsey',
   },
 ];
 
-function MapEvents({
-  onMapBackgroundClick,
-}: {
-  onMapBackgroundClick?: () => void;
-}) {
-  const map = useMap();
-
-  useEffect(() => {
-    const handleClick = () => {
-      onMapBackgroundClick?.();
-    };
-
-    map.on('click', handleClick);
-    return () => {
-      map.off('click', handleClick);
-    };
-  }, [map, onMapBackgroundClick]);
-
-  return null;
-}
-
-function RecenterMap({
-  trigger,
-  onUserLocationChange,
-}: {
-  trigger?: number;
-  onUserLocationChange?: (coords: [number, number]) => void;
-}) {
-  const map = useMap();
-  const prevTrigger = useRef(trigger);
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-          onUserLocationChange?.(coords);
-        },
-        () => {
-          onUserLocationChange?.(LONDON_CENTER);
-        }
-      );
-    } else {
-      onUserLocationChange?.(LONDON_CENTER);
-    }
-  }, [onUserLocationChange]);
-
-  useEffect(() => {
-    if (prevTrigger.current === trigger) return;
-    prevTrigger.current = trigger;
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-          map.flyTo(coords, 13, { duration: 0.8 });
-          onUserLocationChange?.(coords);
-        },
-        () => {
-          map.flyTo(LONDON_CENTER, 11, { duration: 0.8 });
-          onUserLocationChange?.(LONDON_CENTER);
-        }
-      );
-      return;
-    }
-
-    map.flyTo(LONDON_CENTER, 11, { duration: 0.8 });
-    onUserLocationChange?.(LONDON_CENTER);
-  }, [map, trigger, onUserLocationChange]);
-
-  return null;
-}
-
-function getPinColors(master: MasterItem, isSelected: boolean) {
-  if (isSelected) {
-    return {
-      ring: '#ef7db1',
-      bubble: '#ffffff',
-      bubbleBorder: '#ef7db1',
-    };
-  }
-
-  if (master.availableNow) {
-    return {
-      ring: '#63d46c',
-      bubble: '#ffffff',
-      bubbleBorder: '#63d46c',
-    };
-  }
-
-  const category = String(master.category || '').toLowerCase();
-
-  if (category === 'beauty') {
-    return {
-      ring: '#ef7db1',
-      bubble: '#ffffff',
-      bubbleBorder: '#ef7db1',
-    };
-  }
-
-  if (category === 'barber' || category === 'tech' || category === 'repairs') {
-    return {
-      ring: '#5c98ff',
-      bubble: '#ffffff',
-      bubbleBorder: '#5c98ff',
-    };
-  }
-
-  if (category === 'pets') {
-    return {
-      ring: '#63d46c',
-      bubble: '#ffffff',
-      bubbleBorder: '#63d46c',
-    };
-  }
-
-  if (category === 'wellness' || category === 'home') {
-    return {
-      ring: '#f1c84c',
-      bubble: '#ffffff',
-      bubbleBorder: '#f1c84c',
-    };
-  }
-
-  return {
-    ring: '#63d46c',
-    bubble: '#ffffff',
-    bubbleBorder: '#63d46c',
-  };
-}
-
-function createMasterPin(master: MasterItem, isSelected: boolean, isLiked: boolean) {
-  const colors = getPinColors(master, isSelected);
-  const avatar = master.avatar || 'https://via.placeholder.com/80x80.png?text=Pro';
-
-  const pinWidth = isSelected ? 66 : 54;
-  const pinHeight = isSelected ? 86 : 72;
-  const avatarSize = isSelected ? 44 : 34;
-  const whiteBorder = isSelected ? 4 : 3;
-  const smallBubble = isSelected ? 17 : 14;
-
-  return L.divIcon({
-    className: '',
-    html: `
-      <div style="position:relative;width:${pinWidth}px;height:${pinHeight}px;">
-        ${
-          isLiked
-            ? `<div style="
-                position:absolute;
-                left:6px;
-                top:4px;
-                width:18px;
-                height:18px;
-                border-radius:999px;
-                background:#ffffff;
-                border:1.5px solid #f2b6ca;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                box-shadow:0 2px 6px rgba(0,0,0,0.12);
-                z-index:3;
-              ">
-                <span style="font-size:11px;line-height:1;color:#ff4f93;">♥</span>
-              </div>`
-            : ''
-        }
-
-        <div style="
-          position:absolute;
-          left:50%;
-          top:8px;
-          transform:translateX(-50%);
-          width:${pinWidth}px;
-          height:${pinHeight - 6}px;
-          background:${colors.ring};
-          border-radius:${isSelected ? '34px 34px 34px 6px' : '30px 30px 30px 6px'};
-          transform-origin:center;
-          clip-path:polygon(50% 100%, 11% 58%, 11% 22%, 22% 11%, 50% 6%, 78% 11%, 89% 22%, 89% 58%);
-          box-shadow:0 6px 14px rgba(0,0,0,0.16);
-        "></div>
-
-        <div style="
-          position:absolute;
-          left:50%;
-          top:${isSelected ? 13 : 12}px;
-          transform:translateX(-50%);
-          width:${avatarSize + whiteBorder * 2}px;
-          height:${avatarSize + whiteBorder * 2}px;
-          border-radius:50%;
-          background:#ffffff;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          z-index:2;
-        ">
-          <div style="
-            width:${avatarSize}px;
-            height:${avatarSize}px;
-            border-radius:50%;
-            overflow:hidden;
-            background:#ffffff;
-          ">
-            <img
-              src="${avatar}"
-              alt=""
-              style="width:100%;height:100%;object-fit:cover;display:block;"
-            />
-          </div>
-        </div>
-
-        <div style="
-          position:absolute;
-          right:${isSelected ? 5 : 4}px;
-          bottom:${isSelected ? 12 : 10}px;
-          width:${smallBubble}px;
-          height:${smallBubble}px;
-          border-radius:50%;
-          background:${colors.bubble};
-          border:3px solid ${colors.bubbleBorder};
-          z-index:2;
-          box-shadow:0 3px 8px rgba(0,0,0,0.10);
-        "></div>
-      </div>
-    `,
-    iconSize: [pinWidth, pinHeight],
-    iconAnchor: [pinWidth / 2, pinHeight - 4],
-    popupAnchor: [0, -pinHeight + 10],
-  });
-}
-
 function fixLeafletIcons() {
-  delete (L.Icon.Default.prototype as any)._getIconUrl;
+  delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
 
   L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -350,29 +149,291 @@ function hasGoodSpread(items: MasterItem[]) {
     }
   }
 
-  return minDistance > 0.014;
+  return minDistance > 0.0065;
 }
 
 function isInsideLondonArea(items: MasterItem[]) {
   return items.every((item) => {
-    return item.lat > 51.44 && item.lat < 51.56 && item.lng > -0.24 && item.lng < 0.03;
+    return item.lat > 51.44 && item.lat < 51.57 && item.lng > -0.25 && item.lng < 0.04;
   });
+}
+
+function getCategoryColor(master: MasterItem, isSelected: boolean) {
+  if (isSelected) return '#ff4f93';
+  if (master.availableNow) return '#34c759';
+
+  const category = String(master.category || '').toLowerCase();
+
+  if (category === 'beauty') return '#ff4f93';
+  if (category === 'barber') return '#111111';
+  if (category === 'wellness') return '#f4c430';
+  if (category === 'pets') return '#34c759';
+  if (category === 'tech' || category === 'repairs') return '#3b82f6';
+
+  return '#ff4f93';
+}
+
+function createMasterPin(master: MasterItem, isSelected: boolean, isLiked: boolean): DivIcon {
+  const color = getCategoryColor(master, isSelected);
+  const avatar =
+    master.avatar ||
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80';
+
+  const size = isSelected ? 46 : 40;
+  const avatarSize = isSelected ? 32 : 27;
+  const ring = master.availableNow ? '#34c759' : color;
+
+  return L.divIcon({
+    className: 'mapbook-master-pin',
+    html: `
+      <div style="position:relative;width:${size}px;height:${size + 16}px;">
+        <div style="
+          position:absolute;
+          left:50%;
+          top:0;
+          transform:translateX(-50%);
+          width:${size}px;
+          height:${size}px;
+          border-radius:999px;
+          background:#ffffff;
+          border:2.5px solid ${ring};
+          box-shadow:0 5px 14px rgba(0,0,0,0.14);
+          overflow:hidden;
+          z-index:2;
+        ">
+          <img
+            src="${avatar}"
+            alt=""
+            style="
+              width:100%;
+              height:100%;
+              object-fit:cover;
+              display:block;
+            "
+          />
+        </div>
+
+        <div style="
+          position:absolute;
+          left:50%;
+          top:${size - 1}px;
+          transform:translateX(-50%);
+          width:0;
+          height:0;
+          border-left:8px solid transparent;
+          border-right:8px solid transparent;
+          border-top:13px solid ${ring};
+          z-index:1;
+          filter:drop-shadow(0 3px 4px rgba(0,0,0,0.12));
+        "></div>
+
+        ${
+          isLiked
+            ? `
+          <div style="
+            position:absolute;
+            right:-2px;
+            top:-2px;
+            width:17px;
+            height:17px;
+            border-radius:999px;
+            background:#ffffff;
+            border:1.5px solid #111111;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            z-index:3;
+            box-shadow:0 2px 6px rgba(0,0,0,0.14);
+          ">
+            <span style="font-size:10px;line-height:1;color:#ff3b58;">♥</span>
+          </div>
+        `
+            : ''
+        }
+
+        ${
+          master.availableNow
+            ? `
+          <div style="
+            position:absolute;
+            left:-1px;
+            bottom:11px;
+            width:12px;
+            height:12px;
+            border-radius:999px;
+            background:#34c759;
+            border:2px solid #ffffff;
+            z-index:3;
+            box-shadow:0 2px 5px rgba(0,0,0,0.10);
+          "></div>
+        `
+            : ''
+        }
+      </div>
+    `,
+    iconSize: [size, size + 16],
+    iconAnchor: [size / 2, size + 12],
+    popupAnchor: [0, -(size + 10)],
+  });
+}
+
+function MapEvents({ onMapBackgroundClick }: { onMapBackgroundClick?: () => void }) {
+  useMapEvents({
+    click: () => {
+      onMapBackgroundClick?.();
+    },
+  });
+
+  return null;
+}
+
+function ChangeView({
+  center,
+  zoom,
+}: {
+  center: [number, number] | null;
+  zoom?: number;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!center) return;
+    map.flyTo(center, zoom ?? map.getZoom(), { duration: 0.65 });
+  }, [map, center, zoom]);
+
+  return null;
+}
+
+function MapUiBridge({
+  onReady,
+}: {
+  onReady: (actions: { locateMe: () => void; toggleMapMode: () => void }) => void;
+}) {
+  const map = useMap();
+  const [mode, setMode] = useState<'map' | 'satellite'>('map');
+
+  useEffect(() => {
+    onReady({
+      locateMe: () => {
+        if (!navigator.geolocation) {
+          map.flyTo(LONDON_CENTER, 13, { duration: 0.7 });
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            map.flyTo([position.coords.latitude, position.coords.longitude], 14, {
+              duration: 0.7,
+            });
+          },
+          () => {
+            map.flyTo(LONDON_CENTER, 13, { duration: 0.7 });
+          }
+        );
+      },
+      toggleMapMode: () => {
+        setMode((prev) => (prev === 'map' ? 'satellite' : 'map'));
+      },
+    });
+  }, [map, onReady]);
+
+  useEffect(() => {
+    const nextUrl =
+      mode === 'satellite'
+        ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+    const layers: L.TileLayer[] = [];
+    map.eachLayer((layer) => {
+      if (layer instanceof L.TileLayer) layers.push(layer);
+    });
+
+    layers.forEach((layer) => map.removeLayer(layer));
+
+    const tileLayer = L.tileLayer(nextUrl, {
+      attribution:
+        mode === 'satellite'
+          ? '&copy; Esri'
+          : '&copy; OpenStreetMap contributors',
+    });
+
+    tileLayer.addTo(map);
+  }, [map, mode]);
+
+  return null;
 }
 
 export default function RealMap({
   masters = [],
-  mapMode = 'map',
   selectedMasterId = null,
   likedMasterIds = [],
   recenterToUserTrigger = 0,
+  promotionBadgeTextByMasterId = {},
   onMasterSelect,
   onMapBackgroundClick,
+  onToggleLike,
+  onViewMaster,
+  onBookMaster,
 }: RealMapProps) {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+  const [selectedLocalId, setSelectedLocalId] = useState<string | null>(null);
+  const [uiActions, setUiActions] = useState<{
+    locateMe: () => void;
+    toggleMapMode: () => void;
+  } | null>(null);
+
+  const prevRecenterTrigger = useRef(recenterToUserTrigger);
 
   useEffect(() => {
     fixLeafletIcons();
   }, []);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setUserLocation(LONDON_CENTER);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords: [number, number] = [
+          position.coords.latitude,
+          position.coords.longitude,
+        ];
+        setUserLocation(coords);
+        setMapCenter(coords);
+      },
+      () => {
+        setUserLocation(LONDON_CENTER);
+        setMapCenter(LONDON_CENTER);
+      }
+    );
+  }, []);
+
+  useEffect(() => {
+    if (prevRecenterTrigger.current === recenterToUserTrigger) return;
+    prevRecenterTrigger.current = recenterToUserTrigger;
+
+    if (!navigator.geolocation) {
+      setMapCenter(LONDON_CENTER);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords: [number, number] = [
+          position.coords.latitude,
+          position.coords.longitude,
+        ];
+        setUserLocation(coords);
+        setMapCenter(coords);
+      },
+      () => {
+        setMapCenter(LONDON_CENTER);
+      }
+    );
+  }, [recenterToUserTrigger]);
 
   const safeMasters = useMemo(() => {
     const filtered = masters.filter(
@@ -385,24 +446,28 @@ export default function RealMap({
     if (!isInsideLondonArea(firstFive)) return DEMO_MASTERS;
     if (!hasGoodSpread(firstFive)) return DEMO_MASTERS;
 
-    return firstFive;
+    return filtered;
   }, [masters]);
 
   const selectedMaster = useMemo(() => {
-    if (selectedMasterId !== null && selectedMasterId !== undefined) {
-      const found =
-        safeMasters.find((master) => String(master.id) === String(selectedMasterId)) || null;
+    const controlledId =
+      selectedMasterId !== null && selectedMasterId !== undefined
+        ? String(selectedMasterId)
+        : null;
 
-      if (found) return found;
-    }
+    const finalId = controlledId || selectedLocalId;
 
-    return null;
-  }, [safeMasters, selectedMasterId]);
+    if (!finalId) return null;
 
-  const tileUrl =
-    mapMode === 'satellite'
-      ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    return (
+      safeMasters.find((master) => String(master.id) === String(finalId)) || null
+    );
+  }, [safeMasters, selectedLocalId, selectedMasterId]);
+
+  const handleSelectMaster = (master: MasterItem) => {
+    setSelectedLocalId(String(master.id));
+    onMasterSelect?.(master);
+  };
 
   return (
     <div
@@ -411,13 +476,14 @@ export default function RealMap({
         height: '100%',
         borderRadius: 28,
         overflow: 'hidden',
+        position: 'relative',
       }}
     >
       <MapContainer
-        center={LONDON_CENTER}
-        zoom={12}
+        center={mapCenter || LONDON_CENTER}
+        zoom={13}
         minZoom={9}
-        maxZoom={17}
+        maxZoom={18}
         zoomControl={false}
         style={{
           width: '100%',
@@ -425,21 +491,26 @@ export default function RealMap({
           background: '#f2f2ef',
         }}
       >
-        <TileLayer attribution="&copy; OpenStreetMap contributors" url={tileUrl} />
+        <TileLayer
+          attribution="&copy; OpenStreetMap contributors"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
         <ZoomControl position="topleft" />
-
-        <MapEvents onMapBackgroundClick={onMapBackgroundClick} />
-        <RecenterMap
-          trigger={recenterToUserTrigger}
-          onUserLocationChange={(coords) => setUserLocation(coords)}
+        <MapEvents
+          onMapBackgroundClick={() => {
+            setSelectedLocalId(null);
+            onMapBackgroundClick?.();
+          }}
         />
+        <ChangeView center={mapCenter} />
+        <MapUiBridge onReady={setUiActions} />
 
         {userLocation ? (
           <>
             <CircleMarker
               center={userLocation}
-              radius={18}
+              radius={14}
               pathOptions={{
                 color: 'transparent',
                 fillColor: '#2b7cf6',
@@ -448,10 +519,10 @@ export default function RealMap({
             />
             <CircleMarker
               center={userLocation}
-              radius={6}
+              radius={5.5}
               pathOptions={{
                 color: '#ffffff',
-                weight: 2,
+                weight: 2.2,
                 fillColor: '#2b7cf6',
                 fillOpacity: 1,
               }}
@@ -462,7 +533,6 @@ export default function RealMap({
         {safeMasters.map((master) => {
           const isSelected =
             selectedMaster && String(master.id) === String(selectedMaster.id);
-
           const isLiked = likedMasterIds.includes(String(master.id));
 
           return (
@@ -472,13 +542,288 @@ export default function RealMap({
               icon={createMasterPin(master, Boolean(isSelected), isLiked)}
               eventHandlers={{
                 click: () => {
-                  onMasterSelect?.(master);
+                  handleSelectMaster(master);
                 },
               }}
             />
           );
         })}
       </MapContainer>
+
+      <div
+        style={{
+          position: 'absolute',
+          right: 12,
+          top: 12,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          zIndex: 700,
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => uiActions?.locateMe()}
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 999,
+            border: '1.4px solid #111111',
+            background: '#ffffff',
+            boxShadow: '0 6px 14px rgba(0,0,0,0.10)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontSize: 18,
+            color: '#2b7cf6',
+            fontWeight: 900,
+          }}
+        >
+          ◎
+        </button>
+
+        <button
+          type="button"
+          onClick={() => uiActions?.toggleMapMode()}
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 999,
+            border: '1.4px solid #111111',
+            background: '#ffffff',
+            boxShadow: '0 6px 14px rgba(0,0,0,0.10)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontSize: 16,
+            color: '#111111',
+            fontWeight: 900,
+          }}
+        >
+          ◫
+        </button>
+      </div>
+
+      {selectedMaster ? (
+        <div
+          style={{
+            position: 'absolute',
+            left: 10,
+            right: 10,
+            bottom: 10,
+            zIndex: 800,
+          }}
+        >
+          <div
+            style={{
+              borderRadius: 22,
+              border: '1.6px solid #111111',
+              background: '#ffffff',
+              boxShadow: '0 14px 28px rgba(0,0,0,0.14)',
+              padding: 10,
+            }}
+          >
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '70px 1fr auto',
+                gap: 10,
+                alignItems: 'center',
+              }}
+            >
+              <img
+                src={
+                  selectedMaster.avatar ||
+                  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80'
+                }
+                alt={selectedMaster.name || 'Master'}
+                style={{
+                  width: 70,
+                  height: 70,
+                  borderRadius: 18,
+                  objectFit: 'cover',
+                  display: 'block',
+                  border: '1.5px solid #111111',
+                }}
+              />
+
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  {selectedMaster.availableNow ? (
+                    <span
+                      style={{
+                        height: 22,
+                        padding: '0 8px',
+                        borderRadius: 999,
+                        border: '1.4px solid #111111',
+                        background: '#e9faee',
+                        color: '#1f9d43',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        fontSize: 11,
+                        fontWeight: 900,
+                      }}
+                    >
+                      Available now
+                    </span>
+                  ) : null}
+
+                  {promotionBadgeTextByMasterId[String(selectedMaster.id)] ? (
+                    <span
+                      style={{
+                        height: 22,
+                        padding: '0 8px',
+                        borderRadius: 999,
+                        border: '1.4px solid #111111',
+                        background: '#fff5cf',
+                        color: '#9a6a00',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        fontSize: 11,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {promotionBadgeTextByMasterId[String(selectedMaster.id)]}
+                    </span>
+                  ) : null}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    lineHeight: 1.15,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {selectedMaster.name || selectedMaster.title || 'Provider'}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 3,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: '#6f675f',
+                    lineHeight: 1.25,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {selectedMaster.subcategory || selectedMaster.category || 'Service'} •{' '}
+                  {selectedMaster.city || 'London'}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
+                    ★ {typeof selectedMaster.rating === 'number' ? selectedMaster.rating.toFixed(1) : '4.8'}
+                  </span>
+
+                  <span
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
+                    {selectedMaster.price || '£35'}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onToggleLike?.(selectedMaster)}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 999,
+                  border: '1.6px solid #111111',
+                  background: '#ffffff',
+                  cursor: 'pointer',
+                  fontSize: 18,
+                  color: likedMasterIds.includes(String(selectedMaster.id))
+                    ? '#ff3b58'
+                    : '#2d2d2d',
+                  fontWeight: 900,
+                }}
+              >
+                {likedMasterIds.includes(String(selectedMaster.id)) ? '♥' : '♡'}
+              </button>
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 8,
+                marginTop: 10,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => onViewMaster?.(selectedMaster)}
+                style={{
+                  height: 46,
+                  borderRadius: 16,
+                  border: '1.6px solid #111111',
+                  background: '#ffffff',
+                  color: '#17130f',
+                  fontSize: 14,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                Open
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onBookMaster?.(selectedMaster)}
+                style={{
+                  height: 46,
+                  borderRadius: 16,
+                  border: '1.6px solid #111111',
+                  background: '#31b44b',
+                  color: '#ffffff',
+                  fontSize: 14,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                Book
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <style jsx global>{`
         .leaflet-container {
@@ -487,18 +832,18 @@ export default function RealMap({
 
         .leaflet-control-zoom {
           border: none !important;
-          margin-top: 16px !important;
-          margin-left: 16px !important;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+          margin-top: 12px !important;
+          margin-left: 12px !important;
+          box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1) !important;
           overflow: hidden;
           border-radius: 14px !important;
         }
 
         .leaflet-control-zoom a {
-          width: 42px !important;
-          height: 42px !important;
-          line-height: 42px !important;
-          font-size: 30px !important;
+          width: 40px !important;
+          height: 40px !important;
+          line-height: 40px !important;
+          font-size: 26px !important;
           color: #111111 !important;
           border: none !important;
           background: #ffffff !important;
@@ -510,6 +855,11 @@ export default function RealMap({
 
         .leaflet-control-attribution {
           display: none !important;
+        }
+
+        .mapbook-master-pin {
+          background: transparent !important;
+          border: none !important;
         }
       `}</style>
     </div>
