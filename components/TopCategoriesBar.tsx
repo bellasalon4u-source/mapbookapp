@@ -12,16 +12,7 @@ type TopCategoriesBarProps = {
   onClearSubcategory?: () => void;
 };
 
-type DisplayCategory = {
-  id: string;
-  label: string;
-  shortLabel?: string;
-  icon?: string;
-  image: string;
-  isMore?: boolean;
-};
-
-function getCategoryLabel(category: DisplayCategory, language: AppLanguage) {
+function getCategoryLabel(category: any, language: AppLanguage) {
   const map: Record<string, Partial<Record<AppLanguage, string>>> = {
     more: { EN: 'More', ES: 'Más', RU: 'Ещё', UA: 'Ще', CZ: 'Více', DE: 'Mehr', PL: 'Więcej' },
     beauty: { EN: 'Beauty', ES: 'Beauty', RU: 'Красота', UA: 'Краса', CZ: 'Beauty', DE: 'Beauty', PL: 'Beauty' },
@@ -29,41 +20,51 @@ function getCategoryLabel(category: DisplayCategory, language: AppLanguage) {
     wellness: { EN: 'Wellness', ES: 'Wellness', RU: 'Велнес', UA: 'Велнес', CZ: 'Wellness', DE: 'Wellness', PL: 'Wellness' },
     home: { EN: 'Home', ES: 'Home', RU: 'Дом', UA: 'Дім', CZ: 'Home', DE: 'Home', PL: 'Home' },
     repairs: { EN: 'Repairs', ES: 'Repairs', RU: 'Ремонт', UA: 'Ремонт', CZ: 'Repairs', DE: 'Repairs', PL: 'Repairs' },
+    tech: { EN: 'Repairs', ES: 'Repairs', RU: 'Ремонт', UA: 'Ремонт', CZ: 'Repairs', DE: 'Repairs', PL: 'Repairs' },
     pets: { EN: 'Pets', ES: 'Pets', RU: 'Питомцы', UA: 'Тварини', CZ: 'Pets', DE: 'Pets', PL: 'Pets' },
     fitness: { EN: 'Fitness', ES: 'Fitness', RU: 'Фитнес', UA: 'Фітнес', CZ: 'Fitness', DE: 'Fitness', PL: 'Fitness' },
+    fashion: { EN: 'Fashion', ES: 'Fashion', RU: 'Мода', UA: 'Мода', CZ: 'Fashion', DE: 'Fashion', PL: 'Fashion' },
+    auto: { EN: 'Auto', ES: 'Auto', RU: 'Авто', UA: 'Авто', CZ: 'Auto', DE: 'Auto', PL: 'Auto' },
+    moving: { EN: 'Moving', ES: 'Moving', RU: 'Переезд', UA: 'Переїзд', CZ: 'Moving', DE: 'Moving', PL: 'Moving' },
+    education: { EN: 'Education', ES: 'Education', RU: 'Обучение', UA: 'Освіта', CZ: 'Education', DE: 'Education', PL: 'Education' },
+    events: { EN: 'Events', ES: 'Events', RU: 'События', UA: 'Події', CZ: 'Events', DE: 'Events', PL: 'Events' },
+    activities: { EN: 'Activities', ES: 'Activities', RU: 'Активности', UA: 'Активності', CZ: 'Activities', DE: 'Activities', PL: 'Activities' },
+    creative: { EN: 'Creative', ES: 'Creative', RU: 'Креатив', UA: 'Креатив', CZ: 'Creative', DE: 'Creative', PL: 'Creative' },
   };
 
   return map[String(category.id || '').toLowerCase()]?.[language] || category.shortLabel || category.label;
 }
 
-function getDisplayCategories(): DisplayCategory[] {
-  const byId = new Map(categories.map((item) => [item.id, item]));
+function getCategoryVisual(category: any): { type: 'image' | 'emoji'; value: string } | null {
+  const categoryId = String(category?.id || '').toLowerCase();
 
-  const orderedIds = ['beauty', 'barber', 'wellness', 'home', 'repairs', 'pets', 'fitness'];
+  const imageById: Record<string, string> = {
+    beauty: '/ui/categories/beauty.png',
+    barber: '/ui/categories/barber.png',
+    wellness: '/ui/categories/wellness.png',
+    home: '/ui/categories/home.png',
+    repairs: '/ui/categories/repairs.png',
+    tech: '/ui/categories/tech.png',
+    pets: '/ui/categories/pets.png',
+    fashion: '/ui/categories/fashion.png',
+    auto: '/ui/categories/auto.png',
+    moving: '/ui/categories/moving.png',
+    fitness: '/ui/categories/fitness.png',
+    education: '/ui/categories/education.png',
+    events: '/ui/categories/events.png',
+    activities: '/ui/categories/activities.png',
+    creative: '/ui/categories/creative.png',
+  };
 
-  const result: DisplayCategory[] = [
-    {
-      id: 'more',
-      label: 'More',
-      image: '/ui/categories/more.png',
-      isMore: true,
-    },
-  ];
+  if (imageById[categoryId]) {
+    return { type: 'image', value: imageById[categoryId] };
+  }
 
-  orderedIds.forEach((id) => {
-    const item = byId.get(id as any);
-    if (!item) return;
+  if (typeof category?.icon === 'string' && category.icon.trim()) {
+    return { type: 'emoji', value: category.icon };
+  }
 
-    result.push({
-      id: item.id,
-      label: item.label,
-      shortLabel: item.shortLabel,
-      icon: item.icon,
-      image: `/ui/categories/${item.id}.png`,
-    });
-  });
-
-  return result;
+  return null;
 }
 
 export default function TopCategoriesBar({
@@ -71,14 +72,17 @@ export default function TopCategoriesBar({
   language,
   onSelectCategory,
 }: TopCategoriesBarProps) {
-  const visibleCategories = getDisplayCategories();
+  const visualCategories = [
+    { id: 'more', label: 'More' },
+    ...categories.slice(0, 7),
+  ];
 
   return (
     <div style={{ padding: '0 12px' }}>
       <div
         style={{
           display: 'flex',
-          gap: 10,
+          gap: 8,
           overflowX: 'auto',
           overflowY: 'hidden',
           padding: '0 2px 2px',
@@ -87,24 +91,32 @@ export default function TopCategoriesBar({
           msOverflowStyle: 'none',
         }}
       >
-        {visibleCategories.map((category) => {
+        {visualCategories.map((category: any) => {
           const categoryId = String(category.id);
-          const isActive = !category.isMore && activeCategory === categoryId;
-          const label = getCategoryLabel(category, language);
+          const isActive = activeCategory === categoryId;
+          const label =
+            categoryId === 'more'
+              ? getCategoryLabel({ id: 'more', label: 'More' }, language)
+              : getCategoryLabel(category, language);
+
+          const visual =
+            categoryId === 'more'
+              ? { type: 'image' as const, value: '/ui/categories/more.png' }
+              : getCategoryVisual(category);
 
           return (
             <button
               key={categoryId}
               onClick={() => {
-                if (category.isMore) return;
+                if (categoryId === 'more') return;
                 onSelectCategory(categoryId);
               }}
               style={{
                 border: 'none',
                 background: 'transparent',
                 padding: 0,
-                cursor: category.isMore ? 'default' : 'pointer',
-                minWidth: 74,
+                cursor: categoryId === 'more' ? 'default' : 'pointer',
+                minWidth: 66,
                 flexShrink: 0,
                 display: 'flex',
                 flexDirection: 'column',
@@ -113,10 +125,10 @@ export default function TopCategoriesBar({
             >
               <div
                 style={{
-                  width: 74,
-                  height: 74,
-                  borderRadius: 22,
-                  border: isActive ? '1.8px solid #ef7db1' : '1.2px solid #cfc8be',
+                  width: 66,
+                  height: 66,
+                  borderRadius: 20,
+                  border: isActive ? '1.8px solid #ef7db1' : '1.3px solid #cfc8be',
                   background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
@@ -127,26 +139,52 @@ export default function TopCategoriesBar({
                   overflow: 'hidden',
                 }}
               >
-                <img
-                  src={category.image}
-                  alt={label}
-                  style={{
-                    width: '76%',
-                    height: '76%',
-                    objectFit: 'contain',
-                    display: 'block',
-                  }}
-                />
+                {visual?.type === 'image' ? (
+                  <img
+                    src={visual.value}
+                    alt={label}
+                    style={{
+                      width: '74%',
+                      height: '74%',
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                ) : visual?.type === 'emoji' ? (
+                  <span
+                    style={{
+                      fontSize: 34,
+                      lineHeight: 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {visual.value}
+                  </span>
+                ) : (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: '#6b7280',
+                      textAlign: 'center',
+                      padding: '0 8px',
+                    }}
+                  >
+                    {label}
+                  </span>
+                )}
               </div>
 
               <span
                 style={{
-                  marginTop: 8,
+                  marginTop: 7,
                   fontSize: 11,
                   fontWeight: isActive ? 900 : 700,
                   color: '#1f2937',
                   textAlign: 'center',
-                  lineHeight: 1.15,
+                  lineHeight: 1.1,
                   whiteSpace: 'nowrap',
                 }}
               >
