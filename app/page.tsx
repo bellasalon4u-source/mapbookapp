@@ -688,7 +688,7 @@ export default function HomePage() {
   const [dealFilterMode, setDealFilterMode] = useState<DealFilterMode>('none');
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [promotions, setPromotions] = useState<PromotionItem[]>([]);
-  const [recenterToUserTrigger] = useState(0);
+  const [recenterToUserTrigger, setRecenterToUserTrigger] = useState(0);
   const [searchLocation, setSearchLocation] = useState(getEffectiveSearchLocation());
   const [locationLabel, setLocationLabel] = useState(getEffectiveSearchLocation().label);
   const [regionVersion, setRegionVersion] = useState(0);
@@ -1102,8 +1102,8 @@ export default function HomePage() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0,1fr) 44px 44px 44px',
-                gap: 6,
+                gridTemplateColumns: 'minmax(0,1fr) 46px 46px 46px',
+                gap: 7,
                 alignItems: 'center',
               }}
             >
@@ -1183,14 +1183,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language')}
                 style={{
-                  width: 44,
+                  width: 46,
                   height: 48,
                   borderRadius: 15,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 8,
+                  fontSize: 8.5,
                   fontWeight: 900,
                   display: 'inline-flex',
                   flexDirection: 'column',
@@ -1201,21 +1201,21 @@ export default function HomePage() {
                   boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 }}
               >
-                <span style={{ fontSize: 15, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 16, lineHeight: 1 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/currency')}
                 style={{
-                  width: 44,
+                  width: 46,
                   height: 48,
                   borderRadius: 15,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 19,
+                  fontSize: 20,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1228,16 +1228,19 @@ export default function HomePage() {
               </button>
 
               <button
-                onClick={() => router.push('/profile/location')}
+                onClick={() => {
+                  router.push('/profile/location');
+                  setRecenterToUserTrigger((prev) => prev + 1);
+                }}
                 style={{
-                  width: 44,
+                  width: 46,
                   height: 48,
                   borderRadius: 15,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 16,
+                  fontSize: 17,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1520,7 +1523,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '4px 0 0' }}>
+        <section style={{ padding: '6px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1667,32 +1670,6 @@ export default function HomePage() {
                   router.push(`/booking/${master.id}`);
                 }}
               />
-
-              <button
-                onClick={() => router.push('/profile/location')}
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  bottom: 98,
-                  transform: 'translateX(-50%)',
-                  border: '1.2px solid #d7d1c7',
-                  background: '#ffffff',
-                  borderRadius: 999,
-                  padding: '10px 20px',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: '#151515',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  boxShadow: '0 8px 20px rgba(15,23,42,0.10)',
-                  cursor: 'pointer',
-                  zIndex: 500,
-                }}
-              >
-                <span style={{ color: '#2b7cf6', fontSize: 18, lineHeight: 1 }}>⌖</span>
-                <span>My location</span>
-              </button>
             </div>
           </div>
         </section>
