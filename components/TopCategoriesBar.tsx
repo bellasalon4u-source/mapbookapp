@@ -1,7 +1,7 @@
 'use client';
 
 import { categories } from '../services/categories';
-import { t, type AppLanguage } from '../services/i18n';
+import type { AppLanguage } from '../services/i18n';
 
 type TopCategoriesBarProps = {
   activeCategory: string;
@@ -32,7 +32,7 @@ function getCategoryLabel(category: any, language: AppLanguage) {
     creative: { EN: 'Creative', ES: 'Creative', RU: 'Creative', UA: 'Creative', CZ: 'Creative', DE: 'Creative', PL: 'Creative' },
   };
 
-  return map[category.id]?.[language] || category.shortLabel || category.label;
+  return map[String(category.id || '').toLowerCase()]?.[language] || category.shortLabel || category.label;
 }
 
 function getCategoryEmoji(categoryId: string) {
@@ -79,12 +79,12 @@ export default function TopCategoriesBar({
         }}
       >
         {visibleCategories.map((category) => {
-          const isActive = activeCategory === category.id;
+          const isActive = activeCategory === String(category.id);
 
           return (
             <button
-              key={category.id}
-              onClick={() => onSelectCategory(category.id)}
+              key={String(category.id)}
+              onClick={() => onSelectCategory(String(category.id))}
               style={{
                 border: 'none',
                 background: 'transparent',
@@ -114,11 +114,11 @@ export default function TopCategoriesBar({
               >
                 <span
                   style={{
-                    fontSize: category.id === 'more' ? 30 : 42,
+                    fontSize: 40,
                     lineHeight: 1,
                   }}
                 >
-                  {getCategoryEmoji(category.id)}
+                  {getCategoryEmoji(String(category.id))}
                 </span>
               </div>
 
