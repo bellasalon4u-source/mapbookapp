@@ -1,4 +1,5 @@
 export type CategoryKey =
+  | 'more'
   | 'beauty'
   | 'barber'
   | 'wellness'
@@ -19,15 +20,24 @@ export type AppCategory = {
   id: CategoryKey;
   label: string;
   icon: string;
+  image?: string;
   shortLabel?: string;
   subcategories: string[];
 };
 
 export const categories: AppCategory[] = [
   {
+    id: 'more',
+    label: 'More',
+    icon: '⬜',
+    image: '/ui/categories/more.png',
+    subcategories: [],
+  },
+  {
     id: 'beauty',
     label: 'Beauty',
     icon: '🪞',
+    image: '/ui/categories/beauty.png',
     subcategories: [
       'Hair',
       'Brows & Lashes',
@@ -41,7 +51,8 @@ export const categories: AppCategory[] = [
   {
     id: 'barber',
     label: 'Barber',
-    icon: '🧔',
+    icon: '💈',
+    image: '/ui/categories/barber.png',
     subcategories: [
       'Haircut',
       'Beard Trim',
@@ -56,6 +67,7 @@ export const categories: AppCategory[] = [
     id: 'wellness',
     label: 'Wellness',
     icon: '🪷',
+    image: '/ui/categories/wellness.png',
     subcategories: [
       'Massage',
       'Spa',
@@ -70,6 +82,7 @@ export const categories: AppCategory[] = [
     id: 'home',
     label: 'Home',
     icon: '🏡',
+    image: '/ui/categories/home.png',
     subcategories: [
       'Cleaning',
       'Deep Cleaning',
@@ -84,6 +97,7 @@ export const categories: AppCategory[] = [
     id: 'repairs',
     label: 'Repairs',
     icon: '🛠️',
+    image: '/ui/categories/repairs.png',
     subcategories: [
       'Home Repairs',
       'Appliance Repair',
@@ -98,6 +112,7 @@ export const categories: AppCategory[] = [
     id: 'tech',
     label: 'Tech',
     icon: '🖥️',
+    image: '/ui/categories/tech.png',
     subcategories: [
       'Phone Repair',
       'Computer Repair',
@@ -113,6 +128,7 @@ export const categories: AppCategory[] = [
     label: 'Fashion & Tailoring',
     shortLabel: 'Fashion',
     icon: '👗',
+    image: '/ui/categories/fashion.png',
     subcategories: [
       'Tailoring',
       'Alterations',
@@ -126,6 +142,7 @@ export const categories: AppCategory[] = [
     id: 'pets',
     label: 'Pets',
     icon: '🐾',
+    image: '/ui/categories/pets.png',
     subcategories: [
       'Grooming',
       'Dog Walking',
@@ -142,6 +159,7 @@ export const categories: AppCategory[] = [
     id: 'auto',
     label: 'Auto',
     icon: '🚗',
+    image: '/ui/categories/auto.png',
     subcategories: [
       'Car Wash',
       'Detailing',
@@ -157,6 +175,7 @@ export const categories: AppCategory[] = [
     label: 'Moving & Delivery',
     shortLabel: 'Moving',
     icon: '📦',
+    image: '/ui/categories/moving.png',
     subcategories: [
       'Small Moves',
       'Van Help',
@@ -171,6 +190,7 @@ export const categories: AppCategory[] = [
     id: 'fitness',
     label: 'Fitness',
     icon: '💪',
+    image: '/ui/categories/fitness.png',
     subcategories: [
       'Personal Training',
       'Yoga',
@@ -185,6 +205,7 @@ export const categories: AppCategory[] = [
     id: 'education',
     label: 'Education',
     icon: '🎓',
+    image: '/ui/categories/education.png',
     subcategories: [
       'Languages',
       'Tutoring',
@@ -199,6 +220,7 @@ export const categories: AppCategory[] = [
     id: 'events',
     label: 'Events',
     icon: '🎉',
+    image: '/ui/categories/events.png',
     subcategories: [
       'Photography',
       'Videography',
@@ -213,6 +235,7 @@ export const categories: AppCategory[] = [
     id: 'activities',
     label: 'Activities',
     icon: '🎨',
+    image: '/ui/categories/activities.png',
     subcategories: [
       'Tours',
       'Workshops',
@@ -227,6 +250,7 @@ export const categories: AppCategory[] = [
     id: 'creative',
     label: 'Creative',
     icon: '🎬',
+    image: '/ui/categories/creative.png',
     subcategories: [
       'Graphic Design',
       'Content Creation',
