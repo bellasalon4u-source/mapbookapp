@@ -40,6 +40,49 @@ type RealMapProps = {
 
 const LONDON_CENTER: [number, number] = [51.5074, -0.1278];
 
+const DEMO_MASTERS: MasterItem[] = [
+  {
+    id: 'demo-1',
+    name: 'Anna',
+    category: 'beauty',
+    lat: 51.533,
+    lng: -0.164,
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+  },
+  {
+    id: 'demo-2',
+    name: 'Mark',
+    category: 'barber',
+    lat: 51.498,
+    lng: -0.183,
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
+  },
+  {
+    id: 'demo-3',
+    name: 'Oksana',
+    category: 'beauty',
+    lat: 51.507,
+    lng: -0.109,
+    avatar: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=300&q=80',
+  },
+  {
+    id: 'demo-4',
+    name: 'David',
+    category: 'pets',
+    lat: 51.54,
+    lng: -0.045,
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80',
+  },
+  {
+    id: 'demo-5',
+    name: 'Mila',
+    category: 'wellness',
+    lat: 51.484,
+    lng: -0.02,
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
+  },
+];
+
 function MapEvents({
   onMapBackgroundClick,
 }: {
@@ -77,7 +120,7 @@ function RecenterMap({
       Number.isFinite(selectedMaster.lat) &&
       Number.isFinite(selectedMaster.lng)
     ) {
-      map.flyTo([selectedMaster.lat, selectedMaster.lng], 12, {
+      map.flyTo([selectedMaster.lat, selectedMaster.lng], 11, {
         duration: 0.7,
       });
     }
@@ -90,18 +133,18 @@ function RecenterMap({
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          map.flyTo([pos.coords.latitude, pos.coords.longitude], 13, {
+          map.flyTo([pos.coords.latitude, pos.coords.longitude], 12, {
             duration: 0.8,
           });
         },
         () => {
-          map.flyTo(LONDON_CENTER, 11, { duration: 0.8 });
+          map.flyTo(LONDON_CENTER, 10, { duration: 0.8 });
         }
       );
       return;
     }
 
-    map.flyTo(LONDON_CENTER, 11, { duration: 0.8 });
+    map.flyTo(LONDON_CENTER, 10, { duration: 0.8 });
   }, [map, trigger]);
 
   return null;
@@ -111,49 +154,49 @@ function getPinColors(master: MasterItem, isSelected: boolean) {
   if (isSelected) {
     return {
       ring: '#f0629b',
-      dot: '#ffffff',
       accent: '#f0629b',
+      bubble: '#ffffff',
     };
   }
 
   const category = String(master.category || '').toLowerCase();
 
-  if (master.availableNow || master.availableToday) {
-    return {
-      ring: '#7bcf88',
-      dot: '#ffffff',
-      accent: '#7bcf88',
-    };
-  }
-
   if (category === 'beauty') {
     return {
       ring: '#ef7db1',
-      dot: '#ffffff',
       accent: '#ef7db1',
+      bubble: '#ffffff',
     };
   }
 
   if (category === 'barber' || category === 'tech' || category === 'repairs') {
     return {
-      ring: '#66a8ff',
-      dot: '#ffffff',
-      accent: '#66a8ff',
+      ring: '#4f93ff',
+      accent: '#4f93ff',
+      bubble: '#ffffff',
     };
   }
 
   if (category === 'pets') {
     return {
-      ring: '#f0c24d',
-      dot: '#ffffff',
-      accent: '#f0c24d',
+      ring: '#79be76',
+      accent: '#79be76',
+      bubble: '#ffffff',
+    };
+  }
+
+  if (category === 'wellness') {
+    return {
+      ring: '#f0bf48',
+      accent: '#f0bf48',
+      bubble: '#ffffff',
     };
   }
 
   return {
-    ring: '#8ecf97',
-    dot: '#ffffff',
-    accent: '#8ecf97',
+    ring: '#79be76',
+    accent: '#79be76',
+    bubble: '#ffffff',
   };
 }
 
@@ -161,15 +204,15 @@ function createMasterPin(master: MasterItem, isSelected: boolean) {
   const colors = getPinColors(master, isSelected);
   const avatar = master.avatar || 'https://via.placeholder.com/80x80.png?text=Pro';
 
-  const size = isSelected ? 78 : 56;
-  const innerSize = isSelected ? 56 : 40;
-  const bubble = isSelected ? 28 : 22;
-  const outline = isSelected ? 5 : 4;
+  const size = isSelected ? 118 : 74;
+  const innerSize = isSelected ? 76 : 48;
+  const bubble = isSelected ? 36 : 26;
+  const outline = isSelected ? 6 : 4;
 
   return L.divIcon({
     className: '',
     html: `
-      <div style="position:relative;width:${size}px;height:${size + 10}px;">
+      <div style="position:relative;width:${size}px;height:${size + 18}px;">
         <div style="
           position:absolute;
           left:50%;
@@ -202,18 +245,18 @@ function createMasterPin(master: MasterItem, isSelected: boolean) {
 
         <div style="
           position:absolute;
-          right:${isSelected ? 1 : 0}px;
-          bottom:${isSelected ? 6 : 8}px;
+          right:${isSelected ? 6 : 2}px;
+          bottom:${isSelected ? 10 : 8}px;
           width:${bubble}px;
           height:${bubble}px;
           border-radius:50%;
-          background:${colors.dot};
+          background:${colors.bubble};
           border:${outline}px solid ${colors.accent};
           box-shadow:0 4px 10px rgba(0,0,0,0.10);
         "></div>
       </div>
     `,
-    iconSize: [size, size + 10],
+    iconSize: [size, size + 18],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size / 2],
   });
@@ -245,17 +288,18 @@ export default function RealMap({
   }, []);
 
   const safeMasters = useMemo(() => {
-    return masters.filter(
-      (master) =>
-        Number.isFinite(master.lat) &&
-        Number.isFinite(master.lng)
+    const filtered = masters.filter(
+      (master) => Number.isFinite(master.lat) && Number.isFinite(master.lng)
     );
+
+    return filtered.length >= 4 ? filtered : DEMO_MASTERS;
   }, [masters]);
 
   const selectedMaster = useMemo(() => {
-    return (
-      safeMasters.find((master) => String(master.id) === String(selectedMasterId)) || null
-    );
+    const found =
+      safeMasters.find((master) => String(master.id) === String(selectedMasterId)) || null;
+
+    return found || safeMasters[2] || null;
   }, [safeMasters, selectedMasterId]);
 
   const tileUrl =
@@ -274,7 +318,7 @@ export default function RealMap({
     >
       <MapContainer
         center={LONDON_CENTER}
-        zoom={11}
+        zoom={10}
         minZoom={9}
         zoomControl={false}
         style={{
@@ -283,10 +327,7 @@ export default function RealMap({
           background: '#f2f2ef',
         }}
       >
-        <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url={tileUrl}
-        />
+        <TileLayer attribution="&copy; OpenStreetMap contributors" url={tileUrl} />
 
         <ZoomControl position="topleft" />
 
@@ -297,7 +338,8 @@ export default function RealMap({
         />
 
         {safeMasters.map((master) => {
-          const isSelected = String(master.id) === String(selectedMasterId);
+          const isSelected =
+            selectedMaster && String(master.id) === String(selectedMaster.id);
 
           return (
             <Marker
@@ -321,18 +363,18 @@ export default function RealMap({
 
         .leaflet-control-zoom {
           border: none !important;
-          margin-top: 14px !important;
-          margin-left: 14px !important;
+          margin-top: 18px !important;
+          margin-left: 18px !important;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
           overflow: hidden;
-          border-radius: 14px !important;
+          border-radius: 16px !important;
         }
 
         .leaflet-control-zoom a {
-          width: 44px !important;
-          height: 44px !important;
-          line-height: 44px !important;
-          font-size: 28px !important;
+          width: 58px !important;
+          height: 58px !important;
+          line-height: 58px !important;
+          font-size: 38px !important;
           color: #111111 !important;
           border: none !important;
           background: #ffffff !important;
