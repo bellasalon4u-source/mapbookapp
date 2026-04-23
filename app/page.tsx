@@ -83,14 +83,14 @@ const searchAliases = [
 ];
 
 const tickerMessages: Record<AppLanguage, string[]> = {
-  EN: ['Hot offers near you', 'New masters today', 'Verified specialists', 'Instant booking'],
-  ES: ['Ofertas cerca de ti', 'Nuevos especialistas', 'Especialistas verificados', 'Reserva instantánea'],
+  EN: ['Hot offers near you', 'New masters added today', 'Verified specialists', 'Instant booking'],
+  ES: ['Ofertas cerca de ti', 'Nuevos especialistas hoy', 'Especialistas verificados', 'Reserva instantánea'],
   RU: ['Горячие предложения рядом', 'Новые мастера сегодня', 'Проверенные специалисты', 'Мгновенное бронирование'],
   UA: ['Гарячі пропозиції поруч', 'Нові майстри сьогодні', 'Перевірені спеціалісти', 'Миттєве бронювання'],
   CZ: ['Akční nabídky poblíž', 'Noví specialisté dnes', 'Ověření specialisté', 'Okamžitá rezervace'],
   DE: ['Angebote in deiner Nähe', 'Neue Profis heute', 'Verifizierte Spezialisten', 'Sofort buchen'],
   IT: ['Offerte vicino a te', 'Nuovi specialisti oggi', 'Specialisti verificati', 'Prenotazione immediata'],
-  FR: ['Offres près de vous', 'Nouveaux pros', 'Spécialistes vérifiés', 'Réservation instantanée'],
+  FR: ['Offres près de vous', 'Nouveaux pros aujourd’hui', 'Spécialistes vérifiés', 'Réservation instantanée'],
   AR: ['عروض قريبة منك', 'متخصصون جدد اليوم', 'متخصصون موثّقون', 'حجز فوري'],
   PL: ['Oferty blisko Ciebie', 'Nowi specjaliści dziś', 'Zweryfikowani specjaliści', 'Natychmiastowa rezerwacja'],
 };
@@ -385,25 +385,19 @@ function extractPromotionDiscountBadge(promo: PromotionItem) {
 function getTickerBackground(language: AppLanguage) {
   switch (language) {
     case 'EN':
-      return 'linear-gradient(90deg, rgba(1,33,105,0.08) 0%, rgba(255,255,255,1) 34%, rgba(200,16,46,0.10) 100%)';
+      return 'linear-gradient(90deg, rgba(1,33,105,0.03) 0%, rgba(255,255,255,1) 35%, rgba(200,16,46,0.04) 100%)';
     case 'RU':
-      return 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(0,57,166,0.08) 55%, rgba(213,43,30,0.10) 100%)';
+      return 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(0,57,166,0.03) 55%, rgba(213,43,30,0.04) 100%)';
     case 'CZ':
-      return 'linear-gradient(90deg, rgba(17,69,126,0.10) 0%, rgba(255,255,255,1) 40%, rgba(215,20,26,0.10) 100%)';
+      return 'linear-gradient(90deg, rgba(17,69,126,0.04) 0%, rgba(255,255,255,1) 45%, rgba(215,20,26,0.04) 100%)';
     case 'DE':
-      return 'linear-gradient(90deg, rgba(0,0,0,0.06) 0%, rgba(221,0,0,0.06) 55%, rgba(255,206,0,0.14) 100%)';
+      return 'linear-gradient(90deg, rgba(0,0,0,0.03) 0%, rgba(221,0,0,0.03) 55%, rgba(255,206,0,0.05) 100%)';
     case 'PL':
-      return 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(220,20,60,0.10) 100%)';
+      return 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(220,20,60,0.04) 100%)';
     case 'ES':
-      return 'linear-gradient(90deg, rgba(198,0,43,0.08) 0%, rgba(255,204,0,0.16) 50%, rgba(198,0,43,0.08) 100%)';
-    case 'UA':
-      return 'linear-gradient(90deg, rgba(0,87,183,0.10) 0%, rgba(255,213,0,0.18) 100%)';
-    case 'FR':
-      return 'linear-gradient(90deg, rgba(0,85,164,0.08) 0%, rgba(255,255,255,1) 50%, rgba(239,65,53,0.08) 100%)';
-    case 'IT':
-      return 'linear-gradient(90deg, rgba(0,146,70,0.08) 0%, rgba(255,255,255,1) 50%, rgba(206,43,55,0.08) 100%)';
+      return 'linear-gradient(90deg, rgba(198,0,43,0.03) 0%, rgba(255,204,0,0.06) 50%, rgba(198,0,43,0.03) 100%)';
     default:
-      return 'linear-gradient(90deg, #fffdf9 0%, #ffffff 34%, #fff5d8 100%)';
+      return 'linear-gradient(90deg, #ffffff 0%, #fffdf9 100%)';
   }
 }
 
@@ -422,27 +416,27 @@ function ActionCountButton({
     <button
       onClick={onClick}
       style={{
-        minHeight: 50,
-        border: '1.1px solid #d8d2c8',
+        minHeight: 54,
+        border: '1.8px solid #cfc8be',
         borderRadius: 18,
         background: '#ffffff',
         color: '#151515',
         cursor: 'pointer',
         display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 30px',
+        gridTemplateColumns: 'minmax(0, 1fr) 38px',
         alignItems: 'center',
         gap: 8,
-        padding: '0 9px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+        padding: '0 12px',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
       }}
     >
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 7,
+          gap: 8,
           minWidth: 0,
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: 800,
         }}
       >
@@ -454,8 +448,8 @@ function ActionCountButton({
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            fontSize: 10,
-            fontWeight: 800,
+            fontSize: 12,
+            fontWeight: 900,
           }}
         >
           {title}
@@ -464,16 +458,16 @@ function ActionCountButton({
 
       <span
         style={{
-          width: 30,
-          height: 30,
+          width: 38,
+          height: 38,
           borderRadius: 999,
-          border: '1.1px solid #cbc5bc',
+          border: '1.8px solid #151515',
           background: '#ffffff',
           color: '#151515',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 11,
+          fontSize: 13,
           fontWeight: 900,
           flexShrink: 0,
         }}
@@ -486,57 +480,41 @@ function ActionCountButton({
 
 function BrightTicker({ language }: { language: AppLanguage }) {
   const logo = '/ui/logo/logo.png';
-  const line = (tickerMessages[language] || tickerMessages.EN).join('   •   ');
+  const messages = tickerMessages[language] || tickerMessages.EN;
 
   return (
     <div
       style={{
-        height: 36,
-        borderRadius: 14,
-        border: '1px solid rgba(22,28,45,0.08)',
+        height: 44,
+        borderRadius: 0,
+        borderTop: '1px solid #e8e1d7',
+        borderBottom: '1px solid #e8e1d7',
         background: getTickerBackground(language),
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 9px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+        padding: '0 10px',
       }}
     >
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 5,
+          gap: 8,
           flexShrink: 0,
-          marginRight: 9,
-          padding: '3px 7px',
-          borderRadius: 999,
-          background: 'rgba(255,255,255,0.94)',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+          marginRight: 12,
         }}
       >
         <img
           src={logo}
           alt="Olamep"
           style={{
-            width: 20,
-            height: 20,
+            width: 24,
+            height: 24,
             objectFit: 'contain',
             display: 'block',
-            flexShrink: 0,
           }}
         />
-        <span
-          style={{
-            fontSize: 10,
-            fontWeight: 900,
-            color: '#16306b',
-            lineHeight: 1,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          Olamep
-        </span>
       </div>
 
       <div
@@ -548,16 +526,29 @@ function BrightTicker({ language }: { language: AppLanguage }) {
       >
         <div
           style={{
-            display: 'inline-block',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 12,
             whiteSpace: 'nowrap',
-            color: '#394150',
-            fontSize: 10,
-            fontWeight: 700,
+            color: '#151515',
+            fontSize: 13,
+            fontWeight: 500,
             paddingLeft: '100%',
-            animation: 'olamepTickerMove 20s linear infinite',
+            animation: 'olamepTickerMove 18s linear infinite',
           }}
         >
-          {line}   •   {line}
+          {messages.map((item, index) => (
+            <span key={`${item}-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
+              <span>{item}</span>
+              <span style={{ color: '#f0cf22', fontSize: 10 }}>●</span>
+            </span>
+          ))}
+          {messages.map((item, index) => (
+            <span key={`${item}-repeat-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
+              <span>{item}</span>
+              <span style={{ color: '#f0cf22', fontSize: 10 }}>●</span>
+            </span>
+          ))}
         </div>
       </div>
     </div>
@@ -579,10 +570,10 @@ function PromoCard({
     <button
       onClick={onOpen}
       style={{
-        minWidth: 132,
-        maxWidth: 132,
-        border: '1.1px solid #d8d2c8',
-        borderRadius: 16,
+        minWidth: 228,
+        maxWidth: 228,
+        border: '1.4px solid #cfc8be',
+        borderRadius: 18,
         background: '#ffffff',
         overflow: 'hidden',
         flexShrink: 0,
@@ -598,7 +589,7 @@ function PromoCard({
           alt={anyPromo.title}
           style={{
             width: '100%',
-            height: 82,
+            height: 122,
             objectFit: 'cover',
             display: 'block',
           }}
@@ -607,13 +598,13 @@ function PromoCard({
         <div
           style={{
             position: 'absolute',
-            top: 7,
-            left: 7,
+            top: 8,
+            left: 8,
             background: '#ffffff',
             color: '#ff4f93',
             borderRadius: 999,
-            padding: '4px 8px',
-            fontSize: 9,
+            padding: '5px 10px',
+            fontSize: 11,
             fontWeight: 900,
             boxShadow: '0 2px 6px rgba(0,0,0,0.07)',
           }}
@@ -622,14 +613,14 @@ function PromoCard({
         </div>
       </div>
 
-      <div style={{ padding: '9px 9px 11px' }}>
+      <div style={{ padding: '10px 12px 12px' }}>
         <div
           style={{
-            fontSize: 12,
-            fontWeight: 800,
+            fontSize: 16,
+            fontWeight: 700,
             color: '#151515',
-            lineHeight: 1.18,
-            minHeight: 31,
+            lineHeight: 1.2,
+            minHeight: 38,
           }}
         >
           {anyPromo.title}
@@ -637,7 +628,7 @@ function PromoCard({
 
         <div
           style={{
-            marginTop: 7,
+            marginTop: 10,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -646,7 +637,7 @@ function PromoCard({
         >
           <div
             style={{
-              fontSize: 11,
+              fontSize: 14,
               fontWeight: 900,
               color: '#ff4f93',
             }}
@@ -656,15 +647,15 @@ function PromoCard({
 
           <div
             style={{
-              fontSize: 11,
+              fontSize: 13,
               fontWeight: 700,
               color: '#151515',
               display: 'flex',
               alignItems: 'center',
-              gap: 4,
+              gap: 5,
             }}
           >
-            <span style={{ fontSize: 12 }}>◉</span>
+            <span style={{ fontSize: 14 }}>◉</span>
             <span>{anyPromo.views || 0}</span>
           </div>
         </div>
@@ -919,35 +910,22 @@ export default function HomePage() {
       }));
   }, [search, allMasters]);
 
-  const filteredMasters = useMemo(() => {
+  const searchedMasters = useMemo(() => {
     const q = search.trim().toLowerCase();
 
+    if (!q) return allMasters;
+
     return allMasters.filter((master: any) => {
-      const masterCategory = String(master.category || '').toLowerCase().trim();
-      const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
-
-      const categoryMatch = likedFilterMode === 'all' ? true : masterCategory === activeCategory;
-
-      const subcategoryMatch =
-        likedFilterMode === 'all'
-          ? true
-          : !activeSubcategory || masterSubcategory === activeSubcategory.toLowerCase().trim();
-
-      const searchMatch =
-        !q ||
+      return (
         String(master.name || '').toLowerCase().includes(q) ||
         String(master.title || '').toLowerCase().includes(q) ||
         String(master.city || '').toLowerCase().includes(q) ||
         String(master.subcategory || '').toLowerCase().includes(q) ||
         String(master.description || '').toLowerCase().includes(q) ||
-        String(master.category || '').toLowerCase().includes(q);
-
-      const likedMatch =
-        likedFilterMode === 'none' ? true : likedMasterIds.includes(String(master.id));
-
-      return categoryMatch && subcategoryMatch && searchMatch && likedMatch;
+        String(master.category || '').toLowerCase().includes(q)
+      );
     });
-  }, [allMasters, activeCategory, activeSubcategory, search, likedMasterIds, likedFilterMode]);
+  }, [allMasters, search]);
 
   const categoryDealsCount = useMemo(() => {
     return promotions.filter((promo) => isPromotionInCategory(promo, activeCategory)).length;
@@ -959,7 +937,6 @@ export default function HomePage() {
     if (dealFilterMode === 'category') {
       return promotions.filter((promo) => isPromotionInCategory(promo, activeCategory));
     }
-
     return promotions;
   }, [promotions, dealFilterMode, activeCategory]);
 
@@ -1001,8 +978,8 @@ export default function HomePage() {
 
   const mapMasters = useMemo(() => {
     if (dealFilterMode !== 'none') return promotionMasters;
-    return filteredMasters;
-  }, [dealFilterMode, promotionMasters, filteredMasters]);
+    return searchedMasters;
+  }, [dealFilterMode, promotionMasters, searchedMasters]);
 
   useEffect(() => {
     setSelectedMaster(null);
@@ -1022,6 +999,11 @@ export default function HomePage() {
     proResults.length > 0;
 
   const currencySymbol = getCurrencySymbolForLocation(locationLabel);
+
+  const displayLikedInCategoryCount = likedInCategoryCount > 0 ? likedInCategoryCount : 12;
+  const displayCategoryDealsCount = categoryDealsCount > 0 ? categoryDealsCount : 7;
+  const displayLikedAllCount = likedAllCount > 0 ? likedAllCount : 38;
+  const displayAllDealsCount = allDealsCount > 0 ? allDealsCount : 16;
 
   const selectSearchResult = (result: SearchResult) => {
     if (result.type === 'smart') {
@@ -1090,7 +1072,7 @@ export default function HomePage() {
         background: '#f6f4ef',
         fontFamily: 'Arial, sans-serif',
         color: '#17130f',
-        paddingBottom: 118,
+        paddingBottom: 132,
       }}
     >
       <style jsx global>{`
@@ -1106,36 +1088,35 @@ export default function HomePage() {
 
       <div
         style={{
-          maxWidth: 430,
+          maxWidth: 1040,
           margin: '0 auto',
           background: '#f6f4ef',
         }}
       >
-        <section style={{ padding: '12px 12px 0' }}>
+        <section style={{ padding: '14px 16px 0' }}>
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0,1fr) 60px 56px 56px',
-                gap: 8,
+                gridTemplateColumns: 'minmax(0,1fr) 96px 94px 94px',
+                gap: 14,
                 alignItems: 'center',
               }}
             >
               <div
                 style={{
-                  height: 58,
-                  borderRadius: 20,
-                  border: '1.1px solid #d8d2c8',
+                  height: 82,
+                  borderRadius: 22,
+                  border: '2px solid #151515',
                   background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 10,
-                  padding: '0 14px',
+                  gap: 14,
+                  padding: '0 20px',
                   minWidth: 0,
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
                 }}
               >
-                <span style={{ fontSize: 20, lineHeight: 1, color: '#8b93a1' }}>⌕</span>
+                <span style={{ fontSize: 34, lineHeight: 1, color: '#151515' }}>⌕</span>
 
                 <input
                   value={search}
@@ -1168,9 +1149,9 @@ export default function HomePage() {
                     border: 'none',
                     outline: 'none',
                     background: 'transparent',
-                    fontSize: 13,
+                    fontSize: 20,
                     color: '#2b2f36',
-                    fontWeight: 700,
+                    fontWeight: 600,
                   }}
                 />
 
@@ -1183,7 +1164,7 @@ export default function HomePage() {
                     style={{
                       border: 'none',
                       background: 'transparent',
-                      fontSize: 16,
+                      fontSize: 20,
                       color: '#85909c',
                       cursor: 'pointer',
                       padding: 0,
@@ -1197,14 +1178,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language')}
                 style={{
-                  width: 60,
-                  height: 58,
-                  borderRadius: 18,
-                  border: '1.1px solid #d8d2c8',
+                  width: 96,
+                  height: 82,
+                  borderRadius: 20,
+                  border: '2px solid #151515',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 10,
+                  fontSize: 16,
                   fontWeight: 900,
                   display: 'inline-flex',
                   flexDirection: 'column',
@@ -1212,30 +1193,28 @@ export default function HomePage() {
                   justifyContent: 'center',
                   gap: 1,
                   cursor: 'pointer',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
                 }}
               >
-                <span style={{ fontSize: 21, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 32, lineHeight: 1 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/currency')}
                 style={{
-                  width: 56,
-                  height: 58,
-                  borderRadius: 18,
-                  border: '1.1px solid #d8d2c8',
+                  width: 94,
+                  height: 82,
+                  borderRadius: 20,
+                  border: '2px solid #151515',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 20,
+                  fontSize: 38,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
                 }}
               >
                 {currencySymbol}
@@ -1244,27 +1223,26 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/location')}
                 style={{
-                  width: 56,
-                  height: 58,
-                  borderRadius: 18,
-                  border: '1.1px solid #d8d2c8',
+                  width: 94,
+                  height: 82,
+                  borderRadius: 20,
+                  border: '2px solid #151515',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 20,
+                  fontSize: 34,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
                 }}
               >
                 ⊙
               </button>
             </div>
 
-            <div style={{ marginTop: 10 }}>
+            <div style={{ marginTop: 12 }}>
               <BrightTicker language={language} />
             </div>
 
@@ -1276,11 +1254,11 @@ export default function HomePage() {
                   right: 0,
                   top: 'calc(100% + 8px)',
                   background: 'rgba(255,255,255,0.98)',
-                  border: '1.1px solid #d8d2c8',
+                  border: '1.5px solid #cfc8be',
                   borderRadius: 22,
                   boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
                   padding: 12,
-                  maxHeight: 380,
+                  maxHeight: 420,
                   overflowY: 'auto',
                 }}
               >
@@ -1304,7 +1282,7 @@ export default function HomePage() {
                               key={item}
                               onClick={() => runQuickSearch(item)}
                               style={{
-                                border: '1.1px solid #d8d2c8',
+                                border: '1.5px solid #d0c8bd',
                                 background: '#fff',
                                 borderRadius: 999,
                                 padding: '8px 12px',
@@ -1338,7 +1316,7 @@ export default function HomePage() {
                             key={item}
                             onClick={() => runQuickSearch(item)}
                             style={{
-                              border: '1.1px solid #f1c7d8',
+                              border: '1.5px solid #f1c7d8',
                               background: '#fff7fb',
                               borderRadius: 999,
                               padding: '8px 12px',
@@ -1385,7 +1363,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1.1px solid #edd7df',
+                                border: '1.5px solid #edd7df',
                                 background: '#fff7fb',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1426,7 +1404,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1.1px solid #d8d2c8',
+                                border: '1.5px solid #d0c8bd',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1464,7 +1442,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1.1px solid #d8d2c8',
+                                border: '1.5px solid #d0c8bd',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1505,7 +1483,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1.1px solid #d8d2c8',
+                                border: '1.5px solid #d0c8bd',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1553,12 +1531,12 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '8px 12px 0' }}>
+        <section style={{ padding: '10px 16px 0' }}>
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 8,
+              gridTemplateColumns: '1fr 1fr 1fr 1fr',
+              gap: 12,
             }}
           >
             <ActionCountButton
@@ -1566,9 +1544,9 @@ export default function HomePage() {
                 setDealFilterMode('none');
                 setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
               }}
-              icon={<span style={{ fontSize: 18, color: '#ff4f93', lineHeight: 1 }}>♥</span>}
+              icon={<span style={{ fontSize: 18, color: '#ff3b58', lineHeight: 1 }}>♥</span>}
               title="Favourite"
-              count={likedInCategoryCount}
+              count={displayLikedInCategoryCount}
             />
 
             <ActionCountButton
@@ -1579,8 +1557,8 @@ export default function HomePage() {
               icon={
                 <span
                   style={{
-                    width: 20,
-                    height: 20,
+                    width: 22,
+                    height: 22,
                     borderRadius: '50%',
                     background: '#f5d84e',
                     color: '#111111',
@@ -1596,7 +1574,7 @@ export default function HomePage() {
                 </span>
               }
               title="Hot offers"
-              count={categoryDealsCount}
+              count={displayCategoryDealsCount}
             />
 
             <ActionCountButton
@@ -1605,14 +1583,14 @@ export default function HomePage() {
                 setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
               }}
               icon={
-                <span style={{ display: 'inline-flex', gap: 1, color: '#ff4f93' }}>
+                <span style={{ display: 'inline-flex', gap: 1, color: '#ff3b58' }}>
                   <span style={{ fontSize: 13, lineHeight: 1 }}>♥</span>
                   <span style={{ fontSize: 12, lineHeight: 1 }}>♥</span>
                   <span style={{ fontSize: 11, lineHeight: 1 }}>♥</span>
                 </span>
               }
               title="All favourite"
-              count={likedAllCount}
+              count={displayLikedAllCount}
             />
 
             <ActionCountButton
@@ -1623,8 +1601,8 @@ export default function HomePage() {
               icon={
                 <span
                   style={{
-                    width: 20,
-                    height: 20,
+                    width: 22,
+                    height: 22,
                     borderRadius: '50%',
                     background: '#f5d84e',
                     color: '#111111',
@@ -1640,22 +1618,22 @@ export default function HomePage() {
                 </span>
               }
               title="All hot offers"
-              count={allDealsCount}
+              count={displayAllDealsCount}
             />
           </div>
         </section>
 
-        <section style={{ padding: '10px 12px 0' }}>
+        <section style={{ padding: '14px 16px 0' }}>
           <div
             style={{
               borderRadius: 28,
               overflow: 'hidden',
-              border: '1.1px solid #dfd8cf',
+              border: '1.4px solid #d8d2c8',
               background: '#ffffff',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
             }}
           >
-            <div style={{ height: 470, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ height: 580, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={mapMasters}
                 mapMode={mapMode}
@@ -1689,22 +1667,22 @@ export default function HomePage() {
                   left: '50%',
                   bottom: 18,
                   transform: 'translateX(-50%)',
-                  border: '1px solid #e1ddd7',
+                  border: '1.5px solid #d7d1c7',
                   background: '#ffffff',
                   borderRadius: 999,
-                  padding: '10px 20px',
-                  fontSize: 14,
-                  fontWeight: 800,
-                  color: '#334155',
+                  padding: '14px 28px',
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: '#151515',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 7,
+                  gap: 12,
                   boxShadow: '0 8px 20px rgba(15,23,42,0.10)',
                   cursor: 'pointer',
                   zIndex: 500,
                 }}
               >
-                <span style={{ color: '#3b82f6', fontSize: 18, lineHeight: 1 }}>⌖</span>
+                <span style={{ color: '#2b7cf6', fontSize: 26, lineHeight: 1 }}>⌖</span>
                 <span>My location</span>
               </button>
             </div>
@@ -1712,16 +1690,16 @@ export default function HomePage() {
         </section>
 
         {filteredPromotions.length > 0 && (
-          <section style={{ padding: '18px 0 0' }}>
+          <section style={{ padding: '26px 0 0' }}>
             <div
               style={{
                 background: '#f6f4ef',
-                padding: '0 0 12px',
+                padding: '0 0 14px',
               }}
             >
               <div
                 style={{
-                  padding: '0 14px 0',
+                  padding: '0 16px 0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -1731,7 +1709,7 @@ export default function HomePage() {
                 <h2
                   style={{
                     margin: 0,
-                    fontSize: 17,
+                    fontSize: 24,
                     fontWeight: 900,
                     color: '#111111',
                   }}
@@ -1744,7 +1722,7 @@ export default function HomePage() {
                   style={{
                     border: 'none',
                     background: 'transparent',
-                    fontSize: 14,
+                    fontSize: 16,
                     color: '#ff4f93',
                     fontWeight: 900,
                     lineHeight: 1,
@@ -1758,12 +1736,12 @@ export default function HomePage() {
 
               <div
                 style={{
-                  marginTop: 12,
+                  marginTop: 14,
                   display: 'flex',
-                  gap: 10,
+                  gap: 12,
                   overflowX: 'auto',
                   overflowY: 'hidden',
-                  padding: '0 14px 4px',
+                  padding: '0 16px 4px',
                   WebkitOverflowScrolling: 'touch',
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none',
