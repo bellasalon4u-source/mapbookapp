@@ -490,14 +490,14 @@ function BrightTicker({ language }: { language: AppLanguage }) {
   return (
     <div
       style={{
-        height: 38,
+        height: 34,
         borderTop: '1px solid #e8e1d7',
         borderBottom: '1px solid #e8e1d7',
         background: getTickerBackground(language),
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 10px',
+        padding: '0 8px',
       }}
     >
       <div
@@ -513,8 +513,8 @@ function BrightTicker({ language }: { language: AppLanguage }) {
           src={logo}
           alt="Olamep"
           style={{
-            width: 72,
-            height: 20,
+            width: 58,
+            height: 16,
             objectFit: 'contain',
             display: 'block',
           }}
@@ -536,7 +536,7 @@ function BrightTicker({ language }: { language: AppLanguage }) {
             whiteSpace: 'nowrap',
             color: '#151515',
             fontSize: 11,
-            fontWeight: 600,
+            fontWeight: 500,
             paddingLeft: '100%',
             animation: 'olamepTickerMove 18s linear infinite',
           }}
@@ -1076,7 +1076,7 @@ export default function HomePage() {
         background: '#f6f4ef',
         fontFamily: 'Arial, sans-serif',
         color: '#17130f',
-        paddingBottom: 112,
+        paddingBottom: 128,
       }}
     >
       <style jsx global>{`
@@ -1097,31 +1097,31 @@ export default function HomePage() {
           background: '#f6f4ef',
         }}
       >
-        <section style={{ padding: '12px 12px 0' }}>
+        <section style={{ padding: '10px 12px 0' }}>
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0,1fr) 58px 58px 58px',
-                gap: 10,
+                gridTemplateColumns: 'minmax(0,1fr) 54px 54px 54px',
+                gap: 8,
                 alignItems: 'center',
               }}
             >
               <div
                 style={{
-                  height: 54,
+                  height: 50,
                   borderRadius: 20,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 10,
+                  gap: 8,
                   padding: '0 14px',
                   minWidth: 0,
                   boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 }}
               >
-                <span style={{ fontSize: 22, lineHeight: 1, color: '#9ca3af' }}>⌕</span>
+                <span style={{ fontSize: 21, lineHeight: 1, color: '#9ca3af' }}>⌕</span>
 
                 <input
                   value={search}
@@ -1154,7 +1154,7 @@ export default function HomePage() {
                     border: 'none',
                     outline: 'none',
                     background: 'transparent',
-                    fontSize: 12,
+                    fontSize: 11,
                     color: '#2b2f36',
                     fontWeight: 600,
                   }}
@@ -1169,7 +1169,7 @@ export default function HomePage() {
                     style={{
                       border: 'none',
                       background: 'transparent',
-                      fontSize: 16,
+                      fontSize: 15,
                       color: '#85909c',
                       cursor: 'pointer',
                       padding: 0,
@@ -1183,14 +1183,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language')}
                 style={{
-                  width: 58,
-                  height: 54,
+                  width: 54,
+                  height: 50,
                   borderRadius: 16,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: 900,
                   display: 'inline-flex',
                   flexDirection: 'column',
@@ -1201,21 +1201,21 @@ export default function HomePage() {
                   boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 }}
               >
-                <span style={{ fontSize: 18, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 17, lineHeight: 1 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/currency')}
                 style={{
-                  width: 58,
-                  height: 54,
+                  width: 54,
+                  height: 50,
                   borderRadius: 16,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 24,
+                  fontSize: 22,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1230,14 +1230,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/location')}
                 style={{
-                  width: 58,
-                  height: 54,
+                  width: 54,
+                  height: 50,
                   borderRadius: 16,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 23,
+                  fontSize: 20,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1250,7 +1250,7 @@ export default function HomePage() {
               </button>
             </div>
 
-            <div style={{ marginTop: 10 }}>
+            <div style={{ marginTop: 8 }}>
               <BrightTicker language={language} />
             </div>
 
@@ -1520,7 +1520,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '10px 0 0' }}>
+        <section style={{ padding: '8px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1641,7 +1641,7 @@ export default function HomePage() {
               boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
             }}
           >
-            <div style={{ height: 420, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ height: 360, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={mapMasters}
                 mapMode={mapMode}
@@ -1673,7 +1673,7 @@ export default function HomePage() {
                 style={{
                   position: 'absolute',
                   left: '50%',
-                  bottom: 92,
+                  bottom: 76,
                   transform: 'translateX(-50%)',
                   border: '1.2px solid #d7d1c7',
                   background: '#ffffff',
@@ -1698,7 +1698,7 @@ export default function HomePage() {
         </section>
 
         {filteredPromotions.length > 0 && (
-          <section style={{ padding: '20px 0 72px' }}>
+          <section style={{ padding: '20px 0 0' }}>
             <div
               style={{
                 background: '#f6f4ef',
