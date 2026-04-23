@@ -490,14 +490,14 @@ function BrightTicker({ language }: { language: AppLanguage }) {
   return (
     <div
       style={{
-        height: 34,
+        height: 38,
         borderTop: '1px solid #e8e1d7',
         borderBottom: '1px solid #e8e1d7',
         background: getTickerBackground(language),
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 8px',
+        padding: '0 10px',
       }}
     >
       <div
@@ -513,8 +513,8 @@ function BrightTicker({ language }: { language: AppLanguage }) {
           src={logo}
           alt="Olamep"
           style={{
-            width: 58,
-            height: 16,
+            width: 72,
+            height: 20,
             objectFit: 'contain',
             display: 'block',
           }}
@@ -536,7 +536,7 @@ function BrightTicker({ language }: { language: AppLanguage }) {
             whiteSpace: 'nowrap',
             color: '#151515',
             fontSize: 11,
-            fontWeight: 500,
+            fontWeight: 600,
             paddingLeft: '100%',
             animation: 'olamepTickerMove 18s linear infinite',
           }}
@@ -1076,7 +1076,7 @@ export default function HomePage() {
         background: '#f6f4ef',
         fontFamily: 'Arial, sans-serif',
         color: '#17130f',
-        paddingBottom: 128,
+        paddingBottom: 112,
       }}
     >
       <style jsx global>{`
@@ -1641,7 +1641,7 @@ export default function HomePage() {
               boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
             }}
           >
-            <div style={{ height: 360, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ height: 420, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={mapMasters}
                 mapMode={mapMode}
@@ -1673,7 +1673,7 @@ export default function HomePage() {
                 style={{
                   position: 'absolute',
                   left: '50%',
-                  bottom: 76,
+                  bottom: 92,
                   transform: 'translateX(-50%)',
                   border: '1.2px solid #d7d1c7',
                   background: '#ffffff',
@@ -1698,7 +1698,7 @@ export default function HomePage() {
         </section>
 
         {filteredPromotions.length > 0 && (
-          <section style={{ padding: '20px 0 0' }}>
+          <section style={{ padding: '20px 0 72px' }}>
             <div
               style={{
                 background: '#f6f4ef',
