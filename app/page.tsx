@@ -486,6 +486,7 @@ function ActionCountButton({
 function BrightTicker({ language }: { language: AppLanguage }) {
   const logo = '/ui/logo/logo.png';
   const messages = tickerMessages[language] || tickerMessages.EN;
+  const flag = languageFlag(language);
 
   return (
     <div
@@ -509,6 +510,7 @@ function BrightTicker({ language }: { language: AppLanguage }) {
           marginRight: 12,
         }}
       >
+        <span style={{ fontSize: 13, lineHeight: 1 }}>{flag}</span>
         <img
           src={logo}
           alt="Olamep"
