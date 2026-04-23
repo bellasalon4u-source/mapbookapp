@@ -83,76 +83,16 @@ const searchAliases = [
 ];
 
 const tickerMessages: Record<AppLanguage, string[]> = {
-  EN: [
-    'Hot offers near you',
-    'New masters added today',
-    'Verified specialists',
-    'Instant booking',
-    'Explore services around you',
-  ],
-  ES: [
-    'Ofertas cerca de ti',
-    'Nuevos especialistas hoy',
-    'Especialistas verificados',
-    'Reserva instantánea',
-    'Explora servicios cerca de ti',
-  ],
-  RU: [
-    'Горячие предложения рядом',
-    'Новые мастера сегодня',
-    'Проверенные специалисты',
-    'Мгновенное бронирование',
-    'Исследуй услуги рядом',
-  ],
-  UA: [
-    'Гарячі пропозиції поруч',
-    'Нові майстри сьогодні',
-    'Перевірені спеціалісти',
-    'Миттєве бронювання',
-    'Досліджуй послуги поруч',
-  ],
-  CZ: [
-    'Akční nabídky poblíž',
-    'Noví specialisté dnes',
-    'Ověření specialisté',
-    'Okamžitá rezervace',
-    'Objevujte služby poblíž',
-  ],
-  DE: [
-    'Angebote in deiner Nähe',
-    'Neue Profis heute',
-    'Verifizierte Spezialisten',
-    'Sofort buchen',
-    'Entdecke Services in deiner Nähe',
-  ],
-  IT: [
-    'Offerte vicino a te',
-    'Nuovi specialisti oggi',
-    'Specialisti verificati',
-    'Prenotazione immediata',
-    'Scopri servizi vicino a te',
-  ],
-  FR: [
-    'Offres près de vous',
-    'Nouveaux pros aujourd’hui',
-    'Spécialistes vérifiés',
-    'Réservation instantanée',
-    'Découvrez des services autour de vous',
-  ],
-  AR: [
-    'عروض قريبة منك',
-    'متخصصون جدد اليوم',
-    'متخصصون موثّقون',
-    'حجز فوري',
-    'اكتشف الخدمات من حولك',
-  ],
-  PL: [
-    'Oferty blisko Ciebie',
-    'Nowi specjaliści dziś',
-    'Zweryfikowani specjaliści',
-    'Natychmiastowa rezerwacja',
-    'Odkrywaj usługi w pobliżu',
-  ],
+  EN: ['Hot offers near you', 'New masters today', 'Verified specialists', 'Instant booking'],
+  ES: ['Ofertas cerca de ti', 'Nuevos especialistas', 'Especialistas verificados', 'Reserva instantánea'],
+  RU: ['Горячие предложения рядом', 'Новые мастера сегодня', 'Проверенные специалисты', 'Мгновенное бронирование'],
+  UA: ['Гарячі пропозиції поруч', 'Нові майстри сьогодні', 'Перевірені спеціалісти', 'Миттєве бронювання'],
+  CZ: ['Akční nabídky poblíž', 'Noví specialisté dnes', 'Ověření specialisté', 'Okamžitá rezervace'],
+  DE: ['Angebote in deiner Nähe', 'Neue Profis heute', 'Verifizierte Spezialisten', 'Sofort buchen'],
+  IT: ['Offerte vicino a te', 'Nuovi specialisti oggi', 'Specialisti verificati', 'Prenotazione immediata'],
+  FR: ['Offres près de vous', 'Nouveaux pros', 'Spécialistes vérifiés', 'Réservation instantanée'],
+  AR: ['عروض قريبة منك', 'متخصصون جدد اليوم', 'متخصصون موثّقون', 'حجز فوري'],
+  PL: ['Oferty blisko Ciebie', 'Nowi specjaliści dziś', 'Zweryfikowani specjaliści', 'Natychmiastowa rezerwacja'],
 };
 
 type SearchResult =
@@ -445,25 +385,25 @@ function extractPromotionDiscountBadge(promo: PromotionItem) {
 function getTickerBackground(language: AppLanguage) {
   switch (language) {
     case 'EN':
-      return 'linear-gradient(90deg, rgba(1,33,105,0.10) 0%, rgba(255,255,255,1) 32%, rgba(200,16,46,0.12) 100%)';
+      return 'linear-gradient(90deg, rgba(1,33,105,0.08) 0%, rgba(255,255,255,1) 34%, rgba(200,16,46,0.10) 100%)';
     case 'RU':
-      return 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(0,57,166,0.10) 52%, rgba(213,43,30,0.12) 100%)';
+      return 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(0,57,166,0.08) 55%, rgba(213,43,30,0.10) 100%)';
     case 'CZ':
-      return 'linear-gradient(90deg, rgba(17,69,126,0.14) 0%, rgba(255,255,255,1) 40%, rgba(215,20,26,0.12) 100%)';
+      return 'linear-gradient(90deg, rgba(17,69,126,0.10) 0%, rgba(255,255,255,1) 40%, rgba(215,20,26,0.10) 100%)';
     case 'DE':
-      return 'linear-gradient(90deg, rgba(0,0,0,0.08) 0%, rgba(221,0,0,0.08) 52%, rgba(255,206,0,0.18) 100%)';
+      return 'linear-gradient(90deg, rgba(0,0,0,0.06) 0%, rgba(221,0,0,0.06) 55%, rgba(255,206,0,0.14) 100%)';
     case 'PL':
-      return 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(220,20,60,0.12) 100%)';
+      return 'linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(220,20,60,0.10) 100%)';
     case 'ES':
-      return 'linear-gradient(90deg, rgba(198,0,43,0.10) 0%, rgba(255,204,0,0.20) 50%, rgba(198,0,43,0.10) 100%)';
+      return 'linear-gradient(90deg, rgba(198,0,43,0.08) 0%, rgba(255,204,0,0.16) 50%, rgba(198,0,43,0.08) 100%)';
     case 'UA':
-      return 'linear-gradient(90deg, rgba(0,87,183,0.12) 0%, rgba(255,213,0,0.22) 100%)';
+      return 'linear-gradient(90deg, rgba(0,87,183,0.10) 0%, rgba(255,213,0,0.18) 100%)';
     case 'FR':
-      return 'linear-gradient(90deg, rgba(0,85,164,0.12) 0%, rgba(255,255,255,1) 50%, rgba(239,65,53,0.12) 100%)';
+      return 'linear-gradient(90deg, rgba(0,85,164,0.08) 0%, rgba(255,255,255,1) 50%, rgba(239,65,53,0.08) 100%)';
     case 'IT':
-      return 'linear-gradient(90deg, rgba(0,146,70,0.12) 0%, rgba(255,255,255,1) 50%, rgba(206,43,55,0.12) 100%)';
+      return 'linear-gradient(90deg, rgba(0,146,70,0.08) 0%, rgba(255,255,255,1) 50%, rgba(206,43,55,0.08) 100%)';
     default:
-      return 'linear-gradient(90deg, #fffdf9 0%, #ffffff 32%, #fff5d8 100%)';
+      return 'linear-gradient(90deg, #fffdf9 0%, #ffffff 34%, #fff5d8 100%)';
   }
 }
 
@@ -482,17 +422,17 @@ function ActionCountButton({
     <button
       onClick={onClick}
       style={{
-        minHeight: 52,
-        border: '1.2px solid #d8d2c8',
+        minHeight: 50,
+        border: '1.1px solid #d8d2c8',
         borderRadius: 18,
         background: '#ffffff',
         color: '#151515',
         cursor: 'pointer',
         display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 32px',
+        gridTemplateColumns: 'minmax(0, 1fr) 30px',
         alignItems: 'center',
         gap: 8,
-        padding: '0 10px',
+        padding: '0 9px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
       }}
     >
@@ -500,13 +440,13 @@ function ActionCountButton({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
+          gap: 7,
           minWidth: 0,
           fontSize: 11,
           fontWeight: 800,
         }}
       >
-        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           {icon}
         </span>
         <span
@@ -514,7 +454,7 @@ function ActionCountButton({
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: 800,
           }}
         >
@@ -524,16 +464,16 @@ function ActionCountButton({
 
       <span
         style={{
-          width: 32,
-          height: 32,
+          width: 30,
+          height: 30,
           borderRadius: 999,
-          border: '1.2px solid #cbc5bc',
+          border: '1.1px solid #cbc5bc',
           background: '#ffffff',
           color: '#151515',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: 900,
           flexShrink: 0,
         }}
@@ -546,19 +486,19 @@ function ActionCountButton({
 
 function BrightTicker({ language }: { language: AppLanguage }) {
   const logo = '/ui/logo/logo.png';
-  const line = (tickerMessages[language] || tickerMessages.EN).join('   ●   ');
+  const line = (tickerMessages[language] || tickerMessages.EN).join('   •   ');
 
   return (
     <div
       style={{
-        height: 38,
+        height: 36,
         borderRadius: 14,
         border: '1px solid rgba(22,28,45,0.08)',
         background: getTickerBackground(language),
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 10px',
+        padding: '0 9px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
       }}
     >
@@ -566,12 +506,12 @@ function BrightTicker({ language }: { language: AppLanguage }) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 6,
+          gap: 5,
           flexShrink: 0,
-          marginRight: 10,
+          marginRight: 9,
           padding: '3px 7px',
           borderRadius: 999,
-          background: 'rgba(255,255,255,0.92)',
+          background: 'rgba(255,255,255,0.94)',
           boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
         }}
       >
@@ -579,8 +519,8 @@ function BrightTicker({ language }: { language: AppLanguage }) {
           src={logo}
           alt="Olamep"
           style={{
-            width: 22,
-            height: 22,
+            width: 20,
+            height: 20,
             objectFit: 'contain',
             display: 'block',
             flexShrink: 0,
@@ -588,7 +528,7 @@ function BrightTicker({ language }: { language: AppLanguage }) {
         />
         <span
           style={{
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: 900,
             color: '#16306b',
             lineHeight: 1,
@@ -611,13 +551,13 @@ function BrightTicker({ language }: { language: AppLanguage }) {
             display: 'inline-block',
             whiteSpace: 'nowrap',
             color: '#394150',
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: 700,
             paddingLeft: '100%',
-            animation: 'olamepTickerMove 19s linear infinite',
+            animation: 'olamepTickerMove 20s linear infinite',
           }}
         >
-          {line}   ●   {line}
+          {line}   •   {line}
         </div>
       </div>
     </div>
@@ -639,9 +579,9 @@ function PromoCard({
     <button
       onClick={onOpen}
       style={{
-        minWidth: 136,
-        maxWidth: 136,
-        border: '1.2px solid #d8d2c8',
+        minWidth: 132,
+        maxWidth: 132,
+        border: '1.1px solid #d8d2c8',
         borderRadius: 16,
         background: '#ffffff',
         overflow: 'hidden',
@@ -658,7 +598,7 @@ function PromoCard({
           alt={anyPromo.title}
           style={{
             width: '100%',
-            height: 86,
+            height: 82,
             objectFit: 'cover',
             display: 'block',
           }}
@@ -667,13 +607,13 @@ function PromoCard({
         <div
           style={{
             position: 'absolute',
-            top: 8,
-            left: 8,
+            top: 7,
+            left: 7,
             background: '#ffffff',
             color: '#ff4f93',
             borderRadius: 999,
             padding: '4px 8px',
-            fontSize: 10,
+            fontSize: 9,
             fontWeight: 900,
             boxShadow: '0 2px 6px rgba(0,0,0,0.07)',
           }}
@@ -682,14 +622,14 @@ function PromoCard({
         </div>
       </div>
 
-      <div style={{ padding: '10px 10px 12px' }}>
+      <div style={{ padding: '9px 9px 11px' }}>
         <div
           style={{
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: 800,
             color: '#151515',
-            lineHeight: 1.2,
-            minHeight: 34,
+            lineHeight: 1.18,
+            minHeight: 31,
           }}
         >
           {anyPromo.title}
@@ -697,7 +637,7 @@ function PromoCard({
 
         <div
           style={{
-            marginTop: 8,
+            marginTop: 7,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -706,7 +646,7 @@ function PromoCard({
         >
           <div
             style={{
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: 900,
               color: '#ff4f93',
             }}
@@ -716,15 +656,15 @@ function PromoCard({
 
           <div
             style={{
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: 700,
               color: '#151515',
               display: 'flex',
               alignItems: 'center',
-              gap: 5,
+              gap: 4,
             }}
           >
-            <span style={{ fontSize: 13 }}>◉</span>
+            <span style={{ fontSize: 12 }}>◉</span>
             <span>{anyPromo.views || 0}</span>
           </div>
         </div>
@@ -1020,10 +960,6 @@ export default function HomePage() {
       return promotions.filter((promo) => isPromotionInCategory(promo, activeCategory));
     }
 
-    if (dealFilterMode === 'all') {
-      return promotions;
-    }
-
     return promotions;
   }, [promotions, dealFilterMode, activeCategory]);
 
@@ -1189,7 +1125,7 @@ export default function HomePage() {
                 style={{
                   height: 58,
                   borderRadius: 20,
-                  border: '1.2px solid #d8d2c8',
+                  border: '1.1px solid #d8d2c8',
                   background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
@@ -1199,7 +1135,7 @@ export default function HomePage() {
                   boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
                 }}
               >
-                <span style={{ fontSize: 20, lineHeight: 1, color: '#6b7280' }}>⌕</span>
+                <span style={{ fontSize: 20, lineHeight: 1, color: '#8b93a1' }}>⌕</span>
 
                 <input
                   value={search}
@@ -1264,7 +1200,7 @@ export default function HomePage() {
                   width: 60,
                   height: 58,
                   borderRadius: 18,
-                  border: '1.2px solid #d8d2c8',
+                  border: '1.1px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
@@ -1289,7 +1225,7 @@ export default function HomePage() {
                   width: 56,
                   height: 58,
                   borderRadius: 18,
-                  border: '1.2px solid #d8d2c8',
+                  border: '1.1px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
@@ -1311,7 +1247,7 @@ export default function HomePage() {
                   width: 56,
                   height: 58,
                   borderRadius: 18,
-                  border: '1.2px solid #d8d2c8',
+                  border: '1.1px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
@@ -1340,7 +1276,7 @@ export default function HomePage() {
                   right: 0,
                   top: 'calc(100% + 8px)',
                   background: 'rgba(255,255,255,0.98)',
-                  border: '1.2px solid #d8d2c8',
+                  border: '1.1px solid #d8d2c8',
                   borderRadius: 22,
                   boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
                   padding: 12,
@@ -1368,7 +1304,7 @@ export default function HomePage() {
                               key={item}
                               onClick={() => runQuickSearch(item)}
                               style={{
-                                border: '1.2px solid #d8d2c8',
+                                border: '1.1px solid #d8d2c8',
                                 background: '#fff',
                                 borderRadius: 999,
                                 padding: '8px 12px',
@@ -1402,7 +1338,7 @@ export default function HomePage() {
                             key={item}
                             onClick={() => runQuickSearch(item)}
                             style={{
-                              border: '1.2px solid #f1c7d8',
+                              border: '1.1px solid #f1c7d8',
                               background: '#fff7fb',
                               borderRadius: 999,
                               padding: '8px 12px',
@@ -1449,7 +1385,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1.2px solid #edd7df',
+                                border: '1.1px solid #edd7df',
                                 background: '#fff7fb',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1490,7 +1426,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1.2px solid #d8d2c8',
+                                border: '1.1px solid #d8d2c8',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1528,7 +1464,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1.2px solid #d8d2c8',
+                                border: '1.1px solid #d8d2c8',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1569,7 +1505,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1.2px solid #d8d2c8',
+                                border: '1.1px solid #d8d2c8',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1643,8 +1579,8 @@ export default function HomePage() {
               icon={
                 <span
                   style={{
-                    width: 22,
-                    height: 22,
+                    width: 20,
+                    height: 20,
                     borderRadius: '50%',
                     background: '#f5d84e',
                     color: '#111111',
@@ -1687,8 +1623,8 @@ export default function HomePage() {
               icon={
                 <span
                   style={{
-                    width: 22,
-                    height: 22,
+                    width: 20,
+                    height: 20,
                     borderRadius: '50%',
                     background: '#f5d84e',
                     color: '#111111',
@@ -1714,7 +1650,7 @@ export default function HomePage() {
             style={{
               borderRadius: 28,
               overflow: 'hidden',
-              border: '1.2px solid #dfd8cf',
+              border: '1.1px solid #dfd8cf',
               background: '#ffffff',
               boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
             }}
@@ -1768,7 +1704,7 @@ export default function HomePage() {
                   zIndex: 500,
                 }}
               >
-                <span style={{ color: '#3b82f6', fontSize: 19, lineHeight: 1 }}>⌖</span>
+                <span style={{ color: '#3b82f6', fontSize: 18, lineHeight: 1 }}>⌖</span>
                 <span>My location</span>
               </button>
             </div>
