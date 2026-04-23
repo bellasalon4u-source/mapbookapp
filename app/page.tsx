@@ -1673,7 +1673,7 @@ export default function HomePage() {
                 style={{
                   position: 'absolute',
                   left: '50%',
-                  bottom: 16,
+                  bottom: 76,
                   transform: 'translateX(-50%)',
                   border: '1.2px solid #d7d1c7',
                   background: '#ffffff',
