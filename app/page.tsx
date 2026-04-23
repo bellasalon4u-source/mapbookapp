@@ -145,13 +145,13 @@ function mapCategoryToId(category: string) {
 function listingToMaster(listing: ListingItem, index: number) {
   const fallbackCoords: [number, number][] = [
     [51.5074, -0.1278],
-    [51.533, -0.164],
-    [51.498, -0.183],
-    [51.54, -0.045],
-    [51.484, -0.02],
+    [51.5330, -0.1640],
+    [51.4980, -0.1830],
+    [51.5400, -0.0450],
+    [51.4840, -0.0200],
     [51.5202, -0.1028],
     [51.5159, -0.1426],
-    [51.5098, -0.118],
+    [51.5098, -0.1180],
   ];
 
   const coords = fallbackCoords[index % fallbackCoords.length];
@@ -506,15 +506,15 @@ function BrightTicker({ language }: { language: AppLanguage }) {
           alignItems: 'center',
           gap: 6,
           flexShrink: 0,
-          marginRight: 8,
+          marginRight: 12,
         }}
       >
         <img
           src={logo}
           alt="Olamep"
           style={{
-            width: 52,
-            height: 15,
+            width: 58,
+            height: 16,
             objectFit: 'contain',
             display: 'block',
           }}
@@ -532,23 +532,23 @@ function BrightTicker({ language }: { language: AppLanguage }) {
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 8,
+            gap: 10,
             whiteSpace: 'nowrap',
             color: '#151515',
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: 500,
             paddingLeft: '100%',
             animation: 'olamepTickerMove 18s linear infinite',
           }}
         >
           {messages.map((item, index) => (
-            <span key={`${item}-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <span key={`${item}-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
               <span>{item}</span>
               <span style={{ color: '#f0cf22', fontSize: 8 }}>●</span>
             </span>
           ))}
           {messages.map((item, index) => (
-            <span key={`${item}-repeat-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <span key={`${item}-repeat-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
               <span>{item}</span>
               <span style={{ color: '#f0cf22', fontSize: 8 }}>●</span>
             </span>
@@ -1076,7 +1076,7 @@ export default function HomePage() {
         background: '#f6f4ef',
         fontFamily: 'Arial, sans-serif',
         color: '#17130f',
-        paddingBottom: 172,
+        paddingBottom: 128,
       }}
     >
       <style jsx global>{`
@@ -1097,13 +1097,13 @@ export default function HomePage() {
           background: '#f6f4ef',
         }}
       >
-        <section style={{ padding: '12px 12px 0' }}>
+        <section style={{ padding: '10px 12px 0' }}>
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0,1fr) 44px 44px 44px',
-                gap: 6,
+                gridTemplateColumns: 'minmax(0,1fr) 50px 50px 50px',
+                gap: 8,
                 alignItems: 'center',
               }}
             >
@@ -1121,7 +1121,7 @@ export default function HomePage() {
                   boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 }}
               >
-                <span style={{ fontSize: 18, lineHeight: 1, color: '#9ca3af' }}>⌕</span>
+                <span style={{ fontSize: 20, lineHeight: 1, color: '#9ca3af' }}>⌕</span>
 
                 <input
                   value={search}
@@ -1154,7 +1154,7 @@ export default function HomePage() {
                     border: 'none',
                     outline: 'none',
                     background: 'transparent',
-                    fontSize: 10,
+                    fontSize: 11,
                     color: '#2b2f36',
                     fontWeight: 600,
                   }}
@@ -1169,7 +1169,7 @@ export default function HomePage() {
                     style={{
                       border: 'none',
                       background: 'transparent',
-                      fontSize: 16,
+                      fontSize: 15,
                       color: '#85909c',
                       cursor: 'pointer',
                       padding: 0,
@@ -1183,39 +1183,39 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language')}
                 style={{
-                  width: 44,
+                  width: 50,
                   height: 50,
                   borderRadius: 16,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: 900,
                   display: 'inline-flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 1,
+                  gap: 0,
                   cursor: 'pointer',
                   boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
                 }}
               >
-                <span style={{ fontSize: 15, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 17, lineHeight: 1 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/currency')}
                 style={{
-                  width: 44,
+                  width: 50,
                   height: 50,
                   borderRadius: 16,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 19,
+                  fontSize: 22,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1230,14 +1230,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/location')}
                 style={{
-                  width: 44,
+                  width: 50,
                   height: 50,
                   borderRadius: 16,
                   border: '1.2px solid #d8d2c8',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 17,
+                  fontSize: 19,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1520,7 +1520,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '10px 0 0' }}>
+        <section style={{ padding: '8px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1641,7 +1641,7 @@ export default function HomePage() {
               boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
             }}
           >
-            <div style={{ height: 470, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ height: 438, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={mapMasters}
                 mapMode={mapMode}
@@ -1673,7 +1673,7 @@ export default function HomePage() {
                 style={{
                   position: 'absolute',
                   left: '50%',
-                  bottom: 118,
+                  bottom: 92,
                   transform: 'translateX(-50%)',
                   border: '1.2px solid #d7d1c7',
                   background: '#ffffff',
@@ -1698,7 +1698,7 @@ export default function HomePage() {
         </section>
 
         {filteredPromotions.length > 0 && (
-          <section style={{ padding: '26px 0 0' }}>
+          <section style={{ padding: '20px 0 0' }}>
             <div
               style={{
                 background: '#f6f4ef',
