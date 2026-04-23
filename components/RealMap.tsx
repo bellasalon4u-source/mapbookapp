@@ -204,15 +204,15 @@ function createMasterPin(master: MasterItem, isSelected: boolean) {
   const colors = getPinColors(master, isSelected);
   const avatar = master.avatar || 'https://via.placeholder.com/80x80.png?text=Pro';
 
-  const size = isSelected ? 118 : 74;
-  const innerSize = isSelected ? 76 : 48;
-  const bubble = isSelected ? 36 : 26;
-  const outline = isSelected ? 6 : 4;
+  const size = isSelected ? 98 : 62;
+  const innerSize = isSelected ? 64 : 40;
+  const bubble = isSelected ? 30 : 22;
+  const outline = isSelected ? 5 : 4;
 
   return L.divIcon({
     className: '',
     html: `
-      <div style="position:relative;width:${size}px;height:${size + 18}px;">
+      <div style="position:relative;width:${size}px;height:${size + 16}px;">
         <div style="
           position:absolute;
           left:50%;
@@ -245,7 +245,7 @@ function createMasterPin(master: MasterItem, isSelected: boolean) {
 
         <div style="
           position:absolute;
-          right:${isSelected ? 6 : 2}px;
+          right:${isSelected ? 4 : 1}px;
           bottom:${isSelected ? 10 : 8}px;
           width:${bubble}px;
           height:${bubble}px;
@@ -256,7 +256,7 @@ function createMasterPin(master: MasterItem, isSelected: boolean) {
         "></div>
       </div>
     `,
-    iconSize: [size, size + 18],
+    iconSize: [size, size + 16],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size / 2],
   });
@@ -292,7 +292,7 @@ export default function RealMap({
       (master) => Number.isFinite(master.lat) && Number.isFinite(master.lng)
     );
 
-    return filtered.length >= 4 ? filtered : DEMO_MASTERS;
+    return filtered.length >= 4 ? filtered.slice(0, 5) : DEMO_MASTERS;
   }, [masters]);
 
   const selectedMaster = useMemo(() => {
@@ -363,18 +363,18 @@ export default function RealMap({
 
         .leaflet-control-zoom {
           border: none !important;
-          margin-top: 18px !important;
-          margin-left: 18px !important;
+          margin-top: 16px !important;
+          margin-left: 16px !important;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
           overflow: hidden;
-          border-radius: 16px !important;
+          border-radius: 14px !important;
         }
 
         .leaflet-control-zoom a {
-          width: 58px !important;
-          height: 58px !important;
-          line-height: 58px !important;
-          font-size: 38px !important;
+          width: 42px !important;
+          height: 42px !important;
+          line-height: 42px !important;
+          font-size: 30px !important;
           color: #111111 !important;
           border: none !important;
           background: #ffffff !important;
