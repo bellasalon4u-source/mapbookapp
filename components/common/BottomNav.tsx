@@ -40,24 +40,24 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       style={{
         position: 'fixed',
         left: '50%',
-        bottom: 18,
+        bottom: 16,
         transform: 'translateX(-50%)',
-        width: 'calc(100% - 32px)',
-        maxWidth: 920,
+        width: 'calc(100% - 28px)',
+        maxWidth: 402,
         zIndex: 1200,
       }}
     >
       <div
         style={{
           background: '#f7f4ef',
-          border: '1.4px solid #ddd6cb',
-          borderRadius: 30,
+          border: '1.2px solid #ddd6cb',
+          borderRadius: 24,
           boxShadow: '0 8px 28px rgba(15,23,42,0.10)',
-          padding: '14px 18px 16px',
+          padding: '10px 12px 12px',
           display: 'grid',
           gridTemplateColumns: 'repeat(5, 1fr)',
           alignItems: 'end',
-          gap: 10,
+          gap: 8,
         }}
       >
         {items.map((item) => {
@@ -77,24 +77,24 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'flex-end',
-                  gap: 8,
+                  gap: 6,
                 }}
               >
                 <span
                   style={{
-                    width: 88,
-                    height: 88,
+                    width: 72,
+                    height: 72,
                     borderRadius: '50%',
                     background: '#51c35d',
                     color: '#ffffff',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 52,
+                    fontSize: 42,
                     fontWeight: 500,
                     lineHeight: 1,
-                    boxShadow: '0 10px 24px rgba(79,193,90,0.35)',
-                    transform: 'translateY(-18px)',
+                    boxShadow: '0 10px 24px rgba(79,193,90,0.30)',
+                    transform: 'translateY(-14px)',
                   }}
                 >
                   +
@@ -102,8 +102,8 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
 
                 <span
                   style={{
-                    marginTop: -12,
-                    fontSize: 15,
+                    marginTop: -10,
+                    fontSize: 12,
                     fontWeight: 700,
                     color: '#202020',
                   }}
@@ -127,13 +127,13 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'flex-end',
-                gap: 8,
+                gap: 6,
                 position: 'relative',
               }}
             >
               <span
                 style={{
-                  fontSize: 42,
+                  fontSize: 30,
                   lineHeight: 1,
                   color: isActive ? '#51c35d' : '#3f3f3f',
                   fontWeight: isActive ? 800 : 500,
@@ -147,14 +147,14 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   style={{
                     position: 'absolute',
                     top: 0,
-                    right: '26%',
-                    minWidth: 24,
-                    height: 24,
-                    padding: '0 6px',
+                    right: '20%',
+                    minWidth: 20,
+                    height: 20,
+                    padding: '0 5px',
                     borderRadius: 999,
                     background: '#ff3f7f',
                     color: '#ffffff',
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: 900,
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -168,7 +168,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
 
               <span
                 style={{
-                  fontSize: 15,
+                  fontSize: 12,
                   fontWeight: isActive ? 800 : 700,
                   color: isActive ? '#51c35d' : '#303030',
                 }}
