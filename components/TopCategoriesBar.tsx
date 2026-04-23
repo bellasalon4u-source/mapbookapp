@@ -35,7 +35,7 @@ function getCategoryLabel(category: any, language: AppLanguage) {
   return map[String(category.id || '').toLowerCase()]?.[language] || category.shortLabel || category.label;
 }
 
-function getOwnCategoryImage(category: any): string | null {
+function getCategoryVisual(category: any): { type: 'image' | 'emoji'; value: string } | null {
   const candidates = [
     category?.image,
     category?.iconImage,
@@ -43,14 +43,17 @@ function getOwnCategoryImage(category: any): string | null {
     category?.iconUrl,
     category?.photo,
     category?.thumbnail,
-    category?.icon,
     category?.src,
   ];
 
   for (const value of candidates) {
     if (typeof value === 'string' && value.trim()) {
-      return value;
+      return { type: 'image', value };
     }
+  }
+
+  if (typeof category?.icon === 'string' && category.icon.trim()) {
+    return { type: 'emoji', value: category.icon };
   }
 
   return null;
@@ -81,7 +84,7 @@ export default function TopCategoriesBar({
           const categoryId = String(category.id);
           const isActive = activeCategory === categoryId;
           const label = getCategoryLabel(category, language);
-          const imageSrc = getOwnCategoryImage(category);
+          const visual = getCategoryVisual(category);
 
           return (
             <button
@@ -115,9 +118,9 @@ export default function TopCategoriesBar({
                   overflow: 'hidden',
                 }}
               >
-                {imageSrc ? (
+                {visual?.type === 'image' ? (
                   <img
-                    src={imageSrc}
+                    src={visual.value}
                     alt={label}
                     style={{
                       width: '78%',
@@ -126,6 +129,18 @@ export default function TopCategoriesBar({
                       display: 'block',
                     }}
                   />
+                ) : visual?.type === 'emoji' ? (
+                  <span
+                    style={{
+                      fontSize: 40,
+                      lineHeight: 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {visual.value}
+                  </span>
                 ) : (
                   <span
                     style={{
