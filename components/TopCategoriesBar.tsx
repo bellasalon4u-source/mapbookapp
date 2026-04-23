@@ -39,6 +39,7 @@ function getCategoryVisual(category: any): { type: 'image' | 'emoji'; value: str
   const categoryId = String(category?.id || '').toLowerCase();
 
   const imageById: Record<string, string> = {
+    more: '/ui/categories/more.png',
     beauty: '/ui/categories/beauty.png',
     barber: '/ui/categories/barber.png',
     wellness: '/ui/categories/wellness.png',
@@ -72,10 +73,8 @@ export default function TopCategoriesBar({
   language,
   onSelectCategory,
 }: TopCategoriesBarProps) {
-  const visualCategories = [
-    { id: 'more', label: 'More' },
-    ...categories.slice(0, 7),
-  ];
+  const baseCategories = categories.filter((item) => item.id !== 'more');
+  const visibleCategories = [{ id: 'more', label: 'More' }, ...baseCategories].slice(0, 8);
 
   return (
     <div style={{ padding: '0 12px' }}>
@@ -91,18 +90,11 @@ export default function TopCategoriesBar({
           msOverflowStyle: 'none',
         }}
       >
-        {visualCategories.map((category: any) => {
+        {visibleCategories.map((category: any) => {
           const categoryId = String(category.id);
           const isActive = activeCategory === categoryId;
-          const label =
-            categoryId === 'more'
-              ? getCategoryLabel({ id: 'more', label: 'More' }, language)
-              : getCategoryLabel(category, language);
-
-          const visual =
-            categoryId === 'more'
-              ? { type: 'image' as const, value: '/ui/categories/more.png' }
-              : getCategoryVisual(category);
+          const label = getCategoryLabel(category, language);
+          const visual = getCategoryVisual(category);
 
           return (
             <button
