@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
-import { MapContainer, Marker, TileLayer, ZoomControl, useMap } from 'react-leaflet';
+import { MapContainer, Marker, TileLayer, ZoomControl, useMap, CircleMarker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 type MasterItem = {
@@ -45,51 +45,51 @@ const DEMO_MASTERS: MasterItem[] = [
     id: 'demo-1',
     name: 'Anna',
     category: 'beauty',
-    availableNow: false,
-    lat: 51.5231,
-    lng: -0.1586,
+    lat: 51.5238,
+    lng: -0.165,
     avatar:
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80',
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    availableNow: false,
   },
   {
     id: 'demo-2',
     name: 'Mark',
     category: 'barber',
-    availableNow: true,
-    lat: 51.5148,
-    lng: -0.1322,
+    lat: 51.5105,
+    lng: -0.146,
     avatar:
       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
+    availableNow: true,
   },
   {
     id: 'demo-3',
-    name: 'Nadia',
-    category: 'wellness',
-    availableNow: false,
-    lat: 51.5033,
-    lng: -0.1195,
+    name: 'Oksana',
+    category: 'beauty',
+    lat: 51.5052,
+    lng: -0.118,
     avatar:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
+      'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=300&q=80',
+    availableNow: false,
   },
   {
     id: 'demo-4',
-    name: 'Green Home',
-    category: 'home',
-    availableNow: true,
-    lat: 51.5206,
-    lng: -0.155,
+    name: 'David',
+    category: 'pets',
+    lat: 51.5195,
+    lng: -0.091,
     avatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80',
+    availableNow: true,
   },
   {
     id: 'demo-5',
-    name: 'Happy Paws',
-    category: 'pets',
-    availableNow: true,
-    lat: 51.5362,
-    lng: -0.1035,
+    name: 'Mila',
+    category: 'wellness',
+    lat: 51.4965,
+    lng: -0.084,
     avatar:
-      'https://images.unsplash.com/photo-1546961329-78bef0414d7c?auto=format&fit=crop&w=300&q=80',
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
+    availableNow: false,
   },
 ];
 
@@ -101,9 +101,11 @@ function MapEvents({
   const map = useMap();
 
   useEffect(() => {
-    const handleClick = () => onMapBackgroundClick?.();
-    map.on('click', handleClick);
+    const handleClick = () => {
+      onMapBackgroundClick?.();
+    };
 
+    map.on('click', handleClick);
     return () => {
       map.off('click', handleClick);
     };
@@ -114,25 +116,29 @@ function MapEvents({
 
 function RecenterMap({
   trigger,
-  selectedMaster,
+  onUserLocationChange,
 }: {
   trigger?: number;
-  selectedMaster?: MasterItem | null;
+  onUserLocationChange?: (coords: [number, number]) => void;
 }) {
   const map = useMap();
   const prevTrigger = useRef(trigger);
 
   useEffect(() => {
-    if (
-      selectedMaster &&
-      Number.isFinite(selectedMaster.lat) &&
-      Number.isFinite(selectedMaster.lng)
-    ) {
-      map.flyTo([selectedMaster.lat, selectedMaster.lng], 11.8, {
-        duration: 0.55,
-      });
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+          onUserLocationChange?.(coords);
+        },
+        () => {
+          onUserLocationChange?.(LONDON_CENTER);
+        }
+      );
+    } else {
+      onUserLocationChange?.(LONDON_CENTER);
     }
-  }, [map, selectedMaster]);
+  }, [onUserLocationChange]);
 
   useEffect(() => {
     if (prevTrigger.current === trigger) return;
@@ -141,49 +147,92 @@ function RecenterMap({
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          map.flyTo([pos.coords.latitude, pos.coords.longitude], 12, {
-            duration: 0.75,
-          });
+          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+          map.flyTo(coords, 13, { duration: 0.8 });
+          onUserLocationChange?.(coords);
         },
         () => {
-          map.flyTo(LONDON_CENTER, 11, { duration: 0.75 });
+          map.flyTo(LONDON_CENTER, 11, { duration: 0.8 });
+          onUserLocationChange?.(LONDON_CENTER);
         }
       );
       return;
     }
 
-    map.flyTo(LONDON_CENTER, 11, { duration: 0.75 });
-  }, [map, trigger]);
+    map.flyTo(LONDON_CENTER, 11, { duration: 0.8 });
+    onUserLocationChange?.(LONDON_CENTER);
+  }, [map, trigger, onUserLocationChange]);
 
   return null;
 }
 
-function getPinAccent(master: MasterItem, isSelected: boolean) {
-  if (isSelected) return '#ef6aa8';
-  if (master.availableNow) return '#68c96a';
+function getPinColors(master: MasterItem, isSelected: boolean) {
+  if (isSelected) {
+    return {
+      ring: '#ef7db1',
+      bubble: '#ffffff',
+      bubbleBorder: '#ef7db1',
+    };
+  }
+
+  if (master.availableNow) {
+    return {
+      ring: '#63d46c',
+      bubble: '#ffffff',
+      bubbleBorder: '#63d46c',
+    };
+  }
 
   const category = String(master.category || '').toLowerCase();
 
-  if (category === 'beauty') return '#ef7db1';
-  if (category === 'barber' || category === 'tech' || category === 'repairs') return '#5a97f2';
-  if (category === 'wellness' || category === 'home') return '#f0c84f';
-  if (category === 'pets') return '#68c96a';
+  if (category === 'beauty') {
+    return {
+      ring: '#ef7db1',
+      bubble: '#ffffff',
+      bubbleBorder: '#ef7db1',
+    };
+  }
 
-  return '#68c96a';
+  if (category === 'barber' || category === 'tech' || category === 'repairs') {
+    return {
+      ring: '#5c98ff',
+      bubble: '#ffffff',
+      bubbleBorder: '#5c98ff',
+    };
+  }
+
+  if (category === 'pets') {
+    return {
+      ring: '#63d46c',
+      bubble: '#ffffff',
+      bubbleBorder: '#63d46c',
+    };
+  }
+
+  if (category === 'wellness' || category === 'home') {
+    return {
+      ring: '#f1c84c',
+      bubble: '#ffffff',
+      bubbleBorder: '#f1c84c',
+    };
+  }
+
+  return {
+    ring: '#63d46c',
+    bubble: '#ffffff',
+    bubbleBorder: '#63d46c',
+  };
 }
 
 function createMasterPin(master: MasterItem, isSelected: boolean, isLiked: boolean) {
-  const accent = getPinAccent(master, isSelected);
-  const avatar =
-    master.avatar ||
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80';
+  const colors = getPinColors(master, isSelected);
+  const avatar = master.avatar || 'https://via.placeholder.com/80x80.png?text=Pro';
 
-  const pinWidth = isSelected ? 76 : 58;
-  const pinHeight = isSelected ? 96 : 74;
+  const pinWidth = isSelected ? 66 : 54;
+  const pinHeight = isSelected ? 86 : 72;
   const avatarSize = isSelected ? 44 : 34;
-  const avatarBorder = isSelected ? 4 : 3;
-  const bubbleSize = isSelected ? 20 : 17;
-  const heartSize = isSelected ? 18 : 16;
+  const whiteBorder = isSelected ? 4 : 3;
+  const smallBubble = isSelected ? 17 : 14;
 
   return L.divIcon({
     className: '',
@@ -191,89 +240,86 @@ function createMasterPin(master: MasterItem, isSelected: boolean, isLiked: boole
       <div style="position:relative;width:${pinWidth}px;height:${pinHeight}px;">
         ${
           isLiked
-            ? `
-          <div style="
-            position:absolute;
-            left:${isSelected ? 4 : 2}px;
-            top:${isSelected ? 10 : 8}px;
-            width:${heartSize}px;
-            height:${heartSize}px;
-            border-radius:999px;
-            background:#ffffff;
-            border:2px solid ${accent};
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            box-shadow:0 2px 6px rgba(0,0,0,0.10);
-            z-index:3;
-            font-size:${isSelected ? 11 : 10}px;
-            line-height:1;
-            color:#ff4f93;
-            font-weight:700;
-          ">♥</div>
-        `
+            ? `<div style="
+                position:absolute;
+                left:6px;
+                top:4px;
+                width:18px;
+                height:18px;
+                border-radius:999px;
+                background:#ffffff;
+                border:1.5px solid #f2b6ca;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                box-shadow:0 2px 6px rgba(0,0,0,0.12);
+                z-index:3;
+              ">
+                <span style="font-size:11px;line-height:1;color:#ff4f93;">♥</span>
+              </div>`
             : ''
         }
 
         <div style="
           position:absolute;
           left:50%;
-          top:0;
+          top:8px;
           transform:translateX(-50%);
           width:${pinWidth}px;
-          height:${pinHeight}px;
-          filter:drop-shadow(0 6px 10px rgba(0,0,0,0.14));
-        ">
-          <svg width="${pinWidth}" height="${pinHeight}" viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg" style="display:block">
-            <path
-              d="M40 96
-                 C40 96, 72 63, 72 38
-                 C72 18, 58 6, 40 6
-                 C22 6, 8 18, 8 38
-                 C8 63, 40 96, 40 96Z"
-              fill="${accent}"
-            />
-          </svg>
-        </div>
+          height:${pinHeight - 6}px;
+          background:${colors.ring};
+          border-radius:${isSelected ? '34px 34px 34px 6px' : '30px 30px 30px 6px'};
+          transform-origin:center;
+          clip-path:polygon(50% 100%, 11% 58%, 11% 22%, 22% 11%, 50% 6%, 78% 11%, 89% 22%, 89% 58%);
+          box-shadow:0 6px 14px rgba(0,0,0,0.16);
+        "></div>
 
         <div style="
           position:absolute;
           left:50%;
-          top:${isSelected ? 11 : 10}px;
+          top:${isSelected ? 13 : 12}px;
           transform:translateX(-50%);
-          width:${avatarSize}px;
-          height:${avatarSize}px;
-          border-radius:999px;
-          overflow:hidden;
-          border:${avatarBorder}px solid #ffffff;
+          width:${avatarSize + whiteBorder * 2}px;
+          height:${avatarSize + whiteBorder * 2}px;
+          border-radius:50%;
           background:#ffffff;
+          display:flex;
+          align-items:center;
+          justify-content:center;
           z-index:2;
-          box-shadow:0 2px 6px rgba(0,0,0,0.08);
         ">
-          <img
-            src="${avatar}"
-            alt=""
-            style="width:100%;height:100%;object-fit:cover;display:block;"
-          />
+          <div style="
+            width:${avatarSize}px;
+            height:${avatarSize}px;
+            border-radius:50%;
+            overflow:hidden;
+            background:#ffffff;
+          ">
+            <img
+              src="${avatar}"
+              alt=""
+              style="width:100%;height:100%;object-fit:cover;display:block;"
+            />
+          </div>
         </div>
 
         <div style="
           position:absolute;
-          right:${isSelected ? 6 : 5}px;
-          bottom:${isSelected ? 14 : 11}px;
-          width:${bubbleSize}px;
-          height:${bubbleSize}px;
-          border-radius:999px;
-          background:#ffffff;
-          border:${isSelected ? 3 : 2.5}px solid ${accent};
+          right:${isSelected ? 5 : 4}px;
+          bottom:${isSelected ? 12 : 10}px;
+          width:${smallBubble}px;
+          height:${smallBubble}px;
+          border-radius:50%;
+          background:${colors.bubble};
+          border:3px solid ${colors.bubbleBorder};
           z-index:2;
-          box-shadow:0 2px 5px rgba(0,0,0,0.10);
+          box-shadow:0 3px 8px rgba(0,0,0,0.10);
         "></div>
       </div>
     `,
     iconSize: [pinWidth, pinHeight],
     iconAnchor: [pinWidth / 2, pinHeight - 4],
-    popupAnchor: [0, -pinHeight + 8],
+    popupAnchor: [0, -pinHeight + 10],
   });
 }
 
@@ -287,13 +333,30 @@ function fixLeafletIcons() {
   });
 }
 
-function averageCenter(items: MasterItem[]): [number, number] {
-  if (!items.length) return LONDON_CENTER;
+function distance(a: MasterItem, b: MasterItem) {
+  const dx = a.lat - b.lat;
+  const dy = a.lng - b.lng;
+  return Math.sqrt(dx * dx + dy * dy);
+}
 
-  const lat = items.reduce((sum, item) => sum + item.lat, 0) / items.length;
-  const lng = items.reduce((sum, item) => sum + item.lng, 0) / items.length;
+function hasGoodSpread(items: MasterItem[]) {
+  if (items.length < 4) return false;
 
-  return [lat, lng];
+  let minDistance = Infinity;
+
+  for (let i = 0; i < items.length; i += 1) {
+    for (let j = i + 1; j < items.length; j += 1) {
+      minDistance = Math.min(minDistance, distance(items[i], items[j]));
+    }
+  }
+
+  return minDistance > 0.014;
+}
+
+function isInsideLondonArea(items: MasterItem[]) {
+  return items.every((item) => {
+    return item.lat > 51.44 && item.lat < 51.56 && item.lng > -0.24 && item.lng < 0.03;
+  });
 }
 
 export default function RealMap({
@@ -304,8 +367,9 @@ export default function RealMap({
   recenterToUserTrigger = 0,
   onMasterSelect,
   onMapBackgroundClick,
-  onToggleLike,
 }: RealMapProps) {
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+
   useEffect(() => {
     fixLeafletIcons();
   }, []);
@@ -315,21 +379,25 @@ export default function RealMap({
       (master) => Number.isFinite(master.lat) && Number.isFinite(master.lng)
     );
 
-    return filtered.length > 0 ? filtered.slice(0, 12) : DEMO_MASTERS;
+    const firstFive = filtered.slice(0, 5);
+
+    if (firstFive.length < 4) return DEMO_MASTERS;
+    if (!isInsideLondonArea(firstFive)) return DEMO_MASTERS;
+    if (!hasGoodSpread(firstFive)) return DEMO_MASTERS;
+
+    return firstFive;
   }, [masters]);
 
   const selectedMaster = useMemo(() => {
-    if (selectedMasterId === null || selectedMasterId === undefined) return null;
+    if (selectedMasterId !== null && selectedMasterId !== undefined) {
+      const found =
+        safeMasters.find((master) => String(master.id) === String(selectedMasterId)) || null;
 
-    return (
-      safeMasters.find((master) => String(master.id) === String(selectedMasterId)) || null
-    );
+      if (found) return found;
+    }
+
+    return null;
   }, [safeMasters, selectedMasterId]);
-
-  const mapCenter = useMemo(() => {
-    if (selectedMaster) return [selectedMaster.lat, selectedMaster.lng] as [number, number];
-    return averageCenter(safeMasters);
-  }, [safeMasters, selectedMaster]);
 
   const tileUrl =
     mapMode === 'satellite'
@@ -346,10 +414,10 @@ export default function RealMap({
       }}
     >
       <MapContainer
-        center={mapCenter}
-        zoom={11}
+        center={LONDON_CENTER}
+        zoom={12}
         minZoom={9}
-        maxZoom={16}
+        maxZoom={17}
         zoomControl={false}
         style={{
           width: '100%',
@@ -362,11 +430,39 @@ export default function RealMap({
         <ZoomControl position="topleft" />
 
         <MapEvents onMapBackgroundClick={onMapBackgroundClick} />
-        <RecenterMap trigger={recenterToUserTrigger} selectedMaster={selectedMaster} />
+        <RecenterMap
+          trigger={recenterToUserTrigger}
+          onUserLocationChange={(coords) => setUserLocation(coords)}
+        />
+
+        {userLocation ? (
+          <>
+            <CircleMarker
+              center={userLocation}
+              radius={18}
+              pathOptions={{
+                color: 'transparent',
+                fillColor: '#2b7cf6',
+                fillOpacity: 0.12,
+              }}
+            />
+            <CircleMarker
+              center={userLocation}
+              radius={6}
+              pathOptions={{
+                color: '#ffffff',
+                weight: 2,
+                fillColor: '#2b7cf6',
+                fillOpacity: 1,
+              }}
+            />
+          </>
+        ) : null}
 
         {safeMasters.map((master) => {
           const isSelected =
             selectedMaster && String(master.id) === String(selectedMaster.id);
+
           const isLiked = likedMasterIds.includes(String(master.id));
 
           return (
@@ -377,9 +473,6 @@ export default function RealMap({
               eventHandlers={{
                 click: () => {
                   onMasterSelect?.(master);
-                },
-                contextmenu: () => {
-                  onToggleLike?.(master);
                 },
               }}
             />
