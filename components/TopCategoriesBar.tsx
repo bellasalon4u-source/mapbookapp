@@ -35,29 +35,44 @@ function getCategoryLabel(category: any, language: AppLanguage) {
   return map[String(category.id || '').toLowerCase()]?.[language] || category.shortLabel || category.label;
 }
 
-function getCategoryVisual(category: any) {
+function getCategoryImage(category: any) {
   const id = String(category?.id || '').toLowerCase();
 
-  const visualMap: Record<string, string> = {
-    more: '🟩🟦🟥🟨',
-    beauty: '🪞',
-    barber: '💈',
-    wellness: '🪷',
-    home: '🏠',
-    repairs: '🛠️',
-    tech: '🛠️',
-    pets: '🐶',
-    fitness: '🏋️',
-    fashion: '👜',
-    auto: '🚗',
-    moving: '📦',
-    education: '🎓',
-    events: '🎉',
-    activities: '🎯',
-    creative: '🎨',
+  const directCandidates = [
+    category?.image,
+    category?.iconImage,
+    category?.imageUrl,
+    category?.iconUrl,
+    category?.photo,
+    category?.thumbnail,
+  ];
+
+  for (const candidate of directCandidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate;
+    }
+  }
+
+  const fallbackMap: Record<string, string> = {
+    more: 'https://img.icons8.com/fluency/240/four-squares.png',
+    beauty: 'https://img.icons8.com/fluency/240/vanity.png',
+    barber: 'https://img.icons8.com/fluency/240/barbershop.png',
+    wellness: 'https://img.icons8.com/fluency/240/lotus.png',
+    home: 'https://img.icons8.com/fluency/240/home.png',
+    repairs: 'https://img.icons8.com/fluency/240/maintenance.png',
+    tech: 'https://img.icons8.com/fluency/240/maintenance.png',
+    pets: 'https://img.icons8.com/fluency/240/dog.png',
+    fitness: 'https://img.icons8.com/fluency/240/dumbbell.png',
+    fashion: 'https://img.icons8.com/fluency/240/handbag.png',
+    auto: 'https://img.icons8.com/fluency/240/car.png',
+    moving: 'https://img.icons8.com/fluency/240/cardboard-box.png',
+    education: 'https://img.icons8.com/fluency/240/graduation-cap.png',
+    events: 'https://img.icons8.com/fluency/240/confetti.png',
+    activities: 'https://img.icons8.com/fluency/240/goal.png',
+    creative: 'https://img.icons8.com/fluency/240/paint-palette.png',
   };
 
-  return visualMap[id] || '✨';
+  return fallbackMap[id] || 'https://img.icons8.com/fluency/240/star.png';
 }
 
 export default function TopCategoriesBar({
@@ -72,7 +87,7 @@ export default function TopCategoriesBar({
       <div
         style={{
           display: 'flex',
-          gap: 16,
+          gap: 14,
           overflowX: 'auto',
           overflowY: 'hidden',
           padding: '0 2px 2px',
@@ -84,6 +99,7 @@ export default function TopCategoriesBar({
         {visibleCategories.map((category) => {
           const categoryId = String(category.id);
           const isActive = activeCategory === categoryId;
+          const imageSrc = getCategoryImage(category);
 
           return (
             <button
@@ -94,7 +110,7 @@ export default function TopCategoriesBar({
                 background: 'transparent',
                 padding: 0,
                 cursor: 'pointer',
-                minWidth: 102,
+                minWidth: 90,
                 flexShrink: 0,
                 display: 'flex',
                 flexDirection: 'column',
@@ -103,10 +119,10 @@ export default function TopCategoriesBar({
             >
               <div
                 style={{
-                  width: 102,
-                  height: 102,
-                  borderRadius: 26,
-                  border: isActive ? '2px solid #ef7db1' : '1.6px solid #cfc8be',
+                  width: 90,
+                  height: 90,
+                  borderRadius: 24,
+                  border: isActive ? '2px solid #ef7db1' : '1.5px solid #cfc8be',
                   background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
@@ -114,22 +130,25 @@ export default function TopCategoriesBar({
                   boxShadow: isActive
                     ? '0 0 0 5px rgba(239,125,177,0.16), 0 2px 8px rgba(0,0,0,0.03)'
                     : '0 2px 8px rgba(0,0,0,0.03)',
+                  overflow: 'hidden',
                 }}
               >
-                <span
+                <img
+                  src={imageSrc}
+                  alt={getCategoryLabel(category, language)}
                   style={{
-                    fontSize: 54,
-                    lineHeight: 1,
+                    width: '74%',
+                    height: '74%',
+                    objectFit: 'contain',
+                    display: 'block',
                   }}
-                >
-                  {getCategoryVisual(category)}
-                </span>
+                />
               </div>
 
               <span
                 style={{
                   marginTop: 10,
-                  fontSize: 15,
+                  fontSize: 13,
                   fontWeight: isActive ? 900 : 700,
                   color: '#1f2937',
                   textAlign: 'center',
