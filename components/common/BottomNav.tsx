@@ -40,24 +40,24 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       style={{
         position: 'fixed',
         left: '50%',
-        bottom: 14,
+        bottom: 18,
         transform: 'translateX(-50%)',
-        width: 'calc(100% - 28px)',
-        maxWidth: 402,
+        width: 'calc(100% - 32px)',
+        maxWidth: 920,
         zIndex: 1200,
       }}
     >
       <div
         style={{
           background: '#f7f4ef',
-          border: '1.2px solid #e2ddd7',
-          borderRadius: 24,
+          border: '1.4px solid #ddd6cb',
+          borderRadius: 30,
           boxShadow: '0 8px 28px rgba(15,23,42,0.10)',
-          padding: '10px 12px 12px',
+          padding: '14px 18px 16px',
           display: 'grid',
           gridTemplateColumns: 'repeat(5, 1fr)',
           alignItems: 'end',
-          gap: 8,
+          gap: 10,
         }}
       >
         {items.map((item) => {
@@ -77,24 +77,24 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'flex-end',
-                  gap: 6,
+                  gap: 8,
                 }}
               >
                 <span
                   style={{
-                    width: 58,
-                    height: 58,
+                    width: 88,
+                    height: 88,
                     borderRadius: '50%',
-                    background: '#4fc15a',
+                    background: '#51c35d',
                     color: '#ffffff',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 34,
+                    fontSize: 52,
                     fontWeight: 500,
                     lineHeight: 1,
-                    boxShadow: '0 8px 18px rgba(79,193,90,0.35)',
-                    transform: 'translateY(-12px)',
+                    boxShadow: '0 10px 24px rgba(79,193,90,0.35)',
+                    transform: 'translateY(-18px)',
                   }}
                 >
                   +
@@ -102,8 +102,8 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
 
                 <span
                   style={{
-                    marginTop: -8,
-                    fontSize: 12,
+                    marginTop: -12,
+                    fontSize: 15,
                     fontWeight: 700,
                     color: '#202020',
                   }}
@@ -127,15 +127,15 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'flex-end',
-                gap: 6,
+                gap: 8,
                 position: 'relative',
               }}
             >
               <span
                 style={{
-                  fontSize: 30,
+                  fontSize: 42,
                   lineHeight: 1,
-                  color: isActive ? '#4fc15a' : '#5b5b5b',
+                  color: isActive ? '#51c35d' : '#3f3f3f',
                   fontWeight: isActive ? 800 : 500,
                 }}
               >
@@ -147,14 +147,14 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   style={{
                     position: 'absolute',
                     top: 0,
-                    right: '24%',
-                    minWidth: 18,
-                    height: 18,
-                    padding: '0 5px',
+                    right: '26%',
+                    minWidth: 24,
+                    height: 24,
+                    padding: '0 6px',
                     borderRadius: 999,
                     background: '#ff3f7f',
                     color: '#ffffff',
-                    fontSize: 10,
+                    fontSize: 12,
                     fontWeight: 900,
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -168,9 +168,9 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
 
               <span
                 style={{
-                  fontSize: 12,
+                  fontSize: 15,
                   fontWeight: isActive ? 800 : 700,
-                  color: isActive ? '#4fc15a' : '#303030',
+                  color: isActive ? '#51c35d' : '#303030',
                 }}
               >
                 {item.label}
