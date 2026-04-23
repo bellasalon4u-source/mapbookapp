@@ -83,66 +83,16 @@ const searchAliases = [
 ];
 
 const tickerMessages: Record<AppLanguage, string[]> = {
-  EN: [
-    'Hot offers near you',
-    'New masters added today',
-    'Verified specialists',
-    'Instant booking',
-  ],
-  ES: [
-    'Ofertas cerca de ti',
-    'Nuevos especialistas hoy',
-    'Especialistas verificados',
-    'Reserva instantánea',
-  ],
-  RU: [
-    'Горячие предложения рядом',
-    'Новые мастера сегодня',
-    'Проверенные специалисты',
-    'Мгновенное бронирование',
-  ],
-  UA: [
-    'Гарячі пропозиції поруч',
-    'Нові майстри сьогодні',
-    'Перевірені спеціалісти',
-    'Миттєве бронювання',
-  ],
-  CZ: [
-    'Akční nabídky poblíž',
-    'Noví specialisté dnes',
-    'Ověření specialisté',
-    'Okamžitá rezervace',
-  ],
-  DE: [
-    'Angebote in deiner Nähe',
-    'Neue Profis heute',
-    'Verifizierte Spezialisten',
-    'Sofort buchen',
-  ],
-  IT: [
-    'Offerte vicino a te',
-    'Nuovi specialisti oggi',
-    'Specialisti verificati',
-    'Prenotazione immediata',
-  ],
-  FR: [
-    'Offres près de vous',
-    'Nouveaux pros aujourd’hui',
-    'Spécialistes vérifiés',
-    'Réservation instantanée',
-  ],
-  AR: [
-    'عروض قريبة منك',
-    'متخصصون جدد اليوم',
-    'متخصصون موثّقون',
-    'حجز فوري',
-  ],
-  PL: [
-    'Oferty blisko Ciebie',
-    'Nowi specjaliści dziś',
-    'Zweryfikowani specjaliści',
-    'Natychmiastowa rezerwacja',
-  ],
+  EN: ['Hot offers near you', 'New masters added today', 'Verified specialists', 'Instant booking'],
+  ES: ['Ofertas cerca de ti', 'Nuevos especialistas hoy', 'Especialistas verificados', 'Reserva instantánea'],
+  RU: ['Горячие предложения рядом', 'Новые мастера сегодня', 'Проверенные специалисты', 'Мгновенное бронирование'],
+  UA: ['Гарячі пропозиції поруч', 'Нові майстри сьогодні', 'Перевірені спеціалісти', 'Миттєве бронювання'],
+  CZ: ['Akční nabídky poblíž', 'Noví specialisté dnes', 'Ověření specialisté', 'Okamžitá rezervace'],
+  DE: ['Angebote in deiner Nähe', 'Neue Profis heute', 'Verifizierte Spezialisten', 'Sofort buchen'],
+  IT: ['Offerte vicino a te', 'Nuovi specialisti oggi', 'Specialisti verificati', 'Prenotazione immediata'],
+  FR: ['Offres près de vous', 'Nouveaux pros aujourd’hui', 'Spécialistes vérifiés', 'Réservation instantanée'],
+  AR: ['عروض قريبة منك', 'متخصصون جدد اليوم', 'متخصصون موثّقون', 'حجز فوري'],
+  PL: ['Oferty blisko Ciebie', 'Nowi specjaliści dziś', 'Zweryfikowani specjaliści', 'Natychmiastowa rezerwacja'],
 };
 
 type SearchResult =
@@ -1652,8 +1602,8 @@ export default function HomePage() {
 
             <ActionCountButton
               onClick={() => {
-                setLikedFilterMode('none');
-                setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
+                setDealFilterMode('none');
+                setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
               }}
               icon={
                 <span
