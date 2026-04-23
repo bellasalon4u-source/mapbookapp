@@ -12,7 +12,7 @@ type TopCategoriesBarProps = {
   onClearSubcategory?: () => void;
 };
 
-function getCategoryLabel(category: any, language: AppLanguage) {
+function getCategoryLabel(category: { id: string; shortLabel?: string; label: string }, language: AppLanguage) {
   const map: Record<string, Partial<Record<AppLanguage, string>>> = {
     more: { EN: 'More', ES: 'Más', RU: 'Ещё', UA: 'Ще', CZ: 'Více', DE: 'Mehr', PL: 'Więcej' },
     beauty: { EN: 'Beauty', ES: 'Beauty', RU: 'Красота', UA: 'Краса', CZ: 'Beauty', DE: 'Beauty', PL: 'Beauty' },
@@ -35,37 +35,9 @@ function getCategoryLabel(category: any, language: AppLanguage) {
   return map[String(category.id || '').toLowerCase()]?.[language] || category.shortLabel || category.label;
 }
 
-function getCategoryVisual(category: any): { type: 'image' | 'emoji'; value: string } | null {
-  const categoryId = String(category?.id || '').toLowerCase();
-
-  const imageById: Record<string, string> = {
-    more: '/ui/categories/more.png',
-    beauty: '/ui/categories/beauty.png',
-    barber: '/ui/categories/barber.png',
-    wellness: '/ui/categories/wellness.png',
-    home: '/ui/categories/home.png',
-    repairs: '/ui/categories/repairs.png',
-    tech: '/ui/categories/tech.png',
-    pets: '/ui/categories/pets.png',
-    fashion: '/ui/categories/fashion.png',
-    auto: '/ui/categories/auto.png',
-    moving: '/ui/categories/moving.png',
-    fitness: '/ui/categories/fitness.png',
-    education: '/ui/categories/education.png',
-    events: '/ui/categories/events.png',
-    activities: '/ui/categories/activities.png',
-    creative: '/ui/categories/creative.png',
-  };
-
-  if (imageById[categoryId]) {
-    return { type: 'image', value: imageById[categoryId] };
-  }
-
-  if (typeof category?.icon === 'string' && category.icon.trim()) {
-    return { type: 'emoji', value: category.icon };
-  }
-
-  return null;
+function getCategoryImagePath(id: string) {
+  if (id === 'more') return '/ui/categories/more.png';
+  return `/ui/categories/${id}.png`;
 }
 
 export default function TopCategoriesBar({
@@ -73,8 +45,10 @@ export default function TopCategoriesBar({
   language,
   onSelectCategory,
 }: TopCategoriesBarProps) {
-  const baseCategories = categories.filter((item) => item.id !== 'more');
-  const visibleCategories = [{ id: 'more', label: 'More' }, ...baseCategories].slice(0, 8);
+  const visibleCategories = [
+    { id: 'more', label: 'More', shortLabel: 'More' },
+    ...categories.slice(0, 7),
+  ];
 
   return (
     <div style={{ padding: '0 12px' }}>
@@ -84,31 +58,28 @@ export default function TopCategoriesBar({
           gap: 8,
           overflowX: 'auto',
           overflowY: 'hidden',
-          padding: '0 2px 2px',
+          padding: '0 1px 2px',
           WebkitOverflowScrolling: 'touch',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
         }}
       >
-        {visibleCategories.map((category: any) => {
+        {visibleCategories.map((category) => {
           const categoryId = String(category.id);
           const isActive = activeCategory === categoryId;
           const label = getCategoryLabel(category, language);
-          const visual = getCategoryVisual(category);
+          const imageSrc = getCategoryImagePath(categoryId);
 
           return (
             <button
               key={categoryId}
-              onClick={() => {
-                if (categoryId === 'more') return;
-                onSelectCategory(categoryId);
-              }}
+              onClick={() => onSelectCategory(categoryId)}
               style={{
                 border: 'none',
                 background: 'transparent',
                 padding: 0,
-                cursor: categoryId === 'more' ? 'default' : 'pointer',
-                minWidth: 66,
+                cursor: 'pointer',
+                minWidth: 74,
                 flexShrink: 0,
                 display: 'flex',
                 flexDirection: 'column',
@@ -117,10 +88,10 @@ export default function TopCategoriesBar({
             >
               <div
                 style={{
-                  width: 66,
-                  height: 66,
-                  borderRadius: 20,
-                  border: isActive ? '1.8px solid #ef7db1' : '1.3px solid #cfc8be',
+                  width: 74,
+                  height: 74,
+                  borderRadius: 22,
+                  border: isActive ? '1.8px solid #ef7db1' : '1.2px solid #cfc8be',
                   background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
@@ -131,48 +102,22 @@ export default function TopCategoriesBar({
                   overflow: 'hidden',
                 }}
               >
-                {visual?.type === 'image' ? (
-                  <img
-                    src={visual.value}
-                    alt={label}
-                    style={{
-                      width: '74%',
-                      height: '74%',
-                      objectFit: 'contain',
-                      display: 'block',
-                    }}
-                  />
-                ) : visual?.type === 'emoji' ? (
-                  <span
-                    style={{
-                      fontSize: 34,
-                      lineHeight: 1,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    {visual.value}
-                  </span>
-                ) : (
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 800,
-                      color: '#6b7280',
-                      textAlign: 'center',
-                      padding: '0 8px',
-                    }}
-                  >
-                    {label}
-                  </span>
-                )}
+                <img
+                  src={imageSrc}
+                  alt={label}
+                  style={{
+                    width: '72%',
+                    height: '72%',
+                    objectFit: 'contain',
+                    display: 'block',
+                  }}
+                />
               </div>
 
               <span
                 style={{
                   marginTop: 7,
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: isActive ? 900 : 700,
                   color: '#1f2937',
                   textAlign: 'center',
