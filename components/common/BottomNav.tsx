@@ -102,9 +102,9 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       style={{
         position: 'fixed',
         left: '50%',
-        bottom: 12,
+        bottom: 10,
         transform: 'translateX(-50%)',
-        width: 'calc(100% - 36px)',
+        width: 'calc(100% - 38px)',
         maxWidth: 398,
         zIndex: 1200,
       }}
@@ -113,9 +113,9 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
         style={{
           background: '#f7f4ef',
           border: '1.2px solid #ddd6cb',
-          borderRadius: 28,
-          boxShadow: '0 8px 26px rgba(15,23,42,0.10)',
-          padding: '10px 10px 12px',
+          borderRadius: 26,
+          boxShadow: '0 8px 24px rgba(15,23,42,0.10)',
+          padding: '10px 10px 10px',
           display: 'grid',
           gridTemplateColumns: 'repeat(5, 1fr)',
           alignItems: 'end',
@@ -144,19 +144,19 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
               >
                 <span
                   style={{
-                    width: 70,
-                    height: 70,
+                    width: 66,
+                    height: 66,
                     borderRadius: '50%',
                     background: '#55c75f',
                     color: '#ffffff',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 42,
+                    fontSize: 40,
                     fontWeight: 500,
                     lineHeight: 1,
-                    boxShadow: '0 10px 22px rgba(85,199,95,0.28)',
-                    transform: 'translateY(-14px)',
+                    boxShadow: '0 10px 20px rgba(85,199,95,0.26)',
+                    transform: 'translateY(-12px)',
                   }}
                 >
                   +
@@ -164,7 +164,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
 
                 <span
                   style={{
-                    marginTop: -10,
+                    marginTop: -8,
                     fontSize: 12,
                     fontWeight: 700,
                     color: '#202020',
@@ -191,7 +191,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 justifyContent: 'flex-end',
                 gap: 4,
                 position: 'relative',
-                minHeight: 62,
+                minHeight: 58,
               }}
             >
               <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -205,7 +205,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 <span
                   style={{
                     position: 'absolute',
-                    top: 1,
+                    top: 2,
                     right: '18%',
                     minWidth: 19,
                     height: 19,
