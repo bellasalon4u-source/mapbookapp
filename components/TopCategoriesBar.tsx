@@ -12,7 +12,7 @@ type TopCategoriesBarProps = {
   onClearSubcategory?: () => void;
 };
 
-function getCategoryLabel(category: { id: string; shortLabel?: string; label: string }, language: AppLanguage) {
+function getCategoryLabel(category: any, language: AppLanguage) {
   const map: Record<string, Partial<Record<AppLanguage, string>>> = {
     more: { EN: 'More', ES: 'Más', RU: 'Ещё', UA: 'Ще', CZ: 'Více', DE: 'Mehr', PL: 'Więcej' },
     beauty: { EN: 'Beauty', ES: 'Beauty', RU: 'Красота', UA: 'Краса', CZ: 'Beauty', DE: 'Beauty', PL: 'Beauty' },
@@ -35,9 +35,53 @@ function getCategoryLabel(category: { id: string; shortLabel?: string; label: st
   return map[String(category.id || '').toLowerCase()]?.[language] || category.shortLabel || category.label;
 }
 
-function getCategoryImagePath(id: string) {
-  if (id === 'more') return '/ui/categories/more.png';
-  return `/ui/categories/${id}.png`;
+function getCategoryVisual(category: any): { type: 'image' | 'emoji'; value: string } | null {
+  const id = String(category?.id || '').toLowerCase();
+
+  const localImageMap: Record<string, string> = {
+    more: '/ui/categories/more.png',
+    beauty: '/ui/categories/beauty.png',
+    barber: '/ui/categories/barber.png',
+    wellness: '/ui/categories/wellness.png',
+    home: '/ui/categories/home.png',
+    repairs: '/ui/categories/repairs.png',
+    tech: '/ui/categories/tech.png',
+    pets: '/ui/categories/pets.png',
+    fashion: '/ui/categories/fashion.png',
+    auto: '/ui/categories/auto.png',
+    moving: '/ui/categories/moving.png',
+    fitness: '/ui/categories/fitness.png',
+    education: '/ui/categories/education.png',
+    events: '/ui/categories/events.png',
+    activities: '/ui/categories/activities.png',
+    creative: '/ui/categories/creative.png',
+  };
+
+  if (localImageMap[id]) {
+    return { type: 'image', value: localImageMap[id] };
+  }
+
+  const candidates = [
+    category?.image,
+    category?.iconImage,
+    category?.imageUrl,
+    category?.iconUrl,
+    category?.photo,
+    category?.thumbnail,
+    category?.src,
+  ];
+
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim()) {
+      return { type: 'image', value };
+    }
+  }
+
+  if (typeof category?.icon === 'string' && category.icon.trim()) {
+    return { type: 'emoji', value: category.icon };
+  }
+
+  return null;
 }
 
 export default function TopCategoriesBar({
@@ -45,15 +89,17 @@ export default function TopCategoriesBar({
   language,
   onSelectCategory,
 }: TopCategoriesBarProps) {
-  const normalized = categories.filter((item) => String(item.id).toLowerCase() !== 'more');
-  const visibleCategories = [{ id: 'more', label: 'More', shortLabel: 'More' }, ...normalized.slice(0, 7)];
+  const visibleCategories = [
+    { id: 'more', label: 'More', shortLabel: 'More' },
+    ...categories.slice(0, 7),
+  ];
 
   return (
     <div style={{ padding: '0 12px' }}>
       <div
         style={{
           display: 'flex',
-          gap: 8,
+          gap: 10,
           overflowX: 'auto',
           overflowY: 'hidden',
           padding: '0 1px 2px',
@@ -62,16 +108,16 @@ export default function TopCategoriesBar({
           msOverflowStyle: 'none',
         }}
       >
-        {visibleCategories.map((category) => {
+        {visibleCategories.map((category: any) => {
           const categoryId = String(category.id);
           const isActive = activeCategory === categoryId;
           const label = getCategoryLabel(category, language);
-          const imageSrc = getCategoryImagePath(categoryId);
+          const visual = getCategoryVisual(category);
 
           return (
             <button
               key={categoryId}
-              onClick={() => onSelectCategory(categoryId)}
+              onClick={() => onSelectCategory(categoryId === 'more' ? 'beauty' : categoryId)}
               style={{
                 border: 'none',
                 background: 'transparent',
@@ -95,27 +141,53 @@ export default function TopCategoriesBar({
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: isActive
-                    ? '0 0 0 4px rgba(239,125,177,0.14), 0 2px 8px rgba(0,0,0,0.03)'
+                    ? '0 0 0 4px rgba(239,125,177,0.12), 0 2px 8px rgba(0,0,0,0.03)'
                     : '0 2px 8px rgba(0,0,0,0.03)',
                   overflow: 'hidden',
                 }}
               >
-                <img
-                  src={imageSrc}
-                  alt={label}
-                  style={{
-                    width: '72%',
-                    height: '72%',
-                    objectFit: 'contain',
-                    display: 'block',
-                  }}
-                />
+                {visual?.type === 'image' ? (
+                  <img
+                    src={visual.value}
+                    alt={label}
+                    style={{
+                      width: '76%',
+                      height: '76%',
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
+                ) : visual?.type === 'emoji' ? (
+                  <span
+                    style={{
+                      fontSize: 38,
+                      lineHeight: 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {visual.value}
+                  </span>
+                ) : (
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 800,
+                      color: '#6b7280',
+                      textAlign: 'center',
+                      padding: '0 8px',
+                    }}
+                  >
+                    {label}
+                  </span>
+                )}
               </div>
 
               <span
                 style={{
-                  marginTop: 7,
-                  fontSize: 12,
+                  marginTop: 8,
+                  fontSize: 11,
                   fontWeight: isActive ? 900 : 700,
                   color: '#1f2937',
                   textAlign: 'center',
