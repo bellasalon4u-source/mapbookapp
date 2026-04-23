@@ -257,12 +257,9 @@ function fixLeafletIcons() {
   delete (L.Icon.Default.prototype as any)._getIconUrl;
 
   L.Icon.Default.mergeOptions({
-    iconRetinaUrl:
-      'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-    iconUrl:
-      'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    shadowUrl:
-      'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
   });
 }
 
@@ -283,7 +280,13 @@ function hasGoodSpread(items: MasterItem[]) {
     }
   }
 
-  return minDistance > 0.028;
+  return minDistance > 0.02;
+}
+
+function isInsideLondonArea(items: MasterItem[]) {
+  return items.every((item) => {
+    return item.lat > 51.44 && item.lat < 51.56 && item.lng > -0.24 && item.lng < 0.02;
+  });
 }
 
 export default function RealMap({
@@ -303,19 +306,24 @@ export default function RealMap({
       (master) => Number.isFinite(master.lat) && Number.isFinite(master.lng)
     );
 
-    if (!hasGoodSpread(filtered.slice(0, 5))) {
-      return DEMO_MASTERS;
-    }
+    const firstFive = filtered.slice(0, 5);
 
-    return filtered.slice(0, 5);
+    if (firstFive.length < 4) return DEMO_MASTERS;
+    if (!isInsideLondonArea(firstFive)) return DEMO_MASTERS;
+    if (!hasGoodSpread(firstFive)) return DEMO_MASTERS;
+
+    return firstFive;
   }, [masters]);
 
   const selectedMaster = useMemo(() => {
-    if (selectedMasterId === null || selectedMasterId === undefined) return null;
+    if (selectedMasterId !== null && selectedMasterId !== undefined) {
+      const found =
+        safeMasters.find((master) => String(master.id) === String(selectedMasterId)) || null;
 
-    return (
-      safeMasters.find((master) => String(master.id) === String(selectedMasterId)) || null
-    );
+      if (found) return found;
+    }
+
+    return safeMasters[2] || null;
   }, [safeMasters, selectedMasterId]);
 
   const tileUrl =
@@ -336,6 +344,7 @@ export default function RealMap({
         center={LONDON_CENTER}
         zoom={11}
         minZoom={9}
+        maxZoom={16}
         zoomControl={false}
         style={{
           width: '100%',
