@@ -47,7 +47,8 @@ const DEMO_MASTERS: MasterItem[] = [
     category: 'beauty',
     lat: 51.533,
     lng: -0.164,
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    avatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
   },
   {
     id: 'demo-2',
@@ -55,7 +56,8 @@ const DEMO_MASTERS: MasterItem[] = [
     category: 'barber',
     lat: 51.498,
     lng: -0.183,
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
+    avatar:
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
   },
   {
     id: 'demo-3',
@@ -63,7 +65,8 @@ const DEMO_MASTERS: MasterItem[] = [
     category: 'beauty',
     lat: 51.507,
     lng: -0.109,
-    avatar: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=300&q=80',
+    avatar:
+      'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=300&q=80',
   },
   {
     id: 'demo-4',
@@ -71,7 +74,8 @@ const DEMO_MASTERS: MasterItem[] = [
     category: 'pets',
     lat: 51.54,
     lng: -0.045,
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80',
+    avatar:
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80',
   },
   {
     id: 'demo-5',
@@ -79,7 +83,8 @@ const DEMO_MASTERS: MasterItem[] = [
     category: 'wellness',
     lat: 51.484,
     lng: -0.02,
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
+    avatar:
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
   },
 ];
 
@@ -120,7 +125,7 @@ function RecenterMap({
       Number.isFinite(selectedMaster.lat) &&
       Number.isFinite(selectedMaster.lng)
     ) {
-      map.flyTo([selectedMaster.lat, selectedMaster.lng], 11, {
+      map.flyTo([selectedMaster.lat, selectedMaster.lng], 10, {
         duration: 0.7,
       });
     }
@@ -185,7 +190,7 @@ function getPinColors(master: MasterItem, isSelected: boolean) {
     };
   }
 
-  if (category === 'wellness') {
+  if (category === 'wellness' || category === 'home') {
     return {
       ring: '#f0bf48',
       accent: '#f0bf48',
@@ -275,6 +280,26 @@ function fixLeafletIcons() {
   });
 }
 
+function distance(a: MasterItem, b: MasterItem) {
+  const dx = a.lat - b.lat;
+  const dy = a.lng - b.lng;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function hasGoodSpread(items: MasterItem[]) {
+  if (items.length < 4) return false;
+
+  let minDistance = Infinity;
+
+  for (let i = 0; i < items.length; i += 1) {
+    for (let j = i + 1; j < items.length; j += 1) {
+      minDistance = Math.min(minDistance, distance(items[i], items[j]));
+    }
+  }
+
+  return minDistance > 0.028;
+}
+
 export default function RealMap({
   masters = [],
   mapMode = 'map',
@@ -292,14 +317,21 @@ export default function RealMap({
       (master) => Number.isFinite(master.lat) && Number.isFinite(master.lng)
     );
 
-    return filtered.length >= 4 ? filtered.slice(0, 5) : DEMO_MASTERS;
+    if (!hasGoodSpread(filtered.slice(0, 5))) {
+      return DEMO_MASTERS;
+    }
+
+    return filtered.slice(0, 5);
   }, [masters]);
 
   const selectedMaster = useMemo(() => {
-    const found =
-      safeMasters.find((master) => String(master.id) === String(selectedMasterId)) || null;
+    if (selectedMasterId !== null && selectedMasterId !== undefined) {
+      return (
+        safeMasters.find((master) => String(master.id) === String(selectedMasterId)) || null
+      );
+    }
 
-    return found || safeMasters[2] || null;
+    return safeMasters[2] || DEMO_MASTERS[2];
   }, [safeMasters, selectedMasterId]);
 
   const tileUrl =
@@ -332,10 +364,7 @@ export default function RealMap({
         <ZoomControl position="topleft" />
 
         <MapEvents onMapBackgroundClick={onMapBackgroundClick} />
-        <RecenterMap
-          trigger={recenterToUserTrigger}
-          selectedMaster={selectedMaster}
-        />
+        <RecenterMap trigger={recenterToUserTrigger} selectedMaster={selectedMaster} />
 
         {safeMasters.map((master) => {
           const isSelected =
