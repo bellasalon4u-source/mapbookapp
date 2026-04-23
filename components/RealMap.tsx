@@ -111,11 +111,25 @@ function MapEvents({
 
 function RecenterMap({
   trigger,
+  selectedMaster,
 }: {
   trigger?: number;
+  selectedMaster?: MasterItem | null;
 }) {
   const map = useMap();
   const prevTrigger = useRef(trigger);
+
+  useEffect(() => {
+    if (
+      selectedMaster &&
+      Number.isFinite(selectedMaster.lat) &&
+      Number.isFinite(selectedMaster.lng)
+    ) {
+      map.flyTo([selectedMaster.lat, selectedMaster.lng], 11, {
+        duration: 0.55,
+      });
+    }
+  }, [map, selectedMaster]);
 
   useEffect(() => {
     if (prevTrigger.current === trigger) return;
@@ -195,25 +209,26 @@ function createMasterPin(master: MasterItem, isSelected: boolean) {
   const colors = getPinColors(master, isSelected);
   const avatar = master.avatar || 'https://via.placeholder.com/80x80.png?text=Pro';
 
-  const size = isSelected ? 98 : 62;
-  const innerSize = isSelected ? 64 : 40;
-  const bubble = isSelected ? 30 : 22;
+  const size = isSelected ? 112 : 64;
+  const innerSize = isSelected ? 70 : 42;
+  const bubble = isSelected ? 32 : 22;
   const outline = isSelected ? 5 : 4;
+  const top = isSelected ? 8 : 7;
 
   return L.divIcon({
     className: '',
     html: `
-      <div style="position:relative;width:${size}px;height:${size + 16}px;">
+      <div style="position:relative;width:${size}px;height:${size + 18}px;">
         <div style="
           position:absolute;
           left:50%;
-          top:${isSelected ? 8 : 6}px;
+          top:${top}px;
           transform:translateX(-50%);
           width:${size}px;
           height:${size}px;
           border-radius:50%;
           background:${colors.ring};
-          box-shadow:0 6px 14px rgba(0,0,0,0.18);
+          box-shadow:${isSelected ? '0 10px 22px rgba(0,0,0,0.20)' : '0 6px 14px rgba(0,0,0,0.16)'};
           display:flex;
           align-items:center;
           justify-content:center;
@@ -236,8 +251,8 @@ function createMasterPin(master: MasterItem, isSelected: boolean) {
 
         <div style="
           position:absolute;
-          right:${isSelected ? 4 : 1}px;
-          bottom:${isSelected ? 10 : 8}px;
+          right:${isSelected ? 5 : 2}px;
+          bottom:${isSelected ? 11 : 9}px;
           width:${bubble}px;
           height:${bubble}px;
           border-radius:50%;
@@ -247,7 +262,7 @@ function createMasterPin(master: MasterItem, isSelected: boolean) {
         "></div>
       </div>
     `,
-    iconSize: [size, size + 16],
+    iconSize: [size, size + 18],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size / 2],
   });
@@ -357,7 +372,7 @@ export default function RealMap({
         <ZoomControl position="topleft" />
 
         <MapEvents onMapBackgroundClick={onMapBackgroundClick} />
-        <RecenterMap trigger={recenterToUserTrigger} />
+        <RecenterMap trigger={recenterToUserTrigger} selectedMaster={selectedMaster} />
 
         {safeMasters.map((master) => {
           const isSelected =
