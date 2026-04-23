@@ -2,17 +2,29 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 
+type BottomNavProps = {
+  active?: 'home' | 'bookings' | 'add' | 'messages' | 'profile';
+};
+
 const items = [
   { key: 'home', label: 'Home', icon: '⌂', href: '/' },
   { key: 'bookings', label: 'Bookings', icon: '◫', href: '/bookings' },
   { key: 'add', label: 'Add', icon: '+', href: '/profile/promotions/new', accent: true },
   { key: 'messages', label: 'Messages', icon: '◌', href: '/messages', badge: 2 },
   { key: 'profile', label: 'Profile', icon: '◎', href: '/account' },
-];
+] as const;
 
-export default function BottomNav() {
+export default function BottomNav({ active: activeProp }: BottomNavProps) {
   const router = useRouter();
   const pathname = usePathname();
+
+  const getIsActive = (key: BottomNavProps['active'], href: string) => {
+    if (activeProp) return activeProp === key;
+
+    if (href === '/') return pathname === '/';
+    if (href === '/account') return pathname === '/account' || pathname === '/profile';
+    return pathname?.startsWith(href);
+  };
 
   return (
     <div
@@ -40,10 +52,7 @@ export default function BottomNav() {
         }}
       >
         {items.map((item) => {
-          const active =
-            item.href === '/'
-              ? pathname === '/'
-              : pathname?.startsWith(item.href);
+          const active = getIsActive(item.key, item.href);
 
           if (item.accent) {
             return (
