@@ -45,10 +45,8 @@ export default function TopCategoriesBar({
   language,
   onSelectCategory,
 }: TopCategoriesBarProps) {
-  const visibleCategories = [
-    { id: 'more', label: 'More', shortLabel: 'More' },
-    ...categories.slice(0, 7),
-  ];
+  const normalized = categories.filter((item) => String(item.id).toLowerCase() !== 'more');
+  const visibleCategories = [{ id: 'more', label: 'More', shortLabel: 'More' }, ...normalized.slice(0, 7)];
 
   return (
     <div style={{ padding: '0 12px' }}>
