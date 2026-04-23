@@ -16,10 +16,10 @@ type NavItem = {
 
 function HomeIcon({ active }: { active: boolean }) {
   return (
-    <svg width="25" height="25" viewBox="0 0 24 24" fill="none">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
       <path
         d="M4 10.5L12 4L20 10.5V20H4V10.5Z"
-        stroke={active ? '#55c75f' : '#222222'}
+        stroke={active ? '#55c75f' : '#2c2c2c'}
         strokeWidth="1.9"
         strokeLinejoin="round"
       />
@@ -29,50 +29,50 @@ function HomeIcon({ active }: { active: boolean }) {
 
 function CalendarIcon({ active }: { active: boolean }) {
   return (
-    <svg width="25" height="25" viewBox="0 0 24 24" fill="none">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
       <rect
         x="4"
         y="6"
         width="16"
         height="14"
-        rx="2.2"
-        stroke={active ? '#55c75f' : '#222222'}
+        rx="2"
+        stroke={active ? '#55c75f' : '#2c2c2c'}
         strokeWidth="1.9"
       />
-      <path d="M8 3V8" stroke={active ? '#55c75f' : '#222222'} strokeWidth="1.9" strokeLinecap="round" />
-      <path d="M16 3V8" stroke={active ? '#55c75f' : '#222222'} strokeWidth="1.9" strokeLinecap="round" />
-      <path d="M4 10H20" stroke={active ? '#55c75f' : '#222222'} strokeWidth="1.9" />
+      <path d="M8 3V8" stroke={active ? '#55c75f' : '#2c2c2c'} strokeWidth="1.9" strokeLinecap="round" />
+      <path d="M16 3V8" stroke={active ? '#55c75f' : '#2c2c2c'} strokeWidth="1.9" strokeLinecap="round" />
+      <path d="M4 10H20" stroke={active ? '#55c75f' : '#2c2c2c'} strokeWidth="1.9" />
     </svg>
   );
 }
 
 function MessageIcon({ active }: { active: boolean }) {
   return (
-    <svg width="25" height="25" viewBox="0 0 24 24" fill="none">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
       <path
         d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
-        stroke={active ? '#55c75f' : '#222222'}
+        stroke={active ? '#55c75f' : '#2c2c2c'}
         strokeWidth="1.9"
         strokeLinejoin="round"
       />
-      <circle cx="9" cy="11.5" r="0.8" fill={active ? '#55c75f' : '#222222'} />
-      <circle cx="12" cy="11.5" r="0.8" fill={active ? '#55c75f' : '#222222'} />
-      <circle cx="15" cy="11.5" r="0.8" fill={active ? '#55c75f' : '#222222'} />
+      <circle cx="9" cy="11.5" r="0.9" fill={active ? '#55c75f' : '#2c2c2c'} />
+      <circle cx="12" cy="11.5" r="0.9" fill={active ? '#55c75f' : '#2c2c2c'} />
+      <circle cx="15" cy="11.5" r="0.9" fill={active ? '#55c75f' : '#2c2c2c'} />
     </svg>
   );
 }
 
 function ProfileIcon({ active }: { active: boolean }) {
   return (
-    <svg width="25" height="25" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="8" r="3.1" stroke={active ? '#55c75f' : '#222222'} strokeWidth="1.9" />
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="8" r="3.2" stroke={active ? '#55c75f' : '#2c2c2c'} strokeWidth="1.9" />
       <path
-        d="M5.7 19C6.6 15.9 8.9 14.6 12 14.6C15.1 14.6 17.4 15.9 18.3 19"
-        stroke={active ? '#55c75f' : '#222222'}
+        d="M5.5 19C6.5 15.8 8.8 14.5 12 14.5C15.2 14.5 17.5 15.8 18.5 19"
+        stroke={active ? '#55c75f' : '#2c2c2c'}
         strokeWidth="1.9"
         strokeLinecap="round"
       />
-      <circle cx="12" cy="12" r="9" stroke={active ? '#55c75f' : '#222222'} strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="9" stroke={active ? '#55c75f' : '#2c2c2c'} strokeWidth="1.5" />
     </svg>
   );
 }
@@ -102,20 +102,20 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       style={{
         position: 'fixed',
         left: '50%',
-        bottom: 12,
+        bottom: 14,
         transform: 'translateX(-50%)',
         width: 'calc(100% - 32px)',
-        maxWidth: 402,
+        maxWidth: 398,
         zIndex: 1200,
       }}
     >
       <div
         style={{
           background: '#f7f4ef',
-          border: '1.2px solid #ddd6cb',
+          border: '1.2px solid #171717',
           borderRadius: 28,
-          boxShadow: '0 8px 26px rgba(15,23,42,0.10)',
-          padding: '10px 10px 12px',
+          boxShadow: '0 8px 24px rgba(15,23,42,0.08)',
+          padding: '12px 12px 14px',
           display: 'grid',
           gridTemplateColumns: 'repeat(5, 1fr)',
           alignItems: 'end',
@@ -155,8 +155,9 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                     fontSize: 42,
                     fontWeight: 500,
                     lineHeight: 1,
-                    boxShadow: '0 10px 22px rgba(85,199,95,0.28)',
+                    boxShadow: '0 10px 22px rgba(85,199,95,0.24)',
                     transform: 'translateY(-14px)',
+                    border: '1.2px solid rgba(0,0,0,0.10)',
                   }}
                 >
                   +
@@ -205,7 +206,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 <span
                   style={{
                     position: 'absolute',
-                    top: 1,
+                    top: 2,
                     right: '18%',
                     minWidth: 19,
                     height: 19,
@@ -218,7 +219,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 2px 6px rgba(255,63,127,0.35)',
+                    boxShadow: '0 2px 6px rgba(255,63,127,0.30)',
                   }}
                 >
                   {item.badge}
@@ -229,7 +230,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 style={{
                   fontSize: 11,
                   fontWeight: isActive ? 800 : 700,
-                  color: isActive ? '#55c75f' : '#303030',
+                  color: isActive ? '#55c75f' : '#2c2c2c',
                 }}
               >
                 {item.label}
