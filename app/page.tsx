@@ -43,6 +43,69 @@ const popularSearches = [
   'Moving help',
 ];
 
+const tickerMessages: Record<AppLanguage, string[]> = {
+  EN: [
+    'Olamep • Explore services around you',
+    'Verified specialists nearby',
+    'Hot offers updated today',
+    'Fast local booking',
+  ],
+  ES: [
+    'Olamep • Explora servicios cerca de ti',
+    'Especialistas verificados cerca',
+    'Ofertas actualizadas hoy',
+    'Reserva local rápida',
+  ],
+  RU: [
+    'Olamep • Исследуй услуги рядом с собой',
+    'Проверенные специалисты рядом',
+    'Горячие предложения обновлены сегодня',
+    'Быстрое локальное бронирование',
+  ],
+  UA: [
+    'Olamep • Досліджуй послуги поруч',
+    'Перевірені спеціалісти поруч',
+    'Гарячі пропозиції оновлено сьогодні',
+    'Швидке локальне бронювання',
+  ],
+  CZ: [
+    'Olamep • Objevujte služby ve vašem okolí',
+    'Ověření specialisté poblíž',
+    'Akční nabídky aktualizovány dnes',
+    'Rychlá lokální rezervace',
+  ],
+  DE: [
+    'Olamep • Entdecke Services in deiner Nähe',
+    'Verifizierte Profis in der Nähe',
+    'Angebote heute aktualisiert',
+    'Schnelle lokale Buchung',
+  ],
+  IT: [
+    'Olamep • Scopri servizi vicino a te',
+    'Specialisti verificati nelle vicinanze',
+    'Offerte aggiornate oggi',
+    'Prenotazione locale veloce',
+  ],
+  FR: [
+    'Olamep • Découvrez des services autour de vous',
+    'Spécialistes vérifiés à proximité',
+    'Offres mises à jour aujourd’hui',
+    'Réservation locale rapide',
+  ],
+  AR: [
+    'Olamep • اكتشف الخدمات من حولك',
+    'متخصصون موثّقون بالقرب منك',
+    'عروض محدثة اليوم',
+    'حجز محلي سريع',
+  ],
+  PL: [
+    'Olamep • Odkrywaj usługi w pobliżu',
+    'Zweryfikowani specjaliści blisko Ciebie',
+    'Oferty zaktualizowane dzisiaj',
+    'Szybka lokalna rezerwacja',
+  ],
+};
+
 type SearchResult =
   | {
       type: 'smart';
@@ -215,6 +278,10 @@ function languageFlag(language: AppLanguage) {
   return '🇬🇧';
 }
 
+function getSmallLogo() {
+  return '/ui/logo/logo.png';
+}
+
 function findPromotionMaster(promo: PromotionItem, masters: any[]) {
   const anyPromo = promo as any;
   const normalizedCategory = String(anyPromo.categoryId || '').toLowerCase().trim();
@@ -370,20 +437,6 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
   return map[normalized]?.[language] || found.shortLabel || found.label;
 }
 
-function BrandMark() {
-  return (
-    <img
-      src="/ui/logo/logo.png"
-      alt="Olamep"
-      style={{
-        height: 76,
-        width: 'auto',
-        display: 'block',
-      }}
-    />
-  );
-}
-
 function ActionCountButton({
   icon,
   title,
@@ -399,17 +452,17 @@ function ActionCountButton({
     <button
       onClick={onClick}
       style={{
-        minHeight: 64,
+        minHeight: 52,
         border: '2px solid #111111',
-        borderRadius: 22,
+        borderRadius: 18,
         background: '#ffffff',
         color: '#111111',
         cursor: 'pointer',
         display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 46px',
+        gridTemplateColumns: 'minmax(0, 1fr) 34px',
         alignItems: 'center',
         gap: 8,
-        padding: '8px 12px',
+        padding: '0 8px 0 10px',
       }}
     >
       <div
@@ -418,18 +471,11 @@ function ActionCountButton({
           alignItems: 'center',
           gap: 8,
           minWidth: 0,
-          fontSize: 14,
+          fontSize: 11,
           fontWeight: 900,
         }}
       >
-        <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
+        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
           {icon}
         </span>
         <span
@@ -445,8 +491,8 @@ function ActionCountButton({
 
       <span
         style={{
-          width: 46,
-          height: 46,
+          width: 34,
+          height: 34,
           borderRadius: 999,
           border: '2px solid #111111',
           background: '#ffffff',
@@ -454,7 +500,7 @@ function ActionCountButton({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 18,
+          fontSize: 13,
           fontWeight: 900,
           flexShrink: 0,
         }}
@@ -462,6 +508,62 @@ function ActionCountButton({
         {count}
       </span>
     </button>
+  );
+}
+
+function CompactTicker({ language }: { language: AppLanguage }) {
+  const items = tickerMessages[language] || tickerMessages.EN;
+  const line = items.join('   •   ');
+
+  return (
+    <div
+      style={{
+        height: 28,
+        borderRadius: 999,
+        border: '1.5px solid #111111',
+        background: '#fffdf7',
+        overflow: 'hidden',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        paddingLeft: 8,
+      }}
+    >
+      <img
+        src={getSmallLogo()}
+        alt="Olamep"
+        style={{
+          width: 18,
+          height: 18,
+          objectFit: 'contain',
+          flexShrink: 0,
+          display: 'block',
+          marginRight: 8,
+        }}
+      />
+
+      <div
+        style={{
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          flex: 1,
+        }}
+      >
+        <div
+          style={{
+            display: 'inline-block',
+            whiteSpace: 'nowrap',
+            color: '#17233c',
+            fontSize: 11,
+            fontWeight: 800,
+            paddingLeft: '100%',
+            animation: 'olamepTicker 18s linear infinite',
+          }}
+        >
+          {line}   •   {line}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -908,6 +1010,17 @@ export default function HomePage() {
         paddingBottom: 118,
       }}
     >
+      <style jsx global>{`
+        @keyframes olamepTicker {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+      `}</style>
+
       <div
         style={{
           maxWidth: 430,
@@ -915,40 +1028,30 @@ export default function HomePage() {
           background: '#f6f4ef',
         }}
       >
-        <section style={{ padding: '16px 12px 0' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: '0 0 10px',
-            }}
-          >
-            <BrandMark />
-          </div>
-
+        <section style={{ padding: '10px 12px 0' }}>
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 58px 58px 58px',
-                gap: 8,
+                gridTemplateColumns: '1fr 50px 50px 50px',
+                gap: 6,
                 alignItems: 'center',
               }}
             >
               <div
                 style={{
-                  height: 56,
+                  height: 50,
                   borderRadius: 18,
                   border: '2px solid #111111',
                   background: '#fff',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 10,
-                  padding: '0 14px',
+                  gap: 9,
+                  padding: '0 12px',
                   minWidth: 0,
                 }}
               >
-                <span style={{ fontSize: 22, lineHeight: 1, color: '#111111' }}>⌕</span>
+                <span style={{ fontSize: 21, lineHeight: 1, color: '#111111' }}>⌕</span>
                 <input
                   value={search}
                   onFocus={() => setSearchOpen(true)}
@@ -995,7 +1098,7 @@ export default function HomePage() {
                     style={{
                       border: 'none',
                       background: 'transparent',
-                      fontSize: 18,
+                      fontSize: 16,
                       color: '#85909c',
                       cursor: 'pointer',
                       padding: 0,
@@ -1009,14 +1112,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language')}
                 style={{
-                  width: 58,
-                  height: 56,
+                  width: 50,
+                  height: 50,
                   borderRadius: 16,
                   border: '2px solid #111111',
                   background: '#fff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 12,
+                  fontSize: 10,
                   fontWeight: 900,
                   display: 'inline-flex',
                   flexDirection: 'column',
@@ -1026,36 +1129,15 @@ export default function HomePage() {
                   cursor: 'pointer',
                 }}
               >
-                <span style={{ fontSize: 20, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 17, lineHeight: 1 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/currency')}
                 style={{
-                  width: 58,
-                  height: 56,
-                  borderRadius: 16,
-                  border: '2px solid #111111',
-                  background: '#fff',
-                  color: '#111111',
-                  padding: 0,
-                  fontSize: 24,
-                  fontWeight: 900,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                }}
-              >
-                {currencySymbol}
-              </button>
-
-              <button
-                onClick={() => router.push('/profile/location')}
-                style={{
-                  width: 58,
-                  height: 56,
+                  width: 50,
+                  height: 50,
                   borderRadius: 16,
                   border: '2px solid #111111',
                   background: '#fff',
@@ -1069,8 +1151,33 @@ export default function HomePage() {
                   cursor: 'pointer',
                 }}
               >
+                {currencySymbol}
+              </button>
+
+              <button
+                onClick={() => router.push('/profile/location')}
+                style={{
+                  width: 50,
+                  height: 50,
+                  borderRadius: 16,
+                  border: '2px solid #111111',
+                  background: '#fff',
+                  color: '#111111',
+                  padding: 0,
+                  fontSize: 20,
+                  fontWeight: 900,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                }}
+              >
                 ⌖
               </button>
+            </div>
+
+            <div style={{ marginTop: 6 }}>
+              <CompactTicker language={language} />
             </div>
 
             {searchOpen ? (
@@ -1339,7 +1446,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '8px 0 0' }}>
+        <section style={{ padding: '6px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1358,7 +1465,7 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '8px 12px 0' }}>
+        <section style={{ padding: '6px 12px 0' }}>
           <div
             style={{
               display: 'grid',
@@ -1384,15 +1491,15 @@ export default function HomePage() {
               icon={
                 <span
                   style={{
-                    width: 22,
-                    height: 22,
+                    width: 20,
+                    height: 20,
                     borderRadius: '50%',
                     background: '#ffd84a',
                     color: '#111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: 900,
                     lineHeight: 1,
                   }}
@@ -1428,15 +1535,15 @@ export default function HomePage() {
               icon={
                 <span
                   style={{
-                    width: 22,
-                    height: 22,
+                    width: 20,
+                    height: 20,
                     borderRadius: '50%',
                     background: '#ffd84a',
                     color: '#111111',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: 900,
                     lineHeight: 1,
                   }}
@@ -1450,17 +1557,17 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '10px 12px 0' }}>
+        <section style={{ padding: '8px 12px 0' }}>
           <div
             style={{
-              borderRadius: 32,
+              borderRadius: 30,
               overflow: 'hidden',
               border: '1.5px solid #ded8cf',
               background: '#ffffff',
               boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
             }}
           >
-            <div style={{ height: 470, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ height: 540, position: 'relative', overflow: 'hidden' }}>
               <RealMap
                 masters={mapMasters}
                 mapMode={mapMode}
@@ -1491,7 +1598,7 @@ export default function HomePage() {
         </section>
 
         {filteredPromotions.length > 0 && (
-          <section style={{ padding: '14px 0 0' }}>
+          <section style={{ padding: '12px 0 0' }}>
             <div
               style={{
                 background: '#ece7dd',
@@ -1510,7 +1617,7 @@ export default function HomePage() {
                 <h2
                   style={{
                     margin: 0,
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: 900,
                     color: '#21324a',
                   }}
@@ -1524,7 +1631,7 @@ export default function HomePage() {
                   style={{
                     border: 'none',
                     background: 'transparent',
-                    fontSize: 24,
+                    fontSize: 22,
                     color: '#8d918f',
                     lineHeight: 1,
                     cursor: 'pointer',
@@ -1537,9 +1644,9 @@ export default function HomePage() {
 
               <div
                 style={{
-                  marginTop: 12,
+                  marginTop: 10,
                   display: 'flex',
-                  gap: 12,
+                  gap: 10,
                   overflowX: 'auto',
                   overflowY: 'hidden',
                   padding: '0 14px 6px',
@@ -1556,9 +1663,9 @@ export default function HomePage() {
                     }}
                     data-promo-id={promo.id}
                     style={{
-                      minWidth: 300,
-                      maxWidth: 300,
-                      borderRadius: 30,
+                      minWidth: 248,
+                      maxWidth: 248,
+                      borderRadius: 24,
                       border: '2px solid #111111',
                       background: '#fff',
                       overflow: 'hidden',
@@ -1583,7 +1690,7 @@ export default function HomePage() {
                           alt={(promo as any).title}
                           style={{
                             width: '100%',
-                            height: 190,
+                            height: 182,
                             objectFit: 'cover',
                             display: 'block',
                           }}
@@ -1592,13 +1699,13 @@ export default function HomePage() {
                         <div
                           style={{
                             position: 'absolute',
-                            top: 12,
-                            left: 12,
+                            top: 10,
+                            left: 10,
                             background: '#fff',
                             color: '#ff4f93',
                             borderRadius: 999,
-                            padding: '8px 14px',
-                            fontSize: 12,
+                            padding: '7px 12px',
+                            fontSize: 11,
                             fontWeight: 900,
                           }}
                         >
@@ -1606,10 +1713,10 @@ export default function HomePage() {
                         </div>
                       </div>
 
-                      <div style={{ padding: '14px 16px 8px' }}>
+                      <div style={{ padding: '10px 12px 6px' }}>
                         <div
                           style={{
-                            fontSize: 17,
+                            fontSize: 15,
                             fontWeight: 900,
                             color: '#1f2430',
                             lineHeight: 1.2,
@@ -1620,11 +1727,11 @@ export default function HomePage() {
 
                         <div
                           style={{
-                            marginTop: 8,
-                            fontSize: 13,
+                            marginTop: 6,
+                            fontSize: 12,
                             fontWeight: 700,
                             color: '#6b7280',
-                            lineHeight: 1.45,
+                            lineHeight: 1.35,
                           }}
                         >
                           {(promo as any).subtitle ||
@@ -1635,8 +1742,8 @@ export default function HomePage() {
 
                         <div
                           style={{
-                            marginTop: 10,
-                            fontSize: 12,
+                            marginTop: 8,
+                            fontSize: 11,
                             fontWeight: 900,
                             color: '#ff4f93',
                           }}
@@ -1652,19 +1759,19 @@ export default function HomePage() {
                       style={{
                         display: 'grid',
                         gridTemplateColumns: '1fr 1fr',
-                        gap: 12,
-                        padding: '0 16px 16px',
+                        gap: 8,
+                        padding: '0 12px 12px',
                       }}
                     >
                       <button
                         onClick={() => openPromotionView(promo)}
                         style={{
-                          height: 50,
-                          borderRadius: 18,
+                          height: 42,
+                          borderRadius: 16,
                           border: '2px solid #111111',
                           background: '#1f4da8',
                           color: '#fff',
-                          fontSize: 15,
+                          fontSize: 14,
                           fontWeight: 900,
                           cursor: 'pointer',
                         }}
@@ -1675,12 +1782,12 @@ export default function HomePage() {
                       <button
                         onClick={() => openPromotionBooking(promo)}
                         style={{
-                          height: 50,
-                          borderRadius: 18,
+                          height: 42,
+                          borderRadius: 16,
                           border: '2px solid #111111',
                           background: '#ff5252',
                           color: '#fff',
-                          fontSize: 15,
+                          fontSize: 14,
                           fontWeight: 900,
                           cursor: 'pointer',
                         }}
