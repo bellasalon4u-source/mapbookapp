@@ -9,18 +9,80 @@ type BottomNavProps = {
 type NavItem = {
   key: 'home' | 'bookings' | 'add' | 'messages' | 'profile';
   label: string;
-  icon: string;
   href: string;
   accent?: boolean;
   badge?: number;
 };
 
+function HomeIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M4 10.5L12 4L20 10.5V20H4V10.5Z"
+        stroke={active ? '#55c75f' : '#4a4a4a'}
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CalendarIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <rect
+        x="4"
+        y="6"
+        width="16"
+        height="14"
+        rx="2"
+        stroke={active ? '#55c75f' : '#4a4a4a'}
+        strokeWidth="2"
+      />
+      <path d="M8 3V8" stroke={active ? '#55c75f' : '#4a4a4a'} strokeWidth="2" strokeLinecap="round" />
+      <path d="M16 3V8" stroke={active ? '#55c75f' : '#4a4a4a'} strokeWidth="2" strokeLinecap="round" />
+      <path d="M4 10H20" stroke={active ? '#55c75f' : '#4a4a4a'} strokeWidth="2" />
+    </svg>
+  );
+}
+
+function MessageIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
+        stroke={active ? '#55c75f' : '#4a4a4a'}
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <circle cx="9" cy="11.5" r="0.9" fill={active ? '#55c75f' : '#4a4a4a'} />
+      <circle cx="12" cy="11.5" r="0.9" fill={active ? '#55c75f' : '#4a4a4a'} />
+      <circle cx="15" cy="11.5" r="0.9" fill={active ? '#55c75f' : '#4a4a4a'} />
+    </svg>
+  );
+}
+
+function ProfileIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="8" r="3.2" stroke={active ? '#55c75f' : '#4a4a4a'} strokeWidth="2" />
+      <path
+        d="M5.5 19C6.5 15.8 8.8 14.5 12 14.5C15.2 14.5 17.5 15.8 18.5 19"
+        stroke={active ? '#55c75f' : '#4a4a4a'}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <circle cx="12" cy="12" r="9" stroke={active ? '#55c75f' : '#4a4a4a'} strokeWidth="1.6" />
+    </svg>
+  );
+}
+
 const items: NavItem[] = [
-  { key: 'home', label: 'Home', icon: '⌂', href: '/' },
-  { key: 'bookings', label: 'Bookings', icon: '⌑', href: '/bookings' },
-  { key: 'add', label: 'Add', icon: '+', href: '/profile/promotions/new', accent: true },
-  { key: 'messages', label: 'Messages', icon: '◌', href: '/messages', badge: 2 },
-  { key: 'profile', label: 'Profile', icon: '◎', href: '/account' },
+  { key: 'home', label: 'Home', href: '/' },
+  { key: 'bookings', label: 'Bookings', href: '/bookings' },
+  { key: 'add', label: 'Add', href: '/profile/promotions/new', accent: true },
+  { key: 'messages', label: 'Messages', href: '/messages', badge: 2 },
+  { key: 'profile', label: 'Profile', href: '/account' },
 ];
 
 export default function BottomNav({ active: activeProp }: BottomNavProps) {
@@ -40,10 +102,10 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       style={{
         position: 'fixed',
         left: '50%',
-        bottom: 14,
+        bottom: 12,
         transform: 'translateX(-50%)',
-        width: 'calc(100% - 32px)',
-        maxWidth: 404,
+        width: 'calc(100% - 36px)',
+        maxWidth: 398,
         zIndex: 1200,
       }}
     >
@@ -51,7 +113,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
         style={{
           background: '#f7f4ef',
           border: '1.2px solid #ddd6cb',
-          borderRadius: 26,
+          borderRadius: 28,
           boxShadow: '0 8px 26px rgba(15,23,42,0.10)',
           padding: '10px 10px 12px',
           display: 'grid',
@@ -82,15 +144,15 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
               >
                 <span
                   style={{
-                    width: 68,
-                    height: 68,
+                    width: 70,
+                    height: 70,
                     borderRadius: '50%',
                     background: '#55c75f',
                     color: '#ffffff',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 40,
+                    fontSize: 42,
                     fontWeight: 500,
                     lineHeight: 1,
                     boxShadow: '0 10px 22px rgba(85,199,95,0.28)',
@@ -132,22 +194,18 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 minHeight: 62,
               }}
             >
-              <span
-                style={{
-                  fontSize: 28,
-                  lineHeight: 1,
-                  color: isActive ? '#55c75f' : '#4a4a4a',
-                  fontWeight: isActive ? 800 : 500,
-                }}
-              >
-                {item.icon}
+              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                {item.key === 'home' && <HomeIcon active={isActive} />}
+                {item.key === 'bookings' && <CalendarIcon active={isActive} />}
+                {item.key === 'messages' && <MessageIcon active={isActive} />}
+                {item.key === 'profile' && <ProfileIcon active={isActive} />}
               </span>
 
               {typeof item.badge === 'number' ? (
                 <span
                   style={{
                     position: 'absolute',
-                    top: 2,
+                    top: 1,
                     right: '18%',
                     minWidth: 19,
                     height: 19,
