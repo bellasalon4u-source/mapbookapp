@@ -45,6 +45,7 @@ const DEMO_MASTERS: MasterItem[] = [
     id: 'demo-1',
     name: 'Anna',
     category: 'beauty',
+    availableNow: false,
     lat: 51.536,
     lng: -0.186,
     avatar:
@@ -54,6 +55,7 @@ const DEMO_MASTERS: MasterItem[] = [
     id: 'demo-2',
     name: 'Mark',
     category: 'barber',
+    availableNow: true,
     lat: 51.493,
     lng: -0.183,
     avatar:
@@ -63,6 +65,7 @@ const DEMO_MASTERS: MasterItem[] = [
     id: 'demo-3',
     name: 'Oksana',
     category: 'beauty',
+    availableNow: false,
     lat: 51.507,
     lng: -0.112,
     avatar:
@@ -72,6 +75,7 @@ const DEMO_MASTERS: MasterItem[] = [
     id: 'demo-4',
     name: 'David',
     category: 'pets',
+    availableNow: true,
     lat: 51.539,
     lng: -0.052,
     avatar:
@@ -81,6 +85,7 @@ const DEMO_MASTERS: MasterItem[] = [
     id: 'demo-5',
     name: 'Mila',
     category: 'wellness',
+    availableNow: false,
     lat: 51.487,
     lng: -0.028,
     avatar:
@@ -111,25 +116,11 @@ function MapEvents({
 
 function RecenterMap({
   trigger,
-  selectedMaster,
 }: {
   trigger?: number;
-  selectedMaster?: MasterItem | null;
 }) {
   const map = useMap();
   const prevTrigger = useRef(trigger);
-
-  useEffect(() => {
-    if (
-      selectedMaster &&
-      Number.isFinite(selectedMaster.lat) &&
-      Number.isFinite(selectedMaster.lng)
-    ) {
-      map.flyTo([selectedMaster.lat, selectedMaster.lng], 11, {
-        duration: 0.55,
-      });
-    }
-  }, [map, selectedMaster]);
 
   useEffect(() => {
     if (prevTrigger.current === trigger) return;
@@ -153,119 +144,6 @@ function RecenterMap({
   }, [map, trigger]);
 
   return null;
-}
-
-function getPinColors(master: MasterItem, isSelected: boolean) {
-  if (isSelected) {
-    return {
-      ring: '#f0629b',
-      accent: '#f0629b',
-      bubble: '#ffffff',
-    };
-  }
-
-  const category = String(master.category || '').toLowerCase();
-
-  if (category === 'beauty') {
-    return {
-      ring: '#ef7db1',
-      accent: '#ef7db1',
-      bubble: '#ffffff',
-    };
-  }
-
-  if (category === 'barber' || category === 'tech' || category === 'repairs') {
-    return {
-      ring: '#4f93ff',
-      accent: '#4f93ff',
-      bubble: '#ffffff',
-    };
-  }
-
-  if (category === 'pets') {
-    return {
-      ring: '#79be76',
-      accent: '#79be76',
-      bubble: '#ffffff',
-    };
-  }
-
-  if (category === 'wellness' || category === 'home') {
-    return {
-      ring: '#f0bf48',
-      accent: '#f0bf48',
-      bubble: '#ffffff',
-    };
-  }
-
-  return {
-    ring: '#79be76',
-    accent: '#79be76',
-    bubble: '#ffffff',
-  };
-}
-
-function createMasterPin(master: MasterItem, isSelected: boolean) {
-  const colors = getPinColors(master, isSelected);
-  const avatar = master.avatar || 'https://via.placeholder.com/80x80.png?text=Pro';
-
-  const size = isSelected ? 112 : 64;
-  const innerSize = isSelected ? 70 : 42;
-  const bubble = isSelected ? 32 : 22;
-  const outline = isSelected ? 5 : 4;
-  const top = isSelected ? 8 : 7;
-
-  return L.divIcon({
-    className: '',
-    html: `
-      <div style="position:relative;width:${size}px;height:${size + 18}px;">
-        <div style="
-          position:absolute;
-          left:50%;
-          top:${top}px;
-          transform:translateX(-50%);
-          width:${size}px;
-          height:${size}px;
-          border-radius:50%;
-          background:${colors.ring};
-          box-shadow:${isSelected ? '0 10px 22px rgba(0,0,0,0.20)' : '0 6px 14px rgba(0,0,0,0.16)'};
-          display:flex;
-          align-items:center;
-          justify-content:center;
-        ">
-          <div style="
-            width:${innerSize}px;
-            height:${innerSize}px;
-            border-radius:50%;
-            overflow:hidden;
-            border:${outline}px solid #ffffff;
-            background:#ffffff;
-          ">
-            <img
-              src="${avatar}"
-              alt=""
-              style="width:100%;height:100%;object-fit:cover;display:block;"
-            />
-          </div>
-        </div>
-
-        <div style="
-          position:absolute;
-          right:${isSelected ? 5 : 2}px;
-          bottom:${isSelected ? 11 : 9}px;
-          width:${bubble}px;
-          height:${bubble}px;
-          border-radius:50%;
-          background:${colors.bubble};
-          border:${outline}px solid ${colors.accent};
-          box-shadow:0 4px 10px rgba(0,0,0,0.10);
-        "></div>
-      </div>
-    `,
-    iconSize: [size, size + 18],
-    iconAnchor: [size / 2, size / 2],
-    popupAnchor: [0, -size / 2],
-  });
 }
 
 function fixLeafletIcons() {
@@ -304,10 +182,136 @@ function isInsideLondonArea(items: MasterItem[]) {
   });
 }
 
+function getRingColor(master: MasterItem, isSelected: boolean) {
+  if (isSelected) return '#ef5ea0';
+  if (master.availableNow) return '#63c56b';
+
+  const category = String(master.category || '').toLowerCase();
+
+  if (category === 'beauty') return '#ef7db1';
+  if (category === 'barber' || category === 'tech' || category === 'repairs') return '#4f93ff';
+  if (category === 'pets') return '#79be76';
+  if (category === 'wellness' || category === 'home') return '#f0bf48';
+
+  return '#ef7db1';
+}
+
+function createMasterPin(
+  master: MasterItem,
+  {
+    isSelected,
+    isLiked,
+  }: {
+    isSelected: boolean;
+    isLiked: boolean;
+  }
+) {
+  const ring = getRingColor(master, isSelected);
+  const avatar = master.avatar || 'https://via.placeholder.com/80x80.png?text=Pro';
+
+  const size = isSelected ? 112 : 76;
+  const innerSize = isSelected ? 68 : 44;
+  const outline = isSelected ? 6 : 4;
+  const bubbleSize = isSelected ? 32 : 24;
+  const tailSize = isSelected ? 16 : 12;
+  const heartSize = isSelected ? 26 : 20;
+
+  return L.divIcon({
+    className: '',
+    html: `
+      <div style="position:relative;width:${size}px;height:${size + 18}px;">
+        <div style="
+          position:absolute;
+          left:50%;
+          top:2px;
+          transform:translateX(-50%);
+          width:${size}px;
+          height:${size}px;
+          border-radius:50%;
+          background:${ring};
+          box-shadow:0 8px 18px rgba(0,0,0,0.18);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+        ">
+          <div style="
+            width:${innerSize}px;
+            height:${innerSize}px;
+            border-radius:50%;
+            overflow:hidden;
+            border:${outline}px solid #ffffff;
+            background:#ffffff;
+          ">
+            <img
+              src="${avatar}"
+              alt=""
+              style="width:100%;height:100%;object-fit:cover;display:block;"
+            />
+          </div>
+        </div>
+
+        <div style="
+          position:absolute;
+          left:50%;
+          bottom:0;
+          transform:translateX(-50%);
+          width:0;
+          height:0;
+          border-left:${tailSize}px solid transparent;
+          border-right:${tailSize}px solid transparent;
+          border-top:${tailSize + 8}px solid ${ring};
+          filter:drop-shadow(0 3px 4px rgba(0,0,0,0.10));
+        "></div>
+
+        <div style="
+          position:absolute;
+          right:${isSelected ? 6 : 3}px;
+          bottom:${isSelected ? 14 : 12}px;
+          width:${bubbleSize}px;
+          height:${bubbleSize}px;
+          border-radius:50%;
+          background:#ffffff;
+          border:${outline}px solid ${ring};
+          box-shadow:0 4px 10px rgba(0,0,0,0.10);
+        "></div>
+
+        ${
+          isLiked
+            ? `
+          <div style="
+            position:absolute;
+            left:${isSelected ? 2 : 0}px;
+            bottom:${isSelected ? 18 : 16}px;
+            width:${heartSize}px;
+            height:${heartSize}px;
+            border-radius:50%;
+            background:#ffffff;
+            border:3px solid #ff5a8f;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 4px 10px rgba(0,0,0,0.12);
+            color:#ff4d86;
+            font-size:${isSelected ? 14 : 12}px;
+            line-height:1;
+            font-weight:700;
+          ">♥</div>
+        `
+            : ''
+        }
+      </div>
+    `,
+    iconSize: [size, size + 18],
+    iconAnchor: [size / 2, size + 8],
+    popupAnchor: [0, -size / 2],
+  });
+}
+
 export default function RealMap({
   masters = [],
   mapMode = 'map',
   selectedMasterId = null,
+  likedMasterIds = [],
   recenterToUserTrigger = 0,
   onMasterSelect,
   onMapBackgroundClick,
@@ -338,8 +342,10 @@ export default function RealMap({
       if (found) return found;
     }
 
-    return safeMasters[2] || null;
+    return null;
   }, [safeMasters, selectedMasterId]);
+
+  const likedSet = useMemo(() => new Set(likedMasterIds.map(String)), [likedMasterIds]);
 
   const tileUrl =
     mapMode === 'satellite'
@@ -372,17 +378,21 @@ export default function RealMap({
         <ZoomControl position="topleft" />
 
         <MapEvents onMapBackgroundClick={onMapBackgroundClick} />
-        <RecenterMap trigger={recenterToUserTrigger} selectedMaster={selectedMaster} />
+        <RecenterMap trigger={recenterToUserTrigger} />
 
         {safeMasters.map((master) => {
           const isSelected =
             selectedMaster && String(master.id) === String(selectedMaster.id);
+          const isLiked = likedSet.has(String(master.id));
 
           return (
             <Marker
               key={String(master.id)}
               position={[master.lat, master.lng]}
-              icon={createMasterPin(master, Boolean(isSelected))}
+              icon={createMasterPin(master, {
+                isSelected: Boolean(isSelected),
+                isLiked,
+              })}
               eventHandlers={{
                 click: () => {
                   onMasterSelect?.(master);
