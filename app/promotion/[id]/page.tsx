@@ -1,4 +1,4 @@
-'use client'; 
+'use client';
 
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -24,6 +24,340 @@ type MasterLike = {
   subcategory?: string;
   avatar?: string;
   rating?: number;
+};
+
+type PromotionDetailsTexts = {
+  back: string;
+  close: string;
+  notFound: string;
+  notFoundSub: string;
+  specialOffer: string;
+  views: string;
+  category: string;
+  save: string;
+  professional: string;
+  openProfile: string;
+  share: string;
+  bookNow: string;
+  aboutOffer: string;
+  included: string;
+  pricing: string;
+  oldPrice: string;
+  now: string;
+  youSave: string;
+  validUntil: string;
+  location: string;
+  area: string;
+  address: string;
+  distance: string;
+  copied: string;
+  beauty: string;
+  providerFallback: string;
+  noAddress: string;
+};
+
+const EN_TEXTS: PromotionDetailsTexts = {
+  back: 'Back',
+  close: 'Close',
+  notFound: 'Promotion not found',
+  notFoundSub: 'This offer is unavailable or no longer exists.',
+  specialOffer: 'Special offer',
+  views: 'Views',
+  category: 'Category',
+  save: 'You save',
+  professional: 'Professional',
+  openProfile: 'Open profile',
+  share: 'Share',
+  bookNow: 'Book now',
+  aboutOffer: 'About this ad',
+  included: 'What’s included',
+  pricing: 'Pricing',
+  oldPrice: 'Old price',
+  now: 'Now',
+  youSave: 'You save',
+  validUntil: 'Valid until',
+  location: 'Location',
+  area: 'Area',
+  address: 'Address',
+  distance: 'Distance',
+  copied: 'Link copied',
+  beauty: 'Beauty',
+  providerFallback: 'Provider',
+  noAddress: 'Contacts and address are shown inside this ad',
+};
+
+const TEXTS_BY_LANGUAGE: Record<AppLanguage, PromotionDetailsTexts> = {
+  EN: EN_TEXTS,
+
+  ES: {
+    back: 'Atrás',
+    close: 'Cerrar',
+    notFound: 'Publicidad no encontrada',
+    notFoundSub: 'Esta oferta no está disponible o ya no existe.',
+    specialOffer: 'Oferta especial',
+    views: 'Vistas',
+    category: 'Categoría',
+    save: 'Ahorro',
+    professional: 'Profesional',
+    openProfile: 'Abrir perfil',
+    share: 'Compartir',
+    bookNow: 'Reservar',
+    aboutOffer: 'Sobre esta publicidad',
+    included: 'Qué incluye',
+    pricing: 'Precio',
+    oldPrice: 'Precio anterior',
+    now: 'Ahora',
+    youSave: 'Ahorras',
+    validUntil: 'Válido hasta',
+    location: 'Ubicación',
+    area: 'Zona',
+    address: 'Dirección',
+    distance: 'Distancia',
+    copied: 'Enlace copiado',
+    beauty: 'Belleza',
+    providerFallback: 'Profesional',
+    noAddress: 'Los contactos y la dirección están indicados en la publicidad',
+  },
+
+  RU: {
+    back: 'Назад',
+    close: 'Закрыть',
+    notFound: 'Реклама не найдена',
+    notFoundSub: 'Это предложение недоступно или больше не существует.',
+    specialOffer: 'Специальное предложение',
+    views: 'Просмотры',
+    category: 'Категория',
+    save: 'Экономия',
+    professional: 'Специалист',
+    openProfile: 'Открыть профиль',
+    share: 'Поделиться',
+    bookNow: 'Забронировать',
+    aboutOffer: 'Об этой рекламе',
+    included: 'Что входит',
+    pricing: 'Стоимость',
+    oldPrice: 'Старая цена',
+    now: 'Сейчас',
+    youSave: 'Вы экономите',
+    validUntil: 'Действует до',
+    location: 'Локация',
+    area: 'Район',
+    address: 'Адрес',
+    distance: 'Расстояние',
+    copied: 'Ссылка скопирована',
+    beauty: 'Красота',
+    providerFallback: 'Исполнитель',
+    noAddress: 'Контакты и адрес указаны в рекламе',
+  },
+
+  UA: {
+    back: 'Назад',
+    close: 'Закрити',
+    notFound: 'Рекламу не знайдено',
+    notFoundSub: 'Ця пропозиція недоступна або більше не існує.',
+    specialOffer: 'Спеціальна пропозиція',
+    views: 'Перегляди',
+    category: 'Категорія',
+    save: 'Економія',
+    professional: 'Спеціаліст',
+    openProfile: 'Відкрити профіль',
+    share: 'Поділитися',
+    bookNow: 'Забронювати',
+    aboutOffer: 'Про цю рекламу',
+    included: 'Що входить',
+    pricing: 'Вартість',
+    oldPrice: 'Стара ціна',
+    now: 'Зараз',
+    youSave: 'Ви економите',
+    validUntil: 'Діє до',
+    location: 'Локація',
+    area: 'Район',
+    address: 'Адреса',
+    distance: 'Відстань',
+    copied: 'Посилання скопійовано',
+    beauty: 'Краса',
+    providerFallback: 'Виконавець',
+    noAddress: 'Контакти та адреса вказані в рекламі',
+  },
+
+  CZ: {
+    back: 'Zpět',
+    close: 'Zavřít',
+    notFound: 'Reklama nenalezena',
+    notFoundSub: 'Tato nabídka není dostupná nebo již neexistuje.',
+    specialOffer: 'Speciální nabídka',
+    views: 'Zobrazení',
+    category: 'Kategorie',
+    save: 'Úspora',
+    professional: 'Specialista',
+    openProfile: 'Otevřít profil',
+    share: 'Sdílet',
+    bookNow: 'Rezervovat',
+    aboutOffer: 'O této reklamě',
+    included: 'Co je zahrnuto',
+    pricing: 'Cena',
+    oldPrice: 'Původní cena',
+    now: 'Nyní',
+    youSave: 'Ušetříte',
+    validUntil: 'Platí do',
+    location: 'Lokalita',
+    area: 'Oblast',
+    address: 'Adresa',
+    distance: 'Vzdálenost',
+    copied: 'Odkaz zkopírován',
+    beauty: 'Krása',
+    providerFallback: 'Poskytovatel',
+    noAddress: 'Kontakty a adresa jsou uvedeny v reklamě',
+  },
+
+  DE: {
+    back: 'Zurück',
+    close: 'Schließen',
+    notFound: 'Werbung nicht gefunden',
+    notFoundSub: 'Dieses Angebot ist nicht verfügbar oder existiert nicht mehr.',
+    specialOffer: 'Sonderangebot',
+    views: 'Aufrufe',
+    category: 'Kategorie',
+    save: 'Ersparnis',
+    professional: 'Profi',
+    openProfile: 'Profil öffnen',
+    share: 'Teilen',
+    bookNow: 'Jetzt buchen',
+    aboutOffer: 'Über diese Werbung',
+    included: 'Enthalten',
+    pricing: 'Preis',
+    oldPrice: 'Alter Preis',
+    now: 'Jetzt',
+    youSave: 'Sie sparen',
+    validUntil: 'Gültig bis',
+    location: 'Standort',
+    area: 'Bereich',
+    address: 'Adresse',
+    distance: 'Entfernung',
+    copied: 'Link kopiert',
+    beauty: 'Beauty',
+    providerFallback: 'Anbieter',
+    noAddress: 'Kontakte und Adresse stehen in der Werbung',
+  },
+
+  IT: {
+    back: 'Indietro',
+    close: 'Chiudi',
+    notFound: 'Pubblicità non trovata',
+    notFoundSub: 'Questa offerta non è disponibile o non esiste più.',
+    specialOffer: 'Offerta speciale',
+    views: 'Visualizzazioni',
+    category: 'Categoria',
+    save: 'Risparmio',
+    professional: 'Professionista',
+    openProfile: 'Apri profilo',
+    share: 'Condividi',
+    bookNow: 'Prenota',
+    aboutOffer: 'Informazioni su questa pubblicità',
+    included: 'Cosa include',
+    pricing: 'Prezzo',
+    oldPrice: 'Vecchio prezzo',
+    now: 'Ora',
+    youSave: 'Risparmi',
+    validUntil: 'Valido fino a',
+    location: 'Posizione',
+    area: 'Zona',
+    address: 'Indirizzo',
+    distance: 'Distanza',
+    copied: 'Link copiato',
+    beauty: 'Beauty',
+    providerFallback: 'Fornitore',
+    noAddress: 'Contatti e indirizzo sono indicati nella pubblicità',
+  },
+
+  FR: {
+    back: 'Retour',
+    close: 'Fermer',
+    notFound: 'Publicité introuvable',
+    notFoundSub: 'Cette offre est indisponible ou n’existe plus.',
+    specialOffer: 'Offre spéciale',
+    views: 'Vues',
+    category: 'Catégorie',
+    save: 'Économie',
+    professional: 'Professionnel',
+    openProfile: 'Ouvrir le profil',
+    share: 'Partager',
+    bookNow: 'Réserver',
+    aboutOffer: 'À propos de cette publicité',
+    included: 'Ce qui est inclus',
+    pricing: 'Prix',
+    oldPrice: 'Ancien prix',
+    now: 'Maintenant',
+    youSave: 'Vous économisez',
+    validUntil: 'Valable jusqu’au',
+    location: 'Localisation',
+    area: 'Zone',
+    address: 'Adresse',
+    distance: 'Distance',
+    copied: 'Lien copié',
+    beauty: 'Beauté',
+    providerFallback: 'Prestataire',
+    noAddress: 'Les contacts et l’adresse sont indiqués dans la publicité',
+  },
+
+  AR: {
+    back: 'رجوع',
+    close: 'إغلاق',
+    notFound: 'الإعلان غير موجود',
+    notFoundSub: 'هذا العرض غير متاح أو لم يعد موجوداً.',
+    specialOffer: 'عرض خاص',
+    views: 'المشاهدات',
+    category: 'الفئة',
+    save: 'توفير',
+    professional: 'متخصص',
+    openProfile: 'فتح الملف',
+    share: 'مشاركة',
+    bookNow: 'احجز الآن',
+    aboutOffer: 'حول هذا الإعلان',
+    included: 'ما الذي يشمله',
+    pricing: 'السعر',
+    oldPrice: 'السعر السابق',
+    now: 'الآن',
+    youSave: 'توفر',
+    validUntil: 'صالح حتى',
+    location: 'الموقع',
+    area: 'المنطقة',
+    address: 'العنوان',
+    distance: 'المسافة',
+    copied: 'تم نسخ الرابط',
+    beauty: 'الجمال',
+    providerFallback: 'مقدم الخدمة',
+    noAddress: 'جهات الاتصال والعنوان موجودة داخل الإعلان',
+  },
+
+  PL: {
+    back: 'Wstecz',
+    close: 'Zamknij',
+    notFound: 'Reklama nie znaleziona',
+    notFoundSub: 'Ta oferta jest niedostępna lub już nie istnieje.',
+    specialOffer: 'Oferta specjalna',
+    views: 'Wyświetlenia',
+    category: 'Kategoria',
+    save: 'Oszczędzasz',
+    professional: 'Specjalista',
+    openProfile: 'Otwórz profil',
+    share: 'Udostępnij',
+    bookNow: 'Zarezerwuj',
+    aboutOffer: 'O tej reklamie',
+    included: 'Co zawiera',
+    pricing: 'Cena',
+    oldPrice: 'Stara cena',
+    now: 'Teraz',
+    youSave: 'Oszczędzasz',
+    validUntil: 'Ważne do',
+    location: 'Lokalizacja',
+    area: 'Obszar',
+    address: 'Adres',
+    distance: 'Odległość',
+    copied: 'Link skopiowany',
+    beauty: 'Uroda',
+    providerFallback: 'Wykonawca',
+    noAddress: 'Kontakt i adres są podane w reklamie',
+  },
 };
 
 function SectionCard({
@@ -60,195 +394,7 @@ function SectionCard({
 }
 
 function getTexts(language: AppLanguage) {
-  if (language === 'RU') {
-    return {
-      back: 'Назад',
-      close: 'Закрыть',
-      notFound: 'Реклама не найдена',
-      notFoundSub: 'Это предложение недоступно или больше не существует.',
-      specialOffer: 'Специальное предложение',
-      views: 'Просмотры',
-      category: 'Категория',
-      save: 'Экономия',
-      professional: 'Специалист',
-      openProfile: 'Открыть профиль',
-      share: 'Поделиться',
-      bookNow: 'Забронировать',
-      aboutOffer: 'Об этой рекламе',
-      included: 'Что входит',
-      pricing: 'Стоимость',
-      oldPrice: 'Старая цена',
-      now: 'Сейчас',
-      youSave: 'Вы экономите',
-      validUntil: 'Действует до',
-      location: 'Локация',
-      area: 'Район',
-      address: 'Адрес',
-      distance: 'Расстояние',
-      copied: 'Ссылка скопирована',
-      beauty: 'Красота',
-      providerFallback: 'Исполнитель',
-      noAddress: 'Контакты и адрес указаны в рекламе',
-    };
-  }
-
-  if (language === 'ES') {
-    return {
-      back: 'Atrás',
-      close: 'Cerrar',
-      notFound: 'Publicidad no encontrada',
-      notFoundSub: 'Esta oferta no está disponible o ya no existe.',
-      specialOffer: 'Oferta especial',
-      views: 'Vistas',
-      category: 'Categoría',
-      save: 'Ahorro',
-      professional: 'Profesional',
-      openProfile: 'Abrir perfil',
-      share: 'Compartir',
-      bookNow: 'Reservar',
-      aboutOffer: 'Sobre esta publicidad',
-      included: 'Qué incluye',
-      pricing: 'Precio',
-      oldPrice: 'Precio anterior',
-      now: 'Ahora',
-      youSave: 'Ahorras',
-      validUntil: 'Válido hasta',
-      location: 'Ubicación',
-      area: 'Zona',
-      address: 'Dirección',
-      distance: 'Distancia',
-      copied: 'Enlace copiado',
-      beauty: 'Belleza',
-      providerFallback: 'Profesional',
-      noAddress: 'Los contactos y la dirección están indicados en la publicidad',
-    };
-  }
-
-  if (language === 'CZ') {
-    return {
-      back: 'Zpět',
-      close: 'Zavřít',
-      notFound: 'Reklama nenalezena',
-      notFoundSub: 'Tato nabídka není dostupná nebo již neexistuje.',
-      specialOffer: 'Speciální nabídka',
-      views: 'Zobrazení',
-      category: 'Kategorie',
-      save: 'Úspora',
-      professional: 'Specialista',
-      openProfile: 'Otevřít profil',
-      share: 'Sdílet',
-      bookNow: 'Rezervovat',
-      aboutOffer: 'O této reklamě',
-      included: 'Co je zahrnuto',
-      pricing: 'Cena',
-      oldPrice: 'Původní cena',
-      now: 'Nyní',
-      youSave: 'Ušetříte',
-      validUntil: 'Platí do',
-      location: 'Lokalita',
-      area: 'Oblast',
-      address: 'Adresa',
-      distance: 'Vzdálenost',
-      copied: 'Odkaz zkopírován',
-      beauty: 'Krása',
-      providerFallback: 'Poskytovatel',
-      noAddress: 'Kontakty a adresa jsou uvedeny v reklamě',
-    };
-  }
-
-  if (language === 'DE') {
-    return {
-      back: 'Zurück',
-      close: 'Schließen',
-      notFound: 'Werbung nicht gefunden',
-      notFoundSub: 'Dieses Angebot ist nicht verfügbar oder existiert nicht mehr.',
-      specialOffer: 'Sonderangebot',
-      views: 'Aufrufe',
-      category: 'Kategorie',
-      save: 'Ersparnis',
-      professional: 'Profi',
-      openProfile: 'Profil öffnen',
-      share: 'Teilen',
-      bookNow: 'Jetzt buchen',
-      aboutOffer: 'Über diese Werbung',
-      included: 'Enthalten',
-      pricing: 'Preis',
-      oldPrice: 'Alter Preis',
-      now: 'Jetzt',
-      youSave: 'Sie sparen',
-      validUntil: 'Gültig bis',
-      location: 'Standort',
-      area: 'Bereich',
-      address: 'Adresse',
-      distance: 'Entfernung',
-      copied: 'Link kopiert',
-      beauty: 'Beauty',
-      providerFallback: 'Anbieter',
-      noAddress: 'Kontakte und Adresse stehen in der Werbung',
-    };
-  }
-
-  if (language === 'PL') {
-    return {
-      back: 'Wstecz',
-      close: 'Zamknij',
-      notFound: 'Reklama nie znaleziona',
-      notFoundSub: 'Ta oferta jest niedostępna lub już nie istnieje.',
-      specialOffer: 'Oferta specjalna',
-      views: 'Wyświetlenia',
-      category: 'Kategoria',
-      save: 'Oszczędzasz',
-      professional: 'Specjalista',
-      openProfile: 'Otwórz profil',
-      share: 'Udostępnij',
-      bookNow: 'Zarezerwuj',
-      aboutOffer: 'O tej reklamie',
-      included: 'Co zawiera',
-      pricing: 'Cena',
-      oldPrice: 'Stara cena',
-      now: 'Teraz',
-      youSave: 'Oszczędzasz',
-      validUntil: 'Ważne do',
-      location: 'Lokalizacja',
-      area: 'Obszar',
-      address: 'Adres',
-      distance: 'Odległość',
-      copied: 'Link skopiowany',
-      beauty: 'Uroda',
-      providerFallback: 'Wykonawca',
-      noAddress: 'Kontakt i adres są podane w reklamie',
-    };
-  }
-
-  return {
-    back: 'Back',
-    close: 'Close',
-    notFound: 'Promotion not found',
-    notFoundSub: 'This offer is unavailable or no longer exists.',
-    specialOffer: 'Special offer',
-    views: 'Views',
-    category: 'Category',
-    save: 'You save',
-    professional: 'Professional',
-    openProfile: 'Open profile',
-    share: 'Share',
-    bookNow: 'Book now',
-    aboutOffer: 'About this ad',
-    included: 'What’s included',
-    pricing: 'Pricing',
-    oldPrice: 'Old price',
-    now: 'Now',
-    youSave: 'You save',
-    validUntil: 'Valid until',
-    location: 'Location',
-    area: 'Area',
-    address: 'Address',
-    distance: 'Distance',
-    copied: 'Link copied',
-    beauty: 'Beauty',
-    providerFallback: 'Provider',
-    noAddress: 'Contacts and address are shown inside this ad',
-  };
+  return TEXTS_BY_LANGUAGE[language] || TEXTS_BY_LANGUAGE.EN;
 }
 
 function parsePriceNumber(value: string | undefined) {
@@ -257,13 +403,210 @@ function parsePriceNumber(value: string | undefined) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function getCategoryLabel(promotion: PromotionItem | null, fallback: string) {
-  if (!promotion) return fallback;
+function getLocalizedCategoryLabel(categoryId: string | undefined, language: AppLanguage, fallback: string) {
+  const normalized = String(categoryId || '').toLowerCase();
+
+  const map: Record<string, Partial<Record<AppLanguage, string>>> = {
+    beauty: {
+      EN: 'Beauty',
+      ES: 'Belleza',
+      RU: 'Красота',
+      UA: 'Краса',
+      CZ: 'Krása',
+      DE: 'Beauty',
+      IT: 'Beauty',
+      FR: 'Beauté',
+      AR: 'الجمال',
+      PL: 'Uroda',
+    },
+    barber: {
+      EN: 'Barber',
+      ES: 'Barbero',
+      RU: 'Барбер',
+      UA: 'Барбер',
+      CZ: 'Barber',
+      DE: 'Barber',
+      IT: 'Barber',
+      FR: 'Barbier',
+      AR: 'حلاقة',
+      PL: 'Barber',
+    },
+    wellness: {
+      EN: 'Wellness',
+      ES: 'Bienestar',
+      RU: 'Велнес',
+      UA: 'Велнес',
+      CZ: 'Wellness',
+      DE: 'Wellness',
+      IT: 'Benessere',
+      FR: 'Bien-être',
+      AR: 'عافية',
+      PL: 'Wellness',
+    },
+    home: {
+      EN: 'Home',
+      ES: 'Hogar',
+      RU: 'Дом',
+      UA: 'Дім',
+      CZ: 'Domov',
+      DE: 'Zuhause',
+      IT: 'Casa',
+      FR: 'Maison',
+      AR: 'المنزل',
+      PL: 'Dom',
+    },
+    repairs: {
+      EN: 'Repairs',
+      ES: 'Reparaciones',
+      RU: 'Ремонт',
+      UA: 'Ремонт',
+      CZ: 'Opravy',
+      DE: 'Reparaturen',
+      IT: 'Riparazioni',
+      FR: 'Réparations',
+      AR: 'إصلاحات',
+      PL: 'Naprawy',
+    },
+    tech: {
+      EN: 'Tech',
+      ES: 'Tecnología',
+      RU: 'Техника',
+      UA: 'Техніка',
+      CZ: 'Technika',
+      DE: 'Technik',
+      IT: 'Tech',
+      FR: 'Tech',
+      AR: 'تقنية',
+      PL: 'Technika',
+    },
+    fashion: {
+      EN: 'Fashion',
+      ES: 'Moda',
+      RU: 'Мода',
+      UA: 'Мода',
+      CZ: 'Móda',
+      DE: 'Mode',
+      IT: 'Moda',
+      FR: 'Mode',
+      AR: 'موضة',
+      PL: 'Moda',
+    },
+    pets: {
+      EN: 'Pets',
+      ES: 'Mascotas',
+      RU: 'Питомцы',
+      UA: 'Тварини',
+      CZ: 'Mazlíčci',
+      DE: 'Haustiere',
+      IT: 'Animali',
+      FR: 'Animaux',
+      AR: 'حيوانات',
+      PL: 'Zwierzęta',
+    },
+    auto: {
+      EN: 'Auto',
+      ES: 'Auto',
+      RU: 'Авто',
+      UA: 'Авто',
+      CZ: 'Auto',
+      DE: 'Auto',
+      IT: 'Auto',
+      FR: 'Auto',
+      AR: 'سيارات',
+      PL: 'Auto',
+    },
+    moving: {
+      EN: 'Moving',
+      ES: 'Mudanza',
+      RU: 'Переезд',
+      UA: 'Переїзд',
+      CZ: 'Stěhování',
+      DE: 'Umzug',
+      IT: 'Trasloco',
+      FR: 'Déménagement',
+      AR: 'نقل',
+      PL: 'Przeprowadzka',
+    },
+    fitness: {
+      EN: 'Fitness',
+      ES: 'Fitness',
+      RU: 'Фитнес',
+      UA: 'Фітнес',
+      CZ: 'Fitness',
+      DE: 'Fitness',
+      IT: 'Fitness',
+      FR: 'Fitness',
+      AR: 'لياقة',
+      PL: 'Fitness',
+    },
+    education: {
+      EN: 'Education',
+      ES: 'Educación',
+      RU: 'Обучение',
+      UA: 'Освіта',
+      CZ: 'Vzdělání',
+      DE: 'Bildung',
+      IT: 'Formazione',
+      FR: 'Éducation',
+      AR: 'تعليم',
+      PL: 'Edukacja',
+    },
+    events: {
+      EN: 'Events',
+      ES: 'Eventos',
+      RU: 'События',
+      UA: 'Події',
+      CZ: 'Události',
+      DE: 'Events',
+      IT: 'Eventi',
+      FR: 'Événements',
+      AR: 'فعاليات',
+      PL: 'Wydarzenia',
+    },
+    activities: {
+      EN: 'Activities',
+      ES: 'Actividades',
+      RU: 'Активности',
+      UA: 'Активності',
+      CZ: 'Aktivity',
+      DE: 'Aktivitäten',
+      IT: 'Attività',
+      FR: 'Activités',
+      AR: 'أنشطة',
+      PL: 'Aktywności',
+    },
+    creative: {
+      EN: 'Creative',
+      ES: 'Creativo',
+      RU: 'Креатив',
+      UA: 'Креатив',
+      CZ: 'Kreativa',
+      DE: 'Kreativ',
+      IT: 'Creativo',
+      FR: 'Créatif',
+      AR: 'إبداعي',
+      PL: 'Kreatywne',
+    },
+  };
+
+  const categoryFromList = categories.find((item) => item.id === normalized);
+
   return (
-    categories.find((item) => item.id === promotion.categoryId)?.label ||
-    promotion.categoryId ||
+    map[normalized]?.[language] ||
+    map[normalized]?.EN ||
+    categoryFromList?.shortLabel ||
+    categoryFromList?.label ||
     fallback
   );
+}
+
+function getCategoryLabel(
+  promotion: PromotionItem | null,
+  language: AppLanguage,
+  fallback: string
+) {
+  if (!promotion) return fallback;
+  return getLocalizedCategoryLabel(promotion.categoryId, language, fallback);
 }
 
 function normalizeText(value: string) {
@@ -296,7 +639,11 @@ function findLinkedMaster(promotion: PromotionItem | null): MasterLike | null {
 
       if (normalizedTitle && haystack.includes(normalizedTitle)) score += 100;
       if (normalizedSubtitle && haystack.includes(normalizedSubtitle)) score += 50;
-      if (promotion.categoryId && normalizeText(master.category || '') === normalizeText(promotion.categoryId)) {
+
+      if (
+        promotion.categoryId &&
+        normalizeText(master.category || '') === normalizeText(promotion.categoryId)
+      ) {
         score += 30;
       }
 
@@ -323,6 +670,7 @@ export default function PromotionDetailsPage() {
   const [promotion, setPromotion] = useState<PromotionItem | null>(null);
 
   const text = getTexts(language);
+  const isRtl = language === 'AR';
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -352,11 +700,18 @@ export default function PromotionDetailsPage() {
   const master = useMemo(() => findLinkedMaster(promotion), [promotion]);
 
   const categoryLabel = useMemo(() => {
-    return getCategoryLabel(promotion, text.beauty);
-  }, [promotion, text.beauty]);
+    return getCategoryLabel(promotion, language, text.beauty);
+  }, [promotion, language, text.beauty]);
 
-  const oldPriceValue = useMemo(() => parsePriceNumber(promotion?.oldPrice), [promotion?.oldPrice]);
-  const newPriceValue = useMemo(() => parsePriceNumber(promotion?.newPrice), [promotion?.newPrice]);
+  const oldPriceValue = useMemo(
+    () => parsePriceNumber(promotion?.oldPrice),
+    [promotion?.oldPrice]
+  );
+
+  const newPriceValue = useMemo(
+    () => parsePriceNumber(promotion?.newPrice),
+    [promotion?.newPrice]
+  );
 
   const saveAmount = useMemo(() => {
     if (oldPriceValue === null || newPriceValue === null) return 0;
@@ -401,6 +756,7 @@ export default function PromotionDetailsPage() {
   if (!promotion) {
     return (
       <main
+        dir={isRtl ? 'rtl' : 'ltr'}
         style={{
           minHeight: '100vh',
           background: '#f7f4ee',
@@ -494,6 +850,7 @@ export default function PromotionDetailsPage() {
 
   return (
     <main
+      dir={isRtl ? 'rtl' : 'ltr'}
       style={{
         minHeight: '100vh',
         background: '#f7f4ee',
@@ -540,6 +897,7 @@ export default function PromotionDetailsPage() {
             >
               {promotion.title}
             </div>
+
             <div
               style={{
                 marginTop: 4,
@@ -597,7 +955,8 @@ export default function PromotionDetailsPage() {
                 style={{
                   position: 'absolute',
                   top: 14,
-                  left: 14,
+                  left: isRtl ? 'auto' : 14,
+                  right: isRtl ? 14 : 'auto',
                   borderRadius: 999,
                   border: '2px solid #111111',
                   background: '#ecfdf3',
