@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
 import {
@@ -379,6 +379,7 @@ function Card({ children }: { children: React.ReactNode }) {
 
 export default function LanguageRegionPage() {
   const router = useRouter();
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [profile, setProfile] = useState<UserProfile>(getUserProfile());
@@ -410,15 +411,35 @@ export default function LanguageRegionPage() {
     return () => {
       unsubLanguage();
       unsubProfile();
+
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
     };
   }, []);
 
   const text = pageTexts[language] || pageTexts.EN;
   const currencyOptions = useMemo(() => getCurrencyOptions(text), [text]);
 
+  const closeAfterLanguageSelect = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+    }
+
+    closeTimerRef.current = setTimeout(() => {
+      if (typeof window !== 'undefined' && window.history.length > 1) {
+        router.back();
+        return;
+      }
+
+      router.push('/');
+    }, 650);
+  };
+
   const applyLanguage = (nextLanguage: AppLanguage) => {
     setSelectedLanguage(nextLanguage);
     setLanguage(nextLanguage);
+
     saveLanguage(nextLanguage);
 
     updateAppRegionSettings({
@@ -428,6 +449,8 @@ export default function LanguageRegionPage() {
     updateUserProfile({
       language: nextLanguage,
     });
+
+    closeAfterLanguageSelect();
   };
 
   const applyCurrency = (nextCurrency: AppCurrency) => {
@@ -561,12 +584,7 @@ export default function LanguageRegionPage() {
           <Card>
             <SectionTitle>{text.currentSetup}</SectionTitle>
 
-            <div
-              style={{
-                display: 'grid',
-                gap: 10,
-              }}
-            >
+            <div style={{ display: 'grid', gap: 10 }}>
               <div
                 style={{
                   borderRadius: 18,
