@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
@@ -11,7 +11,11 @@ import {
   setLocationMode,
   getEffectiveSearchLocation,
 } from '../../../services/appRegionStore';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
 
 const ManualLocationPickerMap = dynamic(
   () => import('../../../components/profile/ManualLocationPickerMap'),
@@ -176,6 +180,19 @@ const pageTexts: Record<AppLanguage, PageTextShape> = {
   },
 };
 
+function getCurrentLocationLabel(language: AppLanguage) {
+  if (language === 'ES') return 'Ubicación actual';
+  if (language === 'RU') return 'Текущее местоположение';
+  if (language === 'UA') return 'Поточна локація';
+  if (language === 'CZ') return 'Aktuální poloha';
+  if (language === 'DE') return 'Aktueller Standort';
+  if (language === 'IT') return 'Posizione attuale';
+  if (language === 'FR') return 'Position actuelle';
+  if (language === 'AR') return 'الموقع الحالي';
+  if (language === 'PL') return 'Bieżąca lokalizacja';
+  return 'Current location';
+}
+
 function CheckMark({ checked }: { checked: boolean }) {
   return (
     <div
@@ -201,8 +218,10 @@ function CheckMark({ checked }: { checked: boolean }) {
 
 export default function LocationPage() {
   const router = useRouter();
-  const language = getSavedLanguage();
-  const text = pageTexts[language] || pageTexts.EN;
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+
   const settings = getAppRegionSettings();
   const effectiveLocation = getEffectiveSearchLocation();
 
@@ -215,10 +234,40 @@ export default function LocationPage() {
       : null
   );
 
+  const text = pageTexts[language] || pageTexts.EN;
+
+  useEffect(() => {
+    const unsubscribe = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    return () => {
+      unsubscribe();
+
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
+
   const center = useMemo<[number, number]>(() => {
     if (manualMarker) return manualMarker;
     return [effectiveLocation.lat, effectiveLocation.lng];
   }, [manualMarker, effectiveLocation.lat, effectiveLocation.lng]);
+
+  const closePage = () => {
+    router.back();
+  };
+
+  const closeAfterSelection = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+    }
+
+    closeTimerRef.current = setTimeout(() => {
+      router.back();
+    }, 550);
+  };
 
   const handleAutomatic = () => {
     if (typeof window === 'undefined' || !navigator.geolocation) {
@@ -232,13 +281,14 @@ export default function LocationPage() {
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
+        const label = getCurrentLocationLabel(language);
 
-        setCurrentLocation(lat, lng, 'Current location');
+        setCurrentLocation(lat, lng, label);
         setLocationMode('current');
         setMode('current');
         setIsLocating(false);
 
-        alert(text.success);
+        closeAfterSelection();
       },
       () => {
         setIsLocating(false);
@@ -259,9 +309,13 @@ export default function LocationPage() {
 
   const handlePickManualLocation = (lat: number, lng: number) => {
     const label = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
     setCustomLocation(lat, lng, label);
+    setLocationMode('custom');
     setManualMarker([lat, lng]);
     setMode('custom');
+
+    closeAfterSelection();
   };
 
   return (
@@ -277,30 +331,12 @@ export default function LocationPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '52px 1fr',
+            gridTemplateColumns: '1fr 52px',
             alignItems: 'center',
             gap: 12,
             marginBottom: 16,
           }}
         >
-          <button
-            type="button"
-            onClick={() => router.back()}
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: 18,
-              border: '2px solid #111111',
-              background: '#fff',
-              fontSize: 24,
-              fontWeight: 900,
-              color: '#17130f',
-              cursor: 'pointer',
-            }}
-          >
-            ←
-          </button>
-
           <div>
             <h1
               style={{
@@ -313,6 +349,7 @@ export default function LocationPage() {
             >
               {text.title}
             </h1>
+
             <div
               style={{
                 marginTop: 6,
@@ -325,6 +362,29 @@ export default function LocationPage() {
               {text.subtitle}
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={closePage}
+            aria-label="Close"
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: 18,
+              border: '2px solid #111111',
+              background: '#fff',
+              fontSize: 28,
+              fontWeight: 900,
+              color: '#17130f',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
         </div>
 
         <div
@@ -360,7 +420,15 @@ export default function LocationPage() {
               <div style={{ fontSize: 15, fontWeight: 900, color: '#17130f' }}>
                 {isLocating ? text.loading : text.automatic}
               </div>
-              <div style={{ fontSize: 12, color: '#7c746a', fontWeight: 700, marginTop: 4 }}>
+
+              <div
+                style={{
+                  fontSize: 12,
+                  color: '#7c746a',
+                  fontWeight: 700,
+                  marginTop: 4,
+                }}
+              >
                 {text.automaticHint}
               </div>
             </div>
@@ -391,7 +459,15 @@ export default function LocationPage() {
               <div style={{ fontSize: 15, fontWeight: 900, color: '#17130f' }}>
                 {text.manual}
               </div>
-              <div style={{ fontSize: 12, color: '#7c746a', fontWeight: 700, marginTop: 4 }}>
+
+              <div
+                style={{
+                  fontSize: 12,
+                  color: '#7c746a',
+                  fontWeight: 700,
+                  marginTop: 4,
+                }}
+              >
                 {text.manualHint}
               </div>
             </div>
