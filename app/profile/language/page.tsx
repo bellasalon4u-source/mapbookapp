@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
 import {
@@ -14,24 +14,6 @@ import {
   subscribeToUserProfile,
   updateUserProfile,
 } from '../../services/userProfileStore';
-
-type PageTextShape = {
-  title: string;
-  subtitle: string;
-};
-
-const pageTexts: Record<AppLanguage, PageTextShape> = {
-  EN: { title: 'Language', subtitle: 'Choose app language' },
-  ES: { title: 'Idioma', subtitle: 'Elige el idioma de la aplicación' },
-  RU: { title: 'Язык', subtitle: 'Выберите язык приложения' },
-  UA: { title: 'Мова', subtitle: 'Оберіть мову застосунку' },
-  CZ: { title: 'Jazyk', subtitle: 'Vyberte jazyk aplikace' },
-  DE: { title: 'Sprache', subtitle: 'Wähle die Sprache der App' },
-  IT: { title: 'Lingua', subtitle: 'Scegli la lingua dell’app' },
-  FR: { title: 'Langue', subtitle: 'Choisissez la langue de l’application' },
-  AR: { title: 'اللغة', subtitle: 'اختر لغة التطبيق' },
-  PL: { title: 'Język', subtitle: 'Wybierz język aplikacji' },
-};
 
 const languageOptions: { value: AppLanguage; label: string; flag: string }[] = [
   { value: 'EN', label: 'English', flag: '🇬🇧' },
@@ -50,8 +32,8 @@ function CheckMark({ checked }: { checked: boolean }) {
   return (
     <div
       style={{
-        width: 28,
-        height: 28,
+        width: 30,
+        height: 30,
         borderRadius: 999,
         border: '2px solid #111111',
         background: checked ? '#35c94a' : '#ffffff',
@@ -59,9 +41,10 @@ function CheckMark({ checked }: { checked: boolean }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: 900,
         flexShrink: 0,
+        boxShadow: checked ? '0 4px 10px rgba(53,201,74,0.22)' : 'none',
       }}
     >
       {checked ? '✓' : ''}
@@ -71,7 +54,10 @@ function CheckMark({ checked }: { checked: boolean }) {
 
 export default function LanguagePage() {
   const router = useRouter();
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [closingLanguage, setClosingLanguage] = useState<AppLanguage | null>(null);
 
   useEffect(() => {
     const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
@@ -83,13 +69,25 @@ export default function LanguagePage() {
     return () => {
       unsubLanguage();
       unsubProfile();
+
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
     };
   }, []);
 
-  const text = pageTexts[language] || pageTexts.EN;
+  const closePage = () => {
+    router.back();
+  };
 
   const applyLanguage = (nextLanguage: AppLanguage) => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+    }
+
     setLanguage(nextLanguage);
+    setClosingLanguage(nextLanguage);
+
     saveLanguage(nextLanguage);
 
     updateAppRegionSettings({
@@ -99,6 +97,10 @@ export default function LanguagePage() {
     updateUserProfile({
       language: nextLanguage,
     });
+
+    closeTimerRef.current = setTimeout(() => {
+      router.back();
+    }, 450);
   };
 
   return (
@@ -106,76 +108,58 @@ export default function LanguagePage() {
       style={{
         minHeight: '100vh',
         background: '#f6f4ef',
-        padding: '16px 14px 120px',
+        padding: '18px 14px 128px',
         fontFamily: 'Arial, sans-serif',
+        color: '#17130f',
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto' }}>
-        <div
+      <div
+        style={{
+          maxWidth: 430,
+          margin: '0 auto',
+          position: 'relative',
+        }}
+      >
+        <button
+          type="button"
+          onClick={closePage}
+          aria-label="Close"
           style={{
-            display: 'grid',
-            gridTemplateColumns: '52px 1fr',
+            position: 'fixed',
+            top: 18,
+            right: 18,
+            width: 52,
+            height: 52,
+            borderRadius: 999,
+            border: '2px solid #111111',
+            background: '#ffffff',
+            color: '#17130f',
+            fontSize: 28,
+            fontWeight: 900,
+            cursor: 'pointer',
+            zIndex: 1300,
+            boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
+            display: 'flex',
             alignItems: 'center',
-            gap: 12,
-            marginBottom: 16,
+            justifyContent: 'center',
+            lineHeight: 1,
           }}
         >
-          <button
-            type="button"
-            onClick={() => router.back()}
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: 18,
-              border: '2px solid #111111',
-              background: '#fff',
-              fontSize: 24,
-              fontWeight: 900,
-              color: '#17130f',
-              cursor: 'pointer',
-            }}
-          >
-            ←
-          </button>
-
-          <div>
-            <h1
-              style={{
-                fontSize: 24,
-                fontWeight: 900,
-                color: '#17130f',
-                margin: 0,
-                lineHeight: 1.05,
-              }}
-            >
-              {text.title}
-            </h1>
-            <div
-              style={{
-                marginTop: 6,
-                fontSize: 13,
-                color: '#7b7268',
-                fontWeight: 700,
-                lineHeight: 1.35,
-              }}
-            >
-              {text.subtitle}
-            </div>
-          </div>
-        </div>
+          ×
+        </button>
 
         <div
           style={{
             background: '#ffffff',
-            borderRadius: 26,
-            padding: 14,
+            borderRadius: 30,
+            padding: '76px 14px 14px',
             border: '2px solid #111111',
             display: 'grid',
             gap: 10,
           }}
         >
           {languageOptions.map((option) => {
-            const checked = language === option.value;
+            const checked = language === option.value || closingLanguage === option.value;
 
             return (
               <button
@@ -185,24 +169,39 @@ export default function LanguagePage() {
                 style={{
                   width: '100%',
                   display: 'grid',
-                  gridTemplateColumns: '34px 1fr auto',
+                  gridTemplateColumns: '34px minmax(0, 1fr) 34px',
                   alignItems: 'center',
                   gap: 12,
                   padding: '14px 12px',
-                  background: checked ? '#f7f1e7' : '#fff',
+                  background: checked ? '#f7f1e7' : '#ffffff',
                   border: '2px solid #111111',
                   textAlign: 'left',
-                  borderRadius: 18,
+                  borderRadius: 20,
                   cursor: 'pointer',
+                  minHeight: 72,
+                  boxSizing: 'border-box',
                 }}
               >
-                <div style={{ fontSize: 22 }}>{option.flag}</div>
+                <div
+                  style={{
+                    fontSize: 23,
+                    lineHeight: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {option.flag}
+                </div>
 
                 <div
                   style={{
-                    fontSize: 16,
+                    fontSize: 17,
                     fontWeight: 900,
                     color: '#17130f',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {option.label}
