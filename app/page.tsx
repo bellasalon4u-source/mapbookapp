@@ -674,11 +674,12 @@ function PromoCard({
               height: 30,
               borderRadius: 12,
               border: '1.5px solid #111111',
-              background: '#55c75f',
+              background: '#1f6fff',
               color: '#ffffff',
               fontSize: 11,
               fontWeight: 900,
               cursor: 'pointer',
+              boxShadow: '0 5px 12px rgba(31,111,255,0.24)',
             }}
           >
             {bookLabel}
