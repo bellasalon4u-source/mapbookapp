@@ -350,6 +350,7 @@ function extractPromotionDiscountBadge(promo: PromotionItem) {
         return value.startsWith('-') ? value : `-${value.replace(/^-/, '')}`;
       }
       if (value.toUpperCase() === 'SALE') return 'SALE';
+      return value;
     }
   }
 
@@ -443,11 +444,13 @@ function ActionCountButton({
   icon,
   title,
   count,
+  active,
   onClick,
 }: {
   icon: ReactNode;
   title: string;
   count: number;
+  active?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -455,9 +458,9 @@ function ActionCountButton({
       onClick={onClick}
       style={{
         minHeight: 54,
-        border: '1.2px solid #cfc8be',
+        border: active ? '2px solid #111111' : '1.2px solid #cfc8be',
         borderRadius: 18,
-        background: '#ffffff',
+        background: active ? '#fff8d8' : '#ffffff',
         color: '#151515',
         cursor: 'pointer',
         display: 'grid',
@@ -465,25 +468,11 @@ function ActionCountButton({
         alignItems: 'center',
         gap: 8,
         padding: '0 10px 0 12px',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+        boxShadow: active ? '0 3px 0 rgba(0,0,0,0.10)' : '0 1px 2px rgba(0,0,0,0.03)',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          minWidth: 0,
-        }}
-      >
-        <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           {icon}
         </span>
 
@@ -541,15 +530,7 @@ function BrightTicker({ language }: { language: AppLanguage }) {
         borderRadius: 10,
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          flexShrink: 0,
-          marginRight: 12,
-        }}
-      >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, marginRight: 12 }}>
         <span style={{ fontSize: 14, lineHeight: 1 }}>{flag}</span>
         <img
           src={logo}
@@ -563,13 +544,7 @@ function BrightTicker({ language }: { language: AppLanguage }) {
         />
       </div>
 
-      <div
-        style={{
-          overflow: 'hidden',
-          whiteSpace: 'nowrap',
-          flex: 1,
-        }}
-      >
+      <div style={{ overflow: 'hidden', whiteSpace: 'nowrap', flex: 1 }}>
         <div
           style={{
             display: 'inline-flex',
@@ -583,21 +558,8 @@ function BrightTicker({ language }: { language: AppLanguage }) {
             animation: 'olamepTickerMove 18s linear infinite',
           }}
         >
-          {messages.map((item, index) => (
-            <span
-              key={`${item}-${index}`}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}
-            >
-              <span>{item}</span>
-              <span style={{ color: '#d6b500', fontSize: 8 }}>●</span>
-            </span>
-          ))}
-
-          {messages.map((item, index) => (
-            <span
-              key={`${item}-repeat-${index}`}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}
-            >
+          {[...messages, ...messages].map((item, index) => (
+            <span key={`${item}-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
               <span>{item}</span>
               <span style={{ color: '#d6b500', fontSize: 8 }}>●</span>
             </span>
@@ -610,14 +572,27 @@ function BrightTicker({ language }: { language: AppLanguage }) {
 
 function PromoCard({
   promo,
+  language,
   onOpen,
+  onBook,
 }: {
   promo: PromotionItem;
   language: AppLanguage;
   onOpen: () => void;
+  onBook: () => void;
 }) {
   const anyPromo = promo as any;
   const discountBadge = extractPromotionDiscountBadge(promo);
+  const bookLabel =
+    language === 'RU'
+      ? 'Бронь'
+      : language === 'UA'
+      ? 'Бронь'
+      : language === 'CZ'
+      ? 'Rezervovat'
+      : language === 'ES'
+      ? 'Reservar'
+      : 'Book';
 
   return (
     <button
@@ -653,8 +628,9 @@ function PromoCard({
             position: 'absolute',
             top: 6,
             left: 6,
-            background: '#ffffff',
-            color: '#ff4f93',
+            background: '#ffe44d',
+            color: '#17130f',
+            border: '1.5px solid #111111',
             borderRadius: 999,
             padding: '4px 8px',
             fontSize: 9,
@@ -662,7 +638,7 @@ function PromoCard({
             boxShadow: '0 2px 6px rgba(0,0,0,0.07)',
           }}
         >
-          Sponsored
+          {discountBadge}
         </div>
       </div>
 
@@ -670,7 +646,7 @@ function PromoCard({
         <div
           style={{
             fontSize: 12,
-            fontWeight: 700,
+            fontWeight: 800,
             color: '#151515',
             lineHeight: 1.2,
             minHeight: 30,
@@ -682,21 +658,31 @@ function PromoCard({
         <div
           style={{
             marginTop: 8,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: 'grid',
+            gridTemplateColumns: '1fr auto',
             gap: 8,
+            alignItems: 'center',
           }}
         >
-          <div
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onBook();
+            }}
             style={{
-              fontSize: 12,
+              height: 30,
+              borderRadius: 12,
+              border: '1.5px solid #111111',
+              background: '#55c75f',
+              color: '#ffffff',
+              fontSize: 11,
               fontWeight: 900,
-              color: '#ff4f93',
+              cursor: 'pointer',
             }}
           >
-            {discountBadge}
-          </div>
+            {bookLabel}
+          </button>
 
           <div
             style={{
@@ -714,6 +700,271 @@ function PromoCard({
         </div>
       </div>
     </button>
+  );
+}
+
+function MasterMiniCard({
+  master,
+  language,
+  liked,
+  discountBadge,
+  onClose,
+  onLike,
+  onOpen,
+  onRoute,
+  onBook,
+}: {
+  master: any;
+  language: AppLanguage;
+  liked: boolean;
+  discountBadge?: string;
+  onClose: () => void;
+  onLike: () => void;
+  onOpen: () => void;
+  onRoute: () => void;
+  onBook: () => void;
+}) {
+  const tr = t(language);
+  const price = master.price || master.priceFrom || master.startingPrice || '45';
+  const categoryLabel = getCategoryLabel(master.category, language);
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: 10,
+        right: 10,
+        bottom: 10,
+        zIndex: 800,
+        borderRadius: 22,
+        border: '1.8px solid #111111',
+        background: '#ffffff',
+        boxShadow: '0 12px 28px rgba(0,0,0,0.18)',
+        padding: 10,
+      }}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        style={{
+          position: 'absolute',
+          right: 9,
+          top: 9,
+          width: 26,
+          height: 26,
+          borderRadius: 999,
+          border: '1.4px solid #111111',
+          background: '#ffffff',
+          color: '#111111',
+          fontSize: 14,
+          fontWeight: 900,
+          cursor: 'pointer',
+          zIndex: 2,
+        }}
+      >
+        ×
+      </button>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '68px 1fr',
+          gap: 10,
+          alignItems: 'center',
+        }}
+      >
+        <div style={{ position: 'relative' }}>
+          <img
+            src={
+              master.avatar ||
+              master.cover ||
+              'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80'
+            }
+            alt={master.name || master.title || 'Master'}
+            style={{
+              width: 68,
+              height: 68,
+              borderRadius: 18,
+              objectFit: 'cover',
+              display: 'block',
+              border: '1.5px solid #111111',
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={onLike}
+            style={{
+              position: 'absolute',
+              right: -7,
+              bottom: -7,
+              width: 30,
+              height: 30,
+              borderRadius: 999,
+              border: '1.5px solid #111111',
+              background: '#ffffff',
+              color: liked ? '#ff3b58' : '#222222',
+              fontSize: 17,
+              fontWeight: 900,
+              cursor: 'pointer',
+              boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+            }}
+          >
+            {liked ? '♥' : '♡'}
+          </button>
+        </div>
+
+        <div style={{ minWidth: 0, paddingRight: 30 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              marginBottom: 5,
+              flexWrap: 'wrap',
+            }}
+          >
+            <span
+              style={{
+                borderRadius: 999,
+                background: master.availableNow ? '#dff2e3' : '#f4f1ea',
+                color: master.availableNow ? '#15803d' : '#6f675f',
+                border: '1.2px solid #111111',
+                padding: '4px 8px',
+                fontSize: 9,
+                fontWeight: 900,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {master.availableNow ? tr.availableNow : tr.unavailableToday}
+            </span>
+
+            {discountBadge ? (
+              <span
+                style={{
+                  borderRadius: 999,
+                  background: '#ffe44d',
+                  color: '#17130f',
+                  border: '1.2px solid #111111',
+                  padding: '4px 8px',
+                  fontSize: 9,
+                  fontWeight: 900,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {discountBadge}
+              </span>
+            ) : null}
+          </div>
+
+          <div
+            style={{
+              fontSize: 15,
+              fontWeight: 900,
+              color: '#17130f',
+              lineHeight: 1.15,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {master.name || master.title || 'Professional'}
+          </div>
+
+          <div
+            style={{
+              marginTop: 3,
+              fontSize: 11,
+              fontWeight: 700,
+              color: '#6f675f',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {categoryLabel}
+            {master.subcategory ? ` • ${master.subcategory}` : ''}
+          </div>
+
+          <div
+            style={{
+              marginTop: 5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 11,
+              fontWeight: 800,
+              color: '#17130f',
+            }}
+          >
+            <span>★ {typeof master.rating === 'number' ? master.rating.toFixed(1) : '4.8'}</span>
+            <span>
+              {tr.from} £{String(price).replace(/[^\d.]/g, '') || '45'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: 10,
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1.15fr',
+          gap: 8,
+        }}
+      >
+        <button
+          type="button"
+          onClick={onOpen}
+          style={{
+            height: 40,
+            borderRadius: 14,
+            border: '1.5px solid #111111',
+            background: '#ffffff',
+            color: '#17130f',
+            fontSize: 12,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          {tr.view}
+        </button>
+
+        <button
+          type="button"
+          onClick={onRoute}
+          style={{
+            height: 40,
+            borderRadius: 14,
+            border: '1.5px solid #111111',
+            background: '#eef4ff',
+            color: '#2563eb',
+            fontSize: 12,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          {tr.route}
+        </button>
+
+        <button
+          type="button"
+          onClick={onBook}
+          style={{
+            height: 40,
+            borderRadius: 14,
+            border: '1.5px solid #111111',
+            background: '#55c75f',
+            color: '#ffffff',
+            fontSize: 12,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          {tr.bookNow}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -981,6 +1232,21 @@ export default function HomePage() {
     });
   }, [allMasters, search]);
 
+  const categoryFilteredMasters = useMemo(() => {
+    return searchedMasters.filter((master: any) => {
+      const masterCategory = String(master.category || '').toLowerCase().trim();
+      const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
+
+      const categoryOk = masterCategory === String(activeCategory || '').toLowerCase().trim();
+
+      if (!categoryOk) return false;
+
+      if (!activeSubcategory) return true;
+
+      return masterSubcategory === String(activeSubcategory || '').toLowerCase().trim();
+    });
+  }, [searchedMasters, activeCategory, activeSubcategory]);
+
   const categoryDealsCount = useMemo(() => {
     return promotions.filter((promo) => isPromotionInCategory(promo, activeCategory)).length;
   }, [promotions, activeCategory]);
@@ -1030,10 +1296,24 @@ export default function HomePage() {
     return Object.fromEntries(entries);
   }, [promotionMasters]);
 
+  const likedFilteredMasters = useMemo(() => {
+    if (likedFilterMode === 'all') {
+      return allMasters.filter((master: any) => likedMasterIds.includes(String(master.id)));
+    }
+
+    if (likedFilterMode === 'category') {
+      return categoryFilteredMasters.filter((master: any) =>
+        likedMasterIds.includes(String(master.id))
+      );
+    }
+
+    return categoryFilteredMasters;
+  }, [likedFilterMode, allMasters, categoryFilteredMasters, likedMasterIds]);
+
   const mapMasters = useMemo(() => {
     if (dealFilterMode !== 'none') return promotionMasters;
-    return searchedMasters;
-  }, [dealFilterMode, promotionMasters, searchedMasters]);
+    return likedFilteredMasters;
+  }, [dealFilterMode, promotionMasters, likedFilteredMasters]);
 
   useEffect(() => {
     setSelectedMaster(null);
@@ -1055,10 +1335,14 @@ export default function HomePage() {
 
   const currencySymbol = getCurrencySymbolForLocation(locationLabel);
 
-  const displayLikedInCategoryCount = likedInCategoryCount > 0 ? likedInCategoryCount : 12;
-  const displayCategoryDealsCount = categoryDealsCount > 0 ? categoryDealsCount : 7;
-  const displayLikedAllCount = likedAllCount > 0 ? likedAllCount : 38;
-  const displayAllDealsCount = allDealsCount > 0 ? allDealsCount : 16;
+  const displayLikedInCategoryCount = likedInCategoryCount;
+  const displayCategoryDealsCount = categoryDealsCount;
+  const displayLikedAllCount = likedAllCount;
+  const displayAllDealsCount = allDealsCount;
+
+  const selectedMasterDiscountBadge = selectedMaster?.discountBadge
+    ? String(selectedMaster.discountBadge)
+    : promotionBadgeTextByMasterId[String(selectedMaster?.id || '')];
 
   const selectSearchResult = (result: SearchResult) => {
     if (result.type === 'smart') {
@@ -1118,6 +1402,13 @@ export default function HomePage() {
   const openPromotionView = (promo: PromotionItem) => {
     incrementPromotionViews(promo.id);
     router.push(`/promotion/${promo.id}`);
+  };
+
+  const openRouteToMaster = (master: any) => {
+    const query = encodeURIComponent(
+      String(master.city || master.location || master.address || 'London')
+    );
+    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
   };
 
   return (
@@ -1408,14 +1699,7 @@ export default function HomePage() {
                   <>
                     {smartResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                            color: '#6c7480',
-                            marginBottom: 8,
-                          }}
-                        >
+                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
                           {tr.smartMatches}
                         </div>
 
@@ -1450,14 +1734,7 @@ export default function HomePage() {
 
                     {categoryResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                            color: '#6c7480',
-                            marginBottom: 8,
-                          }}
-                        >
+                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
                           {tr.categories}
                         </div>
 
@@ -1489,14 +1766,7 @@ export default function HomePage() {
 
                     {subcategoryResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                            color: '#6c7480',
-                            marginBottom: 8,
-                          }}
-                        >
+                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
                           {tr.services}
                         </div>
 
@@ -1531,14 +1801,7 @@ export default function HomePage() {
 
                     {proResults.length > 0 && (
                       <div>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                            color: '#6c7480',
-                            marginBottom: 8,
-                          }}
-                        >
+                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
                           {tr.pros}
                         </div>
 
@@ -1584,29 +1847,35 @@ export default function HomePage() {
             activeSubcategory={activeSubcategory}
             onSelectCategory={(category) => {
               setActiveCategory(category);
+              setActiveSubcategory('');
+              setSearch('');
+              setSearchOpen(false);
               setLikedFilterMode('none');
               setDealFilterMode('none');
+              setSelectedMaster(null);
             }}
             onSelectSubcategory={(subcategory) => {
               setActiveSubcategory(subcategory);
+              setSearch('');
+              setSearchOpen(false);
+              setLikedFilterMode('none');
+              setDealFilterMode('none');
+              setSelectedMaster(null);
             }}
             onClearSubcategory={() => {
               setActiveSubcategory('');
+              setSelectedMaster(null);
             }}
           />
         </section>
 
         <section style={{ padding: '10px 12px 0' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 10,
-            }}
-          >
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <ActionCountButton
+              active={likedFilterMode === 'category'}
               onClick={() => {
                 setDealFilterMode('none');
+                setSelectedMaster(null);
                 setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
               }}
               icon={<span style={{ fontSize: 18, color: '#ff3b58', lineHeight: 1 }}>♥</span>}
@@ -1615,8 +1884,10 @@ export default function HomePage() {
             />
 
             <ActionCountButton
+              active={dealFilterMode === 'category'}
               onClick={() => {
                 setLikedFilterMode('none');
+                setSelectedMaster(null);
                 setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
               }}
               icon={
@@ -1643,8 +1914,10 @@ export default function HomePage() {
             />
 
             <ActionCountButton
+              active={likedFilterMode === 'all'}
               onClick={() => {
                 setDealFilterMode('none');
+                setSelectedMaster(null);
                 setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
               }}
               icon={
@@ -1659,8 +1932,10 @@ export default function HomePage() {
             />
 
             <ActionCountButton
+              active={dealFilterMode === 'all'}
               onClick={() => {
                 setLikedFilterMode('none');
+                setSelectedMaster(null);
                 setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
               }}
               icon={
@@ -1724,18 +1999,27 @@ export default function HomePage() {
                   router.push(`/booking/${master.id}`);
                 }}
               />
+
+              {selectedMaster ? (
+                <MasterMiniCard
+                  master={selectedMaster}
+                  language={language}
+                  liked={likedMasterIds.includes(String(selectedMaster.id))}
+                  discountBadge={selectedMasterDiscountBadge}
+                  onClose={() => setSelectedMaster(null)}
+                  onLike={() => toggleLikedMaster(String(selectedMaster.id))}
+                  onOpen={() => router.push(`/master/${selectedMaster.id}`)}
+                  onRoute={() => openRouteToMaster(selectedMaster)}
+                  onBook={() => router.push(`/booking/${selectedMaster.id}`)}
+                />
+              ) : null}
             </div>
           </div>
         </section>
 
         {filteredPromotions.length > 0 && (
           <section style={{ padding: '20px 0 0' }}>
-            <div
-              style={{
-                background: pageBackground,
-                padding: '0 0 12px',
-              }}
-            >
+            <div style={{ background: pageBackground, padding: '0 0 12px' }}>
               <div
                 style={{
                   padding: '0 12px 0',
@@ -1753,7 +2037,13 @@ export default function HomePage() {
                     color: '#111111',
                   }}
                 >
-                  {language === 'ES' ? 'Ofertas cerca de ti' : 'Hot offers near you'}
+                  {language === 'RU'
+                    ? 'Горячие предложения рядом'
+                    : language === 'UA'
+                    ? 'Гарячі пропозиції поруч'
+                    : language === 'ES'
+                    ? 'Ofertas cerca de ti'
+                    : 'Hot offers near you'}
                 </h2>
 
                 <button
@@ -1769,7 +2059,13 @@ export default function HomePage() {
                     padding: 0,
                   }}
                 >
-                  {language === 'ES' ? 'Ver todo ›' : 'See all ›'}
+                  {language === 'RU'
+                    ? 'Все ›'
+                    : language === 'UA'
+                    ? 'Усі ›'
+                    : language === 'ES'
+                    ? 'Ver todo ›'
+                    : 'See all ›'}
                 </button>
               </div>
 
@@ -1798,6 +2094,7 @@ export default function HomePage() {
                       promo={promo}
                       language={language}
                       onOpen={() => openPromotionView(promo)}
+                      onBook={() => router.push(`/booking/${promo.masterId}`)}
                     />
                   </div>
                 ))}
