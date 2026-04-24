@@ -59,8 +59,10 @@ function getSheetTexts(language: AppLanguage) {
   if (language === 'RU') {
     return {
       title: 'Все категории',
-      subtitle: 'Выберите категорию или подкатегорию',
-      all: 'Все',
+      subtitle: 'Выберите категорию',
+      subTitle: 'Подкатегории',
+      allInCategory: 'Все в категории',
+      back: 'Назад',
       close: 'Закрыть',
     };
   }
@@ -68,8 +70,10 @@ function getSheetTexts(language: AppLanguage) {
   if (language === 'UA') {
     return {
       title: 'Усі категорії',
-      subtitle: 'Оберіть категорію або підкатегорію',
-      all: 'Усі',
+      subtitle: 'Оберіть категорію',
+      subTitle: 'Підкатегорії',
+      allInCategory: 'Усе в категорії',
+      back: 'Назад',
       close: 'Закрити',
     };
   }
@@ -77,43 +81,20 @@ function getSheetTexts(language: AppLanguage) {
   if (language === 'CZ') {
     return {
       title: 'Všechny kategorie',
-      subtitle: 'Vyberte kategorii nebo podkategorii',
-      all: 'Vše',
+      subtitle: 'Vyberte kategorii',
+      subTitle: 'Podkategorie',
+      allInCategory: 'Vše v kategorii',
+      back: 'Zpět',
       close: 'Zavřít',
-    };
-  }
-
-  if (language === 'ES') {
-    return {
-      title: 'Todas las categorías',
-      subtitle: 'Elige una categoría o subcategoría',
-      all: 'Todo',
-      close: 'Cerrar',
-    };
-  }
-
-  if (language === 'DE') {
-    return {
-      title: 'Alle Kategorien',
-      subtitle: 'Kategorie oder Unterkategorie wählen',
-      all: 'Alle',
-      close: 'Schließen',
-    };
-  }
-
-  if (language === 'PL') {
-    return {
-      title: 'Wszystkie kategorie',
-      subtitle: 'Wybierz kategorię lub podkategorię',
-      all: 'Wszystko',
-      close: 'Zamknij',
     };
   }
 
   return {
     title: 'All categories',
-    subtitle: 'Choose category or subcategory',
-    all: 'All',
+    subtitle: 'Choose category',
+    subTitle: 'Subcategories',
+    allInCategory: 'All in category',
+    back: 'Back',
     close: 'Close',
   };
 }
@@ -142,22 +123,6 @@ function getCategoryVisual(category: any): { type: 'image' | 'emoji'; value: str
 
   if (localImageMap[id]) {
     return { type: 'image', value: localImageMap[id] };
-  }
-
-  const candidates = [
-    category?.image,
-    category?.iconImage,
-    category?.imageUrl,
-    category?.iconUrl,
-    category?.photo,
-    category?.thumbnail,
-    category?.src,
-  ];
-
-  for (const value of candidates) {
-    if (typeof value === 'string' && value.trim()) {
-      return { type: 'image', value };
-    }
   }
 
   if (typeof category?.icon === 'string' && category.icon.trim()) {
@@ -203,6 +168,7 @@ export default function TopCategoriesBar({
   onClearSubcategory,
 }: TopCategoriesBarProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [selectedSheetCategoryId, setSelectedSheetCategoryId] = useState<string | null>(null);
 
   const filteredCategories = useMemo(() => {
     return categories.filter((item: any) => String(item.id).toLowerCase() !== 'more');
@@ -212,19 +178,34 @@ export default function TopCategoriesBar({
     return [{ id: 'more', label: 'More', shortLabel: 'More' }, ...filteredCategories.slice(0, 7)];
   }, [filteredCategories]);
 
+  const selectedSheetCategory = useMemo(() => {
+    if (!selectedSheetCategoryId) return null;
+    return filteredCategories.find((item: any) => String(item.id) === selectedSheetCategoryId) || null;
+  }, [filteredCategories, selectedSheetCategoryId]);
+
   const accent = getLanguageAccent(language);
   const sheetText = getSheetTexts(language);
 
-  const selectCategory = (categoryId: string) => {
+  const openSheet = () => {
+    setSelectedSheetCategoryId(null);
+    setSheetOpen(true);
+  };
+
+  const closeSheet = () => {
+    setSelectedSheetCategoryId(null);
+    setSheetOpen(false);
+  };
+
+  const selectCategoryOnly = (categoryId: string) => {
     onSelectCategory(categoryId);
     onClearSubcategory?.();
-    setSheetOpen(false);
+    closeSheet();
   };
 
   const selectSubcategory = (categoryId: string, subcategory: string) => {
     onSelectCategory(categoryId);
     onSelectSubcategory?.(subcategory);
-    setSheetOpen(false);
+    closeSheet();
   };
 
   return (
@@ -255,11 +236,12 @@ export default function TopCategoriesBar({
                 type="button"
                 onClick={() => {
                   if (isMore) {
-                    setSheetOpen(true);
+                    openSheet();
                     return;
                   }
 
-                  selectCategory(categoryId);
+                  onSelectCategory(categoryId);
+                  onClearSubcategory?.();
                 }}
                 style={{
                   border: 'none',
@@ -278,9 +260,7 @@ export default function TopCategoriesBar({
                     width: 74,
                     height: 74,
                     borderRadius: 22,
-                    border: isActive
-                      ? `1.8px solid ${accent.border}`
-                      : '1.2px solid #cfc8be',
+                    border: isActive ? `1.8px solid ${accent.border}` : '1.2px solid #cfc8be',
                     background: '#ffffff',
                     display: 'flex',
                     alignItems: 'center',
@@ -303,17 +283,7 @@ export default function TopCategoriesBar({
                       }}
                     />
                   ) : visual?.type === 'emoji' ? (
-                    <span
-                      style={{
-                        fontSize: 38,
-                        lineHeight: 1,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      {visual.value}
-                    </span>
+                    <span style={{ fontSize: 38, lineHeight: 1 }}>{visual.value}</span>
                   ) : (
                     <span
                       style={{
@@ -350,7 +320,7 @@ export default function TopCategoriesBar({
 
       {sheetOpen ? (
         <div
-          onClick={() => setSheetOpen(false)}
+          onClick={closeSheet}
           style={{
             position: 'fixed',
             inset: 0,
@@ -389,13 +359,13 @@ export default function TopCategoriesBar({
               <div>
                 <div
                   style={{
-                    fontSize: 24,
+                    fontSize: 25,
                     fontWeight: 900,
                     color: '#17130f',
                     lineHeight: 1.1,
                   }}
                 >
-                  {sheetText.title}
+                  {selectedSheetCategory ? getCategoryLabel(selectedSheetCategory, language) : sheetText.title}
                 </div>
 
                 <div
@@ -406,13 +376,13 @@ export default function TopCategoriesBar({
                     color: '#756b61',
                   }}
                 >
-                  {sheetText.subtitle}
+                  {selectedSheetCategory ? sheetText.subTitle : sheetText.subtitle}
                 </div>
               </div>
 
               <button
                 type="button"
-                onClick={() => setSheetOpen(false)}
+                onClick={closeSheet}
                 style={{
                   width: 42,
                   height: 42,
@@ -429,48 +399,37 @@ export default function TopCategoriesBar({
               </button>
             </div>
 
-            <div
-              style={{
-                padding: 14,
-                overflowY: 'auto',
-                maxHeight: 'calc(78vh - 90px)',
-              }}
-            >
+            {!selectedSheetCategory ? (
               <div
                 style={{
-                  display: 'grid',
-                  gap: 12,
+                  padding: 14,
+                  overflowY: 'auto',
+                  maxHeight: 'calc(78vh - 92px)',
                 }}
               >
-                {filteredCategories.map((category: any) => {
-                  const categoryId = String(category.id);
-                  const label = getCategoryLabel(category, language);
-                  const visual = getCategoryVisual(category);
-                  const isActiveCategory = activeCategory === categoryId;
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {filteredCategories.map((category: any) => {
+                    const categoryId = String(category.id);
+                    const label = getCategoryLabel(category, language);
+                    const visual = getCategoryVisual(category);
+                    const isActive = activeCategory === categoryId;
 
-                  return (
-                    <div
-                      key={categoryId}
-                      style={{
-                        border: '1.5px solid #111111',
-                        borderRadius: 22,
-                        background: '#ffffff',
-                        overflow: 'hidden',
-                      }}
-                    >
+                    return (
                       <button
+                        key={categoryId}
                         type="button"
-                        onClick={() => selectCategory(categoryId)}
+                        onClick={() => setSelectedSheetCategoryId(categoryId)}
                         style={{
                           width: '100%',
-                          minHeight: 74,
-                          border: 'none',
-                          background: isActiveCategory ? accent.glow : '#ffffff',
-                          padding: 12,
+                          minHeight: 70,
+                          borderRadius: 20,
+                          border: isActive ? `2px solid ${accent.border}` : '1.5px solid #111111',
+                          background: isActive ? accent.glow : '#ffffff',
+                          padding: '10px 12px',
                           display: 'grid',
                           gridTemplateColumns: '54px 1fr auto',
-                          gap: 12,
                           alignItems: 'center',
+                          gap: 12,
                           textAlign: 'left',
                           cursor: 'pointer',
                         }}
@@ -480,9 +439,7 @@ export default function TopCategoriesBar({
                             width: 54,
                             height: 54,
                             borderRadius: 17,
-                            border: isActiveCategory
-                              ? `1.8px solid ${accent.border}`
-                              : '1.2px solid #cfc8be',
+                            border: '1.2px solid #d8d2c8',
                             background: '#ffffff',
                             display: 'flex',
                             alignItems: 'center',
@@ -510,7 +467,7 @@ export default function TopCategoriesBar({
                         <div>
                           <div
                             style={{
-                              fontSize: 17,
+                              fontSize: 18,
                               fontWeight: 900,
                               color: '#17130f',
                             }}
@@ -526,73 +483,109 @@ export default function TopCategoriesBar({
                               color: '#756b61',
                             }}
                           >
-                            {sheetText.all}
+                            {Array.isArray(category.subcategories)
+                              ? `${category.subcategories.length} ${sheetText.subTitle.toLowerCase()}`
+                              : sheetText.subTitle}
                           </div>
                         </div>
 
                         <div
                           style={{
-                            width: 26,
-                            height: 26,
-                            borderRadius: 999,
-                            border: '1.5px solid #111111',
-                            background: isActiveCategory ? accent.border : '#ffffff',
-                            color: '#ffffff',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 13,
+                            fontSize: 26,
                             fontWeight: 900,
+                            color: '#17130f',
                           }}
                         >
-                          {isActiveCategory && !activeSubcategory ? '✓' : ''}
+                          ›
                         </div>
                       </button>
-
-                      {Array.isArray(category.subcategories) && category.subcategories.length > 0 ? (
-                        <div
-                          style={{
-                            borderTop: '1.2px solid #eee7dc',
-                            padding: '10px 12px 12px',
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 8,
-                          }}
-                        >
-                          {category.subcategories.map((subcategory: string) => {
-                            const isActiveSub =
-                              isActiveCategory && activeSubcategory === subcategory;
-
-                            return (
-                              <button
-                                key={`${categoryId}-${subcategory}`}
-                                type="button"
-                                onClick={() => selectSubcategory(categoryId, subcategory)}
-                                style={{
-                                  minHeight: 36,
-                                  borderRadius: 999,
-                                  border: isActiveSub
-                                    ? `1.6px solid ${accent.border}`
-                                    : '1.2px solid #d8d2c8',
-                                  background: isActiveSub ? accent.glow : '#fffefa',
-                                  color: '#17130f',
-                                  padding: '0 12px',
-                                  fontSize: 12,
-                                  fontWeight: 900,
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                {getSubcategoryLabel(subcategory, language)}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      ) : null}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div
+                style={{
+                  padding: 14,
+                  overflowY: 'auto',
+                  maxHeight: 'calc(78vh - 92px)',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setSelectedSheetCategoryId(null)}
+                  style={{
+                    width: '100%',
+                    height: 50,
+                    borderRadius: 18,
+                    border: '1.5px solid #111111',
+                    background: '#ffffff',
+                    color: '#17130f',
+                    fontSize: 16,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    marginBottom: 12,
+                  }}
+                >
+                  ← {sheetText.back}
+                </button>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <button
+                    type="button"
+                    onClick={() => selectCategoryOnly(String(selectedSheetCategory.id))}
+                    style={{
+                      width: '100%',
+                      minHeight: 58,
+                      borderRadius: 18,
+                      border: !activeSubcategory && activeCategory === String(selectedSheetCategory.id)
+                        ? `2px solid ${accent.border}`
+                        : '1.5px solid #111111',
+                      background: !activeSubcategory && activeCategory === String(selectedSheetCategory.id)
+                        ? accent.glow
+                        : '#ffffff',
+                      color: '#17130f',
+                      fontSize: 17,
+                      fontWeight: 900,
+                      textAlign: 'left',
+                      padding: '0 16px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {sheetText.allInCategory}
+                  </button>
+
+                  {(selectedSheetCategory.subcategories || []).map((subcategory: string) => {
+                    const isActiveSub =
+                      activeCategory === String(selectedSheetCategory.id) &&
+                      activeSubcategory === subcategory;
+
+                    return (
+                      <button
+                        key={`${selectedSheetCategory.id}-${subcategory}`}
+                        type="button"
+                        onClick={() => selectSubcategory(String(selectedSheetCategory.id), subcategory)}
+                        style={{
+                          width: '100%',
+                          minHeight: 58,
+                          borderRadius: 18,
+                          border: isActiveSub ? `2px solid ${accent.border}` : '1.5px solid #d8d2c8',
+                          background: isActiveSub ? accent.glow : '#ffffff',
+                          color: '#17130f',
+                          fontSize: 16,
+                          fontWeight: 900,
+                          textAlign: 'left',
+                          padding: '0 16px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {getSubcategoryLabel(subcategory, language)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ) : null}
