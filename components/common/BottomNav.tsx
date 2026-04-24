@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   getSavedLanguage,
@@ -52,7 +52,7 @@ function HomeIcon({ active, language }: { active: boolean; language: AppLanguage
   const color = iconStroke(active, language);
 
   return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+    <svg width="25" height="25" viewBox="0 0 24 24" fill="none">
       <path
         d="M4 10.5L12 4L20 10.5V20H4V10.5Z"
         stroke={color}
@@ -67,7 +67,7 @@ function MessageIcon({ active, language }: { active: boolean; language: AppLangu
   const color = iconStroke(active, language);
 
   return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+    <svg width="25" height="25" viewBox="0 0 24 24" fill="none">
       <path
         d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
         stroke={color}
@@ -82,7 +82,7 @@ function CalendarIcon({ active, language }: { active: boolean; language: AppLang
   const color = iconStroke(active, language);
 
   return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+    <svg width="25" height="25" viewBox="0 0 24 24" fill="none">
       <rect x="4" y="6" width="16" height="14" rx="2" stroke={color} strokeWidth="1.9" />
       <path d="M8 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
       <path d="M16 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
@@ -95,7 +95,7 @@ function ProfileIcon({ active, language }: { active: boolean; language: AppLangu
   const color = iconStroke(active, language);
 
   return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+    <svg width="25" height="25" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="8" r="3.2" stroke={color} strokeWidth="1.9" />
       <path
         d="M5.5 19C6.5 15.8 8.8 14.5 12 14.5C15.2 14.5 17.5 15.8 18.5 19"
@@ -118,8 +118,13 @@ const navItems: NavItem[] = [
 export default function BottomNav({ active: activeProp }: BottomNavProps) {
   const router = useRouter();
   const pathname = usePathname();
+
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [hidden, setHidden] = useState(false);
+
+  const lastScrollYRef = useRef(0);
+  const showTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -132,6 +137,89 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const showSoon = () => {
+      if (showTimerRef.current) {
+        window.clearTimeout(showTimerRef.current);
+      }
+
+      showTimerRef.current = window.setTimeout(() => {
+        setHidden(false);
+      }, 650);
+    };
+
+    const handleScroll = () => {
+      if (addMenuOpen) return;
+
+      const currentY = window.scrollY || 0;
+      const diff = currentY - lastScrollYRef.current;
+
+      if (Math.abs(diff) < 6) return;
+
+      if (diff > 0) {
+        setHidden(true);
+      } else {
+        setHidden(false);
+      }
+
+      lastScrollYRef.current = currentY;
+      showSoon();
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (addMenuOpen) return;
+
+      const target = event.target as HTMLElement | null;
+      const isMapTouch =
+        target?.closest?.('.leaflet-container') ||
+        target?.closest?.('.leaflet-pane') ||
+        target?.closest?.('.leaflet-control-container');
+
+      if (isMapTouch) {
+        setHidden(true);
+      }
+    };
+
+    const handlePointerUp = () => {
+      if (addMenuOpen) return;
+      showSoon();
+    };
+
+    const handleWheel = (event: WheelEvent) => {
+      if (addMenuOpen) return;
+
+      if (event.deltaY > 0) {
+        setHidden(true);
+      } else {
+        setHidden(false);
+      }
+
+      showSoon();
+    };
+
+    lastScrollYRef.current = window.scrollY || 0;
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
+    window.addEventListener('pointerup', handlePointerUp, { passive: true });
+    window.addEventListener('touchend', handlePointerUp, { passive: true });
+    window.addEventListener('wheel', handleWheel, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('touchend', handlePointerUp);
+      window.removeEventListener('wheel', handleWheel);
+
+      if (showTimerRef.current) {
+        window.clearTimeout(showTimerRef.current);
+      }
+    };
+  }, [addMenuOpen]);
 
   const accent = useMemo(() => {
     return {
@@ -151,6 +239,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
 
   const handleNavClick = (item: NavItem) => {
     if (item.key === 'add') {
+      setHidden(false);
       setAddMenuOpen(true);
       return;
     }
@@ -186,7 +275,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
-            padding: '0 26px 142px',
+            padding: '0 26px 132px',
             boxSizing: 'border-box',
           }}
         >
@@ -194,7 +283,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
             onClick={(event) => event.stopPropagation()}
             style={{
               width: '100%',
-              maxWidth: 390,
+              maxWidth: 382,
               background: '#ffffff',
               border: '3px solid #111111',
               borderRadius: 28,
@@ -213,22 +302,22 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 type="button"
                 onClick={handleCreateAd}
                 style={{
-                  minHeight: 128,
+                  minHeight: 118,
                   border: 'none',
                   borderRight: '3px solid #111111',
                   background: '#ffe44d',
                   color: '#17130f',
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: 900,
                   cursor: 'pointer',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 12,
+                  gap: 10,
                 }}
               >
-                <span style={{ fontSize: 34 }}>📣</span>
+                <span style={{ fontSize: 32 }}>📣</span>
                 <span>Реклама</span>
               </button>
 
@@ -236,22 +325,22 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 type="button"
                 onClick={handleCreateService}
                 style={{
-                  minHeight: 128,
+                  minHeight: 118,
                   border: 'none',
                   borderRight: '3px solid #111111',
                   background: '#41c83f',
                   color: '#ffffff',
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: 900,
                   cursor: 'pointer',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 12,
+                  gap: 10,
                 }}
               >
-                <span style={{ fontSize: 40, lineHeight: 1 }}>+</span>
+                <span style={{ fontSize: 38, lineHeight: 1 }}>+</span>
                 <span>Услуга</span>
               </button>
 
@@ -259,11 +348,11 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 type="button"
                 onClick={handleCreateDeal}
                 style={{
-                  minHeight: 128,
+                  minHeight: 118,
                   border: 'none',
                   background: '#ff4b52',
                   color: '#ffffff',
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: 900,
                   cursor: 'pointer',
                   position: 'relative',
@@ -271,16 +360,16 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 12,
+                  gap: 10,
                 }}
               >
                 <span
                   style={{
                     position: 'absolute',
-                    top: 16,
-                    right: 16,
-                    minWidth: 48,
-                    height: 34,
+                    top: 14,
+                    right: 14,
+                    minWidth: 44,
+                    height: 31,
                     borderRadius: 999,
                     border: '3px solid #111111',
                     background: '#ffffff',
@@ -288,13 +377,13 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: 900,
                   }}
                 >
                   £1
                 </span>
-                <span style={{ fontSize: 42, lineHeight: 1 }}>%</span>
+                <span style={{ fontSize: 40, lineHeight: 1 }}>%</span>
                 <span>Скидка</span>
               </button>
             </div>
@@ -304,11 +393,11 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
               onClick={() => setAddMenuOpen(false)}
               style={{
                 width: '100%',
-                minHeight: 64,
+                minHeight: 58,
                 border: 'none',
                 background: '#ffffff',
                 color: '#17130f',
-                fontSize: 20,
+                fontSize: 19,
                 fontWeight: 900,
                 cursor: 'pointer',
               }}
@@ -323,11 +412,14 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
         style={{
           position: 'fixed',
           left: '50%',
-          bottom: 'calc(18px + env(safe-area-inset-bottom))',
-          transform: 'translateX(-50%)',
-          width: 'calc(100% - 42px)',
-          maxWidth: 374,
+          bottom: 'calc(14px + env(safe-area-inset-bottom))',
+          transform: hidden ? 'translate(-50%, 92px)' : 'translate(-50%, 0)',
+          width: 'calc(100% - 54px)',
+          maxWidth: 342,
           zIndex: 1200,
+          opacity: hidden ? 0.04 : 1,
+          pointerEvents: hidden ? 'none' : 'auto',
+          transition: 'transform 220ms ease, opacity 180ms ease',
         }}
       >
         <div
@@ -335,27 +427,27 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
             position: 'relative',
             background: '#fffefa',
             border: '2px solid #111111',
-            borderRadius: 28,
-            boxShadow: '0 12px 28px rgba(15,23,42,0.12)',
-            padding: '10px 11px 9px',
+            borderRadius: 24,
+            boxShadow: '0 10px 24px rgba(15,23,42,0.12)',
+            padding: '7px 9px 7px',
             display: 'grid',
             gridTemplateColumns: 'repeat(5, 1fr)',
             alignItems: 'end',
-            gap: 2,
+            gap: 1,
           }}
         >
           <div
             style={{
               position: 'absolute',
               left: '50%',
-              top: -24,
+              top: -20,
               transform: 'translateX(-50%)',
-              width: 92,
-              height: 50,
+              width: 80,
+              height: 43,
               background: '#fffefa',
               border: '2px solid #111111',
               borderBottom: 'none',
-              borderRadius: '76px 76px 0 0',
+              borderRadius: '70px 70px 0 0',
               zIndex: 0,
             }}
           />
@@ -378,28 +470,28 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'flex-end',
-                  gap: 4,
+                  gap: 3,
                   position: 'relative',
-                  minHeight: 58,
+                  minHeight: 51,
                   zIndex: 2,
                 }}
               >
                 {isAdd ? (
                   <span
                     style={{
-                      width: 72,
-                      height: 72,
+                      width: 62,
+                      height: 62,
                       borderRadius: '50%',
                       background: '#55c75f',
                       color: '#ffffff',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 40,
+                      fontSize: 36,
                       fontWeight: 500,
                       lineHeight: 1,
-                      boxShadow: '0 10px 22px rgba(85,199,95,0.26)',
-                      transform: 'translateY(-20px)',
+                      boxShadow: '0 9px 20px rgba(85,199,95,0.25)',
+                      transform: 'translateY(-17px)',
                     }}
                   >
                     +
@@ -407,9 +499,9 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 ) : (
                   <span
                     style={{
-                      width: 42,
-                      height: 34,
-                      borderRadius: 16,
+                      width: 38,
+                      height: 31,
+                      borderRadius: 15,
                       background: isActive ? accent.gradient : 'transparent',
                       border: isActive ? '1.5px solid #111111' : '1.5px solid transparent',
                       display: 'inline-flex',
@@ -429,15 +521,15 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   <span
                     style={{
                       position: 'absolute',
-                      top: -1,
-                      right: '16%',
-                      minWidth: 21,
-                      height: 21,
+                      top: -2,
+                      right: '13%',
+                      minWidth: 20,
+                      height: 20,
                       padding: '0 6px',
                       borderRadius: 999,
                       background: '#ff4fa0',
                       color: '#ffffff',
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: 900,
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -451,8 +543,8 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
 
                 <span
                   style={{
-                    marginTop: isAdd ? -19 : 0,
-                    fontSize: 12,
+                    marginTop: isAdd ? -16 : 0,
+                    fontSize: 11,
                     fontWeight: 900,
                     color: isActive ? accent.color : '#202020',
                     lineHeight: 1.05,
