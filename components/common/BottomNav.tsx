@@ -2,6 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../services/i18n';
 
 type BottomNavProps = {
   active?: 'home' | 'bookings' | 'add' | 'messages' | 'profile';
@@ -9,10 +14,142 @@ type BottomNavProps = {
 
 type NavItem = {
   key: 'home' | 'bookings' | 'add' | 'messages' | 'profile';
-  label: string;
   href: string;
   badge?: number;
 };
+
+type BottomNavTexts = {
+  home: string;
+  messages: string;
+  add: string;
+  bookings: string;
+  profile: string;
+  ad: string;
+  service: string;
+  deal: string;
+  close: string;
+};
+
+const bottomNavTexts: Record<AppLanguage, BottomNavTexts> = {
+  EN: {
+    home: 'Home',
+    messages: 'Messages',
+    add: 'Add',
+    bookings: 'Bookings',
+    profile: 'Profile',
+    ad: 'Ad',
+    service: 'Service',
+    deal: 'Deal',
+    close: 'Close',
+  },
+  ES: {
+    home: 'Inicio',
+    messages: 'Mensajes',
+    add: 'Añadir',
+    bookings: 'Reservas',
+    profile: 'Perfil',
+    ad: 'Anuncio',
+    service: 'Servicio',
+    deal: 'Oferta',
+    close: 'Cerrar',
+  },
+  RU: {
+    home: 'Главная',
+    messages: 'Сообщения',
+    add: 'Добавить',
+    bookings: 'Брони',
+    profile: 'Профиль',
+    ad: 'Реклама',
+    service: 'Услуга',
+    deal: 'Скидка',
+    close: 'Закрыть',
+  },
+  UA: {
+    home: 'Головна',
+    messages: 'Повідомлення',
+    add: 'Додати',
+    bookings: 'Броні',
+    profile: 'Профіль',
+    ad: 'Реклама',
+    service: 'Послуга',
+    deal: 'Знижка',
+    close: 'Закрити',
+  },
+  CZ: {
+    home: 'Domů',
+    messages: 'Zprávy',
+    add: 'Přidat',
+    bookings: 'Rezervace',
+    profile: 'Profil',
+    ad: 'Reklama',
+    service: 'Služba',
+    deal: 'Sleva',
+    close: 'Zavřít',
+  },
+  DE: {
+    home: 'Home',
+    messages: 'Nachrichten',
+    add: 'Hinzufügen',
+    bookings: 'Buchungen',
+    profile: 'Profil',
+    ad: 'Anzeige',
+    service: 'Service',
+    deal: 'Rabatt',
+    close: 'Schließen',
+  },
+  IT: {
+    home: 'Home',
+    messages: 'Messaggi',
+    add: 'Aggiungi',
+    bookings: 'Prenotazioni',
+    profile: 'Profilo',
+    ad: 'Annuncio',
+    service: 'Servizio',
+    deal: 'Sconto',
+    close: 'Chiudi',
+  },
+  FR: {
+    home: 'Accueil',
+    messages: 'Messages',
+    add: 'Ajouter',
+    bookings: 'Réservations',
+    profile: 'Profil',
+    ad: 'Pub',
+    service: 'Service',
+    deal: 'Réduction',
+    close: 'Fermer',
+  },
+  AR: {
+    home: 'الرئيسية',
+    messages: 'رسائل',
+    add: 'إضافة',
+    bookings: 'حجوزات',
+    profile: 'الملف',
+    ad: 'إعلان',
+    service: 'خدمة',
+    deal: 'خصم',
+    close: 'إغلاق',
+  },
+  PL: {
+    home: 'Start',
+    messages: 'Wiadomości',
+    add: 'Dodaj',
+    bookings: 'Rezerwacje',
+    profile: 'Profil',
+    ad: 'Reklama',
+    service: 'Usługa',
+    deal: 'Zniżka',
+    close: 'Zamknij',
+  },
+};
+
+const navItems: NavItem[] = [
+  { key: 'home', href: '/' },
+  { key: 'messages', href: '/messages', badge: 2 },
+  { key: 'add', href: '/profile/promotions/new' },
+  { key: 'bookings', href: '/bookings' },
+  { key: 'profile', href: '/profile' },
+];
 
 function HomeIcon({ active }: { active: boolean }) {
   return (
@@ -93,23 +230,18 @@ function ProfileIcon({ active }: { active: boolean }) {
   );
 }
 
-const navItems: NavItem[] = [
-  { key: 'home', label: 'Home', href: '/' },
-  { key: 'messages', label: 'Messages', href: '/messages', badge: 2 },
-  { key: 'add', label: 'Add', href: '/profile/promotions/new' },
-  { key: 'bookings', label: 'Bookings', href: '/bookings' },
-  { key: 'profile', label: 'Profile', href: '/profile' },
-];
-
 export default function BottomNav({ active: activeProp }: BottomNavProps) {
   const router = useRouter();
   const pathname = usePathname();
 
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [navVisible, setNavVisible] = useState(true);
 
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastScrollYRef = useRef(0);
+
+  const text = bottomNavTexts[language] || bottomNavTexts.EN;
 
   const showNavForMoment = () => {
     setNavVisible(true);
@@ -124,6 +256,29 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       }
     }, 2200);
   };
+
+  useEffect(() => {
+    const syncLanguage = () => {
+      setLanguage(getSavedLanguage());
+    };
+
+    syncLanguage();
+
+    const unsubscribe = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    window.addEventListener('focus', syncLanguage);
+    window.addEventListener('pageshow', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('pageshow', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
+    };
+  }, []);
 
   useEffect(() => {
     showNavForMoment();
@@ -161,7 +316,9 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
 
     if (href === '/') return pathname === '/';
     if (href === '/profile') return pathname === '/profile' || pathname?.startsWith('/profile');
-    if (key === 'add') return pathname?.startsWith('/profile/promotions/new') || pathname?.startsWith('/add');
+    if (key === 'add') {
+      return pathname?.startsWith('/profile/promotions/new') || pathname?.startsWith('/add');
+    }
 
     return pathname?.startsWith(href);
   };
@@ -190,6 +347,14 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
   const handleCreateDeal = () => {
     setAddMenuOpen(false);
     router.push('/profile/deals/new');
+  };
+
+  const getLabel = (key: NavItem['key']) => {
+    if (key === 'home') return text.home;
+    if (key === 'messages') return text.messages;
+    if (key === 'add') return text.add;
+    if (key === 'bookings') return text.bookings;
+    return text.profile;
   };
 
   return (
@@ -248,7 +413,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 }}
               >
                 <span style={{ fontSize: 34 }}>📣</span>
-                <span>Реклама</span>
+                <span>{text.ad}</span>
               </button>
 
               <button
@@ -271,7 +436,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 }}
               >
                 <span style={{ fontSize: 40, lineHeight: 1 }}>+</span>
-                <span>Услуга</span>
+                <span>{text.service}</span>
               </button>
 
               <button
@@ -314,7 +479,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   £1
                 </span>
                 <span style={{ fontSize: 42, lineHeight: 1 }}>%</span>
-                <span>Скидка</span>
+                <span>{text.deal}</span>
               </button>
             </div>
 
@@ -332,7 +497,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 cursor: 'pointer',
               }}
             >
-              × Закрыть
+              × {text.close}
             </button>
           </div>
         </div>
@@ -475,9 +640,13 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                     fontWeight: 900,
                     color: isActive ? '#55c75f' : '#202020',
                     lineHeight: 1.05,
+                    maxWidth: 66,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  {item.label}
+                  {getLabel(item.key)}
                 </span>
               </button>
             );
