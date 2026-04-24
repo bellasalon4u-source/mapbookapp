@@ -132,37 +132,98 @@ function fixLeafletIcons() {
   });
 }
 
-function distance(a: MasterItem, b: MasterItem) {
-  const dx = a.lat - b.lat;
-  const dy = a.lng - b.lng;
-  return Math.sqrt(dx * dx + dy * dy);
+function normalizeCategory(value?: string) {
+  return String(value || '').toLowerCase().trim();
 }
 
-function hasGoodSpread(items: MasterItem[]) {
-  if (items.length < 4) return false;
+function getText(language?: string) {
+  const lang = String(language || 'EN').toUpperCase();
 
-  let minDistance = Infinity;
-
-  for (let i = 0; i < items.length; i += 1) {
-    for (let j = i + 1; j < items.length; j += 1) {
-      minDistance = Math.min(minDistance, distance(items[i], items[j]));
-    }
+  if (lang === 'RU') {
+    return {
+      availableNow: 'Доступен сейчас',
+      open: 'Открыть',
+      book: 'Бронь',
+      provider: 'Специалист',
+      service: 'Услуга',
+      london: 'Лондон',
+    };
   }
 
-  return minDistance > 0.0065;
-}
+  if (lang === 'UA') {
+    return {
+      availableNow: 'Доступний зараз',
+      open: 'Відкрити',
+      book: 'Бронь',
+      provider: 'Спеціаліст',
+      service: 'Послуга',
+      london: 'Лондон',
+    };
+  }
 
-function isInsideLondonArea(items: MasterItem[]) {
-  return items.every((item) => {
-    return item.lat > 51.44 && item.lat < 51.57 && item.lng > -0.25 && item.lng < 0.04;
-  });
+  if (lang === 'CZ') {
+    return {
+      availableNow: 'Dostupný nyní',
+      open: 'Otevřít',
+      book: 'Rezervovat',
+      provider: 'Specialista',
+      service: 'Služba',
+      london: 'Londýn',
+    };
+  }
+
+  if (lang === 'ES') {
+    return {
+      availableNow: 'Disponible ahora',
+      open: 'Abrir',
+      book: 'Reservar',
+      provider: 'Profesional',
+      service: 'Servicio',
+      london: 'Londres',
+    };
+  }
+
+  if (lang === 'DE') {
+    return {
+      availableNow: 'Jetzt verfügbar',
+      open: 'Öffnen',
+      book: 'Buchen',
+      provider: 'Profi',
+      service: 'Service',
+      london: 'London',
+    };
+  }
+
+  if (lang === 'PL') {
+    return {
+      availableNow: 'Dostępny teraz',
+      open: 'Otwórz',
+      book: 'Rezerwuj',
+      provider: 'Specjalista',
+      service: 'Usługa',
+      london: 'Londyn',
+    };
+  }
+
+  return {
+    availableNow: 'Available now',
+    open: 'Open',
+    book: 'Book',
+    provider: 'Provider',
+    service: 'Service',
+    london: 'London',
+  };
 }
 
 function getCategoryColor(master: MasterItem, isSelected: boolean) {
   if (isSelected) return '#ff4f93';
+
+  const promoBadge = master.discountBadge;
+  if (promoBadge) return '#f4c430';
+
   if (master.availableNow) return '#34c759';
 
-  const category = String(master.category || '').toLowerCase();
+  const category = normalizeCategory(master.category);
 
   if (category === 'beauty') return '#ff4f93';
   if (category === 'barber') return '#111111';
@@ -173,20 +234,27 @@ function getCategoryColor(master: MasterItem, isSelected: boolean) {
   return '#ff4f93';
 }
 
-function createMasterPin(master: MasterItem, isSelected: boolean, isLiked: boolean): DivIcon {
+function createMasterPin(
+  master: MasterItem,
+  isSelected: boolean,
+  isLiked: boolean,
+  promotionBadgeText?: string
+): DivIcon {
   const color = getCategoryColor(master, isSelected);
   const avatar =
     master.avatar ||
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80';
 
-  const size = isSelected ? 46 : 40;
-  const avatarSize = isSelected ? 32 : 27;
-  const ring = master.availableNow ? '#34c759' : color;
+  const hasPromotionBadge = Boolean(promotionBadgeText || master.discountBadge);
+  const badgeText = promotionBadgeText || master.discountBadge || '';
+
+  const size = isSelected ? 48 : 42;
+  const ring = hasPromotionBadge ? '#f4c430' : master.availableNow ? '#34c759' : color;
 
   return L.divIcon({
     className: 'mapbook-master-pin',
     html: `
-      <div style="position:relative;width:${size}px;height:${size + 16}px;">
+      <div style="position:relative;width:${size}px;height:${size + 22}px;">
         <div style="
           position:absolute;
           left:50%;
@@ -196,8 +264,8 @@ function createMasterPin(master: MasterItem, isSelected: boolean, isLiked: boole
           height:${size}px;
           border-radius:999px;
           background:#ffffff;
-          border:2.5px solid ${ring};
-          box-shadow:0 5px 14px rgba(0,0,0,0.14);
+          border:3px solid ${ring};
+          box-shadow:0 6px 15px rgba(0,0,0,0.16);
           overflow:hidden;
           z-index:2;
         ">
@@ -220,29 +288,59 @@ function createMasterPin(master: MasterItem, isSelected: boolean, isLiked: boole
           transform:translateX(-50%);
           width:0;
           height:0;
-          border-left:8px solid transparent;
-          border-right:8px solid transparent;
-          border-top:13px solid ${ring};
+          border-left:9px solid transparent;
+          border-right:9px solid transparent;
+          border-top:15px solid ${ring};
           z-index:1;
-          filter:drop-shadow(0 3px 4px rgba(0,0,0,0.12));
+          filter:drop-shadow(0 3px 4px rgba(0,0,0,0.14));
         "></div>
+
+        ${
+          hasPromotionBadge
+            ? `
+          <div style="
+            position:absolute;
+            left:50%;
+            bottom:-2px;
+            transform:translateX(-50%);
+            min-width:34px;
+            height:18px;
+            border-radius:999px;
+            background:#ffe44d;
+            border:1.5px solid #111111;
+            color:#111111;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            z-index:4;
+            padding:0 6px;
+            font-size:9px;
+            font-weight:900;
+            white-space:nowrap;
+            box-shadow:0 2px 6px rgba(0,0,0,0.14);
+          ">
+            ${badgeText}
+          </div>
+        `
+            : ''
+        }
 
         ${
           isLiked
             ? `
           <div style="
             position:absolute;
-            right:-2px;
-            top:-2px;
-            width:17px;
-            height:17px;
+            right:-3px;
+            top:-3px;
+            width:18px;
+            height:18px;
             border-radius:999px;
             background:#ffffff;
             border:1.5px solid #111111;
             display:flex;
             align-items:center;
             justify-content:center;
-            z-index:3;
+            z-index:5;
             box-shadow:0 2px 6px rgba(0,0,0,0.14);
           ">
             <span style="font-size:10px;line-height:1;color:#ff3b58;">♥</span>
@@ -257,13 +355,13 @@ function createMasterPin(master: MasterItem, isSelected: boolean, isLiked: boole
           <div style="
             position:absolute;
             left:-1px;
-            bottom:11px;
+            bottom:14px;
             width:12px;
             height:12px;
             border-radius:999px;
             background:#34c759;
             border:2px solid #ffffff;
-            z-index:3;
+            z-index:4;
             box-shadow:0 2px 5px rgba(0,0,0,0.10);
           "></div>
         `
@@ -271,8 +369,8 @@ function createMasterPin(master: MasterItem, isSelected: boolean, isLiked: boole
         }
       </div>
     `,
-    iconSize: [size, size + 16],
-    iconAnchor: [size / 2, size + 12],
+    iconSize: [size, size + 22],
+    iconAnchor: [size / 2, size + 14],
     popupAnchor: [0, -(size + 10)],
   });
 }
@@ -304,13 +402,111 @@ function ChangeView({
   return null;
 }
 
+function FitMapToResults({
+  masters,
+  userLocation,
+  selectedMasterId,
+}: {
+  masters: MasterItem[];
+  userLocation: [number, number] | null;
+  selectedMasterId?: string | number | null;
+}) {
+  const map = useMap();
+  const previousKeyRef = useRef('');
+
+  useEffect(() => {
+    const validMasters = masters.filter(
+      (master) => Number.isFinite(master.lat) && Number.isFinite(master.lng)
+    );
+
+    const key = [
+      validMasters.map((master) => `${master.id}:${master.lat}:${master.lng}`).join('|'),
+      userLocation ? `${userLocation[0]}:${userLocation[1]}` : 'no-user',
+      selectedMasterId ? String(selectedMasterId) : 'no-selected',
+    ].join('::');
+
+    if (previousKeyRef.current === key) return;
+    previousKeyRef.current = key;
+
+    if (selectedMasterId) {
+      const selected = validMasters.find(
+        (master) => String(master.id) === String(selectedMasterId)
+      );
+
+      if (selected) {
+        map.flyTo([selected.lat, selected.lng], Math.max(map.getZoom(), 14), {
+          duration: 0.55,
+        });
+        return;
+      }
+    }
+
+    if (validMasters.length === 0) {
+      if (userLocation) {
+        map.flyTo(userLocation, 13, { duration: 0.55 });
+      }
+      return;
+    }
+
+    if (validMasters.length === 1) {
+      const only = validMasters[0];
+
+      if (userLocation) {
+        const bounds = L.latLngBounds([
+          [only.lat, only.lng],
+          userLocation,
+        ]);
+
+        map.fitBounds(bounds, {
+          paddingTopLeft: [42, 42],
+          paddingBottomRight: [42, 150],
+          maxZoom: 14,
+          animate: true,
+          duration: 0.55,
+        });
+        return;
+      }
+
+      map.flyTo([only.lat, only.lng], 14, { duration: 0.55 });
+      return;
+    }
+
+    const points: [number, number][] = validMasters.map((master) => [
+      master.lat,
+      master.lng,
+    ]);
+
+    if (userLocation) {
+      points.push(userLocation);
+    }
+
+    const bounds = L.latLngBounds(points);
+
+    map.fitBounds(bounds, {
+      paddingTopLeft: [42, 42],
+      paddingBottomRight: [42, 150],
+      maxZoom: 14,
+      animate: true,
+      duration: 0.55,
+    });
+  }, [map, masters, userLocation, selectedMasterId]);
+
+  return null;
+}
+
 function MapUiBridge({
+  initialMode,
   onReady,
 }: {
+  initialMode: 'map' | 'satellite';
   onReady: (actions: { locateMe: () => void; toggleMapMode: () => void }) => void;
 }) {
   const map = useMap();
-  const [mode, setMode] = useState<'map' | 'satellite'>('map');
+  const [mode, setMode] = useState<'map' | 'satellite'>(initialMode);
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
 
   useEffect(() => {
     onReady({
@@ -344,17 +540,18 @@ function MapUiBridge({
         : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     const layers: L.TileLayer[] = [];
+
     map.eachLayer((layer) => {
-      if (layer instanceof L.TileLayer) layers.push(layer);
+      if (layer instanceof L.TileLayer) {
+        layers.push(layer);
+      }
     });
 
     layers.forEach((layer) => map.removeLayer(layer));
 
     const tileLayer = L.tileLayer(nextUrl, {
       attribution:
-        mode === 'satellite'
-          ? '&copy; Esri'
-          : '&copy; OpenStreetMap contributors',
+        mode === 'satellite' ? '&copy; Esri' : '&copy; OpenStreetMap contributors',
     });
 
     tileLayer.addTo(map);
@@ -365,9 +562,11 @@ function MapUiBridge({
 
 export default function RealMap({
   masters = [],
+  mapMode = 'map',
   selectedMasterId = null,
   likedMasterIds = [],
   recenterToUserTrigger = 0,
+  language = 'EN',
   promotionBadgeTextByMasterId = {},
   onMasterSelect,
   onMapBackgroundClick,
@@ -384,6 +583,7 @@ export default function RealMap({
   } | null>(null);
 
   const prevRecenterTrigger = useRef(recenterToUserTrigger);
+  const text = getText(language);
 
   useEffect(() => {
     fixLeafletIcons();
@@ -392,6 +592,7 @@ export default function RealMap({
   useEffect(() => {
     if (!navigator.geolocation) {
       setUserLocation(LONDON_CENTER);
+      setMapCenter(LONDON_CENTER);
       return;
     }
 
@@ -401,6 +602,7 @@ export default function RealMap({
           position.coords.latitude,
           position.coords.longitude,
         ];
+
         setUserLocation(coords);
         setMapCenter(coords);
       },
@@ -426,6 +628,7 @@ export default function RealMap({
           position.coords.latitude,
           position.coords.longitude,
         ];
+
         setUserLocation(coords);
         setMapCenter(coords);
       },
@@ -440,14 +643,22 @@ export default function RealMap({
       (master) => Number.isFinite(master.lat) && Number.isFinite(master.lng)
     );
 
-    const firstFive = filtered.slice(0, 5);
-
-    if (firstFive.length < 4) return DEMO_MASTERS;
-    if (!isInsideLondonArea(firstFive)) return DEMO_MASTERS;
-    if (!hasGoodSpread(firstFive)) return DEMO_MASTERS;
+    if (masters.length === 0) {
+      return DEMO_MASTERS;
+    }
 
     return filtered;
   }, [masters]);
+
+  useEffect(() => {
+    if (!selectedLocalId) return;
+
+    const exists = safeMasters.some((master) => String(master.id) === selectedLocalId);
+
+    if (!exists) {
+      setSelectedLocalId(null);
+    }
+  }, [safeMasters, selectedLocalId]);
 
   const selectedMaster = useMemo(() => {
     const controlledId =
@@ -459,9 +670,7 @@ export default function RealMap({
 
     if (!finalId) return null;
 
-    return (
-      safeMasters.find((master) => String(master.id) === String(finalId)) || null
-    );
+    return safeMasters.find((master) => String(master.id) === String(finalId)) || null;
   }, [safeMasters, selectedLocalId, selectedMasterId]);
 
   const handleSelectMaster = (master: MasterItem) => {
@@ -482,7 +691,7 @@ export default function RealMap({
       <MapContainer
         center={mapCenter || LONDON_CENTER}
         zoom={13}
-        minZoom={9}
+        minZoom={8}
         maxZoom={18}
         zoomControl={false}
         style={{
@@ -497,14 +706,23 @@ export default function RealMap({
         />
 
         <ZoomControl position="topleft" />
+
         <MapEvents
           onMapBackgroundClick={() => {
             setSelectedLocalId(null);
             onMapBackgroundClick?.();
           }}
         />
+
         <ChangeView center={mapCenter} />
-        <MapUiBridge onReady={setUiActions} />
+
+        <FitMapToResults
+          masters={safeMasters}
+          userLocation={userLocation}
+          selectedMasterId={selectedMaster?.id ?? null}
+        />
+
+        <MapUiBridge initialMode={mapMode} onReady={setUiActions} />
 
         {userLocation ? (
           <>
@@ -534,12 +752,13 @@ export default function RealMap({
           const isSelected =
             selectedMaster && String(master.id) === String(selectedMaster.id);
           const isLiked = likedMasterIds.includes(String(master.id));
+          const promoBadge = promotionBadgeTextByMasterId[String(master.id)];
 
           return (
             <Marker
               key={String(master.id)}
               position={[master.lat, master.lng]}
-              icon={createMasterPin(master, Boolean(isSelected), isLiked)}
+              icon={createMasterPin(master, Boolean(isSelected), isLiked, promoBadge)}
               eventHandlers={{
                 click: () => {
                   handleSelectMaster(master);
@@ -638,7 +857,7 @@ export default function RealMap({
                   selectedMaster.avatar ||
                   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80'
                 }
-                alt={selectedMaster.name || 'Master'}
+                alt={selectedMaster.name || text.provider}
                 style={{
                   width: 70,
                   height: 70,
@@ -673,7 +892,7 @@ export default function RealMap({
                         fontWeight: 900,
                       }}
                     >
-                      Available now
+                      {text.availableNow}
                     </span>
                   ) : null}
 
@@ -709,7 +928,7 @@ export default function RealMap({
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {selectedMaster.name || selectedMaster.title || 'Provider'}
+                  {selectedMaster.name || selectedMaster.title || text.provider}
                 </div>
 
                 <div
@@ -724,8 +943,8 @@ export default function RealMap({
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {selectedMaster.subcategory || selectedMaster.category || 'Service'} •{' '}
-                  {selectedMaster.city || 'London'}
+                  {selectedMaster.subcategory || selectedMaster.category || text.service} •{' '}
+                  {selectedMaster.city || text.london}
                 </div>
 
                 <div
@@ -743,7 +962,10 @@ export default function RealMap({
                       color: '#17130f',
                     }}
                   >
-                    ★ {typeof selectedMaster.rating === 'number' ? selectedMaster.rating.toFixed(1) : '4.8'}
+                    ★{' '}
+                    {typeof selectedMaster.rating === 'number'
+                      ? selectedMaster.rating.toFixed(1)
+                      : '4.8'}
                   </span>
 
                   <span
@@ -801,7 +1023,7 @@ export default function RealMap({
                   cursor: 'pointer',
                 }}
               >
-                Open
+                {text.open}
               </button>
 
               <button
@@ -818,7 +1040,7 @@ export default function RealMap({
                   cursor: 'pointer',
                 }}
               >
-                Book
+                {text.book}
               </button>
             </div>
           </div>
