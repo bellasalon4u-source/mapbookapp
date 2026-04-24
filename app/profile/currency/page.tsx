@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
 import {
@@ -8,7 +8,11 @@ import {
   updateAppRegionSettings,
   type AppCurrency,
 } from '../../../services/appRegionStore';
-import { getSavedLanguage, type AppLanguage } from '../../../services/i18n';
+import {
+  getSavedLanguage,
+  subscribeToLanguageChange,
+  type AppLanguage,
+} from '../../../services/i18n';
 
 type PageTextShape = {
   title: string;
@@ -215,18 +219,48 @@ function CheckMark({ checked }: { checked: boolean }) {
 
 export default function CurrencyPage() {
   const router = useRouter();
-  const language = getSavedLanguage();
-  const text = pageTexts[language] || pageTexts.EN;
-  const initialCurrency = getAppRegionSettings().currency;
-  const [selectedCurrency, setSelectedCurrency] = useState<AppCurrency>(initialCurrency);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [selectedCurrency, setSelectedCurrency] = useState<AppCurrency>(
+    getAppRegionSettings().currency
+  );
+
+  const text = pageTexts[language] || pageTexts.EN;
   const currencyOptions = useMemo(() => getCurrencyOptions(text), [text]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    return () => {
+      unsubscribe();
+
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
+
+  const closePage = () => {
+    router.back();
+  };
 
   const applyCurrency = (nextCurrency: AppCurrency) => {
     setSelectedCurrency(nextCurrency);
+
     updateAppRegionSettings({
       currency: nextCurrency,
     });
+
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+    }
+
+    closeTimerRef.current = setTimeout(() => {
+      router.back();
+    }, 450);
   };
 
   return (
@@ -242,30 +276,12 @@ export default function CurrencyPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '52px 1fr',
+            gridTemplateColumns: '1fr 52px',
             alignItems: 'center',
             gap: 12,
             marginBottom: 16,
           }}
         >
-          <button
-            type="button"
-            onClick={() => router.back()}
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: 18,
-              border: '2px solid #111111',
-              background: '#fff',
-              fontSize: 24,
-              fontWeight: 900,
-              color: '#17130f',
-              cursor: 'pointer',
-            }}
-          >
-            ←
-          </button>
-
           <div>
             <h1
               style={{
@@ -278,6 +294,7 @@ export default function CurrencyPage() {
             >
               {text.title}
             </h1>
+
             <div
               style={{
                 marginTop: 6,
@@ -290,6 +307,29 @@ export default function CurrencyPage() {
               {text.subtitle}
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={closePage}
+            aria-label="Close"
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: 18,
+              border: '2px solid #111111',
+              background: '#fff',
+              fontSize: 28,
+              fontWeight: 900,
+              color: '#17130f',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
         </div>
 
         <div
@@ -335,10 +375,23 @@ export default function CurrencyPage() {
                 </div>
 
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 900, color: '#17130f' }}>
+                  <div
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
                     {option.title}
                   </div>
-                  <div style={{ fontSize: 12, color: '#7c746a', fontWeight: 700 }}>
+
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: '#7c746a',
+                      fontWeight: 700,
+                    }}
+                  >
                     {option.subtitle}
                   </div>
                 </div>
