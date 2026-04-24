@@ -526,11 +526,11 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
             border: '2px solid #111111',
             borderRadius: 26,
             boxShadow: '0 12px 28px rgba(15,23,42,0.12)',
-            padding: '11px 12px 10px',
+            padding: '12px 10px 11px',
             display: 'grid',
-            gridTemplateColumns: 'repeat(5, 1fr)',
+            gridTemplateColumns: '1fr 1fr 88px 1fr 1fr',
             alignItems: 'end',
-            gap: 2,
+            gap: 0,
           }}
         >
           <div
@@ -539,7 +539,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
               left: '50%',
               top: -24,
               transform: 'translateX(-50%)',
-              width: 88,
+              width: 92,
               height: 50,
               background: '#fffefa',
               border: '2px solid #111111',
@@ -559,6 +559,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 type="button"
                 onClick={() => handleNavClick(item)}
                 style={{
+                  width: '100%',
                   border: 'none',
                   background: 'transparent',
                   padding: 0,
@@ -569,7 +570,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   justifyContent: 'flex-end',
                   gap: 4,
                   position: 'relative',
-                  minHeight: 60,
+                  minHeight: isAdd ? 70 : 60,
                   zIndex: 2,
                 }}
               >
@@ -600,6 +601,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                       alignItems: 'center',
                       justifyContent: 'center',
                       height: 32,
+                      minWidth: 32,
                     }}
                   >
                     {item.key === 'home' && <HomeIcon active={isActive} />}
@@ -635,15 +637,17 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
 
                 <span
                   style={{
-                    marginTop: isAdd ? -19 : 0,
-                    fontSize: 12,
+                    marginTop: isAdd ? -18 : 0,
+                    width: '100%',
+                    padding: '0 2px',
+                    textAlign: 'center',
+                    fontSize: 11,
                     fontWeight: 900,
                     color: isActive ? '#55c75f' : '#202020',
                     lineHeight: 1.05,
-                    maxWidth: 66,
+                    whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
                   }}
                 >
                   {getLabel(item.key)}
