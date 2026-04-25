@@ -23,77 +23,83 @@ import {
 
 type BookingTab = 'upcoming' | 'completed' | 'cancelled';
 
-const pageTexts: Record<
-  AppLanguage,
-  {
-    title: string;
-    subtitle: string;
-    upcoming: string;
-    completed: string;
-    cancelled: string;
-    pending: string;
-    confirmed: string;
-    completedStatus: string;
-    cancelledStatus: string;
-    serviceDetails: string;
-    closeDetails: string;
-    cancelBooking: string;
-    rebook: string;
-    emptyUpcoming: string;
-    emptyCompleted: string;
-    emptyCancelled: string;
-    back: string;
-    home: string;
-    total: string;
-    bookingOverview: string;
-    activeNow: string;
-    menuClose: string;
-    menuCancel: string;
-    menuOpenProfile: string;
-    provider: string;
-    bookingSummary: string;
-    dateTime: string;
-    detailsUnlocked: string;
-    detailsLocked: string;
-    exactAddress: string;
-    area: string;
-    contactAndAddress: string;
-    bookingAccess: string;
-    phone: string;
-    email: string;
-    whatsapp: string;
-    telegram: string;
-    instagram: string;
-    writeSeller: string;
-    callSeller: string;
-    routeToMaster: string;
-    contactsHiddenTitle: string;
-    contactsHiddenText: string;
-    waitingMaster: string;
-    waitingPayment: string;
-    waitingPromotion: string;
-    unlockPaid: string;
-    welcomeBonus: string;
-    referralUsed: string;
-    lockedValue: string;
-    todayAt: string;
-    tomorrowAt: string;
-    noPhoneAction: string;
-    noMessageAction: string;
-    noRouteAction: string;
-  }
-> = {
+type PageTexts = {
+  title: string;
+  subtitle: string;
+  upcoming: string;
+  completed: string;
+  cancelled: string;
+  pending: string;
+  confirmed: string;
+  completedStatus: string;
+  cancelledStatus: string;
+  serviceDetails: string;
+  closeDetails: string;
+  cancelBooking: string;
+  rebook: string;
+  emptyUpcoming: string;
+  emptyCompleted: string;
+  emptyCancelled: string;
+  back: string;
+  home: string;
+  total: string;
+  activeNow: string;
+  menuClose: string;
+  menuCancel: string;
+  menuOpenProfile: string;
+  provider: string;
+  bookingSummary: string;
+  dateTime: string;
+  detailsUnlocked: string;
+  detailsLocked: string;
+  exactAddress: string;
+  area: string;
+  contactAndAddress: string;
+  phone: string;
+  email: string;
+  social: string;
+  openChat: string;
+  callSeller: string;
+  routeToMaster: string;
+  contactsHiddenTitle: string;
+  contactsHiddenText: string;
+  waitingMaster: string;
+  waitingPayment: string;
+  lockedValue: string;
+  todayAt: string;
+  tomorrowAt: string;
+  noPhoneAction: string;
+  noRouteAction: string;
+  chatAvailable: string;
+  chatOnly: string;
+  lockedUntilConfirm: string;
+  paidDeposit: string;
+  masterMustConfirm: string;
+};
+
+const BRAND = {
+  navy: '#071b46',
+  blue: '#1467f2',
+  green: '#21b84b',
+  red: '#ff4b4b',
+  pink: '#ff4f9a',
+  yellow: '#ffd629',
+  border: '#111111',
+  muted: '#626977',
+};
+
+const pageTexts: Partial<Record<AppLanguage, PageTexts>> = {
   EN: {
     title: 'My bookings',
-    subtitle: 'Upcoming visits, completed services and booking access',
+    subtitle: 'Booking status, chat, address and contact access',
     upcoming: 'Upcoming',
     completed: 'Completed',
     cancelled: 'Cancelled',
-    pending: 'Pending confirmation',
-    confirmed: 'Upcoming',
+    pending: 'Waiting for provider',
+    confirmed: 'Confirmed',
     completedStatus: 'Completed',
     cancelledStatus: 'Cancelled',
-    serviceDetails: 'Service details',
+    serviceDetails: 'Booking details',
     closeDetails: 'Close',
     cancelBooking: 'Cancel booking',
     rebook: 'Book again',
@@ -103,7 +109,6 @@ const pageTexts: Record<
     back: 'Back',
     home: 'Home',
     total: 'Total',
-    bookingOverview: 'Booking overview',
     activeNow: 'Active now',
     menuClose: 'Close',
     menuCancel: 'Cancel booking',
@@ -111,105 +116,44 @@ const pageTexts: Record<
     provider: 'Provider',
     bookingSummary: 'Booking summary',
     dateTime: 'Date & time',
-    detailsUnlocked: 'Details unlocked',
-    detailsLocked: 'Details are locked',
+    detailsUnlocked: 'Contacts unlocked',
+    detailsLocked: 'Waiting for provider confirmation',
     exactAddress: 'Exact address',
     area: 'Area',
-    contactAndAddress: 'Contact and address',
-    bookingAccess: 'Booking access',
+    contactAndAddress: 'Specialist contacts',
     phone: 'Phone',
     email: 'Email',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    instagram: 'Instagram',
-    writeSeller: 'Write to seller',
+    social: 'Social',
+    openChat: 'Open chat',
     callSeller: 'Call seller',
-    routeToMaster: 'Route to master',
-    contactsHiddenTitle: 'Contacts hidden',
+    routeToMaster: 'Build route',
+    contactsHiddenTitle: 'Contacts are locked',
     contactsHiddenText:
-      'Direct contacts and exact address will appear only after payment is received and promotion is paid by the master.',
-    waitingMaster: 'Waiting for master confirmation',
-    waitingPayment: 'Waiting for payment',
-    waitingPromotion: 'Promotion not paid',
-    unlockPaid: 'Unlock paid',
-    welcomeBonus: 'Welcome Bonus used',
-    referralUsed: 'Referral booking used',
+      'After deposit payment, chat is available. Phone, exact address and route unlock only after the provider confirms the booking.',
+    waitingMaster: 'Waiting for provider confirmation',
+    waitingPayment: 'Waiting for deposit payment',
     lockedValue: 'Locked',
     todayAt: 'Today at',
     tomorrowAt: 'Tomorrow at',
-    noPhoneAction: 'Number unavailable',
-    noMessageAction: 'Contact unavailable',
-    noRouteAction: 'Address locked',
-  },
-  ES: {
-    title: 'Mis reservas',
-    subtitle: 'Próximas visitas, servicios completados y acceso a la reserva',
-    upcoming: 'Próximas',
-    completed: 'Completadas',
-    cancelled: 'Canceladas',
-    pending: 'Pendiente de confirmación',
-    confirmed: 'Próxima',
-    completedStatus: 'Completada',
-    cancelledStatus: 'Cancelada',
-    serviceDetails: 'Detalles del servicio',
-    closeDetails: 'Cerrar',
-    cancelBooking: 'Cancelar reserva',
-    rebook: 'Reservar otra vez',
-    emptyUpcoming: 'Aún no hay reservas próximas',
-    emptyCompleted: 'Aún no hay reservas completadas',
-    emptyCancelled: 'Aún no hay reservas canceladas',
-    back: 'Atrás',
-    home: 'Inicio',
-    total: 'Total',
-    bookingOverview: 'Resumen de reservas',
-    activeNow: 'Activo ahora',
-    menuClose: 'Cerrar',
-    menuCancel: 'Cancelar reserva',
-    menuOpenProfile: 'Abrir perfil',
-    provider: 'Profesional',
-    bookingSummary: 'Resumen de la reserva',
-    dateTime: 'Fecha y hora',
-    detailsUnlocked: 'Detalles desbloqueados',
-    detailsLocked: 'Los detalles están bloqueados',
-    exactAddress: 'Dirección exacta',
-    area: 'Zona',
-    contactAndAddress: 'Contacto y dirección',
-    bookingAccess: 'Acceso a la reserva',
-    phone: 'Teléfono',
-    email: 'Correo',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    instagram: 'Instagram',
-    writeSeller: 'Escribir al vendedor',
-    callSeller: 'Llamar al vendedor',
-    routeToMaster: 'Ruta al profesional',
-    contactsHiddenTitle: 'Contactos ocultos',
-    contactsHiddenText:
-      'Los contactos directos y la dirección exacta aparecerán solo después de recibir el pago y de que el profesional pague la promoción.',
-    waitingMaster: 'Esperando confirmación del profesional',
-    waitingPayment: 'Esperando pago',
-    waitingPromotion: 'Promoción no pagada',
-    unlockPaid: 'Unlock pagado',
-    welcomeBonus: 'Welcome Bonus usado',
-    referralUsed: 'Reserva por referido usada',
-    lockedValue: 'Bloqueado',
-    todayAt: 'Hoy a las',
-    tomorrowAt: 'Mañana a las',
-    noPhoneAction: 'Número no disponible',
-    noMessageAction: 'Contacto no disponible',
-    noRouteAction: 'Dirección bloqueada',
+    noPhoneAction: 'Phone locked',
+    noRouteAction: 'Route locked',
+    chatAvailable: 'Chat available',
+    chatOnly: 'Chat only until confirmation',
+    lockedUntilConfirm: 'Locked until provider confirms',
+    paidDeposit: 'Deposit paid',
+    masterMustConfirm: 'Provider must confirm',
   },
   RU: {
     title: 'Мои бронирования',
-    subtitle: 'Предстоящие визиты, завершённые услуги и доступ к брони',
+    subtitle: 'Статус брони, чат, адрес и доступ к контактам',
     upcoming: 'Предстоящие',
     completed: 'Завершённые',
     cancelled: 'Отменённые',
-    pending: 'Ожидает подтверждения',
-    confirmed: 'Предстоящая',
+    pending: 'Ждёт мастера',
+    confirmed: 'Подтверждено',
     completedStatus: 'Завершено',
     cancelledStatus: 'Отменено',
-    serviceDetails: 'Детали услуги',
+    serviceDetails: 'Детали брони',
     closeDetails: 'Закрыть',
     cancelBooking: 'Отменить бронь',
     rebook: 'Повторить бронь',
@@ -219,7 +163,6 @@ const pageTexts: Record<
     back: 'Назад',
     home: 'Главная',
     total: 'Всего',
-    bookingOverview: 'Обзор бронирований',
     activeNow: 'Активно сейчас',
     menuClose: 'Закрыть',
     menuCancel: 'Отменить бронь',
@@ -227,221 +170,44 @@ const pageTexts: Record<
     provider: 'Специалист',
     bookingSummary: 'Сводка бронирования',
     dateTime: 'Дата и время',
-    detailsUnlocked: 'Детали открыты',
-    detailsLocked: 'Детали скрыты',
+    detailsUnlocked: 'Контакты открыты',
+    detailsLocked: 'Ждём подтверждения мастера',
     exactAddress: 'Точный адрес',
     area: 'Район',
-    contactAndAddress: 'Контакты и адрес',
-    bookingAccess: 'Доступ к брони',
+    contactAndAddress: 'Контакты специалиста',
     phone: 'Телефон',
     email: 'Email',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    instagram: 'Instagram',
-    writeSeller: 'Написать мастеру',
-    callSeller: 'Позвонить мастеру',
-    routeToMaster: 'Маршрут к мастеру',
-    contactsHiddenTitle: 'Контакты скрыты',
+    social: 'Соцсети',
+    openChat: 'Открыть чат',
+    callSeller: 'Позвонить',
+    routeToMaster: 'Маршрут',
+    contactsHiddenTitle: 'Контакты закрыты',
     contactsHiddenText:
-      'Прямые контакты и точный адрес откроются только после поступления оплаты и оплаченной рекламы мастером.',
+      'После оплаты депозита доступен только чат. Телефон, точный адрес и маршрут откроются только после подтверждения брони мастером.',
     waitingMaster: 'Ждёт подтверждения мастера',
-    waitingPayment: 'Ждёт оплату',
-    waitingPromotion: 'Реклама не оплачена',
-    unlockPaid: 'Unlock оплачен',
-    welcomeBonus: 'Использован Welcome Bonus',
-    referralUsed: 'Использовано реферальное бронирование',
+    waitingPayment: 'Ждёт оплату депозита',
     lockedValue: 'Скрыто',
     todayAt: 'Сегодня в',
     tomorrowAt: 'Завтра в',
-    noPhoneAction: 'Номер недоступен',
-    noMessageAction: 'Контакт недоступен',
-    noRouteAction: 'Адрес скрыт',
-  },
-  CZ: {
-    title: 'Moje rezervace',
-    subtitle: 'Nadcházející návštěvy, dokončené služby a přístup k rezervaci',
-    upcoming: 'Nadcházející',
-    completed: 'Dokončené',
-    cancelled: 'Zrušené',
-    pending: 'Čeká na potvrzení',
-    confirmed: 'Nadcházející',
-    completedStatus: 'Dokončeno',
-    cancelledStatus: 'Zrušeno',
-    serviceDetails: 'Detail služby',
-    closeDetails: 'Zavřít',
-    cancelBooking: 'Zrušit rezervaci',
-    rebook: 'Rezervovat znovu',
-    emptyUpcoming: 'Zatím žádné nadcházející rezervace',
-    emptyCompleted: 'Zatím žádné dokončené rezervace',
-    emptyCancelled: 'Zatím žádné zrušené rezervace',
-    back: 'Zpět',
-    home: 'Domů',
-    total: 'Celkem',
-    bookingOverview: 'Přehled rezervací',
-    activeNow: 'Aktivní nyní',
-    menuClose: 'Zavřít',
-    menuCancel: 'Zrušit rezervaci',
-    menuOpenProfile: 'Otevřít profil',
-    provider: 'Poskytovatel',
-    bookingSummary: 'Souhrn rezervace',
-    dateTime: 'Datum a čas',
-    detailsUnlocked: 'Detaily odemčeny',
-    detailsLocked: 'Detaily jsou skryté',
-    exactAddress: 'Přesná adresa',
-    area: 'Oblast',
-    contactAndAddress: 'Kontakt a adresa',
-    bookingAccess: 'Přístup k rezervaci',
-    phone: 'Telefon',
-    email: 'Email',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    instagram: 'Instagram',
-    writeSeller: 'Napsat poskytovateli',
-    callSeller: 'Zavolat poskytovateli',
-    routeToMaster: 'Trasa ke specialistovi',
-    contactsHiddenTitle: 'Kontakty skryty',
-    contactsHiddenText:
-      'Přímé kontakty a přesná adresa se zobrazí až po přijetí platby a zaplacení propagace poskytovatelem.',
-    waitingMaster: 'Čeká na potvrzení poskytovatele',
-    waitingPayment: 'Čeká na platbu',
-    waitingPromotion: 'Propagace není zaplacena',
-    unlockPaid: 'Unlock zaplacen',
-    welcomeBonus: 'Použit Welcome Bonus',
-    referralUsed: 'Použita referral rezervace',
-    lockedValue: 'Skryto',
-    todayAt: 'Dnes v',
-    tomorrowAt: 'Zítra v',
-    noPhoneAction: 'Číslo není dostupné',
-    noMessageAction: 'Kontakt není dostupný',
-    noRouteAction: 'Adresa je skrytá',
-  },
-  DE: {
-    title: 'Meine Buchungen',
-    subtitle: 'Bevorstehende Besuche, abgeschlossene Leistungen und Buchungszugang',
-    upcoming: 'Bevorstehend',
-    completed: 'Abgeschlossen',
-    cancelled: 'Storniert',
-    pending: 'Wartet auf Bestätigung',
-    confirmed: 'Bevorstehend',
-    completedStatus: 'Abgeschlossen',
-    cancelledStatus: 'Storniert',
-    serviceDetails: 'Servicedetails',
-    closeDetails: 'Schließen',
-    cancelBooking: 'Buchung stornieren',
-    rebook: 'Erneut buchen',
-    emptyUpcoming: 'Noch keine bevorstehenden Buchungen',
-    emptyCompleted: 'Noch keine abgeschlossenen Buchungen',
-    emptyCancelled: 'Noch keine stornierten Buchungen',
-    back: 'Zurück',
-    home: 'Start',
-    total: 'Gesamt',
-    bookingOverview: 'Buchungsübersicht',
-    activeNow: 'Jetzt aktiv',
-    menuClose: 'Schließen',
-    menuCancel: 'Buchung stornieren',
-    menuOpenProfile: 'Profil öffnen',
-    provider: 'Anbieter',
-    bookingSummary: 'Buchungsübersicht',
-    dateTime: 'Datum & Uhrzeit',
-    detailsUnlocked: 'Details freigeschaltet',
-    detailsLocked: 'Details sind gesperrt',
-    exactAddress: 'Genaue Adresse',
-    area: 'Bereich',
-    contactAndAddress: 'Kontakt und Adresse',
-    bookingAccess: 'Buchungszugang',
-    phone: 'Telefon',
-    email: 'E-Mail',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    instagram: 'Instagram',
-    writeSeller: 'An Anbieter schreiben',
-    callSeller: 'Anbieter anrufen',
-    routeToMaster: 'Route zum Anbieter',
-    contactsHiddenTitle: 'Kontakte verborgen',
-    contactsHiddenText:
-      'Direkte Kontakte und genaue Adresse werden erst nach Zahlungseingang und bezahlter Promotion des Anbieters angezeigt.',
-    waitingMaster: 'Wartet auf Bestätigung des Anbieters',
-    waitingPayment: 'Wartet auf Zahlung',
-    waitingPromotion: 'Promotion nicht bezahlt',
-    unlockPaid: 'Unlock bezahlt',
-    welcomeBonus: 'Welcome Bonus verwendet',
-    referralUsed: 'Referral-Buchung verwendet',
-    lockedValue: 'Gesperrt',
-    todayAt: 'Heute um',
-    tomorrowAt: 'Morgen um',
-    noPhoneAction: 'Nummer nicht verfügbar',
-    noMessageAction: 'Kontakt nicht verfügbar',
-    noRouteAction: 'Adresse gesperrt',
-  },
-  PL: {
-    title: 'Moje rezerwacje',
-    subtitle: 'Nadchodzące wizyty, zakończone usługi i dostęp do rezerwacji',
-    upcoming: 'Nadchodzące',
-    completed: 'Zakończone',
-    cancelled: 'Anulowane',
-    pending: 'Oczekuje na potwierdzenie',
-    confirmed: 'Nadchodząca',
-    completedStatus: 'Zakończone',
-    cancelledStatus: 'Anulowane',
-    serviceDetails: 'Szczegóły usługi',
-    closeDetails: 'Zamknij',
-    cancelBooking: 'Anuluj rezerwację',
-    rebook: 'Zarezerwuj ponownie',
-    emptyUpcoming: 'Brak nadchodzących rezerwacji',
-    emptyCompleted: 'Brak zakończonych rezerwacji',
-    emptyCancelled: 'Brak anulowanych rezerwacji',
-    back: 'Wstecz',
-    home: 'Strona główna',
-    total: 'Łącznie',
-    bookingOverview: 'Przegląd rezerwacji',
-    activeNow: 'Aktywne teraz',
-    menuClose: 'Zamknij',
-    menuCancel: 'Anuluj rezerwację',
-    menuOpenProfile: 'Otwórz profil',
-    provider: 'Usługodawca',
-    bookingSummary: 'Podsumowanie rezerwacji',
-    dateTime: 'Data i godzina',
-    detailsUnlocked: 'Szczegóły odblokowane',
-    detailsLocked: 'Szczegóły są ukryte',
-    exactAddress: 'Dokładny adres',
-    area: 'Obszar',
-    contactAndAddress: 'Kontakt i adres',
-    bookingAccess: 'Dostęp do rezerwacji',
-    phone: 'Telefon',
-    email: 'Email',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    instagram: 'Instagram',
-    writeSeller: 'Napisz do usługodawcy',
-    callSeller: 'Zadzwoń do usługodawcy',
-    routeToMaster: 'Trasa do specjalisty',
-    contactsHiddenTitle: 'Kontakty ukryte',
-    contactsHiddenText:
-      'Bezpośrednie kontakty i dokładny adres pojawią się dopiero po otrzymaniu płatności i opłaceniu promocji przez usługodawcę.',
-    waitingMaster: 'Oczekiwanie na potwierdzenie usługodawcy',
-    waitingPayment: 'Oczekiwanie na płatność',
-    waitingPromotion: 'Promocja nieopłacona',
-    unlockPaid: 'Unlock opłacony',
-    welcomeBonus: 'Użyto Welcome Bonus',
-    referralUsed: 'Użyto rezerwacji polecającej',
-    lockedValue: 'Ukryte',
-    todayAt: 'Dzisiaj o',
-    tomorrowAt: 'Jutro o',
-    noPhoneAction: 'Numer niedostępny',
-    noMessageAction: 'Kontakt niedostępny',
-    noRouteAction: 'Adres ukryty',
+    noPhoneAction: 'Телефон закрыт',
+    noRouteAction: 'Маршрут закрыт',
+    chatAvailable: 'Чат доступен',
+    chatOnly: 'Только чат до подтверждения',
+    lockedUntilConfirm: 'Закрыто до подтверждения мастером',
+    paidDeposit: 'Депозит оплачен',
+    masterMustConfirm: 'Мастер должен подтвердить',
   },
   UA: {
     title: 'Мої бронювання',
-    subtitle: 'Майбутні візити, завершені послуги та доступ до бронювання',
+    subtitle: 'Статус бронювання, чат, адреса і доступ до контактів',
     upcoming: 'Майбутні',
     completed: 'Завершені',
     cancelled: 'Скасовані',
-    pending: 'Очікує підтвердження',
-    confirmed: 'Майбутнє',
+    pending: 'Очікує майстра',
+    confirmed: 'Підтверджено',
     completedStatus: 'Завершено',
     cancelledStatus: 'Скасовано',
-    serviceDetails: 'Деталі послуги',
+    serviceDetails: 'Деталі бронювання',
     closeDetails: 'Закрити',
     cancelBooking: 'Скасувати бронювання',
     rebook: 'Забронювати знову',
@@ -451,7 +217,6 @@ const pageTexts: Record<
     back: 'Назад',
     home: 'Головна',
     total: 'Усього',
-    bookingOverview: 'Огляд бронювань',
     activeNow: 'Активно зараз',
     menuClose: 'Закрити',
     menuCancel: 'Скасувати бронювання',
@@ -459,362 +224,186 @@ const pageTexts: Record<
     provider: 'Спеціаліст',
     bookingSummary: 'Підсумок бронювання',
     dateTime: 'Дата і час',
-    detailsUnlocked: 'Деталі відкрито',
-    detailsLocked: 'Деталі приховано',
+    detailsUnlocked: 'Контакти відкрито',
+    detailsLocked: 'Очікуємо підтвердження майстра',
     exactAddress: 'Точна адреса',
     area: 'Район',
-    contactAndAddress: 'Контакти та адреса',
-    bookingAccess: 'Доступ до бронювання',
+    contactAndAddress: 'Контакти спеціаліста',
     phone: 'Телефон',
     email: 'Email',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    instagram: 'Instagram',
-    writeSeller: 'Написати майстру',
-    callSeller: 'Подзвонити майстру',
-    routeToMaster: 'Маршрут до майстра',
-    contactsHiddenTitle: 'Контакти приховано',
+    social: 'Соцмережі',
+    openChat: 'Відкрити чат',
+    callSeller: 'Подзвонити',
+    routeToMaster: 'Маршрут',
+    contactsHiddenTitle: 'Контакти закрито',
     contactsHiddenText:
-      'Прямі контакти і точна адреса відкриються тільки після надходження оплати та оплаченої реклами майстром.',
+      'Після оплати депозиту доступний тільки чат. Телефон, точна адреса і маршрут відкриються тільки після підтвердження бронювання майстром.',
     waitingMaster: 'Очікує підтвердження майстра',
-    waitingPayment: 'Очікує оплату',
-    waitingPromotion: 'Реклама не оплачена',
-    unlockPaid: 'Unlock оплачено',
-    welcomeBonus: 'Використано Welcome Bonus',
-    referralUsed: 'Використано реферальне бронювання',
+    waitingPayment: 'Очікує оплату депозиту',
     lockedValue: 'Приховано',
     todayAt: 'Сьогодні о',
     tomorrowAt: 'Завтра о',
-    noPhoneAction: 'Номер недоступний',
-    noMessageAction: 'Контакт недоступний',
-    noRouteAction: 'Адресу приховано',
-  },
-  IT: {
-    title: 'Le mie prenotazioni',
-    subtitle: 'Prossime visite, servizi completati e accesso alla prenotazione',
-    upcoming: 'In arrivo',
-    completed: 'Completate',
-    cancelled: 'Annullate',
-    pending: 'In attesa di conferma',
-    confirmed: 'In arrivo',
-    completedStatus: 'Completata',
-    cancelledStatus: 'Annullata',
-    serviceDetails: 'Dettagli del servizio',
-    closeDetails: 'Chiudi',
-    cancelBooking: 'Annulla prenotazione',
-    rebook: 'Prenota di nuovo',
-    emptyUpcoming: 'Nessuna prenotazione imminente',
-    emptyCompleted: 'Nessuna prenotazione completata',
-    emptyCancelled: 'Nessuna prenotazione annullata',
-    back: 'Indietro',
-    home: 'Home',
-    total: 'Totale',
-    bookingOverview: 'Panoramica prenotazioni',
-    activeNow: 'Attive ora',
-    menuClose: 'Chiudi',
-    menuCancel: 'Annulla prenotazione',
-    menuOpenProfile: 'Apri profilo',
-    provider: 'Specialista',
-    bookingSummary: 'Riepilogo prenotazione',
-    dateTime: 'Data e ora',
-    detailsUnlocked: 'Dettagli sbloccati',
-    detailsLocked: 'Dettagli bloccati',
-    exactAddress: 'Indirizzo esatto',
-    area: 'Zona',
-    contactAndAddress: 'Contatti e indirizzo',
-    bookingAccess: 'Accesso prenotazione',
-    phone: 'Telefono',
-    email: 'Email',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    instagram: 'Instagram',
-    writeSeller: 'Scrivi al venditore',
-    callSeller: 'Chiama il venditore',
-    routeToMaster: 'Percorso verso il professionista',
-    contactsHiddenTitle: 'Contatti nascosti',
-    contactsHiddenText:
-      'I contatti diretti e l’indirizzo esatto appariranno solo dopo la ricezione del pagamento e il pagamento della promozione da parte del professionista.',
-    waitingMaster: 'In attesa di conferma del professionista',
-    waitingPayment: 'In attesa del pagamento',
-    waitingPromotion: 'Promozione non pagata',
-    unlockPaid: 'Unlock pagato',
-    welcomeBonus: 'Welcome Bonus usato',
-    referralUsed: 'Prenotazione referral usata',
-    lockedValue: 'Bloccato',
-    todayAt: 'Oggi alle',
-    tomorrowAt: 'Domani alle',
-    noPhoneAction: 'Numero non disponibile',
-    noMessageAction: 'Contatto non disponibile',
-    noRouteAction: 'Indirizzo bloccato',
-  },
-  FR: {
-    title: 'Mes réservations',
-    subtitle: 'Visites à venir, services terminés et accès à la réservation',
-    upcoming: 'À venir',
-    completed: 'Terminées',
-    cancelled: 'Annulées',
-    pending: 'En attente de confirmation',
-    confirmed: 'À venir',
-    completedStatus: 'Terminée',
-    cancelledStatus: 'Annulée',
-    serviceDetails: 'Détails du service',
-    closeDetails: 'Fermer',
-    cancelBooking: 'Annuler la réservation',
-    rebook: 'Réserver à nouveau',
-    emptyUpcoming: 'Aucune réservation à venir',
-    emptyCompleted: 'Aucune réservation terminée',
-    emptyCancelled: 'Aucune réservation annulée',
-    back: 'Retour',
-    home: 'Accueil',
-    total: 'Total',
-    bookingOverview: 'Aperçu des réservations',
-    activeNow: 'Actives maintenant',
-    menuClose: 'Fermer',
-    menuCancel: 'Annuler la réservation',
-    menuOpenProfile: 'Ouvrir le profil',
-    provider: 'Professionnel',
-    bookingSummary: 'Résumé de réservation',
-    dateTime: 'Date et heure',
-    detailsUnlocked: 'Détails débloqués',
-    detailsLocked: 'Détails verrouillés',
-    exactAddress: 'Adresse exacte',
-    area: 'Zone',
-    contactAndAddress: 'Contact et adresse',
-    bookingAccess: 'Accès réservation',
-    phone: 'Téléphone',
-    email: 'Email',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    instagram: 'Instagram',
-    writeSeller: 'Écrire au vendeur',
-    callSeller: 'Appeler le vendeur',
-    routeToMaster: 'Itinéraire vers le professionnel',
-    contactsHiddenTitle: 'Contacts masqués',
-    contactsHiddenText:
-      'Les contacts directs et l’adresse exacte apparaîtront seulement après réception du paiement et paiement de la promotion par le professionnel.',
-    waitingMaster: 'En attente de confirmation du professionnel',
-    waitingPayment: 'En attente du paiement',
-    waitingPromotion: 'Promotion non payée',
-    unlockPaid: 'Unlock payé',
-    welcomeBonus: 'Welcome Bonus utilisé',
-    referralUsed: 'Réservation parrainage utilisée',
-    lockedValue: 'Verrouillé',
-    todayAt: 'Aujourd’hui à',
-    tomorrowAt: 'Demain à',
-    noPhoneAction: 'Numéro indisponible',
-    noMessageAction: 'Contact indisponible',
-    noRouteAction: 'Adresse verrouillée',
-  },
-  AR: {
-    title: 'حجوزاتي',
-    subtitle: 'الزيارات القادمة والخدمات المكتملة والوصول إلى الحجز',
-    upcoming: 'القادمة',
-    completed: 'المكتملة',
-    cancelled: 'الملغاة',
-    pending: 'بانتظار التأكيد',
-    confirmed: 'قادمة',
-    completedStatus: 'مكتملة',
-    cancelledStatus: 'ملغاة',
-    serviceDetails: 'تفاصيل الخدمة',
-    closeDetails: 'إغلاق',
-    cancelBooking: 'إلغاء الحجز',
-    rebook: 'إعادة الحجز',
-    emptyUpcoming: 'لا توجد حجوزات قادمة',
-    emptyCompleted: 'لا توجد حجوزات مكتملة',
-    emptyCancelled: 'لا توجد حجوزات ملغاة',
-    back: 'رجوع',
-    home: 'الرئيسية',
-    total: 'الإجمالي',
-    bookingOverview: 'نظرة على الحجوزات',
-    activeNow: 'نشطة الآن',
-    menuClose: 'إغلاق',
-    menuCancel: 'إلغاء الحجز',
-    menuOpenProfile: 'فتح الملف',
-    provider: 'المتخصص',
-    bookingSummary: 'ملخص الحجز',
-    dateTime: 'التاريخ والوقت',
-    detailsUnlocked: 'تم فتح التفاصيل',
-    detailsLocked: 'التفاصيل مخفية',
-    exactAddress: 'العنوان الدقيق',
-    area: 'المنطقة',
-    contactAndAddress: 'التواصل والعنوان',
-    bookingAccess: 'الوصول إلى الحجز',
-    phone: 'الهاتف',
-    email: 'البريد الإلكتروني',
-    whatsapp: 'واتساب',
-    telegram: 'تيليجرام',
-    instagram: 'إنستغرام',
-    writeSeller: 'مراسلة البائع',
-    callSeller: 'الاتصال بالبائع',
-    routeToMaster: 'الطريق إلى المختص',
-    contactsHiddenTitle: 'جهات الاتصال مخفية',
-    contactsHiddenText:
-      'ستظهر جهات الاتصال المباشرة والعنوان الدقيق فقط بعد استلام الدفع ودفع الترويج من قبل المختص.',
-    waitingMaster: 'بانتظار تأكيد المختص',
-    waitingPayment: 'بانتظار الدفع',
-    waitingPromotion: 'الترويج غير مدفوع',
-    unlockPaid: 'تم دفع Unlock',
-    welcomeBonus: 'تم استخدام Welcome Bonus',
-    referralUsed: 'تم استخدام حجز الإحالة',
-    lockedValue: 'مخفي',
-    todayAt: 'اليوم الساعة',
-    tomorrowAt: 'غدًا الساعة',
-    noPhoneAction: 'الرقم غير متاح',
-    noMessageAction: 'جهة الاتصال غير متاحة',
-    noRouteAction: 'العنوان مخفي',
+    noPhoneAction: 'Телефон закрито',
+    noRouteAction: 'Маршрут закрито',
+    chatAvailable: 'Чат доступний',
+    chatOnly: 'Тільки чат до підтвердження',
+    lockedUntilConfirm: 'Закрито до підтвердження майстром',
+    paidDeposit: 'Депозит оплачено',
+    masterMustConfirm: 'Майстер має підтвердити',
   },
 };
 
 const serviceNameMap: Record<string, Partial<Record<AppLanguage, string>>> = {
-  Маникюр: {
-    EN: 'Manicure',
-    ES: 'Manicura',
-    RU: 'Маникюр',
-    CZ: 'Manikúra',
-    DE: 'Maniküre',
-    PL: 'Manicure',
-    UA: 'Манікюр',
-    IT: 'Manicure',
-    FR: 'Manucure',
-    AR: 'مانيكير',
-  },
-  Стрижка: {
-    EN: 'Haircut',
-    ES: 'Corte de pelo',
-    RU: 'Стрижка',
-    CZ: 'Střih',
-    DE: 'Haarschnitt',
-    PL: 'Strzyżenie',
-    UA: 'Стрижка',
-    IT: 'Taglio di capelli',
-    FR: 'Coupe de cheveux',
-    AR: 'قص شعر',
-  },
-  Массаж: {
-    EN: 'Massage',
-    ES: 'Masaje',
-    RU: 'Массаж',
-    CZ: 'Masáž',
-    DE: 'Massage',
-    PL: 'Masaż',
-    UA: 'Масаж',
-    IT: 'Massaggio',
-    FR: 'Massage',
-    AR: 'تدليك',
-  },
-  Визаж: {
-    EN: 'Makeup',
-    ES: 'Maquillaje',
-    RU: 'Визаж',
-    CZ: 'Make-up',
-    DE: 'Make-up',
-    PL: 'Makijaż',
-    UA: 'Візаж',
-    IT: 'Trucco',
-    FR: 'Maquillage',
-    AR: 'مكياج',
-  },
-  'Ремонт телефона': {
-    EN: 'Phone repair',
-    ES: 'Reparación de teléfono',
-    RU: 'Ремонт телефона',
-    CZ: 'Oprava telefonu',
-    DE: 'Handy-Reparatur',
-    PL: 'Naprawa telefonu',
-    UA: 'Ремонт телефону',
-    IT: 'Riparazione telefono',
-    FR: 'Réparation téléphone',
-    AR: 'إصلاح الهاتف',
-  },
+  Маникюр: { EN: 'Manicure', RU: 'Маникюр', UA: 'Манікюр' },
+  Стрижка: { EN: 'Haircut', RU: 'Стрижка', UA: 'Стрижка' },
+  Массаж: { EN: 'Massage', RU: 'Массаж', UA: 'Масаж' },
+  Визаж: { EN: 'Makeup', RU: 'Визаж', UA: 'Візаж' },
+  'Ремонт телефона': { EN: 'Phone repair', RU: 'Ремонт телефона', UA: 'Ремонт телефону' },
 };
 
 const monthMap: Record<string, Partial<Record<AppLanguage, string>>> = {
-  января: { EN: 'January', ES: 'enero', RU: 'января', CZ: 'ledna', DE: 'Januar', PL: 'stycznia', UA: 'січня', IT: 'gennaio', FR: 'janvier', AR: 'يناير' },
-  февраля: { EN: 'February', ES: 'febrero', RU: 'февраля', CZ: 'února', DE: 'Februar', PL: 'lutego', UA: 'лютого', IT: 'febbraio', FR: 'février', AR: 'فبراير' },
-  марта: { EN: 'March', ES: 'marzo', RU: 'марта', CZ: 'března', DE: 'März', PL: 'marca', UA: 'березня', IT: 'marzo', FR: 'mars', AR: 'مارس' },
-  апреля: { EN: 'April', ES: 'abril', RU: 'апреля', CZ: 'dubna', DE: 'April', PL: 'kwietnia', UA: 'квітня', IT: 'aprile', FR: 'avril', AR: 'أبريل' },
-  мая: { EN: 'May', ES: 'mayo', RU: 'мая', CZ: 'května', DE: 'Mai', PL: 'maja', UA: 'травня', IT: 'maggio', FR: 'mai', AR: 'مايو' },
-  июня: { EN: 'June', ES: 'junio', RU: 'июня', CZ: 'června', DE: 'Juni', PL: 'czerwca', UA: 'червня', IT: 'giugno', FR: 'juin', AR: 'يونيو' },
-  июля: { EN: 'July', ES: 'julio', RU: 'июля', CZ: 'července', DE: 'Juli', PL: 'lipca', UA: 'липня', IT: 'luglio', FR: 'juillet', AR: 'يوليو' },
-  августа: { EN: 'August', ES: 'agosto', RU: 'августа', CZ: 'srpna', DE: 'August', PL: 'sierpnia', UA: 'серпня', IT: 'agosto', FR: 'août', AR: 'أغسطس' },
-  сентября: { EN: 'September', ES: 'septiembre', RU: 'сентября', CZ: 'září', DE: 'September', PL: 'września', UA: 'вересня', IT: 'settembre', FR: 'septembre', AR: 'سبتمبر' },
-  октября: { EN: 'October', ES: 'octubre', RU: 'октября', CZ: 'října', DE: 'Oktober', PL: 'października', UA: 'жовтня', IT: 'ottobre', FR: 'octobre', AR: 'أكتوبر' },
-  ноября: { EN: 'November', ES: 'noviembre', RU: 'ноября', CZ: 'listopadu', DE: 'November', PL: 'listopada', UA: 'листопада', IT: 'novembre', FR: 'novembre', AR: 'نوفمبر' },
-  декабря: { EN: 'December', ES: 'diciembre', RU: 'декабря', CZ: 'prosince', DE: 'Dezember', PL: 'grudnia', UA: 'грудня', IT: 'dicembre', FR: 'décembre', AR: 'ديسمبر' },
+  января: { EN: 'January', RU: 'января', UA: 'січня' },
+  февраля: { EN: 'February', RU: 'февраля', UA: 'лютого' },
+  марта: { EN: 'March', RU: 'марта', UA: 'березня' },
+  апреля: { EN: 'April', RU: 'апреля', UA: 'квітня' },
+  мая: { EN: 'May', RU: 'мая', UA: 'травня' },
+  июня: { EN: 'June', RU: 'июня', UA: 'червня' },
+  июля: { EN: 'July', RU: 'июля', UA: 'липня' },
+  августа: { EN: 'August', RU: 'августа', UA: 'серпня' },
+  сентября: { EN: 'September', RU: 'сентября', UA: 'вересня' },
+  октября: { EN: 'October', RU: 'октября', UA: 'жовтня' },
+  ноября: { EN: 'November', RU: 'ноября', UA: 'листопада' },
+  декабря: { EN: 'December', RU: 'декабря', UA: 'грудня' },
 };
 
 function getTexts(language: AppLanguage) {
-  return pageTexts[language] || pageTexts.EN;
+  return pageTexts[language] || pageTexts.EN!;
 }
 
 function formatPrice(price: number) {
-  return `£${price.toFixed(2)}`;
+  return `£${Number(price || 0).toFixed(2)}`;
 }
 
 function translateServiceName(value: string, language: AppLanguage) {
   return serviceNameMap[value]?.[language] || serviceNameMap[value]?.EN || value;
 }
 
-function translateDateLabel(
-  value: string,
-  language: AppLanguage,
-  text: ReturnType<typeof getTexts>
-) {
+function translateDateLabel(value: string, language: AppLanguage, text: PageTexts) {
   const source = String(value || '').trim();
   if (!source) return source;
 
   if (source.startsWith('Сегодня в ')) {
-    const time = source.replace('Сегодня в ', '').trim();
-    return `${text.todayAt} ${time}`;
+    return `${text.todayAt} ${source.replace('Сегодня в ', '').trim()}`;
   }
 
   if (source.startsWith('Завтра в ')) {
-    const time = source.replace('Завтра в ', '').trim();
-    return `${text.tomorrowAt} ${time}`;
+    return `${text.tomorrowAt} ${source.replace('Завтра в ', '').trim()}`;
   }
 
   const match = source.match(/^(\d{1,2})\s+([А-Яа-яё]+),\s*(\d{1,2}:\d{2})$/);
   if (match) {
     const [, day, rawMonth, time] = match;
     const month = monthMap[rawMonth.toLowerCase()];
-    if (month) {
-      return `${day} ${month[language] || month.EN || rawMonth}, ${time}`;
-    }
+    if (month) return `${day} ${month[language] || month.EN || rawMonth}, ${time}`;
   }
 
   return source;
 }
 
-function getStatusMeta(status: BookingStatus, text: ReturnType<typeof getTexts>) {
+function getStatusMeta(status: BookingStatus, text: PageTexts) {
   if (status === 'pending') {
     return {
       label: text.pending,
-      bg: '#fff0da',
-      color: '#c07a00',
+      bg: '#fff7cf',
+      color: '#9a6b00',
+      dot: '#ffd629',
     };
   }
 
   if (status === 'upcoming') {
     return {
       label: text.confirmed,
-      bg: '#dff2e3',
-      color: '#1d7a38',
+      bg: '#eef9f1',
+      color: '#157a35',
+      dot: '#21b84b',
     };
   }
 
   if (status === 'completed') {
     return {
       label: text.completedStatus,
-      bg: '#e6efff',
-      color: '#2559b7',
+      bg: '#eef4ff',
+      color: '#1467f2',
+      dot: '#1467f2',
     };
   }
 
   return {
     label: text.cancelledStatus,
-    bg: '#fde5e5',
-    color: '#b53a3a',
+    bg: '#fff0f0',
+    color: '#d92f2f',
+    dot: '#ff4b4b',
   };
+}
+
+function isBookingPaid(booking: BookingItem) {
+  return Boolean(booking.clientPaid || booking.paymentReceivedByPlatform);
+}
+
+function canOpenChat(booking: BookingItem) {
+  return booking.status !== 'cancelled' && isBookingPaid(booking);
+}
+
+function IconBox({
+  icon,
+  bg,
+  color,
+}: {
+  icon: string;
+  bg: string;
+  color: string;
+}) {
+  return (
+    <div
+      style={{
+        width: 42,
+        height: 42,
+        borderRadius: 14,
+        background: bg,
+        color,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 22,
+        fontWeight: 900,
+        flex: '0 0 auto',
+      }}
+    >
+      {icon}
+    </div>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <div
+      style={{
+        width: 42,
+        height: 42,
+        borderRadius: 999,
+        border: `2px solid ${BRAND.green}`,
+        color: BRAND.green,
+        background: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 23,
+        fontWeight: 900,
+      }}
+    >
+      💬
+    </div>
+  );
 }
 
 export default function BookingsPage() {
@@ -827,13 +416,8 @@ export default function BookingsPage() {
   const [detailsBookingId, setDetailsBookingId] = useState<string | null>(null);
 
   useEffect(() => {
-    const syncLanguage = () => {
-      setLanguage(getSavedLanguage());
-    };
-
-    const syncBookings = () => {
-      setBookings(getBookings());
-    };
+    const syncLanguage = () => setLanguage(getSavedLanguage());
+    const syncBookings = () => setBookings(getBookings());
 
     syncLanguage();
     syncBookings();
@@ -845,11 +429,15 @@ export default function BookingsPage() {
     const unsubscribeBookings = subscribeToBookingsStore(syncBookings);
 
     window.addEventListener('focus', syncLanguage);
+    window.addEventListener('pageshow', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
 
     return () => {
       unsubscribeLanguage();
       unsubscribeBookings();
       window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('pageshow', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
     };
   }, []);
 
@@ -889,6 +477,7 @@ export default function BookingsPage() {
   const handleCancelBooking = (booking: BookingItem) => {
     updateBookingStatus(booking.id, 'cancelled');
     setMenuBookingId(null);
+
     if (detailsBookingId === booking.id) {
       setDetailsBookingId(null);
     }
@@ -903,24 +492,34 @@ export default function BookingsPage() {
     setMenuBookingId(null);
   };
 
+  const handleOpenChat = (booking: BookingItem) => {
+    if (!canOpenChat(booking)) return;
+
+    router.push(
+      `/messages?bookingId=${encodeURIComponent(booking.id)}&masterId=${encodeURIComponent(
+        booking.masterId
+      )}`
+    );
+  };
+
   return (
     <>
       <main
         style={{
           minHeight: '100vh',
           background: '#ffffff',
-          color: '#17130f',
-          paddingBottom: 110,
+          color: BRAND.navy,
+          paddingBottom: 112,
           fontFamily: 'Arial, sans-serif',
         }}
       >
-        <div style={{ maxWidth: 430, margin: '0 auto', padding: '20px 16px 110px' }}>
-          <div
+        <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 18px 112px' }}>
+          <header
             style={{
               display: 'grid',
-              gridTemplateColumns: '54px 1fr 54px',
+              gridTemplateColumns: '46px 1fr 46px',
               alignItems: 'center',
-              gap: 12,
+              gap: 10,
             }}
           >
             <button
@@ -928,14 +527,13 @@ export default function BookingsPage() {
               onClick={() => router.back()}
               aria-label={text.back}
               style={{
-                width: 54,
-                height: 54,
-                borderRadius: 999,
-                border: '2px solid #111111',
-                background: '#fff',
-                fontSize: 26,
-                color: '#17130f',
-                fontWeight: 900,
+                width: 46,
+                height: 46,
+                border: 0,
+                background: 'transparent',
+                fontSize: 38,
+                lineHeight: 1,
+                color: BRAND.navy,
                 cursor: 'pointer',
               }}
             >
@@ -943,27 +541,7 @@ export default function BookingsPage() {
             </button>
 
             <div style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 900,
-                  color: '#17130f',
-                  lineHeight: 1.15,
-                }}
-              >
-                {text.title}
-              </div>
-              <div
-                style={{
-                  marginTop: 4,
-                  fontSize: 13,
-                  color: '#7b7268',
-                  fontWeight: 700,
-                  lineHeight: 1.35,
-                }}
-              >
-                {text.subtitle}
-              </div>
+              <div style={{ fontSize: 30, fontWeight: 900, color: BRAND.navy }}>Olamep</div>
             </div>
 
             <button
@@ -971,174 +549,130 @@ export default function BookingsPage() {
               onClick={() => router.push('/')}
               aria-label={text.home}
               style={{
-                width: 54,
-                height: 54,
-                borderRadius: 999,
-                border: '2px solid #111111',
-                background: '#fff',
-                fontSize: 22,
-                color: '#17130f',
-                fontWeight: 900,
+                width: 46,
+                height: 46,
+                border: 0,
+                background: 'transparent',
+                fontSize: 30,
+                color: BRAND.navy,
                 cursor: 'pointer',
               }}
             >
               ⌂
             </button>
-          </div>
+          </header>
 
-          <section style={{ marginTop: 18 }}>
-            <div
+          <section style={{ marginTop: 26 }}>
+            <h1
               style={{
-                borderRadius: 30,
-                border: '2px solid #111111',
-                background: '#fff',
-                padding: 18,
+                margin: 0,
+                fontSize: 42,
+                lineHeight: 1.02,
+                fontWeight: 900,
+                letterSpacing: '-1.5px',
+                color: BRAND.navy,
               }}
             >
+              {text.title}
+            </h1>
+
+            <p
+              style={{
+                margin: '10px 0 0',
+                fontSize: 17,
+                lineHeight: 1.35,
+                fontWeight: 600,
+                color: '#555c68',
+              }}
+            >
+              {text.subtitle}
+            </p>
+          </section>
+
+          <section
+            style={{
+              marginTop: 18,
+              borderRadius: 20,
+              border: `2px solid ${BRAND.border}`,
+              background: '#ffffff',
+              padding: 14,
+              boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
+            }}
+          >
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                border: '1.5px solid #d9dee8',
+                borderRadius: 18,
+                overflow: 'hidden',
+              }}
+            >
+              <div style={{ padding: 14 }}>
+                <div style={{ fontSize: 13, color: '#6f7582', fontWeight: 800 }}>
+                  {text.activeNow}
+                </div>
+                <div style={{ marginTop: 4, fontSize: 30, fontWeight: 900, color: BRAND.navy }}>
+                  {activeNowCount}
+                </div>
+              </div>
+
               <div
                 style={{
-                  borderRadius: 24,
-                  border: '2px solid #111111',
-                  background: '#2f241c',
-                  color: '#fff',
-                  padding: 18,
+                  padding: 14,
+                  borderLeft: '1.5px solid #d9dee8',
+                  background: '#f5f7fb',
                 }}
               >
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '56px 1fr',
-                    gap: 14,
-                    alignItems: 'center',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 18,
-                      border: '2px solid #111111',
-                      background: '#fff1f7',
-                      color: '#ff4fa0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 26,
-                    }}
-                  >
-                    📅
-                  </div>
-
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 20,
-                        fontWeight: 900,
-                        color: '#ffffff',
-                      }}
-                    >
-                      {text.bookingOverview}
-                    </div>
-                    <div
-                      style={{
-                        marginTop: 6,
-                        fontSize: 14,
-                        lineHeight: 1.5,
-                        color: '#ddd2c6',
-                        fontWeight: 700,
-                      }}
-                    >
-                      {text.title}
-                    </div>
-                  </div>
+                <div style={{ fontSize: 13, color: '#6f7582', fontWeight: 800 }}>
+                  {text.total}
                 </div>
-
-                <div
-                  style={{
-                    marginTop: 14,
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 10,
-                  }}
-                >
-                  <div
-                    style={{
-                      minHeight: 40,
-                      padding: '0 14px',
-                      borderRadius: 999,
-                      border: '2px solid #111111',
-                      background: '#dff2e3',
-                      color: '#1d7a38',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      fontSize: 13,
-                      fontWeight: 900,
-                    }}
-                  >
-                    {text.activeNow}: {activeNowCount}
-                  </div>
-
-                  <div
-                    style={{
-                      minHeight: 40,
-                      padding: '0 14px',
-                      borderRadius: 999,
-                      border: '2px solid #111111',
-                      background: '#fff',
-                      color: '#17130f',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      fontSize: 13,
-                      fontWeight: 900,
-                    }}
-                  >
-                    {text.total}: {bookings.length}
-                  </div>
+                <div style={{ marginTop: 4, fontSize: 30, fontWeight: 900, color: BRAND.blue }}>
+                  {bookings.length}
                 </div>
               </div>
             </div>
           </section>
 
-          <section style={{ marginTop: 16 }}>
-            <div
-              style={{
-                background: '#fff',
-                border: '2px solid #111111',
-                borderRadius: 26,
-                padding: 8,
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: 8,
-              }}
-            >
-              {([
-                ['upcoming', text.upcoming],
-                ['completed', text.completed],
-                ['cancelled', text.cancelled],
-              ] as const).map(([tabKey, label]) => {
-                const active = activeTab === tabKey;
+          <section
+            style={{
+              marginTop: 16,
+              borderRadius: 20,
+              border: `2px solid ${BRAND.border}`,
+              background: '#ffffff',
+              padding: 8,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr',
+              gap: 8,
+            }}
+          >
+            {([
+              ['upcoming', text.upcoming],
+              ['completed', text.completed],
+              ['cancelled', text.cancelled],
+            ] as const).map(([tabKey, label]) => {
+              const active = activeTab === tabKey;
 
-                return (
-                  <button
-                    key={tabKey}
-                    type="button"
-                    onClick={() => setActiveTab(tabKey)}
-                    style={{
-                      minHeight: 52,
-                      borderRadius: 18,
-                      border: '2px solid #111111',
-                      background: active ? '#17130f' : '#fff',
-                      color: active ? '#fff' : '#17130f',
-                      fontSize: 15,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
+              return (
+                <button
+                  key={tabKey}
+                  type="button"
+                  onClick={() => setActiveTab(tabKey)}
+                  style={{
+                    minHeight: 50,
+                    borderRadius: 15,
+                    border: `2px solid ${active ? BRAND.border : '#d9dee8'}`,
+                    background: active ? BRAND.navy : '#ffffff',
+                    color: active ? '#ffffff' : BRAND.navy,
+                    fontSize: 14,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </section>
 
           <section style={{ marginTop: 18 }}>
@@ -1146,13 +680,13 @@ export default function BookingsPage() {
               <div
                 style={{
                   background: '#fff',
-                  border: '2px solid #111111',
-                  borderRadius: 28,
+                  border: `2px solid ${BRAND.border}`,
+                  borderRadius: 20,
                   padding: '28px 20px',
                   textAlign: 'center',
                   fontSize: 16,
                   fontWeight: 800,
-                  color: '#6f7882',
+                  color: '#6f7582',
                 }}
               >
                 {emptyText}
@@ -1164,40 +698,54 @@ export default function BookingsPage() {
                   const showCancelButton =
                     booking.status === 'pending' || booking.status === 'upcoming';
                   const publicLocation = getPublicBookingLocation(booking);
+                  const paid = isBookingPaid(booking);
+                  const chatEnabled = canOpenChat(booking);
+                  const unlocked = canShowDirectContacts(booking) && canShowExactAddress(booking);
 
                   return (
                     <article
                       key={booking.id}
                       style={{
                         background: '#fff',
-                        border: '2px solid #111111',
-                        borderRadius: 30,
-                        padding: 18,
+                        border: `2px solid ${BRAND.border}`,
+                        borderRadius: 22,
+                        padding: 14,
+                        boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
                       }}
                     >
                       <div
                         style={{
                           display: 'flex',
                           justifyContent: 'space-between',
-                          alignItems: 'flex-start',
-                          gap: 12,
-                          marginBottom: 16,
+                          alignItems: 'center',
+                          gap: 10,
+                          marginBottom: 14,
                         }}
                       >
                         <div
                           style={{
                             display: 'inline-flex',
                             alignItems: 'center',
-                            minHeight: 42,
-                            padding: '0 16px',
+                            gap: 8,
+                            minHeight: 36,
+                            padding: '0 12px',
                             borderRadius: 999,
-                            border: '2px solid #111111',
+                            border: `2px solid ${BRAND.border}`,
                             background: statusMeta.bg,
                             color: statusMeta.color,
-                            fontSize: 13,
+                            fontSize: 12,
                             fontWeight: 900,
                           }}
                         >
+                          <span
+                            style={{
+                              width: 9,
+                              height: 9,
+                              borderRadius: 999,
+                              background: statusMeta.dot,
+                              display: 'inline-block',
+                            }}
+                          />
                           {statusMeta.label}
                         </div>
 
@@ -1205,11 +753,11 @@ export default function BookingsPage() {
                           type="button"
                           onClick={() => setMenuBookingId(booking.id)}
                           style={{
-                            border: '2px solid #111111',
+                            border: `2px solid ${BRAND.border}`,
                             background: '#fff',
-                            color: '#17130f',
-                            width: 42,
-                            height: 42,
+                            color: BRAND.navy,
+                            width: 40,
+                            height: 40,
                             borderRadius: 999,
                             fontSize: 20,
                             lineHeight: 1,
@@ -1223,45 +771,33 @@ export default function BookingsPage() {
                       <div
                         style={{
                           display: 'grid',
-                          gridTemplateColumns: '96px 1fr',
-                          gap: 16,
+                          gridTemplateColumns: '92px 1fr',
+                          gap: 12,
                           alignItems: 'center',
                         }}
                       >
                         <img
                           src={
                             booking.masterAvatar ||
-                            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80'
+                            'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=400&q=80'
                           }
                           alt={booking.masterName}
                           style={{
-                            width: 96,
-                            height: 96,
+                            width: 92,
+                            height: 92,
                             objectFit: 'cover',
-                            borderRadius: 22,
-                            border: '2px solid #111111',
+                            borderRadius: 16,
                             display: 'block',
                           }}
                         />
 
-                        <div>
+                        <div style={{ minWidth: 0 }}>
                           <div
                             style={{
-                              fontSize: 14,
-                              fontWeight: 800,
-                              color: '#9a9086',
-                            }}
-                          >
-                            {text.provider}
-                          </div>
-
-                          <div
-                            style={{
-                              marginTop: 4,
                               fontSize: 20,
+                              lineHeight: 1.1,
                               fontWeight: 900,
-                              color: '#17130f',
-                              lineHeight: 1.2,
+                              color: BRAND.navy,
                             }}
                           >
                             {booking.masterName}
@@ -1269,11 +805,10 @@ export default function BookingsPage() {
 
                           <div
                             style={{
-                              marginTop: 6,
+                              marginTop: 5,
                               fontSize: 15,
                               fontWeight: 700,
-                              color: '#6d6d6d',
-                              lineHeight: 1.35,
+                              color: '#4f5663',
                             }}
                           >
                             {translateServiceName(booking.serviceName, language)}
@@ -1281,33 +816,36 @@ export default function BookingsPage() {
 
                           <div
                             style={{
-                              marginTop: 6,
-                              fontSize: 15,
-                              fontWeight: 700,
-                              color: '#5c6470',
-                              lineHeight: 1.35,
+                              marginTop: 9,
+                              display: 'flex',
+                              flexWrap: 'wrap',
+                              alignItems: 'center',
+                              gap: 7,
+                              fontSize: 13,
+                              fontWeight: 800,
+                              color: BRAND.blue,
                             }}
                           >
-                            {translateDateLabel(booking.dateLabel, language, text)}
+                            <span>📅 {translateDateLabel(booking.dateLabel, language, text)}</span>
                           </div>
 
                           <div
                             style={{
-                              marginTop: 6,
-                              fontSize: 14,
-                              fontWeight: 700,
-                              color: '#8e8478',
+                              marginTop: 7,
+                              fontSize: 13,
+                              fontWeight: 800,
+                              color: '#626977',
                             }}
                           >
-                            {publicLocation}
+                            📍 {unlocked ? getVisibleBookingLocation(booking) : publicLocation}
                           </div>
 
                           <div
                             style={{
                               marginTop: 8,
-                              fontSize: 17,
+                              fontSize: 22,
                               fontWeight: 900,
-                              color: '#17130f',
+                              color: BRAND.navy,
                             }}
                           >
                             {formatPrice(booking.price)}
@@ -1315,16 +853,67 @@ export default function BookingsPage() {
                         </div>
                       </div>
 
-                      <div style={{ display: 'grid', gap: 12, marginTop: 18 }}>
+                      <div
+                        style={{
+                          marginTop: 14,
+                          border: '1.5px solid #d9dee8',
+                          borderRadius: 18,
+                          overflow: 'hidden',
+                          display: 'grid',
+                          gridTemplateColumns: '1fr 1fr',
+                        }}
+                      >
+                        <div style={{ padding: 12, background: paid ? '#eef9f1' : '#fff7cf' }}>
+                          <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
+                            {paid ? text.paidDeposit : text.waitingPayment}
+                          </div>
+                          <div
+                            style={{
+                              marginTop: 4,
+                              color: paid ? BRAND.green : '#9a6b00',
+                              fontSize: 14,
+                              lineHeight: 1.25,
+                              fontWeight: 900,
+                            }}
+                          >
+                            {paid ? text.chatAvailable : text.waitingPayment}
+                          </div>
+                        </div>
+
+                        <div
+                          style={{
+                            padding: 12,
+                            borderLeft: '1.5px solid #d9dee8',
+                            background: unlocked ? '#eef9f1' : '#f5f7fb',
+                          }}
+                        >
+                          <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
+                            {unlocked ? text.detailsUnlocked : text.masterMustConfirm}
+                          </div>
+                          <div
+                            style={{
+                              marginTop: 4,
+                              color: unlocked ? BRAND.green : BRAND.blue,
+                              fontSize: 14,
+                              lineHeight: 1.25,
+                              fontWeight: 900,
+                            }}
+                          >
+                            {unlocked ? text.exactAddress : text.lockedUntilConfirm}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gap: 10, marginTop: 14 }}>
                         <button
                           type="button"
                           onClick={() => handleOpenBookingDetails(booking)}
                           style={{
-                            minHeight: 56,
-                            borderRadius: 22,
-                            border: '2px solid #111111',
+                            minHeight: 54,
+                            borderRadius: 16,
+                            border: `2px solid ${BRAND.border}`,
                             background: '#ffffff',
-                            color: '#17130f',
+                            color: BRAND.navy,
                             fontSize: 16,
                             fontWeight: 900,
                             cursor: 'pointer',
@@ -1333,17 +922,35 @@ export default function BookingsPage() {
                           {text.serviceDetails}
                         </button>
 
+                        <button
+                          type="button"
+                          disabled={!chatEnabled}
+                          onClick={() => handleOpenChat(booking)}
+                          style={{
+                            minHeight: 54,
+                            borderRadius: 16,
+                            border: `2px solid ${BRAND.green}`,
+                            background: chatEnabled ? BRAND.green : '#edf2ee',
+                            color: chatEnabled ? '#ffffff' : '#8b968e',
+                            fontSize: 16,
+                            fontWeight: 900,
+                            cursor: chatEnabled ? 'pointer' : 'not-allowed',
+                          }}
+                        >
+                          💬 {chatEnabled ? text.openChat : text.waitingPayment}
+                        </button>
+
                         {showCancelButton ? (
                           <button
                             type="button"
                             onClick={() => handleCancelBooking(booking)}
                             style={{
-                              minHeight: 56,
-                              borderRadius: 22,
-                              border: '2px solid #111111',
-                              background: '#fdeaea',
-                              color: '#c74343',
-                              fontSize: 16,
+                              minHeight: 52,
+                              borderRadius: 16,
+                              border: `2px solid ${BRAND.border}`,
+                              background: '#fff0f0',
+                              color: '#d92f2f',
+                              fontSize: 15,
                               fontWeight: 900,
                               cursor: 'pointer',
                             }}
@@ -1355,12 +962,12 @@ export default function BookingsPage() {
                             type="button"
                             onClick={() => handleRebook(booking)}
                             style={{
-                              minHeight: 56,
-                              borderRadius: 22,
-                              border: '2px solid #111111',
-                              background: '#eaf2ff',
-                              color: '#1f4fa8',
-                              fontSize: 16,
+                              minHeight: 52,
+                              borderRadius: 16,
+                              border: `2px solid ${BRAND.border}`,
+                              background: '#eef4ff',
+                              color: BRAND.blue,
+                              fontSize: 15,
                               fontWeight: 900,
                               cursor: 'pointer',
                             }}
@@ -1405,8 +1012,8 @@ export default function BookingsPage() {
             <div
               style={{
                 background: '#fff',
-                border: '2px solid #111111',
-                borderRadius: 28,
+                border: `2px solid ${BRAND.border}`,
+                borderRadius: 22,
                 padding: 14,
                 display: 'grid',
                 gap: 10,
@@ -1418,10 +1025,10 @@ export default function BookingsPage() {
                 onClick={() => handleOpenBookingDetails(selectedMenuBooking)}
                 style={{
                   minHeight: 54,
-                  borderRadius: 20,
-                  border: '2px solid #111111',
+                  borderRadius: 16,
+                  border: `2px solid ${BRAND.border}`,
                   background: '#ffffff',
-                  color: '#17130f',
+                  color: BRAND.navy,
                   fontSize: 16,
                   fontWeight: 900,
                   cursor: 'pointer',
@@ -1435,10 +1042,10 @@ export default function BookingsPage() {
                 onClick={() => handleOpenProfile(selectedMenuBooking)}
                 style={{
                   minHeight: 54,
-                  borderRadius: 20,
-                  border: '2px solid #111111',
-                  background: '#eef3ff',
-                  color: '#2959b7',
+                  borderRadius: 16,
+                  border: `2px solid ${BRAND.border}`,
+                  background: '#eef4ff',
+                  color: BRAND.blue,
                   fontSize: 16,
                   fontWeight: 900,
                   cursor: 'pointer',
@@ -1454,10 +1061,10 @@ export default function BookingsPage() {
                   onClick={() => handleCancelBooking(selectedMenuBooking)}
                   style={{
                     minHeight: 54,
-                    borderRadius: 20,
-                    border: '2px solid #111111',
-                    background: '#fdeaea',
-                    color: '#c74343',
+                    borderRadius: 16,
+                    border: `2px solid ${BRAND.border}`,
+                    background: '#fff0f0',
+                    color: '#d92f2f',
                     fontSize: 16,
                     fontWeight: 900,
                     cursor: 'pointer',
@@ -1472,9 +1079,9 @@ export default function BookingsPage() {
                 onClick={() => setMenuBookingId(null)}
                 style={{
                   minHeight: 54,
-                  borderRadius: 20,
-                  border: '2px solid #111111',
-                  background: '#17130f',
+                  borderRadius: 16,
+                  border: `2px solid ${BRAND.border}`,
+                  background: BRAND.navy,
                   color: '#ffffff',
                   fontSize: 16,
                   fontWeight: 900,
@@ -1490,11 +1097,14 @@ export default function BookingsPage() {
 
       {selectedDetailsBooking
         ? (() => {
-            const detailsUnlocked = canShowExactAddress(selectedDetailsBooking);
-            const contactsUnlocked = canShowDirectContacts(selectedDetailsBooking);
+            const detailsUnlocked =
+              canShowExactAddress(selectedDetailsBooking) &&
+              canShowDirectContacts(selectedDetailsBooking);
             const visibleAddress = getVisibleBookingLocation(selectedDetailsBooking);
             const safeArea = getPublicBookingLocation(selectedDetailsBooking);
             const protectedContacts = getProtectedBookingContact(selectedDetailsBooking);
+            const paid = isBookingPaid(selectedDetailsBooking);
+            const chatEnabled = canOpenChat(selectedDetailsBooking);
 
             return (
               <div
@@ -1514,7 +1124,7 @@ export default function BookingsPage() {
                   style={{
                     width: '100%',
                     maxWidth: 430,
-                    maxHeight: '88vh',
+                    maxHeight: '90vh',
                     overflowY: 'auto',
                     padding: '0 16px calc(18px + env(safe-area-inset-bottom))',
                     boxSizing: 'border-box',
@@ -1523,92 +1133,102 @@ export default function BookingsPage() {
                   <div
                     style={{
                       background: '#fff',
-                      border: '2px solid #111111',
-                      borderRadius: 30,
-                      padding: 18,
+                      border: `2px solid ${BRAND.border}`,
+                      borderRadius: 24,
+                      padding: 16,
                       boxShadow: '0 22px 44px rgba(0,0,0,0.2)',
                     }}
                   >
                     <div
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: '96px 1fr auto',
-                        gap: 14,
+                        gridTemplateColumns: '78px 1fr auto',
+                        gap: 12,
                         alignItems: 'center',
                       }}
                     >
                       <img
                         src={
                           selectedDetailsBooking.masterAvatar ||
-                          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80'
+                          'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=400&q=80'
                         }
                         alt={selectedDetailsBooking.masterName}
                         style={{
-                          width: 96,
-                          height: 96,
+                          width: 78,
+                          height: 78,
                           objectFit: 'cover',
-                          borderRadius: 22,
-                          border: '2px solid #111111',
+                          borderRadius: 16,
                         }}
                       />
 
-                      <div>
-                        <div style={{ fontSize: 14, fontWeight: 800, color: '#9a9086' }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: '#6f7582' }}>
                           {text.provider}
                         </div>
-                        <div style={{ marginTop: 4, fontSize: 20, fontWeight: 900, color: '#17130f' }}>
+
+                        <div
+                          style={{
+                            marginTop: 3,
+                            fontSize: 20,
+                            lineHeight: 1.1,
+                            fontWeight: 900,
+                            color: BRAND.navy,
+                          }}
+                        >
                           {selectedDetailsBooking.masterName}
                         </div>
-                        <div style={{ marginTop: 6, fontSize: 15, fontWeight: 700, color: '#6d6d6d' }}>
+
+                        <div
+                          style={{
+                            marginTop: 5,
+                            fontSize: 14,
+                            fontWeight: 700,
+                            color: '#4f5663',
+                          }}
+                        >
                           {translateServiceName(selectedDetailsBooking.serviceName, language)}
                         </div>
                       </div>
 
-                      <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
+                      <div style={{ fontSize: 20, fontWeight: 900, color: BRAND.navy }}>
                         {formatPrice(selectedDetailsBooking.price)}
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gap: 14, marginTop: 18 }}>
-                      <div
+                    <div style={{ display: 'grid', gap: 14, marginTop: 16 }}>
+                      <section
                         style={{
-                          border: '2px solid #111111',
-                          borderRadius: 28,
-                          padding: 16,
+                          border: `2px solid ${BRAND.border}`,
+                          borderRadius: 20,
+                          padding: 14,
                           background: '#fff',
                         }}
                       >
-                        <div style={{ fontSize: 17, fontWeight: 900, color: '#17130f' }}>
+                        <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
                           {text.bookingSummary}
                         </div>
 
                         <div
                           style={{
-                            marginTop: 14,
+                            marginTop: 12,
                             display: 'grid',
                             gridTemplateColumns: '1fr 1fr',
-                            gap: 14,
+                            border: '1.5px solid #d9dee8',
+                            borderRadius: 18,
+                            overflow: 'hidden',
                           }}
                         >
-                          <div
-                            style={{
-                              minHeight: 118,
-                              border: '2px solid #111111',
-                              borderRadius: 24,
-                              padding: 16,
-                              background: '#fff',
-                            }}
-                          >
-                            <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
+                          <div style={{ padding: 12 }}>
+                            <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
                               {text.dateTime}
                             </div>
                             <div
                               style={{
-                                marginTop: 12,
-                                fontSize: 18,
-                                lineHeight: 1.4,
+                                marginTop: 6,
+                                fontSize: 16,
+                                lineHeight: 1.35,
                                 fontWeight: 900,
-                                color: '#17130f',
+                                color: BRAND.blue,
                               }}
                             >
                               {translateDateLabel(selectedDetailsBooking.dateLabel, language, text)}
@@ -1617,23 +1237,20 @@ export default function BookingsPage() {
 
                           <div
                             style={{
-                              minHeight: 118,
-                              border: '2px solid #111111',
-                              borderRadius: 24,
-                              padding: 16,
-                              background: '#fff',
+                              padding: 12,
+                              borderLeft: '1.5px solid #d9dee8',
+                              background: '#f5f7fb',
                             }}
                           >
-                            <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
+                            <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
                               {text.total}
                             </div>
                             <div
                               style={{
-                                marginTop: 12,
-                                fontSize: 18,
-                                lineHeight: 1.4,
+                                marginTop: 6,
+                                fontSize: 22,
                                 fontWeight: 900,
-                                color: '#17130f',
+                                color: BRAND.navy,
                               }}
                             >
                               {formatPrice(selectedDetailsBooking.price)}
@@ -1643,138 +1260,206 @@ export default function BookingsPage() {
 
                         <div
                           style={{
-                            marginTop: 14,
-                            border: '2px solid #111111',
-                            borderRadius: 24,
-                            padding: 16,
-                            background: detailsUnlocked ? '#dff0e7' : '#f4f0ea',
-                            color: detailsUnlocked ? '#1f7b47' : '#7b7268',
+                            marginTop: 12,
+                            border: `2px solid ${BRAND.border}`,
+                            borderRadius: 18,
+                            padding: 14,
+                            background: detailsUnlocked ? '#eef9f1' : '#f5f7fb',
                           }}
                         >
-                          <div style={{ fontSize: 16, fontWeight: 900 }}>
+                          <div
+                            style={{
+                              fontSize: 16,
+                              fontWeight: 900,
+                              color: detailsUnlocked ? BRAND.green : BRAND.blue,
+                            }}
+                          >
                             {detailsUnlocked ? text.detailsUnlocked : text.detailsLocked}
                           </div>
-                          <div style={{ marginTop: 10, fontSize: 15, fontWeight: 800, lineHeight: 1.45 }}>
+
+                          <div
+                            style={{
+                              marginTop: 8,
+                              fontSize: 14,
+                              fontWeight: 800,
+                              lineHeight: 1.45,
+                              color: '#515866',
+                            }}
+                          >
                             {detailsUnlocked
                               ? `${text.exactAddress}: ${visibleAddress}`
                               : `${text.area}: ${safeArea}`}
                           </div>
                         </div>
-                      </div>
+                      </section>
 
-                      <div
+                      <section
                         style={{
-                          border: '2px solid #111111',
-                          borderRadius: 28,
-                          padding: 16,
+                          border: `2px solid ${BRAND.border}`,
+                          borderRadius: 20,
+                          padding: 14,
                           background: '#fff',
-                          position: 'relative',
                         }}
                       >
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            gap: 10,
-                          }}
-                        >
-                          <div style={{ fontSize: 17, fontWeight: 900, color: '#17130f' }}>
-                            {text.contactAndAddress}
-                          </div>
+                        <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
+                          {text.contactAndAddress}
+                        </div>
 
+                        <div style={{ display: 'grid', gap: 10, marginTop: 14 }}>
                           <div
                             style={{
-                              minHeight: 40,
-                              padding: '0 14px',
-                              borderRadius: 999,
-                              border: '2px solid #111111',
-                              background: '#dff0e7',
-                              color: '#1f7b47',
-                              display: 'inline-flex',
+                              border: '1.5px solid #d9dee8',
+                              borderRadius: 16,
+                              padding: 12,
+                              display: 'grid',
+                              gridTemplateColumns: '42px 1fr',
+                              gap: 12,
                               alignItems: 'center',
-                              fontSize: 13,
-                              fontWeight: 900,
-                              whiteSpace: 'nowrap',
+                              opacity: detailsUnlocked ? 1 : 0.55,
                             }}
                           >
-                            {text.bookingAccess}
+                            <IconBox icon="📍" bg="#fff5e8" color="#d68612" />
+                            <div>
+                              <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
+                                {detailsUnlocked ? text.exactAddress : text.area}
+                              </div>
+                              <div
+                                style={{
+                                  marginTop: 4,
+                                  fontSize: 15,
+                                  fontWeight: 900,
+                                  color: BRAND.navy,
+                                }}
+                              >
+                                {detailsUnlocked ? visibleAddress : safeArea}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              border: '1.5px solid #d9dee8',
+                              borderRadius: 16,
+                              padding: 12,
+                              display: 'grid',
+                              gridTemplateColumns: '42px 1fr',
+                              gap: 12,
+                              alignItems: 'center',
+                              opacity: detailsUnlocked ? 1 : 0.55,
+                            }}
+                          >
+                            <IconBox icon="📞" bg="#eef9f1" color={BRAND.green} />
+                            <div>
+                              <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
+                                {text.phone}
+                              </div>
+                              <div
+                                style={{
+                                  marginTop: 4,
+                                  fontSize: 15,
+                                  fontWeight: 900,
+                                  color: BRAND.navy,
+                                }}
+                              >
+                                {detailsUnlocked
+                                  ? protectedContacts.phone || text.lockedValue
+                                  : text.lockedValue}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              border: '1.5px solid #d9dee8',
+                              borderRadius: 16,
+                              padding: 12,
+                              display: 'grid',
+                              gridTemplateColumns: '42px 1fr',
+                              gap: 12,
+                              alignItems: 'center',
+                              opacity: detailsUnlocked ? 1 : 0.55,
+                            }}
+                          >
+                            <IconBox icon="✉️" bg="#eef4ff" color={BRAND.blue} />
+                            <div>
+                              <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
+                                {text.email}
+                              </div>
+                              <div
+                                style={{
+                                  marginTop: 4,
+                                  fontSize: 15,
+                                  fontWeight: 900,
+                                  color: BRAND.navy,
+                                }}
+                              >
+                                {detailsUnlocked
+                                  ? protectedContacts.email || text.lockedValue
+                                  : text.lockedValue}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              border: '1.5px solid #d9dee8',
+                              borderRadius: 16,
+                              padding: 12,
+                              display: 'grid',
+                              gridTemplateColumns: '42px 1fr',
+                              gap: 12,
+                              alignItems: 'center',
+                              opacity: detailsUnlocked ? 1 : 0.55,
+                            }}
+                          >
+                            <IconBox icon="💬" bg="#fff1f7" color={BRAND.pink} />
+                            <div>
+                              <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
+                                {text.social}
+                              </div>
+                              <div
+                                style={{
+                                  marginTop: 4,
+                                  fontSize: 15,
+                                  fontWeight: 900,
+                                  color: BRAND.navy,
+                                }}
+                              >
+                                {detailsUnlocked
+                                  ? [
+                                      protectedContacts.whatsapp,
+                                      protectedContacts.telegram,
+                                      protectedContacts.instagram,
+                                    ]
+                                      .filter(Boolean)
+                                      .join(' • ') || text.lockedValue
+                                  : text.lockedValue}
+                              </div>
+                            </div>
                           </div>
                         </div>
 
-                        <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
-                          <div
-                            style={{
-                              border: '2px solid #111111',
-                              borderRadius: 22,
-                              padding: 14,
-                              background: '#fff',
-                              opacity: contactsUnlocked ? 1 : 0.45,
-                            }}
-                          >
-                            <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
-                              {text.phone}
-                            </div>
-                            <div style={{ marginTop: 10, fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                              {protectedContacts.phone || text.lockedValue}
-                            </div>
-                          </div>
-
-                          <div
-                            style={{
-                              border: '2px solid #111111',
-                              borderRadius: 22,
-                              padding: 14,
-                              background: '#fff',
-                              opacity: contactsUnlocked ? 1 : 0.45,
-                            }}
-                          >
-                            <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
-                              {text.email}
-                            </div>
-                            <div style={{ marginTop: 10, fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                              {protectedContacts.email || text.lockedValue}
-                            </div>
-                          </div>
-
-                          <div
-                            style={{
-                              border: '2px solid #111111',
-                              borderRadius: 22,
-                              padding: 14,
-                              background: '#fff',
-                              opacity: detailsUnlocked ? 1 : 0.45,
-                            }}
-                          >
-                            <div style={{ fontSize: 13, fontWeight: 800, color: '#9a9086' }}>
-                              {detailsUnlocked ? text.exactAddress : text.area}
-                            </div>
-                            <div style={{ marginTop: 10, fontSize: 16, fontWeight: 900, color: '#17130f' }}>
-                              {detailsUnlocked ? visibleAddress : safeArea}
-                            </div>
-                          </div>
-                        </div>
-
-                        {!contactsUnlocked ? (
+                        {!detailsUnlocked ? (
                           <div
                             style={{
                               marginTop: 14,
-                              border: '2px dashed #111111',
-                              borderRadius: 22,
+                              border: `2px solid ${BRAND.border}`,
+                              borderRadius: 18,
                               padding: 14,
-                              background: '#faf7f2',
+                              background: '#fff7cf',
                             }}
                           >
-                            <div style={{ fontSize: 15, fontWeight: 900, color: '#17130f' }}>
+                            <div style={{ fontSize: 16, fontWeight: 900, color: BRAND.navy }}>
                               {text.contactsHiddenTitle}
                             </div>
+
                             <div
                               style={{
                                 marginTop: 8,
                                 fontSize: 13,
                                 lineHeight: 1.45,
-                                fontWeight: 700,
-                                color: '#6f675f',
+                                fontWeight: 800,
+                                color: '#515866',
                               }}
                             >
                               {text.contactsHiddenText}
@@ -1788,63 +1473,39 @@ export default function BookingsPage() {
                                 gap: 8,
                               }}
                             >
-                              {!selectedDetailsBooking.bookingConfirmedByMaster ? (
-                                <span
-                                  style={{
-                                    minHeight: 36,
-                                    padding: '0 12px',
-                                    borderRadius: 999,
-                                    border: '2px solid #111111',
-                                    background: '#fff0da',
-                                    color: '#c07a00',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    fontSize: 12,
-                                    fontWeight: 900,
-                                  }}
-                                >
-                                  {text.waitingMaster}
-                                </span>
-                              ) : null}
+                              <span
+                                style={{
+                                  minHeight: 34,
+                                  padding: '0 10px',
+                                  borderRadius: 999,
+                                  border: `2px solid ${BRAND.border}`,
+                                  background: paid ? '#eef9f1' : '#eef4ff',
+                                  color: paid ? BRAND.green : BRAND.blue,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  fontSize: 12,
+                                  fontWeight: 900,
+                                }}
+                              >
+                                {paid ? text.paidDeposit : text.waitingPayment}
+                              </span>
 
-                              {!selectedDetailsBooking.clientPaid ||
-                              !selectedDetailsBooking.paymentReceivedByPlatform ? (
-                                <span
-                                  style={{
-                                    minHeight: 36,
-                                    padding: '0 12px',
-                                    borderRadius: 999,
-                                    border: '2px solid #111111',
-                                    background: '#eef3ff',
-                                    color: '#2959b7',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    fontSize: 12,
-                                    fontWeight: 900,
-                                  }}
-                                >
-                                  {text.waitingPayment}
-                                </span>
-                              ) : null}
-
-                              {!selectedDetailsBooking.promotionPaidByMaster ? (
-                                <span
-                                  style={{
-                                    minHeight: 36,
-                                    padding: '0 12px',
-                                    borderRadius: 999,
-                                    border: '2px solid #111111',
-                                    background: '#fdeaea',
-                                    color: '#c74343',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    fontSize: 12,
-                                    fontWeight: 900,
-                                  }}
-                                >
-                                  {text.waitingPromotion}
-                                </span>
-                              ) : null}
+                              <span
+                                style={{
+                                  minHeight: 34,
+                                  padding: '0 10px',
+                                  borderRadius: 999,
+                                  border: `2px solid ${BRAND.border}`,
+                                  background: '#f5f7fb',
+                                  color: BRAND.blue,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  fontSize: 12,
+                                  fontWeight: 900,
+                                }}
+                              >
+                                {text.waitingMaster}
+                              </span>
                             </div>
                           </div>
                         ) : null}
@@ -1854,79 +1515,60 @@ export default function BookingsPage() {
                             marginTop: 14,
                             display: 'grid',
                             gridTemplateColumns: '1fr 1fr',
-                            gap: 12,
+                            gap: 10,
                           }}
                         >
                           <button
                             type="button"
-                            onClick={() => {
-                              if (
-                                !protectedContacts.whatsapp &&
-                                !protectedContacts.telegram &&
-                                !protectedContacts.instagram &&
-                                !protectedContacts.email
-                              ) {
-                                return;
-                              }
-                            }}
+                            disabled={!chatEnabled}
+                            onClick={() => handleOpenChat(selectedDetailsBooking)}
                             style={{
                               minHeight: 54,
-                              borderRadius: 20,
-                              border: '2px solid #111111',
-                              background: '#eef3ff',
-                              color: '#2959b7',
-                              fontSize: 16,
+                              borderRadius: 16,
+                              border: `2px solid ${BRAND.green}`,
+                              background: chatEnabled ? BRAND.green : '#edf2ee',
+                              color: chatEnabled ? '#ffffff' : '#8b968e',
+                              fontSize: 15,
                               fontWeight: 900,
-                              cursor:
-                                protectedContacts.whatsapp ||
-                                protectedContacts.telegram ||
-                                protectedContacts.instagram ||
-                                protectedContacts.email
-                                  ? 'pointer'
-                                  : 'not-allowed',
-                              opacity:
-                                protectedContacts.whatsapp ||
-                                protectedContacts.telegram ||
-                                protectedContacts.instagram ||
-                                protectedContacts.email
-                                  ? 1
-                                  : 0.55,
+                              cursor: chatEnabled ? 'pointer' : 'not-allowed',
                             }}
                           >
-                            {protectedContacts.whatsapp ||
-                            protectedContacts.telegram ||
-                            protectedContacts.instagram ||
-                            protectedContacts.email
-                              ? text.writeSeller
-                              : text.noMessageAction}
+                            💬 {text.openChat}
                           </button>
 
                           <button
                             type="button"
+                            disabled={!detailsUnlocked || !protectedContacts.phone}
                             onClick={() => {
-                              if (!protectedContacts.phone) return;
+                              if (!detailsUnlocked || !protectedContacts.phone) return;
                               window.location.href = `tel:${protectedContacts.phone}`;
                             }}
                             style={{
                               minHeight: 54,
-                              borderRadius: 20,
-                              border: '2px solid #111111',
-                              background: '#dff0e7',
-                              color: '#1f7b47',
-                              fontSize: 16,
+                              borderRadius: 16,
+                              border: `2px solid ${BRAND.border}`,
+                              background:
+                                detailsUnlocked && protectedContacts.phone ? '#eef9f1' : '#f5f7fb',
+                              color:
+                                detailsUnlocked && protectedContacts.phone ? BRAND.green : '#9ca3af',
+                              fontSize: 15,
                               fontWeight: 900,
-                              cursor: protectedContacts.phone ? 'pointer' : 'not-allowed',
-                              opacity: protectedContacts.phone ? 1 : 0.55,
+                              cursor:
+                                detailsUnlocked && protectedContacts.phone ? 'pointer' : 'not-allowed',
                             }}
                           >
-                            {protectedContacts.phone ? text.callSeller : text.noPhoneAction}
+                            {detailsUnlocked && protectedContacts.phone
+                              ? text.callSeller
+                              : text.noPhoneAction}
                           </button>
                         </div>
 
                         <button
                           type="button"
+                          disabled={!detailsUnlocked}
                           onClick={() => {
                             if (!detailsUnlocked) return;
+
                             const destination = encodeURIComponent(visibleAddress);
                             window.open(
                               `https://www.google.com/maps/search/?api=1&query=${destination}`,
@@ -1934,34 +1576,33 @@ export default function BookingsPage() {
                             );
                           }}
                           style={{
-                            marginTop: 12,
+                            marginTop: 10,
                             width: '100%',
-                            minHeight: 58,
-                            borderRadius: 22,
-                            border: '2px solid #111111',
-                            background: '#f94ca0',
-                            color: '#ffffff',
-                            fontSize: 17,
+                            minHeight: 56,
+                            borderRadius: 16,
+                            border: `2px solid ${BRAND.border}`,
+                            background: detailsUnlocked ? '#eef4ff' : '#f5f7fb',
+                            color: detailsUnlocked ? BRAND.blue : '#9ca3af',
+                            fontSize: 16,
                             fontWeight: 900,
                             cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
-                            opacity: detailsUnlocked ? 1 : 0.55,
                           }}
                         >
                           {detailsUnlocked ? text.routeToMaster : text.noRouteAction}
                         </button>
-                      </div>
+                      </section>
 
                       <button
                         type="button"
                         onClick={() => setDetailsBookingId(null)}
                         style={{
-                          minHeight: 58,
+                          minHeight: 56,
                           width: '100%',
-                          borderRadius: 22,
-                          border: '2px solid #111111',
-                          background: '#2f241c',
+                          borderRadius: 16,
+                          border: `2px solid ${BRAND.border}`,
+                          background: BRAND.navy,
                           color: '#ffffff',
-                          fontSize: 18,
+                          fontSize: 17,
                           fontWeight: 900,
                           cursor: 'pointer',
                         }}
@@ -1975,13 +1616,13 @@ export default function BookingsPage() {
                           type="button"
                           onClick={() => handleRebook(selectedDetailsBooking)}
                           style={{
-                            minHeight: 58,
+                            minHeight: 56,
                             width: '100%',
-                            borderRadius: 22,
-                            border: '2px solid #111111',
-                            background: '#eaf2ff',
-                            color: '#1f4fa8',
-                            fontSize: 17,
+                            borderRadius: 16,
+                            border: `2px solid ${BRAND.border}`,
+                            background: '#eef4ff',
+                            color: BRAND.blue,
+                            fontSize: 16,
                             fontWeight: 900,
                             cursor: 'pointer',
                           }}
