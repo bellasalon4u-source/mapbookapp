@@ -10,6 +10,27 @@ import {
 } from '../../../../services/i18n';
 import { formatDisplayPrice } from '../../../../services/currencyDisplay';
 
+const BOOKING_DEPOSIT = 1;
+const OLACASH_STORAGE_KEY = 'olamep_olacash_balance';
+
+function getStoredOlaCashBalance() {
+  if (typeof window === 'undefined') return 0;
+
+  const saved = window.localStorage.getItem(OLACASH_STORAGE_KEY);
+  const parsed = Number(saved);
+
+  if (!Number.isFinite(parsed)) return 0;
+
+  return parsed;
+}
+
+function saveStoredOlaCashBalance(value: number) {
+  if (typeof window === 'undefined') return;
+
+  window.localStorage.setItem(OLACASH_STORAGE_KEY, String(Math.max(0, value)));
+  window.dispatchEvent(new CustomEvent('olamep:olacash-change'));
+}
+
 function parseDurationToMinutes(value: string) {
   const hourMatch = value.match(/(\d+)\s*h/i);
   const minuteMatch = value.match(/(\d+)\s*m/i);
@@ -53,12 +74,12 @@ function getTexts(language: AppLanguage) {
       masterNotFound: 'Специалист не найден',
       selectedServicesNotFound: 'Выбранные услуги не найдены',
       holdDeposit: 'Оплата депозита',
-      holdDepositAmount: 'Депозит £5',
+      holdDepositAmount: 'Депозит £1',
       selectedProcedures: 'Выбранные процедуры',
       totalDuration: 'Общая длительность',
       totalPrice: 'Общая цена',
-      holdInfoLine1: '£5 будут временно заморожены на вашей карте.',
-      holdInfoLine2: 'Списание произойдет только после подтверждения записи специалистом.',
+      holdInfoLine1: '£1 будет временно заморожен для подтверждения брони.',
+      holdInfoLine2: 'Если у вас есть OlaCash, депозит можно оплатить с баланса.',
       date: 'Дата',
       time: 'Время',
       customer: 'Клиент',
@@ -66,11 +87,14 @@ function getTexts(language: AppLanguage) {
       email: 'Email',
       social: 'Соцсеть',
       secureBookingFee: 'Безопасный сбор за бронь',
-      holdDepositButton: 'Заморозить депозит £5',
+      holdDepositButton: 'Заморозить депозит £1',
       emptyValue: '—',
       choosePaymentMethod: 'Способ оплаты',
       protectedPayment: 'Безопасная оплата',
-      protectedPaymentSub: 'Ваш депозит защищён системой MapBook',
+      protectedPaymentSub: 'Ваш депозит защищён системой Olamep',
+      olacash: 'OlaCash',
+      olacashBalance: 'Баланс OlaCash',
+      notEnoughOlaCash: 'Недостаточно OlaCash',
       card: 'Банковская карта',
       paypal: 'PayPal',
       appleGoogle: 'Apple Pay / Google Pay',
@@ -85,12 +109,12 @@ function getTexts(language: AppLanguage) {
       masterNotFound: 'Profesional no encontrado',
       selectedServicesNotFound: 'Servicios seleccionados no encontrados',
       holdDeposit: 'Pago del depósito',
-      holdDepositAmount: 'Depósito de £5',
+      holdDepositAmount: 'Depósito de £1',
       selectedProcedures: 'Procedimientos seleccionados',
       totalDuration: 'Duración total',
       totalPrice: 'Precio total',
-      holdInfoLine1: '£5 se retendrán temporalmente en tu tarjeta.',
-      holdInfoLine2: 'Solo se cobrará después de que el profesional confirme tu cita.',
+      holdInfoLine1: '£1 se retendrá temporalmente para confirmar la reserva.',
+      holdInfoLine2: 'Si tienes OlaCash, puedes pagar el depósito desde tu saldo.',
       date: 'Fecha',
       time: 'Hora',
       customer: 'Cliente',
@@ -98,11 +122,14 @@ function getTexts(language: AppLanguage) {
       email: 'Email',
       social: 'Red social',
       secureBookingFee: 'Tarifa segura de reserva',
-      holdDepositButton: 'Retener depósito de £5',
+      holdDepositButton: 'Retener depósito de £1',
       emptyValue: '—',
       choosePaymentMethod: 'Método de pago',
       protectedPayment: 'Pago seguro',
-      protectedPaymentSub: 'Tu depósito está protegido por el sistema MapBook',
+      protectedPaymentSub: 'Tu depósito está protegido por Olamep',
+      olacash: 'OlaCash',
+      olacashBalance: 'Saldo OlaCash',
+      notEnoughOlaCash: 'OlaCash insuficiente',
       card: 'Tarjeta bancaria',
       paypal: 'PayPal',
       appleGoogle: 'Apple Pay / Google Pay',
@@ -117,12 +144,12 @@ function getTexts(language: AppLanguage) {
       masterNotFound: 'Specialista nebyl nalezen',
       selectedServicesNotFound: 'Vybrané služby nebyly nalezeny',
       holdDeposit: 'Platba zálohy',
-      holdDepositAmount: 'Záloha £5',
+      holdDepositAmount: 'Záloha £1',
       selectedProcedures: 'Vybrané procedury',
       totalDuration: 'Celková délka',
       totalPrice: 'Celková cena',
-      holdInfoLine1: '£5 bude dočasně zablokováno na vaší kartě.',
-      holdInfoLine2: 'Stržení proběhne až po potvrzení rezervace specialistou.',
+      holdInfoLine1: '£1 bude dočasně zablokováno pro potvrzení rezervace.',
+      holdInfoLine2: 'Pokud máte OlaCash, můžete zálohu zaplatit ze zůstatku.',
       date: 'Datum',
       time: 'Čas',
       customer: 'Klient',
@@ -130,11 +157,14 @@ function getTexts(language: AppLanguage) {
       email: 'Email',
       social: 'Sociální síť',
       secureBookingFee: 'Bezpečný rezervační poplatek',
-      holdDepositButton: 'Zablokovat zálohu £5',
+      holdDepositButton: 'Zablokovat zálohu £1',
       emptyValue: '—',
       choosePaymentMethod: 'Způsob platby',
       protectedPayment: 'Bezpečná platba',
-      protectedPaymentSub: 'Vaše záloha je chráněna systémem MapBook',
+      protectedPaymentSub: 'Vaše záloha je chráněna systémem Olamep',
+      olacash: 'OlaCash',
+      olacashBalance: 'Zůstatek OlaCash',
+      notEnoughOlaCash: 'Nedostatek OlaCash',
       card: 'Platební karta',
       paypal: 'PayPal',
       appleGoogle: 'Apple Pay / Google Pay',
@@ -149,12 +179,12 @@ function getTexts(language: AppLanguage) {
       masterNotFound: 'Spezialist nicht gefunden',
       selectedServicesNotFound: 'Ausgewählte Leistungen nicht gefunden',
       holdDeposit: 'Anzahlungszahlung',
-      holdDepositAmount: '£5 Anzahlung',
+      holdDepositAmount: '£1 Anzahlung',
       selectedProcedures: 'Ausgewählte Behandlungen',
       totalDuration: 'Gesamtdauer',
       totalPrice: 'Gesamtpreis',
-      holdInfoLine1: '£5 werden vorübergehend auf deiner Karte reserviert.',
-      holdInfoLine2: 'Die Abbuchung erfolgt erst, nachdem der Anbieter deinen Termin bestätigt hat.',
+      holdInfoLine1: '£1 wird vorübergehend zur Bestätigung der Buchung reserviert.',
+      holdInfoLine2: 'Wenn du OlaCash hast, kannst du die Anzahlung damit bezahlen.',
       date: 'Datum',
       time: 'Uhrzeit',
       customer: 'Kunde',
@@ -162,11 +192,14 @@ function getTexts(language: AppLanguage) {
       email: 'Email',
       social: 'Soziales Netzwerk',
       secureBookingFee: 'Sichere Buchungsgebühr',
-      holdDepositButton: '£5 Anzahlung reservieren',
+      holdDepositButton: '£1 Anzahlung reservieren',
       emptyValue: '—',
       choosePaymentMethod: 'Zahlungsmethode',
       protectedPayment: 'Sichere Zahlung',
-      protectedPaymentSub: 'Deine Anzahlung ist durch das MapBook-System geschützt',
+      protectedPaymentSub: 'Deine Anzahlung ist durch Olamep geschützt',
+      olacash: 'OlaCash',
+      olacashBalance: 'OlaCash-Guthaben',
+      notEnoughOlaCash: 'Nicht genug OlaCash',
       card: 'Bankkarte',
       paypal: 'PayPal',
       appleGoogle: 'Apple Pay / Google Pay',
@@ -181,12 +214,12 @@ function getTexts(language: AppLanguage) {
       masterNotFound: 'Specjalista nie został znaleziony',
       selectedServicesNotFound: 'Nie znaleziono wybranych usług',
       holdDeposit: 'Płatność depozytu',
-      holdDepositAmount: 'Depozyt £5',
+      holdDepositAmount: 'Depozyt £1',
       selectedProcedures: 'Wybrane zabiegi',
       totalDuration: 'Łączny czas',
       totalPrice: 'Łączna cena',
-      holdInfoLine1: '£5 zostanie tymczasowo zablokowane na Twojej karcie.',
-      holdInfoLine2: 'Opłata zostanie pobrana dopiero po potwierdzeniu wizyty przez specjalistę.',
+      holdInfoLine1: '£1 zostanie tymczasowo zablokowany w celu potwierdzenia rezerwacji.',
+      holdInfoLine2: 'Jeśli masz OlaCash, możesz zapłacić depozyt z salda.',
       date: 'Data',
       time: 'Godzina',
       customer: 'Klient',
@@ -194,11 +227,14 @@ function getTexts(language: AppLanguage) {
       email: 'Email',
       social: 'Social media',
       secureBookingFee: 'Bezpieczna opłata rezerwacyjna',
-      holdDepositButton: 'Zablokuj depozyt £5',
+      holdDepositButton: 'Zablokuj depozyt £1',
       emptyValue: '—',
       choosePaymentMethod: 'Metoda płatności',
       protectedPayment: 'Bezpieczna płatność',
-      protectedPaymentSub: 'Twój depozyt jest chroniony przez system MapBook',
+      protectedPaymentSub: 'Twój depozyt jest chroniony przez Olamep',
+      olacash: 'OlaCash',
+      olacashBalance: 'Saldo OlaCash',
+      notEnoughOlaCash: 'Za mało OlaCash',
       card: 'Karta bankowa',
       paypal: 'PayPal',
       appleGoogle: 'Apple Pay / Google Pay',
@@ -212,12 +248,12 @@ function getTexts(language: AppLanguage) {
     masterNotFound: 'Master not found',
     selectedServicesNotFound: 'Selected services not found',
     holdDeposit: 'Deposit payment',
-    holdDepositAmount: '£5 hold deposit',
+    holdDepositAmount: '£1 hold deposit',
     selectedProcedures: 'Selected procedures',
     totalDuration: 'Total duration',
     totalPrice: 'Total price',
-    holdInfoLine1: '£5 will be temporarily held on your card.',
-    holdInfoLine2: 'You will only be charged after the seller confirms your appointment.',
+    holdInfoLine1: '£1 will be temporarily held to confirm your booking.',
+    holdInfoLine2: 'If you have OlaCash, you can pay the deposit from your balance.',
     date: 'Date',
     time: 'Time',
     customer: 'Customer',
@@ -225,11 +261,14 @@ function getTexts(language: AppLanguage) {
     email: 'Email',
     social: 'Social',
     secureBookingFee: 'Secure booking fee',
-    holdDepositButton: 'Hold £5 deposit',
+    holdDepositButton: 'Hold £1 deposit',
     emptyValue: '—',
     choosePaymentMethod: 'Payment method',
     protectedPayment: 'Protected payment',
-    protectedPaymentSub: 'Your deposit is protected by the MapBook system',
+    protectedPaymentSub: 'Your deposit is protected by the Olamep system',
+    olacash: 'OlaCash',
+    olacashBalance: 'OlaCash balance',
+    notEnoughOlaCash: 'Not enough OlaCash',
     card: 'Bank card',
     paypal: 'PayPal',
     appleGoogle: 'Apple Pay / Google Pay',
@@ -246,7 +285,7 @@ function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange') {
   return { background: '#fff5e8', color: '#d68612' };
 }
 
-type PaymentMethod = 'card' | 'paypal' | 'wallet';
+type PaymentMethod = 'olacash' | 'card' | 'paypal' | 'wallet';
 
 export default function BookingPaymentPage() {
   const params = useParams();
@@ -254,6 +293,7 @@ export default function BookingPaymentPage() {
   const searchParams = useSearchParams();
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [olaCashBalance, setOlaCashBalance] = useState(0);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('card');
 
   const text = useMemo(() => getTexts(language), [language]);
@@ -280,6 +320,31 @@ export default function BookingPaymentPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const syncOlaCash = () => {
+      const balance = getStoredOlaCashBalance();
+      setOlaCashBalance(balance);
+
+      if (balance >= BOOKING_DEPOSIT) {
+        setSelectedMethod('olacash');
+      } else {
+        setSelectedMethod('card');
+      }
+    };
+
+    syncOlaCash();
+
+    window.addEventListener('focus', syncOlaCash);
+    window.addEventListener('storage', syncOlaCash);
+    window.addEventListener('olamep:olacash-change', syncOlaCash as EventListener);
+
+    return () => {
+      window.removeEventListener('focus', syncOlaCash);
+      window.removeEventListener('storage', syncOlaCash);
+      window.removeEventListener('olamep:olacash-change', syncOlaCash as EventListener);
+    };
+  }, []);
+
   if (!master) {
     return <main style={{ padding: 24 }}>{text.masterNotFound}</main>;
   }
@@ -302,6 +367,28 @@ export default function BookingPaymentPage() {
     (sum, item) => sum + parseDurationToMinutes(item.duration),
     0
   );
+
+  const canUseOlaCash = olaCashBalance >= BOOKING_DEPOSIT;
+
+  const goToConfirmed = () => {
+    if (selectedMethod === 'olacash' && canUseOlaCash) {
+      saveStoredOlaCashBalance(olaCashBalance - BOOKING_DEPOSIT);
+    }
+
+    router.push(
+      `/booking/${master.id}/confirmed?services=${encodeURIComponent(
+        selectedServiceSlugs.join(',')
+      )}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(
+        time
+      )}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(
+        lastName
+      )}&phone=${encodeURIComponent(phone)}&email=${encodeURIComponent(
+        email
+      )}&social=${encodeURIComponent(social)}&paymentMethod=${encodeURIComponent(
+        selectedMethod
+      )}&deposit=${encodeURIComponent(String(BOOKING_DEPOSIT))}`
+    );
+  };
 
   return (
     <main
@@ -492,16 +579,50 @@ export default function BookingPaymentPage() {
 
           <div style={{ display: 'grid', gap: 10 }}>
             {[
-              { id: 'card' as PaymentMethod, icon: '💳', title: text.card, color: 'pink' as const },
-              { id: 'paypal' as PaymentMethod, icon: '🅿️', title: text.paypal, color: 'blue' as const },
-              { id: 'wallet' as PaymentMethod, icon: '📱', title: text.appleGoogle, color: 'green' as const },
+              {
+                id: 'olacash' as PaymentMethod,
+                icon: '🟢',
+                title: text.olacash,
+                subtitle: `${text.olacashBalance}: ${formatDisplayPrice(olaCashBalance)}`,
+                color: 'green' as const,
+                disabled: !canUseOlaCash,
+              },
+              {
+                id: 'card' as PaymentMethod,
+                icon: '💳',
+                title: text.card,
+                subtitle: '',
+                color: 'pink' as const,
+                disabled: false,
+              },
+              {
+                id: 'paypal' as PaymentMethod,
+                icon: '🅿️',
+                title: text.paypal,
+                subtitle: '',
+                color: 'blue' as const,
+                disabled: false,
+              },
+              {
+                id: 'wallet' as PaymentMethod,
+                icon: '📱',
+                title: text.appleGoogle,
+                subtitle: '',
+                color: 'green' as const,
+                disabled: false,
+              },
             ].map((method) => {
               const active = selectedMethod === method.id;
+
               return (
                 <button
                   key={method.id}
                   type="button"
-                  onClick={() => setSelectedMethod(method.id)}
+                  disabled={method.disabled}
+                  onClick={() => {
+                    if (method.disabled) return;
+                    setSelectedMethod(method.id);
+                  }}
                   style={{
                     width: '100%',
                     borderRadius: 22,
@@ -513,7 +634,8 @@ export default function BookingPaymentPage() {
                     gap: 12,
                     alignItems: 'center',
                     textAlign: 'left',
-                    cursor: 'pointer',
+                    cursor: method.disabled ? 'not-allowed' : 'pointer',
+                    opacity: method.disabled ? 0.55 : 1,
                   }}
                 >
                   <div
@@ -531,14 +653,29 @@ export default function BookingPaymentPage() {
                     {method.icon}
                   </div>
 
-                  <div
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
-                    {method.title}
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 900,
+                        color: '#17130f',
+                      }}
+                    >
+                      {method.title}
+                    </div>
+
+                    {method.id === 'olacash' ? (
+                      <div
+                        style={{
+                          marginTop: 4,
+                          fontSize: 12,
+                          fontWeight: 800,
+                          color: canUseOlaCash ? '#2fa35a' : '#d64545',
+                        }}
+                      >
+                        {canUseOlaCash ? method.subtitle : text.notEnoughOlaCash}
+                      </div>
+                    ) : null}
                   </div>
 
                   <div
@@ -826,24 +963,12 @@ export default function BookingPaymentPage() {
                 color: '#17130f',
               }}
             >
-              {formatDisplayPrice(5)}
+              {formatDisplayPrice(BOOKING_DEPOSIT)}
             </div>
           </div>
 
           <button
-            onClick={() =>
-              router.push(
-                `/booking/${master.id}/confirmed?services=${encodeURIComponent(
-                  selectedServiceSlugs.join(',')
-                )}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(
-                  time
-                )}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(
-                  lastName
-                )}&phone=${encodeURIComponent(phone)}&email=${encodeURIComponent(
-                  email
-                )}&social=${encodeURIComponent(social)}`
-              )
-            }
+            onClick={goToConfirmed}
             style={{
               border: 'none',
               background: 'linear-gradient(180deg, #2fa35a 0%, #238247 100%)',
