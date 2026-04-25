@@ -92,7 +92,6 @@ type PageText = {
   alwaysShowFilters: string;
   on: string;
   off: string;
-  tapToOpenFilters: string;
   all: string;
   byTime: string;
   byName: string;
@@ -154,10 +153,9 @@ const EN_TEXT: PageText = {
   free: 'Free',
   home: 'Home',
   filters: 'Filters',
-  alwaysShowFilters: 'Always show filters',
+  alwaysShowFilters: 'Show filters',
   on: 'ON',
   off: 'OFF',
-  tapToOpenFilters: 'Tap this block to open filters',
   all: 'All',
   byTime: 'By time',
   byName: 'By name',
@@ -220,10 +218,9 @@ const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
     free: 'Свободно',
     home: 'Главная',
     filters: 'Фильтры',
-    alwaysShowFilters: 'Всегда показывать фильтры',
+    alwaysShowFilters: 'Показывать фильтры',
     on: 'ВКЛ',
     off: 'ВЫКЛ',
-    tapToOpenFilters: 'Нажмите на этот блок, чтобы открыть фильтры',
     all: 'Все',
     byTime: 'По времени',
     byName: 'По имени',
@@ -560,6 +557,15 @@ function mapBookingsToSlots(bookings: BookingItem[], language: AppLanguage): Pro
   return [...mapped, ...demoSlots].sort((a, b) => a.time.localeCompare(b.time));
 }
 
+function cleanMoneyInput(value: string) {
+  const normalized = value.replace(',', '.').replace(/[^\d.]/g, '');
+  const parts = normalized.split('.');
+
+  if (parts.length <= 1) return normalized;
+
+  return `${parts[0]}.${parts.slice(1).join('').slice(0, 2)}`;
+}
+
 function OlamepLogo() {
   return (
     <div
@@ -625,8 +631,7 @@ export default function ProviderClientsPage() {
   const [noteDraft, setNoteDraft] = useState('');
   const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
 
-  const [filtersAlwaysVisible, setFiltersAlwaysVisible] = useState(true);
-  const [filtersExpanded, setFiltersExpanded] = useState(true);
+  const [filtersEnabled, setFiltersEnabled] = useState(false);
   const [priceFilterOpen, setPriceFilterOpen] = useState(false);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
@@ -681,19 +686,21 @@ export default function ProviderClientsPage() {
       source = source.filter((slot) => slot.status === 'completed' || slot.status === 'cancelled');
     }
 
-    if (activeFilter !== 'all') {
+    if (filtersEnabled && activeFilter !== 'all') {
       source = source.filter((slot) => slot.status === activeFilter);
     }
 
-    const min = Number(minPrice);
-    const max = Number(maxPrice);
+    if (filtersEnabled) {
+      const min = Number.parseFloat(minPrice);
+      const max = Number.parseFloat(maxPrice);
 
-    if (minPrice.trim() && !Number.isNaN(min)) {
-      source = source.filter((slot) => slot.price >= min);
-    }
+      if (minPrice.trim() && !Number.isNaN(min)) {
+        source = source.filter((slot) => slot.price >= Math.max(0.1, min));
+      }
 
-    if (maxPrice.trim() && !Number.isNaN(max)) {
-      source = source.filter((slot) => slot.price <= max);
+      if (maxPrice.trim() && !Number.isNaN(max)) {
+        source = source.filter((slot) => slot.price <= max);
+      }
     }
 
     const q = search.trim().toLowerCase();
@@ -712,13 +719,13 @@ export default function ProviderClientsPage() {
     }
 
     return [...source].sort((a, b) => {
-      if (sortKey === 'name') return a.clientName.localeCompare(b.clientName);
-      if (sortKey === 'procedure') return a.serviceName.localeCompare(b.serviceName);
-      if (sortKey === 'priceAsc') return a.price - b.price;
-      if (sortKey === 'priceDesc') return b.price - a.price;
+      if (filtersEnabled && sortKey === 'name') return a.clientName.localeCompare(b.clientName);
+      if (filtersEnabled && sortKey === 'procedure') return a.serviceName.localeCompare(b.serviceName);
+      if (filtersEnabled && sortKey === 'priceAsc') return a.price - b.price;
+      if (filtersEnabled && sortKey === 'priceDesc') return b.price - a.price;
       return a.time.localeCompare(b.time);
     });
-  }, [activeFilter, activeView, maxPrice, minPrice, search, slots, sortKey]);
+  }, [activeFilter, activeView, filtersEnabled, maxPrice, minPrice, search, slots, sortKey]);
 
   const activeTodayCount = slots.filter(
     (slot) => slot.status === 'confirmed' || slot.status === 'pending'
@@ -820,8 +827,6 @@ export default function ProviderClientsPage() {
   ];
 
   const sortOptions: SortKey[] = ['time', 'name', 'priceAsc', 'priceDesc', 'procedure'];
-
-  const showFilterControls = filtersAlwaysVisible || filtersExpanded;
 
   return (
     <>
@@ -1040,17 +1045,11 @@ export default function ProviderClientsPage() {
 
           <section style={{ marginTop: 12 }}>
             <div
-              onClick={() => {
-                if (!filtersAlwaysVisible) {
-                  setFiltersExpanded((prev) => !prev);
-                }
-              }}
               style={{
                 borderRadius: 24,
                 border: '2px solid #111111',
                 background: '#fffefa',
                 padding: 14,
-                cursor: filtersAlwaysVisible ? 'default' : 'pointer',
               }}
             >
               <div
@@ -1072,32 +1071,23 @@ export default function ProviderClientsPage() {
                     {text.filters}
                   </div>
 
-                  {!filtersAlwaysVisible ? (
-                    <div
-                      style={{
-                        marginTop: 4,
-                        fontSize: 12,
-                        fontWeight: 800,
-                        color: '#7b7268',
-                      }}
-                    >
-                      {showFilterControls ? text.on : text.tapToOpenFilters}
-                    </div>
-                  ) : null}
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontSize: 13,
+                      fontWeight: 900,
+                      color: filtersEnabled ? '#1f8c3f' : '#7b7268',
+                    }}
+                  >
+                    {filtersEnabled ? text.on : text.off}
+                  </div>
                 </div>
 
                 <button
                   type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setFiltersAlwaysVisible((prev) => {
-                      const next = !prev;
-                      if (next) setFiltersExpanded(true);
-                      return next;
-                    });
-                  }}
+                  onClick={() => setFiltersEnabled((prev) => !prev)}
                   style={{
-                    minWidth: 132,
+                    minWidth: 136,
                     height: 54,
                     borderRadius: 999,
                     border: '2px solid #111111',
@@ -1114,12 +1104,13 @@ export default function ProviderClientsPage() {
                     style={{
                       fontSize: 12,
                       fontWeight: 900,
-                      color: filtersAlwaysVisible ? '#1f8c3f' : '#7b7268',
+                      color: filtersEnabled ? '#1f8c3f' : '#7b7268',
+                      lineHeight: 1.15,
                     }}
                   >
                     {text.alwaysShowFilters}
                     <br />
-                    {filtersAlwaysVisible ? text.on : text.off}
+                    {filtersEnabled ? text.on : text.off}
                   </span>
 
                   <span
@@ -1128,10 +1119,10 @@ export default function ProviderClientsPage() {
                       height: 36,
                       borderRadius: 999,
                       border: '2px solid #111111',
-                      background: filtersAlwaysVisible ? '#35c63f' : '#eeeeee',
+                      background: filtersEnabled ? '#35c63f' : '#eeeeee',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: filtersAlwaysVisible ? 'flex-end' : 'flex-start',
+                      justifyContent: filtersEnabled ? 'flex-end' : 'flex-start',
                       padding: 3,
                       boxSizing: 'border-box',
                     }}
@@ -1150,7 +1141,7 @@ export default function ProviderClientsPage() {
                 </button>
               </div>
 
-              {showFilterControls ? (
+              {filtersEnabled ? (
                 <>
                   <div
                     style={{
@@ -1169,10 +1160,7 @@ export default function ProviderClientsPage() {
                         <button
                           key={filter}
                           type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setActiveFilter(filter);
-                          }}
+                          onClick={() => setActiveFilter(filter)}
                           style={{
                             flexShrink: 0,
                             minHeight: 38,
@@ -1208,8 +1196,7 @@ export default function ProviderClientsPage() {
                         <button
                           key={sort}
                           type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
+                          onClick={() => {
                             setSortKey(sort);
                             if (sort === 'priceAsc' || sort === 'priceDesc') {
                               setPriceFilterOpen(true);
@@ -1235,10 +1222,7 @@ export default function ProviderClientsPage() {
 
                     <button
                       type="button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setPriceFilterOpen(true);
-                      }}
+                      onClick={() => setPriceFilterOpen(true)}
                       style={{
                         flexShrink: 0,
                         minHeight: 36,
@@ -1254,7 +1238,7 @@ export default function ProviderClientsPage() {
                       }}
                     >
                       {minPrice || maxPrice
-                        ? `${text.price}: £${minPrice || '0'}–£${maxPrice || '∞'}`
+                        ? `${text.price}: £${minPrice || '0.10'}–£${maxPrice || '∞'}`
                         : text.openPriceFilter}
                     </button>
                   </div>
@@ -2155,9 +2139,9 @@ function PriceRangeModal({
             </div>
             <input
               value={minPrice}
-              onChange={(event) => setMinPrice(event.target.value.replace(/[^\d]/g, ''))}
-              placeholder="45"
-              inputMode="numeric"
+              onChange={(event) => setMinPrice(cleanMoneyInput(event.target.value))}
+              placeholder="0.10"
+              inputMode="decimal"
               style={{
                 marginTop: 8,
                 width: '100%',
@@ -2183,9 +2167,9 @@ function PriceRangeModal({
             </div>
             <input
               value={maxPrice}
-              onChange={(event) => setMaxPrice(event.target.value.replace(/[^\d]/g, ''))}
-              placeholder="50"
-              inputMode="numeric"
+              onChange={(event) => setMaxPrice(cleanMoneyInput(event.target.value))}
+              placeholder="1000"
+              inputMode="decimal"
               style={{
                 marginTop: 8,
                 width: '100%',
@@ -2197,6 +2181,22 @@ function PriceRangeModal({
               }}
             />
           </label>
+        </div>
+
+        <div
+          style={{
+            marginTop: 12,
+            borderRadius: 16,
+            border: '1.5px solid #eeeeee',
+            background: '#fffefa',
+            padding: '10px 12px',
+            fontSize: 13,
+            fontWeight: 800,
+            color: '#7b7268',
+            lineHeight: 1.35,
+          }}
+        >
+          Минимальная цена может быть от £0.10. Максимальную цену можно поставить любую.
         </div>
 
         <div
