@@ -43,106 +43,64 @@ type ClientBooking = {
   holdClient: number;
   holdMaster: number;
   note: string;
+  registeredClient: boolean;
   sourceBooking?: BookingItem;
 };
 
-const pageTexts: Record<
-  AppLanguage,
-  {
-    title: string;
-    subtitle: string;
-    today: string;
-    requests: string;
-    calendar: string;
-    history: string;
-    search: string;
-    activeToday: string;
-    confirmed: string;
-    quickBooking: string;
-    request: string;
-    completed: string;
-    cancelled: string;
-    free: string;
-    full: string;
-    partial: string;
-    off: string;
-    clientCard: string;
-    service: string;
-    time: string;
-    price: string;
-    payment: string;
-    holds: string;
-    confirm: string;
-    cancel: string;
-    complete: string;
-    quickPay: string;
-    close: string;
-    reasonTitle: string;
-    reasonSick: string;
-    reasonClientNoReply: string;
-    reasonTimeMistake: string;
-    reasonUnavailable: string;
-    reasonOther: string;
-    confirmCancel: string;
-    paymentTitle: string;
-    amount: string;
-    generateCode: string;
-    share: string;
-    empty: string;
-    home: string;
-  }
-> = {
-  EN: {
-    title: 'My clients',
-    subtitle: 'Bookings, client requests, calendar and fast payments',
-    today: 'Today',
-    requests: 'Requests',
-    calendar: 'Calendar',
-    history: 'History',
-    search: 'Search client, service, amount',
-    activeToday: 'Active today',
-    confirmed: 'Confirmed',
-    quickBooking: 'Quick booking',
-    request: 'Request',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
-    free: 'Free',
-    full: 'Full',
-    partial: 'Partial',
-    off: 'Off',
-    clientCard: 'Client card',
-    service: 'Service',
-    time: 'Time',
-    price: 'Price',
-    payment: 'Payment',
-    holds: 'Holds',
-    confirm: 'Confirm',
-    cancel: 'Cancel',
-    complete: 'Complete',
-    quickPay: 'Fast payment',
-    close: 'Close',
-    reasonTitle: 'Cancellation reason',
-    reasonSick: 'I am unavailable / sick',
-    reasonClientNoReply: 'Client does not reply',
-    reasonTimeMistake: 'Wrong time',
-    reasonUnavailable: 'Service unavailable',
-    reasonOther: 'Other reason',
-    confirmCancel: 'Confirm cancellation',
-    paymentTitle: 'Generate payment code',
-    amount: 'Amount',
-    generateCode: 'Generate barcode',
-    share: 'Share',
-    empty: 'No client bookings for this day',
-    home: 'Home',
-  },
+const baseTexts = {
+  title: 'My clients',
+  subtitle: 'Bookings, client requests, calendar and fast payments',
+  today: 'Today',
+  requests: 'Requests',
+  calendar: 'Calendar',
+  history: 'History',
+  search: 'Search client, service, amount',
+  activeToday: 'Active today',
+  confirmed: 'Confirmed',
+  quickBooking: 'Quick booking',
+  request: 'Request',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+  free: 'Free',
+  full: 'Full',
+  partial: 'Partial',
+  off: 'Off',
+  clientCard: 'Client card',
+  service: 'Service',
+  time: 'Time',
+  price: 'Price',
+  payment: 'Payment',
+  holds: 'Holds',
+  cancel: 'Cancel',
+  close: 'Close',
+  empty: 'No client bookings for this day',
+  home: 'Home',
+  tapToEdit: 'Tap any row to edit',
+  move: 'Move',
+  contact: 'Contact',
+  phone: 'Phone',
+  email: 'E-mail',
+  message: 'Message',
+  olamepManager: 'Olamep manager',
+  managerOnly: 'Quick booking without registration. Communication is available only through the internal Olamep manager.',
+  registeredContact: 'Registered client. Available contact channels are shown below.',
+  editValue: 'Edit value',
+  save: 'Save',
+  selectTime: 'Select time',
+  cancelBooking: 'Cancel booking',
+  confirmRequest: 'Confirm request',
+  markComplete: 'Mark complete',
+};
+
+const textOverrides: Partial<Record<AppLanguage, Partial<typeof baseTexts>>> = {
   RU: {
     title: 'Мои клиенты',
-    subtitle: 'Брони у меня, запросы, календарь и быстрые расчёты',
+    subtitle: 'Брони, запросы клиентов, календарь и быстрые платежи',
     today: 'Сегодня',
     requests: 'Запросы',
     calendar: 'Календарь',
     history: 'История',
-    search: 'Поиск: клиент, услуга, сумма',
+    search: 'Поиск клиент, услуга, сумма',
     activeToday: 'Активно сегодня',
     confirmed: 'Подтверждено',
     quickBooking: 'Быстрая бронь',
@@ -156,371 +114,128 @@ const pageTexts: Record<
     clientCard: 'Карточка клиента',
     service: 'Услуга',
     time: 'Время',
-    price: 'Цена',
+    price: 'Сумма',
     payment: 'Оплата',
     holds: 'Заморозка',
-    confirm: 'Подтвердить',
-    cancel: 'Отменить',
-    complete: 'Завершить',
-    quickPay: 'Быстрый расчёт',
+    cancel: 'Отмена',
     close: 'Закрыть',
-    reasonTitle: 'Причина отмены',
-    reasonSick: 'Я недоступен / заболел',
-    reasonClientNoReply: 'Клиент не отвечает',
-    reasonTimeMistake: 'Ошибка во времени',
-    reasonUnavailable: 'Услуга недоступна',
-    reasonOther: 'Другая причина',
-    confirmCancel: 'Подтвердить отмену',
-    paymentTitle: 'Сгенерировать код оплаты',
-    amount: 'Сумма',
-    generateCode: 'Создать баркод',
-    share: 'Поделиться',
     empty: 'На этот день нет записей клиентов',
     home: 'Главная',
+    tapToEdit: 'Нажмите на строку, чтобы изменить',
+    move: 'Переместить',
+    contact: 'Связь',
+    phone: 'Телефон',
+    email: 'E-mail',
+    message: 'Написать',
+    olamepManager: 'Менеджер Olamep',
+    managerOnly:
+      'Быстрая бронь без регистрации. Связь доступна только через внутреннего менеджера Olamep.',
+    registeredContact: 'Зарегистрированный клиент. Доступные способы связи ниже.',
+    editValue: 'Изменить значение',
+    save: 'Сохранить',
+    selectTime: 'Выбрать время',
+    cancelBooking: 'Отменить бронь',
+    confirmRequest: 'Подтвердить запрос',
+    markComplete: 'Завершить',
   },
   UA: {
     title: 'Мої клієнти',
-    subtitle: 'Броні у мене, запити, календар і швидкі розрахунки',
+    subtitle: 'Броні, запити клієнтів, календар і швидкі платежі',
     today: 'Сьогодні',
     requests: 'Запити',
     calendar: 'Календар',
     history: 'Історія',
-    search: 'Пошук: клієнт, послуга, сума',
+    search: 'Пошук клієнт, послуга, сума',
     activeToday: 'Активно сьогодні',
     confirmed: 'Підтверджено',
     quickBooking: 'Швидка бронь',
     request: 'Запит',
     completed: 'Завершено',
     cancelled: 'Скасовано',
-    free: 'Вільно',
-    full: 'Повна бронь',
-    partial: 'Частково',
-    off: 'Неробочий',
-    clientCard: 'Картка клієнта',
-    service: 'Послуга',
-    time: 'Час',
-    price: 'Ціна',
-    payment: 'Оплата',
-    holds: 'Заморозка',
-    confirm: 'Підтвердити',
-    cancel: 'Скасувати',
-    complete: 'Завершити',
-    quickPay: 'Швидкий розрахунок',
-    close: 'Закрити',
-    reasonTitle: 'Причина скасування',
-    reasonSick: 'Я недоступний / захворів',
-    reasonClientNoReply: 'Клієнт не відповідає',
-    reasonTimeMistake: 'Помилка в часі',
-    reasonUnavailable: 'Послуга недоступна',
-    reasonOther: 'Інша причина',
-    confirmCancel: 'Підтвердити скасування',
-    paymentTitle: 'Згенерувати код оплати',
-    amount: 'Сума',
-    generateCode: 'Створити баркод',
-    share: 'Поділитися',
-    empty: 'На цей день немає записів клієнтів',
-    home: 'Головна',
+    price: 'Сума',
+    message: 'Написати',
+    managerOnly:
+      'Швидка бронь без реєстрації. Зв’язок доступний тільки через внутрішнього менеджера Olamep.',
   },
   ES: {
     title: 'Mis clientes',
-    subtitle: 'Reservas recibidas, solicitudes, calendario y pagos rápidos',
+    subtitle: 'Reservas, solicitudes, calendario y pagos rápidos',
     today: 'Hoy',
     requests: 'Solicitudes',
     calendar: 'Calendario',
     history: 'Historial',
-    search: 'Buscar cliente, servicio, importe',
     activeToday: 'Activo hoy',
     confirmed: 'Confirmado',
     quickBooking: 'Reserva rápida',
     request: 'Solicitud',
     completed: 'Completado',
     cancelled: 'Cancelado',
-    free: 'Libre',
-    full: 'Completo',
-    partial: 'Parcial',
-    off: 'No laboral',
-    clientCard: 'Ficha del cliente',
-    service: 'Servicio',
-    time: 'Hora',
-    price: 'Precio',
-    payment: 'Pago',
-    holds: 'Retenciones',
-    confirm: 'Confirmar',
-    cancel: 'Cancelar',
-    complete: 'Completar',
-    quickPay: 'Pago rápido',
-    close: 'Cerrar',
-    reasonTitle: 'Motivo de cancelación',
-    reasonSick: 'No estoy disponible',
-    reasonClientNoReply: 'El cliente no responde',
-    reasonTimeMistake: 'Hora incorrecta',
-    reasonUnavailable: 'Servicio no disponible',
-    reasonOther: 'Otro motivo',
-    confirmCancel: 'Confirmar cancelación',
-    paymentTitle: 'Generar código de pago',
-    amount: 'Importe',
-    generateCode: 'Generar código',
-    share: 'Compartir',
-    empty: 'No hay reservas de clientes para este día',
-    home: 'Inicio',
+    price: 'Importe',
+    message: 'Mensaje',
   },
   CZ: {
     title: 'Moji klienti',
-    subtitle: 'Rezervace u mě, požadavky, kalendář a rychlé platby',
+    subtitle: 'Rezervace, požadavky, kalendář a rychlé platby',
     today: 'Dnes',
     requests: 'Požadavky',
     calendar: 'Kalendář',
     history: 'Historie',
-    search: 'Hledat klienta, službu, částku',
     activeToday: 'Aktivní dnes',
     confirmed: 'Potvrzeno',
     quickBooking: 'Rychlá rezervace',
     request: 'Požadavek',
     completed: 'Dokončeno',
     cancelled: 'Zrušeno',
-    free: 'Volno',
-    full: 'Plno',
-    partial: 'Částečně',
-    off: 'Nepracovní',
-    clientCard: 'Karta klienta',
-    service: 'Služba',
-    time: 'Čas',
-    price: 'Cena',
-    payment: 'Platba',
-    holds: 'Blokace',
-    confirm: 'Potvrdit',
-    cancel: 'Zrušit',
-    complete: 'Dokončit',
-    quickPay: 'Rychlá platba',
-    close: 'Zavřít',
-    reasonTitle: 'Důvod zrušení',
-    reasonSick: 'Nejsem dostupný',
-    reasonClientNoReply: 'Klient neodpovídá',
-    reasonTimeMistake: 'Chybný čas',
-    reasonUnavailable: 'Služba není dostupná',
-    reasonOther: 'Jiný důvod',
-    confirmCancel: 'Potvrdit zrušení',
-    paymentTitle: 'Vygenerovat platební kód',
-    amount: 'Částka',
-    generateCode: 'Vytvořit kód',
-    share: 'Sdílet',
-    empty: 'Na tento den nejsou žádné rezervace',
-    home: 'Domů',
+    price: 'Částka',
+    message: 'Napsat',
   },
   DE: {
     title: 'Meine Kunden',
-    subtitle: 'Buchungen bei mir, Anfragen, Kalender und Schnellzahlungen',
+    subtitle: 'Buchungen, Anfragen, Kalender und Schnellzahlungen',
     today: 'Heute',
     requests: 'Anfragen',
     calendar: 'Kalender',
     history: 'Verlauf',
-    search: 'Kunde, Service, Betrag suchen',
     activeToday: 'Heute aktiv',
     confirmed: 'Bestätigt',
     quickBooking: 'Schnellbuchung',
     request: 'Anfrage',
     completed: 'Abgeschlossen',
     cancelled: 'Storniert',
-    free: 'Frei',
-    full: 'Voll',
-    partial: 'Teilweise',
-    off: 'Frei',
-    clientCard: 'Kundenkarte',
-    service: 'Service',
-    time: 'Zeit',
-    price: 'Preis',
-    payment: 'Zahlung',
-    holds: 'Holds',
-    confirm: 'Bestätigen',
-    cancel: 'Stornieren',
-    complete: 'Abschließen',
-    quickPay: 'Schnellzahlung',
-    close: 'Schließen',
-    reasonTitle: 'Stornogrund',
-    reasonSick: 'Ich bin nicht verfügbar',
-    reasonClientNoReply: 'Kunde antwortet nicht',
-    reasonTimeMistake: 'Falsche Zeit',
-    reasonUnavailable: 'Service nicht verfügbar',
-    reasonOther: 'Anderer Grund',
-    confirmCancel: 'Storno bestätigen',
-    paymentTitle: 'Zahlungscode erstellen',
-    amount: 'Betrag',
-    generateCode: 'Barcode erstellen',
-    share: 'Teilen',
-    empty: 'Keine Kundenbuchungen an diesem Tag',
-    home: 'Home',
+    price: 'Betrag',
+    message: 'Schreiben',
   },
   IT: {
     title: 'I miei clienti',
-    subtitle: 'Prenotazioni ricevute, richieste, calendario e pagamenti rapidi',
     today: 'Oggi',
     requests: 'Richieste',
     calendar: 'Calendario',
     history: 'Storico',
-    search: 'Cerca cliente, servizio, importo',
-    activeToday: 'Attivo oggi',
-    confirmed: 'Confermato',
-    quickBooking: 'Prenotazione rapida',
-    request: 'Richiesta',
-    completed: 'Completato',
-    cancelled: 'Annullato',
-    free: 'Libero',
-    full: 'Pieno',
-    partial: 'Parziale',
-    off: 'Non lavorativo',
-    clientCard: 'Scheda cliente',
-    service: 'Servizio',
-    time: 'Orario',
-    price: 'Prezzo',
-    payment: 'Pagamento',
-    holds: 'Blocchi',
-    confirm: 'Conferma',
-    cancel: 'Annulla',
-    complete: 'Completa',
-    quickPay: 'Pagamento rapido',
-    close: 'Chiudi',
-    reasonTitle: 'Motivo cancellazione',
-    reasonSick: 'Non sono disponibile',
-    reasonClientNoReply: 'Il cliente non risponde',
-    reasonTimeMistake: 'Orario sbagliato',
-    reasonUnavailable: 'Servizio non disponibile',
-    reasonOther: 'Altro motivo',
-    confirmCancel: 'Conferma annullamento',
-    paymentTitle: 'Genera codice pagamento',
-    amount: 'Importo',
-    generateCode: 'Genera barcode',
-    share: 'Condividi',
-    empty: 'Nessuna prenotazione clienti per questo giorno',
-    home: 'Home',
+    message: 'Scrivi',
   },
   FR: {
     title: 'Mes clients',
-    subtitle: 'Réservations reçues, demandes, calendrier et paiements rapides',
     today: 'Aujourd’hui',
     requests: 'Demandes',
     calendar: 'Calendrier',
     history: 'Historique',
-    search: 'Rechercher client, service, montant',
-    activeToday: 'Actif aujourd’hui',
-    confirmed: 'Confirmé',
-    quickBooking: 'Réservation rapide',
-    request: 'Demande',
-    completed: 'Terminé',
-    cancelled: 'Annulé',
-    free: 'Libre',
-    full: 'Complet',
-    partial: 'Partiel',
-    off: 'Non travaillé',
-    clientCard: 'Fiche client',
-    service: 'Service',
-    time: 'Heure',
-    price: 'Prix',
-    payment: 'Paiement',
-    holds: 'Blocages',
-    confirm: 'Confirmer',
-    cancel: 'Annuler',
-    complete: 'Terminer',
-    quickPay: 'Paiement rapide',
-    close: 'Fermer',
-    reasonTitle: 'Motif d’annulation',
-    reasonSick: 'Je ne suis pas disponible',
-    reasonClientNoReply: 'Le client ne répond pas',
-    reasonTimeMistake: 'Mauvaise heure',
-    reasonUnavailable: 'Service indisponible',
-    reasonOther: 'Autre motif',
-    confirmCancel: 'Confirmer annulation',
-    paymentTitle: 'Générer le code de paiement',
-    amount: 'Montant',
-    generateCode: 'Créer barcode',
-    share: 'Partager',
-    empty: 'Aucune réservation client ce jour',
-    home: 'Accueil',
+    message: 'Écrire',
   },
   AR: {
     title: 'عملائي',
-    subtitle: 'الحجوزات لدي والطلبات والتقويم والمدفوعات السريعة',
     today: 'اليوم',
     requests: 'الطلبات',
     calendar: 'التقويم',
     history: 'السجل',
-    search: 'بحث العميل أو الخدمة أو المبلغ',
-    activeToday: 'نشط اليوم',
-    confirmed: 'مؤكد',
-    quickBooking: 'حجز سريع',
-    request: 'طلب',
-    completed: 'مكتمل',
-    cancelled: 'ملغى',
-    free: 'متاح',
-    full: 'ممتلئ',
-    partial: 'جزئي',
-    off: 'غير متاح',
-    clientCard: 'بطاقة العميل',
-    service: 'الخدمة',
-    time: 'الوقت',
-    price: 'السعر',
-    payment: 'الدفع',
-    holds: 'الحجز',
-    confirm: 'تأكيد',
-    cancel: 'إلغاء',
-    complete: 'إكمال',
-    quickPay: 'دفع سريع',
-    close: 'إغلاق',
-    reasonTitle: 'سبب الإلغاء',
-    reasonSick: 'أنا غير متاح',
-    reasonClientNoReply: 'العميل لا يرد',
-    reasonTimeMistake: 'وقت خاطئ',
-    reasonUnavailable: 'الخدمة غير متاحة',
-    reasonOther: 'سبب آخر',
-    confirmCancel: 'تأكيد الإلغاء',
-    paymentTitle: 'إنشاء رمز الدفع',
-    amount: 'المبلغ',
-    generateCode: 'إنشاء باركود',
-    share: 'مشاركة',
-    empty: 'لا توجد حجوزات لهذا اليوم',
-    home: 'الرئيسية',
+    message: 'رسالة',
   },
   PL: {
     title: 'Moi klienci',
-    subtitle: 'Rezerwacje u mnie, zapytania, kalendarz i szybkie płatności',
     today: 'Dzisiaj',
     requests: 'Zapytania',
     calendar: 'Kalendarz',
     history: 'Historia',
-    search: 'Szukaj klienta, usługi, kwoty',
-    activeToday: 'Aktywne dziś',
-    confirmed: 'Potwierdzone',
-    quickBooking: 'Szybka rezerwacja',
-    request: 'Zapytanie',
-    completed: 'Zakończone',
-    cancelled: 'Anulowane',
-    free: 'Wolne',
-    full: 'Pełne',
-    partial: 'Częściowo',
-    off: 'Nie pracuje',
-    clientCard: 'Karta klienta',
-    service: 'Usługa',
-    time: 'Godzina',
-    price: 'Cena',
-    payment: 'Płatność',
-    holds: 'Blokady',
-    confirm: 'Potwierdź',
-    cancel: 'Anuluj',
-    complete: 'Zakończ',
-    quickPay: 'Szybka płatność',
-    close: 'Zamknij',
-    reasonTitle: 'Powód anulowania',
-    reasonSick: 'Jestem niedostępny',
-    reasonClientNoReply: 'Klient nie odpowiada',
-    reasonTimeMistake: 'Zły czas',
-    reasonUnavailable: 'Usługa niedostępna',
-    reasonOther: 'Inny powód',
-    confirmCancel: 'Potwierdź anulowanie',
-    paymentTitle: 'Wygeneruj kod płatności',
-    amount: 'Kwota',
-    generateCode: 'Utwórz barcode',
-    share: 'Udostępnij',
-    empty: 'Brak rezerwacji klientów na ten dzień',
-    home: 'Start',
+    message: 'Napisz',
   },
 };
 
@@ -544,14 +259,15 @@ const demoClients: ClientBooking[] = [
     holdClient: 1,
     holdMaster: 1,
     note: 'Client wants a clean bob haircut.',
+    registeredClient: true,
   },
   {
     id: 'provider-demo-2',
     clientName: 'Sofia Miller',
     clientAvatar:
       'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80',
-    clientPhone: '+44 7700 900456',
-    clientEmail: 'sofia@example.com',
+    clientPhone: '',
+    clientEmail: '',
     serviceName: 'Keratin extensions',
     date: '2026-04-25',
     day: 25,
@@ -563,7 +279,8 @@ const demoClients: ClientBooking[] = [
     paymentMethod: 'Card',
     holdClient: 1,
     holdMaster: 1,
-    note: 'Quick booking. Contact opens after confirmation.',
+    note: 'Quick booking without registered client profile.',
+    registeredClient: false,
   },
   {
     id: 'provider-demo-3',
@@ -584,11 +301,15 @@ const demoClients: ClientBooking[] = [
     holdClient: 1,
     holdMaster: 0,
     note: 'Waiting for provider confirmation.',
+    registeredClient: true,
   },
 ];
 
 function getTexts(language: AppLanguage) {
-  return pageTexts[language] || pageTexts.EN;
+  return {
+    ...baseTexts,
+    ...(textOverrides[language] || {}),
+  };
 }
 
 function money(value: number) {
@@ -611,6 +332,9 @@ function mapBookingsToProviderClients(bookings: BookingItem[]): ClientBooking[] 
         ? 'completed'
         : 'cancelled';
 
+    const quick = status === 'quick';
+    const registeredClient = !quick && anyBooking.registeredClient !== false;
+
     return {
       id: String(booking.id || `provider-${index}`),
       clientName:
@@ -622,20 +346,23 @@ function mapBookingsToProviderClients(bookings: BookingItem[]): ClientBooking[] 
         anyBooking.clientAvatar ||
         anyBooking.customerAvatar ||
         'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-      clientPhone: anyBooking.clientPhone || '+44 7700 900123',
-      clientEmail: anyBooking.clientEmail || 'client@example.com',
+      clientPhone: registeredClient ? anyBooking.clientPhone || '+44 7700 900123' : '',
+      clientEmail: registeredClient ? anyBooking.clientEmail || 'client@example.com' : '',
       serviceName: String(booking.serviceName || 'Service'),
       date: anyBooking.date || '2026-04-25',
       day: Number(anyBooking.day || 25 + (index % 4)),
-      time: String(anyBooking.time || anyBooking.timeLabel || booking.dateLabel || '15:00').slice(-5),
+      time: String(anyBooking.time || anyBooking.timeLabel || booking.dateLabel || '15:00').slice(
+        -5
+      ),
       duration: anyBooking.duration || '1h',
       price: Number(booking.price || 45),
       status,
-      bookingType: status === 'quick' ? 'quick' : 'normal',
+      bookingType: quick ? 'quick' : 'normal',
       paymentMethod: index % 3 === 0 ? 'OlaCash' : index % 3 === 1 ? 'Card' : 'QR',
       holdClient: 1,
       holdMaster: status === 'request' ? 0 : 1,
       note: anyBooking.note || 'Booking synced from customer booking list.',
+      registeredClient,
       sourceBooking: booking,
     };
   });
@@ -658,7 +385,7 @@ function getStatusStyle(status: ClientBookingStatus, text: ReturnType<typeof get
     return { label: text.completed, bg: '#dff2e3', color: '#1d7a38' };
   }
 
-  return { label: text.cancelled, bg: '#f4f0ea', color: '#6f675f' };
+  return { label: text.cancelled, bg: '#fde5e5', color: '#c74343' };
 }
 
 function getDayState(day: number, clients: ClientBooking[]): CalendarDayState {
@@ -692,52 +419,25 @@ function getDayBorder(state: CalendarDayState) {
   return '#111111';
 }
 
-function BarcodePreview() {
+function SupportMiniIcon() {
   return (
-    <div
+    <span
       style={{
-        marginTop: 14,
+        width: 34,
+        height: 34,
+        borderRadius: 999,
         border: '2px solid #111111',
-        borderRadius: 22,
         background: '#ffffff',
-        padding: 16,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 18,
+        fontWeight: 900,
+        flexShrink: 0,
       }}
     >
-      <div
-        style={{
-          height: 74,
-          display: 'grid',
-          gridTemplateColumns:
-            '6px 2px 10px 4px 3px 8px 2px 12px 4px 6px 2px 10px 3px 8px 2px 6px',
-          gap: 4,
-          alignItems: 'stretch',
-          justifyContent: 'center',
-        }}
-      >
-        {Array.from({ length: 16 }).map((_, index) => (
-          <div
-            key={index}
-            style={{
-              background: '#111111',
-              borderRadius: 2,
-              height: index % 3 === 0 ? 74 : index % 2 === 0 ? 62 : 68,
-            }}
-          />
-        ))}
-      </div>
-
-      <div
-        style={{
-          marginTop: 12,
-          textAlign: 'center',
-          fontSize: 13,
-          fontWeight: 900,
-          color: '#17130f',
-        }}
-      >
-        OLACASH-PAY-1500
-      </div>
-    </div>
+      ☎
+    </span>
   );
 }
 
@@ -750,11 +450,12 @@ export default function ProviderClientsPage() {
     'calendar'
   );
   const [selectedDay, setSelectedDay] = useState(25);
+  const [selectedTime, setSelectedTime] = useState('15:00');
   const [search, setSearch] = useState('');
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
-  const [cancelClientId, setCancelClientId] = useState<string | null>(null);
-  const [paymentClientId, setPaymentClientId] = useState<string | null>(null);
-  const [paymentAmount, setPaymentAmount] = useState('35');
+  const [editingRow, setEditingRow] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const [localOrder, setLocalOrder] = useState<string[]>([]);
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -782,8 +483,32 @@ export default function ProviderClientsPage() {
 
   const clients = useMemo(() => mapBookingsToProviderClients(bookings), [bookings]);
 
+  useEffect(() => {
+    setLocalOrder((current) => {
+      const ids = clients.map((item) => item.id);
+      const kept = current.filter((id) => ids.includes(id));
+      const missing = ids.filter((id) => !kept.includes(id));
+      return [...kept, ...missing];
+    });
+  }, [clients]);
+
+  const orderedClients = useMemo(() => {
+    if (!localOrder.length) return clients;
+
+    return [...clients].sort((a, b) => {
+      const aIndex = localOrder.indexOf(a.id);
+      const bIndex = localOrder.indexOf(b.id);
+
+      if (aIndex === -1 && bIndex === -1) return 0;
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+
+      return aIndex - bIndex;
+    });
+  }, [clients, localOrder]);
+
   const visibleClients = useMemo(() => {
-    let source = clients;
+    let source = orderedClients;
 
     if (activeView === 'today') {
       source = source.filter((item) => item.day === 25);
@@ -814,11 +539,9 @@ export default function ProviderClientsPage() {
         item.paymentMethod.toLowerCase().includes(q)
       );
     });
-  }, [activeView, clients, search, selectedDay]);
+  }, [activeView, orderedClients, search, selectedDay]);
 
   const selectedClient = clients.find((item) => item.id === selectedClientId) || null;
-  const cancelClient = clients.find((item) => item.id === cancelClientId) || null;
-  const paymentClient = clients.find((item) => item.id === paymentClientId) || null;
 
   const activeTodayCount = clients.filter(
     (item) => item.day === 25 && item.status !== 'cancelled'
@@ -827,6 +550,23 @@ export default function ProviderClientsPage() {
   const requestCount = clients.filter(
     (item) => item.status === 'request' || item.status === 'quick'
   ).length;
+
+  const moveClient = (clientId: string, direction: 'up' | 'down') => {
+    setLocalOrder((current) => {
+      const ids = current.length ? [...current] : clients.map((item) => item.id);
+      const index = ids.indexOf(clientId);
+      if (index === -1) return ids;
+
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= ids.length) return ids;
+
+      const copy = [...ids];
+      const [item] = copy.splice(index, 1);
+      copy.splice(targetIndex, 0, item);
+
+      return copy;
+    });
+  };
 
   const handleConfirm = (client: ClientBooking) => {
     if (client.sourceBooking) {
@@ -846,9 +586,20 @@ export default function ProviderClientsPage() {
     if (client.sourceBooking) {
       updateBookingStatus(client.sourceBooking.id, 'cancelled');
     }
-    setCancelClientId(null);
     setSelectedClientId(null);
   };
+
+  const openEditRow = (row: string, value: string) => {
+    setEditingRow(row);
+    setEditValue(value);
+  };
+
+  const closeEditRow = () => {
+    setEditingRow(null);
+    setEditValue('');
+  };
+
+  const timeSlots = ['09:00', '11:00', '13:00', '15:00', '17:30', '19:00'];
 
   return (
     <>
@@ -1124,17 +875,33 @@ export default function ProviderClientsPage() {
                   style={{
                     marginTop: 14,
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
                     gap: 8,
-                    fontSize: 11,
-                    fontWeight: 900,
-                    color: '#17130f',
                   }}
                 >
-                  <span>🟢 {text.full}</span>
-                  <span>⚪ {text.free}</span>
-                  <span>⚫ {text.partial}</span>
-                  <span>🔴 {text.off}</span>
+                  {timeSlots.map((slot) => {
+                    const active = selectedTime === slot;
+
+                    return (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => setSelectedTime(slot)}
+                        style={{
+                          minHeight: 42,
+                          borderRadius: 999,
+                          border: '2px solid #111111',
+                          background: active ? '#2578ff' : '#ffffff',
+                          color: active ? '#ffffff' : '#17130f',
+                          fontSize: 13,
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {slot}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </section>
@@ -1164,11 +931,13 @@ export default function ProviderClientsPage() {
                   return (
                     <article
                       key={client.id}
+                      onClick={() => setSelectedClientId(client.id)}
                       style={{
                         borderRadius: 30,
                         border: '2px solid #111111',
                         background: '#ffffff',
                         padding: 14,
+                        cursor: 'pointer',
                       }}
                     >
                       <div
@@ -1237,31 +1006,56 @@ export default function ProviderClientsPage() {
                           <div
                             style={{
                               marginTop: 4,
-                              fontSize: 13,
-                              fontWeight: 900,
-                              color: '#17130f',
+                              fontSize: 15,
+                              fontWeight: 1000,
+                              color: '#ef3e36',
                             }}
                           >
-                            {money(client.price)} · {client.paymentMethod}
+                            {money(client.price)}
                           </div>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => setSelectedClientId(client.id)}
+                        <div
+                          onClick={(event) => event.stopPropagation()}
                           style={{
-                            width: 44,
-                            height: 44,
-                            borderRadius: 999,
-                            border: '2px solid #111111',
-                            background: '#ffffff',
-                            fontSize: 20,
-                            fontWeight: 900,
-                            cursor: 'pointer',
+                            display: 'grid',
+                            gap: 6,
                           }}
                         >
-                          ›
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => moveClient(client.id, 'up')}
+                            style={{
+                              width: 42,
+                              height: 34,
+                              borderRadius: 999,
+                              border: '2px solid #111111',
+                              background: '#ffffff',
+                              fontSize: 17,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            ↑
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => moveClient(client.id, 'down')}
+                            style={{
+                              width: 42,
+                              height: 34,
+                              borderRadius: 999,
+                              border: '2px solid #111111',
+                              background: '#ffffff',
+                              fontSize: 17,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            ↓
+                          </button>
+                        </div>
                       </div>
                     </article>
                   );
@@ -1271,7 +1065,7 @@ export default function ProviderClientsPage() {
           </section>
         </div>
 
-        <BottomNav active="bookings" />
+        <BottomNav active="clients" />
       </main>
 
       {selectedClient ? (
@@ -1347,7 +1141,7 @@ export default function ProviderClientsPage() {
                       fontWeight: 800,
                     }}
                   >
-                    {selectedClient.clientPhone}
+                    {selectedClient.registeredClient ? text.registeredContact : text.managerOnly}
                   </div>
                 </div>
 
@@ -1371,11 +1165,21 @@ export default function ProviderClientsPage() {
 
               <div
                 style={{
-                  marginTop: 16,
-                  display: 'grid',
-                  gap: 10,
+                  marginTop: 14,
+                  borderRadius: 20,
+                  border: '2px dashed #111111',
+                  background: '#fffefa',
+                  padding: 12,
+                  fontSize: 13,
+                  lineHeight: 1.45,
+                  color: '#6f675f',
+                  fontWeight: 800,
                 }}
               >
+                {text.tapToEdit}
+              </div>
+
+              <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
                 {[
                   [text.service, selectedClient.serviceName],
                   [text.time, `${selectedClient.time} · ${selectedClient.duration}`],
@@ -1385,31 +1189,128 @@ export default function ProviderClientsPage() {
                     text.holds,
                     `Client £${selectedClient.holdClient} · Master £${selectedClient.holdMaster}`,
                   ],
-                ].map(([label, value]) => (
-                  <div
-                    key={label}
-                    style={{
-                      borderRadius: 20,
-                      border: '2px solid #111111',
-                      background: '#ffffff',
-                      padding: '12px 14px',
-                    }}
-                  >
-                    <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 900 }}>
-                      {label}
+                ].map(([label, value]) => {
+                  const rowKey = String(label);
+                  const isPrice = label === text.price;
+                  const isTime = label === text.time;
+                  const active = editingRow === rowKey;
+
+                  return (
+                    <div
+                      key={label}
+                      onClick={() => openEditRow(rowKey, String(value))}
+                      style={{
+                        borderRadius: 20,
+                        border: active
+                          ? '2px solid #2578ff'
+                          : isTime
+                          ? '2px solid #2578ff'
+                          : '2px solid #111111',
+                        background: active ? '#eaf3ff' : isTime ? '#f0f6ff' : '#ffffff',
+                        padding: '12px 14px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 900 }}>
+                        {label}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: 5,
+                          fontSize: isPrice ? 22 : 15,
+                          color: isPrice ? '#ef3e36' : '#17130f',
+                          fontWeight: 1000,
+                        }}
+                      >
+                        {value}
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  borderRadius: 22,
+                  border: '2px solid #111111',
+                  background: '#ffffff',
+                  padding: 14,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 1000,
+                    color: '#17130f',
+                    marginBottom: 10,
+                  }}
+                >
+                  {text.contact}
+                </div>
+
+                {selectedClient.registeredClient ? (
+                  <div style={{ display: 'grid', gap: 8 }}>
                     <div
                       style={{
-                        marginTop: 5,
-                        fontSize: 15,
-                        color: '#17130f',
+                        borderRadius: 18,
+                        border: '2px solid #111111',
+                        padding: '11px 12px',
+                        fontSize: 14,
                         fontWeight: 900,
                       }}
                     >
-                      {value}
+                      {text.phone}: {selectedClient.clientPhone}
                     </div>
+
+                    <div
+                      style={{
+                        borderRadius: 18,
+                        border: '2px solid #111111',
+                        padding: '11px 12px',
+                        fontSize: 14,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {text.email}: {selectedClient.clientEmail}
+                    </div>
+
+                    <button
+                      type="button"
+                      style={{
+                        minHeight: 50,
+                        borderRadius: 18,
+                        border: '2px solid #111111',
+                        background: '#ffe44d',
+                        color: '#17130f',
+                        fontSize: 15,
+                        fontWeight: 1000,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      ✉ {text.message}
+                    </button>
                   </div>
-                ))}
+                ) : (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      borderRadius: 18,
+                      border: '2px solid #111111',
+                      background: '#ffe44d',
+                      padding: 12,
+                      color: '#17130f',
+                      fontSize: 14,
+                      fontWeight: 900,
+                    }}
+                  >
+                    <SupportMiniIcon />
+                    <span>{text.olamepManager}</span>
+                  </div>
+                )}
               </div>
 
               <div
@@ -1432,7 +1333,7 @@ export default function ProviderClientsPage() {
                 style={{
                   marginTop: 14,
                   display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
+                  gridTemplateColumns: '1fr',
                   gap: 10,
                 }}
               >
@@ -1451,29 +1352,7 @@ export default function ProviderClientsPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    {text.confirm}
-                  </button>
-                )}
-
-                {selectedClient.status === 'confirmed' && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPaymentClientId(selectedClient.id);
-                      setPaymentAmount(String(selectedClient.price));
-                    }}
-                    style={{
-                      minHeight: 52,
-                      borderRadius: 18,
-                      border: '2px solid #111111',
-                      background: '#41c83f',
-                      color: '#ffffff',
-                      fontSize: 15,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {text.quickPay}
+                    {text.confirmRequest}
                   </button>
                 )}
 
@@ -1492,7 +1371,7 @@ export default function ProviderClientsPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    {text.complete}
+                    {text.markComplete}
                   </button>
                 )}
 
@@ -1501,19 +1380,19 @@ export default function ProviderClientsPage() {
                   selectedClient.status === 'confirmed') && (
                   <button
                     type="button"
-                    onClick={() => setCancelClientId(selectedClient.id)}
+                    onClick={() => handleCancel(selectedClient)}
                     style={{
                       minHeight: 52,
                       borderRadius: 18,
                       border: '2px solid #111111',
-                      background: '#fde5e5',
-                      color: '#c74343',
+                      background: '#ff4b52',
+                      color: '#ffffff',
                       fontSize: 15,
-                      fontWeight: 900,
+                      fontWeight: 1000,
                       cursor: 'pointer',
                     }}
                   >
-                    {text.cancel}
+                    {text.cancelBooking}
                   </button>
                 )}
               </div>
@@ -1522,14 +1401,14 @@ export default function ProviderClientsPage() {
         </div>
       ) : null}
 
-      {cancelClient ? (
+      {editingRow ? (
         <div
-          onClick={() => setCancelClientId(null)}
+          onClick={closeEditRow}
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(17,17,17,0.28)',
-            zIndex: 240,
+            background: 'rgba(17,17,17,0.25)',
+            zIndex: 300,
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
@@ -1546,210 +1425,53 @@ export default function ProviderClientsPage() {
           >
             <div
               style={{
-                borderRadius: 30,
+                borderRadius: 28,
                 border: '2px solid #111111',
                 background: '#ffffff',
                 padding: 16,
               }}
             >
-              <div style={{ fontSize: 20, fontWeight: 900, color: '#17130f' }}>
-                {text.reasonTitle}
+              <div style={{ fontSize: 20, fontWeight: 1000, color: '#17130f' }}>
+                {text.editValue}
               </div>
 
-              <div style={{ display: 'grid', gap: 8, marginTop: 14 }}>
-                {[
-                  text.reasonSick,
-                  text.reasonClientNoReply,
-                  text.reasonTimeMistake,
-                  text.reasonUnavailable,
-                  text.reasonOther,
-                ].map((reason) => (
-                  <button
-                    key={reason}
-                    type="button"
-                    style={{
-                      minHeight: 50,
-                      borderRadius: 18,
-                      border: '2px solid #111111',
-                      background: '#ffffff',
-                      color: '#17130f',
-                      fontSize: 14,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      padding: '0 14px',
-                    }}
-                  >
-                    {reason}
-                  </button>
-                ))}
-              </div>
+              <input
+                value={editValue}
+                onChange={(event) => setEditValue(event.target.value)}
+                autoFocus
+                style={{
+                  marginTop: 14,
+                  width: '100%',
+                  height: 54,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  padding: '0 14px',
+                  fontSize: 17,
+                  fontWeight: 900,
+                  color: '#17130f',
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                }}
+              />
 
               <button
                 type="button"
-                onClick={() => handleCancel(cancelClient)}
+                onClick={closeEditRow}
                 style={{
                   marginTop: 14,
                   width: '100%',
                   minHeight: 54,
-                  borderRadius: 20,
+                  borderRadius: 18,
                   border: '2px solid #111111',
-                  background: '#ff4b52',
+                  background: '#2578ff',
                   color: '#ffffff',
                   fontSize: 16,
-                  fontWeight: 900,
+                  fontWeight: 1000,
                   cursor: 'pointer',
                 }}
               >
-                {text.confirmCancel}
+                {text.save}
               </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {paymentClient ? (
-        <div
-          onClick={() => setPaymentClientId(null)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(17,17,17,0.28)',
-            zIndex: 260,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            onClick={(event) => event.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              padding: '0 14px calc(18px + env(safe-area-inset-bottom))',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                borderRadius: 30,
-                border: '2px solid #111111',
-                background: '#ffffff',
-                padding: 16,
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 10,
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: 20, fontWeight: 900, color: '#17130f' }}>
-                    {text.paymentTitle}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 5,
-                      fontSize: 13,
-                      fontWeight: 800,
-                      color: '#6f675f',
-                    }}
-                  >
-                    {paymentClient.clientName} · {paymentClient.serviceName}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setPaymentClientId(null)}
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 999,
-                    border: '2px solid #111111',
-                    background: '#ffffff',
-                    fontSize: 18,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-
-              <div
-                style={{
-                  marginTop: 14,
-                  borderRadius: 20,
-                  border: '2px solid #111111',
-                  background: '#fff',
-                  padding: '12px 14px',
-                }}
-              >
-                <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 900 }}>
-                  {text.amount}
-                </div>
-
-                <input
-                  value={paymentAmount}
-                  onChange={(event) => setPaymentAmount(event.target.value)}
-                  style={{
-                    marginTop: 6,
-                    width: '100%',
-                    border: 'none',
-                    outline: 'none',
-                    fontSize: 28,
-                    fontWeight: 900,
-                    color: '#17130f',
-                  }}
-                />
-              </div>
-
-              <BarcodePreview />
-
-              <div
-                style={{
-                  marginTop: 14,
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: 10,
-                }}
-              >
-                <button
-                  type="button"
-                  style={{
-                    minHeight: 52,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: '#e6efff',
-                    color: '#245cc9',
-                    fontSize: 15,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {text.share}
-                </button>
-
-                <button
-                  type="button"
-                  style={{
-                    minHeight: 52,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: '#41c83f',
-                    color: '#ffffff',
-                    fontSize: 15,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {text.generateCode}
-                </button>
-              </div>
             </div>
           </div>
         </div>
