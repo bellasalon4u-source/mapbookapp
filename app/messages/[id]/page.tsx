@@ -144,6 +144,119 @@ function groupMessagesByDay(messages: ChatMessage[]) {
   return groups;
 }
 
+function OlamepLogoIcon() {
+  return (
+    <div
+      aria-label="Olamep logo"
+      style={{
+        width: 56,
+        height: 56,
+        borderRadius: 18,
+        border: '2px solid #111111',
+        background:
+          'linear-gradient(145deg, #ffffff 0%, #fff7ee 45%, #eef9ff 100%)',
+        boxShadow: '0 6px 0 rgba(17,17,17,0.08)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        flexShrink: 0,
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            'linear-gradient(90deg, rgba(17,17,17,0.06) 1px, transparent 1px), linear-gradient(rgba(17,17,17,0.06) 1px, transparent 1px)',
+          backgroundSize: '14px 14px',
+          opacity: 0.5,
+        }}
+      />
+
+      <div
+        style={{
+          position: 'relative',
+          width: 32,
+          height: 39,
+          background: 'linear-gradient(180deg, #ff4f6d 0%, #246bff 100%)',
+          border: '2px solid #111111',
+          borderRadius: '17px 17px 19px 19px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 0 rgba(17,17,17,0.12)',
+        }}
+      >
+        <div
+          style={{
+            width: 13,
+            height: 13,
+            borderRadius: 999,
+            background: '#ffffff',
+            border: '2px solid #111111',
+            zIndex: 2,
+          }}
+        />
+
+        <div
+          style={{
+            position: 'absolute',
+            bottom: -7,
+            left: '50%',
+            width: 15,
+            height: 15,
+            background: '#246bff',
+            borderRight: '2px solid #111111',
+            borderBottom: '2px solid #111111',
+            transform: 'translateX(-50%) rotate(45deg)',
+            borderRadius: 3,
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 4,
+          left: 6,
+          right: 6,
+          height: 13,
+          borderRadius: 999,
+          background: '#ffffff',
+          border: '1.5px solid #111111',
+          color: '#111111',
+          fontSize: 7,
+          fontWeight: 1000,
+          letterSpacing: -0.4,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          lineHeight: 1,
+        }}
+      >
+        Olamep
+      </div>
+    </div>
+  );
+}
+
+function isOlamepInternalChat(chat: ChatThread) {
+  const name = chat.providerName.toLowerCase();
+  const category = chat.category.toLowerCase();
+
+  return (
+    name.includes('olamep') ||
+    name.includes('support') ||
+    name.includes('manager') ||
+    name.includes('admin') ||
+    category.includes('olamep') ||
+    category.includes('support') ||
+    category.includes('internal')
+  );
+}
+
 export default function ChatPage() {
   const params = useParams();
   const router = useRouter();
@@ -219,6 +332,8 @@ export default function ChatPage() {
       </main>
     );
   }
+
+  const showOlamepLogo = isOlamepInternalChat(chat);
 
   const handleSend = () => {
     const trimmed = input.trim();
@@ -298,18 +413,23 @@ export default function ChatPage() {
               }}
             >
               <div style={{ position: 'relative' }}>
-                <img
-                  src={chat.providerAvatar}
-                  alt={chat.providerName}
-                  style={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: 18,
-                    objectFit: 'cover',
-                    display: 'block',
-                    border: '2px solid #111111',
-                  }}
-                />
+                {showOlamepLogo ? (
+                  <OlamepLogoIcon />
+                ) : (
+                  <img
+                    src={chat.providerAvatar}
+                    alt={chat.providerName}
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 18,
+                      objectFit: 'cover',
+                      display: 'block',
+                      border: '2px solid #111111',
+                    }}
+                  />
+                )}
+
                 <span
                   style={{
                     position: 'absolute',
