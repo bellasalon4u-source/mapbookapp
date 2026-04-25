@@ -386,6 +386,287 @@ const masters: MasterItem[] = [
       },
     ],
   },
+  {
+    id: 'chef-at-home-london',
+    name: 'Chef at Home London',
+    title: 'Private Chef',
+    city: 'London',
+    category: 'food',
+    subcategory: 'Chef at Home',
+    avatar:
+      'https://images.unsplash.com/photo-1583394293214-28ded15ee548?q=80&w=800&auto=format&fit=crop',
+    cover:
+      'https://images.unsplash.com/photo-1551218808-94e220e084d2?q=80&w=1200&auto=format&fit=crop',
+    rating: 4.9,
+    priceFrom: 95,
+    availableNow: true,
+    reviews: 41,
+    description:
+      'Private chef for dinners, family events and special evenings at your home.',
+    address: 'Mayfair, London',
+    phone: '+44 7700 909555',
+    email: 'chefathome@olamep.app',
+    social: '@chefathomelondon',
+    lat: 51.5094,
+    lng: -0.1476,
+    paymentMethods: ['cash', 'card', 'wallet'],
+    gallery: [
+      'https://images.unsplash.com/photo-1551218808-94e220e084d2?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200&auto=format&fit=crop',
+    ],
+    services: [
+      {
+        slug: 'private-dinner',
+        title: 'Private Dinner at Home',
+        duration: '3h',
+        price: 95,
+        image:
+          'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?q=80&w=1200&auto=format&fit=crop',
+        description: 'Personal chef dinner for small groups at home.',
+      },
+      {
+        slug: 'family-chef-visit',
+        title: 'Family Chef Visit',
+        duration: '2h 30m',
+        price: 120,
+        image:
+          'https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'event-chef',
+        title: 'Event Chef',
+        duration: '4h',
+        price: 180,
+        image:
+          'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200&auto=format&fit=crop',
+      },
+    ],
+  },
+  {
+    id: 'soho-table-booking',
+    name: 'Soho Table Booking',
+    title: 'Restaurant & Bar Reservations',
+    city: 'London',
+    category: 'food',
+    subcategory: 'Restaurant & Bar Table',
+    avatar:
+      'https://images.unsplash.com/photo-1559329007-40df8a9345d8?q=80&w=800&auto=format&fit=crop',
+    cover:
+      'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1200&auto=format&fit=crop',
+    rating: 4.8,
+    priceFrom: 10,
+    availableNow: true,
+    reviews: 88,
+    description:
+      'Book a table in restaurants and bars. Fast confirmation for dinner, drinks and events.',
+    address: 'Soho, London',
+    phone: '+44 7700 121212',
+    email: 'tables@olamep.app',
+    social: '@sohotablebooking',
+    lat: 51.5129,
+    lng: -0.1344,
+    paymentMethods: ['card', 'wallet'],
+    gallery: [
+      'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1559329007-40df8a9345d8?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1200&auto=format&fit=crop',
+    ],
+    services: [
+      {
+        slug: 'restaurant-table',
+        title: 'Restaurant Table Booking',
+        duration: 'Instant',
+        price: 10,
+        image:
+          'https://images.unsplash.com/photo-1559329007-40df8a9345d8?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'bar-table',
+        title: 'Bar Table Booking',
+        duration: 'Instant',
+        price: 10,
+        image:
+          'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'group-table',
+        title: 'Group Table Reservation',
+        duration: 'Instant',
+        price: 20,
+        image:
+          'https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1200&auto=format&fit=crop',
+      },
+    ],
+  },
+  {
+    id: 'ink-room-camden',
+    name: 'Ink Room Camden',
+    title: 'Tattoo Artist',
+    city: 'London',
+    category: 'beauty',
+    subcategory: 'Tattoo',
+    avatar:
+      'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?q=80&w=800&auto=format&fit=crop',
+    cover:
+      'https://images.unsplash.com/photo-1590246814883-7f5e67e1a35b?q=80&w=1200&auto=format&fit=crop',
+    rating: 4.9,
+    priceFrom: 70,
+    availableNow: false,
+    reviews: 103,
+    description:
+      'Custom tattoo work, small tattoos, fine line designs and consultations in Camden.',
+    address: 'Camden Town, London',
+    phone: '+44 7700 131313',
+    email: 'inkroom@olamep.app',
+    social: '@inkroomcamden',
+    lat: 51.5416,
+    lng: -0.1432,
+    paymentMethods: ['cash', 'card', 'wallet'],
+    gallery: [
+      'https://images.unsplash.com/photo-1590246814883-7f5e67e1a35b?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?q=80&w=1200&auto=format&fit=crop',
+    ],
+    services: [
+      {
+        slug: 'small-tattoo',
+        title: 'Small Tattoo',
+        duration: '1h',
+        price: 70,
+        image:
+          'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'fine-line-tattoo',
+        title: 'Fine Line Tattoo',
+        duration: '1h 30m',
+        price: 110,
+        image:
+          'https://images.unsplash.com/photo-1590246814883-7f5e67e1a35b?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'tattoo-consultation',
+        title: 'Tattoo Consultation',
+        duration: '30m',
+        price: 25,
+        image:
+          'https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?q=80&w=1200&auto=format&fit=crop',
+      },
+    ],
+  },
+  {
+    id: 'piercing-studio-soho',
+    name: 'Piercing Studio Soho',
+    title: 'Piercing Specialist',
+    city: 'London',
+    category: 'beauty',
+    subcategory: 'Piercing',
+    avatar:
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=800&auto=format&fit=crop',
+    cover:
+      'https://images.unsplash.com/photo-1512316609839-ce289d3eba0a?q=80&w=1200&auto=format&fit=crop',
+    rating: 4.8,
+    priceFrom: 35,
+    availableNow: true,
+    reviews: 79,
+    description:
+      'Ear, nose and body piercing with sterile tools and aftercare guidance.',
+    address: 'Soho, London',
+    phone: '+44 7700 141414',
+    email: 'piercing@olamep.app',
+    social: '@piercingstudiosoho',
+    lat: 51.5135,
+    lng: -0.1361,
+    paymentMethods: ['cash', 'card'],
+    gallery: [
+      'https://images.unsplash.com/photo-1512316609839-ce289d3eba0a?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop',
+    ],
+    services: [
+      {
+        slug: 'ear-piercing',
+        title: 'Ear Piercing',
+        duration: '30m',
+        price: 35,
+        image:
+          'https://images.unsplash.com/photo-1512316609839-ce289d3eba0a?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'nose-piercing',
+        title: 'Nose Piercing',
+        duration: '30m',
+        price: 45,
+        image:
+          'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'piercing-aftercare',
+        title: 'Piercing Aftercare',
+        duration: '20m',
+        price: 20,
+        image:
+          'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop',
+      },
+    ],
+  },
+  {
+    id: 'tattoo-removal-clinic',
+    name: 'Tattoo Removal Clinic',
+    title: 'Tattoo Removal',
+    city: 'London',
+    category: 'beauty',
+    subcategory: 'Tattoo Removal',
+    avatar:
+      'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?q=80&w=800&auto=format&fit=crop',
+    cover:
+      'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200&auto=format&fit=crop',
+    rating: 4.7,
+    priceFrom: 85,
+    availableNow: false,
+    reviews: 36,
+    description:
+      'Tattoo removal consultations and treatment sessions with professional aftercare.',
+    address: 'Harley Street, London',
+    phone: '+44 7700 151515',
+    email: 'removal@olamep.app',
+    social: '@tattooremovalclinic',
+    lat: 51.5201,
+    lng: -0.1478,
+    paymentMethods: ['card', 'wallet'],
+    gallery: [
+      'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1581093458791-9d15482442f6?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1582719471384-894fbb16e074?q=80&w=1200&auto=format&fit=crop',
+    ],
+    services: [
+      {
+        slug: 'tattoo-removal-consultation',
+        title: 'Tattoo Removal Consultation',
+        duration: '30m',
+        price: 35,
+        image:
+          'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'small-tattoo-removal',
+        title: 'Small Tattoo Removal',
+        duration: '45m',
+        price: 85,
+        image:
+          'https://images.unsplash.com/photo-1581093458791-9d15482442f6?q=80&w=1200&auto=format&fit=crop',
+      },
+      {
+        slug: 'large-tattoo-removal',
+        title: 'Large Tattoo Removal',
+        duration: '1h',
+        price: 140,
+        image:
+          'https://images.unsplash.com/photo-1582719471384-894fbb16e074?q=80&w=1200&auto=format&fit=crop',
+      },
+    ],
+  },
 ];
 
 export function getAllMasters() {
