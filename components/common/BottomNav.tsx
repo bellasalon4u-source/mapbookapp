@@ -9,10 +9,10 @@ import {
 } from '../../services/i18n';
 
 type BottomNavProps = {
-  active?: 'home' | 'bookings' | 'add' | 'messages' | 'profile';
+  active?: 'home' | 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
 };
 
-type NavKey = 'home' | 'messages' | 'add' | 'bookings' | 'profile';
+type NavKey = 'profile' | 'clients' | 'add' | 'bookings' | 'messages';
 
 type NavItem = {
   key: NavKey;
@@ -22,74 +22,74 @@ type NavItem = {
 
 const navLabels: Record<AppLanguage, Record<NavKey, string>> = {
   EN: {
-    home: 'Home',
-    messages: 'Messages',
-    add: 'Add',
-    bookings: 'Bookings',
     profile: 'Profile',
+    clients: 'My clients',
+    add: 'Add',
+    bookings: 'My bookings',
+    messages: 'Messages',
   },
   ES: {
-    home: 'Inicio',
-    messages: 'Mensajes',
+    profile: 'Perfil',
+    clients: 'Clientes',
     add: 'Añadir',
     bookings: 'Reservas',
-    profile: 'Perfil',
+    messages: 'Mensajes',
   },
   RU: {
-    home: 'Главная',
-    messages: 'Сообщения',
-    add: 'Добавить',
-    bookings: 'Брони',
     profile: 'Профиль',
+    clients: 'Мои клиенты',
+    add: 'Добавить',
+    bookings: 'Мои брони',
+    messages: 'Сообщения',
   },
   UA: {
-    home: 'Головна',
-    messages: 'Повідомл.',
-    add: 'Додати',
-    bookings: 'Броні',
     profile: 'Профіль',
+    clients: 'Мої клієнти',
+    add: 'Додати',
+    bookings: 'Мої броні',
+    messages: 'Повідомл.',
   },
   CZ: {
-    home: 'Domů',
-    messages: 'Zprávy',
+    profile: 'Profil',
+    clients: 'Klienti',
     add: 'Přidat',
     bookings: 'Rezervace',
-    profile: 'Profil',
+    messages: 'Zprávy',
   },
   DE: {
-    home: 'Start',
-    messages: 'Nachr.',
+    profile: 'Profil',
+    clients: 'Kunden',
     add: 'Plus',
     bookings: 'Buchung',
-    profile: 'Profil',
+    messages: 'Nachr.',
   },
   IT: {
-    home: 'Home',
-    messages: 'Messaggi',
+    profile: 'Profilo',
+    clients: 'Clienti',
     add: 'Aggiungi',
     bookings: 'Prenota',
-    profile: 'Profilo',
+    messages: 'Messaggi',
   },
   FR: {
-    home: 'Accueil',
-    messages: 'Messages',
+    profile: 'Profil',
+    clients: 'Clients',
     add: 'Ajouter',
     bookings: 'Réserv.',
-    profile: 'Profil',
+    messages: 'Messages',
   },
   AR: {
-    home: 'الرئيسية',
-    messages: 'رسائل',
+    profile: 'حسابي',
+    clients: 'عملائي',
     add: 'إضافة',
     bookings: 'حجوزات',
-    profile: 'حسابي',
+    messages: 'رسائل',
   },
   PL: {
-    home: 'Start',
-    messages: 'Wiadom.',
+    profile: 'Profil',
+    clients: 'Klienci',
     add: 'Dodaj',
     bookings: 'Rezerw.',
-    profile: 'Profil',
+    messages: 'Wiadom.',
   },
 };
 
@@ -122,27 +122,6 @@ function getAddText(language: AppLanguage) {
   return addMenuTexts[language] || addMenuTexts.EN;
 }
 
-function HomeIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M4.5 11.2L12 4.8L19.5 11.2"
-        stroke={active ? '#55c75f' : '#202020'}
-        strokeWidth="1.9"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M6.5 10.5V19H10V14H14V19H17.5V10.5"
-        stroke={active ? '#55c75f' : '#202020'}
-        strokeWidth="1.9"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 function ProfileIcon({ active }: { active: boolean }) {
   return (
     <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
@@ -156,6 +135,34 @@ function ProfileIcon({ active }: { active: boolean }) {
       <path
         d="M5.5 19C6.5 15.8 8.8 14.5 12 14.5C15.2 14.5 17.5 15.8 18.5 19"
         stroke={active ? '#55c75f' : '#202020'}
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function ClientsIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+      <rect
+        x="4"
+        y="7"
+        width="16"
+        height="12"
+        rx="2.4"
+        stroke={active ? '#f1b900' : '#202020'}
+        strokeWidth="1.9"
+      />
+      <path
+        d="M9 7V5.8C9 4.8 9.8 4 10.8 4H13.2C14.2 4 15 4.8 15 5.8V7"
+        stroke={active ? '#f1b900' : '#202020'}
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+      <path
+        d="M8 12H16"
+        stroke={active ? '#f1b900' : '#202020'}
         strokeWidth="1.9"
         strokeLinecap="round"
       />
@@ -187,7 +194,11 @@ function CalendarIcon({ active }: { active: boolean }) {
         strokeWidth="1.9"
         strokeLinecap="round"
       />
-      <path d="M4 10H20" stroke={active ? '#2578ff' : '#202020'} strokeWidth="1.9" />
+      <path
+        d="M4 10H20"
+        stroke={active ? '#2578ff' : '#202020'}
+        strokeWidth="1.9"
+      />
     </svg>
   );
 }
@@ -206,11 +217,11 @@ function MessageIcon({ active }: { active: boolean }) {
 }
 
 const navItems: NavItem[] = [
-  { key: 'home', href: '/' },
-  { key: 'messages', href: '/messages', badge: 3 },
+  { key: 'profile', href: '/profile' },
+  { key: 'clients', href: '/bookings/clients' },
   { key: 'add', href: '/add' },
   { key: 'bookings', href: '/bookings' },
-  { key: 'profile', href: '/profile' },
+  { key: 'messages', href: '/messages', badge: 2 },
 ];
 
 export default function BottomNav({ active: activeProp }: BottomNavProps) {
@@ -290,20 +301,20 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
   const getIsActive = (key: BottomNavProps['active'], href: string) => {
     if (activeProp) return activeProp === key;
 
-    if (key === 'home') {
-      return pathname === '/';
+    if (key === 'profile') {
+      return pathname === '/profile' || pathname?.startsWith('/profile/');
+    }
+
+    if (key === 'clients') {
+      return pathname === '/bookings/clients' || pathname?.startsWith('/bookings/clients/');
+    }
+
+    if (key === 'bookings') {
+      return pathname === '/bookings';
     }
 
     if (key === 'messages') {
       return pathname?.startsWith('/messages');
-    }
-
-    if (key === 'bookings') {
-      return pathname === '/bookings' || pathname?.startsWith('/bookings/');
-    }
-
-    if (key === 'profile') {
-      return pathname === '/profile' || pathname?.startsWith('/profile/');
     }
 
     if (key === 'add') {
@@ -597,10 +608,10 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                       flexShrink: 0,
                     }}
                   >
-                    {item.key === 'home' && <HomeIcon active={isActive} />}
-                    {item.key === 'messages' && <MessageIcon active={isActive} />}
-                    {item.key === 'bookings' && <CalendarIcon active={isActive} />}
                     {item.key === 'profile' && <ProfileIcon active={isActive} />}
+                    {item.key === 'clients' && <ClientsIcon active={isActive} />}
+                    {item.key === 'bookings' && <CalendarIcon active={isActive} />}
+                    {item.key === 'messages' && <MessageIcon active={isActive} />}
                   </span>
                 )}
 
