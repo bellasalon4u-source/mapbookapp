@@ -1271,7 +1271,7 @@ export default function ProviderClientsPage() {
           </section>
         </div>
 
-        <BottomNav active="clients" />
+        <BottomNav active="bookings" />
       </main>
 
       {selectedClient ? (
@@ -1381,7 +1381,10 @@ export default function ProviderClientsPage() {
                   [text.time, `${selectedClient.time} · ${selectedClient.duration}`],
                   [text.price, money(selectedClient.price)],
                   [text.payment, selectedClient.paymentMethod],
-                  [text.holds, `Client £${selectedClient.holdClient} · Master £${selectedClient.holdMaster}`],
+                  [
+                    text.holds,
+                    `Client £${selectedClient.holdClient} · Master £${selectedClient.holdMaster}`,
+                  ],
                 ].map(([label, value]) => (
                   <div
                     key={label}
