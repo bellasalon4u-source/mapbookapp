@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { getMasterById } from '../../../../services/masters';
+import { getMasterById, getAllMasters } from '../../../../services/masters';
+import { getListings } from '../../../../services/listingsStore';
 import {
   getSavedLanguage,
   subscribeToLanguageChange,
@@ -12,12 +13,298 @@ import { formatDisplayPrice } from '../../../../services/currencyDisplay';
 
 type PaymentMethod = 'olacash' | 'card' | 'paypal' | 'wallet';
 
+type ListingLike = {
+  id: string | number;
+  title?: string;
+  category?: string;
+  subcategory?: string;
+  location?: string;
+  description?: string;
+  price?: string;
+  hours?: string;
+  availableToday?: boolean;
+  photos?: string[];
+};
+
+type ServiceLike = {
+  slug: string;
+  title: string;
+  duration: string;
+  price: number;
+  image: string;
+};
+
+type MasterLike = {
+  id: string | number;
+  name: string;
+  title: string;
+  city?: string;
+  avatar: string;
+  services: ServiceLike[];
+};
+
+const BRAND = {
+  navy: '#071b46',
+  blue: '#1467f2',
+  green: '#21b84b',
+  red: '#ff4b4b',
+  pink: '#ff4f9a',
+  yellow: '#ffd629',
+  border: '#111111',
+  muted: '#626977',
+};
+
+function getTexts(language: AppLanguage) {
+  if (language === 'RU') {
+    return {
+      bookingNotFound: 'Бронирование не найдено',
+      selectedProceduresNotFound: 'Выбранные процедуры не найдены',
+      bookingSent: 'Заявка отправлена',
+      bookingSentText1: 'Депозит успешно оплачен.',
+      bookingSentText2: 'Теперь мастер должен подтвердить бронирование.',
+      waitingConfirmation: 'Ожидаем подтверждение мастера',
+      waitingText:
+        'Пока мастер не подтвердил бронь, телефон, адрес, соцсети и маршрут скрыты. Доступен только чат внутри Olamep.',
+      selectedProcedure: 'Выбранная услуга',
+      totalDuration: 'Длительность',
+      totalPrice: 'Цена',
+      address: 'Адрес',
+      phone: 'Телефон',
+      email: 'Email',
+      social: 'Соцсети',
+      writeToSeller: 'Написать мастеру',
+      callSeller: 'Позвонить мастеру',
+      goHome: 'На главную',
+      myBookings: 'Мои бронирования',
+      buildRoute: 'Проложить маршрут',
+      bookingDetails: 'Детали бронирования',
+      specialistContacts: 'Контакты специалиста',
+      contactsLocked: 'Контакты закрыты до подтверждения',
+      routeLocked: 'Маршрут откроется после подтверждения мастером',
+      locked: 'Закрыто',
+      secured: 'Оплата подтверждена',
+      depositPaid: 'Оплаченный депозит',
+      paymentMethod: 'Способ оплаты',
+      olacash: 'OlaCash',
+      card: 'Банковская карта',
+      paypal: 'PayPal',
+      wallet: 'Apple Pay / Google Pay',
+      date: 'Дата',
+      time: 'Время',
+      status: 'Статус',
+      chatAvailable: 'Чат доступен',
+      onlyChat: 'Только чат',
+      providerFallback: 'Специалист',
+      serviceProviderFallback: 'Исполнитель услуг',
+      serviceFallback: 'Основная услуга',
+      premiumOption: 'Премиум вариант',
+    };
+  }
+
+  if (language === 'UA') {
+    return {
+      bookingNotFound: 'Бронювання не знайдено',
+      selectedProceduresNotFound: 'Вибрані послуги не знайдено',
+      bookingSent: 'Заявку відправлено',
+      bookingSentText1: 'Депозит успішно оплачено.',
+      bookingSentText2: 'Тепер майстер має підтвердити бронювання.',
+      waitingConfirmation: 'Очікуємо підтвердження майстра',
+      waitingText:
+        'Поки майстер не підтвердив бронювання, телефон, адреса, соцмережі та маршрут приховані. Доступний тільки чат в Olamep.',
+      selectedProcedure: 'Обрана послуга',
+      totalDuration: 'Тривалість',
+      totalPrice: 'Ціна',
+      address: 'Адреса',
+      phone: 'Телефон',
+      email: 'Email',
+      social: 'Соцмережі',
+      writeToSeller: 'Написати майстру',
+      callSeller: 'Подзвонити майстру',
+      goHome: 'На головну',
+      myBookings: 'Мої бронювання',
+      buildRoute: 'Прокласти маршрут',
+      bookingDetails: 'Деталі бронювання',
+      specialistContacts: 'Контакти спеціаліста',
+      contactsLocked: 'Контакти закриті до підтвердження',
+      routeLocked: 'Маршрут відкриється після підтвердження майстром',
+      locked: 'Закрито',
+      secured: 'Оплату підтверджено',
+      depositPaid: 'Оплачений депозит',
+      paymentMethod: 'Метод оплати',
+      olacash: 'OlaCash',
+      card: 'Банківська карта',
+      paypal: 'PayPal',
+      wallet: 'Apple Pay / Google Pay',
+      date: 'Дата',
+      time: 'Час',
+      status: 'Статус',
+      chatAvailable: 'Чат доступний',
+      onlyChat: 'Тільки чат',
+      providerFallback: 'Спеціаліст',
+      serviceProviderFallback: 'Виконавець послуг',
+      serviceFallback: 'Основна послуга',
+      premiumOption: 'Преміум варіант',
+    };
+  }
+
+  return {
+    bookingNotFound: 'Booking not found',
+    selectedProceduresNotFound: 'Selected services not found',
+    bookingSent: 'Booking request sent',
+    bookingSentText1: 'Your deposit was paid successfully.',
+    bookingSentText2: 'Now the provider needs to confirm your appointment.',
+    waitingConfirmation: 'Waiting for provider confirmation',
+    waitingText:
+      'Until the provider confirms the booking, phone, address, social links and route are locked. Only Olamep in-app chat is available.',
+    selectedProcedure: 'Selected service',
+    totalDuration: 'Duration',
+    totalPrice: 'Price',
+    address: 'Address',
+    phone: 'Phone',
+    email: 'Email',
+    social: 'Social',
+    writeToSeller: 'Write to seller',
+    callSeller: 'Call seller',
+    goHome: 'Go home',
+    myBookings: 'My bookings',
+    buildRoute: 'Build route',
+    bookingDetails: 'Booking details',
+    specialistContacts: 'Specialist contacts',
+    contactsLocked: 'Contacts locked until confirmation',
+    routeLocked: 'Route unlocks after provider confirmation',
+    locked: 'Locked',
+    secured: 'Payment confirmed',
+    depositPaid: 'Deposit paid',
+    paymentMethod: 'Payment method',
+    olacash: 'OlaCash',
+    card: 'Bank card',
+    paypal: 'PayPal',
+    wallet: 'Apple Pay / Google Pay',
+    date: 'Date',
+    time: 'Time',
+    status: 'Status',
+    chatAvailable: 'Chat available',
+    onlyChat: 'Chat only',
+    providerFallback: 'Provider',
+    serviceProviderFallback: 'Service provider',
+    serviceFallback: 'Main service',
+    premiumOption: 'Premium option',
+  };
+}
+
+function OlamepLogo() {
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+      }}
+    >
+      <div
+        style={{
+          width: 34,
+          height: 42,
+          position: 'relative',
+          borderRadius: '50% 50% 58% 58%',
+          background:
+            'conic-gradient(from 210deg, #1467f2 0deg, #20c96b 90deg, #ffd629 160deg, #ff3f68 230deg, #1467f2 360deg)',
+          boxShadow: '0 8px 18px rgba(20,103,242,0.18)',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: 8,
+            top: 8,
+            width: 17,
+            height: 17,
+            borderRadius: '50%',
+            background: '#ffffff',
+            border: '4px solid #071b46',
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          fontSize: 30,
+          fontWeight: 900,
+          color: BRAND.navy,
+          letterSpacing: '-1px',
+        }}
+      >
+        Olamep
+      </div>
+    </div>
+  );
+}
+
+function MessageIcon() {
+  return (
+    <div
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 999,
+        border: `2px solid ${BRAND.green}`,
+        background: '#ffffff',
+        color: BRAND.green,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 26,
+        fontWeight: 900,
+      }}
+    >
+      💬
+    </div>
+  );
+}
+
+function SmallIcon({ icon, color }: { icon: string; color: string }) {
+  return (
+    <div
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 15,
+        background: color,
+        color: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 21,
+        fontWeight: 900,
+        flex: '0 0 auto',
+      }}
+    >
+      {icon}
+    </div>
+  );
+}
+
+function normalizePaymentMethod(value: string | null): PaymentMethod {
+  if (value === 'olacash') return 'olacash';
+  if (value === 'paypal') return 'paypal';
+  if (value === 'wallet') return 'wallet';
+  return 'card';
+}
+
 function parseDurationToMinutes(value: string) {
-  const hourMatch = value.match(/(\d+)\s*h/i);
-  const minuteMatch = value.match(/(\d+)\s*m/i);
+  const text = String(value || '').toLowerCase();
+
+  const hourMatch = text.match(/(\d+)\s*(h|hour|hours|ч|г|std)/i);
+  const minuteMatch = text.match(/(\d+)\s*(m|min|mins|minute|minutes|м|хв)/i);
 
   const hours = hourMatch ? Number(hourMatch[1]) : 0;
   const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
+
+  if (hours === 0 && minutes === 0) {
+    const onlyNumber = Number(text.replace(/[^\d.]/g, ''));
+    if (Number.isFinite(onlyNumber) && onlyNumber > 0) return onlyNumber;
+  }
 
   return hours * 60 + minutes;
 }
@@ -26,22 +313,18 @@ function formatMinutes(minutes: number, language: AppLanguage) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
 
+  if (!minutes) return '0m';
+
   if (language === 'RU') {
     if (h > 0 && m > 0) return `${h}ч ${m}м`;
     if (h > 0) return `${h}ч`;
     return `${m}м`;
   }
 
-  if (language === 'DE') {
-    if (h > 0 && m > 0) return `${h}Std ${m}Min`;
-    if (h > 0) return `${h}Std`;
-    return `${m}Min`;
-  }
-
-  if (language === 'ES' || language === 'CZ' || language === 'PL') {
-    if (h > 0 && m > 0) return `${h}h ${m}min`;
-    if (h > 0) return `${h}h`;
-    return `${m}min`;
+  if (language === 'UA') {
+    if (h > 0 && m > 0) return `${h}г ${m}хв`;
+    if (h > 0) return `${h}г`;
+    return `${m}хв`;
   }
 
   if (h > 0 && m > 0) return `${h}h ${m}m`;
@@ -49,216 +332,49 @@ function formatMinutes(minutes: number, language: AppLanguage) {
   return `${m}m`;
 }
 
-function getTexts(language: AppLanguage) {
-  if (language === 'RU') {
-    return {
-      bookingNotFound: 'Бронирование не найдено',
-      selectedProceduresNotFound: 'Выбранные процедуры не найдены',
-      bookingSent: 'Бронирование отправлено',
-      bookingSentText1: 'Ваш депозит успешно оплачен.',
-      bookingSentText2: 'Теперь специалист может просмотреть и подтвердить вашу запись.',
-      selectedProcedures: 'Выбранные процедуры',
-      totalDuration: 'Общая длительность',
-      totalPrice: 'Общая цена',
-      address: 'Адрес',
-      phone: 'Телефон',
-      email: 'Email',
-      social: 'Соцсеть',
-      writeToSeller: 'Написать специалисту',
-      callSeller: 'Позвонить специалисту',
-      goHome: 'На главную',
-      buildRoute: 'Проложить маршрут',
-      bookingDetails: 'Детали бронирования',
-      specialistContacts: 'Контакты специалиста',
-      contactsVisible: 'Контакты открыты после оплаты',
-      routeHint: 'Точный адрес доступен после успешной оплаты',
-      emptyValue: '—',
-      secured: 'Оплата подтверждена',
-      depositPaid: 'Оплаченный депозит',
-      paymentMethod: 'Способ оплаты',
-      olacash: 'OlaCash',
-      card: 'Банковская карта',
-      paypal: 'PayPal',
-      wallet: 'Apple Pay / Google Pay',
-    };
-  }
+function listingToMasterShape(listing: ListingLike, index: number, text: ReturnType<typeof getTexts>) {
+  const fallbackImages = [
+    'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80',
+  ];
 
-  if (language === 'ES') {
-    return {
-      bookingNotFound: 'Reserva no encontrada',
-      selectedProceduresNotFound: 'Procedimientos seleccionados no encontrados',
-      bookingSent: 'Reserva enviada',
-      bookingSentText1: 'Tu depósito fue pagado correctamente.',
-      bookingSentText2: 'Ahora el profesional puede revisar y confirmar tu cita.',
-      selectedProcedures: 'Procedimientos seleccionados',
-      totalDuration: 'Duración total',
-      totalPrice: 'Precio total',
-      address: 'Dirección',
-      phone: 'Teléfono',
-      email: 'Email',
-      social: 'Red social',
-      writeToSeller: 'Escribir al profesional',
-      callSeller: 'Llamar al profesional',
-      goHome: 'Ir al inicio',
-      buildRoute: 'Crear ruta',
-      bookingDetails: 'Detalles de la reserva',
-      specialistContacts: 'Contactos del profesional',
-      contactsVisible: 'Los contactos están abiertos después del pago',
-      routeHint: 'La dirección exacta está disponible después del pago exitoso',
-      emptyValue: '—',
-      secured: 'Pago confirmado',
-      depositPaid: 'Depósito pagado',
-      paymentMethod: 'Método de pago',
-      olacash: 'OlaCash',
-      card: 'Tarjeta bancaria',
-      paypal: 'PayPal',
-      wallet: 'Apple Pay / Google Pay',
-    };
-  }
+  const gallery =
+    listing.photos && listing.photos.length > 0
+      ? listing.photos
+      : [
+          fallbackImages[index % fallbackImages.length],
+          fallbackImages[(index + 1) % fallbackImages.length],
+          fallbackImages[(index + 2) % fallbackImages.length],
+        ];
 
-  if (language === 'CZ') {
-    return {
-      bookingNotFound: 'Rezervace nebyla nalezena',
-      selectedProceduresNotFound: 'Vybrané procedury nebyly nalezeny',
-      bookingSent: 'Rezervace odeslána',
-      bookingSentText1: 'Vaše záloha byla úspěšně zaplacena.',
-      bookingSentText2: 'Specialista nyní může vaši rezervaci zkontrolovat a potvrdit.',
-      selectedProcedures: 'Vybrané procedury',
-      totalDuration: 'Celková délka',
-      totalPrice: 'Celková cena',
-      address: 'Adresa',
-      phone: 'Telefon',
-      email: 'Email',
-      social: 'Sociální síť',
-      writeToSeller: 'Napsat specialistovi',
-      callSeller: 'Zavolat specialistovi',
-      goHome: 'Na hlavní stránku',
-      buildRoute: 'Naplánovat trasu',
-      bookingDetails: 'Detaily rezervace',
-      specialistContacts: 'Kontakty specialisty',
-      contactsVisible: 'Kontakty jsou dostupné po zaplacení',
-      routeHint: 'Přesná adresa je dostupná po úspěšné platbě',
-      emptyValue: '—',
-      secured: 'Platba potvrzena',
-      depositPaid: 'Zaplacená záloha',
-      paymentMethod: 'Způsob platby',
-      olacash: 'OlaCash',
-      card: 'Platební karta',
-      paypal: 'PayPal',
-      wallet: 'Apple Pay / Google Pay',
-    };
-  }
-
-  if (language === 'DE') {
-    return {
-      bookingNotFound: 'Buchung nicht gefunden',
-      selectedProceduresNotFound: 'Ausgewählte Behandlungen nicht gefunden',
-      bookingSent: 'Buchung gesendet',
-      bookingSentText1: 'Deine Anzahlung wurde erfolgreich bezahlt.',
-      bookingSentText2: 'Jetzt kann der Anbieter deinen Termin prüfen und bestätigen.',
-      selectedProcedures: 'Ausgewählte Behandlungen',
-      totalDuration: 'Gesamtdauer',
-      totalPrice: 'Gesamtpreis',
-      address: 'Adresse',
-      phone: 'Telefon',
-      email: 'Email',
-      social: 'Soziales Netzwerk',
-      writeToSeller: 'Dem Anbieter schreiben',
-      callSeller: 'Anbieter anrufen',
-      goHome: 'Zur Startseite',
-      buildRoute: 'Route planen',
-      bookingDetails: 'Buchungsdetails',
-      specialistContacts: 'Kontakte des Anbieters',
-      contactsVisible: 'Kontakte sind nach der Zahlung sichtbar',
-      routeHint: 'Die genaue Adresse ist nach erfolgreicher Zahlung verfügbar',
-      emptyValue: '—',
-      secured: 'Zahlung bestätigt',
-      depositPaid: 'Bezahlte Anzahlung',
-      paymentMethod: 'Zahlungsmethode',
-      olacash: 'OlaCash',
-      card: 'Bankkarte',
-      paypal: 'PayPal',
-      wallet: 'Apple Pay / Google Pay',
-    };
-  }
-
-  if (language === 'PL') {
-    return {
-      bookingNotFound: 'Nie znaleziono rezerwacji',
-      selectedProceduresNotFound: 'Nie znaleziono wybranych zabiegów',
-      bookingSent: 'Rezerwacja wysłana',
-      bookingSentText1: 'Twój depozyt został poprawnie opłacony.',
-      bookingSentText2: 'Teraz specjalista może sprawdzić i potwierdzić Twoją wizytę.',
-      selectedProcedures: 'Wybrane zabiegi',
-      totalDuration: 'Łączny czas',
-      totalPrice: 'Łączna cena',
-      address: 'Adres',
-      phone: 'Telefon',
-      email: 'Email',
-      social: 'Social media',
-      writeToSeller: 'Napisz do specjalisty',
-      callSeller: 'Zadzwoń do specjalisty',
-      goHome: 'Strona główna',
-      buildRoute: 'Wyznacz trasę',
-      bookingDetails: 'Szczegóły rezerwacji',
-      specialistContacts: 'Kontakty specjalisty',
-      contactsVisible: 'Kontakty są dostępne po płatności',
-      routeHint: 'Dokładny adres jest dostępny po udanej płatności',
-      emptyValue: '—',
-      secured: 'Płatność potwierdzona',
-      depositPaid: 'Opłacony depozyt',
-      paymentMethod: 'Metoda płatności',
-      olacash: 'OlaCash',
-      card: 'Karta bankowa',
-      paypal: 'PayPal',
-      wallet: 'Apple Pay / Google Pay',
-    };
-  }
+  const numericPrice = Number(String(listing.price || '').replace(/[^\d.]/g, ''));
+  const priceFrom = Number.isFinite(numericPrice) && numericPrice > 0 ? numericPrice : 45;
 
   return {
-    bookingNotFound: 'Booking not found',
-    selectedProceduresNotFound: 'Selected procedures not found',
-    bookingSent: 'Booking sent',
-    bookingSentText1: 'Your deposit was paid successfully.',
-    bookingSentText2: 'The seller can now review and confirm your appointment.',
-    selectedProcedures: 'Selected procedures',
-    totalDuration: 'Total duration',
-    totalPrice: 'Total price',
-    address: 'Address',
-    phone: 'Phone',
-    email: 'Email',
-    social: 'Social',
-    writeToSeller: 'Write to seller',
-    callSeller: 'Call seller',
-    goHome: 'Go home',
-    buildRoute: 'Build route',
-    bookingDetails: 'Booking details',
-    specialistContacts: 'Specialist contacts',
-    contactsVisible: 'Contacts are visible after payment',
-    routeHint: 'Exact address is available after successful payment',
-    emptyValue: '—',
-    secured: 'Payment confirmed',
-    depositPaid: 'Deposit paid',
-    paymentMethod: 'Payment method',
-    olacash: 'OlaCash',
-    card: 'Bank card',
-    paypal: 'PayPal',
-    wallet: 'Apple Pay / Google Pay',
+    id: String(listing.id),
+    name: listing.title || text.providerFallback,
+    title: listing.subcategory || text.serviceProviderFallback,
+    city: listing.location || 'London',
+    avatar: gallery[0],
+    services: [
+      {
+        slug: 'main-service',
+        title: listing.subcategory || listing.title || text.serviceFallback,
+        duration: listing.hours || '1h',
+        price: priceFrom,
+        image: gallery[0],
+      },
+      {
+        slug: 'premium-service',
+        title: text.premiumOption,
+        duration: '2h',
+        price: priceFrom + 20,
+        image: gallery[1] || gallery[0],
+      },
+    ],
   };
-}
-
-function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange') {
-  if (kind === 'green') return { background: '#eef9f1', color: '#2fa35a' };
-  if (kind === 'blue') return { background: '#eef4ff', color: '#2f7cf6' };
-  if (kind === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
-  return { background: '#fff5e8', color: '#d68612' };
-}
-
-function normalizePaymentMethod(value: string | null): PaymentMethod {
-  if (value === 'olacash') return 'olacash';
-  if (value === 'paypal') return 'paypal';
-  if (value === 'wallet') return 'wallet';
-  return 'card';
 }
 
 export default function BookingConfirmedPage() {
@@ -269,7 +385,7 @@ export default function BookingConfirmedPage() {
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
 
   const text = useMemo(() => getTexts(language), [language]);
-  const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
+  const id = String(params.id);
 
   const servicesParam = searchParams.get('services') || '';
   const date = searchParams.get('date') || '';
@@ -283,19 +399,51 @@ export default function BookingConfirmedPage() {
   const paymentMethodLabel = text[paymentMethod];
 
   useEffect(() => {
-    setLanguage(getSavedLanguage());
+    const syncLanguage = () => {
+      setLanguage(getSavedLanguage());
+    };
+
+    syncLanguage();
 
     const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
 
+    window.addEventListener('focus', syncLanguage);
+    window.addEventListener('pageshow', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
+
     return () => {
       unsubLanguage();
+      window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('pageshow', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
     };
   }, []);
 
+  const master = useMemo<MasterLike | null>(() => {
+    const builtInMaster = getMasterById(id) as unknown as MasterLike | null;
+    if (builtInMaster) return builtInMaster;
+
+    const listings = getListings() as ListingLike[];
+    const listingIndex = listings.findIndex((item) => String(item.id) === id);
+
+    if (listingIndex !== -1) {
+      return listingToMasterShape(listings[listingIndex], listingIndex, text);
+    }
+
+    const fallbackMaster = (getAllMasters() as any[]).find((item: any) => String(item.id) === id);
+    if (fallbackMaster) return fallbackMaster as MasterLike;
+
+    return null;
+  }, [id, text]);
+
   if (!master) {
-    return <main style={{ padding: 24 }}>{text.bookingNotFound}</main>;
+    return (
+      <main style={{ padding: 24, fontFamily: 'Arial, sans-serif', color: BRAND.navy }}>
+        {text.bookingNotFound}
+      </main>
+    );
   }
 
   const selectedServiceSlugs = servicesParam
@@ -308,7 +456,11 @@ export default function BookingConfirmedPage() {
   );
 
   if (!selectedItems.length) {
-    return <main style={{ padding: 24 }}>{text.selectedProceduresNotFound}</main>;
+    return (
+      <main style={{ padding: 24, fontFamily: 'Arial, sans-serif', color: BRAND.navy }}>
+        {text.selectedProceduresNotFound}
+      </main>
+    );
   }
 
   const totalPrice = selectedItems.reduce((sum, item) => sum + item.price, 0);
@@ -317,37 +469,87 @@ export default function BookingConfirmedPage() {
     0
   );
 
-  const addressValue = master.address || text.emptyValue;
-  const phoneValue = master.phone || text.emptyValue;
-  const emailValue = master.email || text.emptyValue;
-  const socialValue = master.social || text.emptyValue;
+  const primaryService = selectedItems[0];
 
   return (
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
-        padding: '20px 16px 40px',
+        background: '#ffffff',
         fontFamily: 'Arial, sans-serif',
-        color: '#17130f',
+        color: BRAND.navy,
+        paddingBottom: 34,
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginTop: 10 }}>
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 18px 34px' }}>
+        <header
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '46px 1fr 46px',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => router.back()}
+            style={{
+              width: 46,
+              height: 46,
+              border: 0,
+              background: 'transparent',
+              fontSize: 38,
+              lineHeight: 1,
+              color: BRAND.navy,
+              cursor: 'pointer',
+            }}
+          >
+            ←
+          </button>
+
+          <div style={{ textAlign: 'center' }}>
+            <OlamepLogo />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => router.push('/messages')}
+            style={{
+              width: 46,
+              height: 46,
+              border: 0,
+              background: 'transparent',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <MessageIcon />
+          </button>
+        </header>
+
+        <section
+          style={{
+            marginTop: 26,
+            textAlign: 'center',
+          }}
+        >
           <div
             style={{
-              width: 112,
-              height: 112,
+              width: 96,
+              height: 96,
               borderRadius: 999,
-              background: 'linear-gradient(180deg, #2fa35a 0%, #238247 100%)',
-              color: '#fff',
+              background: BRAND.green,
+              color: '#ffffff',
               margin: '0 auto',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 62,
+              fontSize: 56,
               fontWeight: 900,
-              boxShadow: '0 16px 30px rgba(47,163,90,0.22)',
+              boxShadow: '0 14px 28px rgba(33,184,75,0.22)',
             }}
           >
             ✓
@@ -355,12 +557,13 @@ export default function BookingConfirmedPage() {
 
           <h1
             style={{
-              fontSize: 36,
-              lineHeight: 1.05,
-              marginTop: 22,
+              fontSize: 40,
+              lineHeight: 1.03,
+              marginTop: 20,
               marginBottom: 0,
               fontWeight: 900,
-              color: '#17130f',
+              letterSpacing: '-1.5px',
+              color: BRAND.navy,
             }}
           >
             {text.bookingSent}
@@ -368,168 +571,151 @@ export default function BookingConfirmedPage() {
 
           <p
             style={{
-              color: '#6f655b',
+              color: '#515866',
               fontSize: 17,
-              marginTop: 14,
-              lineHeight: 1.6,
-              fontWeight: 700,
+              marginTop: 12,
+              lineHeight: 1.5,
+              fontWeight: 600,
             }}
           >
             {text.bookingSentText1}
             <br />
             {text.bookingSentText2}
           </p>
+        </section>
 
-          <div
-            style={{
-              marginTop: 14,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              borderRadius: 999,
-              padding: '10px 14px',
-              ...badgeStyle('green'),
-              fontSize: 13,
-              fontWeight: 900,
-            }}
-          >
-            <span>🛡️</span>
-            <span>{text.secured}</span>
-          </div>
-        </div>
-
-        <div
+        <section
           style={{
-            marginTop: 26,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+            marginTop: 22,
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 14,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.08)',
           }}
         >
           <div
             style={{
-              fontSize: 22,
-              fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
+              display: 'grid',
+              gridTemplateColumns: '96px 1fr auto',
+              gap: 12,
+              alignItems: 'center',
             }}
           >
-            {text.bookingDetails}
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 10,
-              marginBottom: 14,
-            }}
-          >
-            <div
+            <img
+              src={primaryService.image || master.avatar}
+              alt={primaryService.title}
               style={{
-                ...badgeStyle('blue'),
-                borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 13,
-                fontWeight: 900,
+                width: 96,
+                height: 96,
+                borderRadius: 14,
+                objectFit: 'cover',
+                display: 'block',
               }}
-            >
-              📅 {date}
-            </div>
+            />
 
-            <div
-              style={{
-                ...badgeStyle('orange'),
-                borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 13,
-                fontWeight: 900,
-              }}
-            >
-              🕒 {time}
-            </div>
-
-            <div
-              style={{
-                ...badgeStyle('green'),
-                borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 13,
-                fontWeight: 900,
-              }}
-            >
-              💰 {text.depositPaid}: {formatDisplayPrice(safeDepositAmount)}
-            </div>
-
-            <div
-              style={{
-                ...badgeStyle(paymentMethod === 'olacash' ? 'green' : 'pink'),
-                borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 13,
-                fontWeight: 900,
-              }}
-            >
-              {paymentMethod === 'olacash' ? '🟢' : '💳'} {text.paymentMethod}: {paymentMethodLabel}
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {selectedItems.map((item) => (
+            <div style={{ minWidth: 0 }}>
               <div
-                key={item.slug}
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '72px 1fr',
-                  gap: 12,
-                  alignItems: 'center',
-                  padding: 10,
-                  borderRadius: 22,
-                  background: '#fcfaf6',
-                  border: '1px solid #f1e8dc',
+                  fontSize: 21,
+                  lineHeight: 1.08,
+                  fontWeight: 900,
+                  color: BRAND.navy,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  style={{
-                    width: 72,
-                    height: 72,
-                    objectFit: 'cover',
-                    borderRadius: 16,
-                    display: 'block',
-                  }}
-                />
-
-                <div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
-                    {item.title}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 6,
-                      color: '#6e655d',
-                      fontSize: 14,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {item.duration}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 6,
-                      fontWeight: 900,
-                      fontSize: 16,
-                      color: '#17130f',
-                    }}
-                  >
-                    {formatDisplayPrice(item.price)}
-                  </div>
-                </div>
+                {master.name}
               </div>
-            ))}
+
+              <div
+                style={{
+                  marginTop: 6,
+                  color: '#4f5663',
+                  fontSize: 16,
+                  lineHeight: 1.25,
+                  fontWeight: 500,
+                }}
+              >
+                {primaryService.title}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 9,
+                  flexWrap: 'wrap',
+                  color: BRAND.blue,
+                  fontSize: 14,
+                  fontWeight: 800,
+                }}
+              >
+                <span>📅 {date}</span>
+                <span style={{ color: '#c8cdd7' }}>|</span>
+                <span>🕒 {time}</span>
+                <span style={{ color: '#c8cdd7' }}>|</span>
+                <span>⏱ {formatMinutes(totalMinutes, language)}</span>
+              </div>
+            </div>
+
+            <div
+              style={{
+                fontSize: 24,
+                fontWeight: 900,
+                color: BRAND.navy,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {formatDisplayPrice(totalPrice)}
+            </div>
+          </div>
+        </section>
+
+        <section
+          style={{
+            marginTop: 18,
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 14,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
+          }}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '52px 1fr',
+              gap: 12,
+              alignItems: 'center',
+            }}
+          >
+            <SmallIcon icon="⏳" color={BRAND.blue} />
+
+            <div>
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: BRAND.navy,
+                }}
+              >
+                {text.waitingConfirmation}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 14,
+                  lineHeight: 1.45,
+                  color: '#515866',
+                  fontWeight: 700,
+                }}
+              >
+                {text.waitingText}
+              </div>
+            </div>
           </div>
 
           <div
@@ -537,75 +723,118 @@ export default function BookingConfirmedPage() {
               marginTop: 14,
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
-              gap: 12,
+              border: '1.5px solid #d9dee8',
+              borderRadius: 18,
+              overflow: 'hidden',
             }}
           >
-            <div
-              style={{
-                background: '#f7f1e8',
-                borderRadius: 20,
-                padding: 14,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 13,
-                  color: '#6c645c',
-                  fontWeight: 800,
-                }}
-              >
-                {text.totalDuration}
+            <div style={{ padding: 14 }}>
+              <div style={{ fontSize: 13, color: '#6f7582', fontWeight: 800 }}>
+                {text.depositPaid}
               </div>
               <div
                 style={{
-                  fontSize: 24,
+                  marginTop: 3,
+                  fontSize: 27,
+                  color: BRAND.navy,
                   fontWeight: 900,
-                  marginTop: 6,
-                  color: '#17130f',
                 }}
               >
-                {formatMinutes(totalMinutes, language)}
+                {formatDisplayPrice(safeDepositAmount)}
               </div>
             </div>
 
             <div
               style={{
-                background: '#f7f1e8',
-                borderRadius: 20,
                 padding: 14,
+                borderLeft: '1.5px solid #d9dee8',
+                background: '#f5f7fb',
               }}
             >
-              <div
-                style={{
-                  fontSize: 13,
-                  color: '#6c645c',
-                  fontWeight: 800,
-                }}
-              >
-                {text.totalPrice}
+              <div style={{ fontSize: 13, color: '#6f7582', fontWeight: 800 }}>
+                {text.paymentMethod}
               </div>
               <div
                 style={{
-                  fontSize: 24,
+                  marginTop: 4,
+                  fontSize: 16,
+                  lineHeight: 1.3,
+                  color: paymentMethod === 'olacash' ? BRAND.green : BRAND.blue,
                   fontWeight: 900,
-                  marginTop: 6,
-                  color: '#17130f',
                 }}
               >
-                {formatDisplayPrice(totalPrice)}
+                {paymentMethodLabel}
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div
+        <section
           style={{
             marginTop: 18,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 14,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 24,
+              lineHeight: 1.1,
+              fontWeight: 900,
+              color: BRAND.navy,
+              marginBottom: 14,
+            }}
+          >
+            {text.bookingDetails}
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gap: 10,
+              color: '#515866',
+              fontSize: 14,
+              fontWeight: 700,
+            }}
+          >
+            <div>
+              {text.date}: <span style={{ color: BRAND.blue, fontWeight: 900 }}>{date}</span>
+            </div>
+            <div>
+              {text.time}: <span style={{ color: BRAND.blue, fontWeight: 900 }}>{time}</span>
+            </div>
+            <div>
+              {text.status}:{' '}
+              <span style={{ color: BRAND.green, fontWeight: 900 }}>
+                {text.waitingConfirmation}
+              </span>
+            </div>
+            <div>
+              {text.totalDuration}:{' '}
+              <span style={{ color: BRAND.navy, fontWeight: 900 }}>
+                {formatMinutes(totalMinutes, language)}
+              </span>
+            </div>
+            <div>
+              {text.totalPrice}:{' '}
+              <span style={{ color: BRAND.navy, fontWeight: 900 }}>
+                {formatDisplayPrice(totalPrice)}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section
+          style={{
+            marginTop: 18,
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 14,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
           }}
         >
           <div
@@ -618,18 +847,14 @@ export default function BookingConfirmedPage() {
             }}
           >
             <img
-              src={
-                master.avatar ||
-                'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80'
-              }
+              src={master.avatar || primaryService.image}
               alt={master.name}
               style={{
                 width: 72,
                 height: 72,
-                borderRadius: 22,
+                borderRadius: 18,
                 objectFit: 'cover',
                 display: 'block',
-                boxShadow: '0 10px 22px rgba(44, 23, 10, 0.10)',
               }}
             />
 
@@ -638,7 +863,7 @@ export default function BookingConfirmedPage() {
                 style={{
                   fontSize: 22,
                   fontWeight: 900,
-                  color: '#17130f',
+                  color: BRAND.navy,
                 }}
               >
                 {master.name}
@@ -652,88 +877,57 @@ export default function BookingConfirmedPage() {
                   gap: 8,
                   borderRadius: 999,
                   padding: '8px 12px',
-                  ...badgeStyle('pink'),
+                  background: '#edf9ef',
+                  color: BRAND.green,
                   fontSize: 12,
                   fontWeight: 900,
                 }}
               >
-                <span>📍</span>
-                <span>{text.contactsVisible}</span>
+                💬 {text.chatAvailable}
               </div>
             </div>
           </div>
 
           <div
             style={{
-              fontSize: 20,
+              fontSize: 24,
+              lineHeight: 1.1,
               fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
+              color: BRAND.navy,
+              marginBottom: 14,
             }}
           >
             {text.specialistContacts}
           </div>
 
-          <div
-            style={{
-              display: 'grid',
-              gap: 10,
-            }}
-          >
+          <div style={{ display: 'grid', gap: 10 }}>
             {[
-              { label: text.address, value: addressValue, icon: '📍' },
-              { label: text.phone, value: phoneValue, icon: '📞' },
-              { label: text.email, value: emailValue, icon: '✉️' },
-              { label: text.social, value: socialValue, icon: '💬' },
-            ].map((item, index) => (
+              { label: text.address, value: text.locked, icon: '📍', color: BRAND.red },
+              { label: text.phone, value: text.locked, icon: '☎', color: BRAND.green },
+              { label: text.email, value: text.locked, icon: '✉', color: BRAND.blue },
+              { label: text.social, value: text.locked, icon: '💬', color: BRAND.pink },
+            ].map((item) => (
               <div
-                key={`${item.label}-${index}`}
+                key={item.label}
                 style={{
-                  borderRadius: 20,
-                  background: '#fcfaf6',
-                  border: '1px solid #f1e8dc',
-                  padding: '14px 14px',
+                  borderRadius: 16,
+                  background: '#f5f7fb',
+                  border: '1.5px solid #d8dde8',
+                  padding: '12px 12px',
                   display: 'grid',
-                  gridTemplateColumns: '36px 1fr',
+                  gridTemplateColumns: '44px 1fr',
                   gap: 12,
-                  alignItems: 'start',
+                  alignItems: 'center',
+                  opacity: 0.72,
                 }}
               >
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 12,
-                    background:
-                      index === 0
-                        ? '#fff5e8'
-                        : index === 1
-                        ? '#eef9f1'
-                        : index === 2
-                        ? '#eef4ff'
-                        : '#fff1f7',
-                    color:
-                      index === 0
-                        ? '#d68612'
-                        : index === 1
-                        ? '#2fa35a'
-                        : index === 2
-                        ? '#2f7cf6'
-                        : '#ff4fa0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 18,
-                  }}
-                >
-                  {item.icon}
-                </div>
+                <SmallIcon icon={item.icon} color={item.color} />
 
                 <div>
                   <div
                     style={{
                       fontSize: 12,
-                      color: '#8b8075',
+                      color: '#6f7582',
                       fontWeight: 800,
                     }}
                   >
@@ -743,13 +937,12 @@ export default function BookingConfirmedPage() {
                     style={{
                       marginTop: 4,
                       fontSize: 15,
-                      lineHeight: 1.5,
-                      color: '#17130f',
-                      fontWeight: 800,
-                      wordBreak: 'break-word',
+                      lineHeight: 1.4,
+                      color: BRAND.navy,
+                      fontWeight: 900,
                     }}
                   >
-                    {item.value}
+                    🔒 {item.value}
                   </div>
                 </div>
               </div>
@@ -759,82 +952,102 @@ export default function BookingConfirmedPage() {
           <div
             style={{
               marginTop: 12,
-              borderRadius: 18,
-              background: '#eef4ff',
+              borderRadius: 16,
+              background: '#f5f7fb',
               padding: '12px 14px',
               fontSize: 13,
-              color: '#2f5dc4',
-              fontWeight: 800,
+              color: BRAND.blue,
+              fontWeight: 900,
+              lineHeight: 1.45,
             }}
           >
-            {text.routeHint}
+            {text.routeLocked}
           </div>
-        </div>
+        </section>
 
         <div
           style={{
-            display: 'flex',
-            flexDirection: 'column',
+            display: 'grid',
             gap: 12,
             marginTop: 20,
           }}
         >
           <button
             type="button"
+            onClick={() => router.push(`/messages?masterId=${master.id}`)}
             style={{
-              border: 'none',
-              background: 'linear-gradient(180deg, #2fa35a 0%, #238247 100%)',
-              color: '#fff',
-              borderRadius: 22,
+              border: `2px solid ${BRAND.border}`,
+              background: BRAND.green,
+              color: '#ffffff',
+              borderRadius: 18,
               padding: '18px 22px',
               fontWeight: 900,
-              fontSize: 17,
+              fontSize: 18,
               cursor: 'pointer',
-              boxShadow: '0 12px 24px rgba(47,163,90,0.20)',
             }}
           >
-            {text.writeToSeller}
+            💬 {text.writeToSeller}
           </button>
 
           <button
             type="button"
+            disabled
             style={{
-              border: '1px solid #dce8ff',
-              background: '#eef4ff',
-              color: '#2f7cf6',
-              borderRadius: 22,
+              border: '1.5px solid #d8dde8',
+              background: '#f3f4f6',
+              color: '#9ca3af',
+              borderRadius: 18,
               padding: '18px 22px',
               fontWeight: 900,
               fontSize: 17,
-              cursor: 'pointer',
+              cursor: 'not-allowed',
             }}
           >
-            {text.buildRoute}
+            📍 {text.buildRoute}
           </button>
 
           <button
             type="button"
+            disabled
             style={{
-              border: '1px solid #d8eddc',
-              background: '#eef9f1',
-              color: '#24693b',
-              borderRadius: 22,
+              border: '1.5px solid #d8dde8',
+              background: '#f3f4f6',
+              color: '#9ca3af',
+              borderRadius: 18,
+              padding: '18px 22px',
+              fontWeight: 900,
+              fontSize: 17,
+              cursor: 'not-allowed',
+            }}
+          >
+            ☎ {text.callSeller}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.push('/bookings')}
+            style={{
+              border: `2px solid ${BRAND.border}`,
+              background: '#ffffff',
+              color: BRAND.navy,
+              borderRadius: 18,
               padding: '18px 22px',
               fontWeight: 900,
               fontSize: 17,
               cursor: 'pointer',
             }}
           >
-            {text.callSeller}
+            {text.myBookings}
           </button>
 
           <button
+            type="button"
             onClick={() => router.push('/')}
             style={{
-              border: '1px solid #d9d0c4',
-              background: '#fff',
-              color: '#2b231d',
-              borderRadius: 22,
+              border: '1.5px solid #d8dde8',
+              background: '#ffffff',
+              color: BRAND.navy,
+              borderRadius: 18,
               padding: '18px 22px',
               fontWeight: 900,
               fontSize: 17,
