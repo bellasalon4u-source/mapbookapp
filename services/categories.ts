@@ -3,6 +3,7 @@ export type CategoryKey =
   | 'beauty'
   | 'barber'
   | 'wellness'
+  | 'food'
   | 'home'
   | 'repairs'
   | 'tech'
@@ -14,7 +15,8 @@ export type CategoryKey =
   | 'education'
   | 'events'
   | 'activities'
-  | 'creative';
+  | 'creative'
+  | 'other';
 
 export type AppCategory = {
   id: CategoryKey;
@@ -45,6 +47,9 @@ export const categories: AppCategory[] = [
       'Makeup',
       'Skincare',
       'Aesthetics',
+      'Piercing',
+      'Tattoo',
+      'Tattoo Removal',
       'Other',
     ],
   },
@@ -75,6 +80,24 @@ export const categories: AppCategory[] = [
       'Recovery',
       'Holistic Care',
       'Therapy Support',
+      'Other',
+    ],
+  },
+  {
+    id: 'food',
+    label: 'Food & Restaurants',
+    shortLabel: 'Food',
+    icon: '🍽️',
+    image: '/ui/categories/food.png',
+    subcategories: [
+      'Private Chef',
+      'Chef at Home',
+      'Restaurant Table Booking',
+      'Bar Table Booking',
+      'Catering',
+      'Birthday Dinner',
+      'Romantic Dinner',
+      'Event Food',
       'Other',
     ],
   },
@@ -228,6 +251,7 @@ export const categories: AppCategory[] = [
       'DJ & Music',
       'Event Makeup',
       'Catering Help',
+      'Private Chef',
       'Other',
     ],
   },
@@ -259,6 +283,17 @@ export const categories: AppCategory[] = [
       'Branding',
       'Social Media Help',
       'Other',
+    ],
+  },
+  {
+    id: 'other',
+    label: 'Other',
+    icon: '✨',
+    image: '/ui/categories/other.png',
+    subcategories: [
+      'Other Service',
+      'Custom Request',
+      'Not Listed',
     ],
   },
 ];
