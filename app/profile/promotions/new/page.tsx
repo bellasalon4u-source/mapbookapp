@@ -106,6 +106,9 @@ type PromotionTexts = {
   paymentMethodsHint: string;
   selectedPaymentMethod: string;
   confirmPayment: string;
+  required: string;
+  maxPhotos: string;
+  adWillGoLive: string;
 };
 
 type PhotoItem = {
@@ -125,6 +128,7 @@ type VideoItem = {
 const MIN_SCALE = 1;
 const MAX_SCALE = 3;
 const MAX_VIDEO_SECONDS = 5;
+const MAX_PHOTOS = 9;
 
 const enTexts: PromotionTexts = {
   pageTitle: 'Add advertisement',
@@ -166,15 +170,15 @@ const enTexts: PromotionTexts = {
   summary: 'Ad summary',
   total: 'Total',
   continueToPayment: 'Continue to payment',
-  done: 'Done',
+  done: 'Payment confirmed. Advertisement will go live after payment.',
   enterCategory: 'Choose category',
   enterSubcategory: 'Choose subcategory',
   enterTitle: 'Enter ad title',
   enterDescription: 'Enter ad description',
   addPhotoAlert: 'Add at least one photo or one mini video',
   close: 'Close',
-  paymentHint: 'Publication goes live only after payment.',
-  firstAdBonus: 'First ad can be free for 7 days for new users',
+  paymentHint: 'Publication goes live only after payment confirmation.',
+  firstAdBonus: 'First ad can be free for 7 days for new users after confirmation.',
   photosCount: 'Photos',
   adjustPhoto: 'Adjust photo',
   photoEditorHint: 'Move with one finger. Zoom with slider.',
@@ -198,6 +202,9 @@ const enTexts: PromotionTexts = {
   paymentMethodsHint: 'Select one method to continue payment',
   selectedPaymentMethod: 'Selected method',
   confirmPayment: 'Pay now',
+  required: 'Required',
+  maxPhotos: 'JPG / PNG / WEBP · max 9',
+  adWillGoLive: 'Your ad will be published only after payment.',
 };
 
 const textByLanguage: Record<AppLanguage, PromotionTexts> = {
@@ -243,15 +250,16 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     summary: 'Итог рекламы',
     total: 'Итого',
     continueToPayment: 'Перейти к оплате',
-    done: 'Готово',
+    done: 'Оплата подтверждена. Реклама будет опубликована после оплаты.',
     enterCategory: 'Выберите категорию',
     enterSubcategory: 'Выберите подкатегорию',
     enterTitle: 'Введите название рекламы',
     enterDescription: 'Введите описание рекламы',
     addPhotoAlert: 'Добавьте хотя бы одно фото или одно мини видео',
     close: 'Закрыть',
-    paymentHint: 'Публикация выйдет только после оплаты.',
-    firstAdBonus: 'Первая реклама может быть бесплатной на 7 дней для новых пользователей',
+    paymentHint: 'Публикация выйдет только после подтверждения оплаты.',
+    firstAdBonus:
+      'Первая реклама может быть бесплатной на 7 дней для новых пользователей после подтверждения.',
     photosCount: 'Фото',
     adjustPhoto: 'Настроить фото',
     photoEditorHint: 'Перемещай одним пальцем. Увеличивай ползунком.',
@@ -275,37 +283,10 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     paymentMethodsHint: 'Выберите один способ для продолжения оплаты',
     selectedPaymentMethod: 'Выбранный способ',
     confirmPayment: 'Оплатить',
+    required: 'Обязательно',
+    maxPhotos: 'JPG / PNG / WEBP · максимум 9',
+    adWillGoLive: 'Реклама будет опубликована только после оплаты.',
   },
-  ES: {
-    ...enTexts,
-    pageTitle: 'Añadir publicidad',
-    pageSubtitle: 'Crea un anuncio llamativo para conseguir más vistas y clientes.',
-    category: 'Categoría',
-    subcategory: 'Subcategoría',
-    chooseCategory: 'Elegir categoría',
-    chooseSubcategory: 'Elegir subcategoría',
-    title: 'Título del anuncio',
-    titlePlaceholder: 'Introduce el título del anuncio',
-    description: 'Descripción',
-    descriptionPlaceholder: 'Introduce la descripción del anuncio...',
-    badgeText: 'Texto promocional',
-    badgeNone: 'Ninguno',
-    badgeDiscount: 'Descuento',
-    discountValue: 'Valor del descuento',
-    visibility: 'Visibilidad del anuncio',
-    radius: 'Radio',
-    perDay: 'por día',
-    duration: 'Duración',
-    days: 'Días',
-    photo: 'Fotos',
-    addPhoto: 'Añadir fotos',
-    continueToPayment: 'Continuar al pago',
-    choosePaymentMethod: 'Elegir método de pago',
-    confirmPayment: 'Pagar ahora',
-  },
-  CZ: enTexts,
-  DE: enTexts,
-  PL: enTexts,
   UA: {
     ...enTexts,
     pageTitle: 'Додати рекламу',
@@ -326,163 +307,375 @@ const textByLanguage: Record<AppLanguage, PromotionTexts> = {
     radius: 'Радіус',
     perDay: 'на день',
     duration: 'Тривалість реклами',
+    durationHint: 'Від 10 до 30 днів',
     days: 'Дні',
     photo: 'Фото',
+    photoHint: 'Додайте одне або кілька фото для реклами.',
     addPhoto: 'Додати фото',
+    photoSource: 'Джерело файлу',
+    gallery: 'Галерея',
+    camera: 'Камера',
+    files: 'Файли',
+    layout: 'Вигляд показу',
+    layoutSingle: '1 фото',
+    layoutGrid: 'Сітка 2–9',
+    summary: 'Підсумок реклами',
+    total: 'Разом',
     continueToPayment: 'Перейти до оплати',
+    done: 'Оплата підтверджена. Реклама буде опублікована після оплати.',
     choosePaymentMethod: 'Оберіть спосіб оплати',
+    paymentMethodsHint: 'Оберіть один спосіб для продовження оплати',
     confirmPayment: 'Оплатити',
+    paymentHint: 'Публікація буде доступна тільки після підтвердження оплати.',
+    firstAdBonus:
+      'Перша реклама може бути безкоштовною на 7 днів для нових користувачів після підтвердження.',
+    required: 'Обовʼязково',
+    adWillGoLive: 'Реклама буде опублікована тільки після оплати.',
   },
-  IT: enTexts,
-  FR: enTexts,
-  AR: enTexts,
+  ES: {
+    ...enTexts,
+    pageTitle: 'Añadir publicidad',
+    pageSubtitle: 'Crea un anuncio llamativo para conseguir más vistas y clientes.',
+    category: 'Categoría',
+    subcategory: 'Subcategoría',
+    chooseCategory: 'Elegir categoría',
+    chooseSubcategory: 'Elegir subcategoría',
+    title: 'Título del anuncio',
+    titlePlaceholder: 'Introduce el título del anuncio',
+    description: 'Descripción',
+    descriptionPlaceholder: 'Introduce la descripción del anuncio...',
+    badgeText: 'Texto promocional',
+    badgeNone: 'Ninguno',
+    badgeDiscount: 'Descuento',
+    discountValue: 'Valor del descuento',
+    visibility: 'Visibilidad del anuncio',
+    visibilityHint: 'El anuncio se mostrará dentro del radio seleccionado.',
+    radius: 'Radio',
+    perDay: 'por día',
+    duration: 'Duración',
+    durationHint: 'De 10 a 30 días',
+    days: 'Días',
+    photo: 'Fotos',
+    photoHint: 'Añade una o varias fotos para el anuncio.',
+    addPhoto: 'Añadir fotos',
+    photoSource: 'Fuente del archivo',
+    gallery: 'Galería',
+    camera: 'Cámara',
+    files: 'Archivos',
+    layout: 'Diseño',
+    layoutSingle: '1 foto',
+    layoutGrid: 'Cuadrícula 2–9',
+    summary: 'Resumen del anuncio',
+    total: 'Total',
+    continueToPayment: 'Continuar al pago',
+    done: 'Pago confirmado. El anuncio se publicará después del pago.',
+    choosePaymentMethod: 'Elegir método de pago',
+    confirmPayment: 'Pagar ahora',
+    paymentHint: 'La publicación se activa solo después del pago.',
+    firstAdBonus:
+      'El primer anuncio puede ser gratis durante 7 días para nuevos usuarios tras la confirmación.',
+    required: 'Obligatorio',
+    adWillGoLive: 'Tu anuncio se publicará solo después del pago.',
+  },
+  CZ: {
+    ...enTexts,
+    pageTitle: 'Přidat reklamu',
+    pageSubtitle: 'Vytvořte výraznou reklamu pro více zobrazení a klientů.',
+    category: 'Kategorie',
+    subcategory: 'Podkategorie',
+    chooseCategory: 'Vyberte kategorii',
+    chooseSubcategory: 'Vyberte podkategorii',
+    title: 'Název reklamy',
+    titlePlaceholder: 'Zadejte název reklamy',
+    description: 'Popis',
+    descriptionPlaceholder: 'Zadejte popis reklamy...',
+    badgeText: 'Štítek / promo text',
+    badgeNone: 'Žádný',
+    badgeDiscount: 'Sleva',
+    visibility: 'Viditelnost reklamy',
+    visibilityHint: 'Reklama se zobrazí ve vybraném okruhu od místa hledání.',
+    radius: 'Okruh',
+    perDay: 'za den',
+    duration: 'Délka reklamy',
+    durationHint: 'Od 10 do 30 dnů',
+    days: 'Dny',
+    photo: 'Fotky',
+    photoHint: 'Přidejte jednu nebo více fotek pro reklamu.',
+    addPhoto: 'Přidat fotky',
+    photoSource: 'Zdroj souboru',
+    gallery: 'Galerie',
+    camera: 'Kamera',
+    files: 'Soubory',
+    layout: 'Zobrazení',
+    layoutSingle: '1 fotka',
+    layoutGrid: 'Mřížka 2–9',
+    summary: 'Shrnutí reklamy',
+    total: 'Celkem',
+    continueToPayment: 'Pokračovat k platbě',
+    done: 'Platba potvrzena. Reklama bude zveřejněna po platbě.',
+    choosePaymentMethod: 'Vyberte způsob platby',
+    confirmPayment: 'Zaplatit',
+    paymentHint: 'Reklama se zveřejní až po potvrzení platby.',
+    firstAdBonus:
+      'První reklama může být pro nové uživatele zdarma na 7 dní po potvrzení.',
+    required: 'Povinné',
+    adWillGoLive: 'Reklama bude zveřejněna pouze po platbě.',
+  },
+  DE: {
+    ...enTexts,
+    pageTitle: 'Anzeige hinzufügen',
+    pageSubtitle: 'Erstelle eine auffällige Anzeige für mehr Aufrufe und Kunden.',
+    category: 'Kategorie',
+    subcategory: 'Unterkategorie',
+    chooseCategory: 'Kategorie wählen',
+    chooseSubcategory: 'Unterkategorie wählen',
+    title: 'Anzeigentitel',
+    titlePlaceholder: 'Anzeigentitel eingeben',
+    description: 'Beschreibung',
+    descriptionPlaceholder: 'Beschreibung eingeben...',
+    badgeText: 'Badge / Promo-Text',
+    badgeNone: 'Keine',
+    badgeDiscount: 'Rabatt',
+    visibility: 'Sichtbarkeit',
+    visibilityHint: 'Die Anzeige wird im ausgewählten Radius angezeigt.',
+    radius: 'Radius',
+    perDay: 'pro Tag',
+    duration: 'Dauer',
+    durationHint: 'Von 10 bis 30 Tagen',
+    days: 'Tage',
+    photo: 'Fotos',
+    photoHint: 'Füge ein oder mehrere Fotos hinzu.',
+    addPhoto: 'Fotos hinzufügen',
+    gallery: 'Galerie',
+    camera: 'Kamera',
+    files: 'Dateien',
+    layout: 'Layout',
+    layoutSingle: '1 Foto',
+    layoutGrid: 'Raster 2–9',
+    summary: 'Zusammenfassung',
+    total: 'Gesamt',
+    continueToPayment: 'Weiter zur Zahlung',
+    done: 'Zahlung bestätigt. Die Anzeige wird nach der Zahlung veröffentlicht.',
+    choosePaymentMethod: 'Zahlungsmethode wählen',
+    confirmPayment: 'Jetzt zahlen',
+    paymentHint: 'Veröffentlichung nur nach Zahlungsbestätigung.',
+    firstAdBonus:
+      'Die erste Anzeige kann für neue Nutzer nach Bestätigung 7 Tage kostenlos sein.',
+    required: 'Pflichtfeld',
+    adWillGoLive: 'Die Anzeige wird erst nach der Zahlung veröffentlicht.',
+  },
+  PL: {
+    ...enTexts,
+    pageTitle: 'Dodaj reklamę',
+    pageSubtitle: 'Stwórz wyraźną reklamę, aby zdobyć więcej wyświetleń i klientów.',
+    category: 'Kategoria',
+    subcategory: 'Podkategoria',
+    chooseCategory: 'Wybierz kategorię',
+    chooseSubcategory: 'Wybierz podkategorię',
+    title: 'Tytuł reklamy',
+    titlePlaceholder: 'Wpisz tytuł reklamy',
+    description: 'Opis',
+    descriptionPlaceholder: 'Wpisz opis reklamy...',
+    badgeText: 'Etykieta / promo',
+    badgeNone: 'Brak',
+    badgeDiscount: 'Zniżka',
+    visibility: 'Widoczność reklamy',
+    radius: 'Promień',
+    perDay: 'za dzień',
+    duration: 'Czas trwania',
+    durationHint: 'Od 10 do 30 dni',
+    days: 'Dni',
+    photo: 'Zdjęcia',
+    addPhoto: 'Dodaj zdjęcia',
+    gallery: 'Galeria',
+    camera: 'Kamera',
+    files: 'Pliki',
+    layout: 'Układ',
+    layoutSingle: '1 zdjęcie',
+    layoutGrid: 'Siatka 2–9',
+    summary: 'Podsumowanie reklamy',
+    total: 'Razem',
+    continueToPayment: 'Przejdź do płatności',
+    done: 'Płatność potwierdzona. Reklama zostanie opublikowana po płatności.',
+    choosePaymentMethod: 'Wybierz metodę płatności',
+    confirmPayment: 'Zapłać',
+    paymentHint: 'Publikacja nastąpi tylko po potwierdzeniu płatności.',
+    required: 'Wymagane',
+    adWillGoLive: 'Reklama zostanie opublikowana tylko po płatności.',
+  },
+  IT: {
+    ...enTexts,
+    pageTitle: 'Aggiungi pubblicità',
+    pageSubtitle: 'Crea un annuncio brillante per ottenere più visite e clienti.',
+    category: 'Categoria',
+    subcategory: 'Sottocategoria',
+    chooseCategory: 'Scegli categoria',
+    chooseSubcategory: 'Scegli sottocategoria',
+    title: 'Titolo annuncio',
+    titlePlaceholder: 'Inserisci il titolo',
+    description: 'Descrizione',
+    descriptionPlaceholder: 'Inserisci descrizione...',
+    badgeText: 'Badge / testo promo',
+    badgeNone: 'Nessuno',
+    badgeDiscount: 'Sconto',
+    visibility: 'Visibilità annuncio',
+    radius: 'Raggio',
+    perDay: 'al giorno',
+    duration: 'Durata',
+    days: 'Giorni',
+    photo: 'Foto',
+    addPhoto: 'Aggiungi foto',
+    gallery: 'Galleria',
+    camera: 'Camera',
+    files: 'File',
+    layout: 'Layout',
+    layoutSingle: '1 foto',
+    layoutGrid: 'Griglia 2–9',
+    summary: 'Riepilogo',
+    total: 'Totale',
+    continueToPayment: 'Continua al pagamento',
+    done: 'Pagamento confermato. L’annuncio sarà pubblicato dopo il pagamento.',
+    choosePaymentMethod: 'Scegli metodo di pagamento',
+    confirmPayment: 'Paga ora',
+    paymentHint: 'Pubblicazione solo dopo conferma del pagamento.',
+    required: 'Obbligatorio',
+    adWillGoLive: 'Il tuo annuncio sarà pubblicato solo dopo il pagamento.',
+  },
+  FR: {
+    ...enTexts,
+    pageTitle: 'Ajouter une publicité',
+    pageSubtitle: 'Créez une publicité visible pour obtenir plus de vues et de clients.',
+    category: 'Catégorie',
+    subcategory: 'Sous-catégorie',
+    chooseCategory: 'Choisir une catégorie',
+    chooseSubcategory: 'Choisir une sous-catégorie',
+    title: 'Titre de la publicité',
+    titlePlaceholder: 'Entrez le titre',
+    description: 'Description',
+    descriptionPlaceholder: 'Entrez la description...',
+    badgeText: 'Badge / texte promo',
+    badgeNone: 'Aucun',
+    badgeDiscount: 'Réduction',
+    visibility: 'Visibilité',
+    radius: 'Rayon',
+    perDay: 'par jour',
+    duration: 'Durée',
+    days: 'Jours',
+    photo: 'Photos',
+    addPhoto: 'Ajouter des photos',
+    gallery: 'Galerie',
+    camera: 'Caméra',
+    files: 'Fichiers',
+    layout: 'Affichage',
+    layoutSingle: '1 photo',
+    layoutGrid: 'Grille 2–9',
+    summary: 'Résumé',
+    total: 'Total',
+    continueToPayment: 'Continuer au paiement',
+    done: 'Paiement confirmé. La publicité sera publiée après le paiement.',
+    choosePaymentMethod: 'Choisir le moyen de paiement',
+    confirmPayment: 'Payer',
+    paymentHint: 'Publication uniquement après confirmation du paiement.',
+    required: 'Obligatoire',
+    adWillGoLive: 'Votre publicité sera publiée uniquement après le paiement.',
+  },
+  AR: {
+    ...enTexts,
+    pageTitle: 'إضافة إعلان',
+    pageSubtitle: 'أنشئ إعلاناً واضحاً للحصول على مشاهدات وعملاء أكثر.',
+    category: 'الفئة',
+    subcategory: 'الفئة الفرعية',
+    chooseCategory: 'اختر الفئة',
+    chooseSubcategory: 'اختر الفئة الفرعية',
+    title: 'عنوان الإعلان',
+    titlePlaceholder: 'أدخل عنوان الإعلان',
+    description: 'الوصف',
+    descriptionPlaceholder: 'أدخل وصف الإعلان...',
+    badgeText: 'شارة / نص ترويجي',
+    badgeNone: 'لا يوجد',
+    badgeDiscount: 'خصم',
+    visibility: 'ظهور الإعلان',
+    radius: 'النطاق',
+    perDay: 'في اليوم',
+    duration: 'مدة الإعلان',
+    days: 'أيام',
+    photo: 'الصور',
+    addPhoto: 'إضافة صور',
+    gallery: 'المعرض',
+    camera: 'الكاميرا',
+    files: 'الملفات',
+    layout: 'طريقة العرض',
+    layoutSingle: 'صورة واحدة',
+    layoutGrid: 'شبكة 2–9',
+    summary: 'ملخص الإعلان',
+    total: 'الإجمالي',
+    continueToPayment: 'المتابعة للدفع',
+    done: 'تم تأكيد الدفع. سيتم نشر الإعلان بعد الدفع.',
+    choosePaymentMethod: 'اختر طريقة الدفع',
+    confirmPayment: 'ادفع الآن',
+    paymentHint: 'يتم النشر فقط بعد تأكيد الدفع.',
+    required: 'مطلوب',
+    adWillGoLive: 'سيتم نشر إعلانك فقط بعد الدفع.',
+  },
 };
 
-const radiusOptionsByLanguage: Record<AppLanguage, RadiusOption[]> = {
-  EN: [
-    { id: '10', label: '10 km', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
-    { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
-    { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
-  ],
-  RU: [
-    { id: '10', label: '10 км', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
-    { id: '50', label: '50 км', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
-    { id: '100', label: '100 км', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
-  ],
-  ES: [
-    { id: '10', label: '10 km', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
-    { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
-    { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
-  ],
-  CZ: [
-    { id: '10', label: '10 km', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
-    { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
-    { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
-  ],
-  DE: [
-    { id: '10', label: '10 km', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
-    { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
-    { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
-  ],
-  PL: [
-    { id: '10', label: '10 km', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
-    { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
-    { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
-  ],
-  UA: [
-    { id: '10', label: '10 км', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
-    { id: '50', label: '50 км', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
-    { id: '100', label: '100 км', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
-  ],
-  IT: [
-    { id: '10', label: '10 km', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
-    { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
-    { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
-  ],
-  FR: [
-    { id: '10', label: '10 km', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
-    { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
-    { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
-  ],
-  AR: [
-    { id: '10', label: '10 km', km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
-    { id: '50', label: '50 km', km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
-    { id: '100', label: '100 km', km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
-  ],
-};
+function getRadiusOptions(language: AppLanguage): RadiusOption[] {
+  const kmLabel = language === 'RU' || language === 'UA' ? 'км' : 'km';
 
-const paymentMethodsByLanguage: Record<AppLanguage, PaymentMethod[]> = {
-  EN: [
+  return [
+    { id: '10', label: `10 ${kmLabel}`, km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
+    { id: '50', label: `50 ${kmLabel}`, km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
+    { id: '100', label: `100 ${kmLabel}`, km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
+  ];
+}
+
+function getPaymentMethods(language: AppLanguage): PaymentMethod[] {
+  if (language === 'RU') {
+    return [
+      { id: 'card', title: 'Банковская карта', subtitle: 'Visa / Mastercard', icon: '💳' },
+      { id: 'wallet', title: 'Баланс Olamep', subtitle: 'Оплата со счёта приложения', icon: '👛' },
+      { id: 'paypal', title: 'PayPal', subtitle: 'Быстрая оплата', icon: '🅿️' },
+      { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Мгновенная оплата', icon: '' },
+      { id: 'google-pay', title: 'Google Pay', subtitle: 'Мгновенная оплата', icon: 'G' },
+      { id: 'crypto', title: 'Криптокошелёк', subtitle: 'USDT / USDC', icon: '₿' },
+      { id: 'bank', title: 'Банковский перевод', subtitle: 'Ручной перевод', icon: '🏦' },
+    ];
+  }
+
+  if (language === 'UA') {
+    return [
+      { id: 'card', title: 'Банківська карта', subtitle: 'Visa / Mastercard', icon: '💳' },
+      { id: 'wallet', title: 'Баланс Olamep', subtitle: 'Оплата з балансу додатка', icon: '👛' },
+      { id: 'paypal', title: 'PayPal', subtitle: 'Швидка оплата', icon: '🅿️' },
+      { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Миттєва оплата', icon: '' },
+      { id: 'google-pay', title: 'Google Pay', subtitle: 'Миттєва оплата', icon: 'G' },
+      { id: 'crypto', title: 'Криптогаманець', subtitle: 'USDT / USDC', icon: '₿' },
+      { id: 'bank', title: 'Банківський переказ', subtitle: 'Ручний переказ', icon: '🏦' },
+    ];
+  }
+
+  if (language === 'ES') {
+    return [
+      { id: 'card', title: 'Tarjeta bancaria', subtitle: 'Visa / Mastercard', icon: '💳' },
+      { id: 'wallet', title: 'Saldo Olamep', subtitle: 'Pagar desde el saldo', icon: '👛' },
+      { id: 'paypal', title: 'PayPal', subtitle: 'Pago rápido', icon: '🅿️' },
+      { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Pago instantáneo', icon: '' },
+      { id: 'google-pay', title: 'Google Pay', subtitle: 'Pago instantáneo', icon: 'G' },
+      { id: 'crypto', title: 'Billetera cripto', subtitle: 'USDT / USDC', icon: '₿' },
+      { id: 'bank', title: 'Transferencia bancaria', subtitle: 'Transferencia manual', icon: '🏦' },
+    ];
+  }
+
+  return [
     { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
-    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
+    { id: 'wallet', title: 'Olamep balance', subtitle: 'Pay from app balance', icon: '👛' },
     { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
     { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
     { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
     { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
     { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
-  ],
-  RU: [
-    { id: 'card', title: 'Банковская карта', subtitle: 'Visa / Mastercard', icon: '💳' },
-    { id: 'wallet', title: 'Баланс MapBook', subtitle: 'Оплата со счёта приложения', icon: '👛' },
-    { id: 'paypal', title: 'PayPal', subtitle: 'Быстрая оплата', icon: '🅿️' },
-    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Мгновенная оплата', icon: '' },
-    { id: 'google-pay', title: 'Google Pay', subtitle: 'Мгновенная оплата', icon: 'G' },
-    { id: 'crypto', title: 'Криптокошелёк', subtitle: 'USDT / USDC', icon: '₿' },
-    { id: 'bank', title: 'Банковский перевод', subtitle: 'Ручной перевод', icon: '🏦' },
-  ],
-  ES: [
-    { id: 'card', title: 'Tarjeta bancaria', subtitle: 'Visa / Mastercard', icon: '💳' },
-    { id: 'wallet', title: 'Saldo MapBook', subtitle: 'Pagar desde el saldo', icon: '👛' },
-    { id: 'paypal', title: 'PayPal', subtitle: 'Pago rápido', icon: '🅿️' },
-    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Pago instantáneo', icon: '' },
-    { id: 'google-pay', title: 'Google Pay', subtitle: 'Pago instantáneo', icon: 'G' },
-    { id: 'crypto', title: 'Billetera cripto', subtitle: 'USDT / USDC', icon: '₿' },
-    { id: 'bank', title: 'Transferencia bancaria', subtitle: 'Transferencia manual', icon: '🏦' },
-  ],
-  CZ: [
-    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
-    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
-    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
-    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
-    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
-    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
-    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
-  ],
-  DE: [
-    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
-    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
-    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
-    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
-    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
-    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
-    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
-  ],
-  PL: [
-    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
-    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
-    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
-    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
-    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
-    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
-    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
-  ],
-  UA: [
-    { id: 'card', title: 'Банківська карта', subtitle: 'Visa / Mastercard', icon: '💳' },
-    { id: 'wallet', title: 'Баланс MapBook', subtitle: 'Оплата з балансу додатка', icon: '👛' },
-    { id: 'paypal', title: 'PayPal', subtitle: 'Швидка оплата', icon: '🅿️' },
-    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Миттєва оплата', icon: '' },
-    { id: 'google-pay', title: 'Google Pay', subtitle: 'Миттєва оплата', icon: 'G' },
-    { id: 'crypto', title: 'Криптогаманець', subtitle: 'USDT / USDC', icon: '₿' },
-    { id: 'bank', title: 'Банківський переказ', subtitle: 'Ручний переказ', icon: '🏦' },
-  ],
-  IT: [
-    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
-    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
-    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
-    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
-    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
-    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
-    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
-  ],
-  FR: [
-    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
-    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
-    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
-    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
-    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
-    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
-    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
-  ],
-  AR: [
-    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
-    { id: 'wallet', title: 'MapBook balance', subtitle: 'Pay from app balance', icon: '👛' },
-    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
-    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
-    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
-    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
-    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
-  ],
-};
+  ];
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -503,1298 +696,44 @@ function getBadgeLabel(mode: BadgeMode, discountValue: string, text: PromotionTe
 }
 
 function translateCategoryLabel(categoryId: string, language: AppLanguage, fallback?: string) {
-  const map: Record<string, Record<AppLanguage, string>> = {
-    beauty: {
-      EN: 'Beauty',
-      ES: 'Belleza',
-      RU: 'Красота',
-      UA: 'Краса',
-      CZ: 'Krása',
-      DE: 'Beauty',
-      IT: 'Beauty',
-      FR: 'Beauté',
-      AR: 'الجمال',
-      PL: 'Uroda',
-    },
-    barber: {
-      EN: 'Barber',
-      ES: 'Barbero',
-      RU: 'Барбер',
-      UA: 'Барбер',
-      CZ: 'Barber',
-      DE: 'Barber',
-      IT: 'Barber',
-      FR: 'Barbier',
-      AR: 'حلاقة',
-      PL: 'Barber',
-    },
-    wellness: {
-      EN: 'Wellness',
-      ES: 'Bienestar',
-      RU: 'Велнес',
-      UA: 'Велнес',
-      CZ: 'Wellness',
-      DE: 'Wellness',
-      IT: 'Benessere',
-      FR: 'Bien-être',
-      AR: 'عافية',
-      PL: 'Wellness',
-    },
-    home: {
-      EN: 'Home',
-      ES: 'Hogar',
-      RU: 'Дом',
-      UA: 'Дім',
-      CZ: 'Domov',
-      DE: 'Zuhause',
-      IT: 'Casa',
-      FR: 'Maison',
-      AR: 'المنزل',
-      PL: 'Dom',
-    },
-    repairs: {
-      EN: 'Repairs',
-      ES: 'Reparaciones',
-      RU: 'Ремонт',
-      UA: 'Ремонт',
-      CZ: 'Opravy',
-      DE: 'Reparaturen',
-      IT: 'Riparazioni',
-      FR: 'Réparations',
-      AR: 'إصلاحات',
-      PL: 'Naprawy',
-    },
-    tech: {
-      EN: 'Tech',
-      ES: 'Tecnología',
-      RU: 'Техника',
-      UA: 'Техніка',
-      CZ: 'Technika',
-      DE: 'Technik',
-      IT: 'Tech',
-      FR: 'Tech',
-      AR: 'تقنية',
-      PL: 'Technika',
-    },
-    fashion: {
-      EN: 'Fashion',
-      ES: 'Moda',
-      RU: 'Мода',
-      UA: 'Мода',
-      CZ: 'Móda',
-      DE: 'Mode',
-      IT: 'Moda',
-      FR: 'Mode',
-      AR: 'موضة',
-      PL: 'Moda',
-    },
-    pets: {
-      EN: 'Pets',
-      ES: 'Mascotas',
-      RU: 'Питомцы',
-      UA: 'Тварини',
-      CZ: 'Mazlíčci',
-      DE: 'Haustiere',
-      IT: 'Animali',
-      FR: 'Animaux',
-      AR: 'حيوانات',
-      PL: 'Zwierzęta',
-    },
-    auto: {
-      EN: 'Auto',
-      ES: 'Auto',
-      RU: 'Авто',
-      UA: 'Авто',
-      CZ: 'Auto',
-      DE: 'Auto',
-      IT: 'Auto',
-      FR: 'Auto',
-      AR: 'سيارات',
-      PL: 'Auto',
-    },
-    moving: {
-      EN: 'Moving',
-      ES: 'Mudanza',
-      RU: 'Переезд',
-      UA: 'Переїзд',
-      CZ: 'Stěhování',
-      DE: 'Umzug',
-      IT: 'Trasloco',
-      FR: 'Déménagement',
-      AR: 'نقل',
-      PL: 'Przeprowadzka',
-    },
-    fitness: {
-      EN: 'Fitness',
-      ES: 'Fitness',
-      RU: 'Фитнес',
-      UA: 'Фітнес',
-      CZ: 'Fitness',
-      DE: 'Fitness',
-      IT: 'Fitness',
-      FR: 'Fitness',
-      AR: 'لياقة',
-      PL: 'Fitness',
-    },
-    education: {
-      EN: 'Education',
-      ES: 'Educación',
-      RU: 'Обучение',
-      UA: 'Навчання',
-      CZ: 'Vzdělání',
-      DE: 'Bildung',
-      IT: 'Formazione',
-      FR: 'Éducation',
-      AR: 'تعليم',
-      PL: 'Edukacja',
-    },
-    events: {
-      EN: 'Events',
-      ES: 'Eventos',
-      RU: 'События',
-      UA: 'Події',
-      CZ: 'Události',
-      DE: 'Events',
-      IT: 'Eventi',
-      FR: 'Événements',
-      AR: 'فعاليات',
-      PL: 'Wydarzenia',
-    },
-    activities: {
-      EN: 'Activities',
-      ES: 'Actividades',
-      RU: 'Активности',
-      UA: 'Активності',
-      CZ: 'Aktivity',
-      DE: 'Aktivitäten',
-      IT: 'Attività',
-      FR: 'Activités',
-      AR: 'أنشطة',
-      PL: 'Aktywności',
-    },
-    creative: {
-      EN: 'Creative',
-      ES: 'Creativo',
-      RU: 'Креатив',
-      UA: 'Креатив',
-      CZ: 'Kreativa',
-      DE: 'Kreativ',
-      IT: 'Creativo',
-      FR: 'Créatif',
-      AR: 'إبداعي',
-      PL: 'Kreatywne',
-    },
+  const map: Record<string, Partial<Record<AppLanguage, string>>> = {
+    beauty: { EN: 'Beauty', RU: 'Красота', UA: 'Краса', ES: 'Belleza', CZ: 'Krása', DE: 'Beauty', PL: 'Uroda', FR: 'Beauté', IT: 'Beauty', AR: 'الجمال' },
+    barber: { EN: 'Barber', RU: 'Барбер', UA: 'Барбер', ES: 'Barbero', CZ: 'Barber', DE: 'Barber', PL: 'Barber', FR: 'Barbier', IT: 'Barber', AR: 'حلاقة' },
+    wellness: { EN: 'Wellness', RU: 'Велнес', UA: 'Велнес', ES: 'Bienestar', CZ: 'Wellness', DE: 'Wellness', PL: 'Wellness', FR: 'Bien-être', IT: 'Benessere', AR: 'عافية' },
+    home: { EN: 'Home', RU: 'Дом', UA: 'Дім', ES: 'Hogar', CZ: 'Domov', DE: 'Zuhause', PL: 'Dom', FR: 'Maison', IT: 'Casa', AR: 'المنزل' },
+    repairs: { EN: 'Repairs', RU: 'Ремонт', UA: 'Ремонт', ES: 'Reparaciones', CZ: 'Opravy', DE: 'Reparaturen', PL: 'Naprawy', FR: 'Réparations', IT: 'Riparazioni', AR: 'إصلاحات' },
+    tech: { EN: 'Tech', RU: 'Техника', UA: 'Техніка', ES: 'Tecnología', CZ: 'Technika', DE: 'Technik', PL: 'Technika', FR: 'Tech', IT: 'Tech', AR: 'تقنية' },
+    fashion: { EN: 'Fashion', RU: 'Мода', UA: 'Мода', ES: 'Moda', CZ: 'Móda', DE: 'Mode', PL: 'Moda', FR: 'Mode', IT: 'Moda', AR: 'موضة' },
+    pets: { EN: 'Pets', RU: 'Питомцы', UA: 'Тварини', ES: 'Mascotas', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęta', FR: 'Animaux', IT: 'Animali', AR: 'حيوانات' },
+    auto: { EN: 'Auto', RU: 'Авто', UA: 'Авто', ES: 'Auto', CZ: 'Auto', DE: 'Auto', PL: 'Auto', FR: 'Auto', IT: 'Auto', AR: 'سيارات' },
+    moving: { EN: 'Moving', RU: 'Переезд', UA: 'Переїзд', ES: 'Mudanza', CZ: 'Stěhování', DE: 'Umzug', PL: 'Przeprowadzka', FR: 'Déménagement', IT: 'Trasloco', AR: 'نقل' },
+    fitness: { EN: 'Fitness', RU: 'Фитнес', UA: 'Фітнес', ES: 'Fitness', CZ: 'Fitness', DE: 'Fitness', PL: 'Fitness', FR: 'Fitness', IT: 'Fitness', AR: 'لياقة' },
+    education: { EN: 'Education', RU: 'Обучение', UA: 'Навчання', ES: 'Educación', CZ: 'Vzdělání', DE: 'Bildung', PL: 'Edukacja', FR: 'Éducation', IT: 'Formazione', AR: 'تعليم' },
+    events: { EN: 'Events', RU: 'События', UA: 'Події', ES: 'Eventos', CZ: 'Události', DE: 'Events', PL: 'Wydarzenia', FR: 'Événements', IT: 'Eventi', AR: 'فعاليات' },
+    activities: { EN: 'Activities', RU: 'Активности', UA: 'Активності', ES: 'Actividades', CZ: 'Aktivity', DE: 'Aktivitäten', PL: 'Aktywności', FR: 'Activités', IT: 'Attività', AR: 'أنشطة' },
+    creative: { EN: 'Creative', RU: 'Креатив', UA: 'Креатив', ES: 'Creativo', CZ: 'Kreativa', DE: 'Kreativ', PL: 'Kreatywne', FR: 'Créatif', IT: 'Creativo', AR: 'إبداعي' },
   };
 
   return map[categoryId]?.[language] || fallback || categoryId;
 }
 
 function translateSubcategory(value: string, language: AppLanguage) {
-  const dict: Record<string, Record<AppLanguage, string>> = {
-    Hair: {
-      EN: 'Hair',
-      ES: 'Cabello',
-      RU: 'Волосы',
-      UA: 'Волосся',
-      CZ: 'Vlasy',
-      DE: 'Haare',
-      IT: 'Capelli',
-      FR: 'Cheveux',
-      AR: 'الشعر',
-      PL: 'Włosy',
-    },
-    'Brows & Lashes': {
-      EN: 'Brows & Lashes',
-      ES: 'Cejas y pestañas',
-      RU: 'Брови и ресницы',
-      UA: 'Брови та вії',
-      CZ: 'Obočí a řasy',
-      DE: 'Augenbrauen & Wimpern',
-      IT: 'Sopracciglia e ciglia',
-      FR: 'Sourcils et cils',
-      AR: 'الحواجب والرموش',
-      PL: 'Brwi i rzęsy',
-    },
-    Nails: {
-      EN: 'Nails',
-      ES: 'Uñas',
-      RU: 'Ногти',
-      UA: 'Нігті',
-      CZ: 'Nehty',
-      DE: 'Nägel',
-      IT: 'Unghie',
-      FR: 'Ongles',
-      AR: 'الأظافر',
-      PL: 'Paznokcie',
-    },
-    Makeup: {
-      EN: 'Makeup',
-      ES: 'Maquillaje',
-      RU: 'Макияж',
-      UA: 'Макіяж',
-      CZ: 'Make-up',
-      DE: 'Make-up',
-      IT: 'Make-up',
-      FR: 'Maquillage',
-      AR: 'مكياج',
-      PL: 'Makijaż',
-    },
-    Skincare: {
-      EN: 'Skincare',
-      ES: 'Cuidado de la piel',
-      RU: 'Уход за кожей',
-      UA: 'Догляд за шкірою',
-      CZ: 'Péče o pleť',
-      DE: 'Hautpflege',
-      IT: 'Cura della pelle',
-      FR: 'Soin de la peau',
-      AR: 'العناية بالبشرة',
-      PL: 'Pielęgnacja skóry',
-    },
-    Aesthetics: {
-      EN: 'Aesthetics',
-      ES: 'Estética',
-      RU: 'Эстетика',
-      UA: 'Естетика',
-      CZ: 'Estetika',
-      DE: 'Ästhetik',
-      IT: 'Estetica',
-      FR: 'Esthétique',
-      AR: 'التجميل',
-      PL: 'Estetyka',
-    },
-    Haircut: {
-      EN: 'Haircut',
-      ES: 'Corte de pelo',
-      RU: 'Стрижка',
-      UA: 'Стрижка',
-      CZ: 'Střih',
-      DE: 'Haarschnitt',
-      IT: 'Taglio',
-      FR: 'Coupe',
-      AR: 'قص الشعر',
-      PL: 'Strzyżenie',
-    },
-    'Beard Trim': {
-      EN: 'Beard Trim',
-      ES: 'Recorte de barba',
-      RU: 'Подравнивание бороды',
-      UA: 'Підрівнювання бороди',
-      CZ: 'Úprava vousů',
-      DE: 'Bart trimmen',
-      IT: 'Regolazione barba',
-      FR: 'Taille de barbe',
-      AR: 'تهذيب اللحية',
-      PL: 'Przycinanie brody',
-    },
-    Shave: {
-      EN: 'Shave',
-      ES: 'Afeitado',
-      RU: 'Бритьё',
-      UA: 'Гоління',
-      CZ: 'Holení',
-      DE: 'Rasur',
-      IT: 'Rasatura',
-      FR: 'Rasage',
-      AR: 'حلاقة',
-      PL: 'Golenie',
-    },
-    Fade: {
-      EN: 'Fade',
-      ES: 'Fade',
-      RU: 'Фейд',
-      UA: 'Фейд',
-      CZ: 'Fade',
-      DE: 'Fade',
-      IT: 'Fade',
-      FR: 'Fade',
-      AR: 'فيد',
-      PL: 'Fade',
-    },
-    'Kids Haircut': {
-      EN: 'Kids Haircut',
-      ES: 'Corte infantil',
-      RU: 'Детская стрижка',
-      UA: 'Дитяча стрижка',
-      CZ: 'Dětský střih',
-      DE: 'Kinderhaarschnitt',
-      IT: 'Taglio bambino',
-      FR: 'Coupe enfant',
-      AR: 'قص أطفال',
-      PL: 'Strzyżenie dziecięce',
-    },
-    Styling: {
-      EN: 'Styling',
-      ES: 'Peinado',
-      RU: 'Укладка',
-      UA: 'Укладка',
-      CZ: 'Styling',
-      DE: 'Styling',
-      IT: 'Styling',
-      FR: 'Coiffage',
-      AR: 'تصفيف',
-      PL: 'Stylizacja',
-    },
-    Massage: {
-      EN: 'Massage',
-      ES: 'Masaje',
-      RU: 'Массаж',
-      UA: 'Масаж',
-      CZ: 'Masáž',
-      DE: 'Massage',
-      IT: 'Massaggio',
-      FR: 'Massage',
-      AR: 'مساج',
-      PL: 'Masaż',
-    },
-    Spa: {
-      EN: 'Spa',
-      ES: 'Spa',
-      RU: 'Спа',
-      UA: 'Спа',
-      CZ: 'Spa',
-      DE: 'Spa',
-      IT: 'Spa',
-      FR: 'Spa',
-      AR: 'سبا',
-      PL: 'Spa',
-    },
-    Relaxation: {
-      EN: 'Relaxation',
-      ES: 'Relajación',
-      RU: 'Релакс',
-      UA: 'Релакс',
-      CZ: 'Relaxace',
-      DE: 'Entspannung',
-      IT: 'Relax',
-      FR: 'Relaxation',
-      AR: 'استرخاء',
-      PL: 'Relaks',
-    },
-    Recovery: {
-      EN: 'Recovery',
-      ES: 'Recuperación',
-      RU: 'Восстановление',
-      UA: 'Відновлення',
-      CZ: 'Regenerace',
-      DE: 'Erholung',
-      IT: 'Recupero',
-      FR: 'Récupération',
-      AR: 'تعافٍ',
-      PL: 'Regeneracja',
-    },
-    'Holistic Care': {
-      EN: 'Holistic Care',
-      ES: 'Cuidado holístico',
-      RU: 'Холистический уход',
-      UA: 'Холістичний догляд',
-      CZ: 'Holistická péče',
-      DE: 'Ganzheitliche Pflege',
-      IT: 'Cura olistica',
-      FR: 'Soin holistique',
-      AR: 'رعاية شمولية',
-      PL: 'Opieka holistyczna',
-    },
-    'Therapy Support': {
-      EN: 'Therapy Support',
-      ES: 'Apoyo terapéutico',
-      RU: 'Терапевтическая помощь',
-      UA: 'Терапевтична підтримка',
-      CZ: 'Terapeutická podpora',
-      DE: 'Therapie-Unterstützung',
-      IT: 'Supporto terapeutico',
-      FR: 'Soutien thérapeutique',
-      AR: 'دعم علاجي',
-      PL: 'Wsparcie terapeutyczne',
-    },
-    Cleaning: {
-      EN: 'Cleaning',
-      ES: 'Limpieza',
-      RU: 'Уборка',
-      UA: 'Прибирання',
-      CZ: 'Úklid',
-      DE: 'Reinigung',
-      IT: 'Pulizia',
-      FR: 'Nettoyage',
-      AR: 'تنظيف',
-      PL: 'Sprzątanie',
-    },
-    'Deep Cleaning': {
-      EN: 'Deep Cleaning',
-      ES: 'Limpieza profunda',
-      RU: 'Глубокая уборка',
-      UA: 'Глибоке прибирання',
-      CZ: 'Hloubkové čištění',
-      DE: 'Tiefenreinigung',
-      IT: 'Pulizia profonda',
-      FR: 'Nettoyage en profondeur',
-      AR: 'تنظيف عميق',
-      PL: 'Dogłębne czyszczenie',
-    },
-    'Garden Help': {
-      EN: 'Garden Help',
-      ES: 'Ayuda en jardín',
-      RU: 'Помощь в саду',
-      UA: 'Допомога в саду',
-      CZ: 'Pomoc na zahradě',
-      DE: 'Gartenhilfe',
-      IT: 'Aiuto in giardino',
-      FR: 'Aide au jardin',
-      AR: 'مساعدة في الحديقة',
-      PL: 'Pomoc w ogrodzie',
-    },
-    Handyman: {
-      EN: 'Handyman',
-      ES: 'Manitas',
-      RU: 'Мастер на час',
-      UA: 'Майстер на годину',
-      CZ: 'Hodinový manžel',
-      DE: 'Handwerker',
-      IT: 'Tuttofare',
-      FR: 'Bricoleur',
-      AR: 'عامل صيانة',
-      PL: 'Złota rączka',
-    },
-    'Furniture Assembly': {
-      EN: 'Furniture Assembly',
-      ES: 'Montaje de muebles',
-      RU: 'Сборка мебели',
-      UA: 'Збірка меблів',
-      CZ: 'Montáž nábytku',
-      DE: 'Möbelmontage',
-      IT: 'Montaggio mobili',
-      FR: 'Montage de meubles',
-      AR: 'تركيب الأثاث',
-      PL: 'Montaż mebli',
-    },
-    'Home Help': {
-      EN: 'Home Help',
-      ES: 'Ayuda en casa',
-      RU: 'Помощь по дому',
-      UA: 'Допомога по дому',
-      CZ: 'Pomoc v domácnosti',
-      DE: 'Haushaltshilfe',
-      IT: 'Aiuto domestico',
-      FR: 'Aide à domicile',
-      AR: 'مساعدة منزلية',
-      PL: 'Pomoc domowa',
-    },
-    'Home Repairs': {
-      EN: 'Home Repairs',
-      ES: 'Reparaciones del hogar',
-      RU: 'Домашний ремонт',
-      UA: 'Домашній ремонт',
-      CZ: 'Opravy doma',
-      DE: 'Hausreparaturen',
-      IT: 'Riparazioni domestiche',
-      FR: 'Réparations à domicile',
-      AR: 'إصلاحات منزلية',
-      PL: 'Naprawy domowe',
-    },
-    'Appliance Repair': {
-      EN: 'Appliance Repair',
-      ES: 'Reparación de electrodomésticos',
-      RU: 'Ремонт техники',
-      UA: 'Ремонт техніки',
-      CZ: 'Oprava spotřebičů',
-      DE: 'Gerätereparatur',
-      IT: 'Riparazione elettrodomestici',
-      FR: 'Réparation d’appareils',
-      AR: 'إصلاح الأجهزة',
-      PL: 'Naprawa sprzętu',
-    },
-    'Furniture Repair': {
-      EN: 'Furniture Repair',
-      ES: 'Reparación de muebles',
-      RU: 'Ремонт мебели',
-      UA: 'Ремонт меблів',
-      CZ: 'Oprava nábytku',
-      DE: 'Möbelreparatur',
-      IT: 'Riparazione mobili',
-      FR: 'Réparation de meubles',
-      AR: 'إصلاح الأثاث',
-      PL: 'Naprawa mebli',
-    },
-    'Shoe Repair': {
-      EN: 'Shoe Repair',
-      ES: 'Reparación de zapatos',
-      RU: 'Ремонт обуви',
-      UA: 'Ремонт взуття',
-      CZ: 'Oprava bot',
-      DE: 'Schuhreparatur',
-      IT: 'Riparazione scarpe',
-      FR: 'Réparation de chaussures',
-      AR: 'إصلاح الأحذية',
-      PL: 'Naprawa butów',
-    },
-    'Clothing Repair': {
-      EN: 'Clothing Repair',
-      ES: 'Reparación de ropa',
-      RU: 'Ремонт одежды',
-      UA: 'Ремонт одягу',
-      CZ: 'Oprava oblečení',
-      DE: 'Kleiderreparatur',
-      IT: 'Riparazione vestiti',
-      FR: 'Réparation de vêtements',
-      AR: 'إصلاح الملابس',
-      PL: 'Naprawa odzieży',
-    },
-    'Watch Repair': {
-      EN: 'Watch Repair',
-      ES: 'Reparación de relojes',
-      RU: 'Ремонт часов',
-      UA: 'Ремонт годинників',
-      CZ: 'Oprava hodinek',
-      DE: 'Uhrenreparatur',
-      IT: 'Riparazione orologi',
-      FR: 'Réparation de montres',
-      AR: 'إصلاح الساعات',
-      PL: 'Naprawa zegarków',
-    },
-    'Phone Repair': {
-      EN: 'Phone Repair',
-      ES: 'Reparación de teléfono',
-      RU: 'Ремонт телефона',
-      UA: 'Ремонт телефону',
-      CZ: 'Oprava telefonu',
-      DE: 'Handyreparatur',
-      IT: 'Riparazione telefono',
-      FR: 'Réparation téléphone',
-      AR: 'إصلاح الهاتف',
-      PL: 'Naprawa telefonu',
-    },
-    'Computer Repair': {
-      EN: 'Computer Repair',
-      ES: 'Reparación de ordenador',
-      RU: 'Ремонт компьютера',
-      UA: 'Ремонт комп’ютера',
-      CZ: 'Oprava počítače',
-      DE: 'Computerreparatur',
-      IT: 'Riparazione computer',
-      FR: 'Réparation ordinateur',
-      AR: 'إصلاح الكمبيوتر',
-      PL: 'Naprawa komputera',
-    },
-    'Laptop Repair': {
-      EN: 'Laptop Repair',
-      ES: 'Reparación de portátil',
-      RU: 'Ремонт ноутбука',
-      UA: 'Ремонт ноутбука',
-      CZ: 'Oprava notebooku',
-      DE: 'Laptopreparatur',
-      IT: 'Riparazione laptop',
-      FR: 'Réparation portable',
-      AR: 'إصلاح اللابتوب',
-      PL: 'Naprawa laptopa',
-    },
-    'Tablet Repair': {
-      EN: 'Tablet Repair',
-      ES: 'Reparación de tablet',
-      RU: 'Ремонт планшета',
-      UA: 'Ремонт планшета',
-      CZ: 'Oprava tabletu',
-      DE: 'Tablet-Reparatur',
-      IT: 'Riparazione tablet',
-      FR: 'Réparation tablette',
-      AR: 'إصلاح التابلت',
-      PL: 'Naprawa tabletu',
-    },
-    'TV Setup': {
-      EN: 'TV Setup',
-      ES: 'Configuración TV',
-      RU: 'Настройка ТВ',
-      UA: 'Налаштування ТВ',
-      CZ: 'Nastavení TV',
-      DE: 'TV-Einrichtung',
-      IT: 'Configurazione TV',
-      FR: 'Configuration TV',
-      AR: 'إعداد التلفاز',
-      PL: 'Konfiguracja TV',
-    },
-    'Smart Device Help': {
-      EN: 'Smart Device Help',
-      ES: 'Ayuda con dispositivos inteligentes',
-      RU: 'Помощь с умными устройствами',
-      UA: 'Допомога з розумними пристроями',
-      CZ: 'Pomoc s chytrými zařízeními',
-      DE: 'Hilfe mit Smart-Geräten',
-      IT: 'Aiuto dispositivi smart',
-      FR: 'Aide appareils connectés',
-      AR: 'مساعدة الأجهزة الذكية',
-      PL: 'Pomoc ze smart urządzeniami',
-    },
-    Tailoring: {
-      EN: 'Tailoring',
-      ES: 'Sastrería',
-      RU: 'Пошив',
-      UA: 'Пошиття',
-      CZ: 'Krejčovství',
-      DE: 'Schneiderei',
-      IT: 'Sartoria',
-      FR: 'Couture',
-      AR: 'خياطة',
-      PL: 'Krawiectwo',
-    },
-    Alterations: {
-      EN: 'Alterations',
-      ES: 'Arreglos',
-      RU: 'Переделка',
-      UA: 'Переробка',
-      CZ: 'Úpravy',
-      DE: 'Änderungen',
-      IT: 'Modifiche',
-      FR: 'Retouches',
-      AR: 'تعديلات',
-      PL: 'Przeróbki',
-    },
-    'Custom Sewing': {
-      EN: 'Custom Sewing',
-      ES: 'Costura a medida',
-      RU: 'Индивидуальный пошив',
-      UA: 'Індивідуальне пошиття',
-      CZ: 'Zakázkové šití',
-      DE: 'Maßschneiderei',
-      IT: 'Cucito su misura',
-      FR: 'Couture sur mesure',
-      AR: 'خياطة مخصصة',
-      PL: 'Szycie na miarę',
-    },
-    'Shoe Care': {
-      EN: 'Shoe Care',
-      ES: 'Cuidado del calzado',
-      RU: 'Уход за обувью',
-      UA: 'Догляд за взуттям',
-      CZ: 'Péče o obuv',
-      DE: 'Schuhpflege',
-      IT: 'Cura scarpe',
-      FR: 'Entretien des chaussures',
-      AR: 'العناية بالأحذية',
-      PL: 'Pielęgnacja butów',
-    },
-    'Bag Repair': {
-      EN: 'Bag Repair',
-      ES: 'Reparación de bolsos',
-      RU: 'Ремонт сумок',
-      UA: 'Ремонт сумок',
-      CZ: 'Oprava tašek',
-      DE: 'Taschenreparatur',
-      IT: 'Riparazione borse',
-      FR: 'Réparation sacs',
-      AR: 'إصلاح الحقائب',
-      PL: 'Naprawa toreb',
-    },
-    Grooming: {
-      EN: 'Grooming',
-      ES: 'Peluquería',
-      RU: 'Груминг',
-      UA: 'Грумінг',
-      CZ: 'Grooming',
-      DE: 'Grooming',
-      IT: 'Toelettatura',
-      FR: 'Toilettage',
-      AR: 'تنظيف الحيوانات',
-      PL: 'Grooming',
-    },
-    'Dog Walking': {
-      EN: 'Dog Walking',
-      ES: 'Paseo de perros',
-      RU: 'Выгул собак',
-      UA: 'Вигул собак',
-      CZ: 'Venčení psů',
-      DE: 'Gassi-Service',
-      IT: 'Passeggiata cani',
-      FR: 'Promenade de chiens',
-      AR: 'تمشية الكلاب',
-      PL: 'Wyprowadzanie psów',
-    },
-    'Pet Sitting': {
-      EN: 'Pet Sitting',
-      ES: 'Cuidado de mascotas',
-      RU: 'Передержка питомцев',
-      UA: 'Перетримка тварин',
-      CZ: 'Hlídání mazlíčků',
-      DE: 'Tiersitting',
-      IT: 'Pet sitting',
-      FR: 'Garde d’animaux',
-      AR: 'رعاية الحيوانات',
-      PL: 'Opieka nad zwierzętami',
-    },
-    'Pet Taxi': {
-      EN: 'Pet Taxi',
-      ES: 'Taxi para mascotas',
-      RU: 'Такси для питомцев',
-      UA: 'Таксі для тварин',
-      CZ: 'Taxi pro mazlíčky',
-      DE: 'Tier-Taxi',
-      IT: 'Taxi per animali',
-      FR: 'Taxi animaux',
-      AR: 'تاكسي الحيوانات',
-      PL: 'Taxi dla zwierząt',
-    },
-    'Pet Delivery': {
-      EN: 'Pet Delivery',
-      ES: 'Entrega para mascotas',
-      RU: 'Доставка для питомцев',
-      UA: 'Доставка для тварин',
-      CZ: 'Doručení pro mazlíčky',
-      DE: 'Lieferung für Tiere',
-      IT: 'Consegna per animali',
-      FR: 'Livraison animaux',
-      AR: 'توصيل للحيوانات',
-      PL: 'Dostawa dla zwierząt',
-    },
-    Training: {
-      EN: 'Training',
-      ES: 'Entrenamiento',
-      RU: 'Дрессировка',
-      UA: 'Тренування',
-      CZ: 'Trénink',
-      DE: 'Training',
-      IT: 'Allenamento',
-      FR: 'Entraînement',
-      AR: 'تدريب',
-      PL: 'Trening',
-    },
-    'Home Visits': {
-      EN: 'Home Visits',
-      ES: 'Visitas a domicilio',
-      RU: 'Выезд на дом',
-      UA: 'Візит додому',
-      CZ: 'Návštěvy doma',
-      DE: 'Hausbesuche',
-      IT: 'Visite a domicilio',
-      FR: 'Visites à domicile',
-      AR: 'زيارات منزلية',
-      PL: 'Wizyty domowe',
-    },
-    'Accessories & Gifts': {
-      EN: 'Accessories & Gifts',
-      ES: 'Accesorios y regalos',
-      RU: 'Аксессуары и подарки',
-      UA: 'Аксесуари та подарунки',
-      CZ: 'Doplňky a dárky',
-      DE: 'Accessoires & Geschenke',
-      IT: 'Accessori e regali',
-      FR: 'Accessoires et cadeaux',
-      AR: 'إكسسوارات وهدايا',
-      PL: 'Akcesoria i prezenty',
-    },
-    'Car Wash': {
-      EN: 'Car Wash',
-      ES: 'Lavado de coche',
-      RU: 'Мойка авто',
-      UA: 'Мийка авто',
-      CZ: 'Mytí auta',
-      DE: 'Autowäsche',
-      IT: 'Lavaggio auto',
-      FR: 'Lavage auto',
-      AR: 'غسيل السيارة',
-      PL: 'Mycie auta',
-    },
-    Detailing: {
-      EN: 'Detailing',
-      ES: 'Detailing',
-      RU: 'Детейлинг',
-      UA: 'Детейлінг',
-      CZ: 'Detailing',
-      DE: 'Detailing',
-      IT: 'Detailing',
-      FR: 'Detailing',
-      AR: 'تلميع',
-      PL: 'Detailing',
-    },
-    'Tyre Help': {
-      EN: 'Tyre Help',
-      ES: 'Ayuda con neumáticos',
-      RU: 'Помощь с шинами',
-      UA: 'Допомога з шинами',
-      CZ: 'Pomoc s pneumatikami',
-      DE: 'Reifenhilfe',
-      IT: 'Aiuto pneumatici',
-      FR: 'Aide pneus',
-      AR: 'مساعدة الإطارات',
-      PL: 'Pomoc z oponami',
-    },
-    'Battery Help': {
-      EN: 'Battery Help',
-      ES: 'Ayuda con batería',
-      RU: 'Помощь с аккумулятором',
-      UA: 'Допомога з акумулятором',
-      CZ: 'Pomoc s baterií',
-      DE: 'Batteriehilfe',
-      IT: 'Aiuto batteria',
-      FR: 'Aide batterie',
-      AR: 'مساعدة البطارية',
-      PL: 'Pomoc z akumulatorem',
-    },
-    Diagnostics: {
-      EN: 'Diagnostics',
-      ES: 'Diagnóstico',
-      RU: 'Диагностика',
-      UA: 'Діагностика',
-      CZ: 'Diagnostika',
-      DE: 'Diagnose',
-      IT: 'Diagnostica',
-      FR: 'Diagnostic',
-      AR: 'تشخيص',
-      PL: 'Diagnostyka',
-    },
-    'Driver Service': {
-      EN: 'Driver Service',
-      ES: 'Servicio de conductor',
-      RU: 'Услуги водителя',
-      UA: 'Послуги водія',
-      CZ: 'Řidičské služby',
-      DE: 'Fahrerservice',
-      IT: 'Servizio autista',
-      FR: 'Service chauffeur',
-      AR: 'خدمة السائق',
-      PL: 'Usługa kierowcy',
-    },
-    'Small Moves': {
-      EN: 'Small Moves',
-      ES: 'Pequeñas mudanzas',
-      RU: 'Небольшие переезды',
-      UA: 'Невеликі переїзди',
-      CZ: 'Malé stěhování',
-      DE: 'Kleine Umzüge',
-      IT: 'Piccoli traslochi',
-      FR: 'Petits déménagements',
-      AR: 'نقلات صغيرة',
-      PL: 'Małe przeprowadzki',
-    },
-    'Van Help': {
-      EN: 'Van Help',
-      ES: 'Ayuda con furgoneta',
-      RU: 'Помощь с фургоном',
-      UA: 'Допомога з фургоном',
-      CZ: 'Pomoc s dodávkou',
-      DE: 'Transporter-Hilfe',
-      IT: 'Aiuto furgone',
-      FR: 'Aide fourgon',
-      AR: 'مساعدة الشاحنة',
-      PL: 'Pomoc z vanem',
-    },
-    'Furniture Delivery': {
-      EN: 'Furniture Delivery',
-      ES: 'Entrega de muebles',
-      RU: 'Доставка мебели',
-      UA: 'Доставка меблів',
-      CZ: 'Doručení nábytku',
-      DE: 'Möbellieferung',
-      IT: 'Consegna mobili',
-      FR: 'Livraison meubles',
-      AR: 'توصيل الأثاث',
-      PL: 'Dostawa mebli',
-    },
-    Courier: {
-      EN: 'Courier',
-      ES: 'Mensajería',
-      RU: 'Курьер',
-      UA: 'Курʼєр',
-      CZ: 'Kurýr',
-      DE: 'Kurier',
-      IT: 'Corriere',
-      FR: 'Coursier',
-      AR: 'توصيل',
-      PL: 'Kurier',
-    },
-    'Same-Day Delivery': {
-      EN: 'Same-Day Delivery',
-      ES: 'Entrega el mismo día',
-      RU: 'Доставка в тот же день',
-      UA: 'Доставка в той самий день',
-      CZ: 'Doručení ve stejný den',
-      DE: 'Lieferung am selben Tag',
-      IT: 'Consegna in giornata',
-      FR: 'Livraison le jour même',
-      AR: 'توصيل بنفس اليوم',
-      PL: 'Dostawa tego samego dnia',
-    },
-    'Heavy Transport': {
-      EN: 'Heavy Transport',
-      ES: 'Transporte pesado',
-      RU: 'Тяжёлые перевозки',
-      UA: 'Важкі перевезення',
-      CZ: 'Těžká doprava',
-      DE: 'Schwertransport',
-      IT: 'Trasporto pesante',
-      FR: 'Transport lourd',
-      AR: 'نقل ثقيل',
-      PL: 'Transport ciężki',
-    },
-    'Personal Training': {
-      EN: 'Personal Training',
-      ES: 'Entrenamiento personal',
-      RU: 'Персональные тренировки',
-      UA: 'Персональні тренування',
-      CZ: 'Osobní trénink',
-      DE: 'Personal Training',
-      IT: 'Allenamento personale',
-      FR: 'Coaching personnel',
-      AR: 'تدريب شخصي',
-      PL: 'Trening personalny',
-    },
-    Yoga: {
-      EN: 'Yoga',
-      ES: 'Yoga',
-      RU: 'Йога',
-      UA: 'Йога',
-      CZ: 'Jóga',
-      DE: 'Yoga',
-      IT: 'Yoga',
-      FR: 'Yoga',
-      AR: 'يوغا',
-      PL: 'Joga',
-    },
-    Pilates: {
-      EN: 'Pilates',
-      ES: 'Pilates',
-      RU: 'Пилатес',
-      UA: 'Пілатес',
-      CZ: 'Pilates',
-      DE: 'Pilates',
-      IT: 'Pilates',
-      FR: 'Pilates',
-      AR: 'بيلاتس',
-      PL: 'Pilates',
-    },
-    Stretching: {
-      EN: 'Stretching',
-      ES: 'Estiramientos',
-      RU: 'Растяжка',
-      UA: 'Розтяжка',
-      CZ: 'Protahování',
-      DE: 'Stretching',
-      IT: 'Stretching',
-      FR: 'Étirements',
-      AR: 'تمدد',
-      PL: 'Stretching',
-    },
-    'Dance Fitness': {
-      EN: 'Dance Fitness',
-      ES: 'Fitness de baile',
-      RU: 'Танцевальный фитнес',
-      UA: 'Танцювальний фітнес',
-      CZ: 'Taneční fitness',
-      DE: 'Dance Fitness',
-      IT: 'Dance fitness',
-      FR: 'Fitness danse',
-      AR: 'لياقة رقص',
-      PL: 'Fitness taneczny',
-    },
-    'Outdoor Training': {
-      EN: 'Outdoor Training',
-      ES: 'Entrenamiento al aire libre',
-      RU: 'Тренировки на улице',
-      UA: 'Тренування на вулиці',
-      CZ: 'Venkovní trénink',
-      DE: 'Outdoor-Training',
-      IT: 'Allenamento outdoor',
-      FR: 'Entraînement extérieur',
-      AR: 'تدريب خارجي',
-      PL: 'Trening outdoor',
-    },
-    Languages: {
-      EN: 'Languages',
-      ES: 'Idiomas',
-      RU: 'Языки',
-      UA: 'Мови',
-      CZ: 'Jazyky',
-      DE: 'Sprachen',
-      IT: 'Lingue',
-      FR: 'Langues',
-      AR: 'لغات',
-      PL: 'Języki',
-    },
-    Tutoring: {
-      EN: 'Tutoring',
-      ES: 'Tutoría',
-      RU: 'Репетиторство',
-      UA: 'Репетиторство',
-      CZ: 'Doučování',
-      DE: 'Nachhilfe',
-      IT: 'Tutoraggio',
-      FR: 'Tutorat',
-      AR: 'دروس خصوصية',
-      PL: 'Korepetycje',
-    },
-    'Music Lessons': {
-      EN: 'Music Lessons',
-      ES: 'Clases de música',
-      RU: 'Уроки музыки',
-      UA: 'Уроки музики',
-      CZ: 'Hudební lekce',
-      DE: 'Musikunterricht',
-      IT: 'Lezioni di musica',
-      FR: 'Cours de musique',
-      AR: 'دروس موسيقى',
-      PL: 'Lekcje muzyki',
-    },
-    'Kids Learning': {
-      EN: 'Kids Learning',
-      ES: 'Aprendizaje infantil',
-      RU: 'Обучение детей',
-      UA: 'Навчання дітей',
-      CZ: 'Dětské vzdělávání',
-      DE: 'Kinderlernen',
-      IT: 'Apprendimento bambini',
-      FR: 'Apprentissage enfants',
-      AR: 'تعليم الأطفال',
-      PL: 'Nauka dzieci',
-    },
-    'Exam Prep': {
-      EN: 'Exam Prep',
-      ES: 'Preparación de exámenes',
-      RU: 'Подготовка к экзаменам',
-      UA: 'Підготовка до іспитів',
-      CZ: 'Příprava na zkoušky',
-      DE: 'Prüfungsvorbereitung',
-      IT: 'Preparazione esami',
-      FR: 'Préparation examens',
-      AR: 'تحضير للامتحانات',
-      PL: 'Przygotowanie do egzaminów',
-    },
-    'Skill Coaching': {
-      EN: 'Skill Coaching',
-      ES: 'Coaching de habilidades',
-      RU: 'Развитие навыков',
-      UA: 'Розвиток навичок',
-      CZ: 'Koučink dovedností',
-      DE: 'Kompetenz-Coaching',
-      IT: 'Coaching competenze',
-      FR: 'Coaching compétences',
-      AR: 'تدريب مهارات',
-      PL: 'Coaching umiejętności',
-    },
-    Photography: {
-      EN: 'Photography',
-      ES: 'Fotografía',
-      RU: 'Фотография',
-      UA: 'Фотографія',
-      CZ: 'Fotografie',
-      DE: 'Fotografie',
-      IT: 'Fotografia',
-      FR: 'Photographie',
-      AR: 'تصوير',
-      PL: 'Fotografia',
-    },
-    Videography: {
-      EN: 'Videography',
-      ES: 'Videografía',
-      RU: 'Видеосъёмка',
-      UA: 'Відеозйомка',
-      CZ: 'Videografie',
-      DE: 'Videografie',
-      IT: 'Videografia',
-      FR: 'Vidéographie',
-      AR: 'تصوير فيديو',
-      PL: 'Wideografia',
-    },
-    Decor: {
-      EN: 'Decor',
-      ES: 'Decoración',
-      RU: 'Декор',
-      UA: 'Декор',
-      CZ: 'Dekorace',
-      DE: 'Dekor',
-      IT: 'Decor',
-      FR: 'Décor',
-      AR: 'ديكور',
-      PL: 'Dekoracje',
-    },
-    'DJ & Music': {
-      EN: 'DJ & Music',
-      ES: 'DJ y música',
-      RU: 'DJ и музыка',
-      UA: 'DJ та музика',
-      CZ: 'DJ a hudba',
-      DE: 'DJ & Musik',
-      IT: 'DJ e musica',
-      FR: 'DJ et musique',
-      AR: 'دي جي وموسيقى',
-      PL: 'DJ i muzyka',
-    },
-    'Event Makeup': {
-      EN: 'Event Makeup',
-      ES: 'Maquillaje para eventos',
-      RU: 'Макияж на событие',
-      UA: 'Макіяж на подію',
-      CZ: 'Make-up na akce',
-      DE: 'Event-Make-up',
-      IT: 'Make-up eventi',
-      FR: 'Maquillage événement',
-      AR: 'مكياج للمناسبات',
-      PL: 'Makijaż eventowy',
-    },
-    'Catering Help': {
-      EN: 'Catering Help',
-      ES: 'Ayuda de catering',
-      RU: 'Помощь с кейтерингом',
-      UA: 'Допомога з кейтерингом',
-      CZ: 'Pomoc s cateringem',
-      DE: 'Catering-Hilfe',
-      IT: 'Aiuto catering',
-      FR: 'Aide traiteur',
-      AR: 'مساعدة الضيافة',
-      PL: 'Pomoc cateringowa',
-    },
-    Tours: {
-      EN: 'Tours',
-      ES: 'Tours',
-      RU: 'Туры',
-      UA: 'Тури',
-      CZ: 'Prohlídky',
-      DE: 'Touren',
-      IT: 'Tour',
-      FR: 'Tours',
-      AR: 'جولات',
-      PL: 'Wycieczki',
-    },
-    Workshops: {
-      EN: 'Workshops',
-      ES: 'Talleres',
-      RU: 'Мастер-классы',
-      UA: 'Майстер-класи',
-      CZ: 'Workshopy',
-      DE: 'Workshops',
-      IT: 'Workshop',
-      FR: 'Ateliers',
-      AR: 'ورش عمل',
-      PL: 'Warsztaty',
-    },
-    'Kids Activities': {
-      EN: 'Kids Activities',
-      ES: 'Actividades para niños',
-      RU: 'Детские активности',
-      UA: 'Дитячі активності',
-      CZ: 'Dětské aktivity',
-      DE: 'Kinderaktivitäten',
-      IT: 'Attività per bambini',
-      FR: 'Activités enfants',
-      AR: 'أنشطة للأطفال',
-      PL: 'Aktywności dla dzieci',
-    },
-    'Art Classes': {
-      EN: 'Art Classes',
-      ES: 'Clases de arte',
-      RU: 'Уроки искусства',
-      UA: 'Уроки мистецтва',
-      CZ: 'Kurzy umění',
-      DE: 'Kunstkurse',
-      IT: 'Lezioni d’arte',
-      FR: 'Cours d’art',
-      AR: 'دروس فن',
-      PL: 'Lekcje sztuki',
-    },
-    'Dance Classes': {
-      EN: 'Dance Classes',
-      ES: 'Clases de baile',
-      RU: 'Танцевальные занятия',
-      UA: 'Танцювальні заняття',
-      CZ: 'Taneční lekce',
-      DE: 'Tanzkurse',
-      IT: 'Lezioni di danza',
-      FR: 'Cours de danse',
-      AR: 'دروس رقص',
-      PL: 'Lekcje tańca',
-    },
-    'Outdoor Activities': {
-      EN: 'Outdoor Activities',
-      ES: 'Actividades al aire libre',
-      RU: 'Активности на улице',
-      UA: 'Активності на вулиці',
-      CZ: 'Venkovní aktivity',
-      DE: 'Outdoor-Aktivitäten',
-      IT: 'Attività outdoor',
-      FR: 'Activités extérieures',
-      AR: 'أنشطة خارجية',
-      PL: 'Aktywności outdoor',
-    },
-    'Graphic Design': {
-      EN: 'Graphic Design',
-      ES: 'Diseño gráfico',
-      RU: 'Графический дизайн',
-      UA: 'Графічний дизайн',
-      CZ: 'Grafický design',
-      DE: 'Grafikdesign',
-      IT: 'Graphic design',
-      FR: 'Design graphique',
-      AR: 'تصميم جرافيك',
-      PL: 'Projektowanie graficzne',
-    },
-    'Content Creation': {
-      EN: 'Content Creation',
-      ES: 'Creación de contenido',
-      RU: 'Создание контента',
-      UA: 'Створення контенту',
-      CZ: 'Tvorba obsahu',
-      DE: 'Content-Erstellung',
-      IT: 'Creazione contenuti',
-      FR: 'Création de contenu',
-      AR: 'إنشاء محتوى',
-      PL: 'Tworzenie treści',
-    },
-    'Photo Editing': {
-      EN: 'Photo Editing',
-      ES: 'Edición de fotos',
-      RU: 'Обработка фото',
-      UA: 'Обробка фото',
-      CZ: 'Úprava fotografií',
-      DE: 'Fotobearbeitung',
-      IT: 'Editing foto',
-      FR: 'Retouche photo',
-      AR: 'تحرير الصور',
-      PL: 'Edycja zdjęć',
-    },
-    'Video Editing': {
-      EN: 'Video Editing',
-      ES: 'Edición de video',
-      RU: 'Монтаж видео',
-      UA: 'Монтаж відео',
-      CZ: 'Úprava videa',
-      DE: 'Videobearbeitung',
-      IT: 'Editing video',
-      FR: 'Montage vidéo',
-      AR: 'تحرير الفيديو',
-      PL: 'Montaż wideo',
-    },
-    Branding: {
-      EN: 'Branding',
-      ES: 'Branding',
-      RU: 'Брендинг',
-      UA: 'Брендинг',
-      CZ: 'Branding',
-      DE: 'Branding',
-      IT: 'Branding',
-      FR: 'Branding',
-      AR: 'هوية العلامة',
-      PL: 'Branding',
-    },
-    'Social Media Help': {
-      EN: 'Social Media Help',
-      ES: 'Ayuda redes sociales',
-      RU: 'Помощь с соцсетями',
-      UA: 'Допомога з соцмережами',
-      CZ: 'Pomoc se sociálními sítěmi',
-      DE: 'Hilfe mit Social Media',
-      IT: 'Aiuto social media',
-      FR: 'Aide réseaux sociaux',
-      AR: 'مساعدة السوشيال ميديا',
-      PL: 'Pomoc z social media',
-    },
-    Other: {
-      EN: 'Other',
-      ES: 'Otro',
-      RU: 'Другое',
-      UA: 'Інше',
-      CZ: 'Jiné',
-      DE: 'Andere',
-      IT: 'Altro',
-      FR: 'Autre',
-      AR: 'أخرى',
-      PL: 'Inne',
-    },
+  const dict: Record<string, Partial<Record<AppLanguage, string>>> = {
+    Hair: { RU: 'Волосы', UA: 'Волосся', ES: 'Cabello', CZ: 'Vlasy', DE: 'Haare', PL: 'Włosy', FR: 'Cheveux', IT: 'Capelli', AR: 'الشعر' },
+    Nails: { RU: 'Ногти', UA: 'Нігті', ES: 'Uñas', CZ: 'Nehty', DE: 'Nägel', PL: 'Paznokcie', FR: 'Ongles', IT: 'Unghie', AR: 'الأظافر' },
+    Makeup: { RU: 'Макияж', UA: 'Макіяж', ES: 'Maquillaje', CZ: 'Make-up', DE: 'Make-up', PL: 'Makijaż', FR: 'Maquillage', IT: 'Make-up', AR: 'مكياج' },
+    Massage: { RU: 'Массаж', UA: 'Масаж', ES: 'Masaje', CZ: 'Masáž', DE: 'Massage', PL: 'Masaż', FR: 'Massage', IT: 'Massaggio', AR: 'مساج' },
+    Cleaning: { RU: 'Уборка', UA: 'Прибирання', ES: 'Limpieza', CZ: 'Úklid', DE: 'Reinigung', PL: 'Sprzątanie', FR: 'Nettoyage', IT: 'Pulizia', AR: 'تنظيف' },
+    'Phone Repair': { RU: 'Ремонт телефона', UA: 'Ремонт телефону', ES: 'Reparación de teléfono', CZ: 'Oprava telefonu', DE: 'Handyreparatur', PL: 'Naprawa telefonu', FR: 'Réparation téléphone', IT: 'Riparazione telefono', AR: 'إصلاح الهاتف' },
+    'Computer Repair': { RU: 'Ремонт компьютера', UA: 'Ремонт компʼютера', ES: 'Reparación de ordenador', CZ: 'Oprava počítače', DE: 'Computerreparatur', PL: 'Naprawa komputera', FR: 'Réparation ordinateur', IT: 'Riparazione computer', AR: 'إصلاح الكمبيوتر' },
+    'Dog Walking': { RU: 'Выгул собак', UA: 'Вигул собак', ES: 'Paseo de perros', CZ: 'Venčení psů', DE: 'Gassi-Service', PL: 'Wyprowadzanie psów', FR: 'Promenade de chiens', IT: 'Passeggiata cani', AR: 'تمشية الكلاب' },
+    'Pet Sitting': { RU: 'Передержка питомцев', UA: 'Перетримка тварин', ES: 'Cuidado de mascotas', CZ: 'Hlídání mazlíčků', DE: 'Tiersitting', PL: 'Opieka nad zwierzętami', FR: 'Garde d’animaux', IT: 'Pet sitting', AR: 'رعاية الحيوانات' },
+    'Car Wash': { RU: 'Мойка авто', UA: 'Мийка авто', ES: 'Lavado de coche', CZ: 'Mytí auta', DE: 'Autowäsche', PL: 'Mycie auta', FR: 'Lavage auto', IT: 'Lavaggio auto', AR: 'غسيل السيارة' },
+    Courier: { RU: 'Курьер', UA: 'Курʼєр', ES: 'Mensajería', CZ: 'Kurýr', DE: 'Kurier', PL: 'Kurier', FR: 'Coursier', IT: 'Corriere', AR: 'توصيل' },
+    Yoga: { RU: 'Йога', UA: 'Йога', ES: 'Yoga', CZ: 'Jóga', DE: 'Yoga', PL: 'Joga', FR: 'Yoga', IT: 'Yoga', AR: 'يوغا' },
+    Tutoring: { RU: 'Репетиторство', UA: 'Репетиторство', ES: 'Tutoría', CZ: 'Doučování', DE: 'Nachhilfe', PL: 'Korepetycje', FR: 'Tutorat', IT: 'Tutoraggio', AR: 'دروس خصوصية' },
+    Photography: { RU: 'Фотография', UA: 'Фотографія', ES: 'Fotografía', CZ: 'Fotografie', DE: 'Fotografie', PL: 'Fotografia', FR: 'Photographie', IT: 'Fotografia', AR: 'تصوير' },
+    Other: { RU: 'Другое', UA: 'Інше', ES: 'Otro', CZ: 'Jiné', DE: 'Andere', PL: 'Inne', FR: 'Autre', IT: 'Altro', AR: 'أخرى' },
   };
 
   return dict[value]?.[language] || value;
@@ -1849,9 +788,11 @@ export default function NewPromotionPage() {
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
+
     const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
+
     return () => {
       unsubLanguage();
     };
@@ -1862,25 +803,23 @@ export default function NewPromotionPage() {
       photos.forEach((photo) => {
         if (photo.preview) URL.revokeObjectURL(photo.preview);
       });
-      if (miniVideo?.preview) URL.revokeObjectURL(miniVideo.preview);
+
+      if (miniVideo?.preview) {
+        URL.revokeObjectURL(miniVideo.preview);
+      }
     };
   }, [photos, miniVideo]);
 
   const text = textByLanguage[language] || textByLanguage.EN;
-  const radiusOptions = radiusOptionsByLanguage[language] || radiusOptionsByLanguage.EN;
-  const paymentMethods = paymentMethodsByLanguage[language] || paymentMethodsByLanguage.EN;
-
+  const radiusOptions = getRadiusOptions(language);
+  const paymentMethods = getPaymentMethods(language);
   const selectedRadius = radiusOptions.find((item) => item.id === radius) || radiusOptions[0];
 
   const localizedCategories = useMemo(() => {
     return categories.map((item) => ({
       ...item,
       localizedLabel: translateCategoryLabel(item.id, language, item.label),
-      localizedShortLabel: translateCategoryLabel(
-        item.id,
-        language,
-        item.shortLabel || item.label
-      ),
+      localizedShortLabel: translateCategoryLabel(item.id, language, item.shortLabel || item.label),
       localizedSubcategories: item.subcategories.map((sub) => ({
         value: sub,
         label: translateSubcategory(sub, language),
@@ -1888,9 +827,7 @@ export default function NewPromotionPage() {
     }));
   }, [language]);
 
-  const currentCategory =
-    localizedCategories.find((item) => item.id === categoryId) || null;
-
+  const currentCategory = localizedCategories.find((item) => item.id === categoryId) || null;
   const subcategoryOptions = currentCategory?.localizedSubcategories || [];
 
   const totalPrice = useMemo(
@@ -1911,6 +848,7 @@ export default function NewPromotionPage() {
   const openEditor = (photoId: string) => {
     const current = photos.find((photo) => photo.id === photoId);
     if (!current) return;
+
     setEditorPhotoId(photoId);
     setEditorScale(getSafeScale(current.scale));
     setEditorOffsetX(current.offsetX || 0);
@@ -1930,6 +868,7 @@ export default function NewPromotionPage() {
 
   const applyEditor = () => {
     if (!editorPhotoId) return;
+
     setPhotos((prev) =>
       prev.map((photo) =>
         photo.id === editorPhotoId
@@ -1942,6 +881,7 @@ export default function NewPromotionPage() {
           : photo
       )
     );
+
     closeEditor();
   };
 
@@ -1963,8 +903,10 @@ export default function NewPromotionPage() {
 
   const handleEditorPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (dragRef.current.pointerId !== event.pointerId) return;
+
     const deltaX = event.clientX - dragRef.current.startX;
     const deltaY = event.clientY - dragRef.current.startY;
+
     setEditorOffsetX(dragRef.current.startOffsetX + deltaX);
     setEditorOffsetY(dragRef.current.startOffsetY + deltaY);
   };
@@ -1984,7 +926,7 @@ export default function NewPromotionPage() {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
-    const remainingSlots = Math.max(0, 9 - photos.length);
+    const remainingSlots = Math.max(0, MAX_PHOTOS - photos.length);
     const selected = files.slice(0, remainingSlots);
 
     const nextPhotos: PhotoItem[] = selected.map((file, index) => ({
@@ -2019,6 +961,7 @@ export default function NewPromotionPage() {
 
     const preview = URL.createObjectURL(file);
     const video = document.createElement('video');
+
     video.preload = 'metadata';
     video.src = preview;
 
@@ -2066,6 +1009,7 @@ export default function NewPromotionPage() {
     if (miniVideo?.preview) {
       URL.revokeObjectURL(miniVideo.preview);
     }
+
     setMiniVideo(null);
   };
 
@@ -2074,18 +1018,22 @@ export default function NewPromotionPage() {
       alert(text.enterCategory);
       return;
     }
+
     if (!subcategory) {
       alert(text.enterSubcategory);
       return;
     }
+
     if (!title.trim()) {
       alert(text.enterTitle);
       return;
     }
+
     if (!description.trim()) {
       alert(text.enterDescription);
       return;
     }
+
     if (photos.length === 0 && !miniVideo) {
       alert(text.addPhotoAlert);
       return;
@@ -2169,553 +1117,22 @@ export default function NewPromotionPage() {
 
           <div
             style={{
-              borderRadius: 30,
+              borderRadius: 26,
               border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
+              background: '#fff7d6',
+              padding: '12px 14px',
+              marginBottom: 16,
+              fontSize: 14,
+              fontWeight: 900,
+              color: '#17130f',
+              lineHeight: 1.4,
             }}
           >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 8,
-              }}
-            >
-              {text.photo} <span style={{ color: '#ef4444' }}>*</span>
-            </div>
-
-            <div
-              style={{
-                fontSize: 14,
-                lineHeight: 1.5,
-                color: '#7b7268',
-                fontWeight: 700,
-                marginBottom: 14,
-              }}
-            >
-              {text.photoHint}
-            </div>
-
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 12,
-              }}
-            >
-              {text.layout}
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-                marginBottom: 14,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setLayout('single')}
-                style={{
-                  minHeight: 54,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: layout === 'single' ? '#17130f' : '#fff',
-                  color: layout === 'single' ? '#fff' : '#17130f',
-                  fontSize: 15,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.layoutSingle}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setLayout('grid')}
-                style={{
-                  minHeight: 54,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: layout === 'grid' ? '#17130f' : '#fff',
-                  color: layout === 'grid' ? '#fff' : '#17130f',
-                  fontSize: 15,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.layoutGrid}
-              </button>
-            </div>
-
-            <input
-              ref={galleryInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFilesSelected}
-              style={{ display: 'none' }}
-            />
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              multiple
-              onChange={handleFilesSelected}
-              style={{ display: 'none' }}
-            />
-            <input
-              ref={filesInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFilesSelected}
-              style={{ display: 'none' }}
-            />
-
-            <button
-              type="button"
-              onClick={() => setShowPhotoSourceMenu(true)}
-              style={{
-                width: '100%',
-                minHeight: 92,
-                borderRadius: 22,
-                border: '1.5px solid #111111',
-                background: '#fff',
-                padding: 14,
-                display: 'grid',
-                gridTemplateColumns: '72px 1fr',
-                gap: 14,
-                alignItems: 'center',
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              <div
-                style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: 22,
-                  border: '2px solid #c69212',
-                  background: '#fff7d6',
-                  color: '#c69212',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 42,
-                  fontWeight: 700,
-                }}
-              >
-                +
-              </div>
-
-              <div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 900,
-                    color: '#17130f',
-                  }}
-                >
-                  {text.addPhoto}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 6,
-                    fontSize: 14,
-                    color: '#7b7268',
-                    fontWeight: 700,
-                  }}
-                >
-                  JPG / PNG / WEBP · max 9
-                </div>
-              </div>
-            </button>
-
-            {photos.length > 0 ? (
-              <>
-                <div
-                  style={{
-                    marginTop: 14,
-                    fontSize: 16,
-                    fontWeight: 900,
-                    color: '#17130f',
-                  }}
-                >
-                  {text.photoAdded}: {photos.length}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 12,
-                    display: 'grid',
-                    gridTemplateColumns: layout === 'single' ? '1fr' : '1fr 2fr',
-                    gap: 10,
-                  }}
-                >
-                  {(layout === 'single' ? [photos[0]] : photos).map((photo) => {
-                    if (!photo) return null;
-
-                    return (
-                      <div
-                        key={photo.id}
-                        style={{
-                          borderRadius: 22,
-                          border: '1.5px solid #111111',
-                          overflow: 'hidden',
-                          background: '#fff',
-                          position: 'relative',
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: '100%',
-                            height: layout === 'single' ? 220 : 150,
-                            overflow: 'hidden',
-                            position: 'relative',
-                            background: '#f4f1ea',
-                          }}
-                        >
-                          <img
-                            src={photo.preview}
-                            alt={photo.name}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                              display: 'block',
-                              transform: `translate(${photo.offsetX}px, ${photo.offsetY}px) scale(${photo.scale})`,
-                              transformOrigin: 'center center',
-                            }}
-                          />
-                        </div>
-
-                        <div
-                          style={{
-                            position: 'absolute',
-                            top: 10,
-                            right: 10,
-                            display: 'flex',
-                            gap: 8,
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => openEditor(photo.id)}
-                            style={{
-                              minWidth: 34,
-                              height: 34,
-                              borderRadius: 999,
-                              border: '1.5px solid #111111',
-                              background: '#ffffff',
-                              color: '#17130f',
-                              fontSize: 12,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                              padding: '0 10px',
-                            }}
-                          >
-                            ↔
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleRemovePhoto(photo.id)}
-                            style={{
-                              minWidth: 34,
-                              height: 34,
-                              borderRadius: 999,
-                              border: '1.5px solid #111111',
-                              background: '#ffffff',
-                              color: '#17130f',
-                              fontSize: 18,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                              padding: '0 10px',
-                            }}
-                          >
-                            ×
-                          </button>
-                        </div>
-
-                        <div
-                          style={{
-                            padding: '10px 12px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: 10,
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: 13,
-                              color: '#7b7268',
-                              fontWeight: 700,
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              flex: 1,
-                            }}
-                          >
-                            {photo.name}
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => openEditor(photo.id)}
-                            style={{
-                              height: 34,
-                              borderRadius: 12,
-                              border: '1.5px solid #111111',
-                              background: '#fff',
-                              color: '#17130f',
-                              padding: '0 10px',
-                              fontSize: 12,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                              flexShrink: 0,
-                            }}
-                          >
-                            {text.adjustPhoto}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            ) : null}
+            {text.adWillGoLive}
           </div>
 
           <div
             style={{
-              marginTop: 16,
-              borderRadius: 30,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 8,
-              }}
-            >
-              {text.miniVideo}
-            </div>
-
-            <div
-              style={{
-                fontSize: 14,
-                lineHeight: 1.5,
-                color: '#7b7268',
-                fontWeight: 700,
-                marginBottom: 14,
-              }}
-            >
-              {text.miniVideoHint}
-            </div>
-
-            <input
-              ref={galleryVideoInputRef}
-              type="file"
-              accept="video/*"
-              onChange={handleVideoSelected}
-              style={{ display: 'none' }}
-            />
-            <input
-              ref={cameraVideoInputRef}
-              type="file"
-              accept="video/*"
-              capture="environment"
-              onChange={handleVideoSelected}
-              style={{ display: 'none' }}
-            />
-            <input
-              ref={filesVideoInputRef}
-              type="file"
-              accept="video/*"
-              onChange={handleVideoSelected}
-              style={{ display: 'none' }}
-            />
-
-            {!miniVideo ? (
-              <button
-                type="button"
-                onClick={() => setShowVideoSourceMenu(true)}
-                style={{
-                  width: '100%',
-                  minHeight: 92,
-                  borderRadius: 22,
-                  border: '1.5px solid #111111',
-                  background: '#fff',
-                  padding: 14,
-                  display: 'grid',
-                  gridTemplateColumns: '72px 1fr',
-                  gap: 14,
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                <div
-                  style={{
-                    width: 72,
-                    height: 72,
-                    borderRadius: 22,
-                    border: '2px solid #2f7cf6',
-                    background: '#edf4ff',
-                    color: '#2f7cf6',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 34,
-                    fontWeight: 700,
-                  }}
-                >
-                  ▶
-                </div>
-
-                <div>
-                  <div
-                    style={{
-                      fontSize: 18,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
-                    {text.addMiniVideo}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 6,
-                      fontSize: 14,
-                      color: '#7b7268',
-                      fontWeight: 700,
-                    }}
-                  >
-                    MP4 / MOV / WEBM · max 5 sec
-                  </div>
-                </div>
-              </button>
-            ) : (
-              <div
-                style={{
-                  borderRadius: 22,
-                  border: '1.5px solid #111111',
-                  overflow: 'hidden',
-                  background: '#fff',
-                }}
-              >
-                <video
-                  src={miniVideo.preview}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  style={{
-                    width: '100%',
-                    height: 220,
-                    objectFit: 'cover',
-                    display: 'block',
-                    background: '#000',
-                  }}
-                />
-
-                <div
-                  style={{
-                    padding: '12px 14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 10,
-                  }}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 900,
-                        color: '#17130f',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {text.miniVideoAdded}
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: 4,
-                        fontSize: 13,
-                        color: '#7b7268',
-                        fontWeight: 700,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {miniVideo.name}
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                    <button
-                      type="button"
-                      onClick={() => setShowVideoSourceMenu(true)}
-                      style={{
-                        height: 40,
-                        borderRadius: 14,
-                        border: '1.5px solid #111111',
-                        background: '#ffffff',
-                        color: '#17130f',
-                        padding: '0 14px',
-                        fontSize: 14,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {text.replaceMiniVideo}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleRemoveVideo}
-                      style={{
-                        height: 40,
-                        borderRadius: 14,
-                        border: '1.5px solid #111111',
-                        background: '#ffffff',
-                        color: '#17130f',
-                        padding: '0 14px',
-                        fontSize: 14,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {text.removeMiniVideo}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
               borderRadius: 30,
               border: '2px solid #111111',
               background: '#fff',
@@ -2899,6 +1316,7 @@ export default function NewPromotionPage() {
                 ['new', text.badgeNew],
               ] as [BadgeMode, string][]).map(([mode, label]) => {
                 const active = badgeMode === mode;
+
                 return (
                   <button
                     key={mode}
@@ -2962,6 +1380,7 @@ export default function NewPromotionPage() {
                       boxSizing: 'border-box',
                     }}
                   />
+
                   <div
                     style={{
                       fontSize: 24,
@@ -2974,6 +1393,557 @@ export default function NewPromotionPage() {
                 </div>
               </div>
             ) : null}
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 18,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 8,
+              }}
+            >
+              {text.photo} <span style={{ color: '#ef4444' }}>*</span>
+            </div>
+
+            <div
+              style={{
+                fontSize: 14,
+                lineHeight: 1.5,
+                color: '#7b7268',
+                fontWeight: 700,
+                marginBottom: 14,
+              }}
+            >
+              {text.photoHint}
+            </div>
+
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 12,
+              }}
+            >
+              {text.layout}
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
+                marginBottom: 14,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setLayout('single')}
+                style={{
+                  minHeight: 54,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: layout === 'single' ? '#17130f' : '#fff',
+                  color: layout === 'single' ? '#fff' : '#17130f',
+                  fontSize: 15,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.layoutSingle}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setLayout('grid')}
+                style={{
+                  minHeight: 54,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: layout === 'grid' ? '#17130f' : '#fff',
+                  color: layout === 'grid' ? '#fff' : '#17130f',
+                  fontSize: 15,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.layoutGrid}
+              </button>
+            </div>
+
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFilesSelected}
+              style={{ display: 'none' }}
+            />
+
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              multiple
+              onChange={handleFilesSelected}
+              style={{ display: 'none' }}
+            />
+
+            <input
+              ref={filesInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFilesSelected}
+              style={{ display: 'none' }}
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPhotoSourceMenu(true)}
+              style={{
+                width: '100%',
+                minHeight: 92,
+                borderRadius: 22,
+                border: '1.5px solid #111111',
+                background: '#fff',
+                padding: 14,
+                display: 'grid',
+                gridTemplateColumns: '72px 1fr',
+                gap: 14,
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left',
+              }}
+            >
+              <div
+                style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: 22,
+                  border: '2px solid #c69212',
+                  background: '#fff7d6',
+                  color: '#c69212',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 42,
+                  fontWeight: 700,
+                }}
+              >
+                +
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
+                  {text.addPhoto}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 14,
+                    color: '#7b7268',
+                    fontWeight: 700,
+                  }}
+                >
+                  {text.maxPhotos}
+                </div>
+              </div>
+            </button>
+
+            {photos.length > 0 ? (
+              <>
+                <div
+                  style={{
+                    marginTop: 14,
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
+                  {text.photoAdded}: {photos.length}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 12,
+                    display: 'grid',
+                    gridTemplateColumns: layout === 'single' ? '1fr' : '1fr 1fr',
+                    gap: 10,
+                  }}
+                >
+                  {(layout === 'single' ? [photos[0]] : photos).map((photo) => {
+                    if (!photo) return null;
+
+                    return (
+                      <div
+                        key={photo.id}
+                        style={{
+                          borderRadius: 22,
+                          border: '1.5px solid #111111',
+                          overflow: 'hidden',
+                          background: '#fff',
+                          position: 'relative',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: '100%',
+                            height: layout === 'single' ? 220 : 150,
+                            overflow: 'hidden',
+                            position: 'relative',
+                            background: '#f4f1ea',
+                          }}
+                        >
+                          <img
+                            src={photo.preview}
+                            alt={photo.name}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              display: 'block',
+                              transform: `translate(${photo.offsetX}px, ${photo.offsetY}px) scale(${photo.scale})`,
+                              transformOrigin: 'center center',
+                            }}
+                          />
+                        </div>
+
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 10,
+                            right: 10,
+                            display: 'flex',
+                            gap: 8,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => openEditor(photo.id)}
+                            style={{
+                              minWidth: 34,
+                              height: 34,
+                              borderRadius: 999,
+                              border: '1.5px solid #111111',
+                              background: '#ffffff',
+                              color: '#17130f',
+                              fontSize: 12,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                              padding: '0 10px',
+                            }}
+                          >
+                            ↔
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePhoto(photo.id)}
+                            style={{
+                              minWidth: 34,
+                              height: 34,
+                              borderRadius: 999,
+                              border: '1.5px solid #111111',
+                              background: '#ffffff',
+                              color: '#17130f',
+                              fontSize: 18,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                              padding: '0 10px',
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+
+                        <div
+                          style={{
+                            padding: '10px 12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 10,
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: 13,
+                              color: '#7b7268',
+                              fontWeight: 700,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              flex: 1,
+                            }}
+                          >
+                            {photo.name}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => openEditor(photo.id)}
+                            style={{
+                              height: 34,
+                              borderRadius: 12,
+                              border: '1.5px solid #111111',
+                              background: '#fff',
+                              color: '#17130f',
+                              padding: '0 10px',
+                              fontSize: 12,
+                              fontWeight: 900,
+                              cursor: 'pointer',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {text.adjustPhoto}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : null}
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 18,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 900,
+                color: '#17130f',
+                marginBottom: 8,
+              }}
+            >
+              {text.miniVideo}
+            </div>
+
+            <div
+              style={{
+                fontSize: 14,
+                lineHeight: 1.5,
+                color: '#7b7268',
+                fontWeight: 700,
+                marginBottom: 14,
+              }}
+            >
+              {text.miniVideoHint}
+            </div>
+
+            <input
+              ref={galleryVideoInputRef}
+              type="file"
+              accept="video/*"
+              onChange={handleVideoSelected}
+              style={{ display: 'none' }}
+            />
+
+            <input
+              ref={cameraVideoInputRef}
+              type="file"
+              accept="video/*"
+              capture="environment"
+              onChange={handleVideoSelected}
+              style={{ display: 'none' }}
+            />
+
+            <input
+              ref={filesVideoInputRef}
+              type="file"
+              accept="video/*"
+              onChange={handleVideoSelected}
+              style={{ display: 'none' }}
+            />
+
+            {!miniVideo ? (
+              <button
+                type="button"
+                onClick={() => setShowVideoSourceMenu(true)}
+                style={{
+                  width: '100%',
+                  minHeight: 92,
+                  borderRadius: 22,
+                  border: '1.5px solid #111111',
+                  background: '#fff',
+                  padding: 14,
+                  display: 'grid',
+                  gridTemplateColumns: '72px 1fr',
+                  gap: 14,
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <div
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 22,
+                    border: '2px solid #2f7cf6',
+                    background: '#edf4ff',
+                    color: '#2f7cf6',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 34,
+                    fontWeight: 700,
+                  }}
+                >
+                  ▶
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
+                    {text.addMiniVideo}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 14,
+                      color: '#7b7268',
+                      fontWeight: 700,
+                    }}
+                  >
+                    MP4 / MOV / WEBM · max 5 sec
+                  </div>
+                </div>
+              </button>
+            ) : (
+              <div
+                style={{
+                  borderRadius: 22,
+                  border: '1.5px solid #111111',
+                  overflow: 'hidden',
+                  background: '#fff',
+                }}
+              >
+                <video
+                  src={miniVideo.preview}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  style={{
+                    width: '100%',
+                    height: 220,
+                    objectFit: 'cover',
+                    display: 'block',
+                    background: '#000',
+                  }}
+                />
+
+                <div
+                  style={{
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 10,
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 900,
+                        color: '#17130f',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {text.miniVideoAdded}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 4,
+                        fontSize: 13,
+                        color: '#7b7268',
+                        fontWeight: 700,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {miniVideo.name}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowVideoSourceMenu(true)}
+                      style={{
+                        height: 40,
+                        borderRadius: 14,
+                        border: '1.5px solid #111111',
+                        background: '#ffffff',
+                        color: '#17130f',
+                        padding: '0 14px',
+                        fontSize: 14,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {text.replaceMiniVideo}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleRemoveVideo}
+                      style={{
+                        height: 40,
+                        borderRadius: 14,
+                        border: '1.5px solid #111111',
+                        background: '#ffffff',
+                        color: '#17130f',
+                        padding: '0 14px',
+                        fontSize: 14,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {text.removeMiniVideo}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div
@@ -3338,7 +2308,7 @@ export default function NewPromotionPage() {
                       color: '#17130f',
                     }}
                   >
-                    {title || 'Your ad title'}
+                    {title || text.titlePlaceholder}
                   </div>
 
                   <div
@@ -3366,7 +2336,7 @@ export default function NewPromotionPage() {
                     fontWeight: 700,
                   }}
                 >
-                  {description || 'Your ad description will appear here'}
+                  {description || text.descriptionPlaceholder}
                 </div>
 
                 <div
@@ -3456,19 +2426,39 @@ export default function NewPromotionPage() {
                 color: '#17130f',
               }}
             >
-              <div>{text.category}: {currentCategory?.localizedLabel || '—'}</div>
+              <div>
+                {text.category}: {currentCategory?.localizedLabel || '—'}
+              </div>
+
               <div>
                 {text.subcategory}:{' '}
                 {subcategoryOptions.find((item) => item.value === subcategory)?.label || '—'}
               </div>
-              <div>{text.radius}: {selectedRadius.label}</div>
-              <div>{text.duration}: {days}</div>
-              <div>£{selectedRadius.pricePerDay} / {text.perDay}</div>
-              <div>{text.photosCount}: {photos.length}</div>
-              <div>{text.miniVideo}: {miniVideo ? '1' : '0'}</div>
+
+              <div>
+                {text.radius}: {selectedRadius.label}
+              </div>
+
+              <div>
+                {text.duration}: {days}
+              </div>
+
+              <div>
+                £{selectedRadius.pricePerDay} / {text.perDay}
+              </div>
+
+              <div>
+                {text.photosCount}: {photos.length}
+              </div>
+
+              <div>
+                {text.miniVideo}: {miniVideo ? '1' : '0'}
+              </div>
+
               <div>
                 {text.badgeText}: {previewBadge || text.badgeNone}
               </div>
+
               <div
                 style={{
                   color: selectedRadius.color,
@@ -3790,6 +2780,8 @@ export default function NewPromotionPage() {
             style={{
               width: '100%',
               maxWidth: 430,
+              maxHeight: 'calc(100vh - 40px)',
+              overflowY: 'auto',
               borderRadius: 28,
               border: '2px solid #111111',
               background: '#ffffff',
@@ -3937,6 +2929,7 @@ export default function NewPromotionPage() {
                 >
                   {text.selectedPaymentMethod}
                 </div>
+
                 <div
                   style={{
                     marginTop: 2,
