@@ -11,7 +11,6 @@ import {
 import {
   getBookings,
   subscribeToBookingsStore,
-  updateBookingStatus,
   patchBooking,
   canShowDirectContacts,
   getProtectedBookingContact,
@@ -666,6 +665,48 @@ function getTexts(language: AppLanguage) {
   return pageTexts[language] || pageTexts.EN;
 }
 
+function uiText(language: AppLanguage) {
+  if (language === 'RU') {
+    return {
+      filters: 'Фильтры',
+      filtersAlways: 'Фильтры всегда на экране',
+      showFilters: 'Показать фильтры',
+      hideFilters: 'Скрыть фильтры',
+      priceRange: 'Диапазон цены',
+      priceFrom: 'Цена от',
+      priceTo: 'Цена до',
+      apply: 'Применить',
+      reset: 'Сбросить',
+      activePrice: 'Цена',
+      all: 'Все',
+      byTime: 'По времени',
+      byName: 'По имени',
+      priceAsc: 'Цена ↑',
+      priceDesc: 'Цена ↓',
+      byProcedure: 'По процедуре',
+    };
+  }
+
+  return {
+    filters: 'Filters',
+    filtersAlways: 'Always show filters',
+    showFilters: 'Show filters',
+    hideFilters: 'Hide filters',
+    priceRange: 'Price range',
+    priceFrom: 'Price from',
+    priceTo: 'Price to',
+    apply: 'Apply',
+    reset: 'Reset',
+    activePrice: 'Price',
+    all: 'All',
+    byTime: 'By time',
+    byName: 'By name',
+    priceAsc: 'Price ↑',
+    priceDesc: 'Price ↓',
+    byProcedure: 'By service',
+  };
+}
+
 function translateService(value: string, language: AppLanguage) {
   return serviceTranslations[value]?.[language] || serviceTranslations[value]?.EN || value;
 }
@@ -679,28 +720,22 @@ function getFilterLabel(
   text: ReturnType<typeof getTexts>,
   language: AppLanguage
 ) {
-  if (filter === 'all') return language === 'RU' ? 'Все' : 'All';
+  if (filter === 'all') return uiText(language).all;
   return getSlotStatusLabel(filter, text);
 }
 
 function getSortLabel(sort: SortKey, language: AppLanguage) {
-  const ru: Record<SortKey, string> = {
-    time: 'По времени',
-    name: 'По имени',
-    priceAsc: 'Цена ↑',
-    priceDesc: 'Цена ↓',
-    procedure: 'По процедуре',
+  const labels = uiText(language);
+
+  const map: Record<SortKey, string> = {
+    time: labels.byTime,
+    name: labels.byName,
+    priceAsc: labels.priceAsc,
+    priceDesc: labels.priceDesc,
+    procedure: labels.byProcedure,
   };
 
-  const en: Record<SortKey, string> = {
-    time: 'By time',
-    name: 'By name',
-    priceAsc: 'Price ↑',
-    priceDesc: 'Price ↓',
-    procedure: 'By service',
-  };
-
-  return language === 'RU' ? ru[sort] : en[sort];
+  return map[sort];
 }
 
 function getSlotStatusLabel(status: SlotStatus, text: ReturnType<typeof getTexts>) {
@@ -1002,6 +1037,14 @@ export default function ProviderClientsPage() {
   const [noteDraft, setNoteDraft] = useState('');
   const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
 
+  const [filtersAlwaysVisible, setFiltersAlwaysVisible] = useState(true);
+  const [showFiltersPanel, setShowFiltersPanel] = useState(true);
+  const [showPriceSheet, setShowPriceSheet] = useState(false);
+  const [priceFrom, setPriceFrom] = useState('');
+  const [priceTo, setPriceTo] = useState('');
+  const [priceDraftFrom, setPriceDraftFrom] = useState('');
+  const [priceDraftTo, setPriceDraftTo] = useState('');
+
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
     const syncBookings = () => setBookings(getBookings());
@@ -1028,10 +1071,19 @@ export default function ProviderClientsPage() {
     setSlots(mapBookingsToSlots(bookings, language));
   }, [bookings, language]);
 
+  useEffect(() => {
+    if (filtersAlwaysVisible) {
+      setShowFiltersPanel(true);
+    }
+  }, [filtersAlwaysVisible]);
+
   const text = useMemo(() => getTexts(language), [language]);
+  const labels = useMemo(() => uiText(language), [language]);
 
   const selectedSlot = slots.find((slot) => slot.id === selectedSlotId) || null;
   const timeSlot = slots.find((slot) => slot.id === timeSlotId) || null;
+
+  const priceFilterActive = priceFrom.trim() !== '' || priceTo.trim() !== '';
 
   const visibleSlots = useMemo(() => {
     let source = slots;
@@ -1056,6 +1108,17 @@ export default function ProviderClientsPage() {
       source = source.filter((slot) => slot.status === activeFilter);
     }
 
+    const minPrice = priceFrom.trim() === '' ? null : Number(priceFrom);
+    const maxPrice = priceTo.trim() === '' ? null : Number(priceTo);
+
+    if (minPrice !== null && !Number.isNaN(minPrice)) {
+      source = source.filter((slot) => slot.price >= minPrice);
+    }
+
+    if (maxPrice !== null && !Number.isNaN(maxPrice)) {
+      source = source.filter((slot) => slot.price <= maxPrice);
+    }
+
     const q = search.trim().toLowerCase();
 
     if (q) {
@@ -1078,7 +1141,7 @@ export default function ProviderClientsPage() {
       if (sortKey === 'priceDesc') return b.price - a.price;
       return a.time.localeCompare(b.time);
     });
-  }, [activeFilter, activeView, search, slots, sortKey]);
+  }, [activeFilter, activeView, priceFrom, priceTo, search, slots, sortKey]);
 
   const activeTodayCount = slots.filter(
     (slot) => slot.status === 'confirmed' || slot.status === 'pending'
@@ -1091,6 +1154,26 @@ export default function ProviderClientsPage() {
     setEditHour(hour || '09');
     setEditMinute(minute || '30');
     setTimeSlotId(slot.id);
+  };
+
+  const handleOpenPriceSheet = () => {
+    setPriceDraftFrom(priceFrom);
+    setPriceDraftTo(priceTo);
+    setShowPriceSheet(true);
+  };
+
+  const handleApplyPriceFilter = () => {
+    setPriceFrom(priceDraftFrom.replace(/[^\d]/g, ''));
+    setPriceTo(priceDraftTo.replace(/[^\d]/g, ''));
+    setShowPriceSheet(false);
+  };
+
+  const handleResetPriceFilter = () => {
+    setPriceDraftFrom('');
+    setPriceDraftTo('');
+    setPriceFrom('');
+    setPriceTo('');
+    setShowPriceSheet(false);
   };
 
   const handleSaveTime = () => {
@@ -1180,6 +1263,8 @@ export default function ProviderClientsPage() {
   ];
 
   const sortOptions: SortKey[] = ['time', 'name', 'priceAsc', 'priceDesc', 'procedure'];
+
+  const shouldShowFilters = filtersAlwaysVisible || showFiltersPanel;
 
   return (
     <>
@@ -1407,75 +1492,203 @@ export default function ProviderClientsPage() {
             >
               <div
                 style={{
-                  display: 'flex',
-                  gap: 8,
-                  overflowX: 'auto',
-                  paddingBottom: 6,
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  gap: 10,
+                  alignItems: 'center',
                 }}
               >
-                {filterOptions.map((filter) => {
-                  const active = activeFilter === filter;
-                  const style = getFilterStyle(filter, active);
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 900,
+                    color: '#17130f',
+                  }}
+                >
+                  {labels.filters}
+                </div>
 
-                  return (
-                    <button
-                      key={filter}
-                      type="button"
-                      onClick={() => setActiveFilter(filter)}
-                      style={{
-                        flexShrink: 0,
-                        minHeight: 38,
-                        borderRadius: 999,
-                        border: `2px solid ${style.border}`,
-                        background: style.background,
-                        color: style.color,
-                        padding: '0 13px',
-                        fontSize: 12.5,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {getFilterLabel(filter, text, language)}
-                    </button>
-                  );
-                })}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (filtersAlwaysVisible) return;
+                    setShowFiltersPanel((prev) => !prev);
+                  }}
+                  style={{
+                    minHeight: 38,
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: filtersAlwaysVisible ? '#e3f8ea' : '#ffffff',
+                    color: filtersAlwaysVisible ? '#1f8c3f' : '#17130f',
+                    padding: '0 13px',
+                    fontSize: 12,
+                    fontWeight: 900,
+                    cursor: filtersAlwaysVisible ? 'default' : 'pointer',
+                  }}
+                >
+                  {showFiltersPanel || filtersAlwaysVisible ? labels.hideFilters : labels.showFilters}
+                </button>
               </div>
 
               <div
                 style={{
-                  marginTop: 6,
-                  display: 'flex',
-                  gap: 8,
-                  overflowX: 'auto',
-                  paddingBottom: 2,
+                  marginTop: 10,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#ffffff',
+                  padding: 10,
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  gap: 10,
+                  alignItems: 'center',
                 }}
               >
-                {sortOptions.map((sort) => {
-                  const active = sortKey === sort;
+                <div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
+                    {labels.filtersAlways}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: '#8b8277',
+                    }}
+                  >
+                    {filtersAlwaysVisible ? 'ON' : 'OFF'}
+                  </div>
+                </div>
 
-                  return (
+                <button
+                  type="button"
+                  onClick={() => setFiltersAlwaysVisible((prev) => !prev)}
+                  style={{
+                    width: 62,
+                    height: 34,
+                    borderRadius: 999,
+                    border: '2px solid #111111',
+                    background: filtersAlwaysVisible ? '#41c83f' : '#ececec',
+                    padding: 3,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: filtersAlwaysVisible ? 'flex-end' : 'flex-start',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 999,
+                      background: '#ffffff',
+                      border: '2px solid #111111',
+                    }}
+                  />
+                </button>
+              </div>
+
+              {shouldShowFilters ? (
+                <div style={{ marginTop: 10 }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 8,
+                      overflowX: 'auto',
+                      paddingBottom: 6,
+                    }}
+                  >
+                    {filterOptions.map((filter) => {
+                      const active = activeFilter === filter;
+                      const style = getFilterStyle(filter, active);
+
+                      return (
+                        <button
+                          key={filter}
+                          type="button"
+                          onClick={() => setActiveFilter(filter)}
+                          style={{
+                            flexShrink: 0,
+                            minHeight: 38,
+                            borderRadius: 999,
+                            border: `2px solid ${style.border}`,
+                            background: style.background,
+                            color: style.color,
+                            padding: '0 13px',
+                            fontSize: 12.5,
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {getFilterLabel(filter, text, language)}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 6,
+                      display: 'flex',
+                      gap: 8,
+                      overflowX: 'auto',
+                      paddingBottom: 2,
+                    }}
+                  >
+                    {sortOptions.map((sort) => {
+                      const active = sortKey === sort;
+
+                      return (
+                        <button
+                          key={sort}
+                          type="button"
+                          onClick={() => setSortKey(sort)}
+                          style={{
+                            flexShrink: 0,
+                            minHeight: 36,
+                            borderRadius: 999,
+                            border: active ? '2px solid #2f80ed' : '2px solid #111111',
+                            background: active ? '#e8f1ff' : '#ffffff',
+                            color: active ? '#2364c8' : '#17130f',
+                            padding: '0 13px',
+                            fontSize: 12,
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {getSortLabel(sort, language)}
+                        </button>
+                      );
+                    })}
+
                     <button
-                      key={sort}
                       type="button"
-                      onClick={() => setSortKey(sort)}
+                      onClick={handleOpenPriceSheet}
                       style={{
                         flexShrink: 0,
                         minHeight: 36,
                         borderRadius: 999,
-                        border: active ? '2px solid #2f80ed' : '2px solid #111111',
-                        background: active ? '#e8f1ff' : '#ffffff',
-                        color: active ? '#2364c8' : '#17130f',
+                        border: priceFilterActive ? '2px solid #ff3b3b' : '2px solid #111111',
+                        background: priceFilterActive ? '#fff0f0' : '#ffffff',
+                        color: priceFilterActive ? '#ff3b3b' : '#17130f',
                         padding: '0 13px',
                         fontSize: 12,
                         fontWeight: 900,
                         cursor: 'pointer',
                       }}
                     >
-                      {getSortLabel(sort, language)}
+                      {priceFilterActive
+                        ? `${labels.activePrice}: £${priceFrom || '0'}–£${priceTo || '∞'}`
+                        : labels.priceRange}
                     </button>
-                  );
-                })}
-              </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </section>
 
@@ -2199,6 +2412,180 @@ export default function ProviderClientsPage() {
                 }}
               >
                 {text.save}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showPriceSheet ? (
+        <div
+          onClick={() => setShowPriceSheet(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 360,
+            background: 'rgba(17,17,17,0.34)',
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: 430,
+              background: '#ffffff',
+              borderTopLeftRadius: 32,
+              borderTopRightRadius: 32,
+              border: '2px solid #111111',
+              borderBottom: 'none',
+              padding: '18px 18px calc(22px + env(safe-area-inset-bottom))',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div
+              style={{
+                width: 58,
+                height: 5,
+                borderRadius: 999,
+                background: '#d8d8d8',
+                margin: '0 auto 18px',
+              }}
+            />
+
+            <h2
+              style={{
+                margin: 0,
+                textAlign: 'center',
+                fontSize: 24,
+                fontWeight: 900,
+                color: '#17130f',
+              }}
+            >
+              {labels.priceRange}
+            </h2>
+
+            <div
+              style={{
+                marginTop: 18,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 12,
+              }}
+            >
+              <label
+                style={{
+                  borderRadius: 20,
+                  border: '2px solid #111111',
+                  padding: 12,
+                  background: '#fff',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 900,
+                    color: '#7b7268',
+                    marginBottom: 8,
+                  }}
+                >
+                  {labels.priceFrom}
+                </div>
+                <input
+                  value={priceDraftFrom}
+                  onChange={(event) => setPriceDraftFrom(event.target.value.replace(/[^\d]/g, ''))}
+                  inputMode="numeric"
+                  placeholder="45"
+                  style={{
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    fontSize: 28,
+                    fontWeight: 900,
+                    color: '#ff3b3b',
+                    background: 'transparent',
+                  }}
+                />
+              </label>
+
+              <label
+                style={{
+                  borderRadius: 20,
+                  border: '2px solid #111111',
+                  padding: 12,
+                  background: '#fff',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 900,
+                    color: '#7b7268',
+                    marginBottom: 8,
+                  }}
+                >
+                  {labels.priceTo}
+                </div>
+                <input
+                  value={priceDraftTo}
+                  onChange={(event) => setPriceDraftTo(event.target.value.replace(/[^\d]/g, ''))}
+                  inputMode="numeric"
+                  placeholder="50"
+                  style={{
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    fontSize: 28,
+                    fontWeight: 900,
+                    color: '#ff3b3b',
+                    background: 'transparent',
+                  }}
+                />
+              </label>
+            </div>
+
+            <div
+              style={{
+                marginTop: 18,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 12,
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleResetPriceFilter}
+                style={{
+                  minHeight: 56,
+                  borderRadius: 18,
+                  border: '2px solid #ff4b52',
+                  background: '#fff2f4',
+                  color: '#ff4b52',
+                  fontSize: 16,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {labels.reset}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleApplyPriceFilter}
+                style={{
+                  minHeight: 56,
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#41c83f',
+                  color: '#ffffff',
+                  fontSize: 16,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {labels.apply}
               </button>
             </div>
           </div>
