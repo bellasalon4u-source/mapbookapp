@@ -6,7 +6,6 @@ import {
   useRef,
   useState,
   type ChangeEvent,
-  type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -15,6 +14,7 @@ import {
   type AppLanguage,
 } from '../../../../services/i18n';
 import { categories } from '../../../../services/categories';
+import PhotoAdjuster from '../../../../components/common/PhotoAdjuster';
 import PaymentMethodSheet, {
   type PaymentSheetMethod,
 } from '../../../../components/payments/PaymentMethodSheet';
@@ -83,9 +83,6 @@ type DealPhotoState = {
   offsetY: number;
 };
 
-const MIN_SCALE = 1;
-const MAX_SCALE = 3;
-
 const baseTexts: DealTexts = {
   pageTitle: 'Add day deal',
   pageSubtitle: 'Create a special offer for today or several days.',
@@ -133,7 +130,7 @@ const baseTexts: DealTexts = {
   paymentHint: 'The day deal is published only after payment confirmation.',
   summary: 'Day deal summary',
   adjustPhoto: 'Adjust photo',
-  photoEditorHint: 'Move with one finger. Zoom with slider.',
+  photoEditorHint: 'Move photo with one finger. Pinch with two fingers to zoom.',
   resetPhoto: 'Reset',
   applyPhoto: 'Apply',
   livePreview: 'Live preview',
@@ -190,7 +187,7 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     paymentHint: 'Скидка дня публикуется только после подтверждения оплаты.',
     summary: 'Итог скидки дня',
     adjustPhoto: 'Настроить фото',
-    photoEditorHint: 'Перемещай одним пальцем. Увеличивай ползунком.',
+    photoEditorHint: 'Двигай фото одним пальцем. Двумя пальцами увеличивай или уменьшай.',
     resetPhoto: 'Сбросить',
     applyPhoto: 'Применить',
     livePreview: 'Предварительный просмотр',
@@ -245,7 +242,7 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     paymentHint: 'Знижка дня публікується тільки після підтвердження оплати.',
     summary: 'Підсумок знижки дня',
     adjustPhoto: 'Налаштувати фото',
-    photoEditorHint: 'Переміщуйте одним пальцем. Збільшуйте повзунком.',
+    photoEditorHint: 'Рухайте фото одним пальцем. Двома пальцями збільшуйте або зменшуйте.',
     resetPhoto: 'Скинути',
     applyPhoto: 'Застосувати',
     livePreview: 'Попередній перегляд',
@@ -300,7 +297,7 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     paymentHint: 'La oferta se publica solo después de confirmar el pago.',
     summary: 'Resumen del descuento',
     adjustPhoto: 'Ajustar foto',
-    photoEditorHint: 'Mueve con un dedo. Haz zoom con el control.',
+    photoEditorHint: 'Mueve la foto con un dedo. Usa dos dedos para hacer zoom.',
     resetPhoto: 'Restablecer',
     applyPhoto: 'Aplicar',
     livePreview: 'Vista previa',
@@ -355,7 +352,7 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     paymentHint: 'Sleva dne bude publikována až po potvrzení platby.',
     summary: 'Shrnutí slevy dne',
     adjustPhoto: 'Upravit fotku',
-    photoEditorHint: 'Posuňte jedním prstem. Přibližte posuvníkem.',
+    photoEditorHint: 'Posuňte fotku jedním prstem. Dvěma prsty přibližujte nebo oddalujte.',
     resetPhoto: 'Resetovat',
     applyPhoto: 'Použít',
     livePreview: 'Náhled',
@@ -410,7 +407,7 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     paymentHint: 'Der Tagesrabatt wird erst nach Zahlungsbestätigung veröffentlicht.',
     summary: 'Tagesrabatt Übersicht',
     adjustPhoto: 'Foto anpassen',
-    photoEditorHint: 'Mit einem Finger verschieben. Mit dem Regler zoomen.',
+    photoEditorHint: 'Foto mit einem Finger verschieben. Mit zwei Fingern zoomen.',
     resetPhoto: 'Zurücksetzen',
     applyPhoto: 'Anwenden',
     livePreview: 'Vorschau',
@@ -465,178 +462,13 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     paymentHint: 'Zniżka dnia zostanie opublikowana dopiero po potwierdzeniu płatności.',
     summary: 'Podsumowanie zniżki dnia',
     adjustPhoto: 'Dopasuj zdjęcie',
-    photoEditorHint: 'Przesuwaj jednym palcem. Powiększaj suwakiem.',
+    photoEditorHint: 'Przesuwaj zdjęcie jednym palcem. Dwoma palcami powiększaj lub zmniejszaj.',
     resetPhoto: 'Resetuj',
     applyPhoto: 'Zastosuj',
     livePreview: 'Podgląd',
     sponsored: 'Zniżka dnia',
     openDeal: 'Otwórz zniżkę',
     paymentRequired: 'Publikacja jest dostępna tylko po płatności.',
-  },
-  IT: {
-    pageTitle: 'Aggiungi offerta del giorno',
-    pageSubtitle: 'Crea un’offerta speciale per oggi o per più giorni.',
-    category: 'Categoria',
-    subcategory: 'Sottocategoria',
-    chooseCategory: 'Scegli categoria',
-    chooseSubcategory: 'Scegli sottocategoria',
-    discountTitle: 'Titolo offerta',
-    discountTitlePlaceholder: 'Inserisci titolo offerta',
-    discountPercent: 'Percentuale sconto',
-    onlyToday: 'Offerta a tempo limitato',
-    description: 'Descrizione',
-    descriptionPlaceholder: 'Inserisci descrizione...',
-    chooseDays: 'Scegli numero di giorni',
-    photo: 'Foto',
-    photoHint: 'Aggiungi solo 1 foto per l’offerta del giorno.',
-    addPhoto: 'Aggiungi foto',
-    replacePhoto: 'Sostituisci',
-    photoAdded: 'Foto aggiunta',
-    photoSource: 'Fonte foto',
-    gallery: 'Galleria',
-    camera: 'Camera',
-    files: 'File',
-    totalToPay: 'Totale da pagare',
-    choosePaymentMethod: 'Scegli metodo di pagamento',
-    paymentMethodsHint: 'Seleziona come vuoi pagare',
-    selected: 'Selezionato',
-    cancel: 'Annulla',
-    pay: 'Paga',
-    done: 'Pagamento confermato. L’offerta sarà pubblicata dopo il pagamento.',
-    ok: 'OK',
-    publishDay1: 'Pubblica offerta per 1 giorno',
-    publishDays: 'Pubblica offerta per {days} giorni',
-    day: 'giorno',
-    day2to4: 'giorni',
-    days: 'giorni',
-    forPrice: 'per',
-    enterCategory: 'Scegli categoria',
-    enterSubcategory: 'Scegli sottocategoria',
-    enterDiscountTitle: 'Inserisci titolo offerta',
-    enterDiscountPercent: 'Inserisci sconto',
-    enterDescription: 'Inserisci descrizione',
-    addPhotoAlert: 'Aggiungi foto',
-    close: 'Chiudi',
-    paymentHint: 'L’offerta viene pubblicata solo dopo conferma del pagamento.',
-    summary: 'Riepilogo offerta',
-    adjustPhoto: 'Regola foto',
-    photoEditorHint: 'Sposta con un dito. Zoom con lo slider.',
-    resetPhoto: 'Reset',
-    applyPhoto: 'Applica',
-    livePreview: 'Anteprima',
-    sponsored: 'Offerta del giorno',
-    openDeal: 'Apri offerta',
-    paymentRequired: 'La pubblicazione è disponibile solo dopo il pagamento.',
-  },
-  FR: {
-    pageTitle: 'Ajouter une réduction du jour',
-    pageSubtitle: 'Créez une offre spéciale pour aujourd’hui ou plusieurs jours.',
-    category: 'Catégorie',
-    subcategory: 'Sous-catégorie',
-    chooseCategory: 'Choisir une catégorie',
-    chooseSubcategory: 'Choisir une sous-catégorie',
-    discountTitle: 'Titre de la réduction',
-    discountTitlePlaceholder: 'Entrez le titre de la réduction',
-    discountPercent: 'Taille de la réduction',
-    onlyToday: 'Offre limitée',
-    description: 'Description',
-    descriptionPlaceholder: 'Entrez la description...',
-    chooseDays: 'Choisir le nombre de jours',
-    photo: 'Photo',
-    photoHint: 'Ajoutez seulement 1 photo pour la réduction du jour.',
-    addPhoto: 'Ajouter une photo',
-    replacePhoto: 'Remplacer',
-    photoAdded: 'Photo ajoutée',
-    photoSource: 'Source photo',
-    gallery: 'Galerie',
-    camera: 'Caméra',
-    files: 'Fichiers',
-    totalToPay: 'Total à payer',
-    choosePaymentMethod: 'Choisir le moyen de paiement',
-    paymentMethodsHint: 'Sélectionnez comment vous voulez payer',
-    selected: 'Sélectionné',
-    cancel: 'Annuler',
-    pay: 'Payer',
-    done: 'Paiement confirmé. La réduction sera publiée après le paiement.',
-    ok: 'OK',
-    publishDay1: 'Publier la réduction pour 1 jour',
-    publishDays: 'Publier la réduction pour {days} jours',
-    day: 'jour',
-    day2to4: 'jours',
-    days: 'jours',
-    forPrice: 'pour',
-    enterCategory: 'Choisir une catégorie',
-    enterSubcategory: 'Choisir une sous-catégorie',
-    enterDiscountTitle: 'Entrez le titre',
-    enterDiscountPercent: 'Entrez la réduction',
-    enterDescription: 'Entrez la description',
-    addPhotoAlert: 'Ajoutez une photo',
-    close: 'Fermer',
-    paymentHint: 'La réduction est publiée uniquement après confirmation du paiement.',
-    summary: 'Résumé de la réduction',
-    adjustPhoto: 'Ajuster la photo',
-    photoEditorHint: 'Déplacez avec un doigt. Zoomez avec le curseur.',
-    resetPhoto: 'Réinitialiser',
-    applyPhoto: 'Appliquer',
-    livePreview: 'Aperçu',
-    sponsored: 'Réduction du jour',
-    openDeal: 'Ouvrir la réduction',
-    paymentRequired: 'La publication est disponible uniquement après le paiement.',
-  },
-  AR: {
-    pageTitle: 'إضافة خصم اليوم',
-    pageSubtitle: 'أنشئ عرضاً خاصاً لليوم أو لعدة أيام.',
-    category: 'الفئة',
-    subcategory: 'الفئة الفرعية',
-    chooseCategory: 'اختر الفئة',
-    chooseSubcategory: 'اختر الفئة الفرعية',
-    discountTitle: 'عنوان الخصم',
-    discountTitlePlaceholder: 'أدخل عنوان الخصم',
-    discountPercent: 'نسبة الخصم',
-    onlyToday: 'عرض محدود',
-    description: 'الوصف',
-    descriptionPlaceholder: 'أدخل الوصف...',
-    chooseDays: 'اختر عدد الأيام',
-    photo: 'الصورة',
-    photoHint: 'أضف صورة واحدة فقط لخصم اليوم.',
-    addPhoto: 'إضافة صورة',
-    replacePhoto: 'استبدال',
-    photoAdded: 'تمت إضافة الصورة',
-    photoSource: 'مصدر الصورة',
-    gallery: 'المعرض',
-    camera: 'الكاميرا',
-    files: 'الملفات',
-    totalToPay: 'الإجمالي للدفع',
-    choosePaymentMethod: 'اختر طريقة الدفع',
-    paymentMethodsHint: 'اختر كيف تريد الدفع',
-    selected: 'تم الاختيار',
-    cancel: 'إلغاء',
-    pay: 'دفع',
-    done: 'تم تأكيد الدفع. سيتم نشر خصم اليوم بعد الدفع.',
-    ok: 'OK',
-    publishDay1: 'نشر الخصم ليوم واحد',
-    publishDays: 'نشر الخصم لمدة {days} أيام',
-    day: 'يوم',
-    day2to4: 'أيام',
-    days: 'أيام',
-    forPrice: 'مقابل',
-    enterCategory: 'اختر الفئة',
-    enterSubcategory: 'اختر الفئة الفرعية',
-    enterDiscountTitle: 'أدخل عنوان الخصم',
-    enterDiscountPercent: 'أدخل نسبة الخصم',
-    enterDescription: 'أدخل الوصف',
-    addPhotoAlert: 'أضف صورة',
-    close: 'إغلاق',
-    paymentHint: 'يتم نشر خصم اليوم فقط بعد تأكيد الدفع.',
-    summary: 'ملخص خصم اليوم',
-    adjustPhoto: 'تعديل الصورة',
-    photoEditorHint: 'حرّك بإصبع واحد. كبّر باستخدام الشريط.',
-    resetPhoto: 'إعادة ضبط',
-    applyPhoto: 'تطبيق',
-    livePreview: 'معاينة',
-    sponsored: 'خصم اليوم',
-    openDeal: 'فتح الخصم',
-    paymentRequired: 'النشر متاح فقط بعد الدفع.',
   },
 };
 
@@ -670,66 +502,6 @@ function getPaymentMethods(language: AppLanguage): PaymentSheetMethod[] {
     ];
   }
 
-  if (language === 'UA') {
-    return [
-      { id: 'card', title: 'Банківська карта', subtitle: 'Visa / Mastercard', ...common.card },
-      { id: 'paypal', title: 'PayPal', subtitle: 'Швидка оплата', ...common.paypal },
-      { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Швидка оплата', ...common.apple },
-      { id: 'google-pay', title: 'Google Pay', subtitle: 'Оплата в 1 дотик', ...common.google },
-      { id: 'wallet', title: 'Баланс Olamep', subtitle: 'Списати з гаманця', ...common.wallet },
-      { id: 'crypto', title: 'Криптогаманець', subtitle: 'USDT / USDC', ...common.crypto },
-      { id: 'bank', title: 'Банківський переказ', subtitle: 'Ручний переказ', ...common.bank },
-    ];
-  }
-
-  if (language === 'ES') {
-    return [
-      { id: 'card', title: 'Tarjeta bancaria', subtitle: 'Visa / Mastercard', ...common.card },
-      { id: 'paypal', title: 'PayPal', subtitle: 'Pago rápido', ...common.paypal },
-      { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Pago exprés', ...common.apple },
-      { id: 'google-pay', title: 'Google Pay', subtitle: 'Pago en 1 toque', ...common.google },
-      { id: 'wallet', title: 'Saldo Olamep', subtitle: 'Cobrar desde la cartera', ...common.wallet },
-      { id: 'crypto', title: 'Cartera cripto', subtitle: 'USDT / USDC', ...common.crypto },
-      { id: 'bank', title: 'Transferencia bancaria', subtitle: 'Transferencia manual', ...common.bank },
-    ];
-  }
-
-  if (language === 'CZ') {
-    return [
-      { id: 'card', title: 'Bankovní karta', subtitle: 'Visa / Mastercard', ...common.card },
-      { id: 'paypal', title: 'PayPal', subtitle: 'Rychlá platba', ...common.paypal },
-      { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Expresní platba', ...common.apple },
-      { id: 'google-pay', title: 'Google Pay', subtitle: 'Platba jedním klepnutím', ...common.google },
-      { id: 'wallet', title: 'Zůstatek Olamep', subtitle: 'Strhnout z peněženky', ...common.wallet },
-      { id: 'crypto', title: 'Krypto peněženka', subtitle: 'USDT / USDC', ...common.crypto },
-      { id: 'bank', title: 'Bankovní převod', subtitle: 'Ruční převod', ...common.bank },
-    ];
-  }
-
-  if (language === 'DE') {
-    return [
-      { id: 'card', title: 'Bankkarte', subtitle: 'Visa / Mastercard', ...common.card },
-      { id: 'paypal', title: 'PayPal', subtitle: 'Schnelle Zahlung', ...common.paypal },
-      { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Express-Checkout', ...common.apple },
-      { id: 'google-pay', title: 'Google Pay', subtitle: 'Ein-Klick-Zahlung', ...common.google },
-      { id: 'wallet', title: 'Olamep-Guthaben', subtitle: 'Vom Wallet abbuchen', ...common.wallet },
-      { id: 'crypto', title: 'Krypto-Wallet', subtitle: 'USDT / USDC', ...common.crypto },
-      { id: 'bank', title: 'Banküberweisung', subtitle: 'Manuelle Überweisung', ...common.bank },
-    ];
-  }
-
-  if (language === 'PL') {
-    return [
-      { id: 'card', title: 'Karta bankowa', subtitle: 'Visa / Mastercard', ...common.card },
-      { id: 'paypal', title: 'PayPal', subtitle: 'Szybka płatność', ...common.paypal },
-      { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Express checkout', ...common.apple },
-      { id: 'google-pay', title: 'Google Pay', subtitle: 'Płatność jednym dotknięciem', ...common.google },
-      { id: 'wallet', title: 'Saldo Olamep', subtitle: 'Pobierz z portfela', ...common.wallet },
-      { id: 'crypto', title: 'Portfel krypto', subtitle: 'USDT / USDC', ...common.crypto },
-      { id: 'bank', title: 'Przelew bankowy', subtitle: 'Przelew ręczny', ...common.bank },
-    ];
-  }
-
   return [
     { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', ...common.card },
     { id: 'paypal', title: 'PayPal', subtitle: 'Fast payment', ...common.paypal },
@@ -751,14 +523,6 @@ function getDayWord(days: number, language: AppLanguage, text: DealTexts) {
   }
 
   return days === 1 ? text.day : text.days;
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
-}
-
-function getSafeScale(value: number) {
-  return clamp(Number.isFinite(value) ? value : 1, MIN_SCALE, MAX_SCALE);
 }
 
 function translateCategoryLabel(categoryId: string, language: AppLanguage, fallback?: string) {
@@ -825,25 +589,6 @@ export default function NewDealPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<string>('card');
   const [photo, setPhoto] = useState<DealPhotoState | null>(null);
-
-  const [showPhotoEditor, setShowPhotoEditor] = useState(false);
-  const [editorScale, setEditorScale] = useState(1);
-  const [editorOffsetX, setEditorOffsetX] = useState(0);
-  const [editorOffsetY, setEditorOffsetY] = useState(0);
-
-  const dragRef = useRef<{
-    pointerId: number | null;
-    startX: number;
-    startY: number;
-    startOffsetX: number;
-    startOffsetY: number;
-  }>({
-    pointerId: null,
-    startX: 0,
-    startY: 0,
-    startOffsetX: 0,
-    startOffsetY: 0,
-  });
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -917,73 +662,36 @@ export default function NewDealPage() {
     }
 
     setPhoto(null);
-    setShowPhotoEditor(false);
   };
 
-  const openPhotoEditor = () => {
-    if (!photo) return;
-
-    setEditorScale(getSafeScale(photo.scale));
-    setEditorOffsetX(photo.offsetX || 0);
-    setEditorOffsetY(photo.offsetY || 0);
-    setShowPhotoEditor(true);
-  };
-
-  const closePhotoEditor = () => {
-    dragRef.current = {
-      pointerId: null,
-      startX: 0,
-      startY: 0,
-      startOffsetX: 0,
-      startOffsetY: 0,
-    };
-    setShowPhotoEditor(false);
-  };
-
-  const applyPhotoEditor = () => {
+  const updatePhotoTransform = (next: {
+    scale: number;
+    offsetX: number;
+    offsetY: number;
+  }) => {
     setPhoto((prev) =>
       prev
         ? {
             ...prev,
-            scale: getSafeScale(editorScale),
-            offsetX: editorOffsetX,
-            offsetY: editorOffsetY,
+            scale: next.scale,
+            offsetX: next.offsetX,
+            offsetY: next.offsetY,
           }
         : prev
     );
-
-    closePhotoEditor();
   };
 
-  const resetPhotoEditor = () => {
-    setEditorScale(1);
-    setEditorOffsetX(0);
-    setEditorOffsetY(0);
-  };
-
-  const handleEditorPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    dragRef.current = {
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      startOffsetX: editorOffsetX,
-      startOffsetY: editorOffsetY,
-    };
-  };
-
-  const handleEditorPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (dragRef.current.pointerId !== event.pointerId) return;
-
-    const deltaX = event.clientX - dragRef.current.startX;
-    const deltaY = event.clientY - dragRef.current.startY;
-
-    setEditorOffsetX(dragRef.current.startOffsetX + deltaX);
-    setEditorOffsetY(dragRef.current.startOffsetY + deltaY);
-  };
-
-  const handleEditorPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (dragRef.current.pointerId !== event.pointerId) return;
-    dragRef.current.pointerId = null;
+  const resetPhotoTransform = () => {
+    setPhoto((prev) =>
+      prev
+        ? {
+            ...prev,
+            scale: 1,
+            offsetX: 0,
+            offsetY: 0,
+          }
+        : prev
+    );
   };
 
   const handleOpenPayment = () => {
@@ -1472,17 +1180,13 @@ export default function NewDealPage() {
                     background: '#f4f1ea',
                   }}
                 >
-                  <img
+                  <PhotoAdjuster
                     src={photo.preview}
                     alt={photo.name || 'deal-photo'}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
-                      transform: `translate(${photo.offsetX}px, ${photo.offsetY}px) scale(${photo.scale})`,
-                      transformOrigin: 'center center',
-                    }}
+                    scale={photo.scale}
+                    offsetX={photo.offsetX}
+                    offsetY={photo.offsetY}
+                    onChange={updatePhotoTransform}
                   />
 
                   <div
@@ -1492,38 +1196,39 @@ export default function NewDealPage() {
                       right: 10,
                       display: 'flex',
                       gap: 8,
+                      zIndex: 5,
                     }}
                   >
                     <button
                       type="button"
-                      onClick={openPhotoEditor}
+                      onClick={resetPhotoTransform}
                       style={{
-                        minWidth: 34,
-                        height: 34,
+                        minWidth: 38,
+                        height: 38,
                         borderRadius: 999,
-                        border: '1.5px solid #111111',
+                        border: '2px solid #111111',
                         background: '#ffffff',
                         color: '#17130f',
-                        fontSize: 12,
+                        fontSize: 18,
                         fontWeight: 900,
                         cursor: 'pointer',
                         padding: '0 10px',
                       }}
                     >
-                      ↔
+                      ↺
                     </button>
 
                     <button
                       type="button"
                       onClick={handleRemovePhoto}
                       style={{
-                        width: 34,
-                        height: 34,
+                        width: 38,
+                        height: 38,
                         borderRadius: 999,
-                        border: '1.5px solid #111111',
+                        border: '2px solid #111111',
                         background: '#ffffff',
                         color: '#17130f',
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: 900,
                         cursor: 'pointer',
                       }}
@@ -1536,9 +1241,9 @@ export default function NewDealPage() {
                 <div
                   style={{
                     padding: '12px 14px',
-                    display: 'flex',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
                     gap: 10,
                   }}
                 >
@@ -1571,43 +1276,37 @@ export default function NewDealPage() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                    <button
-                      type="button"
-                      onClick={openPhotoEditor}
-                      style={{
-                        height: 40,
-                        borderRadius: 14,
-                        border: '1.5px solid #111111',
-                        background: '#ffffff',
-                        color: '#17130f',
-                        padding: '0 12px',
-                        fontSize: 13,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {text.adjustPhoto}
-                    </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowPhotoSourceMenu(true)}
+                    style={{
+                      height: 40,
+                      borderRadius: 14,
+                      border: '1.5px solid #111111',
+                      background: '#ffffff',
+                      color: '#17130f',
+                      padding: '0 14px',
+                      fontSize: 14,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {text.replacePhoto}
+                  </button>
+                </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setShowPhotoSourceMenu(true)}
-                      style={{
-                        height: 40,
-                        borderRadius: 14,
-                        border: '1.5px solid #111111',
-                        background: '#ffffff',
-                        color: '#17130f',
-                        padding: '0 14px',
-                        fontSize: 14,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {text.replacePhoto}
-                    </button>
-                  </div>
+                <div
+                  style={{
+                    borderTop: '1.5px solid #111111',
+                    padding: '10px 14px',
+                    fontSize: 13,
+                    fontWeight: 800,
+                    lineHeight: 1.35,
+                    color: '#6f675f',
+                    background: '#fffefa',
+                  }}
+                >
+                  {text.photoEditorHint}
                 </div>
               </div>
             )}
@@ -1726,7 +1425,10 @@ export default function NewDealPage() {
                         width: '100%',
                         height: 52,
                         border: 'none',
-                        borderBottom: value === daysOptions[daysOptions.length - 1] ? 'none' : '1px solid #ece3d7',
+                        borderBottom:
+                          value === daysOptions[daysOptions.length - 1]
+                            ? 'none'
+                            : '1px solid #ece3d7',
                         background: value === days ? '#f3fbf3' : '#fff',
                         color: value === days ? '#2fa35a' : '#17130f',
                         fontSize: 20,
@@ -1795,20 +1497,17 @@ export default function NewDealPage() {
                   position: 'relative',
                   height: 280,
                   background: '#ebe6da',
+                  overflow: 'hidden',
                 }}
               >
                 {photo ? (
-                  <img
+                  <PhotoAdjuster
                     src={photo.preview}
                     alt={photo.name || 'deal-preview'}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
-                      transform: `translate(${photo.offsetX}px, ${photo.offsetY}px) scale(${photo.scale})`,
-                      transformOrigin: 'center center',
-                    }}
+                    scale={photo.scale}
+                    offsetX={photo.offsetX}
+                    offsetY={photo.offsetY}
+                    onChange={updatePhotoTransform}
                   />
                 ) : (
                   <div
@@ -1835,6 +1534,8 @@ export default function NewDealPage() {
                     display: 'flex',
                     gap: 10,
                     flexWrap: 'wrap',
+                    zIndex: 5,
+                    pointerEvents: 'none',
                   }}
                 >
                   <div
@@ -2198,170 +1899,6 @@ export default function NewDealPage() {
               >
                 ✕ {text.close}
               </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {showPhotoEditor && photo ? (
-        <div
-          onClick={closePhotoEditor}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(17,17,17,0.42)',
-            zIndex: 300,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              padding: '0 14px calc(20px + env(safe-area-inset-bottom))',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                border: '2px solid #111111',
-                borderRadius: 26,
-                background: '#ffffff',
-                boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                style={{
-                  padding: '16px 16px 8px',
-                  fontSize: 18,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.adjustPhoto}
-              </div>
-
-              <div
-                style={{
-                  padding: '0 16px 14px',
-                  fontSize: 14,
-                  lineHeight: 1.45,
-                  color: '#7b7268',
-                  fontWeight: 700,
-                }}
-              >
-                {text.photoEditorHint}
-              </div>
-
-              <div style={{ padding: '0 16px 14px' }}>
-                <div
-                  onPointerDown={handleEditorPointerDown}
-                  onPointerMove={handleEditorPointerMove}
-                  onPointerUp={handleEditorPointerUp}
-                  onPointerCancel={handleEditorPointerUp}
-                  style={{
-                    width: '100%',
-                    aspectRatio: '1 / 1',
-                    borderRadius: 22,
-                    border: '2px solid #111111',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    background: '#f4f1ea',
-                    touchAction: 'none',
-                  }}
-                >
-                  <img
-                    src={photo.preview}
-                    alt={photo.name}
-                    draggable={false}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
-                      userSelect: 'none',
-                      transform: `translate(${editorOffsetX}px, ${editorOffsetY}px) scale(${editorScale})`,
-                      transformOrigin: 'center center',
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginTop: 14 }}>
-                  <input
-                    type="range"
-                    min={MIN_SCALE}
-                    max={MAX_SCALE}
-                    step={0.01}
-                    value={editorScale}
-                    onChange={(e) => setEditorScale(getSafeScale(Number(e.target.value)))}
-                    style={{ width: '100%' }}
-                  />
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 1fr',
-                  gap: 10,
-                  padding: '0 16px 16px',
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={resetPhotoEditor}
-                  style={{
-                    height: 50,
-                    borderRadius: 16,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    color: '#17130f',
-                    fontSize: 15,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {text.resetPhoto}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={closePhotoEditor}
-                  style={{
-                    height: 50,
-                    borderRadius: 16,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    color: '#17130f',
-                    fontSize: 15,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {text.cancel}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={applyPhotoEditor}
-                  style={{
-                    height: 50,
-                    borderRadius: 16,
-                    border: '2px solid #111111',
-                    background: '#17130f',
-                    color: '#fff',
-                    fontSize: 15,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {text.applyPhoto}
-                </button>
-              </div>
             </div>
           </div>
         </div>
