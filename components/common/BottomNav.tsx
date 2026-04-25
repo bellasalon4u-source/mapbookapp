@@ -9,10 +9,10 @@ import {
 } from '../../services/i18n';
 
 type BottomNavProps = {
-  active?: 'home' | 'bookings' | 'add' | 'messages' | 'profile';
+  active?: 'home' | 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
 };
 
-type NavKey = 'home' | 'bookings' | 'add' | 'messages' | 'profile';
+type NavKey = 'profile' | 'clients' | 'add' | 'bookings' | 'messages';
 
 type NavItem = {
   key: NavKey;
@@ -22,138 +22,104 @@ type NavItem = {
 
 const navLabels: Record<AppLanguage, Record<NavKey, string>> = {
   EN: {
-    home: 'Home',
-    messages: 'Messages',
-    add: 'Add',
-    bookings: 'Bookings',
     profile: 'Profile',
+    clients: 'My clients',
+    add: 'Add',
+    bookings: 'My bookings',
+    messages: 'Messages',
   },
   ES: {
-    home: 'Inicio',
-    messages: 'Mensajes',
-    add: 'Añadir',
-    bookings: 'Reservas',
     profile: 'Perfil',
+    clients: 'Clientes',
+    add: 'Añadir',
+    bookings: 'Mis reservas',
+    messages: 'Mensajes',
   },
   RU: {
-    home: 'Главная',
-    messages: 'Сообщения',
-    add: 'Добавить',
-    bookings: 'Брони',
     profile: 'Профиль',
+    clients: 'Мои клиенты',
+    add: 'Добавить',
+    bookings: 'Мои брони',
+    messages: 'Сообщения',
   },
   UA: {
-    home: 'Головна',
-    messages: 'Повідомлення',
-    add: 'Додати',
-    bookings: 'Броні',
     profile: 'Профіль',
+    clients: 'Мої клієнти',
+    add: 'Додати',
+    bookings: 'Мої броні',
+    messages: 'Повідомлення',
   },
   CZ: {
-    home: 'Domů',
-    messages: 'Zprávy',
-    add: 'Přidat',
-    bookings: 'Rezervace',
     profile: 'Profil',
+    clients: 'Klienti',
+    add: 'Přidat',
+    bookings: 'Moje rezervace',
+    messages: 'Zprávy',
   },
   DE: {
-    home: 'Home',
-    messages: 'Nachrichten',
+    profile: 'Profil',
+    clients: 'Kunden',
     add: 'Plus',
     bookings: 'Buchungen',
-    profile: 'Profil',
+    messages: 'Nachrichten',
   },
   IT: {
-    home: 'Home',
-    messages: 'Messaggi',
-    add: 'Aggiungi',
-    bookings: 'Prenota',
     profile: 'Profilo',
+    clients: 'Clienti',
+    add: 'Aggiungi',
+    bookings: 'Prenotazioni',
+    messages: 'Messaggi',
   },
   FR: {
-    home: 'Accueil',
-    messages: 'Messages',
-    add: 'Ajouter',
-    bookings: 'Réserver',
     profile: 'Profil',
+    clients: 'Clients',
+    add: 'Ajouter',
+    bookings: 'Mes réserv.',
+    messages: 'Messages',
   },
   AR: {
-    home: 'الرئيسية',
-    messages: 'رسائل',
-    add: 'إضافة',
-    bookings: 'حجوزات',
     profile: 'حسابي',
+    clients: 'عملائي',
+    add: 'إضافة',
+    bookings: 'حجوزاتي',
+    messages: 'رسائل',
   },
   PL: {
-    home: 'Start',
-    messages: 'Wiadom.',
+    profile: 'Profil',
+    clients: 'Klienci',
     add: 'Dodaj',
     bookings: 'Rezerw.',
-    profile: 'Profil',
+    messages: 'Wiadom.',
   },
+};
+
+const addMenuTexts: Record<
+  AppLanguage,
+  {
+    ad: string;
+    service: string;
+    deal: string;
+    close: string;
+  }
+> = {
+  EN: { ad: 'Ad', service: 'Service', deal: 'Deal', close: 'Close' },
+  ES: { ad: 'Anuncio', service: 'Servicio', deal: 'Descuento', close: 'Cerrar' },
+  RU: { ad: 'Реклама', service: 'Услуга', deal: 'Скидка', close: 'Закрыть' },
+  UA: { ad: 'Реклама', service: 'Послуга', deal: 'Знижка', close: 'Закрити' },
+  CZ: { ad: 'Reklama', service: 'Služba', deal: 'Sleva', close: 'Zavřít' },
+  DE: { ad: 'Anzeige', service: 'Service', deal: 'Rabatt', close: 'Schließen' },
+  IT: { ad: 'Pubblicità', service: 'Servizio', deal: 'Sconto', close: 'Chiudi' },
+  FR: { ad: 'Pub', service: 'Service', deal: 'Réduction', close: 'Fermer' },
+  AR: { ad: 'إعلان', service: 'خدمة', deal: 'خصم', close: 'إغلاق' },
+  PL: { ad: 'Reklama', service: 'Usługa', deal: 'Zniżka', close: 'Zamknij' },
 };
 
 function getLabel(language: AppLanguage, key: NavKey) {
   return navLabels[language]?.[key] || navLabels.EN[key];
 }
 
-function HomeIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M4 10.5L12 4L20 10.5V20H4V10.5Z"
-        stroke={active ? '#55c75f' : '#202020'}
-        strokeWidth="1.9"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function MessageIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
-        stroke={active ? '#55c75f' : '#202020'}
-        strokeWidth="1.9"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function CalendarIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-      <rect
-        x="4"
-        y="6"
-        width="16"
-        height="14"
-        rx="2"
-        stroke={active ? '#55c75f' : '#202020'}
-        strokeWidth="1.9"
-      />
-      <path
-        d="M8 3V8"
-        stroke={active ? '#55c75f' : '#202020'}
-        strokeWidth="1.9"
-        strokeLinecap="round"
-      />
-      <path
-        d="M16 3V8"
-        stroke={active ? '#55c75f' : '#202020'}
-        strokeWidth="1.9"
-        strokeLinecap="round"
-      />
-      <path
-        d="M4 10H20"
-        stroke={active ? '#55c75f' : '#202020'}
-        strokeWidth="1.9"
-      />
-    </svg>
-  );
+function getAddText(language: AppLanguage) {
+  return addMenuTexts[language] || addMenuTexts.EN;
 }
 
 function ProfileIcon({ active }: { active: boolean }) {
@@ -176,12 +142,86 @@ function ProfileIcon({ active }: { active: boolean }) {
   );
 }
 
+function ClientsIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+      <rect
+        x="4"
+        y="7"
+        width="16"
+        height="12"
+        rx="2.4"
+        stroke={active ? '#f1b900' : '#202020'}
+        strokeWidth="1.9"
+      />
+      <path
+        d="M9 7V5.8C9 4.8 9.8 4 10.8 4H13.2C14.2 4 15 4.8 15 5.8V7"
+        stroke={active ? '#f1b900' : '#202020'}
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+      <path
+        d="M8 12H16"
+        stroke={active ? '#f1b900' : '#202020'}
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function CalendarIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+      <rect
+        x="4"
+        y="6"
+        width="16"
+        height="14"
+        rx="2"
+        stroke={active ? '#2578ff' : '#202020'}
+        strokeWidth="1.9"
+      />
+      <path
+        d="M8 3V8"
+        stroke={active ? '#2578ff' : '#202020'}
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+      <path
+        d="M16 3V8"
+        stroke={active ? '#2578ff' : '#202020'}
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4 10H20"
+        stroke={active ? '#2578ff' : '#202020'}
+        strokeWidth="1.9"
+      />
+    </svg>
+  );
+}
+
+function MessageIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
+        stroke={active ? '#55c75f' : '#202020'}
+        strokeWidth="1.9"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const navItems: NavItem[] = [
-  { key: 'home', href: '/' },
-  { key: 'messages', href: '/messages', badge: 2 },
+  { key: 'profile', href: '/profile' },
+  { key: 'clients', href: '/bookings/clients' },
   { key: 'add', href: '/profile/promotions/new' },
   { key: 'bookings', href: '/bookings' },
-  { key: 'profile', href: '/profile' },
+  { key: 'messages', href: '/messages', badge: 2 },
 ];
 
 export default function BottomNav({ active: activeProp }: BottomNavProps) {
@@ -211,6 +251,8 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
     return navLabels[language] || navLabels.EN;
   }, [language]);
 
+  const addText = useMemo(() => getAddText(language), [language]);
+
   const showNavForMoment = () => {
     setNavVisible(true);
 
@@ -222,7 +264,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       if (!addMenuOpen) {
         setNavVisible(false);
       }
-    }, 2200);
+    }, 3200);
   };
 
   useEffect(() => {
@@ -259,8 +301,21 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
   const getIsActive = (key: BottomNavProps['active'], href: string) => {
     if (activeProp) return activeProp === key;
 
-    if (href === '/') return pathname === '/';
-    if (href === '/profile') return pathname === '/profile' || pathname?.startsWith('/profile');
+    if (key === 'profile') {
+      return pathname === '/profile' || pathname?.startsWith('/profile/');
+    }
+
+    if (key === 'clients') {
+      return pathname?.startsWith('/bookings/clients');
+    }
+
+    if (key === 'bookings') {
+      return pathname === '/bookings' || pathname?.startsWith('/bookings/');
+    }
+
+    if (key === 'messages') {
+      return pathname?.startsWith('/messages');
+    }
 
     if (key === 'add') {
       return (
@@ -269,6 +324,8 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
         pathname?.startsWith('/add')
       );
     }
+
+    if (href === '/') return pathname === '/';
 
     return pathname?.startsWith(href);
   };
@@ -355,27 +412,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 }}
               >
                 <span style={{ fontSize: 34 }}>📣</span>
-                <span>
-                  {language === 'EN'
-                    ? 'Ad'
-                    : language === 'ES'
-                    ? 'Anuncio'
-                    : language === 'UA'
-                    ? 'Реклама'
-                    : language === 'CZ'
-                    ? 'Reklama'
-                    : language === 'DE'
-                    ? 'Anzeige'
-                    : language === 'IT'
-                    ? 'Pubblicità'
-                    : language === 'FR'
-                    ? 'Pub'
-                    : language === 'PL'
-                    ? 'Reklama'
-                    : language === 'AR'
-                    ? 'إعلان'
-                    : 'Реклама'}
-                </span>
+                <span>{addText.ad}</span>
               </button>
 
               <button
@@ -398,27 +435,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 }}
               >
                 <span style={{ fontSize: 40, lineHeight: 1 }}>+</span>
-                <span>
-                  {language === 'EN'
-                    ? 'Service'
-                    : language === 'ES'
-                    ? 'Servicio'
-                    : language === 'UA'
-                    ? 'Послуга'
-                    : language === 'CZ'
-                    ? 'Služba'
-                    : language === 'DE'
-                    ? 'Service'
-                    : language === 'IT'
-                    ? 'Servizio'
-                    : language === 'FR'
-                    ? 'Service'
-                    : language === 'PL'
-                    ? 'Usługa'
-                    : language === 'AR'
-                    ? 'خدمة'
-                    : 'Услуга'}
-                </span>
+                <span>{addText.service}</span>
               </button>
 
               <button
@@ -461,27 +478,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   £1
                 </span>
                 <span style={{ fontSize: 42, lineHeight: 1 }}>%</span>
-                <span>
-                  {language === 'EN'
-                    ? 'Deal'
-                    : language === 'ES'
-                    ? 'Descuento'
-                    : language === 'UA'
-                    ? 'Знижка'
-                    : language === 'CZ'
-                    ? 'Sleva'
-                    : language === 'DE'
-                    ? 'Rabatt'
-                    : language === 'IT'
-                    ? 'Sconto'
-                    : language === 'FR'
-                    ? 'Réduction'
-                    : language === 'PL'
-                    ? 'Zniżka'
-                    : language === 'AR'
-                    ? 'خصم'
-                    : 'Скидка'}
-                </span>
+                <span>{addText.deal}</span>
               </button>
             </div>
 
@@ -499,26 +496,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 cursor: 'pointer',
               }}
             >
-              ×{' '}
-              {language === 'EN'
-                ? 'Close'
-                : language === 'ES'
-                ? 'Cerrar'
-                : language === 'UA'
-                ? 'Закрити'
-                : language === 'CZ'
-                ? 'Zavřít'
-                : language === 'DE'
-                ? 'Schließen'
-                : language === 'IT'
-                ? 'Chiudi'
-                : language === 'FR'
-                ? 'Fermer'
-                : language === 'PL'
-                ? 'Zamknij'
-                : language === 'AR'
-                ? 'إغلاق'
-                : 'Закрыть'}
+              × {addText.close}
             </button>
           </div>
         </div>
@@ -632,10 +610,10 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                       flexShrink: 0,
                     }}
                   >
-                    {item.key === 'home' && <HomeIcon active={isActive} />}
-                    {item.key === 'messages' && <MessageIcon active={isActive} />}
-                    {item.key === 'bookings' && <CalendarIcon active={isActive} />}
                     {item.key === 'profile' && <ProfileIcon active={isActive} />}
+                    {item.key === 'clients' && <ClientsIcon active={isActive} />}
+                    {item.key === 'bookings' && <CalendarIcon active={isActive} />}
+                    {item.key === 'messages' && <MessageIcon active={isActive} />}
                   </span>
                 )}
 
@@ -668,14 +646,18 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   style={{
                     marginTop: isAdd ? -19 : 0,
                     width: '100%',
-                    maxWidth: 58,
+                    maxWidth: 62,
                     minWidth: 0,
                     display: 'block',
                     textAlign: 'center',
                     fontSize:
-                      language === 'UA' || language === 'DE' || language === 'IT'
-                        ? 10.5
-                        : 11.5,
+                      language === 'UA' ||
+                      language === 'DE' ||
+                      language === 'IT' ||
+                      language === 'CZ' ||
+                      language === 'FR'
+                        ? 10.2
+                        : 11,
                     fontWeight: 900,
                     color: isActive ? '#55c75f' : '#202020',
                     lineHeight: 1.05,
