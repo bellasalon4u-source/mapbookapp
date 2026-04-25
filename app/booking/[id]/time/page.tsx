@@ -34,22 +34,216 @@ type ServiceLike = {
   image: string;
 };
 
+const BRAND = {
+  navy: '#071b46',
+  blue: '#1467f2',
+  green: '#21b84b',
+  red: '#ff4b4b',
+  border: '#111111',
+  muted: '#626977',
+};
+
+function getTexts(language: AppLanguage) {
+  if (language === 'RU') {
+    return {
+      bookingDataNotFound: 'Данные бронирования не найдены',
+      chooseTime: 'Выберите время',
+      subtitle: 'Выберите удобное время для визита',
+      selectedServices: 'Выбранная услуга',
+      totalDuration: 'Длительность',
+      totalPrice: 'Цена',
+      availableTime: 'Доступное время',
+      selectedDate: 'Выбранная дата',
+      selected: 'Выбрано',
+      notSelected: 'Не выбрано',
+      continue: 'Продолжить',
+      morning: 'Утро',
+      day: 'День',
+      evening: 'Вечер',
+      busy: 'Занято',
+      available: 'Доступно',
+      fastBooking: 'Быстрая бронь',
+      timeHint: 'Занятые слоты недоступны.',
+      providerFallback: 'Специалист',
+      serviceProviderFallback: 'Исполнитель услуг',
+      serviceFallback: 'Основная услуга',
+      premiumOption: 'Премиум вариант',
+      message: 'Сообщения',
+    };
+  }
+
+  if (language === 'UA') {
+    return {
+      bookingDataNotFound: 'Дані бронювання не знайдено',
+      chooseTime: 'Оберіть час',
+      subtitle: 'Оберіть зручний час для візиту',
+      selectedServices: 'Обрана послуга',
+      totalDuration: 'Тривалість',
+      totalPrice: 'Ціна',
+      availableTime: 'Доступний час',
+      selectedDate: 'Обрана дата',
+      selected: 'Обрано',
+      notSelected: 'Не обрано',
+      continue: 'Продовжити',
+      morning: 'Ранок',
+      day: 'День',
+      evening: 'Вечір',
+      busy: 'Зайнято',
+      available: 'Доступно',
+      fastBooking: 'Швидке бронювання',
+      timeHint: 'Зайняті слоти недоступні.',
+      providerFallback: 'Спеціаліст',
+      serviceProviderFallback: 'Виконавець послуг',
+      serviceFallback: 'Основна послуга',
+      premiumOption: 'Преміум варіант',
+      message: 'Повідомлення',
+    };
+  }
+
+  return {
+    bookingDataNotFound: 'Booking data not found',
+    chooseTime: 'Choose time',
+    subtitle: 'Select the best time for your appointment',
+    selectedServices: 'Selected service',
+    totalDuration: 'Duration',
+    totalPrice: 'Price',
+    availableTime: 'Available time',
+    selectedDate: 'Selected date',
+    selected: 'Selected',
+    notSelected: 'Not selected',
+    continue: 'Continue',
+    morning: 'Morning',
+    day: 'Day',
+    evening: 'Evening',
+    busy: 'Busy',
+    available: 'Available',
+    fastBooking: 'Fast booking',
+    timeHint: 'Busy slots are unavailable.',
+    providerFallback: 'Provider',
+    serviceProviderFallback: 'Service provider',
+    serviceFallback: 'Main service',
+    premiumOption: 'Premium option',
+    message: 'Messages',
+  };
+}
+
+function OlamepLogo() {
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+      }}
+    >
+      <div
+        style={{
+          width: 34,
+          height: 42,
+          position: 'relative',
+          borderRadius: '50% 50% 58% 58%',
+          background:
+            'conic-gradient(from 210deg, #1467f2 0deg, #20c96b 90deg, #ffd629 160deg, #ff3f68 230deg, #1467f2 360deg)',
+          boxShadow: '0 8px 18px rgba(20,103,242,0.18)',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: 8,
+            top: 8,
+            width: 17,
+            height: 17,
+            borderRadius: '50%',
+            background: '#ffffff',
+            border: '4px solid #071b46',
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          fontSize: 30,
+          fontWeight: 900,
+          color: BRAND.navy,
+          letterSpacing: '-1px',
+        }}
+      >
+        Olamep
+      </div>
+    </div>
+  );
+}
+
+function MessageIcon() {
+  return (
+    <div
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 999,
+        border: `2px solid ${BRAND.green}`,
+        background: '#ffffff',
+        color: BRAND.green,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 26,
+        fontWeight: 900,
+      }}
+    >
+      💬
+    </div>
+  );
+}
+
 function parseDurationToMinutes(value: string) {
-  const hourMatch = value.match(/(\d+)\s*h/i);
-  const minuteMatch = value.match(/(\d+)\s*m/i);
+  const text = String(value || '').toLowerCase();
+
+  const hourMatch = text.match(/(\d+)\s*(h|hour|hours|ч|г|std)/i);
+  const minuteMatch = text.match(/(\d+)\s*(m|min|mins|minute|minutes|м|хв)/i);
 
   const hours = hourMatch ? Number(hourMatch[1]) : 0;
   const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
 
+  if (hours === 0 && minutes === 0) {
+    const onlyNumber = Number(text.replace(/[^\d.]/g, ''));
+    if (Number.isFinite(onlyNumber) && onlyNumber > 0) return onlyNumber;
+  }
+
   return hours * 60 + minutes;
+}
+
+function formatMinutes(minutes: number, language: AppLanguage) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+
+  if (!minutes) return '0m';
+
+  if (language === 'RU') {
+    if (h > 0 && m > 0) return `${h}ч ${m}м`;
+    if (h > 0) return `${h}ч`;
+    return `${m}м`;
+  }
+
+  if (language === 'UA') {
+    if (h > 0 && m > 0) return `${h}г ${m}хв`;
+    if (h > 0) return `${h}г`;
+    return `${m}хв`;
+  }
+
+  if (h > 0 && m > 0) return `${h}h ${m}m`;
+  if (h > 0) return `${h}h`;
+  return `${m}m`;
 }
 
 function listingToMasterShape(listing: ListingLike, index: number, text: ReturnType<typeof getTexts>) {
   const fallbackImages = [
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=1200&q=80',
     'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80',
   ];
 
   const gallery =
@@ -89,221 +283,6 @@ function listingToMasterShape(listing: ListingLike, index: number, text: ReturnT
   };
 }
 
-function getTexts(language: AppLanguage) {
-  if (language === 'RU') {
-    return {
-      bookingDataNotFound: 'Данные бронирования не найдены',
-      chooseTime: 'Выберите время',
-      selectedServices: 'Выбранные услуги',
-      totalDuration: 'Общая длительность',
-      totalPrice: 'Общая цена',
-      availableTime: 'Доступное время',
-      selectedDate: 'Выбранная дата',
-      selected: 'Выбрано',
-      notSelected: 'Не выбрано',
-      continue: 'Продолжить',
-      zeroMinutes: '0м',
-      morning: 'Утро',
-      day: 'День',
-      evening: 'Вечер',
-      busy: 'Занято',
-      fastBooking: 'Быстрая бронь',
-      timeHint: 'Выберите удобное время. Занятые слоты недоступны.',
-      providerFallback: 'Специалист',
-      serviceProviderFallback: 'Исполнитель услуг',
-      serviceFallback: 'Основная услуга',
-      premiumOption: 'Премиум вариант',
-    };
-  }
-
-  if (language === 'UA') {
-    return {
-      bookingDataNotFound: 'Дані бронювання не знайдено',
-      chooseTime: 'Оберіть час',
-      selectedServices: 'Вибрані послуги',
-      totalDuration: 'Загальна тривалість',
-      totalPrice: 'Загальна ціна',
-      availableTime: 'Доступний час',
-      selectedDate: 'Вибрана дата',
-      selected: 'Вибрано',
-      notSelected: 'Не вибрано',
-      continue: 'Продовжити',
-      zeroMinutes: '0хв',
-      morning: 'Ранок',
-      day: 'День',
-      evening: 'Вечір',
-      busy: 'Зайнято',
-      fastBooking: 'Швидке бронювання',
-      timeHint: 'Оберіть зручний час. Зайняті слоти недоступні.',
-      providerFallback: 'Спеціаліст',
-      serviceProviderFallback: 'Виконавець послуг',
-      serviceFallback: 'Основна послуга',
-      premiumOption: 'Преміум варіант',
-    };
-  }
-
-  if (language === 'ES') {
-    return {
-      bookingDataNotFound: 'Datos de reserva no encontrados',
-      chooseTime: 'Elige hora',
-      selectedServices: 'Servicios seleccionados',
-      totalDuration: 'Duración total',
-      totalPrice: 'Precio total',
-      availableTime: 'Hora disponible',
-      selectedDate: 'Fecha seleccionada',
-      selected: 'Seleccionado',
-      notSelected: 'No seleccionado',
-      continue: 'Continuar',
-      zeroMinutes: '0 min',
-      morning: 'Mañana',
-      day: 'Día',
-      evening: 'Tarde',
-      busy: 'Ocupado',
-      fastBooking: 'Reserva rápida',
-      timeHint: 'Elige una hora conveniente. Los horarios ocupados no están disponibles.',
-      providerFallback: 'Profesional',
-      serviceProviderFallback: 'Proveedor de servicios',
-      serviceFallback: 'Servicio principal',
-      premiumOption: 'Opción premium',
-    };
-  }
-
-  if (language === 'CZ') {
-    return {
-      bookingDataNotFound: 'Údaje rezervace nebyly nalezeny',
-      chooseTime: 'Vyberte čas',
-      selectedServices: 'Vybrané služby',
-      totalDuration: 'Celková délka',
-      totalPrice: 'Celková cena',
-      availableTime: 'Dostupný čas',
-      selectedDate: 'Vybrané datum',
-      selected: 'Vybráno',
-      notSelected: 'Nevybráno',
-      continue: 'Pokračovat',
-      zeroMinutes: '0 min',
-      morning: 'Ráno',
-      day: 'Den',
-      evening: 'Večer',
-      busy: 'Obsazeno',
-      fastBooking: 'Rychlá rezervace',
-      timeHint: 'Vyberte vhodný čas. Obsazené časy nejsou dostupné.',
-      providerFallback: 'Specialista',
-      serviceProviderFallback: 'Poskytovatel služeb',
-      serviceFallback: 'Hlavní služba',
-      premiumOption: 'Prémiová možnost',
-    };
-  }
-
-  if (language === 'DE') {
-    return {
-      bookingDataNotFound: 'Buchungsdaten nicht gefunden',
-      chooseTime: 'Zeit wählen',
-      selectedServices: 'Ausgewählte Leistungen',
-      totalDuration: 'Gesamtdauer',
-      totalPrice: 'Gesamtpreis',
-      availableTime: 'Verfügbare Zeit',
-      selectedDate: 'Ausgewähltes Datum',
-      selected: 'Ausgewählt',
-      notSelected: 'Nicht ausgewählt',
-      continue: 'Weiter',
-      zeroMinutes: '0 Min',
-      morning: 'Morgen',
-      day: 'Tag',
-      evening: 'Abend',
-      busy: 'Besetzt',
-      fastBooking: 'Schnellbuchung',
-      timeHint: 'Wähle eine passende Zeit. Besetzte Zeiten sind nicht verfügbar.',
-      providerFallback: 'Spezialist',
-      serviceProviderFallback: 'Dienstleister',
-      serviceFallback: 'Hauptservice',
-      premiumOption: 'Premium-Option',
-    };
-  }
-
-  if (language === 'PL') {
-    return {
-      bookingDataNotFound: 'Nie znaleziono danych rezerwacji',
-      chooseTime: 'Wybierz godzinę',
-      selectedServices: 'Wybrane usługi',
-      totalDuration: 'Łączny czas',
-      totalPrice: 'Łączna cena',
-      availableTime: 'Dostępny czas',
-      selectedDate: 'Wybrana data',
-      selected: 'Wybrano',
-      notSelected: 'Nie wybrano',
-      continue: 'Dalej',
-      zeroMinutes: '0 min',
-      morning: 'Rano',
-      day: 'Dzień',
-      evening: 'Wieczór',
-      busy: 'Zajęte',
-      fastBooking: 'Szybka rezerwacja',
-      timeHint: 'Wybierz dogodną godzinę. Zajęte sloty są niedostępne.',
-      providerFallback: 'Specjalista',
-      serviceProviderFallback: 'Usługodawca',
-      serviceFallback: 'Usługa główna',
-      premiumOption: 'Opcja premium',
-    };
-  }
-
-  return {
-    bookingDataNotFound: 'Booking data not found',
-    chooseTime: 'Choose time',
-    selectedServices: 'Selected services',
-    totalDuration: 'Total duration',
-    totalPrice: 'Total price',
-    availableTime: 'Available time',
-    selectedDate: 'Selected date',
-    selected: 'Selected',
-    notSelected: 'Not selected',
-    continue: 'Continue',
-    zeroMinutes: '0m',
-    morning: 'Morning',
-    day: 'Day',
-    evening: 'Evening',
-    busy: 'Busy',
-    fastBooking: 'Fast booking',
-    timeHint: 'Choose a convenient time. Busy slots are unavailable.',
-    providerFallback: 'Provider',
-    serviceProviderFallback: 'Service provider',
-    serviceFallback: 'Main service',
-    premiumOption: 'Premium option',
-  };
-}
-
-function formatMinutes(minutes: number, language: AppLanguage) {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-
-  if (language === 'RU') {
-    if (h > 0 && m > 0) return `${h}ч ${m}м`;
-    if (h > 0) return `${h}ч`;
-    return `${m}м`;
-  }
-
-  if (language === 'UA') {
-    if (h > 0 && m > 0) return `${h}г ${m}хв`;
-    if (h > 0) return `${h}г`;
-    return `${m}хв`;
-  }
-
-  if (language === 'DE') {
-    if (h > 0 && m > 0) return `${h}Std ${m}Min`;
-    if (h > 0) return `${h}Std`;
-    return `${m}Min`;
-  }
-
-  if (language === 'ES' || language === 'CZ' || language === 'PL') {
-    if (h > 0 && m > 0) return `${h}h ${m}min`;
-    if (h > 0) return `${h}h`;
-    return `${m}min`;
-  }
-
-  if (h > 0 && m > 0) return `${h}h ${m}m`;
-  if (h > 0) return `${h}h`;
-  return `${m}m`;
-}
-
 const timeGroups = [
   {
     id: 'morning',
@@ -338,9 +317,6 @@ export default function BookingTimePage() {
   const text = useMemo(() => getTexts(language), [language]);
 
   const id = String(params.id);
-  const allMasters = getAllMasters() as any[];
-  const listings = getListings() as ListingLike[];
-
   const servicesParam = searchParams.get('services') || '';
   const date = searchParams.get('date') || '';
 
@@ -349,20 +325,45 @@ export default function BookingTimePage() {
     .map((item) => item.trim())
     .filter(Boolean);
 
+  useEffect(() => {
+    const syncLanguage = () => {
+      setLanguage(getSavedLanguage());
+    };
+
+    syncLanguage();
+
+    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+      setLanguage(nextLanguage);
+    });
+
+    window.addEventListener('focus', syncLanguage);
+    window.addEventListener('pageshow', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
+
+    return () => {
+      unsubLanguage();
+      window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('pageshow', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
+    };
+  }, []);
+
   const master = useMemo(() => {
     const builtInMaster = getMasterById(id);
-    if (builtInMaster) return builtInMaster;
+    if (builtInMaster) return builtInMaster as any;
 
+    const listings = getListings() as ListingLike[];
     const listingIndex = listings.findIndex((item) => String(item.id) === id);
+
     if (listingIndex !== -1) {
       return listingToMasterShape(listings[listingIndex], listingIndex, text);
     }
 
-    const fallbackMaster = allMasters.find((item: any) => String(item.id) === id);
+    const fallbackMaster = (getAllMasters() as any[]).find((item: any) => String(item.id) === id);
     if (fallbackMaster) return fallbackMaster;
 
     return null;
-  }, [id, listings, allMasters, text]);
+  }, [id, text]);
 
   const selectedItems = useMemo(() => {
     if (!master) return [] as ServiceLike[];
@@ -372,22 +373,20 @@ export default function BookingTimePage() {
     );
   }, [master, selectedServiceSlugs]);
 
-  useEffect(() => {
-    setLanguage(getSavedLanguage());
-
-    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
-      setLanguage(nextLanguage);
-    });
-
-    window.addEventListener('focus', () => setLanguage(getSavedLanguage()));
-
-    return () => {
-      unsubLanguage();
-    };
-  }, []);
-
   if (!master || !selectedItems.length || !date) {
-    return <main style={{ padding: 24 }}>{text.bookingDataNotFound}</main>;
+    return (
+      <main
+        style={{
+          minHeight: '100vh',
+          background: '#ffffff',
+          padding: 24,
+          fontFamily: 'Arial, sans-serif',
+          color: BRAND.navy,
+        }}
+      >
+        {text.bookingDataNotFound}
+      </main>
+    );
   }
 
   const totalPrice = selectedItems.reduce((sum: number, item: ServiceLike) => sum + item.price, 0);
@@ -396,208 +395,213 @@ export default function BookingTimePage() {
     0
   );
 
+  const primaryService = selectedItems[0];
+
   return (
     <main
       style={{
         minHeight: '100vh',
-        background: '#fcf8f2',
+        background: '#ffffff',
         fontFamily: 'Arial, sans-serif',
-        color: '#1d1712',
-        paddingBottom: 132,
+        color: BRAND.navy,
+        paddingBottom: 126,
       }}
     >
-      <div style={{ maxWidth: 420, margin: '0 auto', padding: 24 }}>
-        <div
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 18px 112px' }}>
+        <header
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
+            display: 'grid',
+            gridTemplateColumns: '46px 1fr 46px',
             alignItems: 'center',
-            marginBottom: 22,
+            gap: 10,
           }}
         >
           <button
+            type="button"
             onClick={() => router.back()}
             style={{
-              width: 54,
-              height: 54,
-              borderRadius: 999,
-              border: '1px solid #e7ddd0',
-              background: '#fff',
-              fontSize: 24,
+              width: 46,
+              height: 46,
+              border: 0,
+              background: 'transparent',
+              fontSize: 38,
+              lineHeight: 1,
+              color: BRAND.navy,
               cursor: 'pointer',
             }}
           >
             ←
           </button>
 
-          <div style={{ fontSize: 30, fontWeight: 900 }}>{text.chooseTime}</div>
+          <div style={{ textAlign: 'center' }}>
+            <OlamepLogo />
+          </div>
 
           <button
-            onClick={() => router.push('/')}
+            type="button"
+            onClick={() => router.push('/messages')}
             style={{
-              width: 54,
-              height: 54,
-              borderRadius: 999,
-              border: '1px solid #e7ddd0',
-              background: '#fff',
-              fontSize: 22,
+              width: 46,
+              height: 46,
+              border: 0,
+              background: 'transparent',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: 'pointer',
             }}
           >
-            ⌂
+            <MessageIcon />
           </button>
-        </div>
+        </header>
 
-        <div
+        <section style={{ marginTop: 28 }}>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 42,
+              lineHeight: 1.02,
+              fontWeight: 900,
+              letterSpacing: '-1.6px',
+              color: BRAND.navy,
+            }}
+          >
+            {text.chooseTime}
+          </h1>
+
+          <p
+            style={{
+              margin: '10px 0 0',
+              fontSize: 18,
+              lineHeight: 1.35,
+              fontWeight: 500,
+              color: '#515866',
+            }}
+          >
+            {text.subtitle}
+          </p>
+        </section>
+
+        <section
           style={{
-            background: '#fff',
-            border: '1px solid #e4d8ca',
-            borderRadius: 28,
-            padding: 16,
-            boxShadow: '0 10px 28px rgba(29,23,18,0.06)',
+            marginTop: 18,
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 12,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.08)',
           }}
         >
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '64px 1fr',
+              gridTemplateColumns: '96px 1fr auto',
               gap: 12,
               alignItems: 'center',
             }}
           >
             <img
-              src={master.avatar}
-              alt={master.name}
+              src={primaryService.image || master.avatar}
+              alt={primaryService.title}
               style={{
-                width: 64,
-                height: 64,
-                borderRadius: 18,
+                width: 96,
+                height: 96,
+                borderRadius: 14,
                 objectFit: 'cover',
+                display: 'block',
               }}
             />
 
-            <div>
-              <div style={{ fontSize: 21, fontWeight: 900 }}>{master.name}</div>
-              <div style={{ marginTop: 5, color: '#746b62', fontSize: 14, fontWeight: 700 }}>
-                {master.title} • {master.city}
-              </div>
-            </div>
-          </div>
-
-          <div style={{ marginTop: 16, fontSize: 22, fontWeight: 900 }}>
-            {text.selectedServices}
-          </div>
-
-          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {selectedItems.map((item) => (
+            <div style={{ minWidth: 0 }}>
               <div
-                key={item.slug}
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '56px 1fr auto',
-                  gap: 12,
-                  alignItems: 'center',
-                  padding: 10,
-                  borderRadius: 18,
-                  background: '#faf6ef',
+                  fontSize: 21,
+                  lineHeight: 1.08,
+                  fontWeight: 900,
+                  color: BRAND.navy,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  style={{
-                    width: 56,
-                    height: 56,
-                    objectFit: 'cover',
-                    borderRadius: 14,
-                  }}
-                />
-
-                <div>
-                  <div style={{ fontSize: 17, fontWeight: 900 }}>{item.title}</div>
-                  <div style={{ marginTop: 4, color: '#746b62', fontSize: 14, fontWeight: 700 }}>
-                    {item.duration}
-                  </div>
-                </div>
-
-                <div style={{ fontSize: 16, fontWeight: 900, color: '#ef3e36' }}>
-                  {formatDisplayPrice(item.price)}
-                </div>
+                {master.name}
               </div>
-            ))}
-          </div>
 
-          <div
-            style={{
-              marginTop: 14,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 12,
-            }}
-          >
-            <div
-              style={{
-                background: '#f7f1e8',
-                borderRadius: 18,
-                padding: 12,
-              }}
-            >
-              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 800 }}>
-                {text.totalDuration}
+              <div
+                style={{
+                  marginTop: 6,
+                  color: '#4f5663',
+                  fontSize: 16,
+                  lineHeight: 1.25,
+                  fontWeight: 500,
+                }}
+              >
+                {primaryService.title}
               </div>
-              <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
-                {formatMinutes(totalMinutes, language)}
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 9,
+                  flexWrap: 'wrap',
+                  color: BRAND.blue,
+                  fontSize: 14,
+                  fontWeight: 800,
+                }}
+              >
+                <span>📅 {date}</span>
+                <span style={{ color: '#c8cdd7' }}>|</span>
+                <span>⏱ {formatMinutes(totalMinutes, language)}</span>
               </div>
             </div>
 
             <div
               style={{
-                background: '#f7f1e8',
-                borderRadius: 18,
-                padding: 12,
+                fontSize: 24,
+                fontWeight: 900,
+                color: BRAND.navy,
+                whiteSpace: 'nowrap',
               }}
             >
-              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 800 }}>
-                {text.totalPrice}
-              </div>
-              <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6, color: '#ef3e36' }}>
-                {formatDisplayPrice(totalPrice)}
-              </div>
+              {formatDisplayPrice(totalPrice)}
             </div>
           </div>
-        </div>
+        </section>
 
-        <div
+        <section
           style={{
-            marginTop: 22,
-            background: '#fff',
-            border: '1px solid #e4d8ca',
-            borderRadius: 28,
-            padding: 18,
-            boxShadow: '0 10px 28px rgba(29,23,18,0.06)',
+            marginTop: 18,
+            background: '#ffffff',
+            border: `2px solid ${BRAND.border}`,
+            borderRadius: 18,
+            padding: 14,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
           }}
         >
-          <div style={{ fontSize: 24, fontWeight: 900 }}>{text.availableTime}</div>
+          <div style={{ fontSize: 28, lineHeight: 1.1, fontWeight: 900, color: BRAND.navy }}>
+            {text.availableTime}
+          </div>
 
           <div
             style={{
               marginTop: 10,
-              borderRadius: 18,
-              background: '#f7f1e8',
+              borderRadius: 16,
+              background: '#f5f7fb',
               padding: '12px 14px',
-              color: '#6f655b',
+              color: '#515866',
               fontSize: 15,
-              fontWeight: 800,
+              fontWeight: 700,
               lineHeight: 1.4,
             }}
           >
-            {text.selectedDate}:{' '}
-            <span style={{ fontWeight: 900, color: '#1d1712' }}>{date}</span>
+            <span style={{ color: BRAND.blue, fontWeight: 900 }}>📅 {date}</span>
             <br />
             {text.timeHint}
           </div>
 
-          <div style={{ marginTop: 18, display: 'grid', gap: 18 }}>
+          <div style={{ marginTop: 18, display: 'grid', gap: 20 }}>
             {timeGroups.map((group) => (
               <div key={group.id}>
                 <div
@@ -608,7 +612,7 @@ export default function BookingTimePage() {
                     marginBottom: 10,
                   }}
                 >
-                  <div style={{ fontSize: 18, fontWeight: 900 }}>
+                  <div style={{ fontSize: 20, fontWeight: 900, color: BRAND.navy }}>
                     {getGroupTitle(group.id, text)}
                   </div>
 
@@ -616,7 +620,8 @@ export default function BookingTimePage() {
                     style={{
                       borderRadius: 999,
                       background: '#edf9ef',
-                      color: '#15803d',
+                      color: BRAND.green,
+                      border: `1.5px solid ${BRAND.green}`,
                       padding: '6px 10px',
                       fontSize: 12,
                       fontWeight: 900,
@@ -640,29 +645,31 @@ export default function BookingTimePage() {
                     return (
                       <button
                         key={slot}
+                        type="button"
                         disabled={busy}
                         onClick={() => {
                           if (busy) return;
                           setSelectedTime(slot);
                         }}
                         style={{
-                          minHeight: 62,
-                          borderRadius: 20,
+                          minHeight: 64,
+                          borderRadius: 16,
                           padding: '10px 8px',
                           border: active
-                            ? '2px solid #16a34a'
+                            ? `2px solid ${BRAND.blue}`
                             : busy
-                            ? '1px solid #f0a6af'
-                            : '1px solid #ddd2c4',
-                          background: active ? '#dcfce7' : busy ? '#ffe4e6' : '#fff',
-                          color: active ? '#15803d' : busy ? '#e11d48' : '#1d1712',
+                            ? '1.5px solid #e1e4ea'
+                            : '1.5px solid #d8dde8',
+                          background: active ? BRAND.blue : busy ? '#f3f4f6' : '#ffffff',
+                          color: active ? '#ffffff' : busy ? '#a7acb6' : BRAND.navy,
                           cursor: busy ? 'not-allowed' : 'pointer',
                           opacity: busy ? 0.72 : 1,
+                          boxShadow: active ? '0 8px 18px rgba(20,103,242,0.22)' : 'none',
                         }}
                       >
-                        <div style={{ fontSize: 18, fontWeight: 900 }}>{slot}</div>
+                        <div style={{ fontSize: 19, fontWeight: 900 }}>{slot}</div>
                         <div style={{ marginTop: 4, fontSize: 11, fontWeight: 800 }}>
-                          {busy ? text.busy : text.availableTime}
+                          {busy ? text.busy : text.available}
                         </div>
                       </button>
                     );
@@ -671,7 +678,7 @@ export default function BookingTimePage() {
               </div>
             ))}
           </div>
-        </div>
+        </section>
       </div>
 
       <div
@@ -680,66 +687,84 @@ export default function BookingTimePage() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: '#fff',
-          borderTop: '1px solid #e6ddd1',
-          padding: '14px 16px calc(14px + env(safe-area-inset-bottom))',
-          boxShadow: '0 -10px 24px rgba(29,23,18,0.08)',
+          background: '#ffffff',
+          borderTop: '1px solid #e4e7ee',
+          padding: '12px 18px calc(14px + env(safe-area-inset-bottom))',
+          zIndex: 40,
+          boxShadow: '0 -12px 28px rgba(0,0,0,0.08)',
         }}
       >
-        <div
-          style={{
-            maxWidth: 420,
-            margin: '0 auto',
-            display: 'flex',
-            gap: 14,
-            alignItems: 'center',
-          }}
-        >
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 800 }}>
-              {text.selected}
-            </div>
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: 900,
-                marginTop: 6,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {selectedTime ? `${date} • ${selectedTime}` : text.notSelected}
-            </div>
-          </div>
-
-          <button
-            disabled={!selectedTime}
-            onClick={() => {
-              if (!selectedTime) return;
-
-              const servicesEncoded = encodeURIComponent(selectedServiceSlugs.join(','));
-
-              router.push(
-                `/booking/${master.id}/details?services=${servicesEncoded}&date=${encodeURIComponent(
-                  date
-                )}&time=${encodeURIComponent(selectedTime)}`
-              );
-            }}
+        <div style={{ maxWidth: 430, margin: '0 auto' }}>
+          <div
             style={{
-              border: 'none',
-              background: selectedTime ? '#16a34a' : '#b7d9bf',
-              color: '#fff',
-              borderRadius: 24,
-              padding: '18px 24px',
-              fontWeight: 900,
-              fontSize: 18,
-              cursor: selectedTime ? 'pointer' : 'not-allowed',
-              boxShadow: selectedTime ? '0 8px 18px rgba(22,163,74,0.24)' : 'none',
+              minHeight: 74,
+              borderRadius: 18,
+              border: '1.5px solid #d9dee8',
+              background: '#ffffff',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1.5px 1.25fr',
+              alignItems: 'center',
+              overflow: 'hidden',
             }}
           >
-            {text.continue}
-          </button>
+            <div
+              style={{
+                padding: '12px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <MessageIcon />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13, color: '#6f7582', fontWeight: 800 }}>
+                  {text.selected}
+                </div>
+                <div
+                  style={{
+                    marginTop: 2,
+                    fontSize: 20,
+                    color: selectedTime ? BRAND.navy : '#9ca3af',
+                    fontWeight: 900,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {selectedTime || text.notSelected}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ height: 46, background: '#d9dee8' }} />
+
+            <button
+              type="button"
+              disabled={!selectedTime}
+              onClick={() => {
+                if (!selectedTime) return;
+
+                const servicesEncoded = encodeURIComponent(selectedServiceSlugs.join(','));
+
+                router.push(
+                  `/booking/${master.id}/details?services=${servicesEncoded}&date=${encodeURIComponent(
+                    date
+                  )}&time=${encodeURIComponent(selectedTime)}`
+                );
+              }}
+              style={{
+                height: 74,
+                border: 0,
+                background: selectedTime ? BRAND.green : '#b7d9bf',
+                color: '#ffffff',
+                fontWeight: 900,
+                fontSize: 20,
+                cursor: selectedTime ? 'pointer' : 'not-allowed',
+              }}
+            >
+              {text.continue} →
+            </button>
+          </div>
         </div>
       </div>
     </main>
