@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { getMasterById } from '../../../../services/masters';
+import { getMasterById, getAllMasters } from '../../../../services/masters';
+import { getListings } from '../../../../services/listingsStore';
 import {
   getSavedLanguage,
   subscribeToLanguageChange,
@@ -12,6 +13,49 @@ import { formatDisplayPrice } from '../../../../services/currencyDisplay';
 
 const BOOKING_DEPOSIT = 1;
 const OLACASH_STORAGE_KEY = 'olamep_olacash_balance';
+
+type PaymentMethod = 'olacash' | 'card' | 'paypal' | 'wallet';
+
+type ListingLike = {
+  id: string | number;
+  title?: string;
+  category?: string;
+  subcategory?: string;
+  location?: string;
+  description?: string;
+  price?: string;
+  hours?: string;
+  availableToday?: boolean;
+  photos?: string[];
+};
+
+type ServiceLike = {
+  slug: string;
+  title: string;
+  duration: string;
+  price: number;
+  image: string;
+};
+
+type MasterLike = {
+  id: string | number;
+  name: string;
+  title: string;
+  city?: string;
+  avatar: string;
+  services: ServiceLike[];
+};
+
+const BRAND = {
+  navy: '#071b46',
+  blue: '#1467f2',
+  green: '#21b84b',
+  red: '#ff4b4b',
+  pink: '#ff4f9a',
+  yellow: '#ffd629',
+  border: '#111111',
+  muted: '#626977',
+};
 
 function getStoredOlaCashBalance() {
   if (typeof window === 'undefined') return 0;
@@ -31,67 +75,31 @@ function saveStoredOlaCashBalance(value: number) {
   window.dispatchEvent(new CustomEvent('olamep:olacash-change'));
 }
 
-function parseDurationToMinutes(value: string) {
-  const hourMatch = value.match(/(\d+)\s*h/i);
-  const minuteMatch = value.match(/(\d+)\s*m/i);
-
-  const hours = hourMatch ? Number(hourMatch[1]) : 0;
-  const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
-
-  return hours * 60 + minutes;
-}
-
-function formatMinutes(minutes: number, language: AppLanguage) {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-
-  if (language === 'RU') {
-    if (h > 0 && m > 0) return `${h}ч ${m}м`;
-    if (h > 0) return `${h}ч`;
-    return `${m}м`;
-  }
-
-  if (language === 'DE') {
-    if (h > 0 && m > 0) return `${h}Std ${m}Min`;
-    if (h > 0) return `${h}Std`;
-    return `${m}Min`;
-  }
-
-  if (language === 'ES' || language === 'CZ' || language === 'PL') {
-    if (h > 0 && m > 0) return `${h}h ${m}min`;
-    if (h > 0) return `${h}h`;
-    return `${m}min`;
-  }
-
-  if (h > 0 && m > 0) return `${h}h ${m}m`;
-  if (h > 0) return `${h}h`;
-  return `${m}m`;
-}
-
 function getTexts(language: AppLanguage) {
   if (language === 'RU') {
     return {
       masterNotFound: 'Специалист не найден',
       selectedServicesNotFound: 'Выбранные услуги не найдены',
       holdDeposit: 'Оплата депозита',
-      holdDepositAmount: 'Депозит £1',
-      selectedProcedures: 'Выбранные процедуры',
-      totalDuration: 'Общая длительность',
-      totalPrice: 'Общая цена',
+      subtitle: 'Депозит защищает бронь внутри Olamep',
+      holdDepositAmount: '£1 депозит',
+      selectedProcedure: 'Выбранная услуга',
+      totalDuration: 'Длительность',
+      totalPrice: 'Цена',
       holdInfoLine1: '£1 будет временно заморожен для подтверждения брони.',
-      holdInfoLine2: 'Если у вас есть OlaCash, депозит можно оплатить с баланса.',
+      holdInfoLine2: 'Контакты и точный адрес не откроются, пока мастер не подтвердит бронь.',
       date: 'Дата',
       time: 'Время',
       customer: 'Клиент',
       phone: 'Телефон',
       email: 'Email',
-      social: 'Соцсеть',
-      secureBookingFee: 'Безопасный сбор за бронь',
-      holdDepositButton: 'Заморозить депозит £1',
+      social: 'Соцсети',
+      secureBookingFee: 'Безопасный депозит',
+      holdDepositButton: 'Оплатить £1',
       emptyValue: '—',
-      choosePaymentMethod: 'Способ оплаты',
-      protectedPayment: 'Безопасная оплата',
-      protectedPaymentSub: 'Ваш депозит защищён системой Olamep',
+      choosePaymentMethod: 'Метод оплаты',
+      protectedPayment: 'Защищённая оплата',
+      protectedPaymentSub: 'После оплаты заявка уйдёт мастеру на подтверждение',
       olacash: 'OlaCash',
       olacashBalance: 'Баланс OlaCash',
       notEnoughOlaCash: 'Недостаточно OlaCash',
@@ -100,172 +108,81 @@ function getTexts(language: AppLanguage) {
       appleGoogle: 'Apple Pay / Google Pay',
       paymentReady: 'Готово к оплате',
       bookingSummary: 'Сводка бронирования',
-      paymentWillUnlock: 'Контакты и точный адрес откроются после оплаты',
+      paymentWillUnlock: 'Контакты откроются только после подтверждения мастером',
+      message: 'Сообщения',
+      pendingAccess: 'После оплаты: только чат, статус брони и ожидание мастера',
+      providerFallback: 'Специалист',
+      serviceProviderFallback: 'Исполнитель услуг',
+      serviceFallback: 'Основная услуга',
+      premiumOption: 'Премиум вариант',
     };
   }
 
-  if (language === 'ES') {
+  if (language === 'UA') {
     return {
-      masterNotFound: 'Profesional no encontrado',
-      selectedServicesNotFound: 'Servicios seleccionados no encontrados',
-      holdDeposit: 'Pago del depósito',
-      holdDepositAmount: 'Depósito de £1',
-      selectedProcedures: 'Procedimientos seleccionados',
-      totalDuration: 'Duración total',
-      totalPrice: 'Precio total',
-      holdInfoLine1: '£1 se retendrá temporalmente para confirmar la reserva.',
-      holdInfoLine2: 'Si tienes OlaCash, puedes pagar el depósito desde tu saldo.',
-      date: 'Fecha',
-      time: 'Hora',
-      customer: 'Cliente',
-      phone: 'Teléfono',
+      masterNotFound: 'Спеціаліста не знайдено',
+      selectedServicesNotFound: 'Вибрані послуги не знайдено',
+      holdDeposit: 'Оплата депозиту',
+      subtitle: 'Депозит захищає бронювання всередині Olamep',
+      holdDepositAmount: '£1 депозит',
+      selectedProcedure: 'Обрана послуга',
+      totalDuration: 'Тривалість',
+      totalPrice: 'Ціна',
+      holdInfoLine1: '£1 буде тимчасово заморожено для підтвердження бронювання.',
+      holdInfoLine2: 'Контакти й точна адреса не відкриються, поки майстер не підтвердить бронювання.',
+      date: 'Дата',
+      time: 'Час',
+      customer: 'Клієнт',
+      phone: 'Телефон',
       email: 'Email',
-      social: 'Red social',
-      secureBookingFee: 'Tarifa segura de reserva',
-      holdDepositButton: 'Retener depósito de £1',
+      social: 'Соцмережі',
+      secureBookingFee: 'Безпечний депозит',
+      holdDepositButton: 'Оплатити £1',
       emptyValue: '—',
-      choosePaymentMethod: 'Método de pago',
-      protectedPayment: 'Pago seguro',
-      protectedPaymentSub: 'Tu depósito está protegido por Olamep',
+      choosePaymentMethod: 'Метод оплати',
+      protectedPayment: 'Захищена оплата',
+      protectedPaymentSub: 'Після оплати заявка піде майстру на підтвердження',
       olacash: 'OlaCash',
-      olacashBalance: 'Saldo OlaCash',
-      notEnoughOlaCash: 'OlaCash insuficiente',
-      card: 'Tarjeta bancaria',
+      olacashBalance: 'Баланс OlaCash',
+      notEnoughOlaCash: 'Недостатньо OlaCash',
+      card: 'Банківська карта',
       paypal: 'PayPal',
       appleGoogle: 'Apple Pay / Google Pay',
-      paymentReady: 'Listo para pagar',
-      bookingSummary: 'Resumen de la reserva',
-      paymentWillUnlock: 'Los contactos y la dirección exacta se abrirán después del pago',
-    };
-  }
-
-  if (language === 'CZ') {
-    return {
-      masterNotFound: 'Specialista nebyl nalezen',
-      selectedServicesNotFound: 'Vybrané služby nebyly nalezeny',
-      holdDeposit: 'Platba zálohy',
-      holdDepositAmount: 'Záloha £1',
-      selectedProcedures: 'Vybrané procedury',
-      totalDuration: 'Celková délka',
-      totalPrice: 'Celková cena',
-      holdInfoLine1: '£1 bude dočasně zablokováno pro potvrzení rezervace.',
-      holdInfoLine2: 'Pokud máte OlaCash, můžete zálohu zaplatit ze zůstatku.',
-      date: 'Datum',
-      time: 'Čas',
-      customer: 'Klient',
-      phone: 'Telefon',
-      email: 'Email',
-      social: 'Sociální síť',
-      secureBookingFee: 'Bezpečný rezervační poplatek',
-      holdDepositButton: 'Zablokovat zálohu £1',
-      emptyValue: '—',
-      choosePaymentMethod: 'Způsob platby',
-      protectedPayment: 'Bezpečná platba',
-      protectedPaymentSub: 'Vaše záloha je chráněna systémem Olamep',
-      olacash: 'OlaCash',
-      olacashBalance: 'Zůstatek OlaCash',
-      notEnoughOlaCash: 'Nedostatek OlaCash',
-      card: 'Platební karta',
-      paypal: 'PayPal',
-      appleGoogle: 'Apple Pay / Google Pay',
-      paymentReady: 'Připraveno k platbě',
-      bookingSummary: 'Souhrn rezervace',
-      paymentWillUnlock: 'Kontakty a přesná adresa se otevřou po zaplacení',
-    };
-  }
-
-  if (language === 'DE') {
-    return {
-      masterNotFound: 'Spezialist nicht gefunden',
-      selectedServicesNotFound: 'Ausgewählte Leistungen nicht gefunden',
-      holdDeposit: 'Anzahlungszahlung',
-      holdDepositAmount: '£1 Anzahlung',
-      selectedProcedures: 'Ausgewählte Behandlungen',
-      totalDuration: 'Gesamtdauer',
-      totalPrice: 'Gesamtpreis',
-      holdInfoLine1: '£1 wird vorübergehend zur Bestätigung der Buchung reserviert.',
-      holdInfoLine2: 'Wenn du OlaCash hast, kannst du die Anzahlung damit bezahlen.',
-      date: 'Datum',
-      time: 'Uhrzeit',
-      customer: 'Kunde',
-      phone: 'Telefon',
-      email: 'Email',
-      social: 'Soziales Netzwerk',
-      secureBookingFee: 'Sichere Buchungsgebühr',
-      holdDepositButton: '£1 Anzahlung reservieren',
-      emptyValue: '—',
-      choosePaymentMethod: 'Zahlungsmethode',
-      protectedPayment: 'Sichere Zahlung',
-      protectedPaymentSub: 'Deine Anzahlung ist durch Olamep geschützt',
-      olacash: 'OlaCash',
-      olacashBalance: 'OlaCash-Guthaben',
-      notEnoughOlaCash: 'Nicht genug OlaCash',
-      card: 'Bankkarte',
-      paypal: 'PayPal',
-      appleGoogle: 'Apple Pay / Google Pay',
-      paymentReady: 'Bereit zur Zahlung',
-      bookingSummary: 'Buchungsübersicht',
-      paymentWillUnlock: 'Kontakte und genaue Adresse werden nach der Zahlung geöffnet',
-    };
-  }
-
-  if (language === 'PL') {
-    return {
-      masterNotFound: 'Specjalista nie został znaleziony',
-      selectedServicesNotFound: 'Nie znaleziono wybranych usług',
-      holdDeposit: 'Płatność depozytu',
-      holdDepositAmount: 'Depozyt £1',
-      selectedProcedures: 'Wybrane zabiegi',
-      totalDuration: 'Łączny czas',
-      totalPrice: 'Łączna cena',
-      holdInfoLine1: '£1 zostanie tymczasowo zablokowany w celu potwierdzenia rezerwacji.',
-      holdInfoLine2: 'Jeśli masz OlaCash, możesz zapłacić depozyt z salda.',
-      date: 'Data',
-      time: 'Godzina',
-      customer: 'Klient',
-      phone: 'Telefon',
-      email: 'Email',
-      social: 'Social media',
-      secureBookingFee: 'Bezpieczna opłata rezerwacyjna',
-      holdDepositButton: 'Zablokuj depozyt £1',
-      emptyValue: '—',
-      choosePaymentMethod: 'Metoda płatności',
-      protectedPayment: 'Bezpieczna płatność',
-      protectedPaymentSub: 'Twój depozyt jest chroniony przez Olamep',
-      olacash: 'OlaCash',
-      olacashBalance: 'Saldo OlaCash',
-      notEnoughOlaCash: 'Za mało OlaCash',
-      card: 'Karta bankowa',
-      paypal: 'PayPal',
-      appleGoogle: 'Apple Pay / Google Pay',
-      paymentReady: 'Gotowe do płatności',
-      bookingSummary: 'Podsumowanie rezerwacji',
-      paymentWillUnlock: 'Kontakty i dokładny adres otworzą się po płatności',
+      paymentReady: 'Готово до оплати',
+      bookingSummary: 'Підсумок бронювання',
+      paymentWillUnlock: 'Контакти відкриються тільки після підтвердження майстром',
+      message: 'Повідомлення',
+      pendingAccess: 'Після оплати: тільки чат, статус бронювання та очікування майстра',
+      providerFallback: 'Спеціаліст',
+      serviceProviderFallback: 'Виконавець послуг',
+      serviceFallback: 'Основна послуга',
+      premiumOption: 'Преміум варіант',
     };
   }
 
   return {
-    masterNotFound: 'Master not found',
+    masterNotFound: 'Provider not found',
     selectedServicesNotFound: 'Selected services not found',
     holdDeposit: 'Deposit payment',
+    subtitle: 'Your deposit keeps the booking protected inside Olamep',
     holdDepositAmount: '£1 hold deposit',
-    selectedProcedures: 'Selected procedures',
-    totalDuration: 'Total duration',
-    totalPrice: 'Total price',
+    selectedProcedure: 'Selected service',
+    totalDuration: 'Duration',
+    totalPrice: 'Price',
     holdInfoLine1: '£1 will be temporarily held to confirm your booking.',
-    holdInfoLine2: 'If you have OlaCash, you can pay the deposit from your balance.',
+    holdInfoLine2: 'Contacts and exact address will not unlock until the provider confirms.',
     date: 'Date',
     time: 'Time',
     customer: 'Customer',
     phone: 'Phone',
     email: 'Email',
     social: 'Social',
-    secureBookingFee: 'Secure booking fee',
-    holdDepositButton: 'Hold £1 deposit',
+    secureBookingFee: 'Secure deposit',
+    holdDepositButton: 'Pay £1',
     emptyValue: '—',
     choosePaymentMethod: 'Payment method',
     protectedPayment: 'Protected payment',
-    protectedPaymentSub: 'Your deposit is protected by the Olamep system',
+    protectedPaymentSub: 'After payment, your request goes to the provider for confirmation',
     olacash: 'OlaCash',
     olacashBalance: 'OlaCash balance',
     notEnoughOlaCash: 'Not enough OlaCash',
@@ -274,18 +191,193 @@ function getTexts(language: AppLanguage) {
     appleGoogle: 'Apple Pay / Google Pay',
     paymentReady: 'Ready to pay',
     bookingSummary: 'Booking summary',
-    paymentWillUnlock: 'Contacts and exact address will unlock after payment',
+    paymentWillUnlock: 'Contacts unlock only after provider confirmation',
+    message: 'Messages',
+    pendingAccess: 'After payment: chat, booking status and waiting for provider only',
+    providerFallback: 'Provider',
+    serviceProviderFallback: 'Service provider',
+    serviceFallback: 'Main service',
+    premiumOption: 'Premium option',
   };
 }
 
-function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange') {
-  if (kind === 'green') return { background: '#eef9f1', color: '#2fa35a' };
-  if (kind === 'blue') return { background: '#eef4ff', color: '#2f7cf6' };
-  if (kind === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
-  return { background: '#fff5e8', color: '#d68612' };
+function OlamepLogo() {
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+      }}
+    >
+      <div
+        style={{
+          width: 34,
+          height: 42,
+          position: 'relative',
+          borderRadius: '50% 50% 58% 58%',
+          background:
+            'conic-gradient(from 210deg, #1467f2 0deg, #20c96b 90deg, #ffd629 160deg, #ff3f68 230deg, #1467f2 360deg)',
+          boxShadow: '0 8px 18px rgba(20,103,242,0.18)',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: 8,
+            top: 8,
+            width: 17,
+            height: 17,
+            borderRadius: '50%',
+            background: '#ffffff',
+            border: '4px solid #071b46',
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          fontSize: 30,
+          fontWeight: 900,
+          color: BRAND.navy,
+          letterSpacing: '-1px',
+        }}
+      >
+        Olamep
+      </div>
+    </div>
+  );
 }
 
-type PaymentMethod = 'olacash' | 'card' | 'paypal' | 'wallet';
+function MessageIcon() {
+  return (
+    <div
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 999,
+        border: `2px solid ${BRAND.green}`,
+        background: '#ffffff',
+        color: BRAND.green,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 26,
+        fontWeight: 900,
+      }}
+    >
+      💬
+    </div>
+  );
+}
+
+function SmallIcon({ icon, color }: { icon: string; color: string }) {
+  return (
+    <div
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 15,
+        background: color,
+        color: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 22,
+        fontWeight: 900,
+        flex: '0 0 auto',
+      }}
+    >
+      {icon}
+    </div>
+  );
+}
+
+function parseDurationToMinutes(value: string) {
+  const text = String(value || '').toLowerCase();
+
+  const hourMatch = text.match(/(\d+)\s*(h|hour|hours|ч|г|std)/i);
+  const minuteMatch = text.match(/(\d+)\s*(m|min|mins|minute|minutes|м|хв)/i);
+
+  const hours = hourMatch ? Number(hourMatch[1]) : 0;
+  const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
+
+  if (hours === 0 && minutes === 0) {
+    const onlyNumber = Number(text.replace(/[^\d.]/g, ''));
+    if (Number.isFinite(onlyNumber) && onlyNumber > 0) return onlyNumber;
+  }
+
+  return hours * 60 + minutes;
+}
+
+function formatMinutes(minutes: number, language: AppLanguage) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+
+  if (!minutes) return '0m';
+
+  if (language === 'RU') {
+    if (h > 0 && m > 0) return `${h}ч ${m}м`;
+    if (h > 0) return `${h}ч`;
+    return `${m}м`;
+  }
+
+  if (language === 'UA') {
+    if (h > 0 && m > 0) return `${h}г ${m}хв`;
+    if (h > 0) return `${h}г`;
+    return `${m}хв`;
+  }
+
+  if (h > 0 && m > 0) return `${h}h ${m}m`;
+  if (h > 0) return `${h}h`;
+  return `${m}m`;
+}
+
+function listingToMasterShape(listing: ListingLike, index: number, text: ReturnType<typeof getTexts>) {
+  const fallbackImages = [
+    'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80',
+  ];
+
+  const gallery =
+    listing.photos && listing.photos.length > 0
+      ? listing.photos
+      : [
+          fallbackImages[index % fallbackImages.length],
+          fallbackImages[(index + 1) % fallbackImages.length],
+          fallbackImages[(index + 2) % fallbackImages.length],
+        ];
+
+  const numericPrice = Number(String(listing.price || '').replace(/[^\d.]/g, ''));
+  const priceFrom = Number.isFinite(numericPrice) && numericPrice > 0 ? numericPrice : 45;
+
+  return {
+    id: String(listing.id),
+    name: listing.title || text.providerFallback,
+    title: listing.subcategory || text.serviceProviderFallback,
+    city: listing.location || 'London',
+    avatar: gallery[0],
+    services: [
+      {
+        slug: 'main-service',
+        title: listing.subcategory || listing.title || text.serviceFallback,
+        duration: listing.hours || '1h',
+        price: priceFrom,
+        image: gallery[0],
+      },
+      {
+        slug: 'premium-service',
+        title: text.premiumOption,
+        duration: '2h',
+        price: priceFrom + 20,
+        image: gallery[1] || gallery[0],
+      },
+    ],
+  };
+}
 
 export default function BookingPaymentPage() {
   const params = useParams();
@@ -297,7 +389,7 @@ export default function BookingPaymentPage() {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('card');
 
   const text = useMemo(() => getTexts(language), [language]);
-  const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
+  const id = String(params.id);
 
   const servicesParam = searchParams.get('services') || '';
   const date = searchParams.get('date') || '';
@@ -306,19 +398,50 @@ export default function BookingPaymentPage() {
   const lastName = searchParams.get('lastName') || '';
   const phone = searchParams.get('phone') || '';
   const email = searchParams.get('email') || '';
-  const social = searchParams.get('social') || '';
+  const whatsapp = searchParams.get('whatsapp') || '';
+  const telegram = searchParams.get('telegram') || '';
+  const instagram = searchParams.get('instagram') || '';
+  const registrationMode = searchParams.get('registrationMode') || 'quick';
 
   useEffect(() => {
-    setLanguage(getSavedLanguage());
+    const syncLanguage = () => {
+      setLanguage(getSavedLanguage());
+    };
+
+    syncLanguage();
 
     const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
 
+    window.addEventListener('focus', syncLanguage);
+    window.addEventListener('pageshow', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
+
     return () => {
       unsubLanguage();
+      window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('pageshow', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
     };
   }, []);
+
+  const master = useMemo<MasterLike | null>(() => {
+    const builtInMaster = getMasterById(id) as unknown as MasterLike | null;
+    if (builtInMaster) return builtInMaster;
+
+    const listings = getListings() as ListingLike[];
+    const listingIndex = listings.findIndex((item) => String(item.id) === id);
+
+    if (listingIndex !== -1) {
+      return listingToMasterShape(listings[listingIndex], listingIndex, text);
+    }
+
+    const fallbackMaster = (getAllMasters() as any[]).find((item: any) => String(item.id) === id);
+    if (fallbackMaster) return fallbackMaster as MasterLike;
+
+    return null;
+  }, [id, text]);
 
   useEffect(() => {
     const syncOlaCash = () => {
@@ -346,7 +469,11 @@ export default function BookingPaymentPage() {
   }, []);
 
   if (!master) {
-    return <main style={{ padding: 24 }}>{text.masterNotFound}</main>;
+    return (
+      <main style={{ padding: 24, fontFamily: 'Arial, sans-serif', color: BRAND.navy }}>
+        {text.masterNotFound}
+      </main>
+    );
   }
 
   const selectedServiceSlugs = servicesParam
@@ -359,7 +486,11 @@ export default function BookingPaymentPage() {
   );
 
   if (!selectedItems.length) {
-    return <main style={{ padding: 24 }}>{text.selectedServicesNotFound}</main>;
+    return (
+      <main style={{ padding: 24, fontFamily: 'Arial, sans-serif', color: BRAND.navy }}>
+        {text.selectedServicesNotFound}
+      </main>
+    );
   }
 
   const totalPrice = selectedItems.reduce((sum, item) => sum + item.price, 0);
@@ -368,6 +499,7 @@ export default function BookingPaymentPage() {
     0
   );
 
+  const primaryService = selectedItems[0];
   const canUseOlaCash = olaCashBalance >= BOOKING_DEPOSIT;
 
   const goToConfirmed = () => {
@@ -384,137 +516,259 @@ export default function BookingPaymentPage() {
         lastName
       )}&phone=${encodeURIComponent(phone)}&email=${encodeURIComponent(
         email
-      )}&social=${encodeURIComponent(social)}&paymentMethod=${encodeURIComponent(
-        selectedMethod
-      )}&deposit=${encodeURIComponent(String(BOOKING_DEPOSIT))}`
+      )}&whatsapp=${encodeURIComponent(whatsapp)}&telegram=${encodeURIComponent(
+        telegram
+      )}&instagram=${encodeURIComponent(instagram)}&registrationMode=${encodeURIComponent(
+        registrationMode
+      )}&paymentMethod=${encodeURIComponent(selectedMethod)}&deposit=${encodeURIComponent(
+        String(BOOKING_DEPOSIT)
+      )}&status=pending_master_confirmation`
     );
   };
+
+  const paymentMethods = [
+    {
+      id: 'olacash' as PaymentMethod,
+      icon: 'O',
+      title: text.olacash,
+      subtitle: canUseOlaCash
+        ? `${text.olacashBalance}: ${formatDisplayPrice(olaCashBalance)}`
+        : text.notEnoughOlaCash,
+      color: BRAND.green,
+      disabled: !canUseOlaCash,
+    },
+    {
+      id: 'card' as PaymentMethod,
+      icon: '💳',
+      title: text.card,
+      subtitle: 'Visa • Mastercard',
+      color: BRAND.pink,
+      disabled: false,
+    },
+    {
+      id: 'paypal' as PaymentMethod,
+      icon: 'P',
+      title: text.paypal,
+      subtitle: 'PayPal checkout',
+      color: BRAND.blue,
+      disabled: false,
+    },
+    {
+      id: 'wallet' as PaymentMethod,
+      icon: '📱',
+      title: text.appleGoogle,
+      subtitle: 'Mobile wallet',
+      color: BRAND.navy,
+      disabled: false,
+    },
+  ];
 
   return (
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
+        background: '#ffffff',
         fontFamily: 'Arial, sans-serif',
-        color: '#17130f',
-        paddingBottom: 120,
+        color: BRAND.navy,
+        paddingBottom: 126,
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto', padding: 20 }}>
-        <div
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 18px 112px' }}>
+        <header
           style={{
             display: 'grid',
-            gridTemplateColumns: '54px 1fr 54px',
+            gridTemplateColumns: '46px 1fr 46px',
             alignItems: 'center',
-            gap: 12,
+            gap: 10,
           }}
         >
           <button
+            type="button"
             onClick={() => router.back()}
             style={{
-              width: 54,
-              height: 54,
-              borderRadius: 999,
-              border: '1px solid #e7ddd0',
-              background: '#fff',
-              fontSize: 24,
+              width: 46,
+              height: 46,
+              border: 0,
+              background: 'transparent',
+              fontSize: 38,
+              lineHeight: 1,
+              color: BRAND.navy,
               cursor: 'pointer',
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
             }}
           >
             ←
           </button>
 
           <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                fontSize: 28,
-                fontWeight: 900,
-                color: '#17130f',
-                lineHeight: 1.05,
-              }}
-            >
-              {text.holdDeposit}
-            </div>
-            <div
-              style={{
-                marginTop: 8,
-                fontSize: 15,
-                color: '#7a7066',
-                fontWeight: 700,
-              }}
-            >
-              {text.holdDepositAmount}
-            </div>
+            <OlamepLogo />
           </div>
 
           <button
-            onClick={() => router.push('/')}
+            type="button"
+            onClick={() => router.push('/messages')}
+            aria-label={text.message}
             style={{
-              width: 54,
-              height: 54,
-              borderRadius: 999,
-              border: '1px solid #e7ddd0',
-              background: '#fff',
-              fontSize: 22,
+              width: 46,
+              height: 46,
+              border: 0,
+              background: 'transparent',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: 'pointer',
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
             }}
           >
-            ⌂
+            <MessageIcon />
           </button>
-        </div>
+        </header>
 
-        <div
+        <section style={{ marginTop: 28 }}>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 42,
+              lineHeight: 1.02,
+              fontWeight: 900,
+              letterSpacing: '-1.6px',
+              color: BRAND.navy,
+            }}
+          >
+            {text.holdDeposit}
+          </h1>
+
+          <p
+            style={{
+              margin: '10px 0 0',
+              fontSize: 18,
+              lineHeight: 1.35,
+              fontWeight: 500,
+              color: '#515866',
+            }}
+          >
+            {text.subtitle}
+          </p>
+        </section>
+
+        <section
           style={{
             marginTop: 18,
-            borderRadius: 30,
-            border: '1px solid #f0e3d7',
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 12,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.08)',
           }}
         >
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
+              display: 'grid',
+              gridTemplateColumns: '96px 1fr auto',
               gap: 12,
-              marginBottom: 12,
+              alignItems: 'center',
             }}
           >
-            <div
+            <img
+              src={primaryService.image || master.avatar}
+              alt={primaryService.title}
               style={{
-                width: 54,
-                height: 54,
-                borderRadius: 18,
-                background: '#eef9f1',
-                color: '#2fa35a',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 26,
+                width: 96,
+                height: 96,
+                borderRadius: 14,
+                objectFit: 'cover',
+                display: 'block',
               }}
-            >
-              🛡️
-            </div>
+            />
 
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div
                 style={{
-                  fontSize: 20,
+                  fontSize: 21,
+                  lineHeight: 1.08,
                   fontWeight: 900,
-                  color: '#17130f',
+                  color: BRAND.navy,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
+                {master.name}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 6,
+                  color: '#4f5663',
+                  fontSize: 16,
+                  lineHeight: 1.25,
+                  fontWeight: 500,
+                }}
+              >
+                {primaryService.title}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 9,
+                  flexWrap: 'wrap',
+                  color: BRAND.blue,
+                  fontSize: 14,
+                  fontWeight: 800,
+                }}
+              >
+                <span>📅 {date}</span>
+                <span style={{ color: '#c8cdd7' }}>|</span>
+                <span>🕒 {time}</span>
+                <span style={{ color: '#c8cdd7' }}>|</span>
+                <span>⏱ {formatMinutes(totalMinutes, language)}</span>
+              </div>
+            </div>
+
+            <div
+              style={{
+                fontSize: 24,
+                fontWeight: 900,
+                color: BRAND.navy,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {formatDisplayPrice(totalPrice)}
+            </div>
+          </div>
+        </section>
+
+        <section
+          style={{
+            marginTop: 18,
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 14,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
+          }}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '52px 1fr',
+              gap: 12,
+              alignItems: 'center',
+            }}
+          >
+            <SmallIcon icon="🛡" color={BRAND.green} />
+
+            <div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
                 {text.protectedPayment}
               </div>
               <div
                 style={{
-                  marginTop: 4,
+                  marginTop: 5,
                   fontSize: 14,
-                  lineHeight: 1.5,
-                  color: '#7b7268',
+                  lineHeight: 1.45,
+                  color: '#515866',
                   fontWeight: 700,
                 }}
               >
@@ -525,93 +779,79 @@ export default function BookingPaymentPage() {
 
           <div
             style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 10,
+              marginTop: 14,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              border: '1.5px solid #d9dee8',
+              borderRadius: 18,
+              overflow: 'hidden',
             }}
           >
-            <span
-              style={{
-                ...badgeStyle('green'),
-                borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 12,
-                fontWeight: 900,
-              }}
-            >
-              {text.paymentReady}
-            </span>
+            <div style={{ padding: 14 }}>
+              <div style={{ fontSize: 13, color: '#6f7582', fontWeight: 800 }}>
+                {text.secureBookingFee}
+              </div>
+              <div
+                style={{
+                  marginTop: 3,
+                  fontSize: 28,
+                  color: BRAND.navy,
+                  fontWeight: 900,
+                }}
+              >
+                {formatDisplayPrice(BOOKING_DEPOSIT)}
+              </div>
+            </div>
 
-            <span
+            <div
               style={{
-                ...badgeStyle('blue'),
-                borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 12,
-                fontWeight: 900,
+                padding: 14,
+                borderLeft: '1.5px solid #d9dee8',
+                background: '#f5f7fb',
               }}
             >
-              {text.paymentWillUnlock}
-            </span>
+              <div style={{ fontSize: 13, color: '#6f7582', fontWeight: 800 }}>
+                {text.paymentReady}
+              </div>
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 15,
+                  lineHeight: 1.3,
+                  color: BRAND.blue,
+                  fontWeight: 900,
+                }}
+              >
+                {text.paymentWillUnlock}
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div
+        <section
           style={{
-            marginTop: 16,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+            marginTop: 18,
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 14,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
           }}
         >
           <div
             style={{
-              fontSize: 20,
+              fontSize: 24,
+              lineHeight: 1.1,
               fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
+              color: BRAND.navy,
+              marginBottom: 14,
             }}
           >
             {text.choosePaymentMethod}
           </div>
 
           <div style={{ display: 'grid', gap: 10 }}>
-            {[
-              {
-                id: 'olacash' as PaymentMethod,
-                icon: '🟢',
-                title: text.olacash,
-                subtitle: `${text.olacashBalance}: ${formatDisplayPrice(olaCashBalance)}`,
-                color: 'green' as const,
-                disabled: !canUseOlaCash,
-              },
-              {
-                id: 'card' as PaymentMethod,
-                icon: '💳',
-                title: text.card,
-                subtitle: '',
-                color: 'pink' as const,
-                disabled: false,
-              },
-              {
-                id: 'paypal' as PaymentMethod,
-                icon: '🅿️',
-                title: text.paypal,
-                subtitle: '',
-                color: 'blue' as const,
-                disabled: false,
-              },
-              {
-                id: 'wallet' as PaymentMethod,
-                icon: '📱',
-                title: text.appleGoogle,
-                subtitle: '',
-                color: 'green' as const,
-                disabled: false,
-              },
-            ].map((method) => {
+            {paymentMethods.map((method) => {
               const active = selectedMethod === method.id;
 
               return (
@@ -625,10 +865,10 @@ export default function BookingPaymentPage() {
                   }}
                   style={{
                     width: '100%',
-                    borderRadius: 22,
-                    border: active ? '2px solid #ff4fa0' : '1px solid #efe4d7',
-                    background: active ? '#fff8fb' : '#fcfaf6',
-                    padding: 14,
+                    borderRadius: 16,
+                    border: active ? `2px solid ${method.color}` : '1.5px solid #d8dde8',
+                    background: active ? '#f4f8ff' : '#ffffff',
+                    padding: 12,
                     display: 'grid',
                     gridTemplateColumns: '46px 1fr auto',
                     gap: 12,
@@ -636,229 +876,75 @@ export default function BookingPaymentPage() {
                     textAlign: 'left',
                     cursor: method.disabled ? 'not-allowed' : 'pointer',
                     opacity: method.disabled ? 0.55 : 1,
+                    boxShadow: active ? '0 8px 18px rgba(20,103,242,0.12)' : 'none',
                   }}
                 >
-                  <div
-                    style={{
-                      width: 46,
-                      height: 46,
-                      borderRadius: 16,
-                      ...badgeStyle(method.color),
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 22,
-                    }}
-                  >
-                    {method.icon}
-                  </div>
+                  <SmallIcon icon={method.icon} color={method.color} />
 
                   <div>
                     <div
                       style={{
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: 900,
-                        color: '#17130f',
+                        color: BRAND.navy,
                       }}
                     >
                       {method.title}
                     </div>
 
-                    {method.id === 'olacash' ? (
-                      <div
-                        style={{
-                          marginTop: 4,
-                          fontSize: 12,
-                          fontWeight: 800,
-                          color: canUseOlaCash ? '#2fa35a' : '#d64545',
-                        }}
-                      >
-                        {canUseOlaCash ? method.subtitle : text.notEnoughOlaCash}
-                      </div>
-                    ) : null}
+                    <div
+                      style={{
+                        marginTop: 4,
+                        fontSize: 12,
+                        fontWeight: 800,
+                        color:
+                          method.id === 'olacash' && !canUseOlaCash ? BRAND.red : BRAND.muted,
+                      }}
+                    >
+                      {method.subtitle}
+                    </div>
                   </div>
 
                   <div
                     style={{
-                      width: 24,
-                      height: 24,
+                      width: 30,
+                      height: 30,
                       borderRadius: 999,
-                      border: active ? '7px solid #ff4fa0' : '2px solid #d8d0c5',
-                      background: '#fff',
-                      boxSizing: 'border-box',
+                      background: active ? method.color : '#ffffff',
+                      border: active ? `2px solid ${method.color}` : '2px solid #cfd4dd',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 17,
+                      fontWeight: 900,
                     }}
-                  />
+                  >
+                    {active ? '✓' : ''}
+                  </div>
                 </button>
               );
             })}
           </div>
-        </div>
+        </section>
 
-        <div
+        <section
           style={{
-            marginTop: 16,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+            marginTop: 18,
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 14,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
           }}
         >
           <div
             style={{
-              fontSize: 20,
+              fontSize: 24,
+              lineHeight: 1.1,
               fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
-            }}
-          >
-            {text.selectedProcedures}
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {selectedItems.map((item) => (
-              <div
-                key={item.slug}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '64px 1fr auto',
-                  gap: 12,
-                  alignItems: 'center',
-                  padding: 10,
-                  borderRadius: 20,
-                  background: '#fcfaf6',
-                  border: '1px solid #f1e8dc',
-                }}
-              >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  style={{
-                    width: 64,
-                    height: 64,
-                    objectFit: 'cover',
-                    borderRadius: 16,
-                    display: 'block',
-                  }}
-                />
-
-                <div>
-                  <div
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
-                    {item.title}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 4,
-                      color: '#746b62',
-                      fontSize: 14,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {item.duration}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    fontSize: 16,
-                    fontWeight: 900,
-                    color: '#17130f',
-                  }}
-                >
-                  {formatDisplayPrice(item.price)}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div
-            style={{
-              marginTop: 14,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 12,
-            }}
-          >
-            <div
-              style={{
-                background: '#f7f1e8',
-                borderRadius: 20,
-                padding: 14,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 13,
-                  color: '#6c645c',
-                  fontWeight: 800,
-                }}
-              >
-                {text.totalDuration}
-              </div>
-              <div
-                style={{
-                  fontSize: 24,
-                  fontWeight: 900,
-                  marginTop: 6,
-                  color: '#17130f',
-                }}
-              >
-                {formatMinutes(totalMinutes, language)}
-              </div>
-            </div>
-
-            <div
-              style={{
-                background: '#f7f1e8',
-                borderRadius: 20,
-                padding: 14,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 13,
-                  color: '#6c645c',
-                  fontWeight: 800,
-                }}
-              >
-                {text.totalPrice}
-              </div>
-              <div
-                style={{
-                  fontSize: 24,
-                  fontWeight: 900,
-                  marginTop: 6,
-                  color: '#17130f',
-                }}
-              >
-                {formatDisplayPrice(totalPrice)}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            marginTop: 16,
-            borderRadius: 30,
-            border: '1px solid #efe4d7',
-            background: '#fff',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 20,
-              fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
+              color: BRAND.navy,
+              marginBottom: 14,
             }}
           >
             {text.bookingSummary}
@@ -866,62 +952,60 @@ export default function BookingPaymentPage() {
 
           <div
             style={{
-              borderRadius: 22,
-              background: '#eef9f1',
-              color: '#1f6d35',
-              padding: 16,
-              fontWeight: 800,
-              lineHeight: 1.55,
+              borderRadius: 16,
+              background: '#f5f7fb',
+              padding: 14,
+              color: '#515866',
+              lineHeight: 1.5,
               fontSize: 14,
+              fontWeight: 700,
             }}
           >
-            {text.holdInfoLine1}
-            <br />
-            {text.holdInfoLine2}
+            <div style={{ color: BRAND.green, fontWeight: 900 }}>{text.holdInfoLine1}</div>
+            <div style={{ marginTop: 6, color: BRAND.blue, fontWeight: 900 }}>
+              {text.holdInfoLine2}
+            </div>
           </div>
 
           <div
             style={{
               marginTop: 14,
-              borderRadius: 22,
-              background: '#fcfaf6',
-              border: '1px solid #f1e8dc',
-              padding: 16,
-              color: '#5e554d',
-              lineHeight: 1.7,
+              display: 'grid',
+              gap: 10,
+              color: '#515866',
               fontSize: 14,
               fontWeight: 700,
             }}
           >
             <div>
-              {text.date}: <span style={{ color: '#17130f', fontWeight: 900 }}>{date}</span>
+              {text.date}: <span style={{ color: BRAND.blue, fontWeight: 900 }}>{date}</span>
             </div>
             <div>
-              {text.time}: <span style={{ color: '#17130f', fontWeight: 900 }}>{time}</span>
+              {text.time}: <span style={{ color: BRAND.blue, fontWeight: 900 }}>{time}</span>
             </div>
             <div>
               {text.customer}:{' '}
-              <span style={{ color: '#17130f', fontWeight: 900 }}>
+              <span style={{ color: BRAND.navy, fontWeight: 900 }}>
                 {firstName} {lastName}
               </span>
             </div>
             <div>
-              {text.phone}: <span style={{ color: '#17130f', fontWeight: 900 }}>{phone}</span>
+              {text.phone}: <span style={{ color: BRAND.navy, fontWeight: 900 }}>{phone}</span>
             </div>
             <div>
               {text.email}:{' '}
-              <span style={{ color: '#17130f', fontWeight: 900 }}>
+              <span style={{ color: BRAND.navy, fontWeight: 900 }}>
                 {email || text.emptyValue}
               </span>
             </div>
             <div>
               {text.social}:{' '}
-              <span style={{ color: '#17130f', fontWeight: 900 }}>
-                {social || text.emptyValue}
+              <span style={{ color: BRAND.navy, fontWeight: 900 }}>
+                {[whatsapp, telegram, instagram].filter(Boolean).join(' • ') || text.emptyValue}
               </span>
             </div>
           </div>
-        </div>
+        </section>
       </div>
 
       <div
@@ -930,60 +1014,71 @@ export default function BookingPaymentPage() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(255,255,255,0.96)',
-          backdropFilter: 'blur(10px)',
-          borderTop: '1px solid #e6ddd1',
-          padding: '14px 16px calc(14px + env(safe-area-inset-bottom))',
+          background: '#ffffff',
+          borderTop: '1px solid #e4e7ee',
+          padding: '12px 18px calc(14px + env(safe-area-inset-bottom))',
+          zIndex: 50,
+          boxShadow: '0 -12px 28px rgba(0,0,0,0.08)',
         }}
       >
-        <div
-          style={{
-            maxWidth: 430,
-            margin: '0 auto',
-            display: 'flex',
-            gap: 14,
-            alignItems: 'center',
-          }}
-        >
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                fontSize: 13,
-                color: '#6c645c',
-                fontWeight: 800,
-              }}
-            >
-              {text.secureBookingFee}
-            </div>
-            <div
-              style={{
-                fontSize: 30,
-                fontWeight: 900,
-                marginTop: 4,
-                color: '#17130f',
-              }}
-            >
-              {formatDisplayPrice(BOOKING_DEPOSIT)}
-            </div>
-          </div>
-
-          <button
-            onClick={goToConfirmed}
+        <div style={{ maxWidth: 430, margin: '0 auto' }}>
+          <div
             style={{
-              border: 'none',
-              background: 'linear-gradient(180deg, #2fa35a 0%, #238247 100%)',
-              color: '#fff',
-              borderRadius: 22,
-              padding: '18px 24px',
-              fontWeight: 900,
-              fontSize: 16,
-              cursor: 'pointer',
-              boxShadow: '0 12px 24px rgba(47,163,90,0.20)',
-              whiteSpace: 'nowrap',
+              minHeight: 74,
+              borderRadius: 18,
+              border: '1.5px solid #d9dee8',
+              background: '#ffffff',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1.5px 1.25fr',
+              alignItems: 'center',
+              overflow: 'hidden',
             }}
           >
-            {text.holdDepositButton}
-          </button>
+            <div
+              style={{
+                padding: '12px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <MessageIcon />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13, color: '#6f7582', fontWeight: 800 }}>
+                  {text.secureBookingFee}
+                </div>
+                <div
+                  style={{
+                    marginTop: 2,
+                    fontSize: 23,
+                    color: BRAND.navy,
+                    fontWeight: 900,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {formatDisplayPrice(BOOKING_DEPOSIT)}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ height: 46, background: '#d9dee8' }} />
+
+            <button
+              type="button"
+              onClick={goToConfirmed}
+              style={{
+                height: 74,
+                border: 0,
+                background: BRAND.green,
+                color: '#ffffff',
+                fontWeight: 900,
+                fontSize: 20,
+                cursor: 'pointer',
+              }}
+            >
+              {text.holdDepositButton} →
+            </button>
+          </div>
         </div>
       </div>
     </main>
