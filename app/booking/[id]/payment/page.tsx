@@ -272,21 +272,30 @@ function MessageIcon() {
   );
 }
 
-function SmallIcon({ icon, color }: { icon: string; color: string }) {
+function SmallIcon({
+  icon,
+  color,
+  bg,
+}: {
+  icon: string;
+  color: string;
+  bg: string;
+}) {
   return (
     <div
       style={{
-        width: 44,
-        height: 44,
-        borderRadius: 15,
-        background: color,
-        color: '#ffffff',
+        width: 52,
+        height: 52,
+        borderRadius: 16,
+        background: bg,
+        color,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: 22,
+        fontSize: 27,
         fontWeight: 900,
         flex: '0 0 auto',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.65)',
       }}
     >
       {icon}
@@ -529,12 +538,13 @@ export default function BookingPaymentPage() {
   const paymentMethods = [
     {
       id: 'olacash' as PaymentMethod,
-      icon: 'O',
+      icon: '●',
       title: text.olacash,
       subtitle: canUseOlaCash
         ? `${text.olacashBalance}: ${formatDisplayPrice(olaCashBalance)}`
         : text.notEnoughOlaCash,
-      color: BRAND.green,
+      color: '#7acb8b',
+      bg: '#eaf9ef',
       disabled: !canUseOlaCash,
     },
     {
@@ -542,7 +552,8 @@ export default function BookingPaymentPage() {
       icon: '💳',
       title: text.card,
       subtitle: 'Visa • Mastercard',
-      color: BRAND.pink,
+      color: '#071b46',
+      bg: BRAND.pink,
       disabled: false,
     },
     {
@@ -550,7 +561,8 @@ export default function BookingPaymentPage() {
       icon: 'P',
       title: text.paypal,
       subtitle: 'PayPal checkout',
-      color: BRAND.blue,
+      color: '#ffffff',
+      bg: BRAND.blue,
       disabled: false,
     },
     {
@@ -558,7 +570,8 @@ export default function BookingPaymentPage() {
       icon: '📱',
       title: text.appleGoogle,
       subtitle: 'Mobile wallet',
-      color: BRAND.navy,
+      color: '#ffffff',
+      bg: BRAND.navy,
       disabled: false,
     },
   ];
@@ -757,7 +770,7 @@ export default function BookingPaymentPage() {
               alignItems: 'center',
             }}
           >
-            <SmallIcon icon="🛡" color={BRAND.green} />
+            <SmallIcon icon="🛡" color="#ffffff" bg={BRAND.green} />
 
             <div>
               <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
@@ -866,11 +879,11 @@ export default function BookingPaymentPage() {
                   style={{
                     width: '100%',
                     borderRadius: 16,
-                    border: active ? `2px solid ${method.color}` : '1.5px solid #d8dde8',
+                    border: active ? `2px solid ${method.bg}` : '1.5px solid #d8dde8',
                     background: active ? '#f4f8ff' : '#ffffff',
                     padding: 12,
                     display: 'grid',
-                    gridTemplateColumns: '46px 1fr auto',
+                    gridTemplateColumns: '52px 1fr auto',
                     gap: 12,
                     alignItems: 'center',
                     textAlign: 'left',
@@ -879,7 +892,7 @@ export default function BookingPaymentPage() {
                     boxShadow: active ? '0 8px 18px rgba(20,103,242,0.12)' : 'none',
                   }}
                 >
-                  <SmallIcon icon={method.icon} color={method.color} />
+                  <SmallIcon icon={method.icon} color={method.color} bg={method.bg} />
 
                   <div>
                     <div
@@ -910,8 +923,8 @@ export default function BookingPaymentPage() {
                       width: 30,
                       height: 30,
                       borderRadius: 999,
-                      background: active ? method.color : '#ffffff',
-                      border: active ? `2px solid ${method.color}` : '2px solid #cfd4dd',
+                      background: active ? method.bg : '#ffffff',
+                      border: active ? `2px solid ${method.bg}` : '2px solid #cfd4dd',
                       color: '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
