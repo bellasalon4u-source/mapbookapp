@@ -96,6 +96,10 @@ type TranslationShape = {
   popularSearchHairExtensions: string;
   popularSearchMassage: string;
   popularSearchMovingHelp: string;
+  popularSearchPrivateChef: string;
+  popularSearchRestaurantBooking: string;
+  popularSearchTattoo: string;
+  popularSearchPiercing: string;
 
   hotOffersNear: string;
   sponsored: string;
@@ -119,6 +123,47 @@ type TranslationShape = {
   welcomeFreeActions: string;
   newUserBonusTitle: string;
   newUserBonusText: string;
+
+  categoryMore: string;
+  categoryBeauty: string;
+  categoryBarber: string;
+  categoryWellness: string;
+  categoryFood: string;
+  categoryHome: string;
+  categoryRepairs: string;
+  categoryTech: string;
+  categoryFashion: string;
+  categoryPets: string;
+  categoryAuto: string;
+  categoryMoving: string;
+  categoryFitness: string;
+  categoryEducation: string;
+  categoryEvents: string;
+  categoryActivities: string;
+  categoryCreative: string;
+  categoryOther: string;
+
+  subHair: string;
+  subBrowsLashes: string;
+  subNails: string;
+  subMakeup: string;
+  subSkincare: string;
+  subAesthetics: string;
+  subPiercing: string;
+  subTattoo: string;
+  subTattooRemoval: string;
+  subPrivateChef: string;
+  subChefAtHome: string;
+  subRestaurantTableBooking: string;
+  subBarTableBooking: string;
+  subCatering: string;
+  subBirthdayDinner: string;
+  subRomanticDinner: string;
+  subEventFood: string;
+  subOther: string;
+  subOtherService: string;
+  subCustomRequest: string;
+  subNotListed: string;
 };
 
 const EN: TranslationShape = {
@@ -201,6 +246,10 @@ const EN: TranslationShape = {
   popularSearchHairExtensions: 'Hair extensions',
   popularSearchMassage: 'Massage',
   popularSearchMovingHelp: 'Moving help',
+  popularSearchPrivateChef: 'Private chef',
+  popularSearchRestaurantBooking: 'Restaurant booking',
+  popularSearchTattoo: 'Tattoo',
+  popularSearchPiercing: 'Piercing',
 
   hotOffersNear: 'Hot offers near',
   sponsored: 'Sponsored',
@@ -225,6 +274,47 @@ const EN: TranslationShape = {
   newUserBonusTitle: 'Free first launch',
   newUserBonusText:
     'New users can publish their first ad, first booking and first hot offer for free.',
+
+  categoryMore: 'More',
+  categoryBeauty: 'Beauty',
+  categoryBarber: 'Barber',
+  categoryWellness: 'Wellness',
+  categoryFood: 'Food & Restaurants',
+  categoryHome: 'Home',
+  categoryRepairs: 'Repairs',
+  categoryTech: 'Tech',
+  categoryFashion: 'Fashion',
+  categoryPets: 'Pets',
+  categoryAuto: 'Auto',
+  categoryMoving: 'Moving',
+  categoryFitness: 'Fitness',
+  categoryEducation: 'Education',
+  categoryEvents: 'Events',
+  categoryActivities: 'Activities',
+  categoryCreative: 'Creative',
+  categoryOther: 'Other',
+
+  subHair: 'Hair',
+  subBrowsLashes: 'Brows & Lashes',
+  subNails: 'Nails',
+  subMakeup: 'Makeup',
+  subSkincare: 'Skincare',
+  subAesthetics: 'Aesthetics',
+  subPiercing: 'Piercing',
+  subTattoo: 'Tattoo',
+  subTattooRemoval: 'Tattoo Removal',
+  subPrivateChef: 'Private Chef',
+  subChefAtHome: 'Chef at Home',
+  subRestaurantTableBooking: 'Restaurant Table Booking',
+  subBarTableBooking: 'Bar Table Booking',
+  subCatering: 'Catering',
+  subBirthdayDinner: 'Birthday Dinner',
+  subRomanticDinner: 'Romantic Dinner',
+  subEventFood: 'Event Food',
+  subOther: 'Other',
+  subOtherService: 'Other Service',
+  subCustomRequest: 'Custom Request',
+  subNotListed: 'Not Listed',
 };
 
 export const translations: Record<AppLanguage, TranslationShape> = {
@@ -291,6 +381,46 @@ export const translations: Record<AppLanguage, TranslationShape> = {
     sponsored: 'Patrocinado',
     viewAction: 'Abrir',
     bookAction: 'Reservar',
+
+    popularSearchPrivateChef: 'Chef privado',
+    popularSearchRestaurantBooking: 'Reserva de restaurante',
+    popularSearchTattoo: 'Tatuaje',
+    popularSearchPiercing: 'Piercing',
+
+    categoryMore: 'Más',
+    categoryBeauty: 'Belleza',
+    categoryBarber: 'Barbero',
+    categoryWellness: 'Bienestar',
+    categoryFood: 'Comida y restaurantes',
+    categoryHome: 'Hogar',
+    categoryRepairs: 'Reparaciones',
+    categoryTech: 'Tecnología',
+    categoryFashion: 'Moda',
+    categoryPets: 'Mascotas',
+    categoryAuto: 'Auto',
+    categoryMoving: 'Mudanza',
+    categoryFitness: 'Fitness',
+    categoryEducation: 'Educación',
+    categoryEvents: 'Eventos',
+    categoryActivities: 'Actividades',
+    categoryCreative: 'Creativo',
+    categoryOther: 'Otro',
+
+    subPiercing: 'Piercing',
+    subTattoo: 'Tatuaje',
+    subTattooRemoval: 'Eliminación de tatuajes',
+    subPrivateChef: 'Chef privado',
+    subChefAtHome: 'Chef a domicilio',
+    subRestaurantTableBooking: 'Reserva de mesa en restaurante',
+    subBarTableBooking: 'Reserva de mesa en bar',
+    subCatering: 'Catering',
+    subBirthdayDinner: 'Cena de cumpleaños',
+    subRomanticDinner: 'Cena romántica',
+    subEventFood: 'Comida para evento',
+    subOther: 'Otro',
+    subOtherService: 'Otro servicio',
+    subCustomRequest: 'Solicitud personalizada',
+    subNotListed: 'No está en la lista',
   },
   RU: {
     ...EN,
@@ -370,6 +500,10 @@ export const translations: Record<AppLanguage, TranslationShape> = {
     popularSearchHairExtensions: 'Наращивание волос',
     popularSearchMassage: 'Массаж',
     popularSearchMovingHelp: 'Помощь с переездом',
+    popularSearchPrivateChef: 'Шеф-повар на дом',
+    popularSearchRestaurantBooking: 'Бронирование ресторана',
+    popularSearchTattoo: 'Тату',
+    popularSearchPiercing: 'Пирсинг',
 
     hotOffersNear: 'Горячие предложения рядом с',
     sponsored: 'Реклама',
@@ -394,6 +528,47 @@ export const translations: Record<AppLanguage, TranslationShape> = {
     newUserBonusTitle: 'Первый запуск бесплатно',
     newUserBonusText:
       'Новый пользователь может бесплатно запустить первую рекламу, первое бронирование и первый hot offer.',
+
+    categoryMore: 'Ещё',
+    categoryBeauty: 'Красота',
+    categoryBarber: 'Барбер',
+    categoryWellness: 'Велнес',
+    categoryFood: 'Еда и рестораны',
+    categoryHome: 'Дом',
+    categoryRepairs: 'Ремонт',
+    categoryTech: 'Техника',
+    categoryFashion: 'Мода',
+    categoryPets: 'Питомцы',
+    categoryAuto: 'Авто',
+    categoryMoving: 'Переезд',
+    categoryFitness: 'Фитнес',
+    categoryEducation: 'Обучение',
+    categoryEvents: 'События',
+    categoryActivities: 'Активности',
+    categoryCreative: 'Креатив',
+    categoryOther: 'Остальное',
+
+    subHair: 'Волосы',
+    subBrowsLashes: 'Брови и ресницы',
+    subNails: 'Ногти',
+    subMakeup: 'Макияж',
+    subSkincare: 'Уход за кожей',
+    subAesthetics: 'Эстетика',
+    subPiercing: 'Пирсинг',
+    subTattoo: 'Тату',
+    subTattooRemoval: 'Удаление тату',
+    subPrivateChef: 'Личный шеф-повар',
+    subChefAtHome: 'Шеф-повар на дом',
+    subRestaurantTableBooking: 'Бронирование столика в ресторане',
+    subBarTableBooking: 'Бронирование столика в баре',
+    subCatering: 'Кейтеринг',
+    subBirthdayDinner: 'Ужин на день рождения',
+    subRomanticDinner: 'Романтический ужин',
+    subEventFood: 'Еда для события',
+    subOther: 'Другое',
+    subOtherService: 'Другая услуга',
+    subCustomRequest: 'Индивидуальный запрос',
+    subNotListed: 'Нет в списке',
   },
   UA: {
     ...EN,
@@ -441,6 +616,42 @@ export const translations: Record<AppLanguage, TranslationShape> = {
     sponsored: 'Реклама',
     viewAction: 'Відкрити',
     bookAction: 'Бронь',
+
+    popularSearchPrivateChef: 'Шеф-кухар додому',
+    popularSearchRestaurantBooking: 'Бронювання ресторану',
+    popularSearchTattoo: 'Тату',
+    popularSearchPiercing: 'Пірсинг',
+
+    categoryMore: 'Ще',
+    categoryBeauty: 'Краса',
+    categoryBarber: 'Барбер',
+    categoryWellness: 'Велнес',
+    categoryFood: 'Їжа та ресторани',
+    categoryHome: 'Дім',
+    categoryRepairs: 'Ремонт',
+    categoryTech: 'Техніка',
+    categoryFashion: 'Мода',
+    categoryPets: 'Тварини',
+    categoryAuto: 'Авто',
+    categoryMoving: 'Переїзд',
+    categoryFitness: 'Фітнес',
+    categoryEducation: 'Навчання',
+    categoryEvents: 'Події',
+    categoryActivities: 'Активності',
+    categoryCreative: 'Креатив',
+    categoryOther: 'Інше',
+
+    subPiercing: 'Пірсинг',
+    subTattoo: 'Тату',
+    subTattooRemoval: 'Видалення тату',
+    subPrivateChef: 'Особистий шеф-кухар',
+    subChefAtHome: 'Шеф-кухар додому',
+    subRestaurantTableBooking: 'Бронювання столика в ресторані',
+    subBarTableBooking: 'Бронювання столика в барі',
+    subOther: 'Інше',
+    subOtherService: 'Інша послуга',
+    subCustomRequest: 'Індивідуальний запит',
+    subNotListed: 'Немає у списку',
   },
   CZ: {
     ...EN,
@@ -487,6 +698,42 @@ export const translations: Record<AppLanguage, TranslationShape> = {
     sponsored: 'Reklama',
     viewAction: 'Otevřít',
     bookAction: 'Rezervovat',
+
+    popularSearchPrivateChef: 'Soukromý kuchař',
+    popularSearchRestaurantBooking: 'Rezervace restaurace',
+    popularSearchTattoo: 'Tetování',
+    popularSearchPiercing: 'Piercing',
+
+    categoryMore: 'Více',
+    categoryBeauty: 'Krása',
+    categoryBarber: 'Barber',
+    categoryWellness: 'Wellness',
+    categoryFood: 'Jídlo a restaurace',
+    categoryHome: 'Domov',
+    categoryRepairs: 'Opravy',
+    categoryTech: 'Technika',
+    categoryFashion: 'Móda',
+    categoryPets: 'Mazlíčci',
+    categoryAuto: 'Auto',
+    categoryMoving: 'Stěhování',
+    categoryFitness: 'Fitness',
+    categoryEducation: 'Vzdělání',
+    categoryEvents: 'Události',
+    categoryActivities: 'Aktivity',
+    categoryCreative: 'Kreativa',
+    categoryOther: 'Ostatní',
+
+    subPiercing: 'Piercing',
+    subTattoo: 'Tetování',
+    subTattooRemoval: 'Odstranění tetování',
+    subPrivateChef: 'Soukromý kuchař',
+    subChefAtHome: 'Kuchař domů',
+    subRestaurantTableBooking: 'Rezervace stolu v restauraci',
+    subBarTableBooking: 'Rezervace stolu v baru',
+    subOther: 'Jiné',
+    subOtherService: 'Jiná služba',
+    subCustomRequest: 'Vlastní požadavek',
+    subNotListed: 'Není v seznamu',
   },
   DE: {
     ...EN,
@@ -533,6 +780,25 @@ export const translations: Record<AppLanguage, TranslationShape> = {
     sponsored: 'Werbung',
     viewAction: 'Öffnen',
     bookAction: 'Buchen',
+
+    popularSearchPrivateChef: 'Privatkoch',
+    popularSearchRestaurantBooking: 'Restaurantreservierung',
+    popularSearchTattoo: 'Tattoo',
+    popularSearchPiercing: 'Piercing',
+
+    categoryFood: 'Essen & Restaurants',
+    categoryOther: 'Sonstiges',
+    subPiercing: 'Piercing',
+    subTattoo: 'Tattoo',
+    subTattooRemoval: 'Tattooentfernung',
+    subPrivateChef: 'Privatkoch',
+    subChefAtHome: 'Koch zu Hause',
+    subRestaurantTableBooking: 'Tischreservierung im Restaurant',
+    subBarTableBooking: 'Tischreservierung in der Bar',
+    subOther: 'Andere',
+    subOtherService: 'Andere Dienstleistung',
+    subCustomRequest: 'Individuelle Anfrage',
+    subNotListed: 'Nicht gelistet',
   },
   IT: {
     ...EN,
@@ -557,6 +823,25 @@ export const translations: Record<AppLanguage, TranslationShape> = {
     sponsored: 'Pubblicità',
     viewAction: 'Apri',
     bookAction: 'Prenota',
+
+    popularSearchPrivateChef: 'Chef privato',
+    popularSearchRestaurantBooking: 'Prenotazione ristorante',
+    popularSearchTattoo: 'Tatuaggio',
+    popularSearchPiercing: 'Piercing',
+
+    categoryFood: 'Cibo e ristoranti',
+    categoryOther: 'Altro',
+    subPiercing: 'Piercing',
+    subTattoo: 'Tatuaggio',
+    subTattooRemoval: 'Rimozione tatuaggio',
+    subPrivateChef: 'Chef privato',
+    subChefAtHome: 'Chef a domicilio',
+    subRestaurantTableBooking: 'Prenotazione tavolo ristorante',
+    subBarTableBooking: 'Prenotazione tavolo bar',
+    subOther: 'Altro',
+    subOtherService: 'Altro servizio',
+    subCustomRequest: 'Richiesta personalizzata',
+    subNotListed: 'Non in lista',
   },
   FR: {
     ...EN,
@@ -581,6 +866,25 @@ export const translations: Record<AppLanguage, TranslationShape> = {
     sponsored: 'Publicité',
     viewAction: 'Ouvrir',
     bookAction: 'Réserver',
+
+    popularSearchPrivateChef: 'Chef privé',
+    popularSearchRestaurantBooking: 'Réservation restaurant',
+    popularSearchTattoo: 'Tatouage',
+    popularSearchPiercing: 'Piercing',
+
+    categoryFood: 'Cuisine et restaurants',
+    categoryOther: 'Autre',
+    subPiercing: 'Piercing',
+    subTattoo: 'Tatouage',
+    subTattooRemoval: 'Détatouage',
+    subPrivateChef: 'Chef privé',
+    subChefAtHome: 'Chef à domicile',
+    subRestaurantTableBooking: 'Réservation de table au restaurant',
+    subBarTableBooking: 'Réservation de table au bar',
+    subOther: 'Autre',
+    subOtherService: 'Autre service',
+    subCustomRequest: 'Demande personnalisée',
+    subNotListed: 'Non listé',
   },
   AR: {
     ...EN,
@@ -605,6 +909,25 @@ export const translations: Record<AppLanguage, TranslationShape> = {
     sponsored: 'إعلان',
     viewAction: 'فتح',
     bookAction: 'احجز',
+
+    popularSearchPrivateChef: 'طاهٍ خاص',
+    popularSearchRestaurantBooking: 'حجز مطعم',
+    popularSearchTattoo: 'وشم',
+    popularSearchPiercing: 'ثقب',
+
+    categoryFood: 'الطعام والمطاعم',
+    categoryOther: 'أخرى',
+    subPiercing: 'ثقب',
+    subTattoo: 'وشم',
+    subTattooRemoval: 'إزالة الوشم',
+    subPrivateChef: 'طاهٍ خاص',
+    subChefAtHome: 'طاهٍ في المنزل',
+    subRestaurantTableBooking: 'حجز طاولة في مطعم',
+    subBarTableBooking: 'حجز طاولة في بار',
+    subOther: 'أخرى',
+    subOtherService: 'خدمة أخرى',
+    subCustomRequest: 'طلب خاص',
+    subNotListed: 'غير موجود في القائمة',
   },
   PL: {
     ...EN,
@@ -651,6 +974,25 @@ export const translations: Record<AppLanguage, TranslationShape> = {
     sponsored: 'Reklama',
     viewAction: 'Otwórz',
     bookAction: 'Rezerwuj',
+
+    popularSearchPrivateChef: 'Prywatny szef kuchni',
+    popularSearchRestaurantBooking: 'Rezerwacja restauracji',
+    popularSearchTattoo: 'Tatuaż',
+    popularSearchPiercing: 'Piercing',
+
+    categoryFood: 'Jedzenie i restauracje',
+    categoryOther: 'Inne',
+    subPiercing: 'Piercing',
+    subTattoo: 'Tatuaż',
+    subTattooRemoval: 'Usuwanie tatuażu',
+    subPrivateChef: 'Prywatny szef kuchni',
+    subChefAtHome: 'Szef kuchni w domu',
+    subRestaurantTableBooking: 'Rezerwacja stolika w restauracji',
+    subBarTableBooking: 'Rezerwacja stolika w barze',
+    subOther: 'Inne',
+    subOtherService: 'Inna usługa',
+    subCustomRequest: 'Indywidualne zapytanie',
+    subNotListed: 'Nie ma na liście',
   },
 };
 
