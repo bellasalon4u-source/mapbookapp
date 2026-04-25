@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { getMasterById } from '../../../../services/masters';
+import { getMasterById, getAllMasters } from '../../../../services/masters';
+import { getListings } from '../../../../services/listingsStore';
 import {
   getSavedLanguage,
   subscribeToLanguageChange,
@@ -10,7 +11,39 @@ import {
 } from '../../../../services/i18n';
 import { formatDisplayPrice } from '../../../../services/currencyDisplay';
 
-type DateStatus = 'free' | 'full';
+type DateStatus = 'free' | 'full' | 'partial' | 'past';
+
+type ListingLike = {
+  id: string | number;
+  title?: string;
+  category?: string;
+  subcategory?: string;
+  location?: string;
+  description?: string;
+  price?: string;
+  hours?: string;
+  availableToday?: boolean;
+  photos?: string[];
+  paymentMethods?: string[];
+  serviceModes?: string[];
+};
+
+type ServiceLike = {
+  slug: string;
+  title: string;
+  duration: string;
+  price: number;
+  image: string;
+};
+
+type MasterLike = {
+  id: string | number;
+  name: string;
+  title: string;
+  city: string;
+  avatar: string;
+  services: ServiceLike[];
+};
 
 function getTexts(language: AppLanguage) {
   if (language === 'RU') {
@@ -25,11 +58,16 @@ function getTexts(language: AppLanguage) {
       chooseMonth: 'Выберите месяц',
       available: 'Доступно',
       unavailable: 'Недоступно',
+      partial: 'Частично',
       todayLabel: 'Сегодня',
       selectedDate: 'Выбранная дата',
       notSelected: 'Не выбрано',
       chooseTime: 'Выбрать время',
       from: 'от',
+      providerFallback: 'Специалист',
+      serviceProviderFallback: 'Исполнитель услуг',
+      serviceFallback: 'Основная услуга',
+      premiumOption: 'Премиум вариант',
       zeroMinutes: '0м',
       monthsFull: [
         'Январь',
@@ -45,8 +83,76 @@ function getTexts(language: AppLanguage) {
         'Ноябрь',
         'Декабрь',
       ],
-      monthsShort: ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'],
-      weekdaysShort: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+      monthsShort: [
+        'янв',
+        'фев',
+        'мар',
+        'апр',
+        'май',
+        'июн',
+        'июл',
+        'авг',
+        'сен',
+        'окт',
+        'ноя',
+        'дек',
+      ],
+      weekdaysShort: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+    };
+  }
+
+  if (language === 'UA') {
+    return {
+      bookingDataNotFound: 'Дані бронювання не знайдені',
+      chooseDate: 'Оберіть дату',
+      selectedServices: 'Обрані послуги',
+      totalDuration: 'Загальна тривалість',
+      totalPrice: 'Загальна ціна',
+      today: 'Сьогодні',
+      chooseYear: 'Оберіть рік',
+      chooseMonth: 'Оберіть місяць',
+      available: 'Доступно',
+      unavailable: 'Недоступно',
+      partial: 'Частково',
+      todayLabel: 'Сьогодні',
+      selectedDate: 'Обрана дата',
+      notSelected: 'Не обрано',
+      chooseTime: 'Обрати час',
+      from: 'від',
+      providerFallback: 'Спеціаліст',
+      serviceProviderFallback: 'Виконавець послуг',
+      serviceFallback: 'Основна послуга',
+      premiumOption: 'Преміум варіант',
+      zeroMinutes: '0хв',
+      monthsFull: [
+        'Січень',
+        'Лютий',
+        'Березень',
+        'Квітень',
+        'Травень',
+        'Червень',
+        'Липень',
+        'Серпень',
+        'Вересень',
+        'Жовтень',
+        'Листопад',
+        'Грудень',
+      ],
+      monthsShort: [
+        'січ',
+        'лют',
+        'бер',
+        'кві',
+        'тра',
+        'чер',
+        'лип',
+        'сер',
+        'вер',
+        'жов',
+        'лис',
+        'гру',
+      ],
+      weekdaysShort: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'],
     };
   }
 
@@ -62,11 +168,16 @@ function getTexts(language: AppLanguage) {
       chooseMonth: 'Elige mes',
       available: 'Disponible',
       unavailable: 'No disponible',
+      partial: 'Parcial',
       todayLabel: 'Hoy',
       selectedDate: 'Fecha seleccionada',
       notSelected: 'No seleccionada',
       chooseTime: 'Elegir hora',
       from: 'desde',
+      providerFallback: 'Profesional',
+      serviceProviderFallback: 'Proveedor de servicios',
+      serviceFallback: 'Servicio principal',
+      premiumOption: 'Opción premium',
       zeroMinutes: '0 min',
       monthsFull: [
         'Enero',
@@ -82,8 +193,21 @@ function getTexts(language: AppLanguage) {
         'Noviembre',
         'Diciembre',
       ],
-      monthsShort: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
-      weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+      monthsShort: [
+        'ene',
+        'feb',
+        'mar',
+        'abr',
+        'may',
+        'jun',
+        'jul',
+        'ago',
+        'sep',
+        'oct',
+        'nov',
+        'dic',
+      ],
+      weekdaysShort: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
     };
   }
 
@@ -99,11 +223,16 @@ function getTexts(language: AppLanguage) {
       chooseMonth: 'Vyberte měsíc',
       available: 'Dostupné',
       unavailable: 'Nedostupné',
+      partial: 'Částečně',
       todayLabel: 'Dnes',
       selectedDate: 'Vybrané datum',
       notSelected: 'Nevybráno',
       chooseTime: 'Vybrat čas',
       from: 'od',
+      providerFallback: 'Specialista',
+      serviceProviderFallback: 'Poskytovatel služeb',
+      serviceFallback: 'Hlavní služba',
+      premiumOption: 'Prémiová možnost',
       zeroMinutes: '0 min',
       monthsFull: [
         'Leden',
@@ -119,8 +248,21 @@ function getTexts(language: AppLanguage) {
         'Listopad',
         'Prosinec',
       ],
-      monthsShort: ['led', 'úno', 'bře', 'dub', 'kvě', 'čen', 'čvc', 'srp', 'zář', 'říj', 'lis', 'pro'],
-      weekdaysShort: ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'],
+      monthsShort: [
+        'led',
+        'úno',
+        'bře',
+        'dub',
+        'kvě',
+        'čen',
+        'čvc',
+        'srp',
+        'zář',
+        'říj',
+        'lis',
+        'pro',
+      ],
+      weekdaysShort: ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'],
     };
   }
 
@@ -136,11 +278,16 @@ function getTexts(language: AppLanguage) {
       chooseMonth: 'Monat wählen',
       available: 'Verfügbar',
       unavailable: 'Nicht verfügbar',
+      partial: 'Teilweise',
       todayLabel: 'Heute',
       selectedDate: 'Ausgewähltes Datum',
       notSelected: 'Nicht ausgewählt',
       chooseTime: 'Zeit wählen',
       from: 'ab',
+      providerFallback: 'Spezialist',
+      serviceProviderFallback: 'Dienstleister',
+      serviceFallback: 'Hauptservice',
+      premiumOption: 'Premium-Option',
       zeroMinutes: '0 Min',
       monthsFull: [
         'Januar',
@@ -156,8 +303,21 @@ function getTexts(language: AppLanguage) {
         'November',
         'Dezember',
       ],
-      monthsShort: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
-      weekdaysShort: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+      monthsShort: [
+        'Jan',
+        'Feb',
+        'Mär',
+        'Apr',
+        'Mai',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Dez',
+      ],
+      weekdaysShort: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
     };
   }
 
@@ -173,11 +333,16 @@ function getTexts(language: AppLanguage) {
       chooseMonth: 'Wybierz miesiąc',
       available: 'Dostępne',
       unavailable: 'Niedostępne',
+      partial: 'Częściowo',
       todayLabel: 'Dziś',
       selectedDate: 'Wybrana data',
       notSelected: 'Nie wybrano',
       chooseTime: 'Wybierz godzinę',
       from: 'od',
+      providerFallback: 'Specjalista',
+      serviceProviderFallback: 'Usługodawca',
+      serviceFallback: 'Usługa główna',
+      premiumOption: 'Opcja premium',
       zeroMinutes: '0 min',
       monthsFull: [
         'Styczeń',
@@ -193,8 +358,21 @@ function getTexts(language: AppLanguage) {
         'Listopad',
         'Grudzień',
       ],
-      monthsShort: ['sty', 'lut', 'mar', 'kwi', 'maj', 'cze', 'lip', 'sie', 'wrz', 'paź', 'lis', 'gru'],
-      weekdaysShort: ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'],
+      monthsShort: [
+        'sty',
+        'lut',
+        'mar',
+        'kwi',
+        'maj',
+        'cze',
+        'lip',
+        'sie',
+        'wrz',
+        'paź',
+        'lis',
+        'gru',
+      ],
+      weekdaysShort: ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd'],
     };
   }
 
@@ -209,11 +387,16 @@ function getTexts(language: AppLanguage) {
     chooseMonth: 'Choose month',
     available: 'Available',
     unavailable: 'Unavailable',
+    partial: 'Partial',
     todayLabel: 'Today',
     selectedDate: 'Selected date',
     notSelected: 'Not selected',
     chooseTime: 'Choose time',
     from: 'from',
+    providerFallback: 'Provider',
+    serviceProviderFallback: 'Service provider',
+    serviceFallback: 'Main service',
+    premiumOption: 'Premium option',
     zeroMinutes: '0m',
     monthsFull: [
       'January',
@@ -229,21 +412,69 @@ function getTexts(language: AppLanguage) {
       'November',
       'December',
     ],
-    monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    weekdaysShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    monthsShort: [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ],
+    weekdaysShort: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   };
 }
 
-function getMonthLabel(monthIndex: number, language: AppLanguage) {
-  return getTexts(language).monthsFull[monthIndex];
-}
+function listingToMasterShape(listing: ListingLike, index: number, language: AppLanguage): MasterLike {
+  const text = getTexts(language);
 
-function getShortMonthLabel(monthIndex: number, language: AppLanguage) {
-  return getTexts(language).monthsShort[monthIndex];
-}
+  const fallbackImages = [
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=80',
+  ];
 
-function getWeekdayShort(date: Date, language: AppLanguage) {
-  return getTexts(language).weekdaysShort[date.getDay()];
+  const gallery =
+    listing.photos && listing.photos.length > 0
+      ? listing.photos
+      : [
+          fallbackImages[index % fallbackImages.length],
+          fallbackImages[(index + 1) % fallbackImages.length],
+          fallbackImages[(index + 2) % fallbackImages.length],
+        ];
+
+  const numericPrice = Number(String(listing.price || '').replace(/[^\d.]/g, ''));
+  const priceFrom = Number.isFinite(numericPrice) && numericPrice > 0 ? numericPrice : 45;
+
+  return {
+    id: listing.id,
+    name: listing.title || text.providerFallback,
+    title: listing.subcategory || text.serviceProviderFallback,
+    city: listing.location || 'London',
+    avatar: gallery[0],
+    services: [
+      {
+        slug: 'main-service',
+        title: listing.subcategory || listing.title || text.serviceFallback,
+        duration: listing.hours || '1h',
+        price: priceFrom,
+        image: gallery[0],
+      },
+      {
+        slug: 'premium-service',
+        title: text.premiumOption,
+        duration: '2h',
+        price: priceFrom + 20,
+        image: gallery[1] || gallery[0],
+      },
+    ],
+  };
 }
 
 function getDateKey(date: Date) {
@@ -281,6 +512,12 @@ function formatMinutes(minutes: number, language: AppLanguage) {
     return `${m}м`;
   }
 
+  if (language === 'UA') {
+    if (h > 0 && m > 0) return `${h}г ${m}хв`;
+    if (h > 0) return `${h}г`;
+    return `${m}хв`;
+  }
+
   if (language === 'DE') {
     if (h > 0 && m > 0) return `${h}Std ${m}Min`;
     if (h > 0) return `${h}Std`;
@@ -298,48 +535,88 @@ function formatMinutes(minutes: number, language: AppLanguage) {
   return `${m}m`;
 }
 
+function getMonthDates(year: number, month: number) {
+  const firstDay = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const mondayBasedOffset = (firstDay.getDay() + 6) % 7;
+  const leadingEmpty = Array.from({ length: mondayBasedOffset }, () => null);
+  const days = Array.from({ length: daysInMonth }, (_, index) => new Date(year, month, index + 1));
+
+  const totalCells = Math.ceil((leadingEmpty.length + days.length) / 7) * 7;
+  const trailingEmpty = Array.from(
+    { length: Math.max(0, totalCells - leadingEmpty.length - days.length) },
+    () => null
+  );
+
+  return [...leadingEmpty, ...days, ...trailingEmpty];
+}
+
 function getStatusForDate(date: Date, today: Date): DateStatus {
   const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-  if (normalizedDate < normalizedToday) return 'full';
+  if (normalizedDate < normalizedToday) return 'past';
 
   const day = normalizedDate.getDate();
 
   if (day % 7 === 0) return 'full';
+  if (day % 5 === 0) return 'partial';
+
   return 'free';
 }
 
-function getStatusStyles(status: DateStatus, active: boolean, today: boolean) {
+function getStatusStyles(status: DateStatus, active: boolean, isToday: boolean) {
   if (active) {
     return {
       background: '#16a34a',
       color: '#ffffff',
-      border: '2px solid #16a34a',
-      boxShadow: '0 10px 22px rgba(22,163,74,0.25)',
+      border: '2px solid #111111',
+      boxShadow: '0 8px 0 rgba(17,17,17,0.08)',
     };
   }
 
-  if (today) {
+  if (status === 'past') {
     return {
-      background: '#dbeafe',
-      color: '#1d4ed8',
-      border: '2px solid #2563eb',
+      background: '#f2f2f2',
+      color: '#a3a3a3',
+      border: '1.5px solid #dddddd',
+      boxShadow: 'none',
     };
   }
 
-  if (status === 'free') {
+  if (status === 'full') {
     return {
-      background: '#dcfce7',
-      color: '#15803d',
-      border: '1px solid #86efac',
+      background: '#ffe1e7',
+      color: '#cf3344',
+      border: '1.5px solid #ff7a85',
+      boxShadow: 'none',
+    };
+  }
+
+  if (status === 'partial') {
+    return {
+      background: '#fff3d6',
+      color: '#ad7200',
+      border: '1.5px solid #f0b429',
+      boxShadow: 'none',
+    };
+  }
+
+  if (isToday) {
+    return {
+      background: '#e8f1ff',
+      color: '#2364c8',
+      border: '2px solid #2f80ed',
+      boxShadow: 'none',
     };
   }
 
   return {
-    background: '#ffe4e6',
-    color: '#e11d48',
-    border: '1px solid #fda4af',
+    background: '#e3f8ea',
+    color: '#1f8c3f',
+    border: '1.5px solid #55c75f',
+    boxShadow: 'none',
   };
 }
 
@@ -348,21 +625,10 @@ export default function BookingDatePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
-
-  const text = useMemo(() => getTexts(language), [language]);
-
-  const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
+  const id = String(params.id);
   const servicesParam = searchParams.get('services') || '';
 
-  const selectedServiceSlugs = servicesParam
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-  const selectedItems = master
-    ? master.services.filter((service) => selectedServiceSlugs.includes(service.slug))
-    : [];
+  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
 
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -373,20 +639,57 @@ export default function BookingDatePage() {
   const [pickerMode, setPickerMode] = useState<'closed' | 'year' | 'month'>('closed');
 
   useEffect(() => {
-    setLanguage(getSavedLanguage());
+    const syncLanguage = () => {
+      setLanguage(getSavedLanguage());
+    };
+
+    syncLanguage();
 
     const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
 
+    window.addEventListener('focus', syncLanguage);
+    window.addEventListener('pageshow', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
+
     return () => {
       unsubLanguage();
+      window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('pageshow', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
     };
   }, []);
 
-  if (!master || !selectedItems.length) {
-    return <main style={{ padding: 24 }}>{text.bookingDataNotFound}</main>;
-  }
+  const text = useMemo(() => getTexts(language), [language]);
+
+  const master = useMemo(() => {
+    const builtInMaster = getMasterById(id);
+    if (builtInMaster) return builtInMaster as MasterLike;
+
+    const listings = getListings() as ListingLike[];
+    const listingIndex = listings.findIndex((item) => String(item.id) === id);
+
+    if (listingIndex !== -1) {
+      return listingToMasterShape(listings[listingIndex], listingIndex, language);
+    }
+
+    const fallbackMaster = (getAllMasters() as any[]).find((item) => String(item.id) === id);
+    if (fallbackMaster) return fallbackMaster as MasterLike;
+
+    return null;
+  }, [id, language]);
+
+  const selectedServiceSlugs = servicesParam
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  const selectedItems = useMemo(() => {
+    if (!master) return [] as ServiceLike[];
+
+    return master.services.filter((service) => selectedServiceSlugs.includes(service.slug));
+  }, [master, selectedServiceSlugs]);
 
   const totalPrice = selectedItems.reduce((sum, item) => sum + item.price, 0);
   const totalMinutes = selectedItems.reduce(
@@ -394,17 +697,27 @@ export default function BookingDatePage() {
     0
   );
 
-  const years = Array.from({ length: 3 }, (_, index) => today.getFullYear() + index);
+  const years = Array.from({ length: 4 }, (_, index) => today.getFullYear() + index);
   const monthDates = Array.from({ length: 12 }, (_, index) => new Date(activeYear, index, 1));
+  const calendarCells = getMonthDates(activeYear, activeMonth);
 
-  const activeMonthDates = Array.from({ length: 31 }, (_, index) => new Date(activeYear, activeMonth, index + 1))
-    .filter((date) => date.getMonth() === activeMonth);
+  const selectedDate = selectedDateKey ? new Date(`${selectedDateKey}T12:00:00`) : null;
 
-  const selectedDate =
-    selectedDateKey
-      ? activeMonthDates.find((date) => getDateKey(date) === selectedDateKey) ||
-        new Date(selectedDateKey)
-      : null;
+  if (!master || !selectedItems.length) {
+    return (
+      <main
+        style={{
+          minHeight: '100vh',
+          background: '#fcf8f2',
+          padding: 24,
+          fontFamily: 'Arial, sans-serif',
+          color: '#17130f',
+        }}
+      >
+        {text.bookingDataNotFound}
+      </main>
+    );
+  }
 
   return (
     <main
@@ -413,73 +726,144 @@ export default function BookingDatePage() {
         background: '#fcf8f2',
         fontFamily: 'Arial, sans-serif',
         color: '#1d1712',
-        paddingBottom: 120,
+        paddingBottom: 138,
       }}
     >
-      <div style={{ maxWidth: 420, margin: '0 auto', padding: 24 }}>
-        <div
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 138px' }}>
+        <header
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
+            display: 'grid',
+            gridTemplateColumns: '54px 1fr 54px',
             alignItems: 'center',
-            marginBottom: 22,
+            gap: 12,
+            marginBottom: 18,
           }}
         >
           <button
+            type="button"
             onClick={() => router.back()}
             style={{
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #e7ddd0',
-              background: '#fff',
-              fontSize: 24,
+              border: '2px solid #111111',
+              background: '#ffffff',
+              fontSize: 26,
+              fontWeight: 900,
+              color: '#17130f',
               cursor: 'pointer',
             }}
           >
             ←
           </button>
 
-          <div style={{ fontSize: 30, fontWeight: 800 }}>{text.chooseDate}</div>
+          <div
+            style={{
+              textAlign: 'center',
+              fontSize: 27,
+              lineHeight: 1.05,
+              fontWeight: 900,
+              color: '#17130f',
+            }}
+          >
+            {text.chooseDate}
+          </div>
 
           <button
+            type="button"
             onClick={() => router.push('/')}
             style={{
               width: 54,
               height: 54,
               borderRadius: 999,
-              border: '1px solid #e7ddd0',
-              background: '#fff',
+              border: '2px solid #111111',
+              background: '#ffffff',
               fontSize: 22,
+              fontWeight: 900,
+              color: '#17130f',
               cursor: 'pointer',
             }}
           >
-            ⌂
+            ×
           </button>
-        </div>
+        </header>
 
-        <div
+        <section
           style={{
-            background: '#fff',
-            border: '1px solid #e4d8ca',
-            borderRadius: 26,
-            padding: 16,
+            borderRadius: 28,
+            border: '2px solid #111111',
+            background: '#ffffff',
+            padding: 14,
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 800 }}>{text.selectedServices}</div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '70px 1fr',
+              gap: 12,
+              alignItems: 'center',
+              marginBottom: 14,
+            }}
+          >
+            <img
+              src={master.avatar}
+              alt={master.name}
+              style={{
+                width: 70,
+                height: 70,
+                borderRadius: 20,
+                objectFit: 'cover',
+                border: '2px solid #111111',
+              }}
+            />
 
-          <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 21,
+                  fontWeight: 900,
+                  color: '#17130f',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {master.name}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 5,
+                  fontSize: 14,
+                  fontWeight: 800,
+                  color: '#6f675f',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {master.title} · {master.city}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ fontSize: 18, fontWeight: 900, color: '#17130f' }}>
+            {text.selectedServices}
+          </div>
+
+          <div style={{ marginTop: 12, display: 'grid', gap: 10 }}>
             {selectedItems.map((item) => (
               <div
                 key={item.slug}
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '56px 1fr auto',
-                  gap: 12,
+                  gap: 10,
                   alignItems: 'center',
                   padding: 10,
-                  borderRadius: 18,
-                  background: '#faf6ef',
+                  borderRadius: 20,
+                  border: '1.5px solid #e4d8ca',
+                  background: '#fffefa',
                 }}
               >
                 <img
@@ -489,18 +873,37 @@ export default function BookingDatePage() {
                     width: 56,
                     height: 56,
                     objectFit: 'cover',
-                    borderRadius: 14,
+                    borderRadius: 16,
                   }}
                 />
 
-                <div>
-                  <div style={{ fontSize: 17, fontWeight: 800 }}>{item.title}</div>
-                  <div style={{ marginTop: 4, color: '#746b62', fontSize: 14 }}>
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 900,
+                      color: '#17130f',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {item.title}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 4,
+                      color: '#746b62',
+                      fontSize: 13,
+                      fontWeight: 800,
+                    }}
+                  >
                     {item.duration}
                   </div>
                 </div>
 
-                <div style={{ fontSize: 16, fontWeight: 800 }}>
+                <div style={{ fontSize: 15, fontWeight: 900, color: '#ff3b3b' }}>
                   {formatDisplayPrice(item.price)}
                 </div>
               </div>
@@ -515,33 +918,56 @@ export default function BookingDatePage() {
               gap: 12,
             }}
           >
-            <div style={{ background: '#f7f1e8', borderRadius: 18, padding: 12 }}>
-              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>
+            <div
+              style={{
+                background: '#f7f1e8',
+                borderRadius: 20,
+                border: '1.5px solid #e4d8ca',
+                padding: 12,
+              }}
+            >
+              <div style={{ fontSize: 13, color: '#6c645c', fontWeight: 900 }}>
                 {text.totalDuration}
               </div>
+
               <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
                 {formatMinutes(totalMinutes, language)}
               </div>
             </div>
 
-            <div style={{ background: '#f7f1e8', borderRadius: 18, padding: 12 }}>
-              <div style={{ fontSize: 14, color: '#6c645c', fontWeight: 700 }}>
+            <div
+              style={{
+                background: '#fff2f2',
+                borderRadius: 20,
+                border: '1.5px solid #ffd2d2',
+                padding: 12,
+              }}
+            >
+              <div style={{ fontSize: 13, color: '#6c645c', fontWeight: 900 }}>
                 {text.totalPrice}
               </div>
-              <div style={{ fontSize: 24, fontWeight: 900, marginTop: 6 }}>
+
+              <div
+                style={{
+                  fontSize: 24,
+                  fontWeight: 900,
+                  marginTop: 6,
+                  color: '#ff3b3b',
+                }}
+              >
                 {formatDisplayPrice(totalPrice)}
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div
+        <section
           style={{
-            marginTop: 22,
-            background: '#fff',
-            border: '1px solid #e4d8ca',
-            borderRadius: 26,
-            padding: 18,
+            marginTop: 16,
+            background: '#ffffff',
+            border: '2px solid #111111',
+            borderRadius: 30,
+            padding: 14,
           }}
         >
           <div
@@ -553,37 +979,56 @@ export default function BookingDatePage() {
             }}
           >
             <button
+              type="button"
               onClick={() => {
                 const prev = new Date(activeYear, activeMonth - 1, 1);
                 setActiveYear(prev.getFullYear());
                 setActiveMonth(prev.getMonth());
+                setPickerMode('closed');
               }}
               style={{
                 width: 42,
                 height: 42,
                 borderRadius: 999,
-                border: '1px solid #e4d8ca',
-                background: '#fff',
+                border: '2px solid #111111',
+                background: '#ffffff',
                 fontSize: 22,
+                fontWeight: 900,
                 cursor: 'pointer',
               }}
             >
               ‹
             </button>
 
-            <div style={{ fontSize: 24, fontWeight: 800, textAlign: 'center' }}>
-              {getMonthLabel(activeMonth, language)} {activeYear}
-            </div>
+            <button
+              type="button"
+              onClick={() => setPickerMode(pickerMode === 'year' ? 'closed' : 'year')}
+              style={{
+                minHeight: 42,
+                borderRadius: 18,
+                border: '2px solid #111111',
+                background: '#fffefa',
+                color: '#17130f',
+                fontSize: 19,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              {text.monthsFull[activeMonth]} {activeYear}
+            </button>
 
             <button
-              onClick={() => setPickerMode(pickerMode === 'year' ? 'closed' : 'year')}
+              type="button"
+              onClick={() => setPickerMode(pickerMode === 'month' ? 'closed' : 'month')}
               style={{
                 width: 42,
                 height: 42,
                 borderRadius: 999,
-                border: '1px solid #e4d8ca',
-                background: '#fff',
-                fontSize: 20,
+                border: '2px solid #111111',
+                background: '#e8f1ff',
+                color: '#2364c8',
+                fontSize: 18,
+                fontWeight: 900,
                 cursor: 'pointer',
               }}
             >
@@ -591,18 +1036,21 @@ export default function BookingDatePage() {
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 const next = new Date(activeYear, activeMonth + 1, 1);
                 setActiveYear(next.getFullYear());
                 setActiveMonth(next.getMonth());
+                setPickerMode('closed');
               }}
               style={{
                 width: 42,
                 height: 42,
                 borderRadius: 999,
-                border: '1px solid #e4d8ca',
-                background: '#fff',
+                border: '2px solid #111111',
+                background: '#ffffff',
                 fontSize: 22,
+                fontWeight: 900,
                 cursor: 'pointer',
               }}
             >
@@ -610,21 +1058,30 @@ export default function BookingDatePage() {
             </button>
           </div>
 
-          <div style={{ marginTop: 10, color: '#6c645c', fontSize: 14, fontWeight: 700 }}>
-            {text.today}: {today.getDate()} {getShortMonthLabel(today.getMonth(), language)} {today.getFullYear()}
+          <div
+            style={{
+              marginTop: 10,
+              color: '#6c645c',
+              fontSize: 13,
+              fontWeight: 800,
+              textAlign: 'center',
+            }}
+          >
+            {text.today}: {today.getDate()} {text.monthsShort[today.getMonth()]}{' '}
+            {today.getFullYear()}
           </div>
 
-          {pickerMode === 'year' && (
+          {pickerMode === 'year' ? (
             <div
               style={{
                 marginTop: 14,
                 background: '#fffaf2',
-                border: '1px solid #eadfce',
-                borderRadius: 20,
+                border: '1.5px solid #eadfce',
+                borderRadius: 22,
                 padding: 14,
               }}
             >
-              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>
+              <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 10 }}>
                 {text.chooseYear}
               </div>
 
@@ -635,6 +1092,7 @@ export default function BookingDatePage() {
                   return (
                     <button
                       key={year}
+                      type="button"
                       onClick={() => {
                         setActiveYear(year);
                         setPickerMode('month');
@@ -642,9 +1100,10 @@ export default function BookingDatePage() {
                       style={{
                         padding: '14px 12px',
                         borderRadius: 18,
-                        border: active ? '2px solid #16a34a' : '1px solid #e4d8ca',
-                        background: active ? '#e6f8ec' : '#fff',
-                        fontWeight: 800,
+                        border: active ? '2px solid #16a34a' : '1.5px solid #111111',
+                        background: active ? '#e6f8ec' : '#ffffff',
+                        color: active ? '#15803d' : '#17130f',
+                        fontWeight: 900,
                         fontSize: 16,
                         cursor: 'pointer',
                       }}
@@ -655,19 +1114,19 @@ export default function BookingDatePage() {
                 })}
               </div>
             </div>
-          )}
+          ) : null}
 
-          {pickerMode === 'month' && (
+          {pickerMode === 'month' ? (
             <div
               style={{
                 marginTop: 14,
                 background: '#fffaf2',
-                border: '1px solid #eadfce',
-                borderRadius: 20,
+                border: '1.5px solid #eadfce',
+                borderRadius: 22,
                 padding: 14,
               }}
             >
-              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>
+              <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 10 }}>
                 {text.chooseMonth}
               </div>
 
@@ -678,6 +1137,7 @@ export default function BookingDatePage() {
                   return (
                     <button
                       key={date.getMonth()}
+                      type="button"
                       onClick={() => {
                         setActiveMonth(date.getMonth());
                         setPickerMode('closed');
@@ -685,63 +1145,81 @@ export default function BookingDatePage() {
                       style={{
                         padding: '14px 12px',
                         borderRadius: 18,
-                        border: active ? '2px solid #16a34a' : '1px solid #e4d8ca',
-                        background: active ? '#e6f8ec' : '#fff',
-                        fontWeight: 800,
+                        border: active ? '2px solid #16a34a' : '1.5px solid #111111',
+                        background: active ? '#e6f8ec' : '#ffffff',
+                        color: active ? '#15803d' : '#17130f',
+                        fontWeight: 900,
                         fontSize: 15,
                         cursor: 'pointer',
                       }}
                     >
-                      {getMonthLabel(date.getMonth(), language)} {activeYear}
+                      {text.monthsFull[date.getMonth()]}
                     </button>
                   );
                 })}
               </div>
             </div>
-          )}
+          ) : null}
 
           <div
             style={{
               marginTop: 16,
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 12,
+              gridTemplateColumns: 'repeat(7, 1fr)',
+              gap: 7,
+              color: '#7b7268',
+              fontSize: 11,
+              fontWeight: 900,
+              textAlign: 'center',
             }}
           >
-            {activeMonthDates.map((date) => {
+            {text.weekdaysShort.map((weekday) => (
+              <div key={weekday}>{weekday}</div>
+            ))}
+          </div>
+
+          <div
+            style={{
+              marginTop: 8,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(7, 1fr)',
+              gap: 7,
+            }}
+          >
+            {calendarCells.map((date, index) => {
+              if (!date) {
+                return <div key={`empty-${index}`} style={{ minHeight: 44 }} />;
+              }
+
               const key = getDateKey(date);
               const status = getStatusForDate(date, today);
               const active = selectedDateKey === key;
               const isToday = sameDay(date, today);
-              const disabled = status === 'full';
+              const disabled = status === 'full' || status === 'past';
               const styles = getStatusStyles(status, active, isToday);
 
               return (
                 <button
                   key={key}
+                  type="button"
                   disabled={disabled}
                   onClick={() => {
                     if (disabled) return;
                     setSelectedDateKey(key);
                   }}
                   style={{
-                    borderRadius: 20,
-                    padding: '14px 10px',
+                    minHeight: 46,
+                    borderRadius: 15,
                     textAlign: 'center',
-                    opacity: disabled ? 0.8 : 1,
+                    opacity: disabled ? 0.75 : 1,
                     cursor: disabled ? 'not-allowed' : 'pointer',
+                    fontSize: 14,
+                    fontWeight: 900,
+                    padding: 0,
                     ...styles,
                   }}
                 >
-                  <div style={{ fontSize: 13, fontWeight: 700 }}>
-                    {getWeekdayShort(date, language)}
-                  </div>
-                  <div style={{ fontSize: 26, fontWeight: 900, marginTop: 4 }}>
-                    {date.getDate()}
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4 }}>
-                    {getShortMonthLabel(date.getMonth(), language)}
-                  </div>
+                  {date.getDate()}
                 </button>
               );
             })}
@@ -750,21 +1228,22 @@ export default function BookingDatePage() {
           <div
             style={{
               display: 'flex',
-              gap: 14,
+              gap: 10,
               flexWrap: 'wrap',
               marginTop: 16,
-              fontSize: 14,
+              fontSize: 12,
               color: '#6d645c',
+              fontWeight: 800,
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span
                 style={{
-                  width: 14,
-                  height: 14,
+                  width: 13,
+                  height: 13,
                   borderRadius: 999,
-                  background: '#dcfce7',
-                  border: '1px solid #86efac',
+                  background: '#e3f8ea',
+                  border: '1px solid #55c75f',
                   display: 'inline-block',
                 }}
               />
@@ -774,11 +1253,25 @@ export default function BookingDatePage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span
                 style={{
-                  width: 14,
-                  height: 14,
+                  width: 13,
+                  height: 13,
                   borderRadius: 999,
-                  background: '#ffe4e6',
-                  border: '1px solid #fda4af',
+                  background: '#fff3d6',
+                  border: '1px solid #f0b429',
+                  display: 'inline-block',
+                }}
+              />
+              {text.partial}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span
+                style={{
+                  width: 13,
+                  height: 13,
+                  borderRadius: 999,
+                  background: '#ffe1e7',
+                  border: '1px solid #ff7a85',
                   display: 'inline-block',
                 }}
               />
@@ -788,18 +1281,18 @@ export default function BookingDatePage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span
                 style={{
-                  width: 14,
-                  height: 14,
+                  width: 13,
+                  height: 13,
                   borderRadius: 999,
-                  background: '#dbeafe',
-                  border: '1px solid #60a5fa',
+                  background: '#e8f1ff',
+                  border: '1px solid #2f80ed',
                   display: 'inline-block',
                 }}
               />
               {text.todayLabel}
             </div>
           </div>
-        </div>
+        </section>
       </div>
 
       <div
@@ -808,39 +1301,57 @@ export default function BookingDatePage() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: '#fff',
-          borderTop: '1px solid #e6ddd1',
-          padding: '14px 16px',
+          background: '#ffffff',
+          borderTop: '2px solid #111111',
+          padding: '14px 14px calc(14px + env(safe-area-inset-bottom))',
+          zIndex: 40,
         }}
       >
         <div
           style={{
-            maxWidth: 420,
+            maxWidth: 430,
             margin: '0 auto',
-            display: 'flex',
-            gap: 14,
+            display: 'grid',
+            gridTemplateColumns: '1fr auto',
+            gap: 12,
             alignItems: 'center',
           }}
         >
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, color: '#6c645c', fontWeight: 700 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 13, color: '#6c645c', fontWeight: 900 }}>
               {text.selectedDate}
             </div>
-            <div style={{ fontSize: 22, fontWeight: 900, marginTop: 6 }}>
+
+            <div
+              style={{
+                fontSize: 19,
+                fontWeight: 900,
+                marginTop: 5,
+                color: selectedDate ? '#17130f' : '#9ca3af',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {selectedDate
-                ? `${selectedDate.getDate()} ${getShortMonthLabel(selectedDate.getMonth(), language)} ${selectedDate.getFullYear()}`
+                ? `${selectedDate.getDate()} ${
+                    text.monthsShort[selectedDate.getMonth()]
+                  } ${selectedDate.getFullYear()}`
                 : text.notSelected}
             </div>
           </div>
 
           <button
+            type="button"
             disabled={!selectedDate}
             onClick={() => {
               if (!selectedDate) return;
 
               const servicesEncoded = encodeURIComponent(selectedServiceSlugs.join(','));
               const dateEncoded = encodeURIComponent(
-                `${selectedDate.getDate()} ${getShortMonthLabel(selectedDate.getMonth(), language)} ${selectedDate.getFullYear()}`
+                `${selectedDate.getDate()} ${
+                  text.monthsShort[selectedDate.getMonth()]
+                } ${selectedDate.getFullYear()}`
               );
 
               router.push(
@@ -848,14 +1359,15 @@ export default function BookingDatePage() {
               );
             }}
             style={{
-              border: 'none',
+              border: '2px solid #111111',
               background: selectedDate ? '#16a34a' : '#b7d9bf',
-              color: '#fff',
-              borderRadius: 24,
-              padding: '18px 26px',
-              fontWeight: 800,
-              fontSize: 18,
+              color: '#ffffff',
+              borderRadius: 22,
+              padding: '17px 20px',
+              fontWeight: 900,
+              fontSize: 16,
               cursor: selectedDate ? 'pointer' : 'not-allowed',
+              boxShadow: selectedDate ? '0 6px 0 rgba(17,17,17,0.08)' : 'none',
             }}
           >
             {text.chooseTime}
