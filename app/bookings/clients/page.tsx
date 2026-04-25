@@ -44,107 +44,135 @@ type ProviderSlot = {
   contactInstagram?: string;
 };
 
-const pageTexts: Record<
-  AppLanguage,
-  {
-    title: string;
-    subtitle: string;
-    today: string;
-    tomorrow: string;
-    requests: string;
-    calendar: string;
-    history: string;
-    activeToday: string;
-    requestsCount: string;
-    search: string;
-    dayTitle: string;
-    daySubtitle: string;
-    time: string;
-    clientProcedure: string;
-    price: string;
-    notes: string;
-    freeSlot: string;
-    unavailable: string;
-    addBooking: string;
-    closeTime: string;
-    clientCard: string;
-    procedure: string;
-    status: string;
-    contacts: string;
-    fullContactInfo: string;
-    quickContactInfo: string;
-    call: string;
-    whatsapp: string;
-    internalChat: string;
-    message: string;
-    editNotes: string;
-    save: string;
-    close: string;
-    changeTime: string;
-    hour: string;
-    minutes: string;
-    newTime: string;
-    synced: string;
-    cancel: string;
-    confirmed: string;
-    completed: string;
-    cancelled: string;
-    pending: string;
-    blocked: string;
-    free: string;
-    home: string;
-  }
-> = {
-  EN: {
-    title: 'My clients',
-    subtitle: 'Bookings, client requests, calendar and fast payments',
-    today: 'Today',
-    tomorrow: 'Tomorrow',
-    requests: 'Requests',
-    calendar: 'Calendar',
-    history: 'History',
-    activeToday: 'Active today',
-    requestsCount: 'Requests',
-    search: 'Search client, service, amount',
-    dayTitle: 'Friday, 18 April 2026',
-    daySubtitle: 'Booking management',
-    time: 'Time',
-    clientProcedure: 'Client / Procedure',
-    price: 'Price',
-    notes: 'Notes',
-    freeSlot: 'Free slot',
-    unavailable: 'Unavailable',
-    addBooking: 'Add booking',
-    closeTime: 'Close time',
-    clientCard: 'Client card',
-    procedure: 'Procedure',
-    status: 'Status',
-    contacts: 'Contacts',
-    fullContactInfo:
-      'Registered client confirmed by both sides. All client contact methods are available.',
-    quickContactInfo:
-      'Quick booking. Only internal Olamep chat is available until full registration.',
-    call: 'Call',
-    whatsapp: 'WhatsApp',
-    internalChat: 'Message in chat',
-    message: 'Message',
-    editNotes: 'Edit notes',
-    save: 'Save',
-    close: 'Close',
-    changeTime: 'Change time',
-    hour: 'Hour',
-    minutes: 'Minutes',
-    newTime: 'New time',
-    synced: 'Free · synced',
-    cancel: 'Cancel',
-    confirmed: 'Confirmed',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
-    pending: 'Pending',
-    blocked: 'Blocked',
-    free: 'Free',
-    home: 'Home',
-  },
+type PageText = {
+  title: string;
+  subtitle: string;
+  today: string;
+  tomorrow: string;
+  requests: string;
+  calendar: string;
+  history: string;
+  activeToday: string;
+  requestsCount: string;
+  search: string;
+  dayTitle: string;
+  daySubtitle: string;
+  time: string;
+  clientProcedure: string;
+  price: string;
+  notes: string;
+  freeSlot: string;
+  unavailable: string;
+  clientCard: string;
+  procedure: string;
+  status: string;
+  contacts: string;
+  fullContactInfo: string;
+  quickContactInfo: string;
+  call: string;
+  whatsapp: string;
+  internalChat: string;
+  message: string;
+  save: string;
+  close: string;
+  changeTime: string;
+  hour: string;
+  minutes: string;
+  newTime: string;
+  synced: string;
+  cancel: string;
+  confirmed: string;
+  completed: string;
+  cancelled: string;
+  pending: string;
+  blocked: string;
+  free: string;
+  home: string;
+  filters: string;
+  alwaysShowFilters: string;
+  on: string;
+  off: string;
+  tapToOpenFilters: string;
+  all: string;
+  byTime: string;
+  byName: string;
+  priceUp: string;
+  priceDown: string;
+  byProcedure: string;
+  priceRange: string;
+  from: string;
+  to: string;
+  apply: string;
+  reset: string;
+  openPriceFilter: string;
+};
+
+const EN_TEXT: PageText = {
+  title: 'My clients',
+  subtitle: 'Bookings, client requests, calendar and fast payments',
+  today: 'Today',
+  tomorrow: 'Tomorrow',
+  requests: 'Requests',
+  calendar: 'Calendar',
+  history: 'History',
+  activeToday: 'Active today',
+  requestsCount: 'Requests',
+  search: 'Search client, service, amount',
+  dayTitle: 'Friday, 18 April 2026',
+  daySubtitle: 'Booking management',
+  time: 'Time',
+  clientProcedure: 'Client / Procedure',
+  price: 'Price',
+  notes: 'Notes',
+  freeSlot: 'Free slot',
+  unavailable: 'Unavailable',
+  clientCard: 'Client card',
+  procedure: 'Procedure',
+  status: 'Status',
+  contacts: 'Contacts',
+  fullContactInfo:
+    'Registered client confirmed by both sides. All client contact methods are available.',
+  quickContactInfo:
+    'Quick booking. Only internal Olamep chat is available until full registration.',
+  call: 'Call',
+  whatsapp: 'WhatsApp',
+  internalChat: 'Message in chat',
+  message: 'Message',
+  save: 'Save',
+  close: 'Close',
+  changeTime: 'Change time',
+  hour: 'Hour',
+  minutes: 'Minutes',
+  newTime: 'New time',
+  synced: 'Free · synced',
+  cancel: 'Cancel',
+  confirmed: 'Confirmed',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+  pending: 'Pending',
+  blocked: 'Blocked',
+  free: 'Free',
+  home: 'Home',
+  filters: 'Filters',
+  alwaysShowFilters: 'Always show filters',
+  on: 'ON',
+  off: 'OFF',
+  tapToOpenFilters: 'Tap this block to open filters',
+  all: 'All',
+  byTime: 'By time',
+  byName: 'By name',
+  priceUp: 'Price ↑',
+  priceDown: 'Price ↓',
+  byProcedure: 'By service',
+  priceRange: 'Price range',
+  from: 'From',
+  to: 'To',
+  apply: 'Apply',
+  reset: 'Reset',
+  openPriceFilter: 'Price range',
+};
+
+const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
   RU: {
     title: 'Мои клиенты',
     subtitle: 'Брони у меня, запросы, календарь и быстрые расчёты',
@@ -164,8 +192,6 @@ const pageTexts: Record<
     notes: 'Пометки',
     freeSlot: 'Свободное окно',
     unavailable: 'Недоступно',
-    addBooking: 'Добавить бронь',
-    closeTime: 'Закрыть время',
     clientCard: 'Карта клиента',
     procedure: 'Процедура',
     status: 'Статус',
@@ -178,7 +204,6 @@ const pageTexts: Record<
     whatsapp: 'WhatsApp',
     internalChat: 'Написать в чат',
     message: 'Сообщение',
-    editNotes: 'Изменить пометки',
     save: 'Сохранить',
     close: 'Закрыть',
     changeTime: 'Изменить время',
@@ -194,404 +219,23 @@ const pageTexts: Record<
     blocked: 'Недоступно',
     free: 'Свободно',
     home: 'Главная',
-  },
-  UA: {
-    title: 'Мої клієнти',
-    subtitle: 'Броні у мене, запити, календар і швидкі розрахунки',
-    today: 'Сьогодні',
-    tomorrow: 'Завтра',
-    requests: 'Запити',
-    calendar: 'Календар',
-    history: 'Історія',
-    activeToday: 'Активно сьогодні',
-    requestsCount: 'Запити',
-    search: 'Пошук: клієнт, послуга, сума',
-    dayTitle: 'Пʼятниця, 18 квітня 2026',
-    daySubtitle: 'Керування бронями',
-    time: 'Час',
-    clientProcedure: 'Клієнт / Процедура',
-    price: 'Ціна',
-    notes: 'Нотатки',
-    freeSlot: 'Вільне вікно',
-    unavailable: 'Недоступно',
-    addBooking: 'Додати бронь',
-    closeTime: 'Закрити час',
-    clientCard: 'Карта клієнта',
-    procedure: 'Процедура',
-    status: 'Статус',
-    contacts: 'Контакти',
-    fullContactInfo:
-      'Якщо бронь оформлена зареєстрованим клієнтом і підтверджена обома сторонами, майстру доступні всі способи звʼязку.',
-    quickContactInfo:
-      'Швидка бронь. Доступний тільки внутрішній чат Olamep до повної реєстрації клієнта.',
-    call: 'Подзвонити',
-    whatsapp: 'WhatsApp',
-    internalChat: 'Написати в чат',
-    message: 'Повідомлення',
-    editNotes: 'Змінити нотатки',
-    save: 'Зберегти',
-    close: 'Закрити',
-    changeTime: 'Змінити час',
-    hour: 'Година',
-    minutes: 'Хвилини',
-    newTime: 'Новий час',
-    synced: 'Вільно · синхронізовано',
-    cancel: 'Скасувати',
-    confirmed: 'Підтверджено',
-    completed: 'Готово',
-    cancelled: 'Скасовано',
-    pending: 'Очікує',
-    blocked: 'Недоступно',
-    free: 'Вільно',
-    home: 'Головна',
-  },
-  ES: {
-    title: 'Mis clientes',
-    subtitle: 'Reservas recibidas, solicitudes, calendario y pagos rápidos',
-    today: 'Hoy',
-    tomorrow: 'Mañana',
-    requests: 'Solicitudes',
-    calendar: 'Calendario',
-    history: 'Historial',
-    activeToday: 'Activo hoy',
-    requestsCount: 'Solicitudes',
-    search: 'Buscar cliente, servicio, importe',
-    dayTitle: 'Viernes, 18 abril 2026',
-    daySubtitle: 'Gestión de reservas',
-    time: 'Hora',
-    clientProcedure: 'Cliente / Procedimiento',
-    price: 'Precio',
-    notes: 'Notas',
-    freeSlot: 'Espacio libre',
-    unavailable: 'No disponible',
-    addBooking: 'Añadir reserva',
-    closeTime: 'Bloquear hora',
-    clientCard: 'Ficha del cliente',
-    procedure: 'Procedimiento',
-    status: 'Estado',
-    contacts: 'Contactos',
-    fullContactInfo:
-      'Cliente registrado y confirmado por ambas partes. Todos los contactos están disponibles.',
-    quickContactInfo:
-      'Reserva rápida. Solo está disponible el chat interno de Olamep hasta el registro completo.',
-    call: 'Llamar',
-    whatsapp: 'WhatsApp',
-    internalChat: 'Escribir en chat',
-    message: 'Mensaje',
-    editNotes: 'Editar notas',
-    save: 'Guardar',
-    close: 'Cerrar',
-    changeTime: 'Cambiar hora',
-    hour: 'Hora',
-    minutes: 'Minutos',
-    newTime: 'Nueva hora',
-    synced: 'Libre · sincronizado',
-    cancel: 'Cancelar',
-    confirmed: 'Confirmado',
-    completed: 'Completado',
-    cancelled: 'Cancelado',
-    pending: 'Pendiente',
-    blocked: 'Bloqueado',
-    free: 'Libre',
-    home: 'Inicio',
-  },
-  CZ: {
-    title: 'Moji klienti',
-    subtitle: 'Rezervace u mě, požadavky, kalendář a rychlé platby',
-    today: 'Dnes',
-    tomorrow: 'Zítra',
-    requests: 'Požadavky',
-    calendar: 'Kalendář',
-    history: 'Historie',
-    activeToday: 'Aktivní dnes',
-    requestsCount: 'Požadavky',
-    search: 'Hledat klienta, službu, částku',
-    dayTitle: 'Pátek, 18. dubna 2026',
-    daySubtitle: 'Správa rezervací',
-    time: 'Čas',
-    clientProcedure: 'Klient / Procedura',
-    price: 'Cena',
-    notes: 'Poznámky',
-    freeSlot: 'Volné okno',
-    unavailable: 'Nedostupné',
-    addBooking: 'Přidat rezervaci',
-    closeTime: 'Zavřít čas',
-    clientCard: 'Karta klienta',
-    procedure: 'Procedura',
-    status: 'Status',
-    contacts: 'Kontakty',
-    fullContactInfo:
-      'Registrovaný klient potvrzen oběma stranami. Všechny kontakty jsou dostupné.',
-    quickContactInfo:
-      'Rychlá rezervace. Dostupný je pouze interní chat Olamep do plné registrace klienta.',
-    call: 'Zavolat',
-    whatsapp: 'WhatsApp',
-    internalChat: 'Napsat v chatu',
-    message: 'Zpráva',
-    editNotes: 'Upravit poznámky',
-    save: 'Uložit',
-    close: 'Zavřít',
-    changeTime: 'Změnit čas',
-    hour: 'Hodina',
-    minutes: 'Minuty',
-    newTime: 'Nový čas',
-    synced: 'Volné · synchronizováno',
-    cancel: 'Zrušit',
-    confirmed: 'Potvrzeno',
-    completed: 'Hotovo',
-    cancelled: 'Zrušeno',
-    pending: 'Čeká',
-    blocked: 'Nedostupné',
-    free: 'Volno',
-    home: 'Domů',
-  },
-  DE: {
-    title: 'Meine Kunden',
-    subtitle: 'Buchungen bei mir, Anfragen, Kalender und Schnellzahlungen',
-    today: 'Heute',
-    tomorrow: 'Morgen',
-    requests: 'Anfragen',
-    calendar: 'Kalender',
-    history: 'Verlauf',
-    activeToday: 'Heute aktiv',
-    requestsCount: 'Anfragen',
-    search: 'Kunde, Service, Betrag suchen',
-    dayTitle: 'Freitag, 18. April 2026',
-    daySubtitle: 'Buchungsverwaltung',
-    time: 'Zeit',
-    clientProcedure: 'Kunde / Behandlung',
-    price: 'Preis',
-    notes: 'Notizen',
-    freeSlot: 'Freies Fenster',
-    unavailable: 'Nicht verfügbar',
-    addBooking: 'Buchung hinzufügen',
-    closeTime: 'Zeit sperren',
-    clientCard: 'Kundenkarte',
-    procedure: 'Behandlung',
-    status: 'Status',
-    contacts: 'Kontakte',
-    fullContactInfo:
-      'Registrierter Kunde, beidseitig bestätigt. Alle Kontaktwege sind verfügbar.',
-    quickContactInfo:
-      'Schnellbuchung. Nur interner Olamep-Chat ist bis zur vollständigen Registrierung verfügbar.',
-    call: 'Anrufen',
-    whatsapp: 'WhatsApp',
-    internalChat: 'Im Chat schreiben',
-    message: 'Nachricht',
-    editNotes: 'Notizen bearbeiten',
-    save: 'Speichern',
-    close: 'Schließen',
-    changeTime: 'Zeit ändern',
-    hour: 'Stunde',
-    minutes: 'Minuten',
-    newTime: 'Neue Zeit',
-    synced: 'Frei · synchronisiert',
-    cancel: 'Abbrechen',
-    confirmed: 'Bestätigt',
-    completed: 'Fertig',
-    cancelled: 'Storniert',
-    pending: 'Wartet',
-    blocked: 'Gesperrt',
-    free: 'Frei',
-    home: 'Home',
-  },
-  IT: {
-    title: 'I miei clienti',
-    subtitle: 'Prenotazioni ricevute, richieste, calendario e pagamenti rapidi',
-    today: 'Oggi',
-    tomorrow: 'Domani',
-    requests: 'Richieste',
-    calendar: 'Calendario',
-    history: 'Storico',
-    activeToday: 'Attivo oggi',
-    requestsCount: 'Richieste',
-    search: 'Cerca cliente, servizio, importo',
-    dayTitle: 'Venerdì, 18 aprile 2026',
-    daySubtitle: 'Gestione prenotazioni',
-    time: 'Ora',
-    clientProcedure: 'Cliente / Procedura',
-    price: 'Prezzo',
-    notes: 'Note',
-    freeSlot: 'Slot libero',
-    unavailable: 'Non disponibile',
-    addBooking: 'Aggiungi prenotazione',
-    closeTime: 'Chiudi orario',
-    clientCard: 'Scheda cliente',
-    procedure: 'Procedura',
-    status: 'Stato',
-    contacts: 'Contatti',
-    fullContactInfo:
-      'Cliente registrato e confermato da entrambe le parti. Tutti i contatti sono disponibili.',
-    quickContactInfo:
-      'Prenotazione rapida. Solo chat interna Olamep fino alla registrazione completa.',
-    call: 'Chiama',
-    whatsapp: 'WhatsApp',
-    internalChat: 'Scrivi in chat',
-    message: 'Messaggio',
-    editNotes: 'Modifica note',
-    save: 'Salva',
-    close: 'Chiudi',
-    changeTime: 'Cambia ora',
-    hour: 'Ora',
-    minutes: 'Minuti',
-    newTime: 'Nuova ora',
-    synced: 'Libero · sincronizzato',
-    cancel: 'Annulla',
-    confirmed: 'Confermato',
-    completed: 'Fatto',
-    cancelled: 'Annullato',
-    pending: 'In attesa',
-    blocked: 'Bloccato',
-    free: 'Libero',
-    home: 'Home',
-  },
-  FR: {
-    title: 'Mes clients',
-    subtitle: 'Réservations reçues, demandes, calendrier et paiements rapides',
-    today: 'Aujourd’hui',
-    tomorrow: 'Demain',
-    requests: 'Demandes',
-    calendar: 'Calendrier',
-    history: 'Historique',
-    activeToday: 'Actif aujourd’hui',
-    requestsCount: 'Demandes',
-    search: 'Rechercher client, service, montant',
-    dayTitle: 'Vendredi, 18 avril 2026',
-    daySubtitle: 'Gestion des réservations',
-    time: 'Heure',
-    clientProcedure: 'Client / Procédure',
-    price: 'Prix',
-    notes: 'Notes',
-    freeSlot: 'Créneau libre',
-    unavailable: 'Indisponible',
-    addBooking: 'Ajouter réservation',
-    closeTime: 'Fermer le créneau',
-    clientCard: 'Fiche client',
-    procedure: 'Procédure',
-    status: 'Statut',
-    contacts: 'Contacts',
-    fullContactInfo:
-      'Client enregistré et confirmé par les deux parties. Tous les contacts sont disponibles.',
-    quickContactInfo:
-      'Réservation rapide. Seul le chat interne Olamep est disponible avant inscription complète.',
-    call: 'Appeler',
-    whatsapp: 'WhatsApp',
-    internalChat: 'Écrire dans le chat',
-    message: 'Message',
-    editNotes: 'Modifier notes',
-    save: 'Enregistrer',
-    close: 'Fermer',
-    changeTime: 'Modifier l’heure',
-    hour: 'Heure',
-    minutes: 'Minutes',
-    newTime: 'Nouvelle heure',
-    synced: 'Libre · synchronisé',
-    cancel: 'Annuler',
-    confirmed: 'Confirmé',
-    completed: 'Terminé',
-    cancelled: 'Annulé',
-    pending: 'En attente',
-    blocked: 'Bloqué',
-    free: 'Libre',
-    home: 'Accueil',
-  },
-  AR: {
-    title: 'عملائي',
-    subtitle: 'الحجوزات لدي والطلبات والتقويم والمدفوعات السريعة',
-    today: 'اليوم',
-    tomorrow: 'غدًا',
-    requests: 'الطلبات',
-    calendar: 'التقويم',
-    history: 'السجل',
-    activeToday: 'نشط اليوم',
-    requestsCount: 'الطلبات',
-    search: 'بحث العميل أو الخدمة أو المبلغ',
-    dayTitle: 'الجمعة، 18 أبريل 2026',
-    daySubtitle: 'إدارة الحجوزات',
-    time: 'الوقت',
-    clientProcedure: 'العميل / الخدمة',
-    price: 'السعر',
-    notes: 'ملاحظات',
-    freeSlot: 'وقت متاح',
-    unavailable: 'غير متاح',
-    addBooking: 'إضافة حجز',
-    closeTime: 'إغلاق الوقت',
-    clientCard: 'بطاقة العميل',
-    procedure: 'الخدمة',
-    status: 'الحالة',
-    contacts: 'جهات الاتصال',
-    fullContactInfo: 'عميل مسجل ومؤكد من الطرفين. كل طرق التواصل متاحة.',
-    quickContactInfo: 'حجز سريع. متاح فقط شات Olamep الداخلي حتى التسجيل الكامل.',
-    call: 'اتصال',
-    whatsapp: 'WhatsApp',
-    internalChat: 'رسالة في الشات',
-    message: 'رسالة',
-    editNotes: 'تعديل الملاحظات',
-    save: 'حفظ',
-    close: 'إغلاق',
-    changeTime: 'تغيير الوقت',
-    hour: 'الساعة',
-    minutes: 'الدقائق',
-    newTime: 'وقت جديد',
-    synced: 'متاح · متزامن',
-    cancel: 'إلغاء',
-    confirmed: 'مؤكد',
-    completed: 'تم',
-    cancelled: 'ملغى',
-    pending: 'قيد الانتظار',
-    blocked: 'غير متاح',
-    free: 'متاح',
-    home: 'الرئيسية',
-  },
-  PL: {
-    title: 'Moi klienci',
-    subtitle: 'Rezerwacje u mnie, zapytania, kalendarz i szybkie płatności',
-    today: 'Dzisiaj',
-    tomorrow: 'Jutro',
-    requests: 'Zapytania',
-    calendar: 'Kalendarz',
-    history: 'Historia',
-    activeToday: 'Aktywne dziś',
-    requestsCount: 'Zapytania',
-    search: 'Szukaj klienta, usługi, kwoty',
-    dayTitle: 'Piątek, 18 kwietnia 2026',
-    daySubtitle: 'Zarządzanie rezerwacjami',
-    time: 'Czas',
-    clientProcedure: 'Klient / Procedura',
-    price: 'Cena',
-    notes: 'Notatki',
-    freeSlot: 'Wolne okno',
-    unavailable: 'Niedostępne',
-    addBooking: 'Dodaj rezerwację',
-    closeTime: 'Zamknij czas',
-    clientCard: 'Karta klienta',
-    procedure: 'Procedura',
-    status: 'Status',
-    contacts: 'Kontakty',
-    fullContactInfo:
-      'Zarejestrowany klient potwierdzony przez obie strony. Wszystkie kontakty są dostępne.',
-    quickContactInfo:
-      'Szybka rezerwacja. Dostępny tylko wewnętrzny chat Olamep do pełnej rejestracji.',
-    call: 'Zadzwoń',
-    whatsapp: 'WhatsApp',
-    internalChat: 'Napisz w czacie',
-    message: 'Wiadomość',
-    editNotes: 'Edytuj notatki',
-    save: 'Zapisz',
-    close: 'Zamknij',
-    changeTime: 'Zmień czas',
-    hour: 'Godzina',
-    minutes: 'Minuty',
-    newTime: 'Nowy czas',
-    synced: 'Wolne · zsynchronizowane',
-    cancel: 'Anuluj',
-    confirmed: 'Potwierdzone',
-    completed: 'Gotowe',
-    cancelled: 'Anulowane',
-    pending: 'Oczekuje',
-    blocked: 'Niedostępne',
-    free: 'Wolne',
-    home: 'Start',
+    filters: 'Фильтры',
+    alwaysShowFilters: 'Всегда показывать фильтры',
+    on: 'ВКЛ',
+    off: 'ВЫКЛ',
+    tapToOpenFilters: 'Нажмите на этот блок, чтобы открыть фильтры',
+    all: 'Все',
+    byTime: 'По времени',
+    byName: 'По имени',
+    priceUp: 'Цена ↑',
+    priceDown: 'Цена ↓',
+    byProcedure: 'По процедуре',
+    priceRange: 'Диапазон цены',
+    from: 'От',
+    to: 'До',
+    apply: 'Применить',
+    reset: 'Сбросить',
+    openPriceFilter: 'Цена от/до',
   },
 };
 
@@ -661,49 +305,10 @@ const serviceTranslations: Record<string, Partial<Record<AppLanguage, string>>> 
 const demoAvatar =
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80';
 
-function getTexts(language: AppLanguage) {
-  return pageTexts[language] || pageTexts.EN;
-}
-
-function uiText(language: AppLanguage) {
-  if (language === 'RU') {
-    return {
-      filters: 'Фильтры',
-      filtersAlways: 'Фильтры всегда на экране',
-      showFilters: 'Показать фильтры',
-      hideFilters: 'Скрыть фильтры',
-      priceRange: 'Диапазон цены',
-      priceFrom: 'Цена от',
-      priceTo: 'Цена до',
-      apply: 'Применить',
-      reset: 'Сбросить',
-      activePrice: 'Цена',
-      all: 'Все',
-      byTime: 'По времени',
-      byName: 'По имени',
-      priceAsc: 'Цена ↑',
-      priceDesc: 'Цена ↓',
-      byProcedure: 'По процедуре',
-    };
-  }
-
+function getTexts(language: AppLanguage): PageText {
   return {
-    filters: 'Filters',
-    filtersAlways: 'Always show filters',
-    showFilters: 'Show filters',
-    hideFilters: 'Hide filters',
-    priceRange: 'Price range',
-    priceFrom: 'Price from',
-    priceTo: 'Price to',
-    apply: 'Apply',
-    reset: 'Reset',
-    activePrice: 'Price',
-    all: 'All',
-    byTime: 'By time',
-    byName: 'By name',
-    priceAsc: 'Price ↑',
-    priceDesc: 'Price ↓',
-    byProcedure: 'By service',
+    ...EN_TEXT,
+    ...(textOverrides[language] || {}),
   };
 }
 
@@ -715,36 +320,26 @@ function money(value: number) {
   return `£${Number(value || 0).toFixed(0)}`;
 }
 
-function getFilterLabel(
-  filter: FilterKey,
-  text: ReturnType<typeof getTexts>,
-  language: AppLanguage
-) {
-  if (filter === 'all') return uiText(language).all;
-  return getSlotStatusLabel(filter, text);
-}
-
-function getSortLabel(sort: SortKey, language: AppLanguage) {
-  const labels = uiText(language);
-
-  const map: Record<SortKey, string> = {
-    time: labels.byTime,
-    name: labels.byName,
-    priceAsc: labels.priceAsc,
-    priceDesc: labels.priceDesc,
-    procedure: labels.byProcedure,
-  };
-
-  return map[sort];
-}
-
-function getSlotStatusLabel(status: SlotStatus, text: ReturnType<typeof getTexts>) {
+function getSlotStatusLabel(status: SlotStatus, text: PageText) {
   if (status === 'confirmed') return text.confirmed;
   if (status === 'completed') return text.completed;
   if (status === 'cancelled') return text.cancelled;
   if (status === 'pending') return text.pending;
   if (status === 'blocked') return text.blocked;
   return text.free;
+}
+
+function getFilterLabel(filter: FilterKey, text: PageText) {
+  if (filter === 'all') return text.all;
+  return getSlotStatusLabel(filter, text);
+}
+
+function getSortLabel(sort: SortKey, text: PageText) {
+  if (sort === 'time') return text.byTime;
+  if (sort === 'name') return text.byName;
+  if (sort === 'priceAsc') return text.priceUp;
+  if (sort === 'priceDesc') return text.priceDown;
+  return text.byProcedure;
 }
 
 function getFilterStyle(filter: FilterKey, active: boolean) {
@@ -810,7 +405,6 @@ function getSlotStyle(status: SlotStatus) {
       border: '#55c75f',
       color: '#1f8c3f',
       side: '#35bf55',
-      price: '#ff3b3b',
     };
   }
 
@@ -820,7 +414,6 @@ function getSlotStyle(status: SlotStatus) {
       border: '#2f80ed',
       color: '#2364c8',
       side: '#2f80ed',
-      price: '#ff3b3b',
     };
   }
 
@@ -830,7 +423,6 @@ function getSlotStyle(status: SlotStatus) {
       border: '#ff7a85',
       color: '#cf3344',
       side: '#ff3b4e',
-      price: '#ff3b3b',
     };
   }
 
@@ -840,7 +432,6 @@ function getSlotStyle(status: SlotStatus) {
       border: '#ff5a6b',
       color: '#c6283b',
       side: '#ff3b4e',
-      price: '#ff3b3b',
     };
   }
 
@@ -850,7 +441,6 @@ function getSlotStyle(status: SlotStatus) {
       border: '#f0b429',
       color: '#ad7200',
       side: '#f0b429',
-      price: '#ff3b3b',
     };
   }
 
@@ -859,7 +449,6 @@ function getSlotStyle(status: SlotStatus) {
     border: '#e4e4e4',
     color: '#6f675f',
     side: '#d9d9d9',
-    price: '#ff3b3b',
   };
 }
 
@@ -989,7 +578,6 @@ function OlamepLogo() {
           borderRadius: '50% 50% 58% 58%',
           background:
             'conic-gradient(from 210deg, #0e73d8 0deg, #2fc96d 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
-          transform: 'rotate(0deg)',
           boxShadow: '0 8px 18px rgba(14,115,216,0.2)',
         }}
       >
@@ -1038,12 +626,10 @@ export default function ProviderClientsPage() {
   const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
 
   const [filtersAlwaysVisible, setFiltersAlwaysVisible] = useState(true);
-  const [showFiltersPanel, setShowFiltersPanel] = useState(true);
-  const [showPriceSheet, setShowPriceSheet] = useState(false);
-  const [priceFrom, setPriceFrom] = useState('');
-  const [priceTo, setPriceTo] = useState('');
-  const [priceDraftFrom, setPriceDraftFrom] = useState('');
-  const [priceDraftTo, setPriceDraftTo] = useState('');
+  const [filtersExpanded, setFiltersExpanded] = useState(true);
+  const [priceFilterOpen, setPriceFilterOpen] = useState(false);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -1071,19 +657,10 @@ export default function ProviderClientsPage() {
     setSlots(mapBookingsToSlots(bookings, language));
   }, [bookings, language]);
 
-  useEffect(() => {
-    if (filtersAlwaysVisible) {
-      setShowFiltersPanel(true);
-    }
-  }, [filtersAlwaysVisible]);
-
   const text = useMemo(() => getTexts(language), [language]);
-  const labels = useMemo(() => uiText(language), [language]);
 
   const selectedSlot = slots.find((slot) => slot.id === selectedSlotId) || null;
   const timeSlot = slots.find((slot) => slot.id === timeSlotId) || null;
-
-  const priceFilterActive = priceFrom.trim() !== '' || priceTo.trim() !== '';
 
   const visibleSlots = useMemo(() => {
     let source = slots;
@@ -1108,15 +685,15 @@ export default function ProviderClientsPage() {
       source = source.filter((slot) => slot.status === activeFilter);
     }
 
-    const minPrice = priceFrom.trim() === '' ? null : Number(priceFrom);
-    const maxPrice = priceTo.trim() === '' ? null : Number(priceTo);
+    const min = Number(minPrice);
+    const max = Number(maxPrice);
 
-    if (minPrice !== null && !Number.isNaN(minPrice)) {
-      source = source.filter((slot) => slot.price >= minPrice);
+    if (minPrice.trim() && !Number.isNaN(min)) {
+      source = source.filter((slot) => slot.price >= min);
     }
 
-    if (maxPrice !== null && !Number.isNaN(maxPrice)) {
-      source = source.filter((slot) => slot.price <= maxPrice);
+    if (maxPrice.trim() && !Number.isNaN(max)) {
+      source = source.filter((slot) => slot.price <= max);
     }
 
     const q = search.trim().toLowerCase();
@@ -1141,7 +718,7 @@ export default function ProviderClientsPage() {
       if (sortKey === 'priceDesc') return b.price - a.price;
       return a.time.localeCompare(b.time);
     });
-  }, [activeFilter, activeView, priceFrom, priceTo, search, slots, sortKey]);
+  }, [activeFilter, activeView, maxPrice, minPrice, search, slots, sortKey]);
 
   const activeTodayCount = slots.filter(
     (slot) => slot.status === 'confirmed' || slot.status === 'pending'
@@ -1154,26 +731,6 @@ export default function ProviderClientsPage() {
     setEditHour(hour || '09');
     setEditMinute(minute || '30');
     setTimeSlotId(slot.id);
-  };
-
-  const handleOpenPriceSheet = () => {
-    setPriceDraftFrom(priceFrom);
-    setPriceDraftTo(priceTo);
-    setShowPriceSheet(true);
-  };
-
-  const handleApplyPriceFilter = () => {
-    setPriceFrom(priceDraftFrom.replace(/[^\d]/g, ''));
-    setPriceTo(priceDraftTo.replace(/[^\d]/g, ''));
-    setShowPriceSheet(false);
-  };
-
-  const handleResetPriceFilter = () => {
-    setPriceDraftFrom('');
-    setPriceDraftTo('');
-    setPriceFrom('');
-    setPriceTo('');
-    setShowPriceSheet(false);
   };
 
   const handleSaveTime = () => {
@@ -1264,7 +821,7 @@ export default function ProviderClientsPage() {
 
   const sortOptions: SortKey[] = ['time', 'name', 'priceAsc', 'priceDesc', 'procedure'];
 
-  const shouldShowFilters = filtersAlwaysVisible || showFiltersPanel;
+  const showFilterControls = filtersAlwaysVisible || filtersExpanded;
 
   return (
     <>
@@ -1483,120 +1040,121 @@ export default function ProviderClientsPage() {
 
           <section style={{ marginTop: 12 }}>
             <div
+              onClick={() => {
+                if (!filtersAlwaysVisible) {
+                  setFiltersExpanded((prev) => !prev);
+                }
+              }}
               style={{
                 borderRadius: 24,
                 border: '2px solid #111111',
                 background: '#fffefa',
-                padding: 10,
+                padding: 14,
+                cursor: filtersAlwaysVisible ? 'default' : 'pointer',
               }}
             >
               <div
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr auto',
-                  gap: 10,
-                  alignItems: 'center',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 900,
-                    color: '#17130f',
-                  }}
-                >
-                  {labels.filters}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (filtersAlwaysVisible) return;
-                    setShowFiltersPanel((prev) => !prev);
-                  }}
-                  style={{
-                    minHeight: 38,
-                    borderRadius: 999,
-                    border: '2px solid #111111',
-                    background: filtersAlwaysVisible ? '#e3f8ea' : '#ffffff',
-                    color: filtersAlwaysVisible ? '#1f8c3f' : '#17130f',
-                    padding: '0 13px',
-                    fontSize: 12,
-                    fontWeight: 900,
-                    cursor: filtersAlwaysVisible ? 'default' : 'pointer',
-                  }}
-                >
-                  {showFiltersPanel || filtersAlwaysVisible ? labels.hideFilters : labels.showFilters}
-                </button>
-              </div>
-
-              <div
-                style={{
-                  marginTop: 10,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#ffffff',
-                  padding: 10,
-                  display: 'grid',
-                  gridTemplateColumns: '1fr auto',
-                  gap: 10,
+                  gap: 12,
                   alignItems: 'center',
                 }}
               >
                 <div>
                   <div
                     style={{
-                      fontSize: 13,
+                      fontSize: 22,
                       fontWeight: 900,
                       color: '#17130f',
                     }}
                   >
-                    {labels.filtersAlways}
+                    {text.filters}
                   </div>
-                  <div
-                    style={{
-                      marginTop: 4,
-                      fontSize: 11,
-                      fontWeight: 800,
-                      color: '#8b8277',
-                    }}
-                  >
-                    {filtersAlwaysVisible ? 'ON' : 'OFF'}
-                  </div>
+
+                  {!filtersAlwaysVisible ? (
+                    <div
+                      style={{
+                        marginTop: 4,
+                        fontSize: 12,
+                        fontWeight: 800,
+                        color: '#7b7268',
+                      }}
+                    >
+                      {showFilterControls ? text.on : text.tapToOpenFilters}
+                    </div>
+                  ) : null}
                 </div>
 
                 <button
                   type="button"
-                  onClick={() => setFiltersAlwaysVisible((prev) => !prev)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setFiltersAlwaysVisible((prev) => {
+                      const next = !prev;
+                      if (next) setFiltersExpanded(true);
+                      return next;
+                    });
+                  }}
                   style={{
-                    width: 62,
-                    height: 34,
+                    minWidth: 132,
+                    height: 54,
                     borderRadius: 999,
                     border: '2px solid #111111',
-                    background: filtersAlwaysVisible ? '#41c83f' : '#ececec',
-                    padding: 3,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    justifyContent: filtersAlwaysVisible ? 'flex-end' : 'flex-start',
+                    background: '#ffffff',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 58px',
                     alignItems: 'center',
+                    padding: 5,
+                    cursor: 'pointer',
+                    gap: 6,
                   }}
                 >
                   <span
                     style={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: 999,
-                      background: '#ffffff',
-                      border: '2px solid #111111',
+                      fontSize: 12,
+                      fontWeight: 900,
+                      color: filtersAlwaysVisible ? '#1f8c3f' : '#7b7268',
                     }}
-                  />
+                  >
+                    {text.alwaysShowFilters}
+                    <br />
+                    {filtersAlwaysVisible ? text.on : text.off}
+                  </span>
+
+                  <span
+                    style={{
+                      width: 48,
+                      height: 36,
+                      borderRadius: 999,
+                      border: '2px solid #111111',
+                      background: filtersAlwaysVisible ? '#35c63f' : '#eeeeee',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: filtersAlwaysVisible ? 'flex-end' : 'flex-start',
+                      padding: 3,
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 26,
+                        height: 26,
+                        borderRadius: 999,
+                        background: '#ffffff',
+                        border: '2px solid #111111',
+                        display: 'block',
+                      }}
+                    />
+                  </span>
                 </button>
               </div>
 
-              {shouldShowFilters ? (
-                <div style={{ marginTop: 10 }}>
+              {showFilterControls ? (
+                <>
                   <div
                     style={{
+                      marginTop: 12,
                       display: 'flex',
                       gap: 8,
                       overflowX: 'auto',
@@ -1611,7 +1169,10 @@ export default function ProviderClientsPage() {
                         <button
                           key={filter}
                           type="button"
-                          onClick={() => setActiveFilter(filter)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setActiveFilter(filter);
+                          }}
                           style={{
                             flexShrink: 0,
                             minHeight: 38,
@@ -1625,7 +1186,7 @@ export default function ProviderClientsPage() {
                             cursor: 'pointer',
                           }}
                         >
-                          {getFilterLabel(filter, text, language)}
+                          {getFilterLabel(filter, text)}
                         </button>
                       );
                     })}
@@ -1647,7 +1208,13 @@ export default function ProviderClientsPage() {
                         <button
                           key={sort}
                           type="button"
-                          onClick={() => setSortKey(sort)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setSortKey(sort);
+                            if (sort === 'priceAsc' || sort === 'priceDesc') {
+                              setPriceFilterOpen(true);
+                            }
+                          }}
                           style={{
                             flexShrink: 0,
                             minHeight: 36,
@@ -1661,33 +1228,37 @@ export default function ProviderClientsPage() {
                             cursor: 'pointer',
                           }}
                         >
-                          {getSortLabel(sort, language)}
+                          {getSortLabel(sort, text)}
                         </button>
                       );
                     })}
 
                     <button
                       type="button"
-                      onClick={handleOpenPriceSheet}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setPriceFilterOpen(true);
+                      }}
                       style={{
                         flexShrink: 0,
                         minHeight: 36,
                         borderRadius: 999,
-                        border: priceFilterActive ? '2px solid #ff3b3b' : '2px solid #111111',
-                        background: priceFilterActive ? '#fff0f0' : '#ffffff',
-                        color: priceFilterActive ? '#ff3b3b' : '#17130f',
+                        border:
+                          minPrice || maxPrice ? '2px solid #ff3b3b' : '2px solid #111111',
+                        background: minPrice || maxPrice ? '#fff2f2' : '#ffffff',
+                        color: minPrice || maxPrice ? '#ff3b3b' : '#17130f',
                         padding: '0 13px',
                         fontSize: 12,
                         fontWeight: 900,
                         cursor: 'pointer',
                       }}
                     >
-                      {priceFilterActive
-                        ? `${labels.activePrice}: £${priceFrom || '0'}–£${priceTo || '∞'}`
-                        : labels.priceRange}
+                      {minPrice || maxPrice
+                        ? `${text.price}: £${minPrice || '0'}–£${maxPrice || '∞'}`
+                        : text.openPriceFilter}
                     </button>
                   </div>
-                </div>
+                </>
               ) : null}
             </div>
           </section>
@@ -1918,690 +1489,764 @@ export default function ProviderClientsPage() {
       </main>
 
       {selectedSlot ? (
-        <div
-          onClick={() => setSelectedSlotId(null)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 300,
-            background: 'rgba(17,17,17,0.22)',
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            onClick={(event) => event.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              maxHeight: '92vh',
-              overflowY: 'auto',
-              background: '#ffffff',
-              borderTopLeftRadius: 32,
-              borderTopRightRadius: 32,
-              border: '2px solid #111111',
-              borderBottom: 'none',
-              padding: '18px 14px calc(22px + env(safe-area-inset-bottom))',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-              <button
-                type="button"
-                onClick={() => setSelectedSlotId(null)}
-                style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 999,
-                  border: '2px solid #111111',
-                  background: '#ffffff',
-                  fontSize: 22,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                ×
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleOpenTimeModal(selectedSlot)}
-                style={{
-                  minHeight: 42,
-                  padding: '0 14px',
-                  borderRadius: 999,
-                  border: '2px solid #111111',
-                  background: '#e8f1ff',
-                  color: '#2364c8',
-                  fontSize: 13,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.changeTime}
-              </button>
-            </div>
-
-            <div style={{ marginTop: 12, textAlign: 'center' }}>
-              <OlamepLogo />
-            </div>
-
-            <section
-              style={{
-                marginTop: 18,
-                borderRadius: 28,
-                border: '1.5px solid #e4e4e4',
-                background: '#ffffff',
-                padding: 16,
-                boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '82px 1fr',
-                  gap: 14,
-                  alignItems: 'center',
-                }}
-              >
-                <div style={{ position: 'relative' }}>
-                  <img
-                    src={selectedSlot.clientAvatar || demoAvatar}
-                    alt={selectedSlot.clientName}
-                    style={{
-                      width: 82,
-                      height: 82,
-                      borderRadius: 24,
-                      objectFit: 'cover',
-                    }}
-                  />
-                  <span
-                    style={{
-                      position: 'absolute',
-                      right: -2,
-                      bottom: -2,
-                      width: 24,
-                      height: 24,
-                      borderRadius: 999,
-                      background: '#25b65a',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '2px solid #ffffff',
-                      fontSize: 14,
-                      fontWeight: 900,
-                    }}
-                  >
-                    ✓
-                  </span>
-                </div>
-
-                <div>
-                  <h2
-                    style={{
-                      margin: 0,
-                      fontSize: 27,
-                      lineHeight: 1.05,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
-                    {selectedSlot.clientName}
-                  </h2>
-
-                  <div
-                    style={{
-                      marginTop: 6,
-                      fontSize: 15,
-                      fontWeight: 800,
-                      color: '#6f675f',
-                    }}
-                  >
-                    {selectedSlot.serviceName}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 6,
-                      fontSize: 13,
-                      fontWeight: 800,
-                      color: '#6f675f',
-                    }}
-                  >
-                    18 апреля 2026 · {selectedSlot.time}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 10,
-                      fontSize: 34,
-                      fontWeight: 900,
-                      color: '#ff3b3b',
-                    }}
-                  >
-                    {money(selectedSlot.price)}
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  marginTop: 18,
-                  borderTop: '1.5px solid #eeeeee',
-                }}
-              >
-                {[
-                  [text.procedure, selectedSlot.serviceName],
-                  [text.price, money(selectedSlot.price)],
-                  [text.status, getSlotStatusLabel(selectedSlot.status, text)],
-                ].map(([label, value]) => (
-                  <div
-                    key={label}
-                    style={{
-                      minHeight: 54,
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr',
-                      alignItems: 'center',
-                      borderBottom: '1.5px solid #eeeeee',
-                      gap: 12,
-                    }}
-                  >
-                    <div style={{ fontSize: 14, fontWeight: 900, color: '#17130f' }}>
-                      {label}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 800,
-                        color: label === text.price ? '#ff3b3b' : '#17130f',
-                        textAlign: 'right',
-                      }}
-                    >
-                      {value}
-                    </div>
-                  </div>
-                ))}
-
-                <div
-                  style={{
-                    minHeight: 74,
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    alignItems: 'center',
-                    borderBottom: '1.5px solid #eeeeee',
-                    gap: 12,
-                  }}
-                >
-                  <div style={{ fontSize: 14, fontWeight: 900, color: '#17130f' }}>
-                    {text.notes}
-                  </div>
-
-                  <textarea
-                    value={noteDraft}
-                    onChange={(event) => setNoteDraft(event.target.value)}
-                    onBlur={handleSaveNote}
-                    rows={3}
-                    style={{
-                      width: '100%',
-                      border: 'none',
-                      outline: 'none',
-                      resize: 'none',
-                      fontSize: 14,
-                      lineHeight: 1.25,
-                      fontWeight: 800,
-                      color: '#d2a300',
-                      textAlign: 'right',
-                      background: 'transparent',
-                      fontFamily: 'Arial, sans-serif',
-                    }}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section
-              style={{
-                marginTop: 14,
-                borderRadius: 24,
-                border: '1.5px solid #e4e4e4',
-                background: '#ffffff',
-                padding: 16,
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  fontSize: 20,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                <span style={{ color: '#25b65a' }}>⬟</span>
-                {text.contacts}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 12,
-                  borderRadius: 16,
-                  border: '1.5px solid #cfeeda',
-                  background: '#f2fff6',
-                  padding: 12,
-                  fontSize: 13,
-                  fontWeight: 800,
-                  lineHeight: 1.45,
-                  color: '#5d665f',
-                }}
-              >
-                {selectedSlot.contactMode === 'full' ? text.fullContactInfo : text.quickContactInfo}
-              </div>
-
-              {selectedSlot.contactMode === 'full' ? (
-                <FullContactsBlock slot={selectedSlot} text={text} />
-              ) : (
-                <QuickContactsBlock text={text} />
-              )}
-            </section>
-          </div>
-        </div>
+        <ClientCardModal
+          slot={selectedSlot}
+          text={text}
+          noteDraft={noteDraft}
+          setNoteDraft={setNoteDraft}
+          onSaveNote={handleSaveNote}
+          onClose={() => setSelectedSlotId(null)}
+          onChangeTime={() => handleOpenTimeModal(selectedSlot)}
+        />
       ) : null}
 
       {timeSlot ? (
-        <div
-          onClick={() => setTimeSlotId(null)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 340,
-            background: 'rgba(17,17,17,0.38)',
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            onClick={(event) => event.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              background: '#ffffff',
-              borderTopLeftRadius: 32,
-              borderTopRightRadius: 32,
-              border: '2px solid #111111',
-              borderBottom: 'none',
-              padding: '18px 22px calc(22px + env(safe-area-inset-bottom))',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                width: 58,
-                height: 5,
-                borderRadius: 999,
-                background: '#d8d8d8',
-                margin: '0 auto 18px',
-              }}
-            />
-
-            <h2
-              style={{
-                margin: 0,
-                textAlign: 'center',
-                fontSize: 24,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.changeTime}
-            </h2>
-
-            <div
-              style={{
-                marginTop: 26,
-                display: 'grid',
-                gridTemplateColumns: '1fr 20px 1fr',
-                gap: 16,
-                alignItems: 'center',
-              }}
-            >
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 13, fontWeight: 900, color: '#17130f' }}>
-                  {text.hour}
-                </div>
-                <input
-                  value={editHour}
-                  onChange={(event) => {
-                    const clean = event.target.value.replace(/\D/g, '').slice(0, 2);
-                    setEditHour(clean.padStart(2, '0'));
-                  }}
-                  style={{
-                    marginTop: 10,
-                    width: '100%',
-                    height: 92,
-                    borderRadius: 18,
-                    border: '2px solid #dedede',
-                    textAlign: 'center',
-                    fontSize: 45,
-                    fontWeight: 900,
-                    color: '#07111f',
-                    outline: 'none',
-                  }}
-                />
-              </div>
-
-              <div
-                style={{
-                  marginTop: 26,
-                  textAlign: 'center',
-                  fontSize: 34,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                :
-              </div>
-
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 13, fontWeight: 900, color: '#17130f' }}>
-                  {text.minutes}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 10,
-                    borderRadius: 18,
-                    border: '2px solid #dedede',
-                    overflow: 'hidden',
-                  }}
-                >
-                  {['00', '15', '20', '25', '30', '35', '40', '45'].map((minute) => {
-                    const active = editMinute === minute;
-
-                    return (
-                      <button
-                        key={minute}
-                        type="button"
-                        onClick={() => setEditMinute(minute)}
-                        style={{
-                          width: '100%',
-                          minHeight: 34,
-                          border: 'none',
-                          background: active ? '#e8f1ff' : '#ffffff',
-                          color: active ? '#2364c8' : '#9ca3af',
-                          fontSize: active ? 22 : 17,
-                          fontWeight: 900,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {minute}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 22,
-                textAlign: 'center',
-                fontSize: 20,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {text.newTime}:{' '}
-              <span style={{ color: '#2364c8' }}>
-                {editHour}:{editMinute}
-              </span>
-            </div>
-
-            <div
-              style={{
-                marginTop: 12,
-                textAlign: 'center',
-                fontSize: 14,
-                fontWeight: 800,
-                color: '#25a653',
-              }}
-            >
-              ✓ {text.synced}
-            </div>
-
-            <div
-              style={{
-                marginTop: 22,
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 12,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setTimeSlotId(null)}
-                style={{
-                  minHeight: 56,
-                  borderRadius: 18,
-                  border: '2px solid #ff4b52',
-                  background: '#fff2f4',
-                  color: '#ff4b52',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.cancel}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSaveTime}
-                style={{
-                  minHeight: 56,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#41c83f',
-                  color: '#ffffff',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.save}
-              </button>
-            </div>
-          </div>
-        </div>
+        <TimeModal
+          text={text}
+          editHour={editHour}
+          editMinute={editMinute}
+          setEditHour={setEditHour}
+          setEditMinute={setEditMinute}
+          onClose={() => setTimeSlotId(null)}
+          onSave={handleSaveTime}
+        />
       ) : null}
 
-      {showPriceSheet ? (
-        <div
-          onClick={() => setShowPriceSheet(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 360,
-            background: 'rgba(17,17,17,0.34)',
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
+      {priceFilterOpen ? (
+        <PriceRangeModal
+          text={text}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          setMinPrice={setMinPrice}
+          setMaxPrice={setMaxPrice}
+          onClose={() => setPriceFilterOpen(false)}
+          onReset={() => {
+            setMinPrice('');
+            setMaxPrice('');
+            setPriceFilterOpen(false);
           }}
-        >
-          <div
-            onClick={(event) => event.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              background: '#ffffff',
-              borderTopLeftRadius: 32,
-              borderTopRightRadius: 32,
-              border: '2px solid #111111',
-              borderBottom: 'none',
-              padding: '18px 18px calc(22px + env(safe-area-inset-bottom))',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                width: 58,
-                height: 5,
-                borderRadius: 999,
-                background: '#d8d8d8',
-                margin: '0 auto 18px',
-              }}
-            />
-
-            <h2
-              style={{
-                margin: 0,
-                textAlign: 'center',
-                fontSize: 24,
-                fontWeight: 900,
-                color: '#17130f',
-              }}
-            >
-              {labels.priceRange}
-            </h2>
-
-            <div
-              style={{
-                marginTop: 18,
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 12,
-              }}
-            >
-              <label
-                style={{
-                  borderRadius: 20,
-                  border: '2px solid #111111',
-                  padding: 12,
-                  background: '#fff',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 900,
-                    color: '#7b7268',
-                    marginBottom: 8,
-                  }}
-                >
-                  {labels.priceFrom}
-                </div>
-                <input
-                  value={priceDraftFrom}
-                  onChange={(event) => setPriceDraftFrom(event.target.value.replace(/[^\d]/g, ''))}
-                  inputMode="numeric"
-                  placeholder="45"
-                  style={{
-                    width: '100%',
-                    border: 'none',
-                    outline: 'none',
-                    fontSize: 28,
-                    fontWeight: 900,
-                    color: '#ff3b3b',
-                    background: 'transparent',
-                  }}
-                />
-              </label>
-
-              <label
-                style={{
-                  borderRadius: 20,
-                  border: '2px solid #111111',
-                  padding: 12,
-                  background: '#fff',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 900,
-                    color: '#7b7268',
-                    marginBottom: 8,
-                  }}
-                >
-                  {labels.priceTo}
-                </div>
-                <input
-                  value={priceDraftTo}
-                  onChange={(event) => setPriceDraftTo(event.target.value.replace(/[^\d]/g, ''))}
-                  inputMode="numeric"
-                  placeholder="50"
-                  style={{
-                    width: '100%',
-                    border: 'none',
-                    outline: 'none',
-                    fontSize: 28,
-                    fontWeight: 900,
-                    color: '#ff3b3b',
-                    background: 'transparent',
-                  }}
-                />
-              </label>
-            </div>
-
-            <div
-              style={{
-                marginTop: 18,
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 12,
-              }}
-            >
-              <button
-                type="button"
-                onClick={handleResetPriceFilter}
-                style={{
-                  minHeight: 56,
-                  borderRadius: 18,
-                  border: '2px solid #ff4b52',
-                  background: '#fff2f4',
-                  color: '#ff4b52',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {labels.reset}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleApplyPriceFilter}
-                style={{
-                  minHeight: 56,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#41c83f',
-                  color: '#ffffff',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {labels.apply}
-              </button>
-            </div>
-          </div>
-        </div>
+        />
       ) : null}
     </>
   );
 }
 
-function FullContactsBlock({
+function ClientCardModal({
   slot,
   text,
+  noteDraft,
+  setNoteDraft,
+  onSaveNote,
+  onClose,
+  onChangeTime,
 }: {
   slot: ProviderSlot;
-  text: ReturnType<typeof getTexts>;
+  text: PageText;
+  noteDraft: string;
+  setNoteDraft: (value: string) => void;
+  onSaveNote: () => void;
+  onClose: () => void;
+  onChangeTime: () => void;
 }) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 300,
+        background: 'rgba(17,17,17,0.22)',
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={(event) => event.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: 430,
+          maxHeight: '92vh',
+          overflowY: 'auto',
+          background: '#ffffff',
+          borderTopLeftRadius: 32,
+          borderTopRightRadius: 32,
+          border: '2px solid #111111',
+          borderBottom: 'none',
+          padding: '18px 14px calc(22px + env(safe-area-inset-bottom))',
+          boxSizing: 'border-box',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 999,
+              border: '2px solid #111111',
+              background: '#ffffff',
+              fontSize: 22,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            ×
+          </button>
+
+          <button
+            type="button"
+            onClick={onChangeTime}
+            style={{
+              minHeight: 42,
+              padding: '0 14px',
+              borderRadius: 999,
+              border: '2px solid #111111',
+              background: '#e8f1ff',
+              color: '#2364c8',
+              fontSize: 13,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            {text.changeTime}
+          </button>
+        </div>
+
+        <div style={{ marginTop: 12, textAlign: 'center' }}>
+          <OlamepLogo />
+        </div>
+
+        <section
+          style={{
+            marginTop: 18,
+            borderRadius: 28,
+            border: '1.5px solid #e4e4e4',
+            background: '#ffffff',
+            padding: 16,
+            boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+          }}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '82px 1fr',
+              gap: 14,
+              alignItems: 'center',
+            }}
+          >
+            <div style={{ position: 'relative' }}>
+              <img
+                src={slot.clientAvatar || demoAvatar}
+                alt={slot.clientName}
+                style={{
+                  width: 82,
+                  height: 82,
+                  borderRadius: 24,
+                  objectFit: 'cover',
+                }}
+              />
+              <span
+                style={{
+                  position: 'absolute',
+                  right: -2,
+                  bottom: -2,
+                  width: 24,
+                  height: 24,
+                  borderRadius: 999,
+                  background: '#25b65a',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid #ffffff',
+                  fontSize: 14,
+                  fontWeight: 900,
+                }}
+              >
+                ✓
+              </span>
+            </div>
+
+            <div>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 27,
+                  lineHeight: 1.05,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                {slot.clientName}
+              </h2>
+
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: '#6f675f',
+                }}
+              >
+                {slot.serviceName}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: '#6f675f',
+                }}
+              >
+                18 апреля 2026 · {slot.time}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 10,
+                  fontSize: 34,
+                  fontWeight: 900,
+                  color: '#ff3b3b',
+                }}
+              >
+                {money(slot.price)}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: 18,
+              borderTop: '1.5px solid #eeeeee',
+            }}
+          >
+            {[
+              [text.procedure, slot.serviceName],
+              [text.price, money(slot.price)],
+              [text.status, getSlotStatusLabel(slot.status, text)],
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                style={{
+                  minHeight: 54,
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  alignItems: 'center',
+                  borderBottom: '1.5px solid #eeeeee',
+                  gap: 12,
+                }}
+              >
+                <div style={{ fontSize: 14, fontWeight: 900, color: '#17130f' }}>
+                  {label}
+                </div>
+                <div
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 800,
+                    color: label === text.price ? '#ff3b3b' : '#17130f',
+                    textAlign: 'right',
+                  }}
+                >
+                  {value}
+                </div>
+              </div>
+            ))}
+
+            <div
+              style={{
+                minHeight: 74,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                alignItems: 'center',
+                borderBottom: '1.5px solid #eeeeee',
+                gap: 12,
+              }}
+            >
+              <div style={{ fontSize: 14, fontWeight: 900, color: '#17130f' }}>
+                {text.notes}
+              </div>
+
+              <textarea
+                value={noteDraft}
+                onChange={(event) => setNoteDraft(event.target.value)}
+                onBlur={onSaveNote}
+                rows={3}
+                style={{
+                  width: '100%',
+                  border: 'none',
+                  outline: 'none',
+                  resize: 'none',
+                  fontSize: 14,
+                  lineHeight: 1.25,
+                  fontWeight: 800,
+                  color: '#d2a300',
+                  textAlign: 'right',
+                  background: 'transparent',
+                  fontFamily: 'Arial, sans-serif',
+                }}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section
+          style={{
+            marginTop: 14,
+            borderRadius: 24,
+            border: '1.5px solid #e4e4e4',
+            background: '#ffffff',
+            padding: 16,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              fontSize: 20,
+              fontWeight: 900,
+              color: '#17130f',
+            }}
+          >
+            <span style={{ color: '#25b65a' }}>⬟</span>
+            {text.contacts}
+          </div>
+
+          <div
+            style={{
+              marginTop: 12,
+              borderRadius: 16,
+              border: '1.5px solid #cfeeda',
+              background: '#f2fff6',
+              padding: 12,
+              fontSize: 13,
+              fontWeight: 800,
+              lineHeight: 1.45,
+              color: '#5d665f',
+            }}
+          >
+            {slot.contactMode === 'full' ? text.fullContactInfo : text.quickContactInfo}
+          </div>
+
+          {slot.contactMode === 'full' ? (
+            <FullContactsBlock slot={slot} text={text} />
+          ) : (
+            <QuickContactsBlock text={text} />
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function TimeModal({
+  text,
+  editHour,
+  editMinute,
+  setEditHour,
+  setEditMinute,
+  onClose,
+  onSave,
+}: {
+  text: PageText;
+  editHour: string;
+  editMinute: string;
+  setEditHour: (value: string) => void;
+  setEditMinute: (value: string) => void;
+  onClose: () => void;
+  onSave: () => void;
+}) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 340,
+        background: 'rgba(17,17,17,0.38)',
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={(event) => event.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: 430,
+          background: '#ffffff',
+          borderTopLeftRadius: 32,
+          borderTopRightRadius: 32,
+          border: '2px solid #111111',
+          borderBottom: 'none',
+          padding: '18px 22px calc(22px + env(safe-area-inset-bottom))',
+          boxSizing: 'border-box',
+        }}
+      >
+        <div
+          style={{
+            width: 58,
+            height: 5,
+            borderRadius: 999,
+            background: '#d8d8d8',
+            margin: '0 auto 18px',
+          }}
+        />
+
+        <h2
+          style={{
+            margin: 0,
+            textAlign: 'center',
+            fontSize: 24,
+            fontWeight: 900,
+            color: '#17130f',
+          }}
+        >
+          {text.changeTime}
+        </h2>
+
+        <div
+          style={{
+            marginTop: 26,
+            display: 'grid',
+            gridTemplateColumns: '1fr 20px 1fr',
+            gap: 16,
+            alignItems: 'center',
+          }}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: '#17130f' }}>
+              {text.hour}
+            </div>
+            <input
+              value={editHour}
+              onChange={(event) => {
+                const clean = event.target.value.replace(/\D/g, '').slice(0, 2);
+                setEditHour(clean.padStart(2, '0'));
+              }}
+              style={{
+                marginTop: 10,
+                width: '100%',
+                height: 92,
+                borderRadius: 18,
+                border: '2px solid #dedede',
+                textAlign: 'center',
+                fontSize: 45,
+                fontWeight: 900,
+                color: '#07111f',
+                outline: 'none',
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              marginTop: 26,
+              textAlign: 'center',
+              fontSize: 34,
+              fontWeight: 900,
+              color: '#17130f',
+            }}
+          >
+            :
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: '#17130f' }}>
+              {text.minutes}
+            </div>
+
+            <div
+              style={{
+                marginTop: 10,
+                borderRadius: 18,
+                border: '2px solid #dedede',
+                overflow: 'hidden',
+              }}
+            >
+              {['00', '15', '20', '25', '30', '35', '40', '45'].map((minute) => {
+                const active = editMinute === minute;
+
+                return (
+                  <button
+                    key={minute}
+                    type="button"
+                    onClick={() => setEditMinute(minute)}
+                    style={{
+                      width: '100%',
+                      minHeight: 34,
+                      border: 'none',
+                      background: active ? '#e8f1ff' : '#ffffff',
+                      color: active ? '#2364c8' : '#9ca3af',
+                      fontSize: active ? 22 : 17,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {minute}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 22,
+            textAlign: 'center',
+            fontSize: 20,
+            fontWeight: 900,
+            color: '#17130f',
+          }}
+        >
+          {text.newTime}:{' '}
+          <span style={{ color: '#2364c8' }}>
+            {editHour}:{editMinute}
+          </span>
+        </div>
+
+        <div
+          style={{
+            marginTop: 12,
+            textAlign: 'center',
+            fontSize: 14,
+            fontWeight: 800,
+            color: '#25a653',
+          }}
+        >
+          ✓ {text.synced}
+        </div>
+
+        <div
+          style={{
+            marginTop: 22,
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 12,
+          }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              minHeight: 56,
+              borderRadius: 18,
+              border: '2px solid #ff4b52',
+              background: '#fff2f4',
+              color: '#ff4b52',
+              fontSize: 16,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            {text.cancel}
+          </button>
+
+          <button
+            type="button"
+            onClick={onSave}
+            style={{
+              minHeight: 56,
+              borderRadius: 18,
+              border: '2px solid #111111',
+              background: '#41c83f',
+              color: '#ffffff',
+              fontSize: 16,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            {text.save}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PriceRangeModal({
+  text,
+  minPrice,
+  maxPrice,
+  setMinPrice,
+  setMaxPrice,
+  onClose,
+  onReset,
+}: {
+  text: PageText;
+  minPrice: string;
+  maxPrice: string;
+  setMinPrice: (value: string) => void;
+  setMaxPrice: (value: string) => void;
+  onClose: () => void;
+  onReset: () => void;
+}) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 360,
+        background: 'rgba(17,17,17,0.34)',
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={(event) => event.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: 430,
+          background: '#ffffff',
+          borderTopLeftRadius: 32,
+          borderTopRightRadius: 32,
+          border: '2px solid #111111',
+          borderBottom: 'none',
+          padding: '18px 18px calc(22px + env(safe-area-inset-bottom))',
+          boxSizing: 'border-box',
+        }}
+      >
+        <div
+          style={{
+            width: 58,
+            height: 5,
+            borderRadius: 999,
+            background: '#d8d8d8',
+            margin: '0 auto 18px',
+          }}
+        />
+
+        <h2
+          style={{
+            margin: 0,
+            textAlign: 'center',
+            fontSize: 24,
+            fontWeight: 900,
+            color: '#17130f',
+          }}
+        >
+          {text.priceRange}
+        </h2>
+
+        <div
+          style={{
+            marginTop: 20,
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 12,
+          }}
+        >
+          <label
+            style={{
+              borderRadius: 20,
+              border: '2px solid #111111',
+              padding: 14,
+              background: '#fff',
+            }}
+          >
+            <div style={{ fontSize: 13, fontWeight: 900, color: '#7b7268' }}>
+              {text.from}
+            </div>
+            <input
+              value={minPrice}
+              onChange={(event) => setMinPrice(event.target.value.replace(/[^\d]/g, ''))}
+              placeholder="45"
+              inputMode="numeric"
+              style={{
+                marginTop: 8,
+                width: '100%',
+                border: 'none',
+                outline: 'none',
+                fontSize: 28,
+                fontWeight: 900,
+                color: '#ff3b3b',
+              }}
+            />
+          </label>
+
+          <label
+            style={{
+              borderRadius: 20,
+              border: '2px solid #111111',
+              padding: 14,
+              background: '#fff',
+            }}
+          >
+            <div style={{ fontSize: 13, fontWeight: 900, color: '#7b7268' }}>
+              {text.to}
+            </div>
+            <input
+              value={maxPrice}
+              onChange={(event) => setMaxPrice(event.target.value.replace(/[^\d]/g, ''))}
+              placeholder="50"
+              inputMode="numeric"
+              style={{
+                marginTop: 8,
+                width: '100%',
+                border: 'none',
+                outline: 'none',
+                fontSize: 28,
+                fontWeight: 900,
+                color: '#ff3b3b',
+              }}
+            />
+          </label>
+        </div>
+
+        <div
+          style={{
+            marginTop: 18,
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 12,
+          }}
+        >
+          <button
+            type="button"
+            onClick={onReset}
+            style={{
+              minHeight: 56,
+              borderRadius: 18,
+              border: '2px solid #ff4b52',
+              background: '#fff2f4',
+              color: '#ff4b52',
+              fontSize: 16,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            {text.reset}
+          </button>
+
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              minHeight: 56,
+              borderRadius: 18,
+              border: '2px solid #111111',
+              background: '#41c83f',
+              color: '#ffffff',
+              fontSize: 16,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            {text.apply}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FullContactsBlock({ slot, text }: { slot: ProviderSlot; text: PageText }) {
   const booking = slot.sourceBooking;
   const protectedContact = booking ? getProtectedBookingContact(booking) : null;
 
@@ -2637,7 +2282,7 @@ function FullContactsBlock({
   );
 }
 
-function QuickContactsBlock({ text }: { text: ReturnType<typeof getTexts> }) {
+function QuickContactsBlock({ text }: { text: PageText }) {
   return (
     <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
       <ContactRow icon="💬" value="Olamep chat" buttonLabel={text.internalChat} accent="yellow" />
