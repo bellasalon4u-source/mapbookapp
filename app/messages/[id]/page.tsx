@@ -144,104 +144,6 @@ function groupMessagesByDay(messages: ChatMessage[]) {
   return groups;
 }
 
-function OlamepLogoIcon() {
-  return (
-    <div
-      aria-label="Olamep logo"
-      style={{
-        width: 56,
-        height: 56,
-        borderRadius: 18,
-        border: '2px solid #111111',
-        background:
-          'linear-gradient(145deg, #ffffff 0%, #fff7ee 45%, #eef9ff 100%)',
-        boxShadow: '0 6px 0 rgba(17,17,17,0.08)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-        flexShrink: 0,
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage:
-            'linear-gradient(90deg, rgba(17,17,17,0.06) 1px, transparent 1px), linear-gradient(rgba(17,17,17,0.06) 1px, transparent 1px)',
-          backgroundSize: '14px 14px',
-          opacity: 0.5,
-        }}
-      />
-
-      <div
-        style={{
-          position: 'relative',
-          width: 32,
-          height: 39,
-          background: 'linear-gradient(180deg, #ff4f6d 0%, #246bff 100%)',
-          border: '2px solid #111111',
-          borderRadius: '17px 17px 19px 19px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 4px 0 rgba(17,17,17,0.12)',
-        }}
-      >
-        <div
-          style={{
-            width: 13,
-            height: 13,
-            borderRadius: 999,
-            background: '#ffffff',
-            border: '2px solid #111111',
-            zIndex: 2,
-          }}
-        />
-
-        <div
-          style={{
-            position: 'absolute',
-            bottom: -7,
-            left: '50%',
-            width: 15,
-            height: 15,
-            background: '#246bff',
-            borderRight: '2px solid #111111',
-            borderBottom: '2px solid #111111',
-            transform: 'translateX(-50%) rotate(45deg)',
-            borderRadius: 3,
-          }}
-        />
-      </div>
-
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 4,
-          left: 6,
-          right: 6,
-          height: 13,
-          borderRadius: 999,
-          background: '#ffffff',
-          border: '1.5px solid #111111',
-          color: '#111111',
-          fontSize: 7,
-          fontWeight: 1000,
-          letterSpacing: -0.4,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          lineHeight: 1,
-        }}
-      >
-        Olamep
-      </div>
-    </div>
-  );
-}
-
 function isOlamepInternalChat(chat: ChatThread) {
   const name = chat.providerName.toLowerCase();
   const category = chat.category.toLowerCase();
@@ -254,6 +156,111 @@ function isOlamepInternalChat(chat: ChatThread) {
     category.includes('olamep') ||
     category.includes('support') ||
     category.includes('internal')
+  );
+}
+
+function OlamepSupportAvatar({ online }: { online?: boolean }) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: 56,
+        height: 56,
+        borderRadius: 999,
+        border: '2px solid #111111',
+        background: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+        boxSizing: 'border-box',
+      }}
+    >
+      <svg
+        width="34"
+        height="34"
+        viewBox="0 0 64 64"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M15 34C15 23.5 22.4 16 32 16C41.6 16 49 23.5 49 34"
+          stroke="#111111"
+          strokeWidth="5"
+          strokeLinecap="round"
+        />
+        <path
+          d="M18 34V44"
+          stroke="#111111"
+          strokeWidth="8"
+          strokeLinecap="round"
+        />
+        <path
+          d="M46 34V44"
+          stroke="#111111"
+          strokeWidth="8"
+          strokeLinecap="round"
+        />
+        <path
+          d="M24 34C24 29.6 27.6 26 32 26C36.4 26 40 29.6 40 34V39C40 43.4 36.4 47 32 47C27.6 47 24 43.4 24 39V34Z"
+          fill="#111111"
+        />
+        <circle cx="29" cy="35" r="2.2" fill="#ffffff" />
+        <circle cx="35" cy="35" r="2.2" fill="#ffffff" />
+        <path
+          d="M27.5 41C29 43 31 44 32.8 44C34.6 44 36.3 43.1 37.5 41"
+          stroke="#ffffff"
+          strokeWidth="2.8"
+          strokeLinecap="round"
+        />
+        <path
+          d="M49 43C49 49 45 52 39 52"
+          stroke="#111111"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+        <circle cx="38" cy="52" r="4" fill="#111111" />
+      </svg>
+
+      <div
+        style={{
+          position: 'absolute',
+          right: -6,
+          bottom: -6,
+          width: 23,
+          height: 23,
+          borderRadius: 999,
+          border: '2px solid #ffffff',
+          background: '#ffffff',
+          overflow: 'hidden',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.12)',
+        }}
+      >
+        <img
+          src="/ui/logo/icon.png"
+          alt="Olamep"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+          }}
+        />
+      </div>
+
+      <span
+        style={{
+          position: 'absolute',
+          right: -2,
+          bottom: -2,
+          width: 16,
+          height: 16,
+          borderRadius: 999,
+          background: online ? '#2fbb52' : '#c7c7c7',
+          border: '2px solid #ffffff',
+        }}
+      />
+    </div>
   );
 }
 
@@ -333,7 +340,7 @@ export default function ChatPage() {
     );
   }
 
-  const showOlamepLogo = isOlamepInternalChat(chat);
+  const showOlamepSupportAvatar = isOlamepInternalChat(chat);
 
   const handleSend = () => {
     const trimmed = input.trim();
@@ -413,35 +420,37 @@ export default function ChatPage() {
               }}
             >
               <div style={{ position: 'relative' }}>
-                {showOlamepLogo ? (
-                  <OlamepLogoIcon />
+                {showOlamepSupportAvatar ? (
+                  <OlamepSupportAvatar online={chat.online} />
                 ) : (
-                  <img
-                    src={chat.providerAvatar}
-                    alt={chat.providerName}
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 18,
-                      objectFit: 'cover',
-                      display: 'block',
-                      border: '2px solid #111111',
-                    }}
-                  />
-                )}
+                  <>
+                    <img
+                      src={chat.providerAvatar}
+                      alt={chat.providerName}
+                      style={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 18,
+                        objectFit: 'cover',
+                        display: 'block',
+                        border: '2px solid #111111',
+                      }}
+                    />
 
-                <span
-                  style={{
-                    position: 'absolute',
-                    right: -2,
-                    bottom: -2,
-                    width: 16,
-                    height: 16,
-                    borderRadius: 999,
-                    background: chat.online ? '#2fbb52' : '#c7c7c7',
-                    border: '2px solid #ffffff',
-                  }}
-                />
+                    <span
+                      style={{
+                        position: 'absolute',
+                        right: -2,
+                        bottom: -2,
+                        width: 16,
+                        height: 16,
+                        borderRadius: 999,
+                        background: chat.online ? '#2fbb52' : '#c7c7c7',
+                        border: '2px solid #ffffff',
+                      }}
+                    />
+                  </>
+                )}
               </div>
 
               <div style={{ minWidth: 0 }}>
