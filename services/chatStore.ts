@@ -23,7 +23,28 @@ export type ChatThread = {
 
 const STORAGE_KEY = 'mapbook_chat_threads_v1';
 
+const olamepSupportThread: ChatThread = {
+  id: 'olamep-support',
+  providerName: 'Olamep Support',
+  providerAvatar: '',
+  category: 'Olamep Internal',
+  online: true,
+  lastSeenText: 'Online',
+  unreadCount: 1,
+  messages: [
+    {
+      id: 'olamep-m1',
+      sender: 'provider',
+      text: 'Welcome to Olamep. If you need help with bookings, services, ads or payments, our support team is here.',
+      sentAt: '2026-04-25T09:00:00.000Z',
+      deliveredAt: '2026-04-25T09:00:05.000Z',
+      status: 'delivered',
+    },
+  ],
+};
+
 const demoThreads: ChatThread[] = [
+  olamepSupportThread,
   {
     id: 'bella-keratin-studio',
     providerName: 'Bella Keratin Studio',
@@ -135,6 +156,27 @@ function isValidChatThreads(value: unknown): value is ChatThread[] {
   return Array.isArray(value);
 }
 
+function ensureSystemThreads(threads: ChatThread[]) {
+  const hasOlamepSupport = threads.some((thread) => thread.id === olamepSupportThread.id);
+
+  if (hasOlamepSupport) {
+    return threads.map((thread) => {
+      if (thread.id !== olamepSupportThread.id) return thread;
+
+      return {
+        ...thread,
+        providerName: 'Olamep Support',
+        providerAvatar: '',
+        category: 'Olamep Internal',
+        online: true,
+        lastSeenText: 'Online',
+      };
+    });
+  }
+
+  return [olamepSupportThread, ...threads];
+}
+
 export function getChatThreads(): ChatThread[] {
   if (!canUseStorage()) {
     return cloneThreads(demoThreads);
@@ -155,7 +197,13 @@ export function getChatThreads(): ChatThread[] {
       return cloneThreads(demoThreads);
     }
 
-    return cloneThreads(parsed);
+    const withSystemThreads = ensureSystemThreads(parsed);
+
+    if (JSON.stringify(withSystemThreads) !== JSON.stringify(parsed)) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(withSystemThreads));
+    }
+
+    return cloneThreads(withSystemThreads);
   } catch {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(demoThreads));
     return cloneThreads(demoThreads);
@@ -164,7 +212,9 @@ export function getChatThreads(): ChatThread[] {
 
 export function saveChatThreads(threads: ChatThread[]) {
   if (!canUseStorage()) return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(threads));
+
+  const withSystemThreads = ensureSystemThreads(threads);
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(withSystemThreads));
 }
 
 export function getChatThreadById(id: string): ChatThread | null {
