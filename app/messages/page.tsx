@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import BottomNav from '../../components/common/BottomNav';
 import {
   getSavedLanguage,
@@ -72,6 +72,45 @@ const messagesTexts = {
   },
 } as const;
 
+function normalizeValue(value: unknown) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function doesThreadMatchDirectOpen(
+  thread: ChatThread,
+  bookingId: string,
+  masterId: string,
+  threadId: string
+) {
+  const item = thread as any;
+
+  const wantedBookingId = normalizeValue(bookingId);
+  const wantedMasterId = normalizeValue(masterId);
+  const wantedThreadId = normalizeValue(threadId);
+
+  const threadValues = [
+    item.id,
+    item.threadId,
+    item.chatId,
+    item.bookingId,
+    item.booking_id,
+    item.masterId,
+    item.master_id,
+    item.providerId,
+    item.provider_id,
+    item.professionalId,
+    item.professional_id,
+    item.listingId,
+    item.listing_id,
+  ].map(normalizeValue);
+
+  if (wantedThreadId && threadValues.includes(wantedThreadId)) return true;
+  if (wantedBookingId && threadValues.includes(wantedBookingId)) return true;
+  if (wantedMasterId && threadValues.includes(wantedMasterId)) return true;
+
+  return false;
+}
+
 function isOlamepInternalThread(thread: ChatThread) {
   const name = thread.providerName.toLowerCase();
   const category = thread.category.toLowerCase();
@@ -134,31 +173,15 @@ function OlamepSupportAvatar({ online }: { online?: boolean }) {
         boxSizing: 'border-box',
       }}
     >
-      <svg
-        width="48"
-        height="48"
-        viewBox="0 0 64 64"
-        fill="none"
-        aria-hidden="true"
-      >
+      <svg width="48" height="48" viewBox="0 0 64 64" fill="none" aria-hidden="true">
         <path
           d="M15 34C15 23.5 22.4 16 32 16C41.6 16 49 23.5 49 34"
           stroke="#111111"
           strokeWidth="5"
           strokeLinecap="round"
         />
-        <path
-          d="M18 34V44"
-          stroke="#111111"
-          strokeWidth="8"
-          strokeLinecap="round"
-        />
-        <path
-          d="M46 34V44"
-          stroke="#111111"
-          strokeWidth="8"
-          strokeLinecap="round"
-        />
+        <path d="M18 34V44" stroke="#111111" strokeWidth="8" strokeLinecap="round" />
+        <path d="M46 34V44" stroke="#111111" strokeWidth="8" strokeLinecap="round" />
         <path
           d="M24 34C24 29.6 27.6 26 32 26C36.4 26 40 29.6 40 34V39C40 43.4 36.4 47 32 47C27.6 47 24 43.4 24 39V34Z"
           fill="#111111"
@@ -259,6 +282,11 @@ function getLastMessageTime(lastMessage: any) {
 
 export default function MessagesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const bookingId = searchParams.get('bookingId') || '';
+  const masterId = searchParams.get('masterId') || '';
+  const threadId = searchParams.get('threadId') || '';
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [threads, setThreads] = useState<ChatThread[]>([]);
@@ -285,6 +313,19 @@ export default function MessagesPage() {
       unsubLanguage();
     };
   }, []);
+
+  useEffect(() => {
+    if (!bookingId && !masterId && !threadId) return;
+    if (!threads.length) return;
+
+    const targetThread = threads.find((thread) =>
+      doesThreadMatchDirectOpen(thread, bookingId, masterId, threadId)
+    );
+
+    if (!targetThread) return;
+
+    router.replace(`/messages/${targetThread.id}`);
+  }, [bookingId, masterId, threadId, threads, router]);
 
   const text = messagesTexts[language as keyof typeof messagesTexts] || messagesTexts.EN;
 
@@ -333,9 +374,7 @@ export default function MessagesPage() {
       return (
         thread.providerName.toLowerCase().includes(q) ||
         thread.category.toLowerCase().includes(q) ||
-        String(lastMessage?.text || '')
-          .toLowerCase()
-          .includes(q)
+        String(lastMessage?.text || '').toLowerCase().includes(q)
       );
     });
   }, [threads, search]);
