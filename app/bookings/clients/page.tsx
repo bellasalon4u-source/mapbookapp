@@ -22,6 +22,9 @@ type ProviderView = 'today' | 'tomorrow' | 'requests' | 'calendar' | 'history';
 type SlotStatus = 'free' | 'confirmed' | 'completed' | 'cancelled' | 'blocked' | 'pending';
 type ContactMode = 'full' | 'quick';
 
+type FilterKey = 'all' | SlotStatus;
+type SortKey = 'time' | 'name' | 'priceAsc' | 'priceDesc' | 'procedure';
+
 type ProviderSlot = {
   id: string;
   time: string;
@@ -518,10 +521,8 @@ const pageTexts: Record<
     procedure: 'الخدمة',
     status: 'الحالة',
     contacts: 'جهات الاتصال',
-    fullContactInfo:
-      'عميل مسجل ومؤكد من الطرفين. كل طرق التواصل متاحة.',
-    quickContactInfo:
-      'حجز سريع. متاح فقط شات Olamep الداخلي حتى التسجيل الكامل.',
+    fullContactInfo: 'عميل مسجل ومؤكد من الطرفين. كل طرق التواصل متاحة.',
+    quickContactInfo: 'حجز سريع. متاح فقط شات Olamep الداخلي حتى التسجيل الكامل.',
     call: 'اتصال',
     whatsapp: 'WhatsApp',
     internalChat: 'رسالة في الشات',
@@ -673,6 +674,35 @@ function money(value: number) {
   return `£${Number(value || 0).toFixed(0)}`;
 }
 
+function getFilterLabel(
+  filter: FilterKey,
+  text: ReturnType<typeof getTexts>,
+  language: AppLanguage
+) {
+  if (filter === 'all') return language === 'RU' ? 'Все' : 'All';
+  return getSlotStatusLabel(filter, text);
+}
+
+function getSortLabel(sort: SortKey, language: AppLanguage) {
+  const ru: Record<SortKey, string> = {
+    time: 'По времени',
+    name: 'По имени',
+    priceAsc: 'Цена ↑',
+    priceDesc: 'Цена ↓',
+    procedure: 'По процедуре',
+  };
+
+  const en: Record<SortKey, string> = {
+    time: 'By time',
+    name: 'By name',
+    priceAsc: 'Price ↑',
+    priceDesc: 'Price ↓',
+    procedure: 'By service',
+  };
+
+  return language === 'RU' ? ru[sort] : en[sort];
+}
+
 function getSlotStatusLabel(status: SlotStatus, text: ReturnType<typeof getTexts>) {
   if (status === 'confirmed') return text.confirmed;
   if (status === 'completed') return text.completed;
@@ -680,6 +710,62 @@ function getSlotStatusLabel(status: SlotStatus, text: ReturnType<typeof getTexts
   if (status === 'pending') return text.pending;
   if (status === 'blocked') return text.blocked;
   return text.free;
+}
+
+function getFilterStyle(filter: FilterKey, active: boolean) {
+  if (!active) {
+    return {
+      background: '#ffffff',
+      color: '#17130f',
+      border: '#111111',
+    };
+  }
+
+  if (filter === 'confirmed') {
+    return {
+      background: '#e3f8ea',
+      color: '#1f8c3f',
+      border: '#55c75f',
+    };
+  }
+
+  if (filter === 'completed') {
+    return {
+      background: '#e8f1ff',
+      color: '#2364c8',
+      border: '#2f80ed',
+    };
+  }
+
+  if (filter === 'cancelled' || filter === 'blocked') {
+    return {
+      background: '#ffe1e7',
+      color: '#cf3344',
+      border: '#ff5a6b',
+    };
+  }
+
+  if (filter === 'pending') {
+    return {
+      background: '#fff3d6',
+      color: '#ad7200',
+      border: '#f0b429',
+    };
+  }
+
+  if (filter === 'free') {
+    return {
+      background: '#f4f4f4',
+      color: '#6f675f',
+      border: '#cfcfcf',
+    };
+  }
+
+  return {
+    background: '#17130f',
+    color: '#ffffff',
+    border: '#111111',
+  };
 }
 
 function getSlotStyle(status: SlotStatus) {
@@ -905,6 +991,8 @@ export default function ProviderClientsPage() {
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [bookings, setBookings] = useState<BookingItem[]>(getBookings());
   const [activeView, setActiveView] = useState<ProviderView>('today');
+  const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
+  const [sortKey, setSortKey] = useState<SortKey>('time');
   const [search, setSearch] = useState('');
   const [slots, setSlots] = useState<ProviderSlot[]>([]);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
@@ -964,20 +1052,33 @@ export default function ProviderClientsPage() {
       source = source.filter((slot) => slot.status === 'completed' || slot.status === 'cancelled');
     }
 
+    if (activeFilter !== 'all') {
+      source = source.filter((slot) => slot.status === activeFilter);
+    }
+
     const q = search.trim().toLowerCase();
 
-    if (!q) return source;
+    if (q) {
+      source = source.filter((slot) => {
+        return (
+          slot.clientName.toLowerCase().includes(q) ||
+          slot.serviceName.toLowerCase().includes(q) ||
+          String(slot.price).includes(q) ||
+          slot.notes.toLowerCase().includes(q) ||
+          slot.paymentMethod.toLowerCase().includes(q) ||
+          slot.time.toLowerCase().includes(q)
+        );
+      });
+    }
 
-    return source.filter((slot) => {
-      return (
-        slot.clientName.toLowerCase().includes(q) ||
-        slot.serviceName.toLowerCase().includes(q) ||
-        String(slot.price).includes(q) ||
-        slot.notes.toLowerCase().includes(q) ||
-        slot.paymentMethod.toLowerCase().includes(q)
-      );
+    return [...source].sort((a, b) => {
+      if (sortKey === 'name') return a.clientName.localeCompare(b.clientName);
+      if (sortKey === 'procedure') return a.serviceName.localeCompare(b.serviceName);
+      if (sortKey === 'priceAsc') return a.price - b.price;
+      if (sortKey === 'priceDesc') return b.price - a.price;
+      return a.time.localeCompare(b.time);
     });
-  }, [activeView, search, slots]);
+  }, [activeFilter, activeView, search, slots, sortKey]);
 
   const activeTodayCount = slots.filter(
     (slot) => slot.status === 'confirmed' || slot.status === 'pending'
@@ -1067,6 +1168,18 @@ export default function ProviderClientsPage() {
 
     setDraggingSlotId(null);
   };
+
+  const filterOptions: FilterKey[] = [
+    'all',
+    'confirmed',
+    'completed',
+    'pending',
+    'cancelled',
+    'blocked',
+    'free',
+  ];
+
+  const sortOptions: SortKey[] = ['time', 'name', 'priceAsc', 'priceDesc', 'procedure'];
 
   return (
     <>
@@ -1280,6 +1393,89 @@ export default function ProviderClientsPage() {
                   </button>
                 );
               })}
+            </div>
+          </section>
+
+          <section style={{ marginTop: 12 }}>
+            <div
+              style={{
+                borderRadius: 24,
+                border: '2px solid #111111',
+                background: '#fffefa',
+                padding: 10,
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 8,
+                  overflowX: 'auto',
+                  paddingBottom: 6,
+                }}
+              >
+                {filterOptions.map((filter) => {
+                  const active = activeFilter === filter;
+                  const style = getFilterStyle(filter, active);
+
+                  return (
+                    <button
+                      key={filter}
+                      type="button"
+                      onClick={() => setActiveFilter(filter)}
+                      style={{
+                        flexShrink: 0,
+                        minHeight: 38,
+                        borderRadius: 999,
+                        border: `2px solid ${style.border}`,
+                        background: style.background,
+                        color: style.color,
+                        padding: '0 13px',
+                        fontSize: 12.5,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {getFilterLabel(filter, text, language)}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 6,
+                  display: 'flex',
+                  gap: 8,
+                  overflowX: 'auto',
+                  paddingBottom: 2,
+                }}
+              >
+                {sortOptions.map((sort) => {
+                  const active = sortKey === sort;
+
+                  return (
+                    <button
+                      key={sort}
+                      type="button"
+                      onClick={() => setSortKey(sort)}
+                      style={{
+                        flexShrink: 0,
+                        minHeight: 36,
+                        borderRadius: 999,
+                        border: active ? '2px solid #2f80ed' : '2px solid #111111',
+                        background: active ? '#e8f1ff' : '#ffffff',
+                        color: active ? '#2364c8' : '#17130f',
+                        padding: '0 13px',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {getSortLabel(sort, language)}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </section>
 
