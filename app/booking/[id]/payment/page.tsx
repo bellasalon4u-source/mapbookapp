@@ -82,7 +82,6 @@ function getTexts(language: AppLanguage) {
       selectedServicesNotFound: 'Выбранные услуги не найдены',
       holdDeposit: 'Оплата депозита',
       subtitle: 'Депозит защищает бронь внутри Olamep',
-      holdDepositAmount: '£1 депозит',
       selectedProcedure: 'Выбранная услуга',
       totalDuration: 'Длительность',
       totalPrice: 'Цена',
@@ -110,7 +109,6 @@ function getTexts(language: AppLanguage) {
       bookingSummary: 'Сводка бронирования',
       paymentWillUnlock: 'Контакты откроются только после подтверждения мастером',
       message: 'Сообщения',
-      pendingAccess: 'После оплаты: только чат, статус брони и ожидание мастера',
       providerFallback: 'Специалист',
       serviceProviderFallback: 'Исполнитель услуг',
       serviceFallback: 'Основная услуга',
@@ -124,7 +122,6 @@ function getTexts(language: AppLanguage) {
       selectedServicesNotFound: 'Вибрані послуги не знайдено',
       holdDeposit: 'Оплата депозиту',
       subtitle: 'Депозит захищає бронювання всередині Olamep',
-      holdDepositAmount: '£1 депозит',
       selectedProcedure: 'Обрана послуга',
       totalDuration: 'Тривалість',
       totalPrice: 'Ціна',
@@ -152,7 +149,6 @@ function getTexts(language: AppLanguage) {
       bookingSummary: 'Підсумок бронювання',
       paymentWillUnlock: 'Контакти відкриються тільки після підтвердження майстром',
       message: 'Повідомлення',
-      pendingAccess: 'Після оплати: тільки чат, статус бронювання та очікування майстра',
       providerFallback: 'Спеціаліст',
       serviceProviderFallback: 'Виконавець послуг',
       serviceFallback: 'Основна послуга',
@@ -165,7 +161,6 @@ function getTexts(language: AppLanguage) {
     selectedServicesNotFound: 'Selected services not found',
     holdDeposit: 'Deposit payment',
     subtitle: 'Your deposit keeps the booking protected inside Olamep',
-    holdDepositAmount: '£1 hold deposit',
     selectedProcedure: 'Selected service',
     totalDuration: 'Duration',
     totalPrice: 'Price',
@@ -193,7 +188,6 @@ function getTexts(language: AppLanguage) {
     bookingSummary: 'Booking summary',
     paymentWillUnlock: 'Contacts unlock only after provider confirmation',
     message: 'Messages',
-    pendingAccess: 'After payment: chat, booking status and waiting for provider only',
     providerFallback: 'Provider',
     serviceProviderFallback: 'Service provider',
     serviceFallback: 'Main service',
@@ -272,35 +266,170 @@ function MessageIcon() {
   );
 }
 
-function SmallIcon({
-  icon,
-  color,
-  bg,
-}: {
-  icon: string;
-  color: string;
-  bg: string;
-}) {
+function PaymentIcon({ type }: { type: PaymentMethod | 'shield' }) {
+  const baseStyle = {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative' as const,
+    flex: '0 0 auto',
+    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.65)',
+  };
+
+  if (type === 'shield') {
+    return (
+      <div style={{ ...baseStyle, background: BRAND.green }}>
+        <div
+          style={{
+            width: 25,
+            height: 30,
+            borderRadius: '14px 14px 18px 18px',
+            border: '3px solid #ffffff',
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              left: 7,
+              top: 6,
+              width: 8,
+              height: 14,
+              borderRight: '3px solid #ffffff',
+              borderBottom: '3px solid #ffffff',
+              transform: 'rotate(40deg)',
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (type === 'olacash') {
+    return (
+      <div style={{ ...baseStyle, background: '#eaf9ef' }}>
+        <div
+          style={{
+            width: 26,
+            height: 26,
+            borderRadius: 999,
+            background: 'linear-gradient(180deg, #9be3ad 0%, #61c87b 100%)',
+            border: '2px solid #ffffff',
+            boxShadow: '0 4px 10px rgba(33,184,75,0.22)',
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (type === 'card') {
+    return (
+      <div style={{ ...baseStyle, background: BRAND.pink }}>
+        <div
+          style={{
+            width: 34,
+            height: 23,
+            borderRadius: 5,
+            background: '#ffd629',
+            border: '2px solid #071b46',
+            position: 'relative',
+            boxShadow: '0 4px 8px rgba(7,27,70,0.18)',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: 6,
+              height: 4,
+              background: '#071b46',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              left: 5,
+              bottom: 4,
+              width: 12,
+              height: 2,
+              borderRadius: 999,
+              background: '#071b46',
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (type === 'paypal') {
+    return (
+      <div style={{ ...baseStyle, background: BRAND.blue }}>
+        <div
+          style={{
+            color: '#ffffff',
+            fontSize: 33,
+            lineHeight: 1,
+            fontWeight: 900,
+            fontFamily: 'Arial, sans-serif',
+          }}
+        >
+          P
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div
-      style={{
-        width: 52,
-        height: 52,
-        borderRadius: 16,
-        background: bg,
-        color,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 27,
-        fontWeight: 900,
-        flex: '0 0 auto',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.65)',
-      }}
-    >
-      {icon}
+    <div style={{ ...baseStyle, background: BRAND.navy }}>
+      <div
+        style={{
+          width: 22,
+          height: 34,
+          borderRadius: 6,
+          background: '#111827',
+          border: '2px solid #ffffff',
+          padding: 3,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 2,
+        }}
+      >
+        {[
+          '#ff4b4b',
+          '#ffd629',
+          '#21b84b',
+          '#1467f2',
+          '#ffffff',
+          '#ff4f9a',
+          '#21b84b',
+          '#ffd629',
+          '#1467f2',
+        ].map((color, index) => (
+          <span
+            key={index}
+            style={{
+              width: 3,
+              height: 3,
+              borderRadius: 1,
+              background: color,
+              display: 'block',
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
+}
+
+function getPaymentAccent(method: PaymentMethod) {
+  if (method === 'card') return BRAND.pink;
+  if (method === 'paypal') return BRAND.blue;
+  if (method === 'wallet') return BRAND.navy;
+  return BRAND.green;
 }
 
 function parseDurationToMinutes(value: string) {
@@ -538,40 +667,28 @@ export default function BookingPaymentPage() {
   const paymentMethods = [
     {
       id: 'olacash' as PaymentMethod,
-      icon: '●',
       title: text.olacash,
       subtitle: canUseOlaCash
         ? `${text.olacashBalance}: ${formatDisplayPrice(olaCashBalance)}`
         : text.notEnoughOlaCash,
-      color: '#7acb8b',
-      bg: '#eaf9ef',
       disabled: !canUseOlaCash,
     },
     {
       id: 'card' as PaymentMethod,
-      icon: '💳',
       title: text.card,
       subtitle: 'Visa • Mastercard',
-      color: '#071b46',
-      bg: BRAND.pink,
       disabled: false,
     },
     {
       id: 'paypal' as PaymentMethod,
-      icon: 'P',
       title: text.paypal,
       subtitle: 'PayPal checkout',
-      color: '#ffffff',
-      bg: BRAND.blue,
       disabled: false,
     },
     {
       id: 'wallet' as PaymentMethod,
-      icon: '📱',
       title: text.appleGoogle,
       subtitle: 'Mobile wallet',
-      color: '#ffffff',
-      bg: BRAND.navy,
       disabled: false,
     },
   ];
@@ -770,7 +887,7 @@ export default function BookingPaymentPage() {
               alignItems: 'center',
             }}
           >
-            <SmallIcon icon="🛡" color="#ffffff" bg={BRAND.green} />
+            <PaymentIcon type="shield" />
 
             <div>
               <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
@@ -866,6 +983,7 @@ export default function BookingPaymentPage() {
           <div style={{ display: 'grid', gap: 10 }}>
             {paymentMethods.map((method) => {
               const active = selectedMethod === method.id;
+              const accent = getPaymentAccent(method.id);
 
               return (
                 <button
@@ -879,7 +997,7 @@ export default function BookingPaymentPage() {
                   style={{
                     width: '100%',
                     borderRadius: 16,
-                    border: active ? `2px solid ${method.bg}` : '1.5px solid #d8dde8',
+                    border: active ? `2px solid ${accent}` : '1.5px solid #d8dde8',
                     background: active ? '#f4f8ff' : '#ffffff',
                     padding: 12,
                     display: 'grid',
@@ -892,7 +1010,7 @@ export default function BookingPaymentPage() {
                     boxShadow: active ? '0 8px 18px rgba(20,103,242,0.12)' : 'none',
                   }}
                 >
-                  <SmallIcon icon={method.icon} color={method.color} bg={method.bg} />
+                  <PaymentIcon type={method.id} />
 
                   <div>
                     <div
@@ -923,8 +1041,8 @@ export default function BookingPaymentPage() {
                       width: 30,
                       height: 30,
                       borderRadius: 999,
-                      background: active ? method.bg : '#ffffff',
-                      border: active ? `2px solid ${method.bg}` : '2px solid #cfd4dd',
+                      background: active ? accent : '#ffffff',
+                      border: active ? `2px solid ${accent}` : '2px solid #cfd4dd',
                       color: '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
