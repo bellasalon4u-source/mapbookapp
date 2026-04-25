@@ -50,12 +50,22 @@ type MasterLike = {
   services: ServiceLike[];
 };
 
+const BRAND = {
+  navy: '#071b46',
+  blue: '#1467f2',
+  green: '#21b84b',
+  red: '#ff4b4b',
+  border: '#111111',
+  soft: '#f8f9fc',
+  muted: '#6f7582',
+};
+
 function listingToMasterShape(listing: ListingLike, index: number): MasterLike {
   const fallbackImages = [
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=1200&q=80',
     'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80',
   ];
 
   const gallery =
@@ -106,9 +116,10 @@ function getTexts(language: AppLanguage) {
     return {
       notFound: 'Специалист не найден',
       chooseServices: 'Выберите услуги',
+      subtitle: 'Выберите услугу, затем дату, время и депозит',
       services: 'Услуги',
-      totalDuration: 'Общая длительность',
-      totalPrice: 'Общая цена',
+      totalDuration: 'Длительность',
+      totalPrice: 'Цена',
       continue: 'Продолжить',
       from: 'от',
       providerFallback: 'Специалист',
@@ -121,9 +132,12 @@ function getTexts(language: AppLanguage) {
       selected: 'Выбрано',
       select: 'Выбрать',
       step: 'Шаг 1 из 5',
-      hint: 'Можно выбрать одну или несколько услуг. Дата, время и оплата будут дальше.',
+      hint: 'Можно выбрать одну или несколько услуг.',
       back: 'Назад',
       home: 'Главная',
+      selectedServices: 'Выбранные услуги',
+      selectedCount: 'Выбрано',
+      message: 'Сообщения',
     };
   }
 
@@ -131,9 +145,10 @@ function getTexts(language: AppLanguage) {
     return {
       notFound: 'Спеціаліста не знайдено',
       chooseServices: 'Оберіть послуги',
+      subtitle: 'Оберіть послугу, потім дату, час і депозит',
       services: 'Послуги',
-      totalDuration: 'Загальна тривалість',
-      totalPrice: 'Загальна ціна',
+      totalDuration: 'Тривалість',
+      totalPrice: 'Ціна',
       continue: 'Продовжити',
       from: 'від',
       providerFallback: 'Спеціаліст',
@@ -146,118 +161,22 @@ function getTexts(language: AppLanguage) {
       selected: 'Обрано',
       select: 'Обрати',
       step: 'Крок 1 з 5',
-      hint: 'Можна обрати одну або кілька послуг. Дата, час і оплата будуть далі.',
+      hint: 'Можна обрати одну або кілька послуг.',
       back: 'Назад',
       home: 'Головна',
-    };
-  }
-
-  if (language === 'ES') {
-    return {
-      notFound: 'Profesional no encontrado',
-      chooseServices: 'Elige servicios',
-      services: 'Servicios',
-      totalDuration: 'Duración total',
-      totalPrice: 'Precio total',
-      continue: 'Continuar',
-      from: 'desde',
-      providerFallback: 'Profesional',
-      serviceProviderFallback: 'Proveedor de servicios',
-      serviceFallback: 'Servicio principal',
-      premiumOption: 'Opción premium',
-      zeroMinutes: '0 min',
-      verified: 'Profesional verificado',
-      availableNow: 'Disponible ahora',
-      selected: 'Seleccionado',
-      select: 'Seleccionar',
-      step: 'Paso 1 de 5',
-      hint: 'Puedes elegir uno o varios servicios. Fecha, hora y pago van después.',
-      back: 'Atrás',
-      home: 'Inicio',
-    };
-  }
-
-  if (language === 'CZ') {
-    return {
-      notFound: 'Specialista nebyl nalezen',
-      chooseServices: 'Vyberte služby',
-      services: 'Služby',
-      totalDuration: 'Celková délka',
-      totalPrice: 'Celková cena',
-      continue: 'Pokračovat',
-      from: 'od',
-      providerFallback: 'Specialista',
-      serviceProviderFallback: 'Poskytovatel služeb',
-      serviceFallback: 'Hlavní služba',
-      premiumOption: 'Prémiová možnost',
-      zeroMinutes: '0 min',
-      verified: 'Ověřený specialista',
-      availableNow: 'Dostupný nyní',
-      selected: 'Vybráno',
-      select: 'Vybrat',
-      step: 'Krok 1 z 5',
-      hint: 'Můžete vybrat jednu nebo více služeb. Datum, čas a platba budou dále.',
-      back: 'Zpět',
-      home: 'Domů',
-    };
-  }
-
-  if (language === 'DE') {
-    return {
-      notFound: 'Spezialist nicht gefunden',
-      chooseServices: 'Dienstleistungen wählen',
-      services: 'Dienstleistungen',
-      totalDuration: 'Gesamtdauer',
-      totalPrice: 'Gesamtpreis',
-      continue: 'Weiter',
-      from: 'ab',
-      providerFallback: 'Spezialist',
-      serviceProviderFallback: 'Dienstleister',
-      serviceFallback: 'Hauptservice',
-      premiumOption: 'Premium-Option',
-      zeroMinutes: '0 Min',
-      verified: 'Verifizierter Spezialist',
-      availableNow: 'Jetzt verfügbar',
-      selected: 'Ausgewählt',
-      select: 'Auswählen',
-      step: 'Schritt 1 von 5',
-      hint: 'Sie können eine oder mehrere Dienstleistungen auswählen. Datum, Zeit und Zahlung folgen.',
-      back: 'Zurück',
-      home: 'Home',
-    };
-  }
-
-  if (language === 'PL') {
-    return {
-      notFound: 'Specjalista nie został znaleziony',
-      chooseServices: 'Wybierz usługi',
-      services: 'Usługi',
-      totalDuration: 'Łączny czas',
-      totalPrice: 'Łączna cena',
-      continue: 'Dalej',
-      from: 'od',
-      providerFallback: 'Specjalista',
-      serviceProviderFallback: 'Usługodawca',
-      serviceFallback: 'Usługa główna',
-      premiumOption: 'Opcja premium',
-      zeroMinutes: '0 min',
-      verified: 'Zweryfikowany specjalista',
-      availableNow: 'Dostępny teraz',
-      selected: 'Wybrano',
-      select: 'Wybierz',
-      step: 'Krok 1 z 5',
-      hint: 'Możesz wybrać jedną lub kilka usług. Data, czas i płatność będą dalej.',
-      back: 'Wstecz',
-      home: 'Start',
+      selectedServices: 'Обрані послуги',
+      selectedCount: 'Обрано',
+      message: 'Повідомлення',
     };
   }
 
   return {
     notFound: 'Provider not found',
     chooseServices: 'Choose services',
+    subtitle: 'Choose a service, then date, time and deposit',
     services: 'Services',
-    totalDuration: 'Total duration',
-    totalPrice: 'Total price',
+    totalDuration: 'Duration',
+    totalPrice: 'Price',
     continue: 'Continue',
     from: 'from',
     providerFallback: 'Provider',
@@ -270,9 +189,12 @@ function getTexts(language: AppLanguage) {
     selected: 'Selected',
     select: 'Select',
     step: 'Step 1 of 5',
-    hint: 'You can choose one or several services. Date, time and payment come next.',
+    hint: 'You can choose one or several services.',
     back: 'Back',
     home: 'Home',
+    selectedServices: 'Selected services',
+    selectedCount: 'Selected',
+    message: 'Messages',
   };
 }
 
@@ -283,7 +205,7 @@ function OlamepLogo() {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 9,
+        gap: 10,
       }}
     >
       <div
@@ -293,8 +215,8 @@ function OlamepLogo() {
           position: 'relative',
           borderRadius: '50% 50% 58% 58%',
           background:
-            'conic-gradient(from 210deg, #0e73d8 0deg, #2fc96d 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
-          boxShadow: '0 8px 18px rgba(14,115,216,0.20)',
+            'conic-gradient(from 210deg, #1467f2 0deg, #20c96b 90deg, #ffd629 160deg, #ff3f68 230deg, #1467f2 360deg)',
+          boxShadow: '0 8px 18px rgba(20,103,242,0.18)',
         }}
       >
         <div
@@ -306,20 +228,43 @@ function OlamepLogo() {
             height: 17,
             borderRadius: '50%',
             background: '#ffffff',
+            border: '4px solid #071b46',
           }}
         />
       </div>
 
       <div
         style={{
-          fontSize: 28,
+          fontSize: 30,
           fontWeight: 900,
-          color: '#08245c',
+          color: BRAND.navy,
           letterSpacing: '-1px',
         }}
       >
         Olamep
       </div>
+    </div>
+  );
+}
+
+function MessageIcon() {
+  return (
+    <div
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 999,
+        border: `2px solid ${BRAND.green}`,
+        background: '#ffffff',
+        color: BRAND.green,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 26,
+        fontWeight: 900,
+      }}
+    >
+      💬
     </div>
   );
 }
@@ -471,10 +416,10 @@ export default function BookingServicePage() {
       <main
         style={{
           minHeight: '100vh',
-          background: '#fcf8f2',
+          background: '#ffffff',
           padding: 24,
           fontFamily: 'Arial, sans-serif',
-          color: '#17130f',
+          color: BRAND.navy,
         }}
       >
         <button
@@ -484,7 +429,7 @@ export default function BookingServicePage() {
             width: 52,
             height: 52,
             borderRadius: 999,
-            border: '2px solid #111111',
+            border: `2px solid ${BRAND.border}`,
             background: '#ffffff',
             fontSize: 24,
             fontWeight: 900,
@@ -514,21 +459,24 @@ export default function BookingServicePage() {
     0
   );
 
+  const primaryService = selectedItems[0] || master.services[0];
+  const primaryImage = primaryService?.image || master.avatar;
+
   return (
     <main
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(180deg, #fffefa 0%, #fcf8f2 48%, #fff1f4 100%)',
+        background: '#ffffff',
         fontFamily: 'Arial, sans-serif',
-        color: '#17130f',
-        paddingBottom: 158,
+        color: BRAND.navy,
+        paddingBottom: 132,
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 120px' }}>
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 18px 112px' }}>
         <header
           style={{
             display: 'grid',
-            gridTemplateColumns: '48px 1fr 48px',
+            gridTemplateColumns: '46px 1fr 46px',
             alignItems: 'center',
             gap: 10,
           }}
@@ -538,14 +486,14 @@ export default function BookingServicePage() {
             onClick={() => router.back()}
             aria-label={text.back}
             style={{
-              width: 48,
-              height: 48,
-              borderRadius: 999,
-              border: '2px solid #111111',
-              background: '#ffffff',
-              fontSize: 25,
-              color: '#17130f',
-              fontWeight: 900,
+              width: 46,
+              height: 46,
+              border: '0',
+              background: 'transparent',
+              fontSize: 38,
+              lineHeight: 1,
+              color: BRAND.navy,
+              fontWeight: 400,
               cursor: 'pointer',
             }}
           >
@@ -558,52 +506,33 @@ export default function BookingServicePage() {
 
           <button
             type="button"
-            onClick={() => router.push('/')}
-            aria-label={text.home}
+            onClick={() => router.push('/messages')}
+            aria-label={text.message}
             style={{
-              width: 48,
-              height: 48,
-              borderRadius: 999,
-              border: '2px solid #111111',
-              background: '#ffffff',
-              fontSize: 23,
-              color: '#17130f',
-              fontWeight: 900,
+              width: 46,
+              height: 46,
+              border: 0,
+              background: 'transparent',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: 'pointer',
             }}
           >
-            ×
+            <MessageIcon />
           </button>
         </header>
 
-        <section style={{ marginTop: 20 }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              height: 34,
-              padding: '0 14px',
-              borderRadius: 999,
-              border: '2px solid #111111',
-              background: '#fff7cf',
-              color: '#17130f',
-              fontSize: 13,
-              fontWeight: 900,
-            }}
-          >
-            <span>●</span>
-            <span>{text.step}</span>
-          </div>
-
+        <section style={{ marginTop: 28 }}>
           <h1
             style={{
-              margin: '14px 0 0',
-              fontSize: 34,
-              lineHeight: 1.05,
+              margin: 0,
+              fontSize: 42,
+              lineHeight: 1.02,
               fontWeight: 900,
-              letterSpacing: '-1px',
-              color: '#08245c',
+              letterSpacing: '-1.6px',
+              color: BRAND.navy,
             }}
           >
             {text.chooseServices}
@@ -611,73 +540,54 @@ export default function BookingServicePage() {
 
           <p
             style={{
-              margin: '8px 0 0',
-              fontSize: 14,
-              lineHeight: 1.45,
-              fontWeight: 800,
-              color: '#7b7268',
+              margin: '10px 0 0',
+              fontSize: 18,
+              lineHeight: 1.35,
+              fontWeight: 500,
+              color: '#515866',
             }}
           >
-            {text.hint}
+            {text.subtitle}
           </p>
         </section>
 
         <section
           style={{
             marginTop: 18,
-            borderRadius: 30,
-            border: '2px solid #111111',
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
             background: '#ffffff',
-            padding: 14,
-            boxShadow: '0 8px 0 rgba(17,17,17,0.04)',
+            padding: 12,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.08)',
           }}
         >
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '92px 1fr',
+              gridTemplateColumns: '112px 1fr',
               gap: 14,
               alignItems: 'center',
             }}
           >
             <img
-              src={master.avatar}
+              src={primaryImage}
               alt={master.name}
               style={{
-                width: 92,
-                height: 92,
-                borderRadius: 24,
+                width: 112,
+                height: 112,
+                borderRadius: 14,
                 objectFit: 'cover',
-                border: '2px solid #111111',
+                display: 'block',
               }}
             />
 
             <div style={{ minWidth: 0 }}>
               <div
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  minHeight: 28,
-                  borderRadius: 999,
-                  background: '#edf9ef',
-                  color: '#1f8c3f',
-                  border: '1.5px solid #55c75f',
-                  padding: '0 10px',
-                  fontSize: 11,
+                  fontSize: 22,
+                  lineHeight: 1.08,
                   fontWeight: 900,
-                }}
-              >
-                ✓ {text.verified}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 8,
-                  fontSize: 24,
-                  lineHeight: 1.05,
-                  fontWeight: 900,
-                  color: '#17130f',
+                  color: BRAND.navy,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                 }}
@@ -687,46 +597,94 @@ export default function BookingServicePage() {
 
               <div
                 style={{
-                  marginTop: 7,
-                  color: '#746b62',
-                  fontSize: 14,
-                  lineHeight: 1.35,
-                  fontWeight: 800,
+                  marginTop: 6,
+                  color: '#4f5663',
+                  fontSize: 17,
+                  lineHeight: 1.25,
+                  fontWeight: 500,
                 }}
               >
-                {master.title} • {master.city}
+                {master.title}
               </div>
 
               <div
                 style={{
-                  marginTop: 8,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  flexWrap: 'wrap',
-                  fontSize: 13,
-                  fontWeight: 900,
-                  color: '#17130f',
+                  marginTop: 18,
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 10,
                 }}
               >
-                <span>★ {typeof master.rating === 'number' ? master.rating.toFixed(1) : '4.8'}</span>
-                <span>•</span>
-                <span>
-                  {text.from} {formatDisplayPrice(master.priceFrom || master.services[0]?.price || 0)}
-                </span>
+                <div
+                  style={{
+                    border: `1.5px solid #d8dde8`,
+                    borderRadius: 14,
+                    padding: '10px 12px',
+                    background: '#ffffff',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: '#6f7582',
+                      fontWeight: 800,
+                    }}
+                  >
+                    ★ {typeof master.rating === 'number' ? master.rating.toFixed(1) : '4.8'}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 3,
+                      fontSize: 15,
+                      color: BRAND.green,
+                      fontWeight: 900,
+                    }}
+                  >
+                    {text.verified}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    border: `1.5px solid #d8dde8`,
+                    borderRadius: 14,
+                    padding: '10px 12px',
+                    background: '#ffffff',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: '#6f7582',
+                      fontWeight: 800,
+                    }}
+                  >
+                    {text.from}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 3,
+                      fontSize: 17,
+                      color: BRAND.navy,
+                      fontWeight: 900,
+                    }}
+                  >
+                    {formatDisplayPrice(master.priceFrom || master.services[0]?.price || 0)}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section style={{ marginTop: 22 }}>
+        <section style={{ marginTop: 26 }}>
           <h2
             style={{
               margin: 0,
-              fontSize: 26,
+              fontSize: 28,
               lineHeight: 1.1,
               fontWeight: 900,
-              color: '#17130f',
+              color: BRAND.navy,
             }}
           >
             {text.services}
@@ -744,81 +702,39 @@ export default function BookingServicePage() {
                   style={{
                     width: '100%',
                     textAlign: 'left',
-                    background: active ? '#f2fff6' : '#ffffff',
-                    border: active ? '2px solid #35bf55' : '2px solid #111111',
-                    borderRadius: 28,
+                    background: '#ffffff',
+                    border: active ? `2px solid ${BRAND.blue}` : `2px solid ${BRAND.border}`,
+                    borderRadius: 18,
                     padding: 12,
                     display: 'grid',
-                    gridTemplateColumns: '96px 1fr',
+                    gridTemplateColumns: '92px 1fr auto',
                     gap: 14,
                     alignItems: 'center',
                     cursor: 'pointer',
                     boxShadow: active
-                      ? '0 8px 0 rgba(53,191,85,0.14)'
-                      : '0 7px 0 rgba(17,17,17,0.04)',
+                      ? '0 8px 20px rgba(20,103,242,0.16)'
+                      : '0 6px 16px rgba(7,27,70,0.06)',
                   }}
                 >
-                  <div style={{ position: 'relative' }}>
-                    <img
-                      src={service.image}
-                      alt={service.title}
-                      style={{
-                        width: 96,
-                        height: 96,
-                        objectFit: 'cover',
-                        borderRadius: 22,
-                        border: '2px solid #111111',
-                        display: 'block',
-                      }}
-                    />
-
-                    <div
-                      style={{
-                        position: 'absolute',
-                        right: -7,
-                        bottom: -7,
-                        width: 36,
-                        height: 36,
-                        borderRadius: 999,
-                        border: '2px solid #111111',
-                        background: active ? '#35bf55' : '#ffffff',
-                        color: active ? '#ffffff' : '#17130f',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: active ? 22 : 18,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {active ? '✓' : '+'}
-                    </div>
-                  </div>
+                  <img
+                    src={service.image}
+                    alt={service.title}
+                    style={{
+                      width: 92,
+                      height: 92,
+                      objectFit: 'cover',
+                      borderRadius: 14,
+                      display: 'block',
+                    }}
+                  />
 
                   <div style={{ minWidth: 0 }}>
                     <div
                       style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        minHeight: 28,
-                        borderRadius: 999,
-                        border: active ? '1.5px solid #35bf55' : '1.5px solid #d8cdc0',
-                        background: active ? '#ffffff' : '#fffefa',
-                        color: active ? '#1f8c3f' : '#7b7268',
-                        padding: '0 10px',
-                        fontSize: 11,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {active ? text.selected : text.select}
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: 8,
-                        fontSize: 19,
+                        fontSize: 20,
                         lineHeight: 1.15,
                         fontWeight: 900,
-                        color: '#17130f',
+                        color: BRAND.navy,
                       }}
                     >
                       {service.title}
@@ -826,10 +742,10 @@ export default function BookingServicePage() {
 
                     <div
                       style={{
-                        marginTop: 7,
-                        color: '#746b62',
-                        fontSize: 14,
-                        fontWeight: 800,
+                        marginTop: 8,
+                        color: '#4f5663',
+                        fontSize: 16,
+                        fontWeight: 700,
                       }}
                     >
                       {service.duration}
@@ -837,14 +753,57 @@ export default function BookingServicePage() {
 
                     <div
                       style={{
-                        marginTop: 9,
-                        color: '#ff3b3b',
+                        marginTop: 8,
+                        display: 'inline-flex',
+                        minHeight: 28,
+                        padding: '0 10px',
+                        alignItems: 'center',
+                        borderRadius: 999,
+                        background: active ? '#eaf2ff' : '#f4f6fa',
+                        color: active ? BRAND.blue : '#6f7582',
+                        fontSize: 12,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {active ? text.selected : text.select}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      textAlign: 'right',
+                      minWidth: 70,
+                    }}
+                  >
+                    <div
+                      style={{
+                        color: BRAND.navy,
                         fontSize: 24,
                         lineHeight: 1,
                         fontWeight: 900,
                       }}
                     >
                       {formatDisplayPrice(service.price)}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 14,
+                        marginLeft: 'auto',
+                        width: 32,
+                        height: 32,
+                        borderRadius: 999,
+                        background: active ? BRAND.blue : '#ffffff',
+                        color: active ? '#ffffff' : '#9aa1ad',
+                        border: active ? `2px solid ${BRAND.blue}` : '2px solid #cfd4dd',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 18,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {active ? '✓' : '+'}
                     </div>
                   </div>
                 </button>
@@ -862,53 +821,65 @@ export default function BookingServicePage() {
           bottom: 0,
           zIndex: 100,
           background: '#ffffff',
-          borderTop: '2px solid #111111',
-          padding: '12px 14px calc(14px + env(safe-area-inset-bottom))',
+          borderTop: '1px solid #e4e7ee',
+          padding: '12px 18px calc(14px + env(safe-area-inset-bottom))',
           boxShadow: '0 -12px 28px rgba(0,0,0,0.08)',
         }}
       >
         <div style={{ maxWidth: 430, margin: '0 auto' }}>
           <div
             style={{
+              minHeight: 74,
+              borderRadius: 18,
+              border: '1.5px solid #d9dee8',
+              background: '#ffffff',
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 10,
+              gridTemplateColumns: '1fr 1.5px 1fr',
+              alignItems: 'center',
+              overflow: 'hidden',
               marginBottom: 12,
             }}
           >
-            <div
-              style={{
-                borderRadius: 20,
-                border: '2px solid #111111',
-                background: '#fffefa',
-                padding: '10px 12px',
-              }}
-            >
-              <div style={{ fontSize: 12, color: '#6c645c', fontWeight: 900 }}>
+            <div style={{ padding: '12px 16px' }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: '#6f7582',
+                  fontWeight: 800,
+                }}
+              >
                 {text.totalDuration}
               </div>
-              <div style={{ fontSize: 25, fontWeight: 900, marginTop: 5 }}>
+              <div
+                style={{
+                  marginTop: 2,
+                  fontSize: 22,
+                  color: BRAND.navy,
+                  fontWeight: 900,
+                }}
+              >
                 {formatMinutes(totalMinutes, language, text.zeroMinutes)}
               </div>
             </div>
 
-            <div
-              style={{
-                borderRadius: 20,
-                border: '2px solid #111111',
-                background: '#fff2f2',
-                padding: '10px 12px',
-              }}
-            >
-              <div style={{ fontSize: 12, color: '#6c645c', fontWeight: 900 }}>
+            <div style={{ height: 44, background: '#d9dee8' }} />
+
+            <div style={{ padding: '12px 16px' }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: '#6f7582',
+                  fontWeight: 800,
+                }}
+              >
                 {text.totalPrice}
               </div>
               <div
                 style={{
-                  fontSize: 25,
+                  marginTop: 2,
+                  fontSize: 22,
+                  color: selectedItems.length ? BRAND.navy : '#9ca3af',
                   fontWeight: 900,
-                  marginTop: 5,
-                  color: selectedItems.length ? '#ff3b3b' : '#9ca3af',
                 }}
               >
                 {formatDisplayPrice(totalPrice)}
@@ -927,18 +898,18 @@ export default function BookingServicePage() {
             }}
             style={{
               width: '100%',
-              border: '2px solid #111111',
-              background: selectedItems.length ? '#35bf55' : '#b7d9bf',
+              border: selectedItems.length ? `2px solid ${BRAND.border}` : '2px solid #b8c0cc',
+              background: selectedItems.length ? BRAND.green : '#b7d9bf',
               color: '#ffffff',
-              borderRadius: 22,
-              padding: '17px 26px',
+              borderRadius: 18,
+              padding: '18px 26px',
               fontWeight: 900,
-              fontSize: 19,
+              fontSize: 22,
               cursor: selectedItems.length ? 'pointer' : 'not-allowed',
-              boxShadow: selectedItems.length ? '0 6px 0 rgba(17,17,17,0.12)' : 'none',
+              boxShadow: selectedItems.length ? '0 6px 0 rgba(17,17,17,0.10)' : 'none',
             }}
           >
-            {text.continue}
+            {text.continue} →
           </button>
         </div>
       </div>
