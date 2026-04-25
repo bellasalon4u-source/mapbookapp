@@ -77,12 +77,15 @@ const baseTexts = {
   home: 'Home',
   tapToEdit: 'Tap any row to edit',
   move: 'Move',
+  moveUp: 'Move up',
+  moveDown: 'Move down',
   contact: 'Contact',
   phone: 'Phone',
   email: 'E-mail',
   message: 'Message',
   olamepManager: 'Olamep manager',
-  managerOnly: 'Quick booking without registration. Communication is available only through the internal Olamep manager.',
+  managerOnly:
+    'Quick booking without registration. Communication is available only through the internal Olamep manager.',
   registeredContact: 'Registered client. Available contact channels are shown below.',
   editValue: 'Edit value',
   save: 'Save',
@@ -123,6 +126,8 @@ const textOverrides: Partial<Record<AppLanguage, Partial<typeof baseTexts>>> = {
     home: 'Главная',
     tapToEdit: 'Нажмите на строку, чтобы изменить',
     move: 'Переместить',
+    moveUp: 'Выше',
+    moveDown: 'Ниже',
     contact: 'Связь',
     phone: 'Телефон',
     email: 'E-mail',
@@ -154,6 +159,8 @@ const textOverrides: Partial<Record<AppLanguage, Partial<typeof baseTexts>>> = {
     cancelled: 'Скасовано',
     price: 'Сума',
     message: 'Написати',
+    moveUp: 'Вище',
+    moveDown: 'Нижче',
     managerOnly:
       'Швидка бронь без реєстрації. Зв’язок доступний тільки через внутрішнього менеджера Olamep.',
   },
@@ -1016,45 +1023,21 @@ export default function ProviderClientsPage() {
                         </div>
 
                         <div
-                          onClick={(event) => event.stopPropagation()}
                           style={{
-                            display: 'grid',
-                            gap: 6,
+                            width: 44,
+                            height: 44,
+                            borderRadius: 999,
+                            border: '2px solid #111111',
+                            background: '#ffffff',
+                            fontSize: 20,
+                            fontWeight: 900,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#17130f',
                           }}
                         >
-                          <button
-                            type="button"
-                            onClick={() => moveClient(client.id, 'up')}
-                            style={{
-                              width: 42,
-                              height: 34,
-                              borderRadius: 999,
-                              border: '2px solid #111111',
-                              background: '#ffffff',
-                              fontSize: 17,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                            }}
-                          >
-                            ↑
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => moveClient(client.id, 'down')}
-                            style={{
-                              width: 42,
-                              height: 34,
-                              borderRadius: 999,
-                              border: '2px solid #111111',
-                              background: '#ffffff',
-                              fontSize: 17,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                            }}
-                          >
-                            ↓
-                          </button>
+                          ›
                         </div>
                       </div>
                     </article>
@@ -1075,10 +1058,12 @@ export default function ProviderClientsPage() {
             position: 'fixed',
             inset: 0,
             background: 'rgba(17,17,17,0.28)',
-            zIndex: 220,
+            zIndex: 1400,
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
+            paddingTop: 72,
+            boxSizing: 'border-box',
           }}
         >
           <div
@@ -1086,7 +1071,9 @@ export default function ProviderClientsPage() {
             style={{
               width: '100%',
               maxWidth: 430,
-              padding: '0 14px calc(18px + env(safe-area-inset-bottom))',
+              maxHeight: 'calc(100vh - 92px)',
+              overflowY: 'auto',
+              padding: '0 14px calc(28px + env(safe-area-inset-bottom))',
               boxSizing: 'border-box',
             }}
           >
@@ -1177,6 +1164,69 @@ export default function ProviderClientsPage() {
                 }}
               >
                 {text.tapToEdit}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 12,
+                  borderRadius: 20,
+                  border: '2px solid #111111',
+                  background: '#ffffff',
+                  padding: 12,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: '#8b8277',
+                    fontWeight: 900,
+                    marginBottom: 10,
+                  }}
+                >
+                  {text.move}
+                </div>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: 10,
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => moveClient(selectedClient.id, 'up')}
+                    style={{
+                      minHeight: 46,
+                      borderRadius: 16,
+                      border: '2px solid #111111',
+                      background: '#ffffff',
+                      color: '#17130f',
+                      fontSize: 15,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {text.moveUp}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => moveClient(selectedClient.id, 'down')}
+                    style={{
+                      minHeight: 46,
+                      borderRadius: 16,
+                      border: '2px solid #111111',
+                      background: '#ffffff',
+                      color: '#17130f',
+                      fontSize: 15,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {text.moveDown}
+                  </button>
+                </div>
               </div>
 
               <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
@@ -1408,7 +1458,7 @@ export default function ProviderClientsPage() {
             position: 'fixed',
             inset: 0,
             background: 'rgba(17,17,17,0.25)',
-            zIndex: 300,
+            zIndex: 1500,
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
