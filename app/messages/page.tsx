@@ -106,6 +106,104 @@ function getLastMessageTime(lastMessage: any) {
   return lastMessage.time || '';
 }
 
+function OlamepLogoIcon() {
+  return (
+    <div
+      aria-label="Olamep logo"
+      style={{
+        width: 58,
+        height: 58,
+        borderRadius: 18,
+        border: '2.5px solid #111111',
+        background:
+          'linear-gradient(145deg, #ffffff 0%, #fff7ee 45%, #eef9ff 100%)',
+        boxShadow: '0 8px 0 rgba(17,17,17,0.08)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        flexShrink: 0,
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            'linear-gradient(90deg, rgba(17,17,17,0.06) 1px, transparent 1px), linear-gradient(rgba(17,17,17,0.06) 1px, transparent 1px)',
+          backgroundSize: '15px 15px',
+          opacity: 0.45,
+        }}
+      />
+
+      <div
+        style={{
+          position: 'relative',
+          width: 34,
+          height: 42,
+          background: 'linear-gradient(180deg, #ff4f6d 0%, #246bff 100%)',
+          border: '2.5px solid #111111',
+          borderRadius: '18px 18px 20px 20px',
+          transform: 'rotate(0deg)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 0 rgba(17,17,17,0.12)',
+        }}
+      >
+        <div
+          style={{
+            width: 14,
+            height: 14,
+            borderRadius: 999,
+            background: '#ffffff',
+            border: '2px solid #111111',
+          }}
+        />
+
+        <div
+          style={{
+            position: 'absolute',
+            bottom: -8,
+            left: '50%',
+            width: 16,
+            height: 16,
+            background: '#246bff',
+            borderRight: '2.5px solid #111111',
+            borderBottom: '2.5px solid #111111',
+            transform: 'translateX(-50%) rotate(45deg)',
+            borderRadius: 3,
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 4,
+          left: 6,
+          right: 6,
+          height: 13,
+          borderRadius: 999,
+          background: '#ffffff',
+          border: '1.5px solid #111111',
+          color: '#111111',
+          fontSize: 7,
+          fontWeight: 1000,
+          letterSpacing: -0.4,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          lineHeight: 1,
+        }}
+      >
+        Olamep
+      </div>
+    </div>
+  );
+}
+
 export default function MessagesPage() {
   const router = useRouter();
 
@@ -226,27 +324,38 @@ export default function MessagesPage() {
               ←
             </button>
 
-            <div>
-              <div
-                style={{
-                  fontSize: 24,
-                  fontWeight: 900,
-                  color: '#1b2537',
-                  lineHeight: 1.1,
-                }}
-              >
-                {text.title}
-              </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                minWidth: 0,
+              }}
+            >
+              <OlamepLogoIcon />
 
-              <div
-                style={{
-                  marginTop: 6,
-                  fontSize: 14,
-                  color: '#6f7782',
-                  fontWeight: 800,
-                }}
-              >
-                {unreadText}
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: 24,
+                    fontWeight: 900,
+                    color: '#1b2537',
+                    lineHeight: 1.1,
+                  }}
+                >
+                  {text.title}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 14,
+                    color: '#6f7782',
+                    fontWeight: 800,
+                  }}
+                >
+                  {unreadText}
+                </div>
               </div>
             </div>
           </div>
@@ -299,6 +408,16 @@ export default function MessagesPage() {
                 textAlign: 'center',
               }}
             >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  marginBottom: 16,
+                }}
+              >
+                <OlamepLogoIcon />
+              </div>
+
               <div
                 style={{
                   fontSize: 20,
