@@ -14,7 +14,6 @@ import {
   type AppLanguage,
 } from '../../../../services/i18n';
 import { categories } from '../../../../services/categories';
-import PhotoAdjuster from '../../../../components/common/PhotoAdjuster';
 import PaymentMethodSheet, {
   type PaymentSheetMethod,
 } from '../../../../components/payments/PaymentMethodSheet';
@@ -55,7 +54,6 @@ type DealTexts = {
   day: string;
   day2to4: string;
   days: string;
-  forPrice: string;
   enterCategory: string;
   enterSubcategory: string;
   enterDiscountTitle: string;
@@ -65,10 +63,6 @@ type DealTexts = {
   close: string;
   paymentHint: string;
   summary: string;
-  adjustPhoto: string;
-  photoEditorHint: string;
-  resetPhoto: string;
-  applyPhoto: string;
   livePreview: string;
   sponsored: string;
   openDeal: string;
@@ -78,9 +72,6 @@ type DealTexts = {
 type DealPhotoState = {
   name: string;
   preview: string;
-  scale: number;
-  offsetX: number;
-  offsetY: number;
 };
 
 const baseTexts: DealTexts = {
@@ -119,7 +110,6 @@ const baseTexts: DealTexts = {
   day: 'day',
   day2to4: 'days',
   days: 'days',
-  forPrice: 'for',
   enterCategory: 'Choose category',
   enterSubcategory: 'Choose subcategory',
   enterDiscountTitle: 'Enter deal title',
@@ -129,10 +119,6 @@ const baseTexts: DealTexts = {
   close: 'Close',
   paymentHint: 'The day deal is published only after payment confirmation.',
   summary: 'Day deal summary',
-  adjustPhoto: 'Adjust photo',
-  photoEditorHint: 'Move photo with one finger. Pinch with two fingers to zoom.',
-  resetPhoto: 'Reset',
-  applyPhoto: 'Apply',
   livePreview: 'Live preview',
   sponsored: 'Deal of the day',
   openDeal: 'Open deal',
@@ -176,7 +162,6 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     day: 'день',
     day2to4: 'дня',
     days: 'дней',
-    forPrice: 'за',
     enterCategory: 'Выберите категорию',
     enterSubcategory: 'Выберите подкатегорию',
     enterDiscountTitle: 'Введите название скидки',
@@ -186,10 +171,6 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     close: 'Закрыть',
     paymentHint: 'Скидка дня публикуется только после подтверждения оплаты.',
     summary: 'Итог скидки дня',
-    adjustPhoto: 'Настроить фото',
-    photoEditorHint: 'Двигай фото одним пальцем. Двумя пальцами увеличивай или уменьшай.',
-    resetPhoto: 'Сбросить',
-    applyPhoto: 'Применить',
     livePreview: 'Предварительный просмотр',
     sponsored: 'Скидка дня',
     openDeal: 'Открыть скидку',
@@ -231,7 +212,6 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     day: 'день',
     day2to4: 'дні',
     days: 'днів',
-    forPrice: 'за',
     enterCategory: 'Оберіть категорію',
     enterSubcategory: 'Оберіть підкатегорію',
     enterDiscountTitle: 'Введіть назву знижки',
@@ -241,10 +221,6 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     close: 'Закрити',
     paymentHint: 'Знижка дня публікується тільки після підтвердження оплати.',
     summary: 'Підсумок знижки дня',
-    adjustPhoto: 'Налаштувати фото',
-    photoEditorHint: 'Рухайте фото одним пальцем. Двома пальцями збільшуйте або зменшуйте.',
-    resetPhoto: 'Скинути',
-    applyPhoto: 'Застосувати',
     livePreview: 'Попередній перегляд',
     sponsored: 'Знижка дня',
     openDeal: 'Відкрити знижку',
@@ -286,7 +262,6 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     day: 'día',
     day2to4: 'días',
     days: 'días',
-    forPrice: 'por',
     enterCategory: 'Elige categoría',
     enterSubcategory: 'Elige subcategoría',
     enterDiscountTitle: 'Introduce el título del descuento',
@@ -296,10 +271,6 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     close: 'Cerrar',
     paymentHint: 'La oferta se publica solo después de confirmar el pago.',
     summary: 'Resumen del descuento',
-    adjustPhoto: 'Ajustar foto',
-    photoEditorHint: 'Mueve la foto con un dedo. Usa dos dedos para hacer zoom.',
-    resetPhoto: 'Restablecer',
-    applyPhoto: 'Aplicar',
     livePreview: 'Vista previa',
     sponsored: 'Descuento del día',
     openDeal: 'Abrir descuento',
@@ -341,7 +312,6 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     day: 'den',
     day2to4: 'dny',
     days: 'dní',
-    forPrice: 'za',
     enterCategory: 'Vyberte kategorii',
     enterSubcategory: 'Vyberte podkategorii',
     enterDiscountTitle: 'Zadejte název slevy',
@@ -351,10 +321,6 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     close: 'Zavřít',
     paymentHint: 'Sleva dne bude publikována až po potvrzení platby.',
     summary: 'Shrnutí slevy dne',
-    adjustPhoto: 'Upravit fotku',
-    photoEditorHint: 'Posuňte fotku jedním prstem. Dvěma prsty přibližujte nebo oddalujte.',
-    resetPhoto: 'Resetovat',
-    applyPhoto: 'Použít',
     livePreview: 'Náhled',
     sponsored: 'Sleva dne',
     openDeal: 'Otevřít slevu',
@@ -396,7 +362,6 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     day: 'Tag',
     day2to4: 'Tage',
     days: 'Tage',
-    forPrice: 'für',
     enterCategory: 'Kategorie wählen',
     enterSubcategory: 'Unterkategorie wählen',
     enterDiscountTitle: 'Rabatttitel eingeben',
@@ -406,10 +371,6 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     close: 'Schließen',
     paymentHint: 'Der Tagesrabatt wird erst nach Zahlungsbestätigung veröffentlicht.',
     summary: 'Tagesrabatt Übersicht',
-    adjustPhoto: 'Foto anpassen',
-    photoEditorHint: 'Foto mit einem Finger verschieben. Mit zwei Fingern zoomen.',
-    resetPhoto: 'Zurücksetzen',
-    applyPhoto: 'Anwenden',
     livePreview: 'Vorschau',
     sponsored: 'Tagesrabatt',
     openDeal: 'Rabatt öffnen',
@@ -451,7 +412,6 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     day: 'dzień',
     day2to4: 'dni',
     days: 'dni',
-    forPrice: 'za',
     enterCategory: 'Wybierz kategorię',
     enterSubcategory: 'Wybierz podkategorię',
     enterDiscountTitle: 'Wpisz nazwę zniżki',
@@ -461,14 +421,160 @@ const textOverrides: Partial<Record<AppLanguage, Partial<DealTexts>>> = {
     close: 'Zamknij',
     paymentHint: 'Zniżka dnia zostanie opublikowana dopiero po potwierdzeniu płatności.',
     summary: 'Podsumowanie zniżki dnia',
-    adjustPhoto: 'Dopasuj zdjęcie',
-    photoEditorHint: 'Przesuwaj zdjęcie jednym palcem. Dwoma palcami powiększaj lub zmniejszaj.',
-    resetPhoto: 'Resetuj',
-    applyPhoto: 'Zastosuj',
     livePreview: 'Podgląd',
     sponsored: 'Zniżka dnia',
     openDeal: 'Otwórz zniżkę',
     paymentRequired: 'Publikacja jest dostępna tylko po płatności.',
+  },
+  IT: {
+    pageTitle: 'Aggiungi offerta del giorno',
+    pageSubtitle: 'Crea una promozione speciale per oggi o più giorni.',
+    category: 'Categoria',
+    subcategory: 'Sottocategoria',
+    chooseCategory: 'Scegli categoria',
+    chooseSubcategory: 'Scegli sottocategoria',
+    discountTitle: 'Titolo offerta',
+    discountTitlePlaceholder: 'Inserisci titolo offerta',
+    discountPercent: 'Sconto',
+    onlyToday: 'Offerta a tempo limitato',
+    description: 'Descrizione',
+    descriptionPlaceholder: 'Inserisci descrizione...',
+    chooseDays: 'Scegli numero di giorni',
+    photo: 'Foto',
+    photoHint: 'Aggiungi 1 foto per l’offerta del giorno.',
+    addPhoto: 'Aggiungi foto',
+    replacePhoto: 'Sostituisci',
+    photoAdded: 'Foto aggiunta',
+    photoSource: 'Fonte foto',
+    gallery: 'Galleria',
+    camera: 'Camera',
+    files: 'File',
+    totalToPay: 'Totale da pagare',
+    choosePaymentMethod: 'Scegli metodo di pagamento',
+    paymentMethodsHint: 'Seleziona come vuoi pagare',
+    selected: 'Selezionato',
+    cancel: 'Annulla',
+    pay: 'Paga',
+    done: 'Pagamento confermato. L’offerta verrà pubblicata dopo il pagamento.',
+    ok: 'OK',
+    publishDay1: 'Pubblica offerta per 1 giorno',
+    publishDays: 'Pubblica offerta per {days} giorni',
+    day: 'giorno',
+    day2to4: 'giorni',
+    days: 'giorni',
+    enterCategory: 'Scegli categoria',
+    enterSubcategory: 'Scegli sottocategoria',
+    enterDiscountTitle: 'Inserisci titolo offerta',
+    enterDiscountPercent: 'Inserisci sconto',
+    enterDescription: 'Inserisci descrizione',
+    addPhotoAlert: 'Aggiungi foto',
+    close: 'Chiudi',
+    paymentHint: 'L’offerta viene pubblicata solo dopo il pagamento.',
+    summary: 'Riepilogo offerta',
+    livePreview: 'Anteprima',
+    sponsored: 'Offerta del giorno',
+    openDeal: 'Apri offerta',
+    paymentRequired: 'La pubblicazione è disponibile solo dopo il pagamento.',
+  },
+  FR: {
+    pageTitle: 'Ajouter une offre du jour',
+    pageSubtitle: 'Créez une offre spéciale pour aujourd’hui ou plusieurs jours.',
+    category: 'Catégorie',
+    subcategory: 'Sous-catégorie',
+    chooseCategory: 'Choisir catégorie',
+    chooseSubcategory: 'Choisir sous-catégorie',
+    discountTitle: 'Titre de l’offre',
+    discountTitlePlaceholder: 'Entrez le titre',
+    discountPercent: 'Réduction',
+    onlyToday: 'Offre limitée',
+    description: 'Description',
+    descriptionPlaceholder: 'Entrez la description...',
+    chooseDays: 'Choisir le nombre de jours',
+    photo: 'Photo',
+    photoHint: 'Ajoutez 1 photo pour l’offre du jour.',
+    addPhoto: 'Ajouter photo',
+    replacePhoto: 'Remplacer',
+    photoAdded: 'Photo ajoutée',
+    photoSource: 'Source photo',
+    gallery: 'Galerie',
+    camera: 'Caméra',
+    files: 'Fichiers',
+    totalToPay: 'Total à payer',
+    choosePaymentMethod: 'Choisir le paiement',
+    paymentMethodsHint: 'Sélectionnez votre mode de paiement',
+    selected: 'Sélectionné',
+    cancel: 'Annuler',
+    pay: 'Payer',
+    done: 'Paiement confirmé. L’offre sera publiée après paiement.',
+    ok: 'OK',
+    publishDay1: 'Publier l’offre pour 1 jour',
+    publishDays: 'Publier l’offre pour {days} jours',
+    day: 'jour',
+    day2to4: 'jours',
+    days: 'jours',
+    enterCategory: 'Choisir catégorie',
+    enterSubcategory: 'Choisir sous-catégorie',
+    enterDiscountTitle: 'Entrez le titre',
+    enterDiscountPercent: 'Entrez la réduction',
+    enterDescription: 'Entrez la description',
+    addPhotoAlert: 'Ajoutez une photo',
+    close: 'Fermer',
+    paymentHint: 'L’offre est publiée seulement après confirmation du paiement.',
+    summary: 'Résumé de l’offre',
+    livePreview: 'Aperçu',
+    sponsored: 'Offre du jour',
+    openDeal: 'Ouvrir l’offre',
+    paymentRequired: 'La publication est disponible uniquement après paiement.',
+  },
+  AR: {
+    pageTitle: 'إضافة عرض اليوم',
+    pageSubtitle: 'أنشئ عرضًا خاصًا لليوم أو لعدة أيام.',
+    category: 'الفئة',
+    subcategory: 'الفئة الفرعية',
+    chooseCategory: 'اختر الفئة',
+    chooseSubcategory: 'اختر الفئة الفرعية',
+    discountTitle: 'عنوان العرض',
+    discountTitlePlaceholder: 'أدخل عنوان العرض',
+    discountPercent: 'قيمة الخصم',
+    onlyToday: 'عرض محدود',
+    description: 'الوصف',
+    descriptionPlaceholder: 'أدخل الوصف...',
+    chooseDays: 'اختر عدد الأيام',
+    photo: 'صورة',
+    photoHint: 'أضف صورة واحدة لعرض اليوم.',
+    addPhoto: 'إضافة صورة',
+    replacePhoto: 'استبدال',
+    photoAdded: 'تمت إضافة الصورة',
+    photoSource: 'مصدر الصورة',
+    gallery: 'المعرض',
+    camera: 'الكاميرا',
+    files: 'الملفات',
+    totalToPay: 'الإجمالي للدفع',
+    choosePaymentMethod: 'اختر طريقة الدفع',
+    paymentMethodsHint: 'اختر كيف تريد الدفع',
+    selected: 'مختار',
+    cancel: 'إلغاء',
+    pay: 'دفع',
+    done: 'تم تأكيد الدفع. سيتم نشر العرض بعد الدفع.',
+    ok: 'موافق',
+    publishDay1: 'نشر العرض ليوم واحد',
+    publishDays: 'نشر العرض لمدة {days} أيام',
+    day: 'يوم',
+    day2to4: 'أيام',
+    days: 'أيام',
+    enterCategory: 'اختر الفئة',
+    enterSubcategory: 'اختر الفئة الفرعية',
+    enterDiscountTitle: 'أدخل عنوان العرض',
+    enterDiscountPercent: 'أدخل قيمة الخصم',
+    enterDescription: 'أدخل الوصف',
+    addPhotoAlert: 'أضف صورة',
+    close: 'إغلاق',
+    paymentHint: 'يتم نشر عرض اليوم فقط بعد تأكيد الدفع.',
+    summary: 'ملخص عرض اليوم',
+    livePreview: 'معاينة',
+    sponsored: 'عرض اليوم',
+    openDeal: 'فتح العرض',
+    paymentRequired: 'النشر متاح فقط بعد الدفع.',
   },
 };
 
@@ -496,7 +602,7 @@ function getPaymentMethods(language: AppLanguage): PaymentSheetMethod[] {
       { id: 'paypal', title: 'PayPal', subtitle: 'Быстрая оплата', ...common.paypal },
       { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Быстрая оплата', ...common.apple },
       { id: 'google-pay', title: 'Google Pay', subtitle: 'Оплата в 1 касание', ...common.google },
-      { id: 'wallet', title: 'Баланс Olamep', subtitle: 'Списать с кошелька', ...common.wallet },
+      { id: 'wallet', title: 'OlaCash', subtitle: 'Списать с кошелька', ...common.wallet },
       { id: 'crypto', title: 'Криптокошелёк', subtitle: 'USDT / USDC', ...common.crypto },
       { id: 'bank', title: 'Банковский перевод', subtitle: 'Ручной перевод', ...common.bank },
     ];
@@ -507,7 +613,7 @@ function getPaymentMethods(language: AppLanguage): PaymentSheetMethod[] {
     { id: 'paypal', title: 'PayPal', subtitle: 'Fast payment', ...common.paypal },
     { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Express checkout', ...common.apple },
     { id: 'google-pay', title: 'Google Pay', subtitle: 'One-tap payment', ...common.google },
-    { id: 'wallet', title: 'Olamep balance', subtitle: 'Charge from wallet', ...common.wallet },
+    { id: 'wallet', title: 'OlaCash', subtitle: 'Charge from wallet', ...common.wallet },
     { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', ...common.crypto },
     { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', ...common.bank },
   ];
@@ -527,21 +633,198 @@ function getDayWord(days: number, language: AppLanguage, text: DealTexts) {
 
 function translateCategoryLabel(categoryId: string, language: AppLanguage, fallback?: string) {
   const map: Record<string, Partial<Record<AppLanguage, string>>> = {
-    beauty: { EN: 'Beauty', RU: 'Красота', UA: 'Краса', ES: 'Belleza', CZ: 'Krása', DE: 'Beauty', PL: 'Uroda', IT: 'Beauty', FR: 'Beauté', AR: 'الجمال' },
-    barber: { EN: 'Barber', RU: 'Барбер', UA: 'Барбер', ES: 'Barbero', CZ: 'Barber', DE: 'Barber', PL: 'Barber', IT: 'Barber', FR: 'Barbier', AR: 'حلاقة' },
-    wellness: { EN: 'Wellness', RU: 'Велнес', UA: 'Велнес', ES: 'Bienestar', CZ: 'Wellness', DE: 'Wellness', PL: 'Wellness', IT: 'Benessere', FR: 'Bien-être', AR: 'عافية' },
-    home: { EN: 'Home', RU: 'Дом', UA: 'Дім', ES: 'Hogar', CZ: 'Domov', DE: 'Zuhause', PL: 'Dom', IT: 'Casa', FR: 'Maison', AR: 'المنزل' },
-    repairs: { EN: 'Repairs', RU: 'Ремонт', UA: 'Ремонт', ES: 'Reparaciones', CZ: 'Opravy', DE: 'Reparaturen', PL: 'Naprawy', IT: 'Riparazioni', FR: 'Réparations', AR: 'إصلاحات' },
-    tech: { EN: 'Tech', RU: 'Техника', UA: 'Техніка', ES: 'Tecnología', CZ: 'Technika', DE: 'Technik', PL: 'Technika', IT: 'Tech', FR: 'Tech', AR: 'تقنية' },
-    fashion: { EN: 'Fashion', RU: 'Мода', UA: 'Мода', ES: 'Moda', CZ: 'Móda', DE: 'Mode', PL: 'Moda', IT: 'Moda', FR: 'Mode', AR: 'موضة' },
-    pets: { EN: 'Pets', RU: 'Питомцы', UA: 'Тварини', ES: 'Mascotas', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęta', IT: 'Animali', FR: 'Animaux', AR: 'حيوانات' },
-    auto: { EN: 'Auto', RU: 'Авто', UA: 'Авто', ES: 'Auto', CZ: 'Auto', DE: 'Auto', PL: 'Auto', IT: 'Auto', FR: 'Auto', AR: 'سيارات' },
-    moving: { EN: 'Moving', RU: 'Переезд', UA: 'Переїзд', ES: 'Mudanza', CZ: 'Stěhování', DE: 'Umzug', PL: 'Przeprowadzka', IT: 'Trasloco', FR: 'Déménagement', AR: 'نقل' },
-    fitness: { EN: 'Fitness', RU: 'Фитнес', UA: 'Фітнес', ES: 'Fitness', CZ: 'Fitness', DE: 'Fitness', PL: 'Fitness', IT: 'Fitness', FR: 'Fitness', AR: 'لياقة' },
-    education: { EN: 'Education', RU: 'Обучение', UA: 'Навчання', ES: 'Educación', CZ: 'Vzdělání', DE: 'Bildung', PL: 'Edukacja', IT: 'Formazione', FR: 'Éducation', AR: 'تعليم' },
-    events: { EN: 'Events', RU: 'События', UA: 'Події', ES: 'Eventos', CZ: 'Události', DE: 'Events', PL: 'Wydarzenia', IT: 'Eventi', FR: 'Événements', AR: 'فعاليات' },
-    activities: { EN: 'Activities', RU: 'Активности', UA: 'Активності', ES: 'Actividades', CZ: 'Aktivity', DE: 'Aktivitäten', PL: 'Aktywności', IT: 'Attività', FR: 'Activités', AR: 'أنشطة' },
-    creative: { EN: 'Creative', RU: 'Креатив', UA: 'Креатив', ES: 'Creativo', CZ: 'Kreativa', DE: 'Kreativ', PL: 'Kreatywne', IT: 'Creativo', FR: 'Créatif', AR: 'إبداعي' },
+    beauty: {
+      EN: 'Beauty',
+      RU: 'Красота',
+      UA: 'Краса',
+      ES: 'Belleza',
+      CZ: 'Krása',
+      DE: 'Beauty',
+      PL: 'Uroda',
+      IT: 'Beauty',
+      FR: 'Beauté',
+      AR: 'الجمال',
+    },
+    barber: {
+      EN: 'Barber',
+      RU: 'Барбер',
+      UA: 'Барбер',
+      ES: 'Barbero',
+      CZ: 'Barber',
+      DE: 'Barber',
+      PL: 'Barber',
+      IT: 'Barber',
+      FR: 'Barbier',
+      AR: 'حلاقة',
+    },
+    wellness: {
+      EN: 'Wellness',
+      RU: 'Велнес',
+      UA: 'Велнес',
+      ES: 'Bienestar',
+      CZ: 'Wellness',
+      DE: 'Wellness',
+      PL: 'Wellness',
+      IT: 'Benessere',
+      FR: 'Bien-être',
+      AR: 'عافية',
+    },
+    home: {
+      EN: 'Home',
+      RU: 'Дом',
+      UA: 'Дім',
+      ES: 'Hogar',
+      CZ: 'Domov',
+      DE: 'Zuhause',
+      PL: 'Dom',
+      IT: 'Casa',
+      FR: 'Maison',
+      AR: 'المنزل',
+    },
+    repairs: {
+      EN: 'Repairs',
+      RU: 'Ремонт',
+      UA: 'Ремонт',
+      ES: 'Reparaciones',
+      CZ: 'Opravy',
+      DE: 'Reparaturen',
+      PL: 'Naprawy',
+      IT: 'Riparazioni',
+      FR: 'Réparations',
+      AR: 'إصلاحات',
+    },
+    tech: {
+      EN: 'Tech',
+      RU: 'Техника',
+      UA: 'Техніка',
+      ES: 'Tecnología',
+      CZ: 'Technika',
+      DE: 'Technik',
+      PL: 'Technika',
+      IT: 'Tech',
+      FR: 'Tech',
+      AR: 'تقنية',
+    },
+    fashion: {
+      EN: 'Fashion',
+      RU: 'Мода',
+      UA: 'Мода',
+      ES: 'Moda',
+      CZ: 'Móda',
+      DE: 'Mode',
+      PL: 'Moda',
+      IT: 'Moda',
+      FR: 'Mode',
+      AR: 'موضة',
+    },
+    pets: {
+      EN: 'Pets',
+      RU: 'Питомцы',
+      UA: 'Тварини',
+      ES: 'Mascotas',
+      CZ: 'Mazlíčci',
+      DE: 'Haustiere',
+      PL: 'Zwierzęta',
+      IT: 'Animali',
+      FR: 'Animaux',
+      AR: 'حيوانات',
+    },
+    auto: {
+      EN: 'Auto',
+      RU: 'Авто',
+      UA: 'Авто',
+      ES: 'Auto',
+      CZ: 'Auto',
+      DE: 'Auto',
+      PL: 'Auto',
+      IT: 'Auto',
+      FR: 'Auto',
+      AR: 'سيارات',
+    },
+    moving: {
+      EN: 'Moving',
+      RU: 'Переезд',
+      UA: 'Переїзд',
+      ES: 'Mudanza',
+      CZ: 'Stěhování',
+      DE: 'Umzug',
+      PL: 'Przeprowadzka',
+      IT: 'Trasloco',
+      FR: 'Déménagement',
+      AR: 'نقل',
+    },
+    fitness: {
+      EN: 'Fitness',
+      RU: 'Фитнес',
+      UA: 'Фітнес',
+      ES: 'Fitness',
+      CZ: 'Fitness',
+      DE: 'Fitness',
+      PL: 'Fitness',
+      IT: 'Fitness',
+      FR: 'Fitness',
+      AR: 'لياقة',
+    },
+    education: {
+      EN: 'Education',
+      RU: 'Обучение',
+      UA: 'Навчання',
+      ES: 'Educación',
+      CZ: 'Vzdělání',
+      DE: 'Bildung',
+      PL: 'Edukacja',
+      IT: 'Formazione',
+      FR: 'Éducation',
+      AR: 'تعليم',
+    },
+    events: {
+      EN: 'Events',
+      RU: 'События',
+      UA: 'Події',
+      ES: 'Eventos',
+      CZ: 'Události',
+      DE: 'Events',
+      PL: 'Wydarzenia',
+      IT: 'Eventi',
+      FR: 'Événements',
+      AR: 'فعاليات',
+    },
+    activities: {
+      EN: 'Activities',
+      RU: 'Активности',
+      UA: 'Активності',
+      ES: 'Actividades',
+      CZ: 'Aktivity',
+      DE: 'Aktivitäten',
+      PL: 'Aktywności',
+      IT: 'Attività',
+      FR: 'Activités',
+      AR: 'أنشطة',
+    },
+    creative: {
+      EN: 'Creative',
+      RU: 'Креатив',
+      UA: 'Креатив',
+      ES: 'Creativo',
+      CZ: 'Kreativa',
+      DE: 'Kreativ',
+      PL: 'Kreatywne',
+      IT: 'Creativo',
+      FR: 'Créatif',
+      AR: 'إبداعي',
+    },
+    other: {
+      EN: 'Other',
+      RU: 'Остальное',
+      UA: 'Інше',
+      ES: 'Otro',
+      CZ: 'Ostatní',
+      DE: 'Andere',
+      PL: 'Inne',
+      IT: 'Altro',
+      FR: 'Autre',
+      AR: 'أخرى',
+    },
   };
 
   return map[categoryId]?.[language] || fallback || categoryId;
@@ -549,24 +832,230 @@ function translateCategoryLabel(categoryId: string, language: AppLanguage, fallb
 
 function translateSubcategory(value: string, language: AppLanguage) {
   const dict: Record<string, Partial<Record<AppLanguage, string>>> = {
-    Hair: { RU: 'Волосы', UA: 'Волосся', ES: 'Cabello', CZ: 'Vlasy', DE: 'Haare', PL: 'Włosy', IT: 'Capelli', FR: 'Cheveux', AR: 'الشعر' },
-    Nails: { RU: 'Ногти', UA: 'Нігті', ES: 'Uñas', CZ: 'Nehty', DE: 'Nägel', PL: 'Paznokcie', IT: 'Unghie', FR: 'Ongles', AR: 'الأظافر' },
-    Makeup: { RU: 'Макияж', UA: 'Макіяж', ES: 'Maquillaje', CZ: 'Make-up', DE: 'Make-up', PL: 'Makijaż', IT: 'Make-up', FR: 'Maquillage', AR: 'مكياج' },
-    Massage: { RU: 'Массаж', UA: 'Масаж', ES: 'Masaje', CZ: 'Masáž', DE: 'Massage', PL: 'Masaż', IT: 'Massaggio', FR: 'Massage', AR: 'مساج' },
-    Cleaning: { RU: 'Уборка', UA: 'Прибирання', ES: 'Limpieza', CZ: 'Úklid', DE: 'Reinigung', PL: 'Sprzątanie', IT: 'Pulizia', FR: 'Nettoyage', AR: 'تنظيف' },
-    'Phone Repair': { RU: 'Ремонт телефона', UA: 'Ремонт телефону', ES: 'Reparación de teléfono', CZ: 'Oprava telefonu', DE: 'Handyreparatur', PL: 'Naprawa telefonu', IT: 'Riparazione telefono', FR: 'Réparation téléphone', AR: 'إصلاح الهاتف' },
-    'Computer Repair': { RU: 'Ремонт компьютера', UA: 'Ремонт компʼютера', ES: 'Reparación de ordenador', CZ: 'Oprava počítače', DE: 'Computerreparatur', PL: 'Naprawa komputera', IT: 'Riparazione computer', FR: 'Réparation ordinateur', AR: 'إصلاح الكمبيوتر' },
-    'Dog Walking': { RU: 'Выгул собак', UA: 'Вигул собак', ES: 'Paseo de perros', CZ: 'Venčení psů', DE: 'Gassi-Service', PL: 'Wyprowadzanie psów', IT: 'Passeggiata cani', FR: 'Promenade de chiens', AR: 'تمشية الكلاب' },
-    'Pet Sitting': { RU: 'Передержка питомцев', UA: 'Перетримка тварин', ES: 'Cuidado de mascotas', CZ: 'Hlídání mazlíčků', DE: 'Tiersitting', PL: 'Opieka nad zwierzętami', IT: 'Pet sitting', FR: 'Garde d’animaux', AR: 'رعاية الحيوانات' },
-    'Car Wash': { RU: 'Мойка авто', UA: 'Мийка авто', ES: 'Lavado de coche', CZ: 'Mytí auta', DE: 'Autowäsche', PL: 'Mycie auta', IT: 'Lavaggio auto', FR: 'Lavage auto', AR: 'غسيل السيارة' },
-    Courier: { RU: 'Курьер', UA: 'Курʼєр', ES: 'Mensajería', CZ: 'Kurýr', DE: 'Kurier', PL: 'Kurier', IT: 'Corriere', FR: 'Coursier', AR: 'توصيل' },
-    Yoga: { RU: 'Йога', UA: 'Йога', ES: 'Yoga', CZ: 'Jóga', DE: 'Yoga', PL: 'Joga', IT: 'Yoga', FR: 'Yoga', AR: 'يوغا' },
-    Tutoring: { RU: 'Репетиторство', UA: 'Репетиторство', ES: 'Tutoría', CZ: 'Doučování', DE: 'Nachhilfe', PL: 'Korepetycje', IT: 'Tutoraggio', FR: 'Tutorat', AR: 'دروس خصوصية' },
-    Photography: { RU: 'Фотография', UA: 'Фотографія', ES: 'Fotografía', CZ: 'Fotografie', DE: 'Fotografie', PL: 'Fotografia', IT: 'Fotografia', FR: 'Photographie', AR: 'تصوير' },
-    Other: { RU: 'Другое', UA: 'Інше', ES: 'Otro', CZ: 'Jiné', DE: 'Andere', PL: 'Inne', IT: 'Altro', FR: 'Autre', AR: 'أخرى' },
+    Hair: {
+      RU: 'Волосы',
+      UA: 'Волосся',
+      ES: 'Cabello',
+      CZ: 'Vlasy',
+      DE: 'Haare',
+      PL: 'Włosy',
+      IT: 'Capelli',
+      FR: 'Cheveux',
+      AR: 'الشعر',
+    },
+    Nails: {
+      RU: 'Ногти',
+      UA: 'Нігті',
+      ES: 'Uñas',
+      CZ: 'Nehty',
+      DE: 'Nägel',
+      PL: 'Paznokcie',
+      IT: 'Unghie',
+      FR: 'Ongles',
+      AR: 'الأظافر',
+    },
+    Makeup: {
+      RU: 'Макияж',
+      UA: 'Макіяж',
+      ES: 'Maquillaje',
+      CZ: 'Make-up',
+      DE: 'Make-up',
+      PL: 'Makijaż',
+      IT: 'Make-up',
+      FR: 'Maquillage',
+      AR: 'مكياج',
+    },
+    Massage: {
+      RU: 'Массаж',
+      UA: 'Масаж',
+      ES: 'Masaje',
+      CZ: 'Masáž',
+      DE: 'Massage',
+      PL: 'Masaż',
+      IT: 'Massaggio',
+      FR: 'Massage',
+      AR: 'مساج',
+    },
+    Cleaning: {
+      RU: 'Уборка',
+      UA: 'Прибирання',
+      ES: 'Limpieza',
+      CZ: 'Úklid',
+      DE: 'Reinigung',
+      PL: 'Sprzątanie',
+      IT: 'Pulizia',
+      FR: 'Nettoyage',
+      AR: 'تنظيف',
+    },
+    'Phone Repair': {
+      RU: 'Ремонт телефона',
+      UA: 'Ремонт телефону',
+      ES: 'Reparación de teléfono',
+      CZ: 'Oprava telefonu',
+      DE: 'Handyreparatur',
+      PL: 'Naprawa telefonu',
+      IT: 'Riparazione telefono',
+      FR: 'Réparation téléphone',
+      AR: 'إصلاح الهاتف',
+    },
+    'Computer Repair': {
+      RU: 'Ремонт компьютера',
+      UA: 'Ремонт компʼютера',
+      ES: 'Reparación de ordenador',
+      CZ: 'Oprava počítače',
+      DE: 'Computerreparatur',
+      PL: 'Naprawa komputera',
+      IT: 'Riparazione computer',
+      FR: 'Réparation ordinateur',
+      AR: 'إصلاح الكمبيوتر',
+    },
+    'Dog Walking': {
+      RU: 'Выгул собак',
+      UA: 'Вигул собак',
+      ES: 'Paseo de perros',
+      CZ: 'Venčení psů',
+      DE: 'Gassi-Service',
+      PL: 'Wyprowadzanie psów',
+      IT: 'Passeggiata cani',
+      FR: 'Promenade de chiens',
+      AR: 'تمشية الكلاب',
+    },
+    'Pet Sitting': {
+      RU: 'Передержка питомцев',
+      UA: 'Перетримка тварин',
+      ES: 'Cuidado de mascotas',
+      CZ: 'Hlídání mazlíčků',
+      DE: 'Tiersitting',
+      PL: 'Opieka nad zwierzętami',
+      IT: 'Pet sitting',
+      FR: 'Garde d’animaux',
+      AR: 'رعاية الحيوانات',
+    },
+    'Car Wash': {
+      RU: 'Мойка авто',
+      UA: 'Мийка авто',
+      ES: 'Lavado de coche',
+      CZ: 'Mytí auta',
+      DE: 'Autowäsche',
+      PL: 'Mycie auta',
+      IT: 'Lavaggio auto',
+      FR: 'Lavage auto',
+      AR: 'غسيل السيارة',
+    },
+    Courier: {
+      RU: 'Курьер',
+      UA: 'Курʼєр',
+      ES: 'Mensajería',
+      CZ: 'Kurýr',
+      DE: 'Kurier',
+      PL: 'Kurier',
+      IT: 'Corriere',
+      FR: 'Coursier',
+      AR: 'توصيل',
+    },
+    Yoga: {
+      RU: 'Йога',
+      UA: 'Йога',
+      ES: 'Yoga',
+      CZ: 'Jóga',
+      DE: 'Yoga',
+      PL: 'Joga',
+      IT: 'Yoga',
+      FR: 'Yoga',
+      AR: 'يوغا',
+    },
+    Tutoring: {
+      RU: 'Репетиторство',
+      UA: 'Репетиторство',
+      ES: 'Tutoría',
+      CZ: 'Doučování',
+      DE: 'Nachhilfe',
+      PL: 'Korepetycje',
+      IT: 'Tutoraggio',
+      FR: 'Tutorat',
+      AR: 'دروس خصوصية',
+    },
+    Photography: {
+      RU: 'Фотография',
+      UA: 'Фотографія',
+      ES: 'Fotografía',
+      CZ: 'Fotografie',
+      DE: 'Fotografie',
+      PL: 'Fotografia',
+      IT: 'Fotografia',
+      FR: 'Photographie',
+      AR: 'تصوير',
+    },
+    Tattoo: {
+      RU: 'Тату',
+      UA: 'Тату',
+      ES: 'Tatuaje',
+      CZ: 'Tetování',
+      DE: 'Tattoo',
+      PL: 'Tatuaż',
+      IT: 'Tatuaggio',
+      FR: 'Tatouage',
+      AR: 'وشم',
+    },
+    Piercing: {
+      RU: 'Пирсинг',
+      UA: 'Пірсинг',
+      ES: 'Piercing',
+      CZ: 'Piercing',
+      DE: 'Piercing',
+      PL: 'Piercing',
+      IT: 'Piercing',
+      FR: 'Piercing',
+      AR: 'ثقب',
+    },
+    'Tattoo removal': {
+      RU: 'Удаление тату',
+      UA: 'Видалення тату',
+      ES: 'Eliminación de tatuajes',
+      CZ: 'Odstranění tetování',
+      DE: 'Tattooentfernung',
+      PL: 'Usuwanie tatuażu',
+      IT: 'Rimozione tatuaggi',
+      FR: 'Détatouage',
+      AR: 'إزالة الوشم',
+    },
+    Other: {
+      RU: 'Остальное',
+      UA: 'Інше',
+      ES: 'Otro',
+      CZ: 'Ostatní',
+      DE: 'Andere',
+      PL: 'Inne',
+      IT: 'Altro',
+      FR: 'Autre',
+      AR: 'أخرى',
+    },
   };
 
   return dict[value]?.[language] || value;
+}
+
+function DealPhotoPreview({
+  src,
+  alt,
+  height,
+}: {
+  src: string;
+  alt: string;
+  height: number;
+}) {
+  return (
+    <img
+      src={src}
+      alt={alt}
+      style={{
+        width: '100%',
+        height,
+        objectFit: 'cover',
+        display: 'block',
+      }}
+    />
+  );
 }
 
 export default function NewDealPage() {
@@ -647,9 +1136,6 @@ export default function NewDealPage() {
     setPhoto({
       name: file.name,
       preview,
-      scale: 1,
-      offsetX: 0,
-      offsetY: 0,
     });
 
     event.target.value = '';
@@ -662,36 +1148,6 @@ export default function NewDealPage() {
     }
 
     setPhoto(null);
-  };
-
-  const updatePhotoTransform = (next: {
-    scale: number;
-    offsetX: number;
-    offsetY: number;
-  }) => {
-    setPhoto((prev) =>
-      prev
-        ? {
-            ...prev,
-            scale: next.scale,
-            offsetX: next.offsetX,
-            offsetY: next.offsetY,
-          }
-        : prev
-    );
-  };
-
-  const resetPhotoTransform = () => {
-    setPhoto((prev) =>
-      prev
-        ? {
-            ...prev,
-            scale: 1,
-            offsetX: 0,
-            offsetY: 0,
-          }
-        : prev
-    );
   };
 
   const handleOpenPayment = () => {
@@ -1180,13 +1636,10 @@ export default function NewDealPage() {
                     background: '#f4f1ea',
                   }}
                 >
-                  <PhotoAdjuster
+                  <DealPhotoPreview
                     src={photo.preview}
                     alt={photo.name || 'deal-photo'}
-                    scale={photo.scale}
-                    offsetX={photo.offsetX}
-                    offsetY={photo.offsetY}
-                    onChange={updatePhotoTransform}
+                    height={220}
                   />
 
                   <div
@@ -1199,25 +1652,6 @@ export default function NewDealPage() {
                       zIndex: 5,
                     }}
                   >
-                    <button
-                      type="button"
-                      onClick={resetPhotoTransform}
-                      style={{
-                        minWidth: 38,
-                        height: 38,
-                        borderRadius: 999,
-                        border: '2px solid #111111',
-                        background: '#ffffff',
-                        color: '#17130f',
-                        fontSize: 18,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                        padding: '0 10px',
-                      }}
-                    >
-                      ↺
-                    </button>
-
                     <button
                       type="button"
                       onClick={handleRemovePhoto}
@@ -1293,20 +1727,6 @@ export default function NewDealPage() {
                   >
                     {text.replacePhoto}
                   </button>
-                </div>
-
-                <div
-                  style={{
-                    borderTop: '1.5px solid #111111',
-                    padding: '10px 14px',
-                    fontSize: 13,
-                    fontWeight: 800,
-                    lineHeight: 1.35,
-                    color: '#6f675f',
-                    background: '#fffefa',
-                  }}
-                >
-                  {text.photoEditorHint}
                 </div>
               </div>
             )}
@@ -1501,13 +1921,10 @@ export default function NewDealPage() {
                 }}
               >
                 {photo ? (
-                  <PhotoAdjuster
+                  <DealPhotoPreview
                     src={photo.preview}
                     alt={photo.name || 'deal-preview'}
-                    scale={photo.scale}
-                    offsetX={photo.offsetX}
-                    offsetY={photo.offsetY}
-                    onChange={updatePhotoTransform}
+                    height={280}
                   />
                 ) : (
                   <div
@@ -1686,14 +2103,22 @@ export default function NewDealPage() {
                 color: '#17130f',
               }}
             >
-              <div>{text.category}: {currentCategory?.localizedLabel || '—'}</div>
+              <div>
+                {text.category}: {currentCategory?.localizedLabel || '—'}
+              </div>
               <div>
                 {text.subcategory}:{' '}
                 {subcategoryOptions.find((item) => item.value === subcategory)?.label || '—'}
               </div>
-              <div>{text.discountPercent}: {discountPercent ? `${discountPercent}%` : '—'}</div>
-              <div>{text.chooseDays}: {days}</div>
-              <div>{text.totalToPay}: £{totalPrice}</div>
+              <div>
+                {text.discountPercent}: {discountPercent ? `${discountPercent}%` : '—'}
+              </div>
+              <div>
+                {text.chooseDays}: {days}
+              </div>
+              <div>
+                {text.totalToPay}: £{totalPrice}
+              </div>
             </div>
 
             <div
