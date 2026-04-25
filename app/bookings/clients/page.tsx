@@ -12,439 +12,890 @@ import {
   getBookings,
   subscribeToBookingsStore,
   updateBookingStatus,
+  patchBooking,
+  canShowDirectContacts,
+  getProtectedBookingContact,
   type BookingItem,
 } from '../../services/bookingsStore';
 
-type ClientBookingStatus =
-  | 'request'
-  | 'confirmed'
-  | 'completed'
-  | 'cancelled'
-  | 'quick'
-  | 'blocked';
+type ProviderView = 'today' | 'tomorrow' | 'requests' | 'calendar' | 'history';
+type SlotStatus = 'free' | 'confirmed' | 'completed' | 'cancelled' | 'blocked' | 'pending';
+type ContactMode = 'full' | 'quick';
 
-type CalendarDayState = 'free' | 'full' | 'partial' | 'off' | 'request';
-
-type ClientBooking = {
+type ProviderSlot = {
   id: string;
-  clientName: string;
-  clientAvatar: string;
-  clientPhone: string;
-  clientEmail: string;
-  serviceName: string;
-  date: string;
-  day: number;
   time: string;
   duration: string;
+  clientName: string;
+  clientAvatar?: string;
+  serviceName: string;
   price: number;
-  status: ClientBookingStatus;
-  bookingType: 'normal' | 'quick';
+  status: SlotStatus;
   paymentMethod: 'OlaCash' | 'Card' | 'Cash' | 'Crypto' | 'QR';
-  holdClient: number;
-  holdMaster: number;
-  note: string;
-  registeredClient: boolean;
+  notes: string;
+  contactMode: ContactMode;
   sourceBooking?: BookingItem;
+  contactPhone?: string;
+  contactEmail?: string;
+  contactWhatsapp?: string;
+  contactTelegram?: string;
+  contactInstagram?: string;
 };
 
-const baseTexts = {
-  title: 'My clients',
-  subtitle: 'Bookings, client requests, calendar and fast payments',
-  today: 'Today',
-  requests: 'Requests',
-  calendar: 'Calendar',
-  history: 'History',
-  search: 'Search client, service, amount',
-  activeToday: 'Active today',
-  confirmed: 'Confirmed',
-  quickBooking: 'Quick booking',
-  request: 'Request',
-  completed: 'Completed',
-  cancelled: 'Cancelled',
-  free: 'Free',
-  full: 'Full',
-  partial: 'Partial',
-  off: 'Off',
-  clientCard: 'Client card',
-  service: 'Service',
-  time: 'Time',
-  price: 'Price',
-  payment: 'Payment',
-  holds: 'Holds',
-  cancel: 'Cancel',
-  close: 'Close',
-  empty: 'No client bookings for this day',
-  home: 'Home',
-  tapToEdit: 'Tap any row to edit',
-  move: 'Move',
-  moveUp: 'Move up',
-  moveDown: 'Move down',
-  contact: 'Contact',
-  phone: 'Phone',
-  email: 'E-mail',
-  message: 'Message',
-  olamepManager: 'Olamep manager',
-  managerOnly:
-    'Quick booking without registration. Communication is available only through the internal Olamep manager.',
-  registeredContact: 'Registered client. Available contact channels are shown below.',
-  editValue: 'Edit value',
-  save: 'Save',
-  selectTime: 'Select time',
-  cancelBooking: 'Cancel booking',
-  confirmRequest: 'Confirm request',
-  markComplete: 'Mark complete',
-};
-
-const textOverrides: Partial<Record<AppLanguage, Partial<typeof baseTexts>>> = {
+const pageTexts: Record<
+  AppLanguage,
+  {
+    title: string;
+    subtitle: string;
+    today: string;
+    tomorrow: string;
+    requests: string;
+    calendar: string;
+    history: string;
+    activeToday: string;
+    requestsCount: string;
+    search: string;
+    dayTitle: string;
+    daySubtitle: string;
+    time: string;
+    clientProcedure: string;
+    price: string;
+    notes: string;
+    freeSlot: string;
+    unavailable: string;
+    addBooking: string;
+    closeTime: string;
+    clientCard: string;
+    procedure: string;
+    status: string;
+    contacts: string;
+    fullContactInfo: string;
+    quickContactInfo: string;
+    call: string;
+    whatsapp: string;
+    internalChat: string;
+    message: string;
+    editNotes: string;
+    save: string;
+    close: string;
+    changeTime: string;
+    hour: string;
+    minutes: string;
+    newTime: string;
+    synced: string;
+    cancel: string;
+    confirmed: string;
+    completed: string;
+    cancelled: string;
+    pending: string;
+    blocked: string;
+    free: string;
+    home: string;
+  }
+> = {
+  EN: {
+    title: 'My clients',
+    subtitle: 'Bookings, client requests, calendar and fast payments',
+    today: 'Today',
+    tomorrow: 'Tomorrow',
+    requests: 'Requests',
+    calendar: 'Calendar',
+    history: 'History',
+    activeToday: 'Active today',
+    requestsCount: 'Requests',
+    search: 'Search client, service, amount',
+    dayTitle: 'Friday, 18 April 2026',
+    daySubtitle: 'Booking management',
+    time: 'Time',
+    clientProcedure: 'Client / Procedure',
+    price: 'Price',
+    notes: 'Notes',
+    freeSlot: 'Free slot',
+    unavailable: 'Unavailable',
+    addBooking: 'Add booking',
+    closeTime: 'Close time',
+    clientCard: 'Client card',
+    procedure: 'Procedure',
+    status: 'Status',
+    contacts: 'Contacts',
+    fullContactInfo:
+      'Registered client confirmed by both sides. All client contact methods are available.',
+    quickContactInfo:
+      'Quick booking. Only internal Olamep chat is available until full registration.',
+    call: 'Call',
+    whatsapp: 'WhatsApp',
+    internalChat: 'Message in chat',
+    message: 'Message',
+    editNotes: 'Edit notes',
+    save: 'Save',
+    close: 'Close',
+    changeTime: 'Change time',
+    hour: 'Hour',
+    minutes: 'Minutes',
+    newTime: 'New time',
+    synced: 'Free · synced',
+    cancel: 'Cancel',
+    confirmed: 'Confirmed',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    pending: 'Pending',
+    blocked: 'Blocked',
+    free: 'Free',
+    home: 'Home',
+  },
   RU: {
     title: 'Мои клиенты',
-    subtitle: 'Брони, запросы клиентов, календарь и быстрые платежи',
+    subtitle: 'Брони у меня, запросы, календарь и быстрые расчёты',
     today: 'Сегодня',
+    tomorrow: 'Завтра',
     requests: 'Запросы',
     calendar: 'Календарь',
     history: 'История',
-    search: 'Поиск клиент, услуга, сумма',
     activeToday: 'Активно сегодня',
-    confirmed: 'Подтверждено',
-    quickBooking: 'Быстрая бронь',
-    request: 'Запрос',
-    completed: 'Завершено',
-    cancelled: 'Отменено',
-    free: 'Свободно',
-    full: 'Полная бронь',
-    partial: 'Частично',
-    off: 'Нерабочий',
-    clientCard: 'Карточка клиента',
-    service: 'Услуга',
+    requestsCount: 'Запросы',
+    search: 'Поиск: клиент, услуга, сумма',
+    dayTitle: 'Пятница, 18 апреля 2026',
+    daySubtitle: 'Управление бронями',
     time: 'Время',
-    price: 'Сумма',
-    payment: 'Оплата',
-    holds: 'Заморозка',
-    cancel: 'Отмена',
-    close: 'Закрыть',
-    empty: 'На этот день нет записей клиентов',
-    home: 'Главная',
-    tapToEdit: 'Нажмите на строку, чтобы изменить',
-    move: 'Переместить',
-    moveUp: 'Выше',
-    moveDown: 'Ниже',
-    contact: 'Связь',
-    phone: 'Телефон',
-    email: 'E-mail',
-    message: 'Написать',
-    olamepManager: 'Менеджер Olamep',
-    managerOnly:
-      'Быстрая бронь без регистрации. Связь доступна только через внутреннего менеджера Olamep.',
-    registeredContact: 'Зарегистрированный клиент. Доступные способы связи ниже.',
-    editValue: 'Изменить значение',
+    clientProcedure: 'Клиент / Процедура',
+    price: 'Цена',
+    notes: 'Пометки',
+    freeSlot: 'Свободное окно',
+    unavailable: 'Недоступно',
+    addBooking: 'Добавить бронь',
+    closeTime: 'Закрыть время',
+    clientCard: 'Карта клиента',
+    procedure: 'Процедура',
+    status: 'Статус',
+    contacts: 'Контакты',
+    fullContactInfo:
+      'Если бронь оформлена зарегистрированным клиентом и подтверждена обеими сторонами, мастеру доступны все способы связи.',
+    quickContactInfo:
+      'Быстрая бронь. Доступен только внутренний чат Olamep до полной регистрации клиента.',
+    call: 'Позвонить',
+    whatsapp: 'WhatsApp',
+    internalChat: 'Написать в чат',
+    message: 'Сообщение',
+    editNotes: 'Изменить пометки',
     save: 'Сохранить',
-    selectTime: 'Выбрать время',
-    cancelBooking: 'Отменить бронь',
-    confirmRequest: 'Подтвердить запрос',
-    markComplete: 'Завершить',
+    close: 'Закрыть',
+    changeTime: 'Изменить время',
+    hour: 'Час',
+    minutes: 'Минуты',
+    newTime: 'Новое время',
+    synced: 'Свободно · синхронизировано',
+    cancel: 'Отмена',
+    confirmed: 'Подтверждено',
+    completed: 'Готово',
+    cancelled: 'Отменено',
+    pending: 'Ожидает',
+    blocked: 'Недоступно',
+    free: 'Свободно',
+    home: 'Главная',
   },
   UA: {
     title: 'Мої клієнти',
-    subtitle: 'Броні, запити клієнтів, календар і швидкі платежі',
+    subtitle: 'Броні у мене, запити, календар і швидкі розрахунки',
     today: 'Сьогодні',
+    tomorrow: 'Завтра',
     requests: 'Запити',
     calendar: 'Календар',
     history: 'Історія',
-    search: 'Пошук клієнт, послуга, сума',
     activeToday: 'Активно сьогодні',
+    requestsCount: 'Запити',
+    search: 'Пошук: клієнт, послуга, сума',
+    dayTitle: 'Пʼятниця, 18 квітня 2026',
+    daySubtitle: 'Керування бронями',
+    time: 'Час',
+    clientProcedure: 'Клієнт / Процедура',
+    price: 'Ціна',
+    notes: 'Нотатки',
+    freeSlot: 'Вільне вікно',
+    unavailable: 'Недоступно',
+    addBooking: 'Додати бронь',
+    closeTime: 'Закрити час',
+    clientCard: 'Карта клієнта',
+    procedure: 'Процедура',
+    status: 'Статус',
+    contacts: 'Контакти',
+    fullContactInfo:
+      'Якщо бронь оформлена зареєстрованим клієнтом і підтверджена обома сторонами, майстру доступні всі способи звʼязку.',
+    quickContactInfo:
+      'Швидка бронь. Доступний тільки внутрішній чат Olamep до повної реєстрації клієнта.',
+    call: 'Подзвонити',
+    whatsapp: 'WhatsApp',
+    internalChat: 'Написати в чат',
+    message: 'Повідомлення',
+    editNotes: 'Змінити нотатки',
+    save: 'Зберегти',
+    close: 'Закрити',
+    changeTime: 'Змінити час',
+    hour: 'Година',
+    minutes: 'Хвилини',
+    newTime: 'Новий час',
+    synced: 'Вільно · синхронізовано',
+    cancel: 'Скасувати',
     confirmed: 'Підтверджено',
-    quickBooking: 'Швидка бронь',
-    request: 'Запит',
-    completed: 'Завершено',
+    completed: 'Готово',
     cancelled: 'Скасовано',
-    price: 'Сума',
-    message: 'Написати',
-    moveUp: 'Вище',
-    moveDown: 'Нижче',
-    managerOnly:
-      'Швидка бронь без реєстрації. Зв’язок доступний тільки через внутрішнього менеджера Olamep.',
+    pending: 'Очікує',
+    blocked: 'Недоступно',
+    free: 'Вільно',
+    home: 'Головна',
   },
   ES: {
     title: 'Mis clientes',
-    subtitle: 'Reservas, solicitudes, calendario y pagos rápidos',
+    subtitle: 'Reservas recibidas, solicitudes, calendario y pagos rápidos',
     today: 'Hoy',
+    tomorrow: 'Mañana',
     requests: 'Solicitudes',
     calendar: 'Calendario',
     history: 'Historial',
     activeToday: 'Activo hoy',
+    requestsCount: 'Solicitudes',
+    search: 'Buscar cliente, servicio, importe',
+    dayTitle: 'Viernes, 18 abril 2026',
+    daySubtitle: 'Gestión de reservas',
+    time: 'Hora',
+    clientProcedure: 'Cliente / Procedimiento',
+    price: 'Precio',
+    notes: 'Notas',
+    freeSlot: 'Espacio libre',
+    unavailable: 'No disponible',
+    addBooking: 'Añadir reserva',
+    closeTime: 'Bloquear hora',
+    clientCard: 'Ficha del cliente',
+    procedure: 'Procedimiento',
+    status: 'Estado',
+    contacts: 'Contactos',
+    fullContactInfo:
+      'Cliente registrado y confirmado por ambas partes. Todos los contactos están disponibles.',
+    quickContactInfo:
+      'Reserva rápida. Solo está disponible el chat interno de Olamep hasta el registro completo.',
+    call: 'Llamar',
+    whatsapp: 'WhatsApp',
+    internalChat: 'Escribir en chat',
+    message: 'Mensaje',
+    editNotes: 'Editar notas',
+    save: 'Guardar',
+    close: 'Cerrar',
+    changeTime: 'Cambiar hora',
+    hour: 'Hora',
+    minutes: 'Minutos',
+    newTime: 'Nueva hora',
+    synced: 'Libre · sincronizado',
+    cancel: 'Cancelar',
     confirmed: 'Confirmado',
-    quickBooking: 'Reserva rápida',
-    request: 'Solicitud',
     completed: 'Completado',
     cancelled: 'Cancelado',
-    price: 'Importe',
-    message: 'Mensaje',
+    pending: 'Pendiente',
+    blocked: 'Bloqueado',
+    free: 'Libre',
+    home: 'Inicio',
   },
   CZ: {
     title: 'Moji klienti',
-    subtitle: 'Rezervace, požadavky, kalendář a rychlé platby',
+    subtitle: 'Rezervace u mě, požadavky, kalendář a rychlé platby',
     today: 'Dnes',
+    tomorrow: 'Zítra',
     requests: 'Požadavky',
     calendar: 'Kalendář',
     history: 'Historie',
     activeToday: 'Aktivní dnes',
+    requestsCount: 'Požadavky',
+    search: 'Hledat klienta, službu, částku',
+    dayTitle: 'Pátek, 18. dubna 2026',
+    daySubtitle: 'Správa rezervací',
+    time: 'Čas',
+    clientProcedure: 'Klient / Procedura',
+    price: 'Cena',
+    notes: 'Poznámky',
+    freeSlot: 'Volné okno',
+    unavailable: 'Nedostupné',
+    addBooking: 'Přidat rezervaci',
+    closeTime: 'Zavřít čas',
+    clientCard: 'Karta klienta',
+    procedure: 'Procedura',
+    status: 'Status',
+    contacts: 'Kontakty',
+    fullContactInfo:
+      'Registrovaný klient potvrzen oběma stranami. Všechny kontakty jsou dostupné.',
+    quickContactInfo:
+      'Rychlá rezervace. Dostupný je pouze interní chat Olamep do plné registrace klienta.',
+    call: 'Zavolat',
+    whatsapp: 'WhatsApp',
+    internalChat: 'Napsat v chatu',
+    message: 'Zpráva',
+    editNotes: 'Upravit poznámky',
+    save: 'Uložit',
+    close: 'Zavřít',
+    changeTime: 'Změnit čas',
+    hour: 'Hodina',
+    minutes: 'Minuty',
+    newTime: 'Nový čas',
+    synced: 'Volné · synchronizováno',
+    cancel: 'Zrušit',
     confirmed: 'Potvrzeno',
-    quickBooking: 'Rychlá rezervace',
-    request: 'Požadavek',
-    completed: 'Dokončeno',
+    completed: 'Hotovo',
     cancelled: 'Zrušeno',
-    price: 'Částka',
-    message: 'Napsat',
+    pending: 'Čeká',
+    blocked: 'Nedostupné',
+    free: 'Volno',
+    home: 'Domů',
   },
   DE: {
     title: 'Meine Kunden',
-    subtitle: 'Buchungen, Anfragen, Kalender und Schnellzahlungen',
+    subtitle: 'Buchungen bei mir, Anfragen, Kalender und Schnellzahlungen',
     today: 'Heute',
+    tomorrow: 'Morgen',
     requests: 'Anfragen',
     calendar: 'Kalender',
     history: 'Verlauf',
     activeToday: 'Heute aktiv',
+    requestsCount: 'Anfragen',
+    search: 'Kunde, Service, Betrag suchen',
+    dayTitle: 'Freitag, 18. April 2026',
+    daySubtitle: 'Buchungsverwaltung',
+    time: 'Zeit',
+    clientProcedure: 'Kunde / Behandlung',
+    price: 'Preis',
+    notes: 'Notizen',
+    freeSlot: 'Freies Fenster',
+    unavailable: 'Nicht verfügbar',
+    addBooking: 'Buchung hinzufügen',
+    closeTime: 'Zeit sperren',
+    clientCard: 'Kundenkarte',
+    procedure: 'Behandlung',
+    status: 'Status',
+    contacts: 'Kontakte',
+    fullContactInfo:
+      'Registrierter Kunde, beidseitig bestätigt. Alle Kontaktwege sind verfügbar.',
+    quickContactInfo:
+      'Schnellbuchung. Nur interner Olamep-Chat ist bis zur vollständigen Registrierung verfügbar.',
+    call: 'Anrufen',
+    whatsapp: 'WhatsApp',
+    internalChat: 'Im Chat schreiben',
+    message: 'Nachricht',
+    editNotes: 'Notizen bearbeiten',
+    save: 'Speichern',
+    close: 'Schließen',
+    changeTime: 'Zeit ändern',
+    hour: 'Stunde',
+    minutes: 'Minuten',
+    newTime: 'Neue Zeit',
+    synced: 'Frei · synchronisiert',
+    cancel: 'Abbrechen',
     confirmed: 'Bestätigt',
-    quickBooking: 'Schnellbuchung',
-    request: 'Anfrage',
-    completed: 'Abgeschlossen',
+    completed: 'Fertig',
     cancelled: 'Storniert',
-    price: 'Betrag',
-    message: 'Schreiben',
+    pending: 'Wartet',
+    blocked: 'Gesperrt',
+    free: 'Frei',
+    home: 'Home',
   },
   IT: {
     title: 'I miei clienti',
+    subtitle: 'Prenotazioni ricevute, richieste, calendario e pagamenti rapidi',
     today: 'Oggi',
+    tomorrow: 'Domani',
     requests: 'Richieste',
     calendar: 'Calendario',
     history: 'Storico',
-    message: 'Scrivi',
+    activeToday: 'Attivo oggi',
+    requestsCount: 'Richieste',
+    search: 'Cerca cliente, servizio, importo',
+    dayTitle: 'Venerdì, 18 aprile 2026',
+    daySubtitle: 'Gestione prenotazioni',
+    time: 'Ora',
+    clientProcedure: 'Cliente / Procedura',
+    price: 'Prezzo',
+    notes: 'Note',
+    freeSlot: 'Slot libero',
+    unavailable: 'Non disponibile',
+    addBooking: 'Aggiungi prenotazione',
+    closeTime: 'Chiudi orario',
+    clientCard: 'Scheda cliente',
+    procedure: 'Procedura',
+    status: 'Stato',
+    contacts: 'Contatti',
+    fullContactInfo:
+      'Cliente registrato e confermato da entrambe le parti. Tutti i contatti sono disponibili.',
+    quickContactInfo:
+      'Prenotazione rapida. Solo chat interna Olamep fino alla registrazione completa.',
+    call: 'Chiama',
+    whatsapp: 'WhatsApp',
+    internalChat: 'Scrivi in chat',
+    message: 'Messaggio',
+    editNotes: 'Modifica note',
+    save: 'Salva',
+    close: 'Chiudi',
+    changeTime: 'Cambia ora',
+    hour: 'Ora',
+    minutes: 'Minuti',
+    newTime: 'Nuova ora',
+    synced: 'Libero · sincronizzato',
+    cancel: 'Annulla',
+    confirmed: 'Confermato',
+    completed: 'Fatto',
+    cancelled: 'Annullato',
+    pending: 'In attesa',
+    blocked: 'Bloccato',
+    free: 'Libero',
+    home: 'Home',
   },
   FR: {
     title: 'Mes clients',
+    subtitle: 'Réservations reçues, demandes, calendrier et paiements rapides',
     today: 'Aujourd’hui',
+    tomorrow: 'Demain',
     requests: 'Demandes',
     calendar: 'Calendrier',
     history: 'Historique',
-    message: 'Écrire',
+    activeToday: 'Actif aujourd’hui',
+    requestsCount: 'Demandes',
+    search: 'Rechercher client, service, montant',
+    dayTitle: 'Vendredi, 18 avril 2026',
+    daySubtitle: 'Gestion des réservations',
+    time: 'Heure',
+    clientProcedure: 'Client / Procédure',
+    price: 'Prix',
+    notes: 'Notes',
+    freeSlot: 'Créneau libre',
+    unavailable: 'Indisponible',
+    addBooking: 'Ajouter réservation',
+    closeTime: 'Fermer le créneau',
+    clientCard: 'Fiche client',
+    procedure: 'Procédure',
+    status: 'Statut',
+    contacts: 'Contacts',
+    fullContactInfo:
+      'Client enregistré et confirmé par les deux parties. Tous les contacts sont disponibles.',
+    quickContactInfo:
+      'Réservation rapide. Seul le chat interne Olamep est disponible avant inscription complète.',
+    call: 'Appeler',
+    whatsapp: 'WhatsApp',
+    internalChat: 'Écrire dans le chat',
+    message: 'Message',
+    editNotes: 'Modifier notes',
+    save: 'Enregistrer',
+    close: 'Fermer',
+    changeTime: 'Modifier l’heure',
+    hour: 'Heure',
+    minutes: 'Minutes',
+    newTime: 'Nouvelle heure',
+    synced: 'Libre · synchronisé',
+    cancel: 'Annuler',
+    confirmed: 'Confirmé',
+    completed: 'Terminé',
+    cancelled: 'Annulé',
+    pending: 'En attente',
+    blocked: 'Bloqué',
+    free: 'Libre',
+    home: 'Accueil',
   },
   AR: {
     title: 'عملائي',
+    subtitle: 'الحجوزات لدي والطلبات والتقويم والمدفوعات السريعة',
     today: 'اليوم',
+    tomorrow: 'غدًا',
     requests: 'الطلبات',
     calendar: 'التقويم',
     history: 'السجل',
+    activeToday: 'نشط اليوم',
+    requestsCount: 'الطلبات',
+    search: 'بحث العميل أو الخدمة أو المبلغ',
+    dayTitle: 'الجمعة، 18 أبريل 2026',
+    daySubtitle: 'إدارة الحجوزات',
+    time: 'الوقت',
+    clientProcedure: 'العميل / الخدمة',
+    price: 'السعر',
+    notes: 'ملاحظات',
+    freeSlot: 'وقت متاح',
+    unavailable: 'غير متاح',
+    addBooking: 'إضافة حجز',
+    closeTime: 'إغلاق الوقت',
+    clientCard: 'بطاقة العميل',
+    procedure: 'الخدمة',
+    status: 'الحالة',
+    contacts: 'جهات الاتصال',
+    fullContactInfo:
+      'عميل مسجل ومؤكد من الطرفين. كل طرق التواصل متاحة.',
+    quickContactInfo:
+      'حجز سريع. متاح فقط شات Olamep الداخلي حتى التسجيل الكامل.',
+    call: 'اتصال',
+    whatsapp: 'WhatsApp',
+    internalChat: 'رسالة في الشات',
     message: 'رسالة',
+    editNotes: 'تعديل الملاحظات',
+    save: 'حفظ',
+    close: 'إغلاق',
+    changeTime: 'تغيير الوقت',
+    hour: 'الساعة',
+    minutes: 'الدقائق',
+    newTime: 'وقت جديد',
+    synced: 'متاح · متزامن',
+    cancel: 'إلغاء',
+    confirmed: 'مؤكد',
+    completed: 'تم',
+    cancelled: 'ملغى',
+    pending: 'قيد الانتظار',
+    blocked: 'غير متاح',
+    free: 'متاح',
+    home: 'الرئيسية',
   },
   PL: {
     title: 'Moi klienci',
+    subtitle: 'Rezerwacje u mnie, zapytania, kalendarz i szybkie płatności',
     today: 'Dzisiaj',
+    tomorrow: 'Jutro',
     requests: 'Zapytania',
     calendar: 'Kalendarz',
     history: 'Historia',
-    message: 'Napisz',
+    activeToday: 'Aktywne dziś',
+    requestsCount: 'Zapytania',
+    search: 'Szukaj klienta, usługi, kwoty',
+    dayTitle: 'Piątek, 18 kwietnia 2026',
+    daySubtitle: 'Zarządzanie rezerwacjami',
+    time: 'Czas',
+    clientProcedure: 'Klient / Procedura',
+    price: 'Cena',
+    notes: 'Notatki',
+    freeSlot: 'Wolne okno',
+    unavailable: 'Niedostępne',
+    addBooking: 'Dodaj rezerwację',
+    closeTime: 'Zamknij czas',
+    clientCard: 'Karta klienta',
+    procedure: 'Procedura',
+    status: 'Status',
+    contacts: 'Kontakty',
+    fullContactInfo:
+      'Zarejestrowany klient potwierdzony przez obie strony. Wszystkie kontakty są dostępne.',
+    quickContactInfo:
+      'Szybka rezerwacja. Dostępny tylko wewnętrzny chat Olamep do pełnej rejestracji.',
+    call: 'Zadzwoń',
+    whatsapp: 'WhatsApp',
+    internalChat: 'Napisz w czacie',
+    message: 'Wiadomość',
+    editNotes: 'Edytuj notatki',
+    save: 'Zapisz',
+    close: 'Zamknij',
+    changeTime: 'Zmień czas',
+    hour: 'Godzina',
+    minutes: 'Minuty',
+    newTime: 'Nowy czas',
+    synced: 'Wolne · zsynchronizowane',
+    cancel: 'Anuluj',
+    confirmed: 'Potwierdzone',
+    completed: 'Gotowe',
+    cancelled: 'Anulowane',
+    pending: 'Oczekuje',
+    blocked: 'Niedostępne',
+    free: 'Wolne',
+    home: 'Start',
   },
 };
 
-const demoClients: ClientBooking[] = [
-  {
-    id: 'provider-demo-1',
-    clientName: 'Anna Brown',
-    clientAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-    clientPhone: '+44 7700 900123',
-    clientEmail: 'anna@example.com',
-    serviceName: 'Haircut',
-    date: '2026-04-25',
-    day: 25,
-    time: '15:00',
-    duration: '45 min',
-    price: 35,
-    status: 'confirmed',
-    bookingType: 'normal',
-    paymentMethod: 'OlaCash',
-    holdClient: 1,
-    holdMaster: 1,
-    note: 'Client wants a clean bob haircut.',
-    registeredClient: true,
+const serviceTranslations: Record<string, Partial<Record<AppLanguage, string>>> = {
+  Маникюр: {
+    EN: 'Manicure',
+    RU: 'Маникюр',
+    UA: 'Манікюр',
+    ES: 'Manicura',
+    CZ: 'Manikúra',
+    DE: 'Maniküre',
+    IT: 'Manicure',
+    FR: 'Manucure',
+    PL: 'Manicure',
+    AR: 'مانيكير',
   },
-  {
-    id: 'provider-demo-2',
-    clientName: 'Sofia Miller',
-    clientAvatar:
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80',
-    clientPhone: '',
-    clientEmail: '',
-    serviceName: 'Keratin extensions',
-    date: '2026-04-25',
-    day: 25,
-    time: '17:30',
-    duration: '2h',
-    price: 120,
-    status: 'quick',
-    bookingType: 'quick',
-    paymentMethod: 'Card',
-    holdClient: 1,
-    holdMaster: 1,
-    note: 'Quick booking without registered client profile.',
-    registeredClient: false,
+  Стрижка: {
+    EN: 'Haircut',
+    RU: 'Стрижка волос',
+    UA: 'Стрижка',
+    ES: 'Corte de pelo',
+    CZ: 'Střih vlasů',
+    DE: 'Haarschnitt',
+    IT: 'Taglio capelli',
+    FR: 'Coupe de cheveux',
+    PL: 'Strzyżenie',
+    AR: 'قص شعر',
   },
-  {
-    id: 'provider-demo-3',
-    clientName: 'Mia Johnson',
-    clientAvatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-    clientPhone: '+44 7700 900789',
-    clientEmail: 'mia@example.com',
-    serviceName: 'Makeup',
-    date: '2026-04-26',
-    day: 26,
-    time: '11:00',
-    duration: '1h',
-    price: 50,
-    status: 'request',
-    bookingType: 'normal',
-    paymentMethod: 'QR',
-    holdClient: 1,
-    holdMaster: 0,
-    note: 'Waiting for provider confirmation.',
-    registeredClient: true,
+  Массаж: {
+    EN: 'Massage',
+    RU: 'Массаж',
+    UA: 'Масаж',
+    ES: 'Masaje',
+    CZ: 'Masáž',
+    DE: 'Massage',
+    IT: 'Massaggio',
+    FR: 'Massage',
+    PL: 'Masaż',
+    AR: 'تدليك',
   },
-];
+  Визаж: {
+    EN: 'Makeup',
+    RU: 'Визаж',
+    UA: 'Візаж',
+    ES: 'Maquillaje',
+    CZ: 'Make-up',
+    DE: 'Make-up',
+    IT: 'Trucco',
+    FR: 'Maquillage',
+    PL: 'Makijaż',
+    AR: 'مكياج',
+  },
+  'Ремонт телефона': {
+    EN: 'Phone repair',
+    RU: 'Ремонт телефона',
+    UA: 'Ремонт телефону',
+    ES: 'Reparación de teléfono',
+    CZ: 'Oprava telefonu',
+    DE: 'Handy-Reparatur',
+    IT: 'Riparazione telefono',
+    FR: 'Réparation téléphone',
+    PL: 'Naprawa telefonu',
+    AR: 'إصلاح الهاتف',
+  },
+};
+
+const demoAvatar =
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80';
 
 function getTexts(language: AppLanguage) {
-  return {
-    ...baseTexts,
-    ...(textOverrides[language] || {}),
-  };
+  return pageTexts[language] || pageTexts.EN;
+}
+
+function translateService(value: string, language: AppLanguage) {
+  return serviceTranslations[value]?.[language] || serviceTranslations[value]?.EN || value;
 }
 
 function money(value: number) {
-  return `£${value.toFixed(2)}`;
+  return `£${Number(value || 0).toFixed(0)}`;
 }
 
-function mapBookingsToProviderClients(bookings: BookingItem[]): ClientBooking[] {
-  if (!bookings.length) return demoClients;
-
-  return bookings.map((booking, index) => {
-    const anyBooking = booking as any;
-    const status: ClientBookingStatus =
-      booking.status === 'pending'
-        ? index % 2 === 0
-          ? 'request'
-          : 'quick'
-        : booking.status === 'upcoming'
-        ? 'confirmed'
-        : booking.status === 'completed'
-        ? 'completed'
-        : 'cancelled';
-
-    const quick = status === 'quick';
-    const registeredClient = !quick && anyBooking.registeredClient !== false;
-
-    return {
-      id: String(booking.id || `provider-${index}`),
-      clientName:
-        anyBooking.clientName ||
-        anyBooking.customerName ||
-        anyBooking.userName ||
-        ['Anna Brown', 'Sofia Miller', 'Mia Johnson', 'Olivia Smith'][index % 4],
-      clientAvatar:
-        anyBooking.clientAvatar ||
-        anyBooking.customerAvatar ||
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-      clientPhone: registeredClient ? anyBooking.clientPhone || '+44 7700 900123' : '',
-      clientEmail: registeredClient ? anyBooking.clientEmail || 'client@example.com' : '',
-      serviceName: String(booking.serviceName || 'Service'),
-      date: anyBooking.date || '2026-04-25',
-      day: Number(anyBooking.day || 25 + (index % 4)),
-      time: String(anyBooking.time || anyBooking.timeLabel || booking.dateLabel || '15:00').slice(
-        -5
-      ),
-      duration: anyBooking.duration || '1h',
-      price: Number(booking.price || 45),
-      status,
-      bookingType: quick ? 'quick' : 'normal',
-      paymentMethod: index % 3 === 0 ? 'OlaCash' : index % 3 === 1 ? 'Card' : 'QR',
-      holdClient: 1,
-      holdMaster: status === 'request' ? 0 : 1,
-      note: anyBooking.note || 'Booking synced from customer booking list.',
-      registeredClient,
-      sourceBooking: booking,
-    };
-  });
+function getSlotStatusLabel(status: SlotStatus, text: ReturnType<typeof getTexts>) {
+  if (status === 'confirmed') return text.confirmed;
+  if (status === 'completed') return text.completed;
+  if (status === 'cancelled') return text.cancelled;
+  if (status === 'pending') return text.pending;
+  if (status === 'blocked') return text.blocked;
+  return text.free;
 }
 
-function getStatusStyle(status: ClientBookingStatus, text: ReturnType<typeof getTexts>) {
-  if (status === 'request') {
-    return { label: text.request, bg: '#fff0da', color: '#a96a00' };
-  }
-
-  if (status === 'quick') {
-    return { label: `⚡ ${text.quickBooking}`, bg: '#ffe7e7', color: '#c74343' };
-  }
-
+function getSlotStyle(status: SlotStatus) {
   if (status === 'confirmed') {
-    return { label: text.confirmed, bg: '#e6efff', color: '#245cc9' };
+    return {
+      bg: '#e3f8ea',
+      border: '#55c75f',
+      color: '#1f8c3f',
+      side: '#35bf55',
+      price: '#ff3b3b',
+    };
   }
 
   if (status === 'completed') {
-    return { label: text.completed, bg: '#dff2e3', color: '#1d7a38' };
+    return {
+      bg: '#e8f1ff',
+      border: '#2f80ed',
+      color: '#2364c8',
+      side: '#2f80ed',
+      price: '#ff3b3b',
+    };
   }
 
-  return { label: text.cancelled, bg: '#fde5e5', color: '#c74343' };
-}
-
-function getDayState(day: number, clients: ClientBooking[]): CalendarDayState {
-  if ([7, 14, 21, 28].includes(day)) return 'off';
-
-  const bookingsForDay = clients.filter((item) => item.day === day);
-
-  if (bookingsForDay.some((item) => item.status === 'request' || item.status === 'quick')) {
-    return 'request';
+  if (status === 'cancelled') {
+    return {
+      bg: 'linear-gradient(135deg, #ffffff 0%, #ffffff 48%, #ffd6dc 49%, #ffd6dc 100%)',
+      border: '#ff7a85',
+      color: '#cf3344',
+      side: '#ff3b4e',
+      price: '#ff3b3b',
+    };
   }
 
-  if (bookingsForDay.length >= 3) return 'full';
-  if (bookingsForDay.length > 0) return 'partial';
+  if (status === 'blocked') {
+    return {
+      bg: '#ffd8df',
+      border: '#ff5a6b',
+      color: '#c6283b',
+      side: '#ff3b4e',
+      price: '#ff3b3b',
+    };
+  }
 
-  return 'free';
+  if (status === 'pending') {
+    return {
+      bg: '#fff3d6',
+      border: '#f0b429',
+      color: '#ad7200',
+      side: '#f0b429',
+      price: '#ff3b3b',
+    };
+  }
+
+  return {
+    bg: '#ffffff',
+    border: '#e4e4e4',
+    color: '#6f675f',
+    side: '#d9d9d9',
+    price: '#ff3b3b',
+  };
 }
 
-function getDayColor(state: CalendarDayState) {
-  if (state === 'full') return '#dff2e3';
-  if (state === 'partial') return '#eeeeee';
-  if (state === 'off') return '#fde5e5';
-  if (state === 'request') return '#fff0da';
-  return '#ffffff';
+function parseTimeFromDateTime(value?: string) {
+  if (!value) return '09:00';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '09:00';
+
+  return date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Europe/London',
+  });
 }
 
-function getDayBorder(state: CalendarDayState) {
-  if (state === 'full') return '#2ca24d';
-  if (state === 'partial') return '#9ca3af';
-  if (state === 'off') return '#e04b4b';
-  if (state === 'request') return '#f0b429';
-  return '#111111';
+function mapBookingStatusToSlotStatus(booking: BookingItem, index: number): SlotStatus {
+  if (booking.status === 'completed') return 'completed';
+  if (booking.status === 'cancelled') return 'cancelled';
+  if (booking.status === 'pending') return 'pending';
+
+  if (index === 1) return 'completed';
+  return 'confirmed';
 }
 
-function SupportMiniIcon() {
+function mapBookingsToSlots(bookings: BookingItem[], language: AppLanguage): ProviderSlot[] {
+  const mapped = bookings.slice(0, 5).map((booking, index) => {
+    const directContactsAvailable = canShowDirectContacts(booking);
+
+    return {
+      id: booking.id,
+      time: parseTimeFromDateTime(booking.dateTime),
+      duration: index === 0 ? '60 min' : index === 1 ? '45 min' : '60 min',
+      clientName:
+        index === 0
+          ? 'Lucie Hlavová'
+          : index === 1
+          ? 'Janička Andělová'
+          : index === 2
+          ? 'Klára Nováková'
+          : index === 3
+          ? 'Lenka Bohatová'
+          : 'Barbora Bendová',
+      clientAvatar: booking.masterAvatar || demoAvatar,
+      serviceName: translateService(booking.serviceName, language),
+      price: booking.price,
+      status: mapBookingStatusToSlotStatus(booking, index),
+      paymentMethod: index === 0 ? 'OlaCash' : index === 1 ? 'Card' : index === 2 ? 'QR' : 'Cash',
+      notes:
+        index === 0
+          ? 'чёлка короче, слои по бокам'
+          : index === 1
+          ? 'готово'
+          : index === 2
+          ? 'частично / отменено'
+          : index === 3
+          ? 'холодный блонд'
+          : 'новые пряди',
+      contactMode: directContactsAvailable ? 'full' : 'quick',
+      sourceBooking: booking,
+      contactPhone: booking.contactPhone,
+      contactEmail: booking.contactEmail,
+      contactWhatsapp: booking.contactWhatsapp,
+      contactTelegram: booking.contactTelegram,
+      contactInstagram: booking.contactInstagram,
+    } satisfies ProviderSlot;
+  });
+
+  const demoSlots: ProviderSlot[] = [
+    {
+      id: 'slot_free_1200',
+      time: '12:00',
+      duration: '60 min',
+      clientName: '',
+      serviceName: '',
+      price: 0,
+      status: 'free',
+      paymentMethod: 'Cash',
+      notes: '',
+      contactMode: 'quick',
+    },
+    {
+      id: 'slot_blocked_1500',
+      time: '15:00',
+      duration: '60 min',
+      clientName: '',
+      serviceName: '',
+      price: 0,
+      status: 'blocked',
+      paymentMethod: 'Cash',
+      notes: '',
+      contactMode: 'quick',
+    },
+    {
+      id: 'slot_free_1900',
+      time: '19:00',
+      duration: '60 min',
+      clientName: '',
+      serviceName: '',
+      price: 0,
+      status: 'free',
+      paymentMethod: 'Cash',
+      notes: '',
+      contactMode: 'quick',
+    },
+  ];
+
+  return [...mapped, ...demoSlots].sort((a, b) => a.time.localeCompare(b.time));
+}
+
+function OlamepLogo() {
   return (
-    <span
+    <div
       style={{
-        width: 34,
-        height: 34,
-        borderRadius: 999,
-        border: '2px solid #111111',
-        background: '#ffffff',
         display: 'inline-flex',
         alignItems: 'center',
+        gap: 10,
         justifyContent: 'center',
-        fontSize: 18,
-        fontWeight: 900,
-        flexShrink: 0,
       }}
     >
-      ☎
-    </span>
+      <div
+        style={{
+          width: 38,
+          height: 46,
+          position: 'relative',
+          borderRadius: '50% 50% 58% 58%',
+          background:
+            'conic-gradient(from 210deg, #0e73d8 0deg, #2fc96d 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
+          transform: 'rotate(0deg)',
+          boxShadow: '0 8px 18px rgba(14,115,216,0.2)',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: 9,
+            top: 8,
+            width: 19,
+            height: 19,
+            borderRadius: '50%',
+            background: '#ffffff',
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          fontSize: 30,
+          fontWeight: 900,
+          color: '#08245c',
+          letterSpacing: '-1px',
+        }}
+      >
+        Olamep
+      </div>
+    </div>
   );
 }
 
@@ -453,16 +904,15 @@ export default function ProviderClientsPage() {
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [bookings, setBookings] = useState<BookingItem[]>(getBookings());
-  const [activeView, setActiveView] = useState<'today' | 'requests' | 'calendar' | 'history'>(
-    'calendar'
-  );
-  const [selectedDay, setSelectedDay] = useState(25);
-  const [selectedTime, setSelectedTime] = useState('15:00');
+  const [activeView, setActiveView] = useState<ProviderView>('today');
   const [search, setSearch] = useState('');
-  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
-  const [editingRow, setEditingRow] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState('');
-  const [localOrder, setLocalOrder] = useState<string[]>([]);
+  const [slots, setSlots] = useState<ProviderSlot[]>([]);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [timeSlotId, setTimeSlotId] = useState<string | null>(null);
+  const [editHour, setEditHour] = useState('09');
+  const [editMinute, setEditMinute] = useState('30');
+  const [noteDraft, setNoteDraft] = useState('');
+  const [draggingSlotId, setDraggingSlotId] = useState<string | null>(null);
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -486,127 +936,137 @@ export default function ProviderClientsPage() {
     };
   }, []);
 
+  useEffect(() => {
+    setSlots(mapBookingsToSlots(bookings, language));
+  }, [bookings, language]);
+
   const text = useMemo(() => getTexts(language), [language]);
 
-  const clients = useMemo(() => mapBookingsToProviderClients(bookings), [bookings]);
+  const selectedSlot = slots.find((slot) => slot.id === selectedSlotId) || null;
+  const timeSlot = slots.find((slot) => slot.id === timeSlotId) || null;
 
-  useEffect(() => {
-    setLocalOrder((current) => {
-      const ids = clients.map((item) => item.id);
-      const kept = current.filter((id) => ids.includes(id));
-      const missing = ids.filter((id) => !kept.includes(id));
-      return [...kept, ...missing];
-    });
-  }, [clients]);
+  const visibleSlots = useMemo(() => {
+    let source = slots;
 
-  const orderedClients = useMemo(() => {
-    if (!localOrder.length) return clients;
-
-    return [...clients].sort((a, b) => {
-      const aIndex = localOrder.indexOf(a.id);
-      const bIndex = localOrder.indexOf(b.id);
-
-      if (aIndex === -1 && bIndex === -1) return 0;
-      if (aIndex === -1) return 1;
-      if (bIndex === -1) return -1;
-
-      return aIndex - bIndex;
-    });
-  }, [clients, localOrder]);
-
-  const visibleClients = useMemo(() => {
-    let source = orderedClients;
-
-    if (activeView === 'today') {
-      source = source.filter((item) => item.day === 25);
+    if (activeView === 'tomorrow') {
+      source = slots.map((slot, index) => ({
+        ...slot,
+        id: `${slot.id}_tomorrow`,
+        time: index === 0 ? '10:00' : index === 1 ? '11:30' : index === 2 ? '14:00' : slot.time,
+      }));
     }
 
     if (activeView === 'requests') {
-      source = source.filter((item) => item.status === 'request' || item.status === 'quick');
-    }
-
-    if (activeView === 'calendar') {
-      source = source.filter((item) => item.day === selectedDay);
+      source = source.filter((slot) => slot.status === 'pending');
     }
 
     if (activeView === 'history') {
-      source = source.filter((item) => item.status === 'completed' || item.status === 'cancelled');
+      source = source.filter((slot) => slot.status === 'completed' || slot.status === 'cancelled');
     }
 
     const q = search.trim().toLowerCase();
 
     if (!q) return source;
 
-    return source.filter((item) => {
+    return source.filter((slot) => {
       return (
-        item.clientName.toLowerCase().includes(q) ||
-        item.serviceName.toLowerCase().includes(q) ||
-        String(item.price).includes(q) ||
-        item.time.toLowerCase().includes(q) ||
-        item.paymentMethod.toLowerCase().includes(q)
+        slot.clientName.toLowerCase().includes(q) ||
+        slot.serviceName.toLowerCase().includes(q) ||
+        String(slot.price).includes(q) ||
+        slot.notes.toLowerCase().includes(q) ||
+        slot.paymentMethod.toLowerCase().includes(q)
       );
     });
-  }, [activeView, orderedClients, search, selectedDay]);
+  }, [activeView, search, slots]);
 
-  const selectedClient = clients.find((item) => item.id === selectedClientId) || null;
-
-  const activeTodayCount = clients.filter(
-    (item) => item.day === 25 && item.status !== 'cancelled'
+  const activeTodayCount = slots.filter(
+    (slot) => slot.status === 'confirmed' || slot.status === 'pending'
   ).length;
 
-  const requestCount = clients.filter(
-    (item) => item.status === 'request' || item.status === 'quick'
-  ).length;
+  const requestCount = slots.filter((slot) => slot.status === 'pending').length;
 
-  const moveClient = (clientId: string, direction: 'up' | 'down') => {
-    setLocalOrder((current) => {
-      const ids = current.length ? [...current] : clients.map((item) => item.id);
-      const index = ids.indexOf(clientId);
-      if (index === -1) return ids;
+  const handleOpenTimeModal = (slot: ProviderSlot) => {
+    const [hour, minute] = slot.time.split(':');
+    setEditHour(hour || '09');
+    setEditMinute(minute || '30');
+    setTimeSlotId(slot.id);
+  };
 
-      const targetIndex = direction === 'up' ? index - 1 : index + 1;
-      if (targetIndex < 0 || targetIndex >= ids.length) return ids;
+  const handleSaveTime = () => {
+    if (!timeSlotId) return;
 
-      const copy = [...ids];
-      const [item] = copy.splice(index, 1);
-      copy.splice(targetIndex, 0, item);
+    const nextTime = `${editHour}:${editMinute}`;
 
-      return copy;
+    setSlots((current) =>
+      current
+        .map((slot) => (slot.id === timeSlotId ? { ...slot, time: nextTime } : slot))
+        .sort((a, b) => a.time.localeCompare(b.time))
+    );
+
+    const slot = slots.find((item) => item.id === timeSlotId);
+    if (slot?.sourceBooking) {
+      const currentDate = new Date(slot.sourceBooking.dateTime);
+      if (!Number.isNaN(currentDate.getTime())) {
+        const [hours, minutes] = nextTime.split(':').map(Number);
+        currentDate.setHours(hours, minutes, 0, 0);
+        patchBooking(slot.sourceBooking.id, {
+          dateTime: currentDate.toISOString(),
+          dateLabel: `${text.today} ${nextTime}`,
+        });
+      }
+    }
+
+    setTimeSlotId(null);
+  };
+
+  const handleSaveNote = () => {
+    if (!selectedSlot) return;
+
+    setSlots((current) =>
+      current.map((slot) =>
+        slot.id === selectedSlot.id
+          ? {
+              ...slot,
+              notes: noteDraft,
+            }
+          : slot
+      )
+    );
+  };
+
+  const handleDropOnSlot = (targetSlot: ProviderSlot) => {
+    if (!draggingSlotId || draggingSlotId === targetSlot.id) {
+      setDraggingSlotId(null);
+      return;
+    }
+
+    setSlots((current) => {
+      const dragging = current.find((slot) => slot.id === draggingSlotId);
+      if (!dragging) return current;
+
+      return current
+        .map((slot) => {
+          if (slot.id === draggingSlotId) {
+            return {
+              ...slot,
+              time: targetSlot.time,
+            };
+          }
+
+          if (slot.id === targetSlot.id) {
+            return {
+              ...slot,
+              time: dragging.time,
+            };
+          }
+
+          return slot;
+        })
+        .sort((a, b) => a.time.localeCompare(b.time));
     });
-  };
 
-  const handleConfirm = (client: ClientBooking) => {
-    if (client.sourceBooking) {
-      updateBookingStatus(client.sourceBooking.id, 'upcoming');
-    }
-    setSelectedClientId(null);
+    setDraggingSlotId(null);
   };
-
-  const handleComplete = (client: ClientBooking) => {
-    if (client.sourceBooking) {
-      updateBookingStatus(client.sourceBooking.id, 'completed');
-    }
-    setSelectedClientId(null);
-  };
-
-  const handleCancel = (client: ClientBooking) => {
-    if (client.sourceBooking) {
-      updateBookingStatus(client.sourceBooking.id, 'cancelled');
-    }
-    setSelectedClientId(null);
-  };
-
-  const openEditRow = (row: string, value: string) => {
-    setEditingRow(row);
-    setEditValue(value);
-  };
-
-  const closeEditRow = () => {
-    setEditingRow(null);
-    setEditValue('');
-  };
-
-  const timeSlots = ['09:00', '11:00', '13:00', '15:00', '17:30', '19:00'];
 
   return (
     <>
@@ -615,7 +1075,7 @@ export default function ProviderClientsPage() {
           minHeight: '100vh',
           background: '#ffffff',
           color: '#17130f',
-          paddingBottom: 120,
+          paddingBottom: 118,
           fontFamily: 'Arial, sans-serif',
         }}
       >
@@ -623,21 +1083,21 @@ export default function ProviderClientsPage() {
           <header
             style={{
               display: 'grid',
-              gridTemplateColumns: '54px 1fr 54px',
+              gridTemplateColumns: '48px 1fr 48px',
               alignItems: 'center',
-              gap: 12,
+              gap: 10,
             }}
           >
             <button
               type="button"
               onClick={() => router.back()}
               style={{
-                width: 54,
-                height: 54,
+                width: 48,
+                height: 48,
                 borderRadius: 999,
                 border: '2px solid #111111',
                 background: '#fff',
-                fontSize: 26,
+                fontSize: 25,
                 color: '#17130f',
                 fontWeight: 900,
                 cursor: 'pointer',
@@ -647,28 +1107,7 @@ export default function ProviderClientsPage() {
             </button>
 
             <div style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 900,
-                  color: '#17130f',
-                  lineHeight: 1.1,
-                }}
-              >
-                {text.title}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 5,
-                  fontSize: 12.5,
-                  color: '#7b7268',
-                  fontWeight: 700,
-                  lineHeight: 1.35,
-                }}
-              >
-                {text.subtitle}
-              </div>
+              <OlamepLogo />
             </div>
 
             <button
@@ -676,8 +1115,8 @@ export default function ProviderClientsPage() {
               onClick={() => router.push('/')}
               aria-label={text.home}
               style={{
-                width: 54,
-                height: 54,
+                width: 48,
+                height: 48,
                 borderRadius: 999,
                 border: '2px solid #111111',
                 background: '#fff',
@@ -692,13 +1131,38 @@ export default function ProviderClientsPage() {
           </header>
 
           <section style={{ marginTop: 16 }}>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 33,
+                fontWeight: 900,
+                letterSpacing: '-1px',
+                color: '#08245c',
+              }}
+            >
+              {text.title}
+            </h1>
+
+            <p
+              style={{
+                margin: '6px 0 0',
+                fontSize: 14,
+                lineHeight: 1.35,
+                fontWeight: 800,
+                color: '#7b7268',
+              }}
+            >
+              {text.subtitle}
+            </p>
+          </section>
+
+          <section style={{ marginTop: 16 }}>
             <div
               style={{
-                borderRadius: 30,
+                borderRadius: 28,
                 border: '2px solid #111111',
-                background: '#fffefa',
+                background: '#ffffff',
                 padding: 14,
-                boxShadow: '0 8px 20px rgba(0,0,0,0.04)',
               }}
             >
               <div
@@ -719,7 +1183,7 @@ export default function ProviderClientsPage() {
                   <div style={{ fontSize: 12, color: '#8b7355', fontWeight: 900 }}>
                     {text.activeToday}
                   </div>
-                  <div style={{ marginTop: 8, fontSize: 28, fontWeight: 900 }}>
+                  <div style={{ marginTop: 8, fontSize: 30, fontWeight: 900 }}>
                     {activeTodayCount}
                   </div>
                 </div>
@@ -733,9 +1197,9 @@ export default function ProviderClientsPage() {
                   }}
                 >
                   <div style={{ fontSize: 12, color: '#2559b7', fontWeight: 900 }}>
-                    {text.requests}
+                    {text.requestsCount}
                   </div>
-                  <div style={{ marginTop: 8, fontSize: 28, fontWeight: 900 }}>
+                  <div style={{ marginTop: 8, fontSize: 30, fontWeight: 900 }}>
                     {requestCount}
                   </div>
                 </div>
@@ -744,7 +1208,7 @@ export default function ProviderClientsPage() {
               <div
                 style={{
                   marginTop: 12,
-                  height: 48,
+                  height: 50,
                   borderRadius: 18,
                   border: '2px solid #111111',
                   background: '#ffffff',
@@ -767,6 +1231,7 @@ export default function ProviderClientsPage() {
                     fontSize: 13,
                     fontWeight: 800,
                     color: '#17130f',
+                    minWidth: 0,
                   }}
                 />
               </div>
@@ -778,15 +1243,16 @@ export default function ProviderClientsPage() {
               style={{
                 background: '#fff',
                 border: '2px solid #111111',
-                borderRadius: 24,
+                borderRadius: 25,
                 padding: 7,
                 display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: 7,
+                gridTemplateColumns: 'repeat(5, 1fr)',
+                gap: 6,
               }}
             >
               {([
                 ['today', text.today],
+                ['tomorrow', text.tomorrow],
                 ['requests', text.requests],
                 ['calendar', text.calendar],
                 ['history', text.history],
@@ -799,14 +1265,15 @@ export default function ProviderClientsPage() {
                     type="button"
                     onClick={() => setActiveView(key)}
                     style={{
-                      minHeight: 48,
+                      minHeight: 46,
                       borderRadius: 16,
                       border: '2px solid #111111',
                       background: active ? '#17130f' : '#ffffff',
                       color: active ? '#ffffff' : '#17130f',
-                      fontSize: 12,
+                      fontSize: language === 'RU' || language === 'UA' ? 10.5 : 11.5,
                       fontWeight: 900,
                       cursor: 'pointer',
+                      padding: '0 4px',
                     }}
                   >
                     {label}
@@ -816,254 +1283,242 @@ export default function ProviderClientsPage() {
             </div>
           </section>
 
-          {activeView === 'calendar' ? (
-            <section style={{ marginTop: 14 }}>
+          <section
+            style={{
+              marginTop: 16,
+              borderRadius: 30,
+              border: '2px solid #111111',
+              background: '#fff',
+              padding: 14,
+            }}
+          >
+            <div style={{ textAlign: 'center' }}>
               <div
                 style={{
-                  borderRadius: 30,
-                  border: '2px solid #111111',
-                  background: '#ffffff',
-                  padding: 14,
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: '#17130f',
                 }}
               >
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(7, 1fr)',
-                    gap: 8,
-                  }}
-                >
-                  {Array.from({ length: 35 }).map((_, index) => {
-                    const day = index + 1;
-                    const state = getDayState(day, clients);
-                    const active = selectedDay === day;
-
-                    return (
-                      <button
-                        key={day}
-                        type="button"
-                        onClick={() => setSelectedDay(day)}
-                        style={{
-                          minHeight: 42,
-                          borderRadius: 14,
-                          border: active
-                            ? '3px solid #111111'
-                            : `2px solid ${getDayBorder(state)}`,
-                          background: getDayColor(state),
-                          color: '#17130f',
-                          fontSize: 13,
-                          fontWeight: 900,
-                          cursor: 'pointer',
-                          position: 'relative',
-                        }}
-                      >
-                        {day}
-
-                        {state === 'request' ? (
-                          <span
-                            style={{
-                              position: 'absolute',
-                              top: 4,
-                              right: 5,
-                              width: 8,
-                              height: 8,
-                              borderRadius: 999,
-                              background: '#ff4b52',
-                              border: '1px solid #111111',
-                            }}
-                          />
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 14,
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: 8,
-                  }}
-                >
-                  {timeSlots.map((slot) => {
-                    const active = selectedTime === slot;
-
-                    return (
-                      <button
-                        key={slot}
-                        type="button"
-                        onClick={() => setSelectedTime(slot)}
-                        style={{
-                          minHeight: 42,
-                          borderRadius: 999,
-                          border: '2px solid #111111',
-                          background: active ? '#2578ff' : '#ffffff',
-                          color: active ? '#ffffff' : '#17130f',
-                          fontSize: 13,
-                          fontWeight: 900,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {slot}
-                      </button>
-                    );
-                  })}
-                </div>
+                {activeView === 'tomorrow' ? text.tomorrow : text.dayTitle}
               </div>
-            </section>
-          ) : null}
 
-          <section style={{ marginTop: 16 }}>
-            {visibleClients.length === 0 ? (
               <div
                 style={{
-                  borderRadius: 28,
-                  border: '2px solid #111111',
-                  background: '#fff',
-                  padding: 24,
-                  textAlign: 'center',
-                  fontSize: 15,
+                  marginTop: 4,
+                  fontSize: 13,
                   fontWeight: 800,
-                  color: '#6f675f',
+                  color: '#7b7268',
                 }}
               >
-                {text.empty}
+                {text.daySubtitle}
               </div>
-            ) : (
-              <div style={{ display: 'grid', gap: 14 }}>
-                {visibleClients.map((client) => {
-                  const meta = getStatusStyle(client.status, text);
+            </div>
 
-                  return (
-                    <article
-                      key={client.id}
-                      onClick={() => setSelectedClientId(client.id)}
+            <div
+              style={{
+                marginTop: 18,
+                display: 'grid',
+                gridTemplateColumns: '64px 1fr 68px 78px',
+                gap: 8,
+                padding: '0 4px',
+                fontSize: 11,
+                fontWeight: 900,
+                color: '#7b7268',
+              }}
+            >
+              <div>{text.time}</div>
+              <div>{text.clientProcedure}</div>
+              <div>{text.price}</div>
+              <div>{text.notes}</div>
+            </div>
+
+            <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
+              {visibleSlots.map((slot) => {
+                const style = getSlotStyle(slot.status);
+                const isEmpty = slot.status === 'free' || slot.status === 'blocked';
+
+                return (
+                  <article
+                    key={slot.id}
+                    draggable={!isEmpty}
+                    onDragStart={() => setDraggingSlotId(slot.id)}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={() => handleDropOnSlot(slot)}
+                    onClick={() => {
+                      if (slot.status === 'free' || slot.status === 'blocked') {
+                        handleOpenTimeModal(slot);
+                        return;
+                      }
+
+                      setSelectedSlotId(slot.id);
+                      setNoteDraft(slot.notes);
+                    }}
+                    style={{
+                      minHeight: 72,
+                      display: 'grid',
+                      gridTemplateColumns: '64px 1fr 68px 78px',
+                      gap: 8,
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleOpenTimeModal(slot);
+                      }}
                       style={{
-                        borderRadius: 30,
-                        border: '2px solid #111111',
+                        minHeight: 58,
+                        border: 'none',
+                        borderLeft: `6px solid ${style.side}`,
                         background: '#ffffff',
-                        padding: 14,
+                        color: '#17130f',
+                        fontSize: 15,
+                        fontWeight: 900,
                         cursor: 'pointer',
+                        textAlign: 'left',
+                        paddingLeft: 9,
                       }}
                     >
-                      <div
-                        style={{
-                          display: 'grid',
-                          gridTemplateColumns: '68px 1fr auto',
-                          gap: 12,
-                          alignItems: 'center',
-                        }}
-                      >
-                        <img
-                          src={client.clientAvatar}
-                          alt={client.clientName}
-                          style={{
-                            width: 68,
-                            height: 68,
-                            borderRadius: 20,
-                            objectFit: 'cover',
-                            border: '2px solid #111111',
-                          }}
-                        />
+                      {slot.time}
+                    </button>
 
-                        <div style={{ minWidth: 0 }}>
-                          <div
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              minHeight: 28,
-                              padding: '0 10px',
-                              borderRadius: 999,
-                              border: '2px solid #111111',
-                              background: meta.bg,
-                              color: meta.color,
-                              fontSize: 11,
-                              fontWeight: 900,
-                              marginBottom: 7,
-                            }}
-                          >
-                            {meta.label}
-                          </div>
-
-                          <div
-                            style={{
-                              fontSize: 17,
-                              fontWeight: 900,
-                              color: '#17130f',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            {client.clientName}
-                          </div>
-
-                          <div
-                            style={{
-                              marginTop: 4,
-                              fontSize: 13,
-                              fontWeight: 800,
-                              color: '#6f675f',
-                            }}
-                          >
-                            {client.time} · {client.serviceName}
-                          </div>
-
-                          <div
-                            style={{
-                              marginTop: 4,
-                              fontSize: 15,
-                              fontWeight: 1000,
-                              color: '#ef3e36',
-                            }}
-                          >
-                            {money(client.price)}
-                          </div>
-                        </div>
-
+                    <div
+                      style={{
+                        minHeight: 64,
+                        borderRadius: 13,
+                        border: `2px solid ${style.border}`,
+                        background: style.bg,
+                        padding: '10px 12px',
+                        boxSizing: 'border-box',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {slot.status === 'free' ? (
                         <div
                           style={{
-                            width: 44,
-                            height: 44,
-                            borderRadius: 999,
-                            border: '2px solid #111111',
-                            background: '#ffffff',
-                            fontSize: 20,
-                            fontWeight: 900,
+                            height: '100%',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#17130f',
+                            fontSize: 15,
+                            fontWeight: 800,
+                            color: '#6f675f',
                           }}
                         >
-                          ›
+                          {text.freeSlot}
                         </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
+                      ) : slot.status === 'blocked' ? (
+                        <div
+                          style={{
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            fontSize: 15,
+                            fontWeight: 900,
+                            color: '#c6283b',
+                          }}
+                        >
+                          {text.unavailable}
+                        </div>
+                      ) : (
+                        <>
+                          <div
+                            style={{
+                              fontSize: 15,
+                              fontWeight: 900,
+                              color: '#17130f',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {slot.clientName}
+                          </div>
+                          <div
+                            style={{
+                              marginTop: 3,
+                              fontSize: 12.5,
+                              fontWeight: 800,
+                              color: '#6f675f',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {slot.serviceName}
+                          </div>
+                          <div
+                            style={{
+                              marginTop: 6,
+                              display: 'inline-flex',
+                              minHeight: 22,
+                              padding: '0 10px',
+                              alignItems: 'center',
+                              borderRadius: 999,
+                              border: `1.5px solid ${style.border}`,
+                              background: '#ffffffcc',
+                              color: style.color,
+                              fontSize: 10.5,
+                              fontWeight: 900,
+                            }}
+                          >
+                            {getSlotStatusLabel(slot.status, text)}
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    <div
+                      style={{
+                        minHeight: 64,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 24,
+                        fontWeight: 900,
+                        color: slot.price > 0 ? '#ff3b3b' : '#9ca3af',
+                      }}
+                    >
+                      {slot.price > 0 ? money(slot.price) : '—'}
+                    </div>
+
+                    <div
+                      style={{
+                        minHeight: 64,
+                        display: 'flex',
+                        alignItems: 'center',
+                        fontSize: 12,
+                        lineHeight: 1.25,
+                        fontWeight: 900,
+                        color: slot.notes ? '#d2a300' : '#9ca3af',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {slot.notes || '—'}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           </section>
         </div>
 
-        <BottomNav active="clients" />
+        <BottomNav active="bookings" />
       </main>
 
-      {selectedClient ? (
+      {selectedSlot ? (
         <div
-          onClick={() => setSelectedClientId(null)}
+          onClick={() => setSelectedSlotId(null)}
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(17,17,17,0.28)',
-            zIndex: 1400,
+            zIndex: 300,
+            background: 'rgba(17,17,17,0.22)',
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
-            paddingTop: 72,
-            boxSizing: 'border-box',
           }}
         >
           <div
@@ -1071,394 +1526,289 @@ export default function ProviderClientsPage() {
             style={{
               width: '100%',
               maxWidth: 430,
-              maxHeight: 'calc(100vh - 92px)',
+              maxHeight: '92vh',
               overflowY: 'auto',
-              padding: '0 14px calc(28px + env(safe-area-inset-bottom))',
+              background: '#ffffff',
+              borderTopLeftRadius: 32,
+              borderTopRightRadius: 32,
+              border: '2px solid #111111',
+              borderBottom: 'none',
+              padding: '18px 14px calc(22px + env(safe-area-inset-bottom))',
               boxSizing: 'border-box',
             }}
           >
-            <div
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+              <button
+                type="button"
+                onClick={() => setSelectedSlotId(null)}
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  background: '#ffffff',
+                  fontSize: 22,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                ×
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleOpenTimeModal(selectedSlot)}
+                style={{
+                  minHeight: 42,
+                  padding: '0 14px',
+                  borderRadius: 999,
+                  border: '2px solid #111111',
+                  background: '#e8f1ff',
+                  color: '#2364c8',
+                  fontSize: 13,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.changeTime}
+              </button>
+            </div>
+
+            <div style={{ marginTop: 12, textAlign: 'center' }}>
+              <OlamepLogo />
+            </div>
+
+            <section
               style={{
-                borderRadius: 30,
-                border: '2px solid #111111',
+                marginTop: 18,
+                borderRadius: 28,
+                border: '1.5px solid #e4e4e4',
                 background: '#ffffff',
                 padding: 16,
-                boxShadow: '0 22px 44px rgba(0,0,0,0.2)',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
               }}
             >
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '76px 1fr auto',
-                  gap: 12,
+                  gridTemplateColumns: '82px 1fr',
+                  gap: 14,
                   alignItems: 'center',
                 }}
               >
-                <img
-                  src={selectedClient.clientAvatar}
-                  alt={selectedClient.clientName}
-                  style={{
-                    width: 76,
-                    height: 76,
-                    borderRadius: 22,
-                    objectFit: 'cover',
-                    border: '2px solid #111111',
-                  }}
-                />
-
-                <div>
-                  <div style={{ fontSize: 13, color: '#8b8277', fontWeight: 900 }}>
-                    {text.clientCard}
-                  </div>
-                  <div
+                <div style={{ position: 'relative' }}>
+                  <img
+                    src={selectedSlot.clientAvatar || demoAvatar}
+                    alt={selectedSlot.clientName}
                     style={{
-                      marginTop: 5,
-                      fontSize: 20,
-                      color: '#17130f',
-                      fontWeight: 900,
+                      width: 82,
+                      height: 82,
+                      borderRadius: 24,
+                      objectFit: 'cover',
                     }}
-                  >
-                    {selectedClient.clientName}
-                  </div>
-                  <div
+                  />
+                  <span
                     style={{
-                      marginTop: 5,
-                      fontSize: 13,
-                      color: '#6f675f',
-                      fontWeight: 800,
-                    }}
-                  >
-                    {selectedClient.registeredClient ? text.registeredContact : text.managerOnly}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedClientId(null)}
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 999,
-                    border: '2px solid #111111',
-                    background: '#ffffff',
-                    fontSize: 18,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-
-              <div
-                style={{
-                  marginTop: 14,
-                  borderRadius: 20,
-                  border: '2px dashed #111111',
-                  background: '#fffefa',
-                  padding: 12,
-                  fontSize: 13,
-                  lineHeight: 1.45,
-                  color: '#6f675f',
-                  fontWeight: 800,
-                }}
-              >
-                {text.tapToEdit}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 12,
-                  borderRadius: 20,
-                  border: '2px solid #111111',
-                  background: '#ffffff',
-                  padding: 12,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: '#8b8277',
-                    fontWeight: 900,
-                    marginBottom: 10,
-                  }}
-                >
-                  {text.move}
-                </div>
-
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: 10,
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => moveClient(selectedClient.id, 'up')}
-                    style={{
-                      minHeight: 46,
-                      borderRadius: 16,
-                      border: '2px solid #111111',
-                      background: '#ffffff',
-                      color: '#17130f',
-                      fontSize: 15,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {text.moveUp}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => moveClient(selectedClient.id, 'down')}
-                    style={{
-                      minHeight: 46,
-                      borderRadius: 16,
-                      border: '2px solid #111111',
-                      background: '#ffffff',
-                      color: '#17130f',
-                      fontSize: 15,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {text.moveDown}
-                  </button>
-                </div>
-              </div>
-
-              <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
-                {[
-                  [text.service, selectedClient.serviceName],
-                  [text.time, `${selectedClient.time} · ${selectedClient.duration}`],
-                  [text.price, money(selectedClient.price)],
-                  [text.payment, selectedClient.paymentMethod],
-                  [
-                    text.holds,
-                    `Client £${selectedClient.holdClient} · Master £${selectedClient.holdMaster}`,
-                  ],
-                ].map(([label, value]) => {
-                  const rowKey = String(label);
-                  const isPrice = label === text.price;
-                  const isTime = label === text.time;
-                  const active = editingRow === rowKey;
-
-                  return (
-                    <div
-                      key={label}
-                      onClick={() => openEditRow(rowKey, String(value))}
-                      style={{
-                        borderRadius: 20,
-                        border: active
-                          ? '2px solid #2578ff'
-                          : isTime
-                          ? '2px solid #2578ff'
-                          : '2px solid #111111',
-                        background: active ? '#eaf3ff' : isTime ? '#f0f6ff' : '#ffffff',
-                        padding: '12px 14px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <div style={{ fontSize: 12, color: '#8b8277', fontWeight: 900 }}>
-                        {label}
-                      </div>
-
-                      <div
-                        style={{
-                          marginTop: 5,
-                          fontSize: isPrice ? 22 : 15,
-                          color: isPrice ? '#ef3e36' : '#17130f',
-                          fontWeight: 1000,
-                        }}
-                      >
-                        {value}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 14,
-                  borderRadius: 22,
-                  border: '2px solid #111111',
-                  background: '#ffffff',
-                  padding: 14,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 1000,
-                    color: '#17130f',
-                    marginBottom: 10,
-                  }}
-                >
-                  {text.contact}
-                </div>
-
-                {selectedClient.registeredClient ? (
-                  <div style={{ display: 'grid', gap: 8 }}>
-                    <div
-                      style={{
-                        borderRadius: 18,
-                        border: '2px solid #111111',
-                        padding: '11px 12px',
-                        fontSize: 14,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {text.phone}: {selectedClient.clientPhone}
-                    </div>
-
-                    <div
-                      style={{
-                        borderRadius: 18,
-                        border: '2px solid #111111',
-                        padding: '11px 12px',
-                        fontSize: 14,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {text.email}: {selectedClient.clientEmail}
-                    </div>
-
-                    <button
-                      type="button"
-                      style={{
-                        minHeight: 50,
-                        borderRadius: 18,
-                        border: '2px solid #111111',
-                        background: '#ffe44d',
-                        color: '#17130f',
-                        fontSize: 15,
-                        fontWeight: 1000,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      ✉ {text.message}
-                    </button>
-                  </div>
-                ) : (
-                  <div
-                    style={{
+                      position: 'absolute',
+                      right: -2,
+                      bottom: -2,
+                      width: 24,
+                      height: 24,
+                      borderRadius: 999,
+                      background: '#25b65a',
+                      color: '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 10,
-                      borderRadius: 18,
-                      border: '2px solid #111111',
-                      background: '#ffe44d',
-                      padding: 12,
-                      color: '#17130f',
+                      justifyContent: 'center',
+                      border: '2px solid #ffffff',
                       fontSize: 14,
                       fontWeight: 900,
                     }}
                   >
-                    <SupportMiniIcon />
-                    <span>{text.olamepManager}</span>
+                    ✓
+                  </span>
+                </div>
+
+                <div>
+                  <h2
+                    style={{
+                      margin: 0,
+                      fontSize: 27,
+                      lineHeight: 1.05,
+                      fontWeight: 900,
+                      color: '#17130f',
+                    }}
+                  >
+                    {selectedSlot.clientName}
+                  </h2>
+
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 15,
+                      fontWeight: 800,
+                      color: '#6f675f',
+                    }}
+                  >
+                    {selectedSlot.serviceName}
                   </div>
-                )}
+
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: '#6f675f',
+                    }}
+                  >
+                    18 апреля 2026 · {selectedSlot.time}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 10,
+                      fontSize: 34,
+                      fontWeight: 900,
+                      color: '#ff3b3b',
+                    }}
+                  >
+                    {money(selectedSlot.price)}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 18,
+                  borderTop: '1.5px solid #eeeeee',
+                }}
+              >
+                {[
+                  [text.procedure, selectedSlot.serviceName],
+                  [text.price, money(selectedSlot.price)],
+                  [text.status, getSlotStatusLabel(selectedSlot.status, text)],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    style={{
+                      minHeight: 54,
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      alignItems: 'center',
+                      borderBottom: '1.5px solid #eeeeee',
+                      gap: 12,
+                    }}
+                  >
+                    <div style={{ fontSize: 14, fontWeight: 900, color: '#17130f' }}>
+                      {label}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 800,
+                        color: label === text.price ? '#ff3b3b' : '#17130f',
+                        textAlign: 'right',
+                      }}
+                    >
+                      {value}
+                    </div>
+                  </div>
+                ))}
+
+                <div
+                  style={{
+                    minHeight: 74,
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    alignItems: 'center',
+                    borderBottom: '1.5px solid #eeeeee',
+                    gap: 12,
+                  }}
+                >
+                  <div style={{ fontSize: 14, fontWeight: 900, color: '#17130f' }}>
+                    {text.notes}
+                  </div>
+
+                  <textarea
+                    value={noteDraft}
+                    onChange={(event) => setNoteDraft(event.target.value)}
+                    onBlur={handleSaveNote}
+                    rows={3}
+                    style={{
+                      width: '100%',
+                      border: 'none',
+                      outline: 'none',
+                      resize: 'none',
+                      fontSize: 14,
+                      lineHeight: 1.25,
+                      fontWeight: 800,
+                      color: '#d2a300',
+                      textAlign: 'right',
+                      background: 'transparent',
+                      fontFamily: 'Arial, sans-serif',
+                    }}
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section
+              style={{
+                marginTop: 14,
+                borderRadius: 24,
+                border: '1.5px solid #e4e4e4',
+                background: '#ffffff',
+                padding: 16,
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  fontSize: 20,
+                  fontWeight: 900,
+                  color: '#17130f',
+                }}
+              >
+                <span style={{ color: '#25b65a' }}>⬟</span>
+                {text.contacts}
               </div>
 
               <div
                 style={{
                   marginTop: 12,
-                  borderRadius: 20,
-                  border: '2px dashed #111111',
-                  background: '#fffefa',
+                  borderRadius: 16,
+                  border: '1.5px solid #cfeeda',
+                  background: '#f2fff6',
                   padding: 12,
                   fontSize: 13,
-                  lineHeight: 1.45,
-                  color: '#6f675f',
                   fontWeight: 800,
+                  lineHeight: 1.45,
+                  color: '#5d665f',
                 }}
               >
-                {selectedClient.note}
+                {selectedSlot.contactMode === 'full' ? text.fullContactInfo : text.quickContactInfo}
               </div>
 
-              <div
-                style={{
-                  marginTop: 14,
-                  display: 'grid',
-                  gridTemplateColumns: '1fr',
-                  gap: 10,
-                }}
-              >
-                {(selectedClient.status === 'request' || selectedClient.status === 'quick') && (
-                  <button
-                    type="button"
-                    onClick={() => handleConfirm(selectedClient)}
-                    style={{
-                      minHeight: 52,
-                      borderRadius: 18,
-                      border: '2px solid #111111',
-                      background: '#e6efff',
-                      color: '#245cc9',
-                      fontSize: 15,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {text.confirmRequest}
-                  </button>
-                )}
-
-                {selectedClient.status === 'confirmed' && (
-                  <button
-                    type="button"
-                    onClick={() => handleComplete(selectedClient)}
-                    style={{
-                      minHeight: 52,
-                      borderRadius: 18,
-                      border: '2px solid #111111',
-                      background: '#dff2e3',
-                      color: '#1d7a38',
-                      fontSize: 15,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {text.markComplete}
-                  </button>
-                )}
-
-                {(selectedClient.status === 'request' ||
-                  selectedClient.status === 'quick' ||
-                  selectedClient.status === 'confirmed') && (
-                  <button
-                    type="button"
-                    onClick={() => handleCancel(selectedClient)}
-                    style={{
-                      minHeight: 52,
-                      borderRadius: 18,
-                      border: '2px solid #111111',
-                      background: '#ff4b52',
-                      color: '#ffffff',
-                      fontSize: 15,
-                      fontWeight: 1000,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {text.cancelBooking}
-                  </button>
-                )}
-              </div>
-            </div>
+              {selectedSlot.contactMode === 'full' ? (
+                <FullContactsBlock slot={selectedSlot} text={text} />
+              ) : (
+                <QuickContactsBlock text={text} />
+              )}
+            </section>
           </div>
         </div>
       ) : null}
 
-      {editingRow ? (
+      {timeSlot ? (
         <div
-          onClick={closeEditRow}
+          onClick={() => setTimeSlotId(null)}
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(17,17,17,0.25)',
-            zIndex: 1500,
+            zIndex: 340,
+            background: 'rgba(17,17,17,0.38)',
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
@@ -1469,54 +1819,186 @@ export default function ProviderClientsPage() {
             style={{
               width: '100%',
               maxWidth: 430,
-              padding: '0 14px calc(18px + env(safe-area-inset-bottom))',
+              background: '#ffffff',
+              borderTopLeftRadius: 32,
+              borderTopRightRadius: 32,
+              border: '2px solid #111111',
+              borderBottom: 'none',
+              padding: '18px 22px calc(22px + env(safe-area-inset-bottom))',
               boxSizing: 'border-box',
             }}
           >
             <div
               style={{
-                borderRadius: 28,
-                border: '2px solid #111111',
-                background: '#ffffff',
-                padding: 16,
+                width: 58,
+                height: 5,
+                borderRadius: 999,
+                background: '#d8d8d8',
+                margin: '0 auto 18px',
+              }}
+            />
+
+            <h2
+              style={{
+                margin: 0,
+                textAlign: 'center',
+                fontSize: 24,
+                fontWeight: 900,
+                color: '#17130f',
               }}
             >
-              <div style={{ fontSize: 20, fontWeight: 1000, color: '#17130f' }}>
-                {text.editValue}
+              {text.changeTime}
+            </h2>
+
+            <div
+              style={{
+                marginTop: 26,
+                display: 'grid',
+                gridTemplateColumns: '1fr 20px 1fr',
+                gap: 16,
+                alignItems: 'center',
+              }}
+            >
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 13, fontWeight: 900, color: '#17130f' }}>
+                  {text.hour}
+                </div>
+                <input
+                  value={editHour}
+                  onChange={(event) => {
+                    const clean = event.target.value.replace(/\D/g, '').slice(0, 2);
+                    setEditHour(clean.padStart(2, '0'));
+                  }}
+                  style={{
+                    marginTop: 10,
+                    width: '100%',
+                    height: 92,
+                    borderRadius: 18,
+                    border: '2px solid #dedede',
+                    textAlign: 'center',
+                    fontSize: 45,
+                    fontWeight: 900,
+                    color: '#07111f',
+                    outline: 'none',
+                  }}
+                />
               </div>
 
-              <input
-                value={editValue}
-                onChange={(event) => setEditValue(event.target.value)}
-                autoFocus
+              <div
                 style={{
-                  marginTop: 14,
-                  width: '100%',
-                  height: 54,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  padding: '0 14px',
-                  fontSize: 17,
+                  marginTop: 26,
+                  textAlign: 'center',
+                  fontSize: 34,
                   fontWeight: 900,
                   color: '#17130f',
-                  boxSizing: 'border-box',
-                  outline: 'none',
                 }}
-              />
+              >
+                :
+              </div>
+
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 13, fontWeight: 900, color: '#17130f' }}>
+                  {text.minutes}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 10,
+                    borderRadius: 18,
+                    border: '2px solid #dedede',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {['00', '15', '20', '25', '30', '35', '40', '45'].map((minute) => {
+                    const active = editMinute === minute;
+
+                    return (
+                      <button
+                        key={minute}
+                        type="button"
+                        onClick={() => setEditMinute(minute)}
+                        style={{
+                          width: '100%',
+                          minHeight: 34,
+                          border: 'none',
+                          background: active ? '#e8f1ff' : '#ffffff',
+                          color: active ? '#2364c8' : '#9ca3af',
+                          fontSize: active ? 22 : 17,
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {minute}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: 22,
+                textAlign: 'center',
+                fontSize: 20,
+                fontWeight: 900,
+                color: '#17130f',
+              }}
+            >
+              {text.newTime}:{' '}
+              <span style={{ color: '#2364c8' }}>
+                {editHour}:{editMinute}
+              </span>
+            </div>
+
+            <div
+              style={{
+                marginTop: 12,
+                textAlign: 'center',
+                fontSize: 14,
+                fontWeight: 800,
+                color: '#25a653',
+              }}
+            >
+              ✓ {text.synced}
+            </div>
+
+            <div
+              style={{
+                marginTop: 22,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 12,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setTimeSlotId(null)}
+                style={{
+                  minHeight: 56,
+                  borderRadius: 18,
+                  border: '2px solid #ff4b52',
+                  background: '#fff2f4',
+                  color: '#ff4b52',
+                  fontSize: 16,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.cancel}
+              </button>
 
               <button
                 type="button"
-                onClick={closeEditRow}
+                onClick={handleSaveTime}
                 style={{
-                  marginTop: 14,
-                  width: '100%',
-                  minHeight: 54,
+                  minHeight: 56,
                   borderRadius: 18,
                   border: '2px solid #111111',
-                  background: '#2578ff',
+                  background: '#41c83f',
                   color: '#ffffff',
                   fontSize: 16,
-                  fontWeight: 1000,
+                  fontWeight: 900,
                   cursor: 'pointer',
                 }}
               >
@@ -1527,5 +2009,138 @@ export default function ProviderClientsPage() {
         </div>
       ) : null}
     </>
+  );
+}
+
+function FullContactsBlock({
+  slot,
+  text,
+}: {
+  slot: ProviderSlot;
+  text: ReturnType<typeof getTexts>;
+}) {
+  const booking = slot.sourceBooking;
+  const protectedContact = booking ? getProtectedBookingContact(booking) : null;
+
+  const phone = protectedContact?.phone || slot.contactPhone || '+44 7700 900123';
+  const email = protectedContact?.email || slot.contactEmail || 'lucie.hlavova@example.com';
+  const whatsapp = protectedContact?.whatsapp || slot.contactWhatsapp || phone;
+
+  return (
+    <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
+      <ContactRow icon="☎" value={phone} buttonLabel={text.call} accent="green" />
+      <ContactRow icon="✉" value={email} buttonLabel={text.message} accent="yellow" />
+      <ContactRow icon="🟢" value={whatsapp} buttonLabel={text.whatsapp} accent="yellow" />
+      <ContactRow icon="💬" value="Olamep chat" buttonLabel={text.internalChat} accent="yellow" />
+
+      <div
+        style={{
+          marginTop: 4,
+          borderTop: '1.5px solid #eeeeee',
+          paddingTop: 10,
+          display: 'flex',
+          gap: 8,
+          alignItems: 'center',
+          fontSize: 12,
+          lineHeight: 1.35,
+          fontWeight: 800,
+          color: '#747474',
+        }}
+      >
+        <span>🔒</span>
+        <span>Все способы связи предоставлены клиентом и доступны вам.</span>
+      </div>
+    </div>
+  );
+}
+
+function QuickContactsBlock({ text }: { text: ReturnType<typeof getTexts> }) {
+  return (
+    <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
+      <ContactRow icon="💬" value="Olamep chat" buttonLabel={text.internalChat} accent="yellow" />
+
+      <div
+        style={{
+          marginTop: 4,
+          borderTop: '1.5px solid #eeeeee',
+          paddingTop: 10,
+          display: 'flex',
+          gap: 8,
+          alignItems: 'center',
+          fontSize: 12,
+          lineHeight: 1.35,
+          fontWeight: 800,
+          color: '#747474',
+        }}
+      >
+        <span>🔒</span>
+        <span>При быстрой брони доступен только внутренний чат приложения.</span>
+      </div>
+    </div>
+  );
+}
+
+function ContactRow({
+  icon,
+  value,
+  buttonLabel,
+  accent,
+}: {
+  icon: string;
+  value: string;
+  buttonLabel: string;
+  accent: 'green' | 'yellow';
+}) {
+  const isYellow = accent === 'yellow';
+
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '28px 1fr auto',
+        gap: 10,
+        alignItems: 'center',
+      }}
+    >
+      <div
+        style={{
+          fontSize: 21,
+          color: isYellow ? '#d2a300' : '#25a653',
+        }}
+      >
+        {icon}
+      </div>
+
+      <div
+        style={{
+          minWidth: 0,
+          fontSize: 14,
+          fontWeight: 800,
+          color: '#17130f',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {value}
+      </div>
+
+      <button
+        type="button"
+        style={{
+          minHeight: 38,
+          padding: '0 12px',
+          borderRadius: 12,
+          border: `2px solid ${isYellow ? '#f2c94c' : '#55c75f'}`,
+          background: isYellow ? '#fff7cf' : '#ffffff',
+          color: isYellow ? '#b28a00' : '#25a653',
+          fontSize: 12,
+          fontWeight: 900,
+          cursor: 'pointer',
+        }}
+      >
+        {buttonLabel}
+      </button>
+    </div>
   );
 }
