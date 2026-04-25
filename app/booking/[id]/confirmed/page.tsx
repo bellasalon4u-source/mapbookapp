@@ -10,6 +10,8 @@ import {
 } from '../../../../services/i18n';
 import { formatDisplayPrice } from '../../../../services/currencyDisplay';
 
+type PaymentMethod = 'olacash' | 'card' | 'paypal' | 'wallet';
+
 function parseDurationToMinutes(value: string) {
   const hourMatch = value.match(/(\d+)\s*h/i);
   const minuteMatch = value.match(/(\d+)\s*m/i);
@@ -53,7 +55,7 @@ function getTexts(language: AppLanguage) {
       bookingNotFound: 'Бронирование не найдено',
       selectedProceduresNotFound: 'Выбранные процедуры не найдены',
       bookingSent: 'Бронирование отправлено',
-      bookingSentText1: 'Ваш депозит £5 успешно удержан.',
+      bookingSentText1: 'Ваш депозит успешно оплачен.',
       bookingSentText2: 'Теперь специалист может просмотреть и подтвердить вашу запись.',
       selectedProcedures: 'Выбранные процедуры',
       totalDuration: 'Общая длительность',
@@ -72,6 +74,12 @@ function getTexts(language: AppLanguage) {
       routeHint: 'Точный адрес доступен после успешной оплаты',
       emptyValue: '—',
       secured: 'Оплата подтверждена',
+      depositPaid: 'Оплаченный депозит',
+      paymentMethod: 'Способ оплаты',
+      olacash: 'OlaCash',
+      card: 'Банковская карта',
+      paypal: 'PayPal',
+      wallet: 'Apple Pay / Google Pay',
     };
   }
 
@@ -80,7 +88,7 @@ function getTexts(language: AppLanguage) {
       bookingNotFound: 'Reserva no encontrada',
       selectedProceduresNotFound: 'Procedimientos seleccionados no encontrados',
       bookingSent: 'Reserva enviada',
-      bookingSentText1: 'Tu depósito de £5 fue retenido correctamente.',
+      bookingSentText1: 'Tu depósito fue pagado correctamente.',
       bookingSentText2: 'Ahora el profesional puede revisar y confirmar tu cita.',
       selectedProcedures: 'Procedimientos seleccionados',
       totalDuration: 'Duración total',
@@ -99,6 +107,12 @@ function getTexts(language: AppLanguage) {
       routeHint: 'La dirección exacta está disponible después del pago exitoso',
       emptyValue: '—',
       secured: 'Pago confirmado',
+      depositPaid: 'Depósito pagado',
+      paymentMethod: 'Método de pago',
+      olacash: 'OlaCash',
+      card: 'Tarjeta bancaria',
+      paypal: 'PayPal',
+      wallet: 'Apple Pay / Google Pay',
     };
   }
 
@@ -107,7 +121,7 @@ function getTexts(language: AppLanguage) {
       bookingNotFound: 'Rezervace nebyla nalezena',
       selectedProceduresNotFound: 'Vybrané procedury nebyly nalezeny',
       bookingSent: 'Rezervace odeslána',
-      bookingSentText1: 'Vaše záloha £5 byla úspěšně blokována.',
+      bookingSentText1: 'Vaše záloha byla úspěšně zaplacena.',
       bookingSentText2: 'Specialista nyní může vaši rezervaci zkontrolovat a potvrdit.',
       selectedProcedures: 'Vybrané procedury',
       totalDuration: 'Celková délka',
@@ -126,6 +140,12 @@ function getTexts(language: AppLanguage) {
       routeHint: 'Přesná adresa je dostupná po úspěšné platbě',
       emptyValue: '—',
       secured: 'Platba potvrzena',
+      depositPaid: 'Zaplacená záloha',
+      paymentMethod: 'Způsob platby',
+      olacash: 'OlaCash',
+      card: 'Platební karta',
+      paypal: 'PayPal',
+      wallet: 'Apple Pay / Google Pay',
     };
   }
 
@@ -134,7 +154,7 @@ function getTexts(language: AppLanguage) {
       bookingNotFound: 'Buchung nicht gefunden',
       selectedProceduresNotFound: 'Ausgewählte Behandlungen nicht gefunden',
       bookingSent: 'Buchung gesendet',
-      bookingSentText1: 'Deine £5 Anzahlung wurde erfolgreich reserviert.',
+      bookingSentText1: 'Deine Anzahlung wurde erfolgreich bezahlt.',
       bookingSentText2: 'Jetzt kann der Anbieter deinen Termin prüfen und bestätigen.',
       selectedProcedures: 'Ausgewählte Behandlungen',
       totalDuration: 'Gesamtdauer',
@@ -153,6 +173,12 @@ function getTexts(language: AppLanguage) {
       routeHint: 'Die genaue Adresse ist nach erfolgreicher Zahlung verfügbar',
       emptyValue: '—',
       secured: 'Zahlung bestätigt',
+      depositPaid: 'Bezahlte Anzahlung',
+      paymentMethod: 'Zahlungsmethode',
+      olacash: 'OlaCash',
+      card: 'Bankkarte',
+      paypal: 'PayPal',
+      wallet: 'Apple Pay / Google Pay',
     };
   }
 
@@ -161,7 +187,7 @@ function getTexts(language: AppLanguage) {
       bookingNotFound: 'Nie znaleziono rezerwacji',
       selectedProceduresNotFound: 'Nie znaleziono wybranych zabiegów',
       bookingSent: 'Rezerwacja wysłana',
-      bookingSentText1: 'Twój depozyt £5 został poprawnie zablokowany.',
+      bookingSentText1: 'Twój depozyt został poprawnie opłacony.',
       bookingSentText2: 'Teraz specjalista może sprawdzić i potwierdzić Twoją wizytę.',
       selectedProcedures: 'Wybrane zabiegi',
       totalDuration: 'Łączny czas',
@@ -180,6 +206,12 @@ function getTexts(language: AppLanguage) {
       routeHint: 'Dokładny adres jest dostępny po udanej płatności',
       emptyValue: '—',
       secured: 'Płatność potwierdzona',
+      depositPaid: 'Opłacony depozyt',
+      paymentMethod: 'Metoda płatności',
+      olacash: 'OlaCash',
+      card: 'Karta bankowa',
+      paypal: 'PayPal',
+      wallet: 'Apple Pay / Google Pay',
     };
   }
 
@@ -187,7 +219,7 @@ function getTexts(language: AppLanguage) {
     bookingNotFound: 'Booking not found',
     selectedProceduresNotFound: 'Selected procedures not found',
     bookingSent: 'Booking sent',
-    bookingSentText1: 'Your £5 hold deposit was secured successfully.',
+    bookingSentText1: 'Your deposit was paid successfully.',
     bookingSentText2: 'The seller can now review and confirm your appointment.',
     selectedProcedures: 'Selected procedures',
     totalDuration: 'Total duration',
@@ -206,6 +238,12 @@ function getTexts(language: AppLanguage) {
     routeHint: 'Exact address is available after successful payment',
     emptyValue: '—',
     secured: 'Payment confirmed',
+    depositPaid: 'Deposit paid',
+    paymentMethod: 'Payment method',
+    olacash: 'OlaCash',
+    card: 'Bank card',
+    paypal: 'PayPal',
+    wallet: 'Apple Pay / Google Pay',
   };
 }
 
@@ -214,6 +252,13 @@ function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange') {
   if (kind === 'blue') return { background: '#eef4ff', color: '#2f7cf6' };
   if (kind === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
   return { background: '#fff5e8', color: '#d68612' };
+}
+
+function normalizePaymentMethod(value: string | null): PaymentMethod {
+  if (value === 'olacash') return 'olacash';
+  if (value === 'paypal') return 'paypal';
+  if (value === 'wallet') return 'wallet';
+  return 'card';
 }
 
 export default function BookingConfirmedPage() {
@@ -229,6 +274,13 @@ export default function BookingConfirmedPage() {
   const servicesParam = searchParams.get('services') || '';
   const date = searchParams.get('date') || '';
   const time = searchParams.get('time') || '';
+  const depositParam = searchParams.get('deposit') || '1';
+  const paymentMethod = normalizePaymentMethod(searchParams.get('paymentMethod'));
+
+  const depositAmount = Number(depositParam);
+  const safeDepositAmount = Number.isFinite(depositAmount) && depositAmount > 0 ? depositAmount : 1;
+
+  const paymentMethodLabel = text[paymentMethod];
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -397,6 +449,30 @@ export default function BookingConfirmedPage() {
               }}
             >
               🕒 {time}
+            </div>
+
+            <div
+              style={{
+                ...badgeStyle('green'),
+                borderRadius: 999,
+                padding: '10px 14px',
+                fontSize: 13,
+                fontWeight: 900,
+              }}
+            >
+              💰 {text.depositPaid}: {formatDisplayPrice(safeDepositAmount)}
+            </div>
+
+            <div
+              style={{
+                ...badgeStyle(paymentMethod === 'olacash' ? 'green' : 'pink'),
+                borderRadius: 999,
+                padding: '10px 14px',
+                fontSize: 13,
+                fontWeight: 900,
+              }}
+            >
+              {paymentMethod === 'olacash' ? '🟢' : '💳'} {text.paymentMethod}: {paymentMethodLabel}
             </div>
           </div>
 
@@ -628,8 +704,22 @@ export default function BookingConfirmedPage() {
                     width: 36,
                     height: 36,
                     borderRadius: 12,
-                    background: index === 0 ? '#fff5e8' : index === 1 ? '#eef9f1' : index === 2 ? '#eef4ff' : '#fff1f7',
-                    color: index === 0 ? '#d68612' : index === 1 ? '#2fa35a' : index === 2 ? '#2f7cf6' : '#ff4fa0',
+                    background:
+                      index === 0
+                        ? '#fff5e8'
+                        : index === 1
+                        ? '#eef9f1'
+                        : index === 2
+                        ? '#eef4ff'
+                        : '#fff1f7',
+                    color:
+                      index === 0
+                        ? '#d68612'
+                        : index === 1
+                        ? '#2fa35a'
+                        : index === 2
+                        ? '#2f7cf6'
+                        : '#ff4fa0',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
