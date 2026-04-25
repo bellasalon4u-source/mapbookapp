@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { getMasterById } from '../../../../services/masters';
+import { getMasterById, getAllMasters } from '../../../../services/masters';
+import { getListings } from '../../../../services/listingsStore';
 import {
   getSavedLanguage,
   subscribeToLanguageChange,
@@ -12,12 +13,287 @@ import { formatDisplayPrice } from '../../../../services/currencyDisplay';
 
 type RegistrationMode = 'quick' | 'full';
 
+type ListingLike = {
+  id: string | number;
+  title?: string;
+  category?: string;
+  subcategory?: string;
+  location?: string;
+  description?: string;
+  price?: string;
+  hours?: string;
+  availableToday?: boolean;
+  photos?: string[];
+  paymentMethods?: string[];
+  serviceModes?: string[];
+};
+
+type ServiceLike = {
+  slug: string;
+  title: string;
+  duration: string;
+  price: number;
+  image: string;
+};
+
+type MasterLike = {
+  id: string | number;
+  name: string;
+  title: string;
+  city?: string;
+  avatar: string;
+  services: ServiceLike[];
+};
+
+const BRAND = {
+  navy: '#071b46',
+  blue: '#1467f2',
+  green: '#21b84b',
+  red: '#ff4b4b',
+  pink: '#ff4f9a',
+  yellow: '#ffd629',
+  border: '#111111',
+  muted: '#626977',
+  light: '#f5f7fb',
+};
+
+function getTexts(language: AppLanguage) {
+  if (language === 'RU') {
+    return {
+      masterNotFound: 'Специалист не найден',
+      selectedServicesNotFound: 'Выбранные услуги не найдены',
+      yourDetails: 'Ваши данные',
+      yourDetailsSub: 'Заполните контакты для подтверждения бронирования',
+      selectedService: 'Выбранная услуга',
+      totalDuration: 'Длительность',
+      totalPrice: 'Цена',
+      firstName: 'Имя',
+      lastName: 'Фамилия',
+      phone: 'Телефон',
+      email: 'Email',
+      whatsapp: 'WhatsApp',
+      telegram: 'Telegram',
+      instagram: 'Instagram',
+      note: 'Комментарий для мастера',
+      notePlaceholder: 'Например: пожелания, детали услуги, важные пометки',
+      nextStep: 'Следующий шаг',
+      holdDeposit: 'Внести депозит',
+      continue: 'Продолжить',
+      required: 'Обязательно',
+      optional: 'Необязательно',
+      phoneCode: 'Код',
+      registrationType: 'Тип бронирования',
+      quickBooking: 'Быстрая',
+      quickBookingText: 'Минимум данных. Мастер сможет писать только в чате Olamep.',
+      fullBooking: 'Полная',
+      fullBookingText: 'Контакты откроются мастеру только после подтверждения и оплаты.',
+      quickBadge: 'Только чат',
+      fullBadge: 'Контакты после подтверждения',
+      protectionTitle: 'Контакты защищены',
+      protectionText:
+        'Телефон, соцсети и прямые контакты не открываются сразу. До подтверждения мастером доступен только чат внутри Olamep.',
+      paymentHint: 'Дальше откроется экран оплаты депозита.',
+      message: 'Сообщения',
+      bookingDetails: 'Booking details',
+      contactDetails: 'Contact details',
+      quickInfo: 'Fast booking',
+      fullInfo: 'Full registration',
+      chatOnly: 'Chat only',
+      protectedContacts: 'Protected contacts',
+      date: 'Дата',
+      time: 'Время',
+      providerFallback: 'Специалист',
+      serviceProviderFallback: 'Исполнитель услуг',
+      serviceFallback: 'Основная услуга',
+      premiumOption: 'Премиум вариант',
+    };
+  }
+
+  if (language === 'UA') {
+    return {
+      masterNotFound: 'Спеціаліста не знайдено',
+      selectedServicesNotFound: 'Вибрані послуги не знайдено',
+      yourDetails: 'Ваші дані',
+      yourDetailsSub: 'Заповніть контакти для підтвердження бронювання',
+      selectedService: 'Обрана послуга',
+      totalDuration: 'Тривалість',
+      totalPrice: 'Ціна',
+      firstName: 'Ім’я',
+      lastName: 'Прізвище',
+      phone: 'Телефон',
+      email: 'Email',
+      whatsapp: 'WhatsApp',
+      telegram: 'Telegram',
+      instagram: 'Instagram',
+      note: 'Коментар для майстра',
+      notePlaceholder: 'Наприклад: побажання, деталі послуги, важливі нотатки',
+      nextStep: 'Наступний крок',
+      holdDeposit: 'Внести депозит',
+      continue: 'Продовжити',
+      required: 'Обов’язково',
+      optional: 'Необов’язково',
+      phoneCode: 'Код',
+      registrationType: 'Тип бронювання',
+      quickBooking: 'Швидка',
+      quickBookingText: 'Мінімум даних. Майстер зможе писати тільки в чаті Olamep.',
+      fullBooking: 'Повна',
+      fullBookingText: 'Контакти відкриються майстру тільки після підтвердження та оплати.',
+      quickBadge: 'Тільки чат',
+      fullBadge: 'Контакти після підтвердження',
+      protectionTitle: 'Контакти захищено',
+      protectionText:
+        'Телефон, соцмережі та прямі контакти не відкриваються одразу. До підтвердження майстром доступний тільки чат в Olamep.',
+      paymentHint: 'Далі відкриється екран оплати депозиту.',
+      message: 'Повідомлення',
+      bookingDetails: 'Booking details',
+      contactDetails: 'Contact details',
+      quickInfo: 'Fast booking',
+      fullInfo: 'Full registration',
+      chatOnly: 'Chat only',
+      protectedContacts: 'Protected contacts',
+      date: 'Дата',
+      time: 'Час',
+      providerFallback: 'Спеціаліст',
+      serviceProviderFallback: 'Виконавець послуг',
+      serviceFallback: 'Основна послуга',
+      premiumOption: 'Преміум варіант',
+    };
+  }
+
+  return {
+    masterNotFound: 'Provider not found',
+    selectedServicesNotFound: 'Selected services not found',
+    yourDetails: 'Your details',
+    yourDetailsSub: 'Fill in your contacts to confirm the booking',
+    selectedService: 'Selected service',
+    totalDuration: 'Duration',
+    totalPrice: 'Price',
+    firstName: 'First name',
+    lastName: 'Last name',
+    phone: 'Phone',
+    email: 'Email',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+    note: 'Note for provider',
+    notePlaceholder: 'Preferences, service details or important notes',
+    nextStep: 'Next step',
+    holdDeposit: 'Hold deposit',
+    continue: 'Continue',
+    required: 'Required',
+    optional: 'Optional',
+    phoneCode: 'Code',
+    registrationType: 'Booking type',
+    quickBooking: 'Quick',
+    quickBookingText: 'Minimum details. The provider can contact you only via Olamep chat.',
+    fullBooking: 'Full',
+    fullBookingText: 'Contacts unlock for the provider only after confirmation and payment.',
+    quickBadge: 'Chat only',
+    fullBadge: 'Contacts after confirmation',
+    protectionTitle: 'Contacts protected',
+    protectionText:
+      'Phone, social links and direct contacts are not opened immediately. Before provider confirmation, only in-app chat is available.',
+    paymentHint: 'Next you will open the deposit payment screen.',
+    message: 'Messages',
+    bookingDetails: 'Booking details',
+    contactDetails: 'Contact details',
+    quickInfo: 'Fast booking',
+    fullInfo: 'Full registration',
+    chatOnly: 'Chat only',
+    protectedContacts: 'Protected contacts',
+    date: 'Date',
+    time: 'Time',
+    providerFallback: 'Provider',
+    serviceProviderFallback: 'Service provider',
+    serviceFallback: 'Main service',
+    premiumOption: 'Premium option',
+  };
+}
+
+function OlamepLogo() {
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+      }}
+    >
+      <div
+        style={{
+          width: 34,
+          height: 42,
+          position: 'relative',
+          borderRadius: '50% 50% 58% 58%',
+          background:
+            'conic-gradient(from 210deg, #1467f2 0deg, #20c96b 90deg, #ffd629 160deg, #ff3f68 230deg, #1467f2 360deg)',
+          boxShadow: '0 8px 18px rgba(20,103,242,0.18)',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: 8,
+            top: 8,
+            width: 17,
+            height: 17,
+            borderRadius: '50%',
+            background: '#ffffff',
+            border: '4px solid #071b46',
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          fontSize: 30,
+          fontWeight: 900,
+          color: BRAND.navy,
+          letterSpacing: '-1px',
+        }}
+      >
+        Olamep
+      </div>
+    </div>
+  );
+}
+
+function MessageIcon() {
+  return (
+    <div
+      style={{
+        width: 44,
+        height: 44,
+        borderRadius: 999,
+        border: `2px solid ${BRAND.green}`,
+        background: '#ffffff',
+        color: BRAND.green,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 26,
+        fontWeight: 900,
+      }}
+    >
+      💬
+    </div>
+  );
+}
+
 function parseDurationToMinutes(value: string) {
-  const hourMatch = value.match(/(\d+)\s*h/i);
-  const minuteMatch = value.match(/(\d+)\s*m/i);
+  const text = String(value || '').toLowerCase();
+
+  const hourMatch = text.match(/(\d+)\s*(h|hour|hours|ч|г|std)/i);
+  const minuteMatch = text.match(/(\d+)\s*(m|min|mins|minute|minutes|м|хв)/i);
 
   const hours = hourMatch ? Number(hourMatch[1]) : 0;
   const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
+
+  if (hours === 0 && minutes === 0) {
+    const onlyNumber = Number(text.replace(/[^\d.]/g, ''));
+    if (Number.isFinite(onlyNumber) && onlyNumber > 0) return onlyNumber;
+  }
 
   return hours * 60 + minutes;
 }
@@ -25,6 +301,8 @@ function parseDurationToMinutes(value: string) {
 function formatMinutes(minutes: number, language: AppLanguage) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
+
+  if (!minutes) return '0m';
 
   if (language === 'RU') {
     if (h > 0 && m > 0) return `${h}ч ${m}м`;
@@ -38,333 +316,73 @@ function formatMinutes(minutes: number, language: AppLanguage) {
     return `${m}хв`;
   }
 
-  if (language === 'DE') {
-    if (h > 0 && m > 0) return `${h}Std ${m}Min`;
-    if (h > 0) return `${h}Std`;
-    return `${m}Min`;
-  }
-
-  if (language === 'ES' || language === 'CZ' || language === 'PL') {
-    if (h > 0 && m > 0) return `${h}h ${m}min`;
-    if (h > 0) return `${h}h`;
-    return `${m}min`;
-  }
-
   if (h > 0 && m > 0) return `${h}h ${m}m`;
   if (h > 0) return `${h}h`;
   return `${m}m`;
 }
 
-function getTexts(language: AppLanguage) {
-  if (language === 'RU') {
-    return {
-      masterNotFound: 'Специалист не найден',
-      selectedServicesNotFound: 'Выбранные услуги не найдены',
-      yourDetails: 'Ваши данные',
-      yourDetailsSub: 'Заполните контакты для подтверждения бронирования',
-      selectedProcedures: 'Выбранные процедуры',
-      totalDuration: 'Общая длительность',
-      totalPrice: 'Общая цена',
-      firstName: 'Имя',
-      lastName: 'Фамилия',
-      phone: 'Телефон',
-      email: 'Email',
-      whatsapp: 'WhatsApp',
-      telegram: 'Telegram',
-      instagram: 'Instagram',
-      note: 'Комментарий для мастера',
-      notePlaceholder: 'Например: пожелания, детали услуги, важные пометки',
-      nextStep: 'Следующий шаг',
-      holdDeposit: 'Внести депозит',
-      continue: 'Продолжить',
-      bookingInfo: 'Информация о бронировании',
-      required: 'Обязательное поле',
-      optional: 'Необязательно',
-      contactsProtected: 'Контакты защищены системой Olamep',
-      phoneCode: 'Код',
-      registrationType: 'Тип бронирования',
-      quickBooking: 'Быстрая бронь',
-      quickBookingText:
-        'Подходит, если клиент не хочет проходить полную регистрацию. Мастер сможет связаться только через чат внутри приложения.',
-      fullBooking: 'Полная регистрация',
-      fullBookingText:
-        'После обоюдного подтверждения мастеру будут доступны телефон, WhatsApp, email и другие контакты, которые вы указали.',
-      quickBadge: 'Только чат',
-      fullBadge: 'Все контакты после подтверждения',
-      protectionTitle: 'Защита контактов',
-      protectionText:
-        'До подтверждения и оплаты прямые контакты скрыты. Это защищает клиента, мастера и бронирование внутри платформы.',
-      clientNote: 'Пометки',
-      paymentHint: 'После этого откроется экран оплаты депозита.',
-    };
-  }
+function listingToMasterShape(listing: ListingLike, index: number, text: ReturnType<typeof getTexts>) {
+  const fallbackImages = [
+    'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1200&q=80',
+  ];
 
-  if (language === 'UA') {
-    return {
-      masterNotFound: 'Спеціаліста не знайдено',
-      selectedServicesNotFound: 'Вибрані послуги не знайдено',
-      yourDetails: 'Ваші дані',
-      yourDetailsSub: 'Заповніть контакти для підтвердження бронювання',
-      selectedProcedures: 'Вибрані процедури',
-      totalDuration: 'Загальна тривалість',
-      totalPrice: 'Загальна ціна',
-      firstName: 'Ім’я',
-      lastName: 'Прізвище',
-      phone: 'Телефон',
-      email: 'Email',
-      whatsapp: 'WhatsApp',
-      telegram: 'Telegram',
-      instagram: 'Instagram',
-      note: 'Коментар для майстра',
-      notePlaceholder: 'Наприклад: побажання, деталі послуги, важливі нотатки',
-      nextStep: 'Наступний крок',
-      holdDeposit: 'Внести депозит',
-      continue: 'Продовжити',
-      bookingInfo: 'Інформація про бронювання',
-      required: 'Обов’язкове поле',
-      optional: 'Необов’язково',
-      contactsProtected: 'Контакти захищені системою Olamep',
-      phoneCode: 'Код',
-      registrationType: 'Тип бронювання',
-      quickBooking: 'Швидка бронь',
-      quickBookingText:
-        'Підходить, якщо клієнт не хоче проходити повну реєстрацію. Майстер зможе зв’язатися тільки через чат у застосунку.',
-      fullBooking: 'Повна реєстрація',
-      fullBookingText:
-        'Після взаємного підтвердження майстру будуть доступні телефон, WhatsApp, email та інші контакти.',
-      quickBadge: 'Тільки чат',
-      fullBadge: 'Усі контакти після підтвердження',
-      protectionTitle: 'Захист контактів',
-      protectionText:
-        'До підтвердження й оплати прямі контакти приховані. Це захищає клієнта, майстра і бронювання всередині платформи.',
-      clientNote: 'Нотатки',
-      paymentHint: 'Після цього відкриється екран оплати депозиту.',
-    };
-  }
+  const gallery =
+    listing.photos && listing.photos.length > 0
+      ? listing.photos
+      : [
+          fallbackImages[index % fallbackImages.length],
+          fallbackImages[(index + 1) % fallbackImages.length],
+          fallbackImages[(index + 2) % fallbackImages.length],
+        ];
 
-  if (language === 'ES') {
-    return {
-      masterNotFound: 'Profesional no encontrado',
-      selectedServicesNotFound: 'Servicios seleccionados no encontrados',
-      yourDetails: 'Tus datos',
-      yourDetailsSub: 'Completa tus contactos para confirmar la reserva',
-      selectedProcedures: 'Procedimientos seleccionados',
-      totalDuration: 'Duración total',
-      totalPrice: 'Precio total',
-      firstName: 'Nombre',
-      lastName: 'Apellido',
-      phone: 'Teléfono',
-      email: 'Email',
-      whatsapp: 'WhatsApp',
-      telegram: 'Telegram',
-      instagram: 'Instagram',
-      note: 'Nota para el profesional',
-      notePlaceholder: 'Preferencias, detalles del servicio o notas importantes',
-      nextStep: 'Siguiente paso',
-      holdDeposit: 'Pagar depósito',
-      continue: 'Continuar',
-      bookingInfo: 'Información de la reserva',
-      required: 'Campo obligatorio',
-      optional: 'Opcional',
-      contactsProtected: 'Tus contactos están protegidos por Olamep',
-      phoneCode: 'Código',
-      registrationType: 'Tipo de reserva',
-      quickBooking: 'Reserva rápida',
-      quickBookingText:
-        'Ideal si el cliente no quiere registrarse completamente. El profesional solo podrá contactar por chat interno.',
-      fullBooking: 'Registro completo',
-      fullBookingText:
-        'Tras la confirmación de ambas partes, el profesional verá teléfono, WhatsApp, email y otros contactos indicados.',
-      quickBadge: 'Solo chat',
-      fullBadge: 'Todos los contactos tras confirmar',
-      protectionTitle: 'Protección de contactos',
-      protectionText:
-        'Antes de la confirmación y el pago, los contactos directos están ocultos.',
-      clientNote: 'Notas',
-      paymentHint: 'Después se abrirá la pantalla de pago del depósito.',
-    };
-  }
-
-  if (language === 'CZ') {
-    return {
-      masterNotFound: 'Specialista nebyl nalezen',
-      selectedServicesNotFound: 'Vybrané služby nebyly nalezeny',
-      yourDetails: 'Vaše údaje',
-      yourDetailsSub: 'Vyplňte kontakty pro potvrzení rezervace',
-      selectedProcedures: 'Vybrané procedury',
-      totalDuration: 'Celková délka',
-      totalPrice: 'Celková cena',
-      firstName: 'Jméno',
-      lastName: 'Příjmení',
-      phone: 'Telefon',
-      email: 'Email',
-      whatsapp: 'WhatsApp',
-      telegram: 'Telegram',
-      instagram: 'Instagram',
-      note: 'Poznámka pro specialistu',
-      notePlaceholder: 'Přání, detaily služby nebo důležité poznámky',
-      nextStep: 'Další krok',
-      holdDeposit: 'Zaplatit zálohu',
-      continue: 'Pokračovat',
-      bookingInfo: 'Informace o rezervaci',
-      required: 'Povinné pole',
-      optional: 'Volitelné',
-      contactsProtected: 'Vaše kontakty jsou chráněny systémem Olamep',
-      phoneCode: 'Kód',
-      registrationType: 'Typ rezervace',
-      quickBooking: 'Rychlá rezervace',
-      quickBookingText:
-        'Vhodné, pokud klient nechce úplnou registraci. Specialista může kontaktovat pouze přes interní chat.',
-      fullBooking: 'Úplná registrace',
-      fullBookingText:
-        'Po potvrzení oběma stranami uvidí specialista telefon, WhatsApp, email a další uvedené kontakty.',
-      quickBadge: 'Pouze chat',
-      fullBadge: 'Všechny kontakty po potvrzení',
-      protectionTitle: 'Ochrana kontaktů',
-      protectionText:
-        'Před potvrzením a platbou jsou přímé kontakty skryté.',
-      clientNote: 'Poznámky',
-      paymentHint: 'Poté se otevře obrazovka platby zálohy.',
-    };
-  }
-
-  if (language === 'DE') {
-    return {
-      masterNotFound: 'Spezialist nicht gefunden',
-      selectedServicesNotFound: 'Ausgewählte Leistungen nicht gefunden',
-      yourDetails: 'Deine Daten',
-      yourDetailsSub: 'Fülle deine Kontaktdaten zur Buchungsbestätigung aus',
-      selectedProcedures: 'Ausgewählte Behandlungen',
-      totalDuration: 'Gesamtdauer',
-      totalPrice: 'Gesamtpreis',
-      firstName: 'Vorname',
-      lastName: 'Nachname',
-      phone: 'Telefon',
-      email: 'Email',
-      whatsapp: 'WhatsApp',
-      telegram: 'Telegram',
-      instagram: 'Instagram',
-      note: 'Notiz für den Profi',
-      notePlaceholder: 'Wünsche, Details zur Leistung oder wichtige Hinweise',
-      nextStep: 'Nächster Schritt',
-      holdDeposit: 'Anzahlung leisten',
-      continue: 'Weiter',
-      bookingInfo: 'Buchungsinfo',
-      required: 'Pflichtfeld',
-      optional: 'Optional',
-      contactsProtected: 'Deine Kontakte sind durch Olamep geschützt',
-      phoneCode: 'Code',
-      registrationType: 'Buchungstyp',
-      quickBooking: 'Schnellbuchung',
-      quickBookingText:
-        'Geeignet, wenn der Kunde keine vollständige Registrierung möchte. Kontakt nur über internen Chat.',
-      fullBooking: 'Vollständige Registrierung',
-      fullBookingText:
-        'Nach beidseitiger Bestätigung sieht der Profi Telefon, WhatsApp, Email und weitere Kontakte.',
-      quickBadge: 'Nur Chat',
-      fullBadge: 'Alle Kontakte nach Bestätigung',
-      protectionTitle: 'Kontaktschutz',
-      protectionText:
-        'Vor Bestätigung und Zahlung sind direkte Kontakte verborgen.',
-      clientNote: 'Notizen',
-      paymentHint: 'Danach öffnet sich die Zahlungsseite für die Anzahlung.',
-    };
-  }
-
-  if (language === 'PL') {
-    return {
-      masterNotFound: 'Specjalista nie został znaleziony',
-      selectedServicesNotFound: 'Nie znaleziono wybranych usług',
-      yourDetails: 'Twoje dane',
-      yourDetailsSub: 'Uzupełnij kontakty, aby potwierdzić rezerwację',
-      selectedProcedures: 'Wybrane zabiegi',
-      totalDuration: 'Łączny czas',
-      totalPrice: 'Łączna cena',
-      firstName: 'Imię',
-      lastName: 'Nazwisko',
-      phone: 'Telefon',
-      email: 'Email',
-      whatsapp: 'WhatsApp',
-      telegram: 'Telegram',
-      instagram: 'Instagram',
-      note: 'Notatka dla specjalisty',
-      notePlaceholder: 'Preferencje, szczegóły usługi lub ważne notatki',
-      nextStep: 'Następny krok',
-      holdDeposit: 'Wpłać depozyt',
-      continue: 'Dalej',
-      bookingInfo: 'Informacje o rezerwacji',
-      required: 'Pole wymagane',
-      optional: 'Opcjonalne',
-      contactsProtected: 'Twoje kontakty są chronione przez Olamep',
-      phoneCode: 'Kod',
-      registrationType: 'Typ rezerwacji',
-      quickBooking: 'Szybka rezerwacja',
-      quickBookingText:
-        'Dobre, jeśli klient nie chce pełnej rejestracji. Specjalista może pisać tylko w czacie aplikacji.',
-      fullBooking: 'Pełna rejestracja',
-      fullBookingText:
-        'Po potwierdzeniu przez obie strony specjalista zobaczy telefon, WhatsApp, email i inne kontakty.',
-      quickBadge: 'Tylko chat',
-      fullBadge: 'Wszystkie kontakty po potwierdzeniu',
-      protectionTitle: 'Ochrona kontaktów',
-      protectionText:
-        'Przed potwierdzeniem i płatnością bezpośrednie kontakty są ukryte.',
-      clientNote: 'Notatki',
-      paymentHint: 'Następnie otworzy się ekran płatności depozytu.',
-    };
-  }
+  const numericPrice = Number(String(listing.price || '').replace(/[^\d.]/g, ''));
+  const priceFrom = Number.isFinite(numericPrice) && numericPrice > 0 ? numericPrice : 45;
 
   return {
-    masterNotFound: 'Master not found',
-    selectedServicesNotFound: 'Selected services not found',
-    yourDetails: 'Your details',
-    yourDetailsSub: 'Fill in your contacts to confirm the booking',
-    selectedProcedures: 'Selected procedures',
-    totalDuration: 'Total duration',
-    totalPrice: 'Total price',
-    firstName: 'First name',
-    lastName: 'Last name',
-    phone: 'Phone',
-    email: 'Email',
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    instagram: 'Instagram',
-    note: 'Note for provider',
-    notePlaceholder: 'Preferences, service details or important notes',
-    nextStep: 'Next step',
-    holdDeposit: 'Hold deposit',
-    continue: 'Continue',
-    bookingInfo: 'Booking info',
-    required: 'Required field',
-    optional: 'Optional',
-    contactsProtected: 'Your contacts are protected by Olamep',
-    phoneCode: 'Code',
-    registrationType: 'Booking type',
-    quickBooking: 'Quick booking',
-    quickBookingText:
-      'Best if the client does not want full registration. The provider can contact only through in-app chat.',
-    fullBooking: 'Full registration',
-    fullBookingText:
-      'After mutual confirmation, the provider can see phone, WhatsApp, email and other contacts you entered.',
-    quickBadge: 'Chat only',
-    fullBadge: 'All contacts after confirmation',
-    protectionTitle: 'Contact protection',
-    protectionText:
-      'Before confirmation and payment, direct contacts are hidden. This keeps the booking protected inside the platform.',
-    clientNote: 'Notes',
-    paymentHint: 'After this, the deposit payment screen will open.',
+    id: String(listing.id),
+    name: listing.title || text.providerFallback,
+    title: listing.subcategory || text.serviceProviderFallback,
+    city: listing.location || 'London',
+    avatar: gallery[0],
+    services: [
+      {
+        slug: 'main-service',
+        title: listing.subcategory || listing.title || text.serviceFallback,
+        duration: listing.hours || '1h',
+        price: priceFrom,
+        image: gallery[0],
+      },
+      {
+        slug: 'premium-service',
+        title: text.premiumOption,
+        duration: '2h',
+        price: priceFrom + 20,
+        image: gallery[1] || gallery[0],
+      },
+    ],
   };
 }
 
-function badgeStyle(kind: 'green' | 'blue' | 'pink' | 'orange' | 'yellow') {
-  if (kind === 'green') return { background: '#eef9f1', color: '#2fa35a' };
-  if (kind === 'blue') return { background: '#eef4ff', color: '#2f7cf6' };
-  if (kind === 'pink') return { background: '#fff1f7', color: '#ff4fa0' };
-  if (kind === 'yellow') return { background: '#fff7cf', color: '#b28a00' };
-  return { background: '#fff5e8', color: '#d68612' };
+function inputStyle() {
+  return {
+    width: '100%',
+    height: 56,
+    padding: '0 15px',
+    borderRadius: 16,
+    border: `1.5px solid #d8dde8`,
+    fontSize: 16,
+    outline: 'none',
+    background: '#ffffff',
+    boxSizing: 'border-box' as const,
+    color: BRAND.navy,
+    fontWeight: 700,
+  };
 }
 
-function fieldLabel(label: string, helper?: string) {
+function FieldLabel({ label, helper }: { label: string; helper?: string }) {
   return (
     <div
       style={{
@@ -379,7 +397,7 @@ function fieldLabel(label: string, helper?: string) {
         style={{
           fontSize: 14,
           fontWeight: 900,
-          color: '#17130f',
+          color: BRAND.navy,
         }}
       >
         {label}
@@ -390,7 +408,7 @@ function fieldLabel(label: string, helper?: string) {
           style={{
             fontSize: 12,
             fontWeight: 800,
-            color: '#8b8075',
+            color: BRAND.muted,
           }}
         >
           {helper}
@@ -400,20 +418,26 @@ function fieldLabel(label: string, helper?: string) {
   );
 }
 
-function inputStyle() {
-  return {
-    width: '100%',
-    height: 56,
-    padding: '0 16px',
-    borderRadius: 18,
-    border: '1.5px solid #ddd2c4',
-    fontSize: 16,
-    outline: 'none',
-    background: '#fff',
-    boxSizing: 'border-box' as const,
-    color: '#17130f',
-    fontWeight: 700,
-  };
+function ContactIcon({ icon, color }: { icon: string; color: string }) {
+  return (
+    <div
+      style={{
+        width: 38,
+        height: 38,
+        borderRadius: 14,
+        background: color,
+        color: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 19,
+        fontWeight: 900,
+        flex: '0 0 auto',
+      }}
+    >
+      {icon}
+    </div>
+  );
 }
 
 export default function BookingDetailsPage() {
@@ -424,7 +448,7 @@ export default function BookingDetailsPage() {
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
 
   const text = useMemo(() => getTexts(language), [language]);
-  const master = useMemo(() => getMasterById(String(params.id)), [params.id]);
+  const id = String(params.id);
 
   const servicesParam = searchParams.get('services') || '';
   const date = searchParams.get('date') || '';
@@ -442,19 +466,51 @@ export default function BookingDetailsPage() {
   const [clientNote, setClientNote] = useState('');
 
   useEffect(() => {
-    setLanguage(getSavedLanguage());
+    const syncLanguage = () => {
+      setLanguage(getSavedLanguage());
+    };
+
+    syncLanguage();
 
     const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
 
+    window.addEventListener('focus', syncLanguage);
+    window.addEventListener('pageshow', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
+
     return () => {
       unsubLanguage();
+      window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('pageshow', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
     };
   }, []);
 
+  const master = useMemo<MasterLike | null>(() => {
+    const builtInMaster = getMasterById(id) as unknown as MasterLike | null;
+    if (builtInMaster) return builtInMaster;
+
+    const listings = getListings() as ListingLike[];
+    const listingIndex = listings.findIndex((item) => String(item.id) === id);
+
+    if (listingIndex !== -1) {
+      return listingToMasterShape(listings[listingIndex], listingIndex, text);
+    }
+
+    const fallbackMaster = (getAllMasters() as any[]).find((item: any) => String(item.id) === id);
+    if (fallbackMaster) return fallbackMaster as MasterLike;
+
+    return null;
+  }, [id, text]);
+
   if (!master) {
-    return <main style={{ padding: 24 }}>{text.masterNotFound}</main>;
+    return (
+      <main style={{ padding: 24, fontFamily: 'Arial, sans-serif', color: BRAND.navy }}>
+        {text.masterNotFound}
+      </main>
+    );
   }
 
   const selectedServiceSlugs = servicesParam
@@ -467,7 +523,11 @@ export default function BookingDetailsPage() {
   );
 
   if (!selectedItems.length) {
-    return <main style={{ padding: 24 }}>{text.selectedServicesNotFound}</main>;
+    return (
+      <main style={{ padding: 24, fontFamily: 'Arial, sans-serif', color: BRAND.navy }}>
+        {text.selectedServicesNotFound}
+      </main>
+    );
   }
 
   const totalPrice = selectedItems.reduce((sum, item) => sum + item.price, 0);
@@ -476,17 +536,15 @@ export default function BookingDetailsPage() {
     0
   );
 
+  const primaryService = selectedItems[0];
+
   const quickValid =
-    firstName.trim().length > 0 &&
-    lastName.trim().length > 0 &&
-    phone.trim().length > 0;
+    firstName.trim().length > 0 && lastName.trim().length > 0 && phone.trim().length > 0;
 
   const fullValid =
     quickValid &&
     email.trim().length > 0 &&
-    (whatsapp.trim().length > 0 ||
-      telegram.trim().length > 0 ||
-      instagram.trim().length > 0);
+    (whatsapp.trim().length > 0 || telegram.trim().length > 0 || instagram.trim().length > 0);
 
   const isValid = registrationMode === 'quick' ? quickValid : fullValid;
 
@@ -497,318 +555,216 @@ export default function BookingDetailsPage() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#fbf7ef',
+        background: '#ffffff',
         fontFamily: 'Arial, sans-serif',
-        color: '#17130f',
+        color: BRAND.navy,
         paddingBottom: 126,
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto', padding: 20 }}>
-        <div
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 18px 112px' }}>
+        <header
           style={{
             display: 'grid',
-            gridTemplateColumns: '54px 1fr 54px',
+            gridTemplateColumns: '46px 1fr 46px',
             alignItems: 'center',
-            gap: 12,
+            gap: 10,
           }}
         >
           <button
             type="button"
             onClick={() => router.back()}
             style={{
-              width: 54,
-              height: 54,
-              borderRadius: 999,
-              border: '1.5px solid #e7ddd0',
-              background: '#fff',
-              fontSize: 24,
+              width: 46,
+              height: 46,
+              border: 0,
+              background: 'transparent',
+              fontSize: 38,
+              lineHeight: 1,
+              color: BRAND.navy,
               cursor: 'pointer',
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
             }}
           >
             ←
           </button>
 
           <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                fontSize: 28,
-                fontWeight: 900,
-                color: '#17130f',
-                lineHeight: 1.05,
-              }}
-            >
-              {text.yourDetails}
-            </div>
-
-            <div
-              style={{
-                marginTop: 8,
-                fontSize: 14,
-                color: '#7a7066',
-                fontWeight: 700,
-                lineHeight: 1.5,
-              }}
-            >
-              {text.yourDetailsSub}
-            </div>
+            <OlamepLogo />
           </div>
 
           <button
             type="button"
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/messages')}
+            aria-label={text.message}
             style={{
-              width: 54,
-              height: 54,
-              borderRadius: 999,
-              border: '1.5px solid #e7ddd0',
-              background: '#fff',
-              fontSize: 22,
+              width: 46,
+              height: 46,
+              border: 0,
+              background: 'transparent',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: 'pointer',
-              boxShadow: '0 10px 22px rgba(44, 23, 10, 0.05)',
             }}
           >
-            ⌂
+            <MessageIcon />
           </button>
-        </div>
+        </header>
+
+        <section style={{ marginTop: 28 }}>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 42,
+              lineHeight: 1.02,
+              fontWeight: 900,
+              letterSpacing: '-1.6px',
+              color: BRAND.navy,
+            }}
+          >
+            {text.yourDetails}
+          </h1>
+
+          <p
+            style={{
+              margin: '10px 0 0',
+              fontSize: 18,
+              lineHeight: 1.35,
+              fontWeight: 500,
+              color: '#515866',
+            }}
+          >
+            {text.yourDetailsSub}
+          </p>
+        </section>
 
         <section
           style={{
             marginTop: 18,
-            borderRadius: 30,
-            border: '1.5px solid #f0e3d7',
-            background: 'linear-gradient(180deg, #ffffff 0%, #fff8f8 100%)',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 12,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.08)',
           }}
         >
           <div
             style={{
-              fontSize: 20,
-              fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
+              display: 'grid',
+              gridTemplateColumns: '96px 1fr auto',
+              gap: 12,
+              alignItems: 'center',
             }}
           >
-            {text.bookingInfo}
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 10,
-              marginBottom: 14,
-            }}
-          >
-            <span
+            <img
+              src={primaryService.image || master.avatar}
+              alt={primaryService.title}
               style={{
-                ...badgeStyle('blue'),
-                borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 12,
-                fontWeight: 900,
+                width: 96,
+                height: 96,
+                borderRadius: 14,
+                objectFit: 'cover',
+                display: 'block',
               }}
-            >
-              📅 {date}
-            </span>
+            />
 
-            <span
-              style={{
-                ...badgeStyle('orange'),
-                borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 12,
-                fontWeight: 900,
-              }}
-            >
-              🕒 {time}
-            </span>
-
-            <span
-              style={{
-                ...badgeStyle('green'),
-                borderRadius: 999,
-                padding: '10px 14px',
-                fontSize: 12,
-                fontWeight: 900,
-              }}
-            >
-              🔒 {text.contactsProtected}
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {selectedItems.map((item) => (
+            <div style={{ minWidth: 0 }}>
               <div
-                key={item.slug}
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '64px 1fr auto',
-                  gap: 12,
-                  alignItems: 'center',
-                  padding: 10,
-                  borderRadius: 20,
-                  background: '#fcfaf6',
-                  border: '1.5px solid #f1e8dc',
+                  fontSize: 21,
+                  lineHeight: 1.08,
+                  fontWeight: 900,
+                  color: BRAND.navy,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  style={{
-                    width: 64,
-                    height: 64,
-                    objectFit: 'cover',
-                    borderRadius: 16,
-                    display: 'block',
-                  }}
-                />
-
-                <div>
-                  <div
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
-                    {item.title}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 4,
-                      color: '#746b62',
-                      fontSize: 14,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {item.duration}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    fontSize: 16,
-                    fontWeight: 900,
-                    color: '#ff3b3b',
-                  }}
-                >
-                  {formatDisplayPrice(item.price)}
-                </div>
+                {master.name}
               </div>
-            ))}
-          </div>
 
-          <div
-            style={{
-              marginTop: 14,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 12,
-            }}
-          >
-            <div
-              style={{
-                background: '#f7f1e8',
-                borderRadius: 20,
-                padding: 14,
-              }}
-            >
               <div
                 style={{
-                  fontSize: 13,
-                  color: '#6c645c',
+                  marginTop: 6,
+                  color: '#4f5663',
+                  fontSize: 16,
+                  lineHeight: 1.25,
+                  fontWeight: 500,
+                }}
+              >
+                {primaryService.title}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 9,
+                  flexWrap: 'wrap',
+                  color: BRAND.blue,
+                  fontSize: 14,
                   fontWeight: 800,
                 }}
               >
-                {text.totalDuration}
-              </div>
-
-              <div
-                style={{
-                  fontSize: 24,
-                  fontWeight: 900,
-                  marginTop: 6,
-                  color: '#17130f',
-                }}
-              >
-                {formatMinutes(totalMinutes, language)}
+                <span>📅 {date}</span>
+                <span style={{ color: '#c8cdd7' }}>|</span>
+                <span>🕒 {time}</span>
+                <span style={{ color: '#c8cdd7' }}>|</span>
+                <span>⏱ {formatMinutes(totalMinutes, language)}</span>
               </div>
             </div>
 
             <div
               style={{
-                background: '#f7f1e8',
-                borderRadius: 20,
-                padding: 14,
+                fontSize: 24,
+                fontWeight: 900,
+                color: BRAND.navy,
+                whiteSpace: 'nowrap',
               }}
             >
-              <div
-                style={{
-                  fontSize: 13,
-                  color: '#6c645c',
-                  fontWeight: 800,
-                }}
-              >
-                {text.totalPrice}
-              </div>
-
-              <div
-                style={{
-                  fontSize: 24,
-                  fontWeight: 900,
-                  marginTop: 6,
-                  color: '#ff3b3b',
-                }}
-              >
-                {formatDisplayPrice(totalPrice)}
-              </div>
+              {formatDisplayPrice(totalPrice)}
             </div>
           </div>
         </section>
 
         <section
           style={{
-            marginTop: 16,
-            borderRadius: 30,
-            border: '1.5px solid #efe4d7',
-            background: '#fff',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+            marginTop: 18,
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 12,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
           }}
         >
           <div
             style={{
-              fontSize: 20,
-              fontWeight: 900,
-              color: '#17130f',
-              marginBottom: 12,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              border: '1.5px solid #d9dee8',
+              borderRadius: 18,
+              overflow: 'hidden',
+              background: '#ffffff',
             }}
           >
-            {text.registrationType}
-          </div>
-
-          <div style={{ display: 'grid', gap: 12 }}>
             {([
               {
                 key: 'quick',
                 title: text.quickBooking,
                 body: text.quickBookingText,
                 badge: text.quickBadge,
-                color: '#fff7cf',
-                border: '#f2c94c',
+                icon: '💬',
+                activeColor: BRAND.green,
               },
               {
                 key: 'full',
                 title: text.fullBooking,
                 body: text.fullBookingText,
                 badge: text.fullBadge,
-                color: '#eef9f1',
-                border: '#2fa35a',
+                icon: '🔐',
+                activeColor: BRAND.blue,
               },
-            ] as const).map((item) => {
+            ] as const).map((item, index) => {
               const active = registrationMode === item.key;
 
               return (
@@ -817,75 +773,82 @@ export default function BookingDetailsPage() {
                   type="button"
                   onClick={() => setRegistrationMode(item.key)}
                   style={{
-                    width: '100%',
-                    borderRadius: 22,
-                    border: active ? `2px solid ${item.border}` : '1.5px solid #e7ddd0',
-                    background: active ? item.color : '#ffffff',
-                    padding: 14,
+                    border: 0,
+                    borderRight: index === 0 ? '1.5px solid #d9dee8' : 0,
+                    background: active ? '#f4f8ff' : '#ffffff',
+                    padding: 12,
+                    minHeight: 142,
                     textAlign: 'left',
                     cursor: 'pointer',
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 34px',
-                    gap: 12,
-                    alignItems: 'center',
+                    color: BRAND.navy,
                   }}
                 >
-                  <div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                    }}
+                  >
+                    <ContactIcon icon={item.icon} color={item.activeColor} />
+
                     <div
                       style={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: 999,
+                        background: active ? item.activeColor : '#ffffff',
+                        border: active ? `2px solid ${item.activeColor}` : '2px solid #cfd4dd',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         fontSize: 17,
                         fontWeight: 900,
-                        color: '#17130f',
                       }}
                     >
-                      {item.title}
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: 6,
-                        fontSize: 13,
-                        lineHeight: 1.45,
-                        fontWeight: 700,
-                        color: '#6f675f',
-                      }}
-                    >
-                      {item.body}
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: 10,
-                        display: 'inline-flex',
-                        borderRadius: 999,
-                        padding: '7px 10px',
-                        background: '#ffffff',
-                        color: item.border,
-                        fontSize: 11,
-                        fontWeight: 900,
-                        border: `1.5px solid ${item.border}`,
-                      }}
-                    >
-                      {item.badge}
+                      {active ? '✓' : ''}
                     </div>
                   </div>
 
                   <div
                     style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 999,
-                      border: active ? `2px solid ${item.border}` : '2px solid #d8cdc0',
-                      background: active ? item.border : '#ffffff',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      marginTop: 10,
                       fontSize: 18,
+                      lineHeight: 1.1,
+                      fontWeight: 900,
+                      color: BRAND.navy,
+                    }}
+                  >
+                    {item.title}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 12,
+                      lineHeight: 1.35,
+                      fontWeight: 700,
+                      color: '#515866',
+                    }}
+                  >
+                    {item.body}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 10,
+                      display: 'inline-flex',
+                      borderRadius: 999,
+                      padding: '6px 9px',
+                      background: active ? item.activeColor : '#f1f3f7',
+                      color: active ? '#ffffff' : '#626977',
+                      fontSize: 10,
                       fontWeight: 900,
                     }}
                   >
-                    {active ? '✓' : ''}
+                    {item.badge}
                   </div>
                 </button>
               );
@@ -895,15 +858,27 @@ export default function BookingDetailsPage() {
 
         <section
           style={{
-            marginTop: 16,
-            borderRadius: 30,
-            border: '1.5px solid #efe4d7',
-            background: '#fff',
-            padding: 18,
-            boxShadow: '0 12px 28px rgba(44, 23, 10, 0.05)',
+            marginTop: 18,
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 14,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
           }}
         >
-          <div style={{ display: 'grid', gap: 16 }}>
+          <div
+            style={{
+              fontSize: 24,
+              lineHeight: 1.1,
+              fontWeight: 900,
+              color: BRAND.navy,
+              marginBottom: 14,
+            }}
+          >
+            {text.contactDetails}
+          </div>
+
+          <div style={{ display: 'grid', gap: 15 }}>
             <div
               style={{
                 display: 'grid',
@@ -912,7 +887,7 @@ export default function BookingDetailsPage() {
               }}
             >
               <label style={{ display: 'block' }}>
-                {fieldLabel(text.firstName, text.required)}
+                <FieldLabel label={text.firstName} helper={text.required} />
                 <input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
@@ -922,7 +897,7 @@ export default function BookingDetailsPage() {
               </label>
 
               <label style={{ display: 'block' }}>
-                {fieldLabel(text.lastName, text.required)}
+                <FieldLabel label={text.lastName} helper={text.required} />
                 <input
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
@@ -933,26 +908,26 @@ export default function BookingDetailsPage() {
             </div>
 
             <label style={{ display: 'block' }}>
-              {fieldLabel(text.phone, text.required)}
+              <FieldLabel label={text.phone} helper={text.required} />
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '118px 1fr',
+                  gridTemplateColumns: '106px 1fr',
                   gap: 10,
                 }}
               >
                 <div
                   style={{
                     height: 56,
-                    borderRadius: 18,
-                    border: '1.5px solid #ddd2c4',
-                    background: '#fff',
+                    borderRadius: 16,
+                    border: '1.5px solid #d8dde8',
+                    background: '#ffffff',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 8,
                     fontWeight: 900,
-                    color: '#17130f',
+                    color: BRAND.navy,
                     fontSize: 15,
                   }}
                 >
@@ -973,7 +948,7 @@ export default function BookingDetailsPage() {
             {registrationMode === 'full' ? (
               <>
                 <label style={{ display: 'block' }}>
-                  {fieldLabel(text.email, text.required)}
+                  <FieldLabel label={text.email} helper={text.required} />
                   <input
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -984,14 +959,17 @@ export default function BookingDetailsPage() {
                 </label>
 
                 <label style={{ display: 'block' }}>
-                  {fieldLabel(text.whatsapp, text.optional)}
-                  <input
-                    value={whatsapp}
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                    placeholder="+44..."
-                    inputMode="tel"
-                    style={inputStyle()}
-                  />
+                  <FieldLabel label={text.whatsapp} helper={text.optional} />
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <ContactIcon icon="☎" color={BRAND.green} />
+                    <input
+                      value={whatsapp}
+                      onChange={(e) => setWhatsapp(e.target.value)}
+                      placeholder="+44..."
+                      inputMode="tel"
+                      style={inputStyle()}
+                    />
+                  </div>
                 </label>
 
                 <div
@@ -1002,7 +980,7 @@ export default function BookingDetailsPage() {
                   }}
                 >
                   <label style={{ display: 'block' }}>
-                    {fieldLabel(text.telegram, text.optional)}
+                    <FieldLabel label={text.telegram} helper={text.optional} />
                     <input
                       value={telegram}
                       onChange={(e) => setTelegram(e.target.value)}
@@ -1012,7 +990,7 @@ export default function BookingDetailsPage() {
                   </label>
 
                   <label style={{ display: 'block' }}>
-                    {fieldLabel(text.instagram, text.optional)}
+                    <FieldLabel label={text.instagram} helper={text.optional} />
                     <input
                       value={instagram}
                       onChange={(e) => setInstagram(e.target.value)}
@@ -1025,7 +1003,7 @@ export default function BookingDetailsPage() {
             ) : null}
 
             <label style={{ display: 'block' }}>
-              {fieldLabel(text.note, text.optional)}
+              <FieldLabel label={text.note} helper={text.optional} />
               <textarea
                 value={clientNote}
                 onChange={(e) => setClientNote(e.target.value)}
@@ -1033,8 +1011,8 @@ export default function BookingDetailsPage() {
                 rows={4}
                 style={{
                   width: '100%',
-                  borderRadius: 18,
-                  border: '1.5px solid #ddd2c4',
+                  borderRadius: 16,
+                  border: '1.5px solid #d8dde8',
                   padding: 14,
                   outline: 'none',
                   resize: 'none',
@@ -1042,7 +1020,7 @@ export default function BookingDetailsPage() {
                   fontSize: 15,
                   lineHeight: 1.4,
                   fontWeight: 700,
-                  color: '#17130f',
+                  color: BRAND.navy,
                   boxSizing: 'border-box',
                 }}
               />
@@ -1052,44 +1030,58 @@ export default function BookingDetailsPage() {
 
         <section
           style={{
-            marginTop: 16,
-            borderRadius: 26,
-            border: '1.5px solid #f2c94c',
-            background: '#fff7cf',
-            padding: 16,
+            marginTop: 18,
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 14,
+            boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
           }}
         >
           <div
             style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: '#17130f',
+              display: 'grid',
+              gridTemplateColumns: '42px 1fr',
+              gap: 12,
+              alignItems: 'center',
             }}
           >
-            🔒 {text.protectionTitle}
-          </div>
+            <ContactIcon icon="🔒" color={BRAND.yellow} />
 
-          <div
-            style={{
-              marginTop: 8,
-              fontSize: 13,
-              fontWeight: 800,
-              lineHeight: 1.45,
-              color: '#6f675f',
-            }}
-          >
-            {text.protectionText}
-          </div>
+            <div>
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 900,
+                  color: BRAND.navy,
+                }}
+              >
+                {text.protectionTitle}
+              </div>
 
-          <div
-            style={{
-              marginTop: 10,
-              fontSize: 13,
-              fontWeight: 900,
-              color: '#b28a00',
-            }}
-          >
-            {text.paymentHint}
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  lineHeight: 1.45,
+                  color: '#515866',
+                }}
+              >
+                {text.protectionText}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 13,
+                  fontWeight: 900,
+                  color: BRAND.blue,
+                }}
+              >
+                {text.paymentHint}
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -1100,87 +1092,94 @@ export default function BookingDetailsPage() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(255,255,255,0.96)',
-          backdropFilter: 'blur(10px)',
-          borderTop: '1px solid #e6ddd1',
-          padding: '14px 16px calc(14px + env(safe-area-inset-bottom))',
+          background: '#ffffff',
+          borderTop: '1px solid #e4e7ee',
+          padding: '12px 18px calc(14px + env(safe-area-inset-bottom))',
           zIndex: 50,
+          boxShadow: '0 -12px 28px rgba(0,0,0,0.08)',
         }}
       >
-        <div
-          style={{
-            maxWidth: 430,
-            margin: '0 auto',
-            display: 'flex',
-            gap: 14,
-            alignItems: 'center',
-          }}
-        >
-          <div style={{ flex: 1 }}>
-            <div
-              style={{
-                fontSize: 13,
-                color: '#6c645c',
-                fontWeight: 800,
-              }}
-            >
-              {text.nextStep}
-            </div>
-
-            <div
-              style={{
-                fontSize: 27,
-                fontWeight: 900,
-                marginTop: 4,
-                color: '#17130f',
-                lineHeight: 1,
-              }}
-            >
-              {text.holdDeposit}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            disabled={!isValid}
-            onClick={() => {
-              if (!isValid) return;
-
-              router.push(
-                `/booking/${master.id}/payment?services=${encodeURIComponent(
-                  selectedServiceSlugs.join(',')
-                )}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(
-                  time
-                )}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(
-                  lastName
-                )}&phone=${encodeURIComponent(safePhone)}&email=${encodeURIComponent(
-                  registrationMode === 'full' ? email : ''
-                )}&whatsapp=${encodeURIComponent(
-                  registrationMode === 'full' ? safeWhatsapp : ''
-                )}&telegram=${encodeURIComponent(
-                  registrationMode === 'full' ? telegram : ''
-                )}&instagram=${encodeURIComponent(
-                  registrationMode === 'full' ? instagram : ''
-                )}&note=${encodeURIComponent(clientNote)}&registrationMode=${registrationMode}`
-              );
-            }}
+        <div style={{ maxWidth: 430, margin: '0 auto' }}>
+          <div
             style={{
-              border: 'none',
-              background: isValid
-                ? 'linear-gradient(180deg, #2fa35a 0%, #238247 100%)'
-                : '#b7d9bf',
-              color: '#fff',
-              borderRadius: 22,
-              padding: '18px 24px',
-              fontWeight: 900,
-              fontSize: 16,
-              cursor: isValid ? 'pointer' : 'not-allowed',
-              boxShadow: isValid ? '0 12px 24px rgba(47,163,90,0.20)' : 'none',
-              whiteSpace: 'nowrap',
+              minHeight: 74,
+              borderRadius: 18,
+              border: '1.5px solid #d9dee8',
+              background: '#ffffff',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1.5px 1.25fr',
+              alignItems: 'center',
+              overflow: 'hidden',
             }}
           >
-            {text.continue}
-          </button>
+            <div
+              style={{
+                padding: '12px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <MessageIcon />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13, color: '#6f7582', fontWeight: 800 }}>
+                  {text.nextStep}
+                </div>
+                <div
+                  style={{
+                    marginTop: 2,
+                    fontSize: 20,
+                    color: BRAND.navy,
+                    fontWeight: 900,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {text.holdDeposit}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ height: 46, background: '#d9dee8' }} />
+
+            <button
+              type="button"
+              disabled={!isValid}
+              onClick={() => {
+                if (!isValid) return;
+
+                router.push(
+                  `/booking/${master.id}/payment?services=${encodeURIComponent(
+                    selectedServiceSlugs.join(',')
+                  )}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(
+                    time
+                  )}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(
+                    lastName
+                  )}&phone=${encodeURIComponent(safePhone)}&email=${encodeURIComponent(
+                    registrationMode === 'full' ? email : ''
+                  )}&whatsapp=${encodeURIComponent(
+                    registrationMode === 'full' ? safeWhatsapp : ''
+                  )}&telegram=${encodeURIComponent(
+                    registrationMode === 'full' ? telegram : ''
+                  )}&instagram=${encodeURIComponent(
+                    registrationMode === 'full' ? instagram : ''
+                  )}&note=${encodeURIComponent(clientNote)}&registrationMode=${registrationMode}`
+                );
+              }}
+              style={{
+                height: 74,
+                border: 0,
+                background: isValid ? BRAND.green : '#b7d9bf',
+                color: '#ffffff',
+                fontWeight: 900,
+                fontSize: 20,
+                cursor: isValid ? 'pointer' : 'not-allowed',
+              }}
+            >
+              {text.continue} →
+            </button>
+          </div>
         </div>
       </div>
     </main>
