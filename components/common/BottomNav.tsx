@@ -16,7 +16,7 @@ type BottomNavProps = {
   active?: 'home' | 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
 };
 
-type NavKey = 'profile' | 'clients' | 'add' | 'bookings' | 'messages';
+type NavKey = 'home' | 'messages' | 'add' | 'bookings' | 'profile';
 
 type NavItem = {
   key: NavKey;
@@ -25,74 +25,74 @@ type NavItem = {
 
 const navLabels: Record<AppLanguage, Record<NavKey, string>> = {
   EN: {
-    profile: 'Profile',
-    clients: 'My clients',
-    add: 'Add',
-    bookings: 'My bookings',
+    home: 'Home',
     messages: 'Messages',
+    add: 'Add',
+    bookings: 'Bookings',
+    profile: 'Profile',
   },
   ES: {
-    profile: 'Perfil',
-    clients: 'Clientes',
+    home: 'Inicio',
+    messages: 'Mensajes',
     add: 'Añadir',
     bookings: 'Reservas',
-    messages: 'Mensajes',
+    profile: 'Perfil',
   },
   RU: {
-    profile: 'Профиль',
-    clients: 'Мои клиенты',
+    home: 'Главная',
+    messages: 'Сообщения',
     add: 'Добавить',
     bookings: 'Мои брони',
-    messages: 'Сообщения',
+    profile: 'Профиль',
   },
   UA: {
-    profile: 'Профіль',
-    clients: 'Мої клієнти',
+    home: 'Головна',
+    messages: 'Повідомл.',
     add: 'Додати',
     bookings: 'Мої броні',
-    messages: 'Повідомл.',
+    profile: 'Профіль',
   },
   CZ: {
-    profile: 'Profil',
-    clients: 'Klienti',
+    home: 'Domů',
+    messages: 'Zprávy',
     add: 'Přidat',
     bookings: 'Rezervace',
-    messages: 'Zprávy',
+    profile: 'Profil',
   },
   DE: {
-    profile: 'Profil',
-    clients: 'Kunden',
+    home: 'Start',
+    messages: 'Nachr.',
     add: 'Plus',
     bookings: 'Buchung',
-    messages: 'Nachr.',
+    profile: 'Profil',
   },
   IT: {
-    profile: 'Profilo',
-    clients: 'Clienti',
+    home: 'Home',
+    messages: 'Messaggi',
     add: 'Aggiungi',
     bookings: 'Prenota',
-    messages: 'Messaggi',
+    profile: 'Profilo',
   },
   FR: {
-    profile: 'Profil',
-    clients: 'Clients',
+    home: 'Accueil',
+    messages: 'Messages',
     add: 'Ajouter',
     bookings: 'Réserv.',
-    messages: 'Messages',
+    profile: 'Profil',
   },
   AR: {
-    profile: 'حسابي',
-    clients: 'عملائي',
+    home: 'الرئيسية',
+    messages: 'رسائل',
     add: 'إضافة',
     bookings: 'حجوزات',
-    messages: 'رسائل',
+    profile: 'حسابي',
   },
   PL: {
-    profile: 'Profil',
-    clients: 'Klienci',
+    home: 'Start',
+    messages: 'Wiadom.',
     add: 'Dodaj',
     bookings: 'Rezerw.',
-    messages: 'Wiadom.',
+    profile: 'Profil',
   },
 };
 
@@ -118,11 +118,11 @@ const addMenuTexts: Record<
 };
 
 const navItems: NavItem[] = [
-  { key: 'profile', href: '/profile' },
-  { key: 'clients', href: '/bookings/clients' },
+  { key: 'home', href: '/' },
+  { key: 'messages', href: '/messages' },
   { key: 'add', href: '/add' },
   { key: 'bookings', href: '/bookings' },
-  { key: 'messages', href: '/messages' },
+  { key: 'profile', href: '/profile' },
 ];
 
 function getLabel(language: AppLanguage, key: NavKey) {
@@ -134,11 +134,35 @@ function getAddText(language: AppLanguage) {
 }
 
 function getActiveColor(key: NavKey) {
-  if (key === 'clients') return '#f1b900';
-  if (key === 'bookings') return '#2578ff';
+  if (key === 'home') return '#55c75f';
   if (key === 'messages') return '#55c75f';
+  if (key === 'bookings') return '#2578ff';
+  if (key === 'profile') return '#55c75f';
   if (key === 'add') return '#55c75f';
   return '#55c75f';
+}
+
+function HomeIcon({ active }: { active: boolean }) {
+  const color = active ? '#55c75f' : '#202020';
+
+  return (
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M4.5 11.2L12 5L19.5 11.2"
+        stroke={color}
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6.5 10.5V19H10V14.5H14V19H17.5V10.5"
+        stroke={color}
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 function ProfileIcon({ active }: { active: boolean }) {
@@ -153,23 +177,6 @@ function ProfileIcon({ active }: { active: boolean }) {
         strokeWidth="1.9"
         strokeLinecap="round"
       />
-    </svg>
-  );
-}
-
-function ClientsIcon({ active }: { active: boolean }) {
-  const color = active ? '#f1b900' : '#202020';
-
-  return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-      <rect x="4" y="7" width="16" height="12" rx="2.4" stroke={color} strokeWidth="1.9" />
-      <path
-        d="M9 7V5.8C9 4.8 9.8 4 10.8 4H13.2C14.2 4 15 4.8 15 5.8V7"
-        stroke={color}
-        strokeWidth="1.9"
-        strokeLinecap="round"
-      />
-      <path d="M8 12H16" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
     </svg>
   );
 }
@@ -302,15 +309,16 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
     };
   }, [addMenuOpen]);
 
-  const getIsActive = (key: NavKey, href: string) => {
+  const getIsActive = (key: NavKey) => {
     if (addMenuOpen && key === 'add') return true;
 
     if (activeProp) {
+      if (activeProp === 'clients' && key === 'bookings') return false;
       return activeProp === key;
     }
 
-    if (key === 'clients') {
-      return pathname === '/bookings/clients' || pathname?.startsWith('/bookings/clients/');
+    if (key === 'home') {
+      return pathname === '/';
     }
 
     if (key === 'bookings') {
@@ -334,7 +342,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       );
     }
 
-    return pathname?.startsWith(href);
+    return false;
   };
 
   const handleNavClick = (item: NavItem) => {
@@ -557,7 +565,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
           />
 
           {navItems.map((item) => {
-            const isActive = getIsActive(item.key, item.href);
+            const isActive = getIsActive(item.key);
             const isAdd = item.key === 'add';
             const label = labels[item.key] || getLabel(language, item.key);
             const activeColor = getActiveColor(item.key);
@@ -622,10 +630,10 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                       flexShrink: 0,
                     }}
                   >
-                    {item.key === 'profile' && <ProfileIcon active={isActive} />}
-                    {item.key === 'clients' && <ClientsIcon active={isActive} />}
-                    {item.key === 'bookings' && <CalendarIcon active={isActive} />}
+                    {item.key === 'home' && <HomeIcon active={isActive} />}
                     {item.key === 'messages' && <MessageIcon active={isActive} />}
+                    {item.key === 'bookings' && <CalendarIcon active={isActive} />}
+                    {item.key === 'profile' && <ProfileIcon active={isActive} />}
                   </span>
                 )}
 
