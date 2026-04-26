@@ -18,7 +18,21 @@ export type ChatThread = {
   online?: boolean;
   lastSeenText?: string;
   unreadCount: number;
+  masterId?: string;
+  providerId?: string;
+  bookingId?: string;
   messages: ChatMessage[];
+};
+
+export type CreateChatThreadInput = {
+  masterId?: string | number;
+  providerId?: string | number;
+  bookingId?: string | number;
+  providerName: string;
+  providerAvatar?: string;
+  category?: string;
+  online?: boolean;
+  initialMessage?: string;
 };
 
 const STORAGE_KEY = 'mapbook_chat_threads_v1';
@@ -30,7 +44,7 @@ const olamepSupportThread: ChatThread = {
   category: 'Olamep Internal',
   online: true,
   lastSeenText: 'Online',
-  unreadCount: 1,
+  unreadCount: 0,
   messages: [
     {
       id: 'olamep-m1',
@@ -38,7 +52,8 @@ const olamepSupportThread: ChatThread = {
       text: 'Welcome to Olamep. If you need help with bookings, services, ads or payments, our support team is here.',
       sentAt: '2026-04-25T09:00:00.000Z',
       deliveredAt: '2026-04-25T09:00:05.000Z',
-      status: 'delivered',
+      seenAt: '2026-04-25T09:10:00.000Z',
+      status: 'seen',
     },
   ],
 };
@@ -47,13 +62,15 @@ const demoThreads: ChatThread[] = [
   olamepSupportThread,
   {
     id: 'bella-keratin-studio',
+    masterId: 'bella-keratin-studio',
+    providerId: 'bella-keratin-studio',
     providerName: 'Bella Keratin Studio',
     providerAvatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
     category: 'Beauty',
     online: true,
     lastSeenText: 'Online',
-    unreadCount: 2,
+    unreadCount: 0,
     messages: [
       {
         id: 'm1',
@@ -88,7 +105,8 @@ const demoThreads: ChatThread[] = [
         text: 'Great, see you tomorrow ✨',
         sentAt: '2026-03-17T21:20:00.000Z',
         deliveredAt: '2026-03-17T21:20:20.000Z',
-        status: 'delivered',
+        seenAt: '2026-03-17T21:24:00.000Z',
+        status: 'seen',
       },
       {
         id: 'm5',
@@ -96,12 +114,15 @@ const demoThreads: ChatThread[] = [
         text: 'Please come 5 minutes earlier if possible.',
         sentAt: '2026-03-17T21:21:00.000Z',
         deliveredAt: '2026-03-17T21:21:10.000Z',
-        status: 'delivered',
+        seenAt: '2026-03-17T21:25:00.000Z',
+        status: 'seen',
       },
     ],
   },
   {
     id: 'mila-wellness',
+    masterId: 'mila-wellness',
+    providerId: 'mila-wellness',
     providerName: 'Mila Wellness',
     providerAvatar:
       'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80',
@@ -123,6 +144,8 @@ const demoThreads: ChatThread[] = [
   },
   {
     id: 'nadia-beauty',
+    masterId: 'nadia-beauty',
+    providerId: 'nadia-beauty',
     providerName: 'Nadia Beauty',
     providerAvatar:
       'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
@@ -156,11 +179,52 @@ function isValidChatThreads(value: unknown): value is ChatThread[] {
   return Array.isArray(value);
 }
 
+function slugify(value: string) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9а-яёіїєґ]+/gi, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
+function normalizeId(value: string | number | undefined | null) {
+  if (value === undefined || value === null) return '';
+  return String(value).trim();
+}
+
+function makeThreadId(input: CreateChatThreadInput) {
+  const masterId = normalizeId(input.masterId);
+  const providerId = normalizeId(input.providerId);
+  const bookingId = normalizeId(input.bookingId);
+
+  if (bookingId) return `booking-${slugify(bookingId)}`;
+  if (masterId) return `master-${slugify(masterId)}`;
+  if (providerId) return `provider-${slugify(providerId)}`;
+
+  return `provider-${slugify(input.providerName || 'chat')}`;
+}
+
+function normalizeThread(thread: ChatThread): ChatThread {
+  const unreadCount = Number(thread.unreadCount || 0);
+
+  return {
+    ...thread,
+    id: String(thread.id || slugify(thread.providerName || 'chat')),
+    providerName: thread.providerName || 'Provider',
+    providerAvatar: thread.providerAvatar || '',
+    category: thread.category || 'Service',
+    unreadCount: Number.isFinite(unreadCount) && unreadCount > 0 ? unreadCount : 0,
+    messages: Array.isArray(thread.messages) ? thread.messages : [],
+  };
+}
+
 function ensureSystemThreads(threads: ChatThread[]) {
-  const hasOlamepSupport = threads.some((thread) => thread.id === olamepSupportThread.id);
+  const normalized = threads.map(normalizeThread);
+  const hasOlamepSupport = normalized.some((thread) => thread.id === olamepSupportThread.id);
 
   if (hasOlamepSupport) {
-    return threads.map((thread) => {
+    return normalized.map((thread) => {
       if (thread.id !== olamepSupportThread.id) return thread;
 
       return {
@@ -170,11 +234,18 @@ function ensureSystemThreads(threads: ChatThread[]) {
         category: 'Olamep Internal',
         online: true,
         lastSeenText: 'Online',
+        unreadCount: Number(thread.unreadCount || 0),
       };
     });
   }
 
-  return [olamepSupportThread, ...threads];
+  return [olamepSupportThread, ...normalized];
+}
+
+function writeThreadsToStorage(threads: ChatThread[]) {
+  if (!canUseStorage()) return;
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(threads));
 }
 
 export function getChatThreads(): ChatThread[] {
@@ -214,23 +285,141 @@ export function saveChatThreads(threads: ChatThread[]) {
   if (!canUseStorage()) return;
 
   const withSystemThreads = ensureSystemThreads(threads);
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(withSystemThreads));
+  writeThreadsToStorage(withSystemThreads);
+  notifyChatStoreChanged();
+}
+
+export function resetDemoChatThreads() {
+  if (!canUseStorage()) return;
+
+  writeThreadsToStorage(demoThreads);
+  notifyChatStoreChanged();
 }
 
 export function getChatThreadById(id: string): ChatThread | null {
+  const safeId = normalizeId(id);
+  if (!safeId) return null;
+
   const threads = getChatThreads();
-  return threads.find((thread) => thread.id === id) ?? null;
+  return threads.find((thread) => thread.id === safeId) ?? null;
+}
+
+export function getChatThreadByMasterId(masterId: string | number): ChatThread | null {
+  const safeMasterId = normalizeId(masterId);
+  if (!safeMasterId) return null;
+
+  const threads = getChatThreads();
+
+  return (
+    threads.find((thread) => String(thread.masterId || '') === safeMasterId) ??
+    threads.find((thread) => String(thread.providerId || '') === safeMasterId) ??
+    threads.find((thread) => thread.id === safeMasterId) ??
+    threads.find((thread) => thread.id === `master-${slugify(safeMasterId)}`) ??
+    null
+  );
+}
+
+export function getChatThreadByBookingId(bookingId: string | number): ChatThread | null {
+  const safeBookingId = normalizeId(bookingId);
+  if (!safeBookingId) return null;
+
+  const threads = getChatThreads();
+
+  return (
+    threads.find((thread) => String(thread.bookingId || '') === safeBookingId) ??
+    threads.find((thread) => thread.id === `booking-${slugify(safeBookingId)}`) ??
+    null
+  );
+}
+
+export function getOrCreateChatThread(input: CreateChatThreadInput): ChatThread {
+  const threads = getChatThreads();
+
+  const masterId = normalizeId(input.masterId);
+  const providerId = normalizeId(input.providerId);
+  const bookingId = normalizeId(input.bookingId);
+
+  const existing =
+    (bookingId ? getChatThreadByBookingId(bookingId) : null) ??
+    (masterId ? getChatThreadByMasterId(masterId) : null) ??
+    (providerId ? getChatThreadByMasterId(providerId) : null);
+
+  if (existing) {
+    const updatedThreads = threads.map((thread) => {
+      if (thread.id !== existing.id) return thread;
+
+      return {
+        ...thread,
+        masterId: thread.masterId || masterId || providerId || undefined,
+        providerId: thread.providerId || providerId || masterId || undefined,
+        bookingId: thread.bookingId || bookingId || undefined,
+        providerName: input.providerName || thread.providerName,
+        providerAvatar: input.providerAvatar ?? thread.providerAvatar,
+        category: input.category || thread.category,
+        online: input.online ?? thread.online,
+      };
+    });
+
+    saveChatThreads(updatedThreads);
+
+    return (
+      updatedThreads.find((thread) => thread.id === existing.id) ??
+      existing
+    );
+  }
+
+  const now = new Date().toISOString();
+
+  const newThread: ChatThread = {
+    id: makeThreadId(input),
+    masterId: masterId || providerId || undefined,
+    providerId: providerId || masterId || undefined,
+    bookingId: bookingId || undefined,
+    providerName: input.providerName || 'Provider',
+    providerAvatar: input.providerAvatar || '',
+    category: input.category || 'Service',
+    online: input.online ?? true,
+    lastSeenText: input.online === false ? 'Offline' : 'Online',
+    unreadCount: 0,
+    messages: input.initialMessage
+      ? [
+          {
+            id: `system_${Date.now()}`,
+            sender: 'me',
+            text: input.initialMessage,
+            sentAt: now,
+            deliveredAt: now,
+            status: 'delivered',
+          },
+        ]
+      : [],
+  };
+
+  saveChatThreads([newThread, ...threads]);
+
+  return cloneThreads([newThread])[0];
+}
+
+export function getOrCreateChatThreadId(input: CreateChatThreadInput): string {
+  return getOrCreateChatThread(input).id;
 }
 
 export function getUnreadMessagesCount(): number {
-  return getChatThreads().reduce((sum, thread) => sum + (thread.unreadCount || 0), 0);
+  return getChatThreads().reduce((sum, thread) => {
+    const unread = Number(thread.unreadCount || 0);
+    return sum + (Number.isFinite(unread) && unread > 0 ? unread : 0);
+  }, 0);
 }
 
 export function markThreadAsRead(id: string) {
+  const safeId = normalizeId(id);
+  if (!safeId) return;
+
   const threads = getChatThreads();
+  const now = new Date().toISOString();
 
   const updated = threads.map((thread) => {
-    if (thread.id !== id) return thread;
+    if (thread.id !== safeId) return thread;
 
     return {
       ...thread,
@@ -240,7 +429,7 @@ export function markThreadAsRead(id: string) {
           return {
             ...message,
             status: 'seen' as ChatMessageStatus,
-            seenAt: new Date().toISOString(),
+            seenAt: now,
           };
         }
 
@@ -250,19 +439,43 @@ export function markThreadAsRead(id: string) {
   });
 
   saveChatThreads(updated);
-  notifyChatStoreChanged();
+}
+
+export function markAllThreadsAsRead() {
+  const threads = getChatThreads();
+  const now = new Date().toISOString();
+
+  const updated = threads.map((thread) => ({
+    ...thread,
+    unreadCount: 0,
+    messages: thread.messages.map((message) => {
+      if (message.sender === 'provider' && message.status !== 'seen') {
+        return {
+          ...message,
+          status: 'seen' as ChatMessageStatus,
+          seenAt: now,
+        };
+      }
+
+      return message;
+    }),
+  }));
+
+  saveChatThreads(updated);
 }
 
 export function sendChatMessage(threadId: string, text: string) {
+  const safeThreadId = normalizeId(threadId);
   const trimmed = text.trim();
-  if (!trimmed) return;
+
+  if (!safeThreadId || !trimmed) return;
 
   const threads = getChatThreads();
   const now = new Date();
   const delivered = new Date(now.getTime() + 10 * 1000);
 
   const updated = threads.map((thread) => {
-    if (thread.id !== threadId) return thread;
+    if (thread.id !== safeThreadId) return thread;
 
     const newMessage: ChatMessage = {
       id: `msg_${now.getTime()}`,
@@ -280,7 +493,38 @@ export function sendChatMessage(threadId: string, text: string) {
   });
 
   saveChatThreads(updated);
-  notifyChatStoreChanged();
+}
+
+export function addProviderMessage(threadId: string, text: string) {
+  const safeThreadId = normalizeId(threadId);
+  const trimmed = text.trim();
+
+  if (!safeThreadId || !trimmed) return;
+
+  const threads = getChatThreads();
+  const now = new Date();
+  const delivered = new Date(now.getTime() + 5 * 1000);
+
+  const updated = threads.map((thread) => {
+    if (thread.id !== safeThreadId) return thread;
+
+    const newMessage: ChatMessage = {
+      id: `provider_${now.getTime()}`,
+      sender: 'provider',
+      text: trimmed,
+      sentAt: now.toISOString(),
+      deliveredAt: delivered.toISOString(),
+      status: 'delivered',
+    };
+
+    return {
+      ...thread,
+      unreadCount: Number(thread.unreadCount || 0) + 1,
+      messages: [...thread.messages, newMessage],
+    };
+  });
+
+  saveChatThreads(updated);
 }
 
 export function subscribeToChatStore(callback: () => void) {
