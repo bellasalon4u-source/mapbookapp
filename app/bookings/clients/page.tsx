@@ -12,10 +12,13 @@ import {
   getBookings,
   subscribeToBookingsStore,
   patchBooking,
+  confirmBookingByMaster,
+  declineBookingByMaster,
   canShowDirectContacts,
   getProtectedBookingContact,
   type BookingItem,
 } from '../../services/bookingsStore';
+import { getOrCreateChatThread } from '../../services/chatStore';
 
 type ProviderView = 'today' | 'tomorrow' | 'requests' | 'calendar' | 'history';
 type SlotStatus = 'free' | 'confirmed' | 'completed' | 'cancelled' | 'blocked' | 'pending';
@@ -104,6 +107,11 @@ type PageText = {
   apply: string;
   reset: string;
   openPriceFilter: string;
+  acceptBooking: string;
+  declineBooking: string;
+  openChat: string;
+  pendingRequestInfo: string;
+  confirmedRequestInfo: string;
 };
 
 const EN_TEXT: PageText = {
@@ -168,6 +176,13 @@ const EN_TEXT: PageText = {
   apply: 'Apply',
   reset: 'Reset',
   openPriceFilter: 'Price range',
+  acceptBooking: 'Accept booking',
+  declineBooking: 'Decline',
+  openChat: 'Open chat',
+  pendingRequestInfo:
+    'This request is waiting for your confirmation. After accepting, the client will get address/contact access according to booking rules.',
+  confirmedRequestInfo:
+    'Booking is confirmed. Contacts and chat are available according to access rules.',
 };
 
 const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
@@ -195,9 +210,9 @@ const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
     status: 'Статус',
     contacts: 'Контакты',
     fullContactInfo:
-      'Если бронь оформлена зарегистрированным клиентом и подтверждена обеими сторонами, мастеру доступны все способы связи.',
+      'Бронь подтверждена. Если клиент оплатил депозит, мастеру доступны разрешённые способы связи.',
     quickContactInfo:
-      'Быстрая бронь. Доступен только внутренний чат Olamep до полной регистрации клиента.',
+      'Быстрая бронь. До подтверждения доступен только внутренний чат Olamep.',
     call: 'Позвонить',
     whatsapp: 'WhatsApp',
     internalChat: 'Написать в чат',
@@ -233,6 +248,13 @@ const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
     apply: 'Применить',
     reset: 'Сбросить',
     openPriceFilter: 'Цена от/до',
+    acceptBooking: 'Подтвердить бронь',
+    declineBooking: 'Отклонить',
+    openChat: 'Открыть чат',
+    pendingRequestInfo:
+      'Эта заявка ждёт вашего подтверждения. После подтверждения клиент получит доступ к адресу и контактам по правилам брони.',
+    confirmedRequestInfo:
+      'Бронь подтверждена. Чат и контакты доступны по правилам доступа.',
   },
 };
 
@@ -463,12 +485,10 @@ function parseTimeFromDateTime(value?: string) {
   });
 }
 
-function mapBookingStatusToSlotStatus(booking: BookingItem, index: number): SlotStatus {
+function mapBookingStatusToSlotStatus(booking: BookingItem): SlotStatus {
   if (booking.status === 'completed') return 'completed';
   if (booking.status === 'cancelled') return 'cancelled';
   if (booking.status === 'pending') return 'pending';
-
-  if (index === 1) return 'completed';
   return 'confirmed';
 }
 
@@ -493,7 +513,7 @@ function mapBookingsToSlots(bookings: BookingItem[], language: AppLanguage): Pro
       clientAvatar: booking.masterAvatar || demoAvatar,
       serviceName: translateService(booking.serviceName, language),
       price: booking.price,
-      status: mapBookingStatusToSlotStatus(booking, index),
+      status: mapBookingStatusToSlotStatus(booking),
       paymentMethod: index === 0 ? 'OlaCash' : index === 1 ? 'Card' : index === 2 ? 'QR' : 'Cash',
       notes:
         index === 0
@@ -780,6 +800,39 @@ export default function ProviderClientsPage() {
           : slot
       )
     );
+  };
+
+  const handleAcceptBooking = (slot: ProviderSlot) => {
+    if (!slot.sourceBooking) return;
+
+    confirmBookingByMaster(slot.sourceBooking.id);
+    setSelectedSlotId(null);
+  };
+
+  const handleDeclineBooking = (slot: ProviderSlot) => {
+    if (!slot.sourceBooking) return;
+
+    declineBookingByMaster(slot.sourceBooking.id);
+    setSelectedSlotId(null);
+  };
+
+  const handleOpenChat = (slot: ProviderSlot) => {
+    const booking = slot.sourceBooking;
+
+    if (!booking) return;
+
+    const threadId = String(booking.masterId || booking.id);
+
+    getOrCreateChatThread({
+      threadId,
+      providerName: booking.masterName,
+      providerAvatar: booking.masterAvatar,
+      category: booking.category || booking.serviceName || 'Booking',
+      online: true,
+      lastSeenText: 'Online',
+    });
+
+    router.push(`/messages/${encodeURIComponent(threadId)}`);
   };
 
   const handleDropOnSlot = (targetSlot: ProviderSlot) => {
@@ -1481,6 +1534,9 @@ export default function ProviderClientsPage() {
           onSaveNote={handleSaveNote}
           onClose={() => setSelectedSlotId(null)}
           onChangeTime={() => handleOpenTimeModal(selectedSlot)}
+          onAcceptBooking={() => handleAcceptBooking(selectedSlot)}
+          onDeclineBooking={() => handleDeclineBooking(selectedSlot)}
+          onOpenChat={() => handleOpenChat(selectedSlot)}
         />
       ) : null}
 
@@ -1523,6 +1579,9 @@ function ClientCardModal({
   onSaveNote,
   onClose,
   onChangeTime,
+  onAcceptBooking,
+  onDeclineBooking,
+  onOpenChat,
 }: {
   slot: ProviderSlot;
   text: PageText;
@@ -1531,7 +1590,13 @@ function ClientCardModal({
   onSaveNote: () => void;
   onClose: () => void;
   onChangeTime: () => void;
+  onAcceptBooking: () => void;
+  onDeclineBooking: () => void;
+  onOpenChat: () => void;
 }) {
+  const isPending = slot.status === 'pending';
+  const hasBooking = Boolean(slot.sourceBooking);
+
   return (
     <div
       onClick={onClose}
@@ -1639,7 +1704,7 @@ function ClientCardModal({
                   width: 24,
                   height: 24,
                   borderRadius: 999,
-                  background: '#25b65a',
+                  background: isPending ? '#f0b429' : '#25b65a',
                   color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
@@ -1649,7 +1714,7 @@ function ClientCardModal({
                   fontWeight: 900,
                 }}
               >
-                ✓
+                {isPending ? '!' : '✓'}
               </span>
             </div>
 
@@ -1700,6 +1765,89 @@ function ClientCardModal({
               </div>
             </div>
           </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              borderRadius: 18,
+              border: '2px solid #111111',
+              background: isPending ? '#fff3d6' : '#f2fff6',
+              padding: 12,
+              fontSize: 13,
+              lineHeight: 1.45,
+              fontWeight: 900,
+              color: isPending ? '#ad7200' : '#1f8c3f',
+            }}
+          >
+            {isPending ? text.pendingRequestInfo : text.confirmedRequestInfo}
+          </div>
+
+          {hasBooking ? (
+            <div
+              style={{
+                marginTop: 12,
+                display: 'grid',
+                gridTemplateColumns: isPending ? '1fr 1fr' : '1fr',
+                gap: 10,
+              }}
+            >
+              {isPending ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={onAcceptBooking}
+                    style={{
+                      minHeight: 54,
+                      borderRadius: 18,
+                      border: '2px solid #111111',
+                      background: '#41c83f',
+                      color: '#ffffff',
+                      fontSize: 15,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    ✓ {text.acceptBooking}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={onDeclineBooking}
+                    style={{
+                      minHeight: 54,
+                      borderRadius: 18,
+                      border: '2px solid #ff4b52',
+                      background: '#fff2f4',
+                      color: '#ff4b52',
+                      fontSize: 15,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    × {text.declineBooking}
+                  </button>
+                </>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={onOpenChat}
+                style={{
+                  minHeight: 54,
+                  gridColumn: isPending ? '1 / -1' : 'auto',
+                  borderRadius: 18,
+                  border: '2px solid #111111',
+                  background: '#fff7cf',
+                  color: '#b28a00',
+                  fontSize: 15,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                💬 {text.openChat}
+              </button>
+            </div>
+          ) : null}
 
           <div
             style={{
@@ -1816,9 +1964,9 @@ function ClientCardModal({
           </div>
 
           {slot.contactMode === 'full' ? (
-            <FullContactsBlock slot={slot} text={text} />
+            <FullContactsBlock slot={slot} text={text} onOpenChat={onOpenChat} />
           ) : (
-            <QuickContactsBlock text={text} />
+            <QuickContactsBlock text={text} onOpenChat={onOpenChat} />
           )}
         </section>
       </div>
@@ -2246,7 +2394,15 @@ function PriceRangeModal({
   );
 }
 
-function FullContactsBlock({ slot, text }: { slot: ProviderSlot; text: PageText }) {
+function FullContactsBlock({
+  slot,
+  text,
+  onOpenChat,
+}: {
+  slot: ProviderSlot;
+  text: PageText;
+  onOpenChat: () => void;
+}) {
   const booking = slot.sourceBooking;
   const protectedContact = booking ? getProtectedBookingContact(booking) : null;
 
@@ -2259,7 +2415,13 @@ function FullContactsBlock({ slot, text }: { slot: ProviderSlot; text: PageText 
       <ContactRow icon="☎" value={phone} buttonLabel={text.call} accent="green" />
       <ContactRow icon="✉" value={email} buttonLabel={text.message} accent="yellow" />
       <ContactRow icon="🟢" value={whatsapp} buttonLabel={text.whatsapp} accent="yellow" />
-      <ContactRow icon="💬" value="Olamep chat" buttonLabel={text.internalChat} accent="yellow" />
+      <ContactRow
+        icon="💬"
+        value="Olamep chat"
+        buttonLabel={text.internalChat}
+        accent="yellow"
+        onClick={onOpenChat}
+      />
 
       <div
         style={{
@@ -2282,10 +2444,22 @@ function FullContactsBlock({ slot, text }: { slot: ProviderSlot; text: PageText 
   );
 }
 
-function QuickContactsBlock({ text }: { text: PageText }) {
+function QuickContactsBlock({
+  text,
+  onOpenChat,
+}: {
+  text: PageText;
+  onOpenChat: () => void;
+}) {
   return (
     <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
-      <ContactRow icon="💬" value="Olamep chat" buttonLabel={text.internalChat} accent="yellow" />
+      <ContactRow
+        icon="💬"
+        value="Olamep chat"
+        buttonLabel={text.internalChat}
+        accent="yellow"
+        onClick={onOpenChat}
+      />
 
       <div
         style={{
@@ -2313,11 +2487,13 @@ function ContactRow({
   value,
   buttonLabel,
   accent,
+  onClick,
 }: {
   icon: string;
   value: string;
   buttonLabel: string;
   accent: 'green' | 'yellow';
+  onClick?: () => void;
 }) {
   const isYellow = accent === 'yellow';
 
@@ -2355,6 +2531,7 @@ function ContactRow({
 
       <button
         type="button"
+        onClick={onClick}
         style={{
           minHeight: 38,
           padding: '0 12px',
@@ -2364,7 +2541,7 @@ function ContactRow({
           color: isYellow ? '#b28a00' : '#25a653',
           fontSize: 12,
           fontWeight: 900,
-          cursor: 'pointer',
+          cursor: onClick ? 'pointer' : 'default',
         }}
       >
         {buttonLabel}
