@@ -13,11 +13,12 @@ import {
   subscribeToBookingsStore,
   patchBooking,
   confirmBookingByMaster,
+  declineBookingByMaster,
   canShowDirectContacts,
   getProtectedBookingContact,
   type BookingItem,
 } from '../../services/bookingsStore';
-import { getOrCreateChatThread } from '../../services/chatStore';
+import { getOrCreateChatThread } from '../../../services/chatStore';
 
 type ProviderView = 'today' | 'tomorrow' | 'requests' | 'calendar' | 'history';
 type SlotStatus = 'free' | 'confirmed' | 'completed' | 'cancelled' | 'blocked' | 'pending';
@@ -548,8 +549,8 @@ function mapBookingsToSlots(bookings: BookingItem[], language: AppLanguage): Pro
       contactMode: 'quick',
     },
     {
-      id: 'slot_blocked_1800',
-      time: '18:00',
+      id: 'slot_blocked_1500',
+      time: '15:00',
       duration: '60 min',
       clientName: '',
       serviceName: '',
@@ -811,11 +812,7 @@ export default function ProviderClientsPage() {
   const handleDeclineBooking = (slot: ProviderSlot) => {
     if (!slot.sourceBooking) return;
 
-    patchBooking(slot.sourceBooking.id, {
-      status: 'cancelled',
-      bookingConfirmedByMaster: false,
-    });
-
+    declineBookingByMaster(slot.sourceBooking.id);
     setSelectedSlotId(null);
   };
 
@@ -1525,7 +1522,7 @@ export default function ProviderClientsPage() {
           </section>
         </div>
 
-        <BottomNav active="clients" />
+        <BottomNav active="bookings" />
       </main>
 
       {selectedSlot ? (
@@ -1606,7 +1603,7 @@ function ClientCardModal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 3000,
+        zIndex: 300,
         background: 'rgba(17,17,17,0.22)',
         display: 'flex',
         alignItems: 'flex-end',
@@ -2000,7 +1997,7 @@ function TimeModal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 3100,
+        zIndex: 340,
         background: 'rgba(17,17,17,0.38)',
         display: 'flex',
         alignItems: 'flex-end',
@@ -2226,7 +2223,7 @@ function PriceRangeModal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 3200,
+        zIndex: 360,
         background: 'rgba(17,17,17,0.34)',
         display: 'flex',
         alignItems: 'flex-end',
