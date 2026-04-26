@@ -10,6 +10,7 @@ import {
   type AppLanguage,
 } from '../../../../services/i18n';
 import { formatDisplayPrice } from '../../../../services/currencyDisplay';
+import { getOrCreateChatThread } from '../../../../services/chatStore';
 
 type PaymentMethod = 'olacash' | 'card' | 'paypal' | 'wallet';
 
@@ -471,6 +472,19 @@ export default function BookingConfirmedPage() {
 
   const primaryService = selectedItems[0];
 
+  const handleOpenMasterChat = () => {
+    const chatThread = getOrCreateChatThread({
+      threadId: String(master.id),
+      providerName: master.name,
+      providerAvatar: master.avatar || primaryService.image,
+      category: master.title || primaryService.title,
+      online: true,
+      lastSeenText: 'Online',
+    });
+
+    router.push(`/messages/${encodeURIComponent(chatThread.id)}`);
+  };
+
   return (
     <main
       style={{
@@ -513,7 +527,7 @@ export default function BookingConfirmedPage() {
 
           <button
             type="button"
-            onClick={() => router.push('/messages')}
+            onClick={handleOpenMasterChat}
             style={{
               width: 46,
               height: 46,
@@ -974,7 +988,7 @@ export default function BookingConfirmedPage() {
         >
           <button
             type="button"
-            onClick={() => router.push(`/messages?masterId=${master.id}`)}
+            onClick={handleOpenMasterChat}
             style={{
               border: `2px solid ${BRAND.border}`,
               background: BRAND.green,
