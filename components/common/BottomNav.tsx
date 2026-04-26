@@ -7,6 +7,10 @@ import {
   subscribeToLanguageChange,
   type AppLanguage,
 } from '../../services/i18n';
+import {
+  getUnreadMessagesCount,
+  subscribeToChatStore,
+} from '../../services/chatStore';
 
 type BottomNavProps = {
   active?: 'home' | 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
@@ -17,7 +21,6 @@ type NavKey = 'profile' | 'clients' | 'add' | 'bookings' | 'messages';
 type NavItem = {
   key: NavKey;
   href: string;
-  badge?: number;
 };
 
 const navLabels: Record<AppLanguage, Record<NavKey, string>> = {
@@ -194,11 +197,7 @@ function CalendarIcon({ active }: { active: boolean }) {
         strokeWidth="1.9"
         strokeLinecap="round"
       />
-      <path
-        d="M4 10H20"
-        stroke={active ? '#2578ff' : '#202020'}
-        strokeWidth="1.9"
-      />
+      <path d="M4 10H20" stroke={active ? '#2578ff' : '#202020'} strokeWidth="1.9" />
     </svg>
   );
 }
@@ -221,7 +220,7 @@ const navItems: NavItem[] = [
   { key: 'clients', href: '/bookings/clients' },
   { key: 'add', href: '/add' },
   { key: 'bookings', href: '/bookings' },
-  { key: 'messages', href: '/messages', badge: 2 },
+  { key: 'messages', href: '/messages' },
 ];
 
 export default function BottomNav({ active: activeProp }: BottomNavProps) {
@@ -231,6 +230,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
   const [language, setLanguage] = useState<AppLanguage>('EN');
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [navVisible, setNavVisible] = useState(true);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastScrollYRef = useRef(0);
@@ -244,6 +244,31 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
 
     return () => {
       unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    const syncUnread = () => {
+      try {
+        setUnreadMessagesCount(getUnreadMessagesCount());
+      } catch {
+        setUnreadMessagesCount(0);
+      }
+    };
+
+    syncUnread();
+
+    const unsubscribe = subscribeToChatStore(syncUnread);
+
+    window.addEventListener('focus', syncUnread);
+    window.addEventListener('pageshow', syncUnread);
+    window.addEventListener('storage', syncUnread);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('focus', syncUnread);
+      window.removeEventListener('pageshow', syncUnread);
+      window.removeEventListener('storage', syncUnread);
     };
   }, []);
 
@@ -551,6 +576,8 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
             const isActive = getIsActive(item.key, item.href);
             const isAdd = item.key === 'add';
             const label = labels[item.key] || getLabel(language, item.key);
+            const badge =
+              item.key === 'messages' && unreadMessagesCount > 0 ? unreadMessagesCount : 0;
 
             return (
               <button
@@ -615,7 +642,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   </span>
                 )}
 
-                {typeof item.badge === 'number' ? (
+                {badge > 0 ? (
                   <span
                     style={{
                       position: 'absolute',
@@ -635,7 +662,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                       boxShadow: '0 3px 8px rgba(255,79,160,0.26)',
                     }}
                   >
-                    {item.badge}
+                    {badge > 99 ? '99+' : badge}
                   </span>
                 ) : null}
 
