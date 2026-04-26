@@ -43,53 +43,55 @@ type PageTexts = {
   emptyCancelled: string;
   back: string;
   home: string;
-  total: string;
   activeNow: string;
-  menuClose: string;
-  menuCancel: string;
-  menuOpenProfile: string;
+  total: string;
   provider: string;
   bookingSummary: string;
   dateTime: string;
-  detailsUnlocked: string;
-  detailsLocked: string;
-  exactAddress: string;
+  price: string;
+  address: string;
   area: string;
-  contactAndAddress: string;
+  exactAddress: string;
+  contacts: string;
   phone: string;
   email: string;
   social: string;
   openChat: string;
   callSeller: string;
   routeToMaster: string;
-  contactsHiddenTitle: string;
-  contactsHiddenText: string;
-  waitingMaster: string;
+  menuClose: string;
+  menuCancel: string;
+  menuOpenProfile: string;
+  paidDeposit: string;
   waitingPayment: string;
+  chatAvailable: string;
+  chatLocked: string;
+  waitingMaster: string;
+  contactsUnlocked: string;
+  contactsLocked: string;
   lockedValue: string;
-  todayAt: string;
-  tomorrowAt: string;
+  hiddenTitle: string;
+  hiddenText: string;
   noPhoneAction: string;
   noRouteAction: string;
-  chatAvailable: string;
-  chatOnly: string;
-  lockedUntilConfirm: string;
-  paidDeposit: string;
-  masterMustConfirm: string;
+  todayAt: string;
+  tomorrowAt: string;
+  doneBadge: string;
+  needsAction: string;
 };
 
 const BRAND = {
   navy: '#071b46',
-  blue: '#1467f2',
-  green: '#21b84b',
-  red: '#ff4b4b',
-  pink: '#ff4f9a',
+  blue: '#0e73d8',
+  green: '#24c45a',
+  red: '#ff2456',
   yellow: '#ffd629',
+  pink: '#ff4f9a',
   border: '#111111',
-  muted: '#626977',
+  muted: '#657080',
 };
 
-const pageTexts: Partial<Record<AppLanguage, PageTexts>> = {
+const texts: Partial<Record<AppLanguage, PageTexts>> = {
   EN: {
     title: 'My bookings',
     subtitle: 'Booking status, chat, address and contact access',
@@ -109,40 +111,42 @@ const pageTexts: Partial<Record<AppLanguage, PageTexts>> = {
     emptyCancelled: 'No cancelled bookings yet',
     back: 'Back',
     home: 'Home',
-    total: 'Total',
     activeNow: 'Active now',
-    menuClose: 'Close',
-    menuCancel: 'Cancel booking',
-    menuOpenProfile: 'Open profile',
+    total: 'Total',
     provider: 'Provider',
     bookingSummary: 'Booking summary',
     dateTime: 'Date & time',
-    detailsUnlocked: 'Contacts unlocked',
-    detailsLocked: 'Waiting for provider confirmation',
-    exactAddress: 'Exact address',
+    price: 'Price',
+    address: 'Address',
     area: 'Area',
-    contactAndAddress: 'Specialist contacts',
+    exactAddress: 'Exact address',
+    contacts: 'Contacts',
     phone: 'Phone',
     email: 'Email',
     social: 'Social',
     openChat: 'Open chat',
-    callSeller: 'Call seller',
-    routeToMaster: 'Build route',
-    contactsHiddenTitle: 'Contacts are locked',
-    contactsHiddenText:
-      'After deposit payment, chat is available. Phone, exact address and route unlock only after the provider confirms the booking.',
-    waitingMaster: 'Waiting for provider confirmation',
-    waitingPayment: 'Waiting for deposit payment',
+    callSeller: 'Call',
+    routeToMaster: 'Route',
+    menuClose: 'Close',
+    menuCancel: 'Cancel booking',
+    menuOpenProfile: 'Open profile',
+    paidDeposit: 'Deposit paid',
+    waitingPayment: 'Waiting for deposit',
+    chatAvailable: 'Chat available',
+    chatLocked: 'Chat locked',
+    waitingMaster: 'Provider must confirm',
+    contactsUnlocked: 'Address & contacts open',
+    contactsLocked: 'Locked until provider confirms',
     lockedValue: 'Locked',
-    todayAt: 'Today at',
-    tomorrowAt: 'Tomorrow at',
+    hiddenTitle: 'Contacts are locked',
+    hiddenText:
+      'Chat is available after deposit payment. Phone, exact address and route open only after the provider confirms the booking.',
     noPhoneAction: 'Phone locked',
     noRouteAction: 'Route locked',
-    chatAvailable: 'Chat available',
-    chatOnly: 'Chat only until confirmation',
-    lockedUntilConfirm: 'Locked until provider confirms',
-    paidDeposit: 'Deposit paid',
-    masterMustConfirm: 'Provider must confirm',
+    todayAt: 'Today at',
+    tomorrowAt: 'Tomorrow at',
+    doneBadge: 'Done',
+    needsAction: 'Needs action',
   },
   RU: {
     title: 'Мои бронирования',
@@ -163,40 +167,42 @@ const pageTexts: Partial<Record<AppLanguage, PageTexts>> = {
     emptyCancelled: 'Пока нет отменённых бронирований',
     back: 'Назад',
     home: 'Главная',
-    total: 'Всего',
     activeNow: 'Активно сейчас',
-    menuClose: 'Закрыть',
-    menuCancel: 'Отменить бронь',
-    menuOpenProfile: 'Открыть профиль',
+    total: 'Всего',
     provider: 'Специалист',
-    bookingSummary: 'Сводка бронирования',
+    bookingSummary: 'Сводка брони',
     dateTime: 'Дата и время',
-    detailsUnlocked: 'Контакты открыты',
-    detailsLocked: 'Ждём подтверждения мастера',
-    exactAddress: 'Точный адрес',
+    price: 'Цена',
+    address: 'Адрес',
     area: 'Район',
-    contactAndAddress: 'Контакты специалиста',
+    exactAddress: 'Точный адрес',
+    contacts: 'Контакты',
     phone: 'Телефон',
     email: 'Email',
     social: 'Соцсети',
     openChat: 'Открыть чат',
     callSeller: 'Позвонить',
     routeToMaster: 'Маршрут',
-    contactsHiddenTitle: 'Контакты закрыты',
-    contactsHiddenText:
-      'После оплаты депозита доступен только чат. Телефон, точный адрес и маршрут откроются только после подтверждения брони мастером.',
-    waitingMaster: 'Ждёт подтверждения мастера',
+    menuClose: 'Закрыть',
+    menuCancel: 'Отменить бронь',
+    menuOpenProfile: 'Открыть профиль',
+    paidDeposit: 'Депозит оплачен',
     waitingPayment: 'Ждёт оплату депозита',
+    chatAvailable: 'Чат доступен',
+    chatLocked: 'Чат закрыт',
+    waitingMaster: 'Мастер должен подтвердить',
+    contactsUnlocked: 'Адрес и контакты открыты',
+    contactsLocked: 'Закрыто до подтверждения мастером',
     lockedValue: 'Скрыто',
-    todayAt: 'Сегодня в',
-    tomorrowAt: 'Завтра в',
+    hiddenTitle: 'Контакты закрыты',
+    hiddenText:
+      'После оплаты депозита доступен чат. Телефон, точный адрес и маршрут откроются только после подтверждения брони мастером.',
     noPhoneAction: 'Телефон закрыт',
     noRouteAction: 'Маршрут закрыт',
-    chatAvailable: 'Чат доступен',
-    chatOnly: 'Только чат до подтверждения',
-    lockedUntilConfirm: 'Закрыто до подтверждения мастером',
-    paidDeposit: 'Депозит оплачен',
-    masterMustConfirm: 'Мастер должен подтвердить',
+    todayAt: 'Сегодня в',
+    tomorrowAt: 'Завтра в',
+    doneBadge: 'Готово',
+    needsAction: 'Нужно действие',
   },
   UA: {
     title: 'Мої бронювання',
@@ -217,44 +223,46 @@ const pageTexts: Partial<Record<AppLanguage, PageTexts>> = {
     emptyCancelled: 'Поки немає скасованих бронювань',
     back: 'Назад',
     home: 'Головна',
-    total: 'Усього',
     activeNow: 'Активно зараз',
-    menuClose: 'Закрити',
-    menuCancel: 'Скасувати бронювання',
-    menuOpenProfile: 'Відкрити профіль',
+    total: 'Усього',
     provider: 'Спеціаліст',
     bookingSummary: 'Підсумок бронювання',
     dateTime: 'Дата і час',
-    detailsUnlocked: 'Контакти відкрито',
-    detailsLocked: 'Очікуємо підтвердження майстра',
-    exactAddress: 'Точна адреса',
+    price: 'Ціна',
+    address: 'Адреса',
     area: 'Район',
-    contactAndAddress: 'Контакти спеціаліста',
+    exactAddress: 'Точна адреса',
+    contacts: 'Контакти',
     phone: 'Телефон',
     email: 'Email',
     social: 'Соцмережі',
     openChat: 'Відкрити чат',
     callSeller: 'Подзвонити',
     routeToMaster: 'Маршрут',
-    contactsHiddenTitle: 'Контакти закрито',
-    contactsHiddenText:
-      'Після оплати депозиту доступний тільки чат. Телефон, точна адреса і маршрут відкриються тільки після підтвердження бронювання майстром.',
-    waitingMaster: 'Очікує підтвердження майстра',
+    menuClose: 'Закрити',
+    menuCancel: 'Скасувати бронювання',
+    menuOpenProfile: 'Відкрити профіль',
+    paidDeposit: 'Депозит оплачено',
     waitingPayment: 'Очікує оплату депозиту',
+    chatAvailable: 'Чат доступний',
+    chatLocked: 'Чат закрито',
+    waitingMaster: 'Майстер має підтвердити',
+    contactsUnlocked: 'Адреса і контакти відкриті',
+    contactsLocked: 'Закрито до підтвердження майстром',
     lockedValue: 'Приховано',
-    todayAt: 'Сьогодні о',
-    tomorrowAt: 'Завтра о',
+    hiddenTitle: 'Контакти закрито',
+    hiddenText:
+      'Після оплати депозиту доступний чат. Телефон, точна адреса і маршрут відкриються тільки після підтвердження бронювання майстром.',
     noPhoneAction: 'Телефон закрито',
     noRouteAction: 'Маршрут закрито',
-    chatAvailable: 'Чат доступний',
-    chatOnly: 'Тільки чат до підтвердження',
-    lockedUntilConfirm: 'Закрито до підтвердження майстром',
-    paidDeposit: 'Депозит оплачено',
-    masterMustConfirm: 'Майстер має підтвердити',
+    todayAt: 'Сьогодні о',
+    tomorrowAt: 'Завтра о',
+    doneBadge: 'Готово',
+    needsAction: 'Потрібна дія',
   },
 };
 
-const serviceNameMap: Record<string, Partial<Record<AppLanguage, string>>> = {
+const serviceNames: Record<string, Partial<Record<AppLanguage, string>>> = {
   Маникюр: { EN: 'Manicure', RU: 'Маникюр', UA: 'Манікюр' },
   Стрижка: { EN: 'Haircut', RU: 'Стрижка', UA: 'Стрижка' },
   Массаж: { EN: 'Massage', RU: 'Массаж', UA: 'Масаж' },
@@ -262,36 +270,36 @@ const serviceNameMap: Record<string, Partial<Record<AppLanguage, string>>> = {
   'Ремонт телефона': { EN: 'Phone repair', RU: 'Ремонт телефона', UA: 'Ремонт телефону' },
 };
 
-const monthMap: Record<string, Partial<Record<AppLanguage, string>>> = {
-  января: { EN: 'January', RU: 'января', UA: 'січня' },
-  февраля: { EN: 'February', RU: 'февраля', UA: 'лютого' },
-  марта: { EN: 'March', RU: 'марта', UA: 'березня' },
-  апреля: { EN: 'April', RU: 'апреля', UA: 'квітня' },
-  мая: { EN: 'May', RU: 'мая', UA: 'травня' },
-  июня: { EN: 'June', RU: 'июня', UA: 'червня' },
-  июля: { EN: 'July', RU: 'июля', UA: 'липня' },
-  августа: { EN: 'August', RU: 'августа', UA: 'серпня' },
-  сентября: { EN: 'September', RU: 'сентября', UA: 'вересня' },
-  октября: { EN: 'October', RU: 'октября', UA: 'жовтня' },
-  ноября: { EN: 'November', RU: 'ноября', UA: 'листопада' },
-  декабря: { EN: 'December', RU: 'декабря', UA: 'грудня' },
-};
-
 function getTexts(language: AppLanguage) {
-  return pageTexts[language] || pageTexts.EN!;
+  return texts[language] || texts.EN!;
 }
 
-function formatPrice(price: number) {
-  return `£${Number(price || 0).toFixed(2)}`;
+function money(value: number) {
+  return `£${Number(value || 0).toFixed(2)}`;
 }
 
-function translateServiceName(value: string, language: AppLanguage) {
-  return serviceNameMap[value]?.[language] || serviceNameMap[value]?.EN || value;
+function serviceName(value: string, language: AppLanguage) {
+  return serviceNames[value]?.[language] || serviceNames[value]?.EN || value;
 }
 
-function translateDateLabel(value: string, language: AppLanguage, text: PageTexts) {
+function isPaid(booking: BookingItem) {
+  return Boolean(booking.clientPaid || booking.paymentReceivedByPlatform || booking.unlockFeePaid);
+}
+
+function isUnlocked(booking: BookingItem) {
+  return canShowExactAddress(booking) && canShowDirectContacts(booking);
+}
+
+function canChat(booking: BookingItem) {
+  return booking.status !== 'cancelled' && isPaid(booking);
+}
+
+function chatThreadId(booking: BookingItem) {
+  return `booking-master-${booking.masterId || booking.id}`;
+}
+
+function formatDateLabel(value: string, text: PageTexts) {
   const source = String(value || '').trim();
-  if (!source) return source;
 
   if (source.startsWith('Сегодня в ')) {
     return `${text.todayAt} ${source.replace('Сегодня в ', '').trim()}`;
@@ -301,96 +309,86 @@ function translateDateLabel(value: string, language: AppLanguage, text: PageText
     return `${text.tomorrowAt} ${source.replace('Завтра в ', '').trim()}`;
   }
 
-  const match = source.match(/^(\d{1,2})\s+([А-Яа-яё]+),\s*(\d{1,2}:\d{2})$/);
-  if (match) {
-    const [, day, rawMonth, time] = match;
-    const month = monthMap[rawMonth.toLowerCase()];
-    if (month) return `${day} ${month[language] || month.EN || rawMonth}, ${time}`;
-  }
-
   return source;
 }
 
-function getStatusMeta(status: BookingStatus, text: PageTexts) {
+function statusMeta(status: BookingStatus, text: PageTexts) {
   if (status === 'pending') {
     return {
       label: text.pending,
-      bg: '#fff7cf',
-      color: '#9a6b00',
-      dot: '#ffd629',
+      bg: '#fff1bf',
+      color: '#b87500',
+      border: '#ffbf1f',
+      icon: '!',
     };
   }
 
   if (status === 'upcoming') {
     return {
       label: text.confirmed,
-      bg: '#eef9f1',
-      color: '#157a35',
-      dot: '#21b84b',
+      bg: '#dcffe8',
+      color: '#008f3a',
+      border: '#24c45a',
+      icon: '✓',
     };
   }
 
   if (status === 'completed') {
     return {
       label: text.completedStatus,
-      bg: '#eef4ff',
-      color: '#1467f2',
-      dot: '#1467f2',
+      bg: '#dcecff',
+      color: '#0e73d8',
+      border: '#0e73d8',
+      icon: '✓',
     };
   }
 
   return {
     label: text.cancelledStatus,
-    bg: '#fff0f0',
-    color: '#d92f2f',
-    dot: '#ff4b4b',
+    bg: '#ffe0e8',
+    color: '#d91f4f',
+    border: '#ff2456',
+    icon: '×',
   };
 }
 
-function isBookingPaid(booking: BookingItem) {
-  return Boolean(booking.clientPaid || booking.paymentReceivedByPlatform);
-}
-
-function canOpenChat(booking: BookingItem) {
-  return booking.status !== 'cancelled' && isBookingPaid(booking);
-}
-
-function getBookingChatThreadId(booking: BookingItem) {
-  const masterId = String(booking.masterId || '').trim();
-  const bookingId = String(booking.id || '').trim();
-
-  if (masterId) return `booking-master-${masterId}`;
-  if (bookingId) return `booking-${bookingId}`;
-
-  return `booking-chat-${Date.now()}`;
-}
-
-function IconBox({
-  icon,
-  bg,
-  color,
-}: {
-  icon: string;
-  bg: string;
-  color: string;
-}) {
+function OlamepLogo() {
   return (
-    <div
-      style={{
-        width: 42,
-        height: 42,
-        borderRadius: 14,
-        background: bg,
-        color,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 22,
-        fontWeight: 900,
-        flex: '0 0 auto',
-      }}
-    >
-      {icon}
+    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
+      <div
+        style={{
+          width: 34,
+          height: 42,
+          borderRadius: '50% 50% 58% 58%',
+          background:
+            'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
+          position: 'relative',
+          boxShadow: '0 8px 18px rgba(14,115,216,0.2)',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: 8,
+            top: 8,
+            width: 17,
+            height: 17,
+            borderRadius: 999,
+            background: '#ffffff',
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          fontSize: 29,
+          fontWeight: 900,
+          color: BRAND.navy,
+          letterSpacing: '-1px',
+        }}
+      >
+        Olamep
+      </div>
     </div>
   );
 }
@@ -399,8 +397,8 @@ export default function BookingsPage() {
   const router = useRouter();
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
-  const [activeTab, setActiveTab] = useState<BookingTab>('upcoming');
   const [bookings, setBookings] = useState<BookingItem[]>(getBookings());
+  const [activeTab, setActiveTab] = useState<BookingTab>('upcoming');
   const [menuBookingId, setMenuBookingId] = useState<string | null>(null);
   const [detailsBookingId, setDetailsBookingId] = useState<string | null>(null);
 
@@ -411,22 +409,19 @@ export default function BookingsPage() {
     syncLanguage();
     syncBookings();
 
-    const unsubscribeLanguage = subscribeToLanguageChange((nextLanguage) => {
-      setLanguage(nextLanguage);
-    });
-
-    const unsubscribeBookings = subscribeToBookingsStore(syncBookings);
+    const unsubLang = subscribeToLanguageChange(setLanguage);
+    const unsubBookings = subscribeToBookingsStore(syncBookings);
 
     window.addEventListener('focus', syncLanguage);
-    window.addEventListener('pageshow', syncLanguage);
-    window.addEventListener('storage', syncLanguage);
+    window.addEventListener('pageshow', syncBookings);
+    window.addEventListener('storage', syncBookings);
 
     return () => {
-      unsubscribeLanguage();
-      unsubscribeBookings();
+      unsubLang();
+      unsubBookings();
       window.removeEventListener('focus', syncLanguage);
-      window.removeEventListener('pageshow', syncLanguage);
-      window.removeEventListener('storage', syncLanguage);
+      window.removeEventListener('pageshow', syncBookings);
+      window.removeEventListener('storage', syncBookings);
     };
   }, []);
 
@@ -444,6 +439,13 @@ export default function BookingsPage() {
     return bookings.filter((item) => item.status === 'cancelled');
   }, [activeTab, bookings]);
 
+  const activeNowCount = bookings.filter(
+    (item) => item.status === 'pending' || item.status === 'upcoming'
+  ).length;
+
+  const menuBooking = bookings.find((booking) => booking.id === menuBookingId) || null;
+  const detailsBooking = bookings.find((booking) => booking.id === detailsBookingId) || null;
+
   const emptyText =
     activeTab === 'upcoming'
       ? text.emptyUpcoming
@@ -451,41 +453,11 @@ export default function BookingsPage() {
       ? text.emptyCompleted
       : text.emptyCancelled;
 
-  const activeNowCount = bookings.filter(
-    (item) => item.status === 'pending' || item.status === 'upcoming'
-  ).length;
+  const openChat = (booking: BookingItem) => {
+    if (!canChat(booking)) return;
 
-  const selectedMenuBooking = bookings.find((item) => item.id === menuBookingId) ?? null;
-  const selectedDetailsBooking = bookings.find((item) => item.id === detailsBookingId) ?? null;
-
-  const handleOpenBookingDetails = (booking: BookingItem) => {
-    setDetailsBookingId(booking.id);
-    setMenuBookingId(null);
-  };
-
-  const handleCancelBooking = (booking: BookingItem) => {
-    updateBookingStatus(booking.id, 'cancelled');
-    setMenuBookingId(null);
-
-    if (detailsBookingId === booking.id) {
-      setDetailsBookingId(null);
-    }
-  };
-
-  const handleRebook = (booking: BookingItem) => {
-    router.push(`/booking/${booking.masterId}`);
-  };
-
-  const handleOpenProfile = (booking: BookingItem) => {
-    router.push(`/master/${booking.masterId}`);
-    setMenuBookingId(null);
-  };
-
-  const handleOpenChat = (booking: BookingItem) => {
-    if (!canOpenChat(booking)) return;
-
-    const chatThread = getOrCreateChatThread({
-      threadId: getBookingChatThreadId(booking),
+    const thread = getOrCreateChatThread({
+      threadId: chatThreadId(booking),
       providerName: booking.masterName || text.provider,
       providerAvatar:
         booking.masterAvatar ||
@@ -495,7 +467,13 @@ export default function BookingsPage() {
       lastSeenText: 'Online',
     });
 
-    router.push(`/messages/${encodeURIComponent(chatThread.id)}`);
+    router.push(`/messages/${encodeURIComponent(thread.id)}`);
+  };
+
+  const cancelBooking = (booking: BookingItem) => {
+    updateBookingStatus(booking.id, 'cancelled');
+    setMenuBookingId(null);
+    if (detailsBookingId === booking.id) setDetailsBookingId(null);
   };
 
   return (
@@ -505,15 +483,15 @@ export default function BookingsPage() {
           minHeight: '100vh',
           background: '#ffffff',
           color: BRAND.navy,
-          paddingBottom: 112,
+          paddingBottom: 140,
           fontFamily: 'Arial, sans-serif',
         }}
       >
-        <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 18px 112px' }}>
+        <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 150px' }}>
           <header
             style={{
               display: 'grid',
-              gridTemplateColumns: '46px 1fr 46px',
+              gridTemplateColumns: '48px 1fr 48px',
               alignItems: 'center',
               gap: 10,
             }}
@@ -523,13 +501,14 @@ export default function BookingsPage() {
               onClick={() => router.back()}
               aria-label={text.back}
               style={{
-                width: 46,
-                height: 46,
-                border: 0,
-                background: 'transparent',
-                fontSize: 38,
-                lineHeight: 1,
+                width: 48,
+                height: 48,
+                borderRadius: 999,
+                border: `2px solid ${BRAND.border}`,
+                background: '#ffffff',
                 color: BRAND.navy,
+                fontSize: 25,
+                fontWeight: 900,
                 cursor: 'pointer',
               }}
             >
@@ -537,7 +516,7 @@ export default function BookingsPage() {
             </button>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 30, fontWeight: 900, color: BRAND.navy }}>Olamep</div>
+              <OlamepLogo />
             </div>
 
             <button
@@ -545,27 +524,29 @@ export default function BookingsPage() {
               onClick={() => router.push('/')}
               aria-label={text.home}
               style={{
-                width: 46,
-                height: 46,
-                border: 0,
-                background: 'transparent',
-                fontSize: 30,
+                width: 48,
+                height: 48,
+                borderRadius: 999,
+                border: `2px solid ${BRAND.border}`,
+                background: '#ffffff',
                 color: BRAND.navy,
+                fontSize: 24,
+                fontWeight: 900,
                 cursor: 'pointer',
               }}
             >
-              ⌂
+              ×
             </button>
           </header>
 
-          <section style={{ marginTop: 26 }}>
+          <section style={{ marginTop: 16 }}>
             <h1
               style={{
                 margin: 0,
-                fontSize: 42,
+                fontSize: 36,
                 lineHeight: 1.02,
                 fontWeight: 900,
-                letterSpacing: '-1.5px',
+                letterSpacing: '-1.2px',
                 color: BRAND.navy,
               }}
             >
@@ -574,11 +555,11 @@ export default function BookingsPage() {
 
             <p
               style={{
-                margin: '10px 0 0',
-                fontSize: 17,
+                margin: '8px 0 0',
+                fontSize: 14,
                 lineHeight: 1.35,
-                fontWeight: 600,
-                color: '#555c68',
+                fontWeight: 800,
+                color: BRAND.muted,
               }}
             >
               {text.subtitle}
@@ -587,80 +568,63 @@ export default function BookingsPage() {
 
           <section
             style={{
-              marginTop: 18,
-              borderRadius: 20,
+              marginTop: 16,
+              borderRadius: 28,
               border: `2px solid ${BRAND.border}`,
               background: '#ffffff',
-              padding: 14,
-              boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
+              padding: 12,
             }}
           >
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                border: '1.5px solid #d9dee8',
-                borderRadius: 18,
-                overflow: 'hidden',
-              }}
-            >
-              <div style={{ padding: 14 }}>
-                <div style={{ fontSize: 13, color: '#6f7582', fontWeight: 800 }}>
-                  {text.activeNow}
-                </div>
-                <div style={{ marginTop: 4, fontSize: 30, fontWeight: 900, color: BRAND.navy }}>
-                  {activeNowCount}
-                </div>
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
+              <SummaryBox
+                title={text.activeNow}
+                value={activeNowCount}
+                bg="#fff0da"
+                color={BRAND.navy}
+                accent="#8b7355"
+              />
 
-              <div
-                style={{
-                  padding: 14,
-                  borderLeft: '1.5px solid #d9dee8',
-                  background: '#f5f7fb',
-                }}
-              >
-                <div style={{ fontSize: 13, color: '#6f7582', fontWeight: 800 }}>
-                  {text.total}
-                </div>
-                <div style={{ marginTop: 4, fontSize: 30, fontWeight: 900, color: BRAND.blue }}>
-                  {bookings.length}
-                </div>
-              </div>
+              <SummaryBox
+                title={text.total}
+                value={bookings.length}
+                bg="#dcecff"
+                color={BRAND.blue}
+                accent={BRAND.blue}
+              />
             </div>
           </section>
 
           <section
             style={{
-              marginTop: 16,
-              borderRadius: 20,
+              marginTop: 14,
+              borderRadius: 24,
               border: `2px solid ${BRAND.border}`,
               background: '#ffffff',
-              padding: 8,
+              padding: 7,
               display: 'grid',
               gridTemplateColumns: '1fr 1fr 1fr',
-              gap: 8,
+              gap: 6,
             }}
           >
             {([
               ['upcoming', text.upcoming],
               ['completed', text.completed],
               ['cancelled', text.cancelled],
-            ] as const).map(([tabKey, label]) => {
-              const active = activeTab === tabKey;
+            ] as const).map(([tab, label]) => {
+              const active = activeTab === tab;
 
               return (
                 <button
-                  key={tabKey}
+                  key={tab}
                   type="button"
-                  onClick={() => setActiveTab(tabKey)}
+                  onClick={() => setActiveTab(tab)}
                   style={{
-                    minHeight: 50,
-                    borderRadius: 15,
-                    border: `2px solid ${active ? BRAND.border : '#d9dee8'}`,
+                    minHeight: 48,
+                    borderRadius: 16,
+                    border: `2px solid ${BRAND.border}`,
                     background: active ? BRAND.navy : '#ffffff',
                     color: active ? '#ffffff' : BRAND.navy,
-                    fontSize: 14,
+                    fontSize: 12.5,
                     fontWeight: 900,
                     cursor: 'pointer',
                   }}
@@ -671,310 +635,40 @@ export default function BookingsPage() {
             })}
           </section>
 
-          <section style={{ marginTop: 18 }}>
+          <section style={{ marginTop: 16 }}>
             {filteredBookings.length === 0 ? (
               <div
                 style={{
-                  background: '#fff',
-                  border: `2px solid ${BRAND.border}`,
-                  borderRadius: 20,
-                  padding: '28px 20px',
+                  minHeight: 130,
+                  borderRadius: 24,
+                  border: `2px dashed #d9d9d9`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   textAlign: 'center',
-                  fontSize: 16,
-                  fontWeight: 800,
-                  color: '#6f7582',
+                  padding: 18,
+                  color: BRAND.muted,
+                  fontSize: 15,
+                  fontWeight: 900,
                 }}
               >
                 {emptyText}
               </div>
             ) : (
-              <div style={{ display: 'grid', gap: 16 }}>
-                {filteredBookings.map((booking) => {
-                  const statusMeta = getStatusMeta(booking.status, text);
-                  const showCancelButton =
-                    booking.status === 'pending' || booking.status === 'upcoming';
-                  const publicLocation = getPublicBookingLocation(booking);
-                  const paid = isBookingPaid(booking);
-                  const chatEnabled = canOpenChat(booking);
-                  const unlocked = canShowDirectContacts(booking) && canShowExactAddress(booking);
-
-                  return (
-                    <article
-                      key={booking.id}
-                      style={{
-                        background: '#fff',
-                        border: `2px solid ${BRAND.border}`,
-                        borderRadius: 22,
-                        padding: 14,
-                        boxShadow: '0 8px 22px rgba(7,27,70,0.06)',
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          gap: 10,
-                          marginBottom: 14,
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 8,
-                            minHeight: 36,
-                            padding: '0 12px',
-                            borderRadius: 999,
-                            border: `2px solid ${BRAND.border}`,
-                            background: statusMeta.bg,
-                            color: statusMeta.color,
-                            fontSize: 12,
-                            fontWeight: 900,
-                          }}
-                        >
-                          <span
-                            style={{
-                              width: 9,
-                              height: 9,
-                              borderRadius: 999,
-                              background: statusMeta.dot,
-                              display: 'inline-block',
-                            }}
-                          />
-                          {statusMeta.label}
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => setMenuBookingId(booking.id)}
-                          style={{
-                            border: `2px solid ${BRAND.border}`,
-                            background: '#fff',
-                            color: BRAND.navy,
-                            width: 40,
-                            height: 40,
-                            borderRadius: 999,
-                            fontSize: 20,
-                            lineHeight: 1,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          ⋯
-                        </button>
-                      </div>
-
-                      <div
-                        style={{
-                          display: 'grid',
-                          gridTemplateColumns: '92px 1fr',
-                          gap: 12,
-                          alignItems: 'center',
-                        }}
-                      >
-                        <img
-                          src={
-                            booking.masterAvatar ||
-                            'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=400&q=80'
-                          }
-                          alt={booking.masterName}
-                          style={{
-                            width: 92,
-                            height: 92,
-                            objectFit: 'cover',
-                            borderRadius: 16,
-                            display: 'block',
-                          }}
-                        />
-
-                        <div style={{ minWidth: 0 }}>
-                          <div
-                            style={{
-                              fontSize: 20,
-                              lineHeight: 1.1,
-                              fontWeight: 900,
-                              color: BRAND.navy,
-                            }}
-                          >
-                            {booking.masterName}
-                          </div>
-
-                          <div
-                            style={{
-                              marginTop: 5,
-                              fontSize: 15,
-                              fontWeight: 700,
-                              color: '#4f5663',
-                            }}
-                          >
-                            {translateServiceName(booking.serviceName, language)}
-                          </div>
-
-                          <div
-                            style={{
-                              marginTop: 9,
-                              display: 'flex',
-                              flexWrap: 'wrap',
-                              alignItems: 'center',
-                              gap: 7,
-                              fontSize: 13,
-                              fontWeight: 800,
-                              color: BRAND.blue,
-                            }}
-                          >
-                            <span>📅 {translateDateLabel(booking.dateLabel, language, text)}</span>
-                          </div>
-
-                          <div
-                            style={{
-                              marginTop: 7,
-                              fontSize: 13,
-                              fontWeight: 800,
-                              color: '#626977',
-                            }}
-                          >
-                            📍 {unlocked ? getVisibleBookingLocation(booking) : publicLocation}
-                          </div>
-
-                          <div
-                            style={{
-                              marginTop: 8,
-                              fontSize: 22,
-                              fontWeight: 900,
-                              color: BRAND.navy,
-                            }}
-                          >
-                            {formatPrice(booking.price)}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          marginTop: 14,
-                          border: '1.5px solid #d9dee8',
-                          borderRadius: 18,
-                          overflow: 'hidden',
-                          display: 'grid',
-                          gridTemplateColumns: '1fr 1fr',
-                        }}
-                      >
-                        <div style={{ padding: 12, background: paid ? '#eef9f1' : '#fff7cf' }}>
-                          <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
-                            {paid ? text.paidDeposit : text.waitingPayment}
-                          </div>
-                          <div
-                            style={{
-                              marginTop: 4,
-                              color: paid ? BRAND.green : '#9a6b00',
-                              fontSize: 14,
-                              lineHeight: 1.25,
-                              fontWeight: 900,
-                            }}
-                          >
-                            {paid ? text.chatAvailable : text.waitingPayment}
-                          </div>
-                        </div>
-
-                        <div
-                          style={{
-                            padding: 12,
-                            borderLeft: '1.5px solid #d9dee8',
-                            background: unlocked ? '#eef9f1' : '#f5f7fb',
-                          }}
-                        >
-                          <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
-                            {unlocked ? text.detailsUnlocked : text.masterMustConfirm}
-                          </div>
-                          <div
-                            style={{
-                              marginTop: 4,
-                              color: unlocked ? BRAND.green : BRAND.blue,
-                              fontSize: 14,
-                              lineHeight: 1.25,
-                              fontWeight: 900,
-                            }}
-                          >
-                            {unlocked ? text.exactAddress : text.lockedUntilConfirm}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'grid', gap: 10, marginTop: 14 }}>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenBookingDetails(booking)}
-                          style={{
-                            minHeight: 54,
-                            borderRadius: 16,
-                            border: `2px solid ${BRAND.border}`,
-                            background: '#ffffff',
-                            color: BRAND.navy,
-                            fontSize: 16,
-                            fontWeight: 900,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          {text.serviceDetails}
-                        </button>
-
-                        <button
-                          type="button"
-                          disabled={!chatEnabled}
-                          onClick={() => handleOpenChat(booking)}
-                          style={{
-                            minHeight: 54,
-                            borderRadius: 16,
-                            border: `2px solid ${BRAND.green}`,
-                            background: chatEnabled ? BRAND.green : '#edf2ee',
-                            color: chatEnabled ? '#ffffff' : '#8b968e',
-                            fontSize: 16,
-                            fontWeight: 900,
-                            cursor: chatEnabled ? 'pointer' : 'not-allowed',
-                          }}
-                        >
-                          💬 {chatEnabled ? text.openChat : text.waitingPayment}
-                        </button>
-
-                        {showCancelButton ? (
-                          <button
-                            type="button"
-                            onClick={() => handleCancelBooking(booking)}
-                            style={{
-                              minHeight: 52,
-                              borderRadius: 16,
-                              border: `2px solid ${BRAND.border}`,
-                              background: '#fff0f0',
-                              color: '#d92f2f',
-                              fontSize: 15,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                            }}
-                          >
-                            {text.cancelBooking}
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleRebook(booking)}
-                            style={{
-                              minHeight: 52,
-                              borderRadius: 16,
-                              border: `2px solid ${BRAND.border}`,
-                              background: '#eef4ff',
-                              color: BRAND.blue,
-                              fontSize: 15,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                            }}
-                          >
-                            {text.rebook}
-                          </button>
-                        )}
-                      </div>
-                    </article>
-                  );
-                })}
+              <div style={{ display: 'grid', gap: 14 }}>
+                {filteredBookings.map((booking) => (
+                  <BookingCard
+                    key={booking.id}
+                    booking={booking}
+                    text={text}
+                    language={language}
+                    onOpenDetails={() => setDetailsBookingId(booking.id)}
+                    onOpenMenu={() => setMenuBookingId(booking.id)}
+                    onOpenChat={() => openChat(booking)}
+                    onCancel={() => cancelBooking(booking)}
+                    onRebook={() => router.push(`/booking/${booking.masterId}`)}
+                  />
+                ))}
               </div>
             )}
           </section>
@@ -983,656 +677,958 @@ export default function BookingsPage() {
         <BottomNav active="bookings" />
       </main>
 
-      {selectedMenuBooking ? (
+      {menuBooking ? (
+        <BookingMenu
+          booking={menuBooking}
+          text={text}
+          onClose={() => setMenuBookingId(null)}
+          onDetails={() => {
+            setDetailsBookingId(menuBooking.id);
+            setMenuBookingId(null);
+          }}
+          onProfile={() => router.push(`/master/${menuBooking.masterId}`)}
+          onCancel={() => cancelBooking(menuBooking)}
+        />
+      ) : null}
+
+      {detailsBooking ? (
+        <BookingDetailsModal
+          booking={detailsBooking}
+          text={text}
+          language={language}
+          onClose={() => setDetailsBookingId(null)}
+          onOpenChat={() => openChat(detailsBooking)}
+          onRebook={() => router.push(`/booking/${detailsBooking.masterId}`)}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function SummaryBox({
+  title,
+  value,
+  bg,
+  color,
+  accent,
+}: {
+  title: string;
+  value: number;
+  bg: string;
+  color: string;
+  accent: string;
+}) {
+  return (
+    <div
+      style={{
+        borderRadius: 20,
+        border: `2px solid ${BRAND.border}`,
+        background: bg,
+        padding: '12px 13px',
+        minHeight: 82,
+        display: 'grid',
+        alignContent: 'space-between',
+      }}
+    >
+      <div style={{ fontSize: 12, fontWeight: 900, color: accent }}>{title}</div>
+      <div style={{ marginTop: 8, fontSize: 31, lineHeight: 1, fontWeight: 900, color }}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function BookingCard({
+  booking,
+  text,
+  language,
+  onOpenDetails,
+  onOpenMenu,
+  onOpenChat,
+  onCancel,
+  onRebook,
+}: {
+  booking: BookingItem;
+  text: PageTexts;
+  language: AppLanguage;
+  onOpenDetails: () => void;
+  onOpenMenu: () => void;
+  onOpenChat: () => void;
+  onCancel: () => void;
+  onRebook: () => void;
+}) {
+  const meta = statusMeta(booking.status, text);
+  const paid = isPaid(booking);
+  const unlocked = isUnlocked(booking);
+  const chatEnabled = canChat(booking);
+  const location = unlocked ? getVisibleBookingLocation(booking) : getPublicBookingLocation(booking);
+  const canCancel = booking.status === 'pending' || booking.status === 'upcoming';
+
+  return (
+    <article
+      style={{
+        position: 'relative',
+        borderRadius: 26,
+        border: `2px solid ${BRAND.border}`,
+        background: '#ffffff',
+        padding: 13,
+        boxShadow: '0 10px 24px rgba(7,27,70,0.07)',
+        overflow: 'hidden',
+      }}
+    >
+      {booking.status === 'completed' ? (
         <div
-          onClick={() => setMenuBookingId(null)}
           style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(17,17,17,0.22)',
-            zIndex: 200,
+            position: 'absolute',
+            right: 12,
+            top: 12,
+            width: 34,
+            height: 34,
+            borderRadius: 999,
+            border: `2px solid ${BRAND.border}`,
+            background: BRAND.green,
+            color: '#ffffff',
             display: 'flex',
-            alignItems: 'flex-end',
+            alignItems: 'center',
             justifyContent: 'center',
+            fontSize: 21,
+            fontWeight: 900,
+            zIndex: 2,
           }}
         >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              padding: '0 16px calc(18px + env(safe-area-inset-bottom))',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                background: '#fff',
-                border: `2px solid ${BRAND.border}`,
-                borderRadius: 22,
-                padding: 14,
-                display: 'grid',
-                gap: 10,
-                boxShadow: '0 20px 40px rgba(0,0,0,0.18)',
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => handleOpenBookingDetails(selectedMenuBooking)}
-                style={{
-                  minHeight: 54,
-                  borderRadius: 16,
-                  border: `2px solid ${BRAND.border}`,
-                  background: '#ffffff',
-                  color: BRAND.navy,
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.serviceDetails}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleOpenProfile(selectedMenuBooking)}
-                style={{
-                  minHeight: 54,
-                  borderRadius: 16,
-                  border: `2px solid ${BRAND.border}`,
-                  background: '#eef4ff',
-                  color: BRAND.blue,
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.menuOpenProfile}
-              </button>
-
-              {(selectedMenuBooking.status === 'pending' ||
-                selectedMenuBooking.status === 'upcoming') && (
-                <button
-                  type="button"
-                  onClick={() => handleCancelBooking(selectedMenuBooking)}
-                  style={{
-                    minHeight: 54,
-                    borderRadius: 16,
-                    border: `2px solid ${BRAND.border}`,
-                    background: '#fff0f0',
-                    color: '#d92f2f',
-                    fontSize: 16,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {text.menuCancel}
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={() => setMenuBookingId(null)}
-                style={{
-                  minHeight: 54,
-                  borderRadius: 16,
-                  border: `2px solid ${BRAND.border}`,
-                  background: BRAND.navy,
-                  color: '#ffffff',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.menuClose}
-              </button>
-            </div>
-          </div>
+          ✓
         </div>
       ) : null}
 
-      {selectedDetailsBooking
-        ? (() => {
-            const detailsUnlocked =
-              canShowExactAddress(selectedDetailsBooking) &&
-              canShowDirectContacts(selectedDetailsBooking);
-            const visibleAddress = getVisibleBookingLocation(selectedDetailsBooking);
-            const safeArea = getPublicBookingLocation(selectedDetailsBooking);
-            const protectedContacts = getProtectedBookingContact(selectedDetailsBooking);
-            const paid = isBookingPaid(selectedDetailsBooking);
-            const chatEnabled = canOpenChat(selectedDetailsBooking);
+      {booking.status === 'pending' ? (
+        <div
+          style={{
+            position: 'absolute',
+            left: 12,
+            top: 12,
+            minHeight: 30,
+            padding: '0 10px',
+            borderRadius: 999,
+            border: `2px solid ${BRAND.border}`,
+            background: BRAND.red,
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: 11,
+            fontWeight: 900,
+            zIndex: 2,
+          }}
+        >
+          ! {text.needsAction}
+        </div>
+      ) : null}
 
-            return (
-              <div
-                onClick={() => setDetailsBookingId(null)}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          marginBottom: booking.status === 'pending' ? 34 : 12,
+        }}
+      >
+        <button
+          type="button"
+          onClick={onOpenMenu}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 999,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            color: BRAND.navy,
+            fontSize: 20,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          ⋯
+        </button>
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '92px minmax(0, 1fr)',
+          gap: 12,
+          alignItems: 'center',
+        }}
+      >
+        <img
+          src={
+            booking.masterAvatar ||
+            'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=400&q=80'
+          }
+          alt={booking.masterName}
+          style={{
+            width: 92,
+            height: 92,
+            objectFit: 'cover',
+            borderRadius: 20,
+            border: '1.5px solid #eeeeee',
+          }}
+        />
+
+        <div style={{ minWidth: 0 }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 7,
+              minHeight: 30,
+              padding: '0 10px',
+              borderRadius: 999,
+              border: `2px solid ${meta.border}`,
+              background: meta.bg,
+              color: meta.color,
+              fontSize: 11,
+              fontWeight: 900,
+              marginBottom: 7,
+            }}
+          >
+            {meta.icon} {meta.label}
+          </div>
+
+          <div
+            style={{
+              fontSize: 20,
+              lineHeight: 1.08,
+              fontWeight: 900,
+              color: BRAND.navy,
+              paddingRight: booking.status === 'completed' ? 24 : 0,
+            }}
+          >
+            {booking.masterName}
+          </div>
+
+          <div
+            style={{
+              marginTop: 5,
+              fontSize: 14,
+              fontWeight: 800,
+              color: BRAND.muted,
+            }}
+          >
+            {serviceName(booking.serviceName, language)}
+          </div>
+
+          <div
+            style={{
+              marginTop: 7,
+              fontSize: 13,
+              fontWeight: 900,
+              color: BRAND.blue,
+            }}
+          >
+            📅 {formatDateLabel(booking.dateLabel, text)}
+          </div>
+
+          <div
+            style={{
+              marginTop: 6,
+              fontSize: 13,
+              lineHeight: 1.25,
+              fontWeight: 800,
+              color: BRAND.muted,
+            }}
+          >
+            📍 {location}
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: 13,
+          display: 'grid',
+          gridTemplateColumns: '1fr auto',
+          gap: 10,
+          alignItems: 'center',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 7,
+          }}
+        >
+          <MiniPill
+            label={paid ? text.paidDeposit : text.waitingPayment}
+            bg={paid ? '#dcffe8' : '#fff1bf'}
+            color={paid ? '#008f3a' : '#b87500'}
+          />
+
+          <MiniPill
+            label={unlocked ? text.contactsUnlocked : text.contactsLocked}
+            bg={unlocked ? '#dcffe8' : '#dcecff'}
+            color={unlocked ? '#008f3a' : BRAND.blue}
+          />
+        </div>
+
+        <div style={{ fontSize: 24, fontWeight: 900, color: BRAND.red }}>
+          {money(booking.price)}
+        </div>
+      </div>
+
+      <div style={{ marginTop: 13, display: 'grid', gap: 9 }}>
+        <button
+          type="button"
+          onClick={onOpenDetails}
+          style={{
+            minHeight: 52,
+            borderRadius: 17,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            color: BRAND.navy,
+            fontSize: 15,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          {text.serviceDetails}
+        </button>
+
+        <button
+          type="button"
+          disabled={!chatEnabled}
+          onClick={onOpenChat}
+          style={{
+            minHeight: 52,
+            borderRadius: 17,
+            border: `2px solid ${chatEnabled ? BRAND.green : '#d7ded9'}`,
+            background: chatEnabled ? BRAND.green : '#edf2ee',
+            color: chatEnabled ? '#ffffff' : '#8b968e',
+            fontSize: 15,
+            fontWeight: 900,
+            cursor: chatEnabled ? 'pointer' : 'not-allowed',
+          }}
+        >
+          💬 {chatEnabled ? text.openChat : text.chatLocked}
+        </button>
+
+        {canCancel ? (
+          <button
+            type="button"
+            onClick={onCancel}
+            style={{
+              minHeight: 50,
+              borderRadius: 17,
+              border: `2px solid ${BRAND.border}`,
+              background: '#ffe0e8',
+              color: '#d91f4f',
+              fontSize: 15,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            {text.cancelBooking}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onRebook}
+            style={{
+              minHeight: 50,
+              borderRadius: 17,
+              border: `2px solid ${BRAND.border}`,
+              background: '#dcecff',
+              color: BRAND.blue,
+              fontSize: 15,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            {text.rebook}
+          </button>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function MiniPill({ label, bg, color }: { label: string; bg: string; color: string }) {
+  return (
+    <span
+      style={{
+        minHeight: 30,
+        padding: '0 9px',
+        borderRadius: 999,
+        border: `1.8px solid ${BRAND.border}`,
+        background: bg,
+        color,
+        display: 'inline-flex',
+        alignItems: 'center',
+        fontSize: 11,
+        lineHeight: 1.1,
+        fontWeight: 900,
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+function BookingMenu({
+  booking,
+  text,
+  onClose,
+  onDetails,
+  onProfile,
+  onCancel,
+}: {
+  booking: BookingItem;
+  text: PageTexts;
+  onClose: () => void;
+  onDetails: () => void;
+  onProfile: () => void;
+  onCancel: () => void;
+}) {
+  const canCancel = booking.status === 'pending' || booking.status === 'upcoming';
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(17,17,17,0.25)',
+        zIndex: 250,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={(event) => event.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: 430,
+          padding: '0 16px calc(18px + env(safe-area-inset-bottom))',
+          boxSizing: 'border-box',
+        }}
+      >
+        <div
+          style={{
+            background: '#ffffff',
+            border: `2px solid ${BRAND.border}`,
+            borderRadius: 24,
+            padding: 14,
+            display: 'grid',
+            gap: 10,
+            boxShadow: '0 20px 44px rgba(0,0,0,0.18)',
+          }}
+        >
+          <MenuButton label={text.serviceDetails} bg="#ffffff" color={BRAND.navy} onClick={onDetails} />
+          <MenuButton label={text.menuOpenProfile} bg="#dcecff" color={BRAND.blue} onClick={onProfile} />
+
+          {canCancel ? (
+            <MenuButton label={text.menuCancel} bg="#ffe0e8" color="#d91f4f" onClick={onCancel} />
+          ) : null}
+
+          <MenuButton label={text.menuClose} bg={BRAND.navy} color="#ffffff" onClick={onClose} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MenuButton({
+  label,
+  bg,
+  color,
+  onClick,
+}: {
+  label: string;
+  bg: string;
+  color: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        minHeight: 54,
+        borderRadius: 17,
+        border: `2px solid ${BRAND.border}`,
+        background: bg,
+        color,
+        fontSize: 16,
+        fontWeight: 900,
+        cursor: 'pointer',
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function BookingDetailsModal({
+  booking,
+  text,
+  language,
+  onClose,
+  onOpenChat,
+  onRebook,
+}: {
+  booking: BookingItem;
+  text: PageTexts;
+  language: AppLanguage;
+  onClose: () => void;
+  onOpenChat: () => void;
+  onRebook: () => void;
+}) {
+  const unlocked = isUnlocked(booking);
+  const paid = isPaid(booking);
+  const chatEnabled = canChat(booking);
+  const contacts = getProtectedBookingContact(booking);
+  const visibleAddress = getVisibleBookingLocation(booking);
+  const publicArea = getPublicBookingLocation(booking);
+  const meta = statusMeta(booking.status, text);
+
+  const social = [contacts.whatsapp, contacts.telegram, contacts.instagram]
+    .filter(Boolean)
+    .join(' • ');
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(17,17,17,0.25)',
+        zIndex: 270,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={(event) => event.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: 430,
+          maxHeight: '92vh',
+          overflowY: 'auto',
+          background: '#ffffff',
+          borderTopLeftRadius: 32,
+          borderTopRightRadius: 32,
+          border: `2px solid ${BRAND.border}`,
+          borderBottom: 'none',
+          padding: '18px 14px calc(20px + env(safe-area-inset-bottom))',
+          boxSizing: 'border-box',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 999,
+              border: `2px solid ${BRAND.border}`,
+              background: '#ffffff',
+              fontSize: 22,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            ×
+          </button>
+
+          <div
+            style={{
+              minHeight: 42,
+              padding: '0 13px',
+              borderRadius: 999,
+              border: `2px solid ${meta.border}`,
+              background: meta.bg,
+              color: meta.color,
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: 12,
+              fontWeight: 900,
+            }}
+          >
+            {meta.icon} {meta.label}
+          </div>
+        </div>
+
+        <div style={{ marginTop: 14, textAlign: 'center' }}>
+          <OlamepLogo />
+        </div>
+
+        <section
+          style={{
+            marginTop: 16,
+            borderRadius: 28,
+            border: '1.5px solid #e4e4e4',
+            background: '#ffffff',
+            padding: 16,
+            boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+          }}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '82px minmax(0,1fr)',
+              gap: 14,
+              alignItems: 'center',
+            }}
+          >
+            <img
+              src={
+                booking.masterAvatar ||
+                'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=400&q=80'
+              }
+              alt={booking.masterName}
+              style={{
+                width: 82,
+                height: 82,
+                borderRadius: 24,
+                objectFit: 'cover',
+              }}
+            />
+
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 900, color: BRAND.muted }}>
+                {text.provider}
+              </div>
+
+              <h2
                 style={{
-                  position: 'fixed',
-                  inset: 0,
-                  background: 'rgba(17,17,17,0.22)',
-                  zIndex: 220,
-                  display: 'flex',
-                  alignItems: 'flex-end',
-                  justifyContent: 'center',
+                  margin: '4px 0 0',
+                  fontSize: 25,
+                  lineHeight: 1.05,
+                  fontWeight: 900,
+                  color: BRAND.navy,
                 }}
               >
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  style={{
-                    width: '100%',
-                    maxWidth: 430,
-                    maxHeight: '90vh',
-                    overflowY: 'auto',
-                    padding: '0 16px calc(18px + env(safe-area-inset-bottom))',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <div
-                    style={{
-                      background: '#fff',
-                      border: `2px solid ${BRAND.border}`,
-                      borderRadius: 24,
-                      padding: 16,
-                      boxShadow: '0 22px 44px rgba(0,0,0,0.2)',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '78px 1fr auto',
-                        gap: 12,
-                        alignItems: 'center',
-                      }}
-                    >
-                      <img
-                        src={
-                          selectedDetailsBooking.masterAvatar ||
-                          'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=400&q=80'
-                        }
-                        alt={selectedDetailsBooking.masterName}
-                        style={{
-                          width: 78,
-                          height: 78,
-                          objectFit: 'cover',
-                          borderRadius: 16,
-                        }}
-                      />
+                {booking.masterName}
+              </h2>
 
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 800, color: '#6f7582' }}>
-                          {text.provider}
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: 3,
-                            fontSize: 20,
-                            lineHeight: 1.1,
-                            fontWeight: 900,
-                            color: BRAND.navy,
-                          }}
-                        >
-                          {selectedDetailsBooking.masterName}
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: 5,
-                            fontSize: 14,
-                            fontWeight: 700,
-                            color: '#4f5663',
-                          }}
-                        >
-                          {translateServiceName(selectedDetailsBooking.serviceName, language)}
-                        </div>
-                      </div>
-
-                      <div style={{ fontSize: 20, fontWeight: 900, color: BRAND.navy }}>
-                        {formatPrice(selectedDetailsBooking.price)}
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gap: 14, marginTop: 16 }}>
-                      <section
-                        style={{
-                          border: `2px solid ${BRAND.border}`,
-                          borderRadius: 20,
-                          padding: 14,
-                          background: '#fff',
-                        }}
-                      >
-                        <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
-                          {text.bookingSummary}
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: 12,
-                            display: 'grid',
-                            gridTemplateColumns: '1fr 1fr',
-                            border: '1.5px solid #d9dee8',
-                            borderRadius: 18,
-                            overflow: 'hidden',
-                          }}
-                        >
-                          <div style={{ padding: 12 }}>
-                            <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
-                              {text.dateTime}
-                            </div>
-                            <div
-                              style={{
-                                marginTop: 6,
-                                fontSize: 16,
-                                lineHeight: 1.35,
-                                fontWeight: 900,
-                                color: BRAND.blue,
-                              }}
-                            >
-                              {translateDateLabel(selectedDetailsBooking.dateLabel, language, text)}
-                            </div>
-                          </div>
-
-                          <div
-                            style={{
-                              padding: 12,
-                              borderLeft: '1.5px solid #d9dee8',
-                              background: '#f5f7fb',
-                            }}
-                          >
-                            <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
-                              {text.total}
-                            </div>
-                            <div
-                              style={{
-                                marginTop: 6,
-                                fontSize: 22,
-                                fontWeight: 900,
-                                color: BRAND.navy,
-                              }}
-                            >
-                              {formatPrice(selectedDetailsBooking.price)}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div
-                          style={{
-                            marginTop: 12,
-                            border: `2px solid ${BRAND.border}`,
-                            borderRadius: 18,
-                            padding: 14,
-                            background: detailsUnlocked ? '#eef9f1' : '#f5f7fb',
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: 16,
-                              fontWeight: 900,
-                              color: detailsUnlocked ? BRAND.green : BRAND.blue,
-                            }}
-                          >
-                            {detailsUnlocked ? text.detailsUnlocked : text.detailsLocked}
-                          </div>
-
-                          <div
-                            style={{
-                              marginTop: 8,
-                              fontSize: 14,
-                              fontWeight: 800,
-                              lineHeight: 1.45,
-                              color: '#515866',
-                            }}
-                          >
-                            {detailsUnlocked
-                              ? `${text.exactAddress}: ${visibleAddress}`
-                              : `${text.area}: ${safeArea}`}
-                          </div>
-                        </div>
-                      </section>
-
-                      <section
-                        style={{
-                          border: `2px solid ${BRAND.border}`,
-                          borderRadius: 20,
-                          padding: 14,
-                          background: '#fff',
-                        }}
-                      >
-                        <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
-                          {text.contactAndAddress}
-                        </div>
-
-                        <div style={{ display: 'grid', gap: 10, marginTop: 14 }}>
-                          <div
-                            style={{
-                              border: '1.5px solid #d9dee8',
-                              borderRadius: 16,
-                              padding: 12,
-                              display: 'grid',
-                              gridTemplateColumns: '42px 1fr',
-                              gap: 12,
-                              alignItems: 'center',
-                              opacity: detailsUnlocked ? 1 : 0.55,
-                            }}
-                          >
-                            <IconBox icon="📍" bg="#fff5e8" color="#d68612" />
-                            <div>
-                              <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
-                                {detailsUnlocked ? text.exactAddress : text.area}
-                              </div>
-                              <div
-                                style={{
-                                  marginTop: 4,
-                                  fontSize: 15,
-                                  fontWeight: 900,
-                                  color: BRAND.navy,
-                                }}
-                              >
-                                {detailsUnlocked ? visibleAddress : safeArea}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div
-                            style={{
-                              border: '1.5px solid #d9dee8',
-                              borderRadius: 16,
-                              padding: 12,
-                              display: 'grid',
-                              gridTemplateColumns: '42px 1fr',
-                              gap: 12,
-                              alignItems: 'center',
-                              opacity: detailsUnlocked ? 1 : 0.55,
-                            }}
-                          >
-                            <IconBox icon="📞" bg="#eef9f1" color={BRAND.green} />
-                            <div>
-                              <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
-                                {text.phone}
-                              </div>
-                              <div
-                                style={{
-                                  marginTop: 4,
-                                  fontSize: 15,
-                                  fontWeight: 900,
-                                  color: BRAND.navy,
-                                }}
-                              >
-                                {detailsUnlocked
-                                  ? protectedContacts.phone || text.lockedValue
-                                  : text.lockedValue}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div
-                            style={{
-                              border: '1.5px solid #d9dee8',
-                              borderRadius: 16,
-                              padding: 12,
-                              display: 'grid',
-                              gridTemplateColumns: '42px 1fr',
-                              gap: 12,
-                              alignItems: 'center',
-                              opacity: detailsUnlocked ? 1 : 0.55,
-                            }}
-                          >
-                            <IconBox icon="✉️" bg="#eef4ff" color={BRAND.blue} />
-                            <div>
-                              <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
-                                {text.email}
-                              </div>
-                              <div
-                                style={{
-                                  marginTop: 4,
-                                  fontSize: 15,
-                                  fontWeight: 900,
-                                  color: BRAND.navy,
-                                }}
-                              >
-                                {detailsUnlocked
-                                  ? protectedContacts.email || text.lockedValue
-                                  : text.lockedValue}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div
-                            style={{
-                              border: '1.5px solid #d9dee8',
-                              borderRadius: 16,
-                              padding: 12,
-                              display: 'grid',
-                              gridTemplateColumns: '42px 1fr',
-                              gap: 12,
-                              alignItems: 'center',
-                              opacity: detailsUnlocked ? 1 : 0.55,
-                            }}
-                          >
-                            <IconBox icon="💬" bg="#fff1f7" color={BRAND.pink} />
-                            <div>
-                              <div style={{ fontSize: 12, fontWeight: 800, color: '#6f7582' }}>
-                                {text.social}
-                              </div>
-                              <div
-                                style={{
-                                  marginTop: 4,
-                                  fontSize: 15,
-                                  fontWeight: 900,
-                                  color: BRAND.navy,
-                                }}
-                              >
-                                {detailsUnlocked
-                                  ? [
-                                      protectedContacts.whatsapp,
-                                      protectedContacts.telegram,
-                                      protectedContacts.instagram,
-                                    ]
-                                      .filter(Boolean)
-                                      .join(' • ') || text.lockedValue
-                                  : text.lockedValue}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {!detailsUnlocked ? (
-                          <div
-                            style={{
-                              marginTop: 14,
-                              border: `2px solid ${BRAND.border}`,
-                              borderRadius: 18,
-                              padding: 14,
-                              background: '#fff7cf',
-                            }}
-                          >
-                            <div style={{ fontSize: 16, fontWeight: 900, color: BRAND.navy }}>
-                              {text.contactsHiddenTitle}
-                            </div>
-
-                            <div
-                              style={{
-                                marginTop: 8,
-                                fontSize: 13,
-                                lineHeight: 1.45,
-                                fontWeight: 800,
-                                color: '#515866',
-                              }}
-                            >
-                              {text.contactsHiddenText}
-                            </div>
-
-                            <div
-                              style={{
-                                marginTop: 10,
-                                display: 'flex',
-                                flexWrap: 'wrap',
-                                gap: 8,
-                              }}
-                            >
-                              <span
-                                style={{
-                                  minHeight: 34,
-                                  padding: '0 10px',
-                                  borderRadius: 999,
-                                  border: `2px solid ${BRAND.border}`,
-                                  background: paid ? '#eef9f1' : '#eef4ff',
-                                  color: paid ? BRAND.green : BRAND.blue,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  fontSize: 12,
-                                  fontWeight: 900,
-                                }}
-                              >
-                                {paid ? text.paidDeposit : text.waitingPayment}
-                              </span>
-
-                              <span
-                                style={{
-                                  minHeight: 34,
-                                  padding: '0 10px',
-                                  borderRadius: 999,
-                                  border: `2px solid ${BRAND.border}`,
-                                  background: '#f5f7fb',
-                                  color: BRAND.blue,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  fontSize: 12,
-                                  fontWeight: 900,
-                                }}
-                              >
-                                {text.waitingMaster}
-                              </span>
-                            </div>
-                          </div>
-                        ) : null}
-
-                        <div
-                          style={{
-                            marginTop: 14,
-                            display: 'grid',
-                            gridTemplateColumns: '1fr 1fr',
-                            gap: 10,
-                          }}
-                        >
-                          <button
-                            type="button"
-                            disabled={!chatEnabled}
-                            onClick={() => handleOpenChat(selectedDetailsBooking)}
-                            style={{
-                              minHeight: 54,
-                              borderRadius: 16,
-                              border: `2px solid ${BRAND.green}`,
-                              background: chatEnabled ? BRAND.green : '#edf2ee',
-                              color: chatEnabled ? '#ffffff' : '#8b968e',
-                              fontSize: 15,
-                              fontWeight: 900,
-                              cursor: chatEnabled ? 'pointer' : 'not-allowed',
-                            }}
-                          >
-                            💬 {text.openChat}
-                          </button>
-
-                          <button
-                            type="button"
-                            disabled={!detailsUnlocked || !protectedContacts.phone}
-                            onClick={() => {
-                              if (!detailsUnlocked || !protectedContacts.phone) return;
-                              window.location.href = `tel:${protectedContacts.phone}`;
-                            }}
-                            style={{
-                              minHeight: 54,
-                              borderRadius: 16,
-                              border: `2px solid ${BRAND.border}`,
-                              background:
-                                detailsUnlocked && protectedContacts.phone ? '#eef9f1' : '#f5f7fb',
-                              color:
-                                detailsUnlocked && protectedContacts.phone ? BRAND.green : '#9ca3af',
-                              fontSize: 15,
-                              fontWeight: 900,
-                              cursor:
-                                detailsUnlocked && protectedContacts.phone ? 'pointer' : 'not-allowed',
-                            }}
-                          >
-                            {detailsUnlocked && protectedContacts.phone
-                              ? text.callSeller
-                              : text.noPhoneAction}
-                          </button>
-                        </div>
-
-                        <button
-                          type="button"
-                          disabled={!detailsUnlocked}
-                          onClick={() => {
-                            if (!detailsUnlocked) return;
-
-                            const destination = encodeURIComponent(visibleAddress);
-                            window.open(
-                              `https://www.google.com/maps/search/?api=1&query=${destination}`,
-                              '_blank'
-                            );
-                          }}
-                          style={{
-                            marginTop: 10,
-                            width: '100%',
-                            minHeight: 56,
-                            borderRadius: 16,
-                            border: `2px solid ${BRAND.border}`,
-                            background: detailsUnlocked ? '#eef4ff' : '#f5f7fb',
-                            color: detailsUnlocked ? BRAND.blue : '#9ca3af',
-                            fontSize: 16,
-                            fontWeight: 900,
-                            cursor: detailsUnlocked ? 'pointer' : 'not-allowed',
-                          }}
-                        >
-                          {detailsUnlocked ? text.routeToMaster : text.noRouteAction}
-                        </button>
-                      </section>
-
-                      <button
-                        type="button"
-                        onClick={() => setDetailsBookingId(null)}
-                        style={{
-                          minHeight: 56,
-                          width: '100%',
-                          borderRadius: 16,
-                          border: `2px solid ${BRAND.border}`,
-                          background: BRAND.navy,
-                          color: '#ffffff',
-                          fontSize: 17,
-                          fontWeight: 900,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {text.closeDetails}
-                      </button>
-
-                      {(selectedDetailsBooking.status === 'completed' ||
-                        selectedDetailsBooking.status === 'cancelled') && (
-                        <button
-                          type="button"
-                          onClick={() => handleRebook(selectedDetailsBooking)}
-                          style={{
-                            minHeight: 56,
-                            width: '100%',
-                            borderRadius: 16,
-                            border: `2px solid ${BRAND.border}`,
-                            background: '#eef4ff',
-                            color: BRAND.blue,
-                            fontSize: 16,
-                            fontWeight: 900,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          {text.rebook}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
+              <div
+                style={{
+                  marginTop: 6,
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: BRAND.muted,
+                }}
+              >
+                {serviceName(booking.serviceName, language)}
               </div>
-            );
-          })()
-        : null}
-    </>
+
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 28,
+                  fontWeight: 900,
+                  color: BRAND.red,
+                }}
+              >
+                {money(booking.price)}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          style={{
+            marginTop: 13,
+            borderRadius: 24,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 14,
+          }}
+        >
+          <h3 style={{ margin: 0, fontSize: 21, fontWeight: 900, color: BRAND.navy }}>
+            {text.bookingSummary}
+          </h3>
+
+          <InfoGrid
+            items={[
+              [text.dateTime, formatDateLabel(booking.dateLabel, text)],
+              [text.price, money(booking.price)],
+              [text.address, unlocked ? visibleAddress : publicArea],
+              [text.contacts, unlocked ? text.contactsUnlocked : text.contactsLocked],
+            ]}
+          />
+
+          {!unlocked ? (
+            <div
+              style={{
+                marginTop: 13,
+                borderRadius: 18,
+                border: `2px solid ${BRAND.border}`,
+                background: '#fff1bf',
+                padding: 13,
+              }}
+            >
+              <div style={{ fontSize: 16, fontWeight: 900, color: BRAND.navy }}>
+                🔒 {text.hiddenTitle}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 7,
+                  fontSize: 13,
+                  lineHeight: 1.45,
+                  fontWeight: 800,
+                  color: '#515866',
+                }}
+              >
+                {text.hiddenText}
+              </div>
+
+              <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <MiniPill
+                  label={paid ? text.paidDeposit : text.waitingPayment}
+                  bg={paid ? '#dcffe8' : '#dcecff'}
+                  color={paid ? '#008f3a' : BRAND.blue}
+                />
+                <MiniPill label={text.waitingMaster} bg="#ffffff" color={BRAND.blue} />
+              </div>
+            </div>
+          ) : null}
+        </section>
+
+        <section
+          style={{
+            marginTop: 13,
+            borderRadius: 24,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 14,
+          }}
+        >
+          <h3 style={{ margin: 0, fontSize: 21, fontWeight: 900, color: BRAND.navy }}>
+            {text.contacts}
+          </h3>
+
+          <div style={{ marginTop: 13, display: 'grid', gap: 10 }}>
+            <ContactLine icon="📍" label={unlocked ? text.exactAddress : text.area} value={unlocked ? visibleAddress : publicArea} locked={false} />
+            <ContactLine icon="📞" label={text.phone} value={unlocked ? contacts.phone || text.lockedValue : text.lockedValue} locked={!unlocked} />
+            <ContactLine icon="✉️" label={text.email} value={unlocked ? contacts.email || text.lockedValue : text.lockedValue} locked={!unlocked} />
+            <ContactLine icon="💬" label={text.social} value={unlocked ? social || text.lockedValue : text.lockedValue} locked={!unlocked} />
+          </div>
+
+          <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <button
+              type="button"
+              disabled={!chatEnabled}
+              onClick={onOpenChat}
+              style={{
+                minHeight: 54,
+                borderRadius: 17,
+                border: `2px solid ${chatEnabled ? BRAND.green : '#d7ded9'}`,
+                background: chatEnabled ? BRAND.green : '#edf2ee',
+                color: chatEnabled ? '#ffffff' : '#8b968e',
+                fontSize: 15,
+                fontWeight: 900,
+                cursor: chatEnabled ? 'pointer' : 'not-allowed',
+              }}
+            >
+              💬 {text.openChat}
+            </button>
+
+            <button
+              type="button"
+              disabled={!unlocked || !contacts.phone}
+              onClick={() => {
+                if (!unlocked || !contacts.phone) return;
+                window.location.href = `tel:${contacts.phone}`;
+              }}
+              style={{
+                minHeight: 54,
+                borderRadius: 17,
+                border: `2px solid ${BRAND.border}`,
+                background: unlocked && contacts.phone ? '#dcffe8' : '#f3f4f6',
+                color: unlocked && contacts.phone ? '#008f3a' : '#9ca3af',
+                fontSize: 15,
+                fontWeight: 900,
+                cursor: unlocked && contacts.phone ? 'pointer' : 'not-allowed',
+              }}
+            >
+              {unlocked && contacts.phone ? text.callSeller : text.noPhoneAction}
+            </button>
+          </div>
+
+          <button
+            type="button"
+            disabled={!unlocked}
+            onClick={() => {
+              if (!unlocked) return;
+              window.open(
+                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                  visibleAddress
+                )}`,
+                '_blank'
+              );
+            }}
+            style={{
+              marginTop: 10,
+              width: '100%',
+              minHeight: 56,
+              borderRadius: 17,
+              border: `2px solid ${BRAND.border}`,
+              background: unlocked ? '#dcecff' : '#f3f4f6',
+              color: unlocked ? BRAND.blue : '#9ca3af',
+              fontSize: 16,
+              fontWeight: 900,
+              cursor: unlocked ? 'pointer' : 'not-allowed',
+            }}
+          >
+            {unlocked ? text.routeToMaster : text.noRouteAction}
+          </button>
+        </section>
+
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            marginTop: 13,
+            width: '100%',
+            minHeight: 56,
+            borderRadius: 18,
+            border: `2px solid ${BRAND.border}`,
+            background: BRAND.navy,
+            color: '#ffffff',
+            fontSize: 17,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          {text.closeDetails}
+        </button>
+
+        {(booking.status === 'completed' || booking.status === 'cancelled') ? (
+          <button
+            type="button"
+            onClick={onRebook}
+            style={{
+              marginTop: 10,
+              width: '100%',
+              minHeight: 56,
+              borderRadius: 18,
+              border: `2px solid ${BRAND.border}`,
+              background: '#dcecff',
+              color: BRAND.blue,
+              fontSize: 16,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            {text.rebook}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function InfoGrid({ items }: { items: Array<[string, string]> }) {
+  return (
+    <div
+      style={{
+        marginTop: 12,
+        borderRadius: 18,
+        border: '1.5px solid #d9dee8',
+        overflow: 'hidden',
+      }}
+    >
+      {items.map(([label, value], index) => (
+        <div
+          key={label}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1.2fr',
+            gap: 10,
+            padding: '12px 11px',
+            borderTop: index === 0 ? 'none' : '1.5px solid #d9dee8',
+            background: index % 2 === 0 ? '#ffffff' : '#f8fbff',
+          }}
+        >
+          <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.muted }}>{label}</div>
+          <div
+            style={{
+              fontSize: 13,
+              lineHeight: 1.3,
+              fontWeight: 900,
+              color: BRAND.navy,
+              textAlign: 'right',
+            }}
+          >
+            {value}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ContactLine({
+  icon,
+  label,
+  value,
+  locked,
+}: {
+  icon: string;
+  label: string;
+  value: string;
+  locked: boolean;
+}) {
+  return (
+    <div
+      style={{
+        borderRadius: 17,
+        border: '1.5px solid #d9dee8',
+        background: '#ffffff',
+        padding: 12,
+        display: 'grid',
+        gridTemplateColumns: '42px minmax(0,1fr)',
+        gap: 11,
+        alignItems: 'center',
+        opacity: locked ? 0.58 : 1,
+      }}
+    >
+      <div
+        style={{
+          width: 42,
+          height: 42,
+          borderRadius: 14,
+          background: locked ? '#f3f4f6' : '#dcecff',
+          color: locked ? '#9ca3af' : BRAND.blue,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 21,
+        }}
+      >
+        {icon}
+      </div>
+
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.muted }}>{label}</div>
+        <div
+          style={{
+            marginTop: 4,
+            fontSize: 14,
+            lineHeight: 1.25,
+            fontWeight: 900,
+            color: BRAND.navy,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {value}
+        </div>
+      </div>
+    </div>
   );
 }
