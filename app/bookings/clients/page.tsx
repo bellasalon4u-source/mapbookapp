@@ -760,9 +760,21 @@ export default function ProviderClientsPage() {
   const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth());
   const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(() => startOfDay(new Date()));
+  const [calendarDayOpen, setCalendarDayOpen] = useState(false);
 
   const todayDate = useMemo(() => startOfDay(new Date()), []);
   const tomorrowDate = useMemo(() => addDays(todayDate, 1), [todayDate]);
+
+  useEffect(() => {
+    if (activeView !== 'calendar') return;
+
+    const today = startOfDay(new Date());
+
+    setCalendarDayOpen(false);
+    setSelectedCalendarDate(today);
+    setCalendarMonth(today.getMonth());
+    setCalendarYear(today.getFullYear());
+  }, [activeView]);
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -927,9 +939,20 @@ export default function ProviderClientsPage() {
 
   const handleSelectCalendarDay = (date: Date) => {
     const next = startOfDay(date);
+
     setSelectedCalendarDate(next);
     setCalendarMonth(next.getMonth());
     setCalendarYear(next.getFullYear());
+    setCalendarDayOpen(true);
+  };
+
+  const handleCloseCalendarDay = () => {
+    const today = startOfDay(new Date());
+
+    setCalendarDayOpen(false);
+    setSelectedCalendarDate(today);
+    setCalendarMonth(today.getMonth());
+    setCalendarYear(today.getFullYear());
   };
 
   const handleOpenTimeModal = (slot: ProviderSlot) => {
@@ -1480,326 +1503,356 @@ export default function ProviderClientsPage() {
             />
           ) : null}
 
-          <section
-            style={{
-              marginTop: 16,
-              borderRadius: 30,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 14,
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  fontSize: activeView === 'tomorrow' ? 24 : 26,
-                  lineHeight: 1.1,
-                  fontWeight: 900,
-                  color: '#17130f',
-                  textTransform: language === 'EN' ? 'capitalize' : 'none',
-                }}
-              >
-                {dateTitle}
+          {activeView === 'calendar' && !calendarDayOpen ? null : (
+            <section
+              style={{
+                marginTop: 16,
+                borderRadius: 30,
+                border: '2px solid #111111',
+                background: '#fff',
+                padding: 14,
+                overflow: 'hidden',
+              }}
+            >
+              <div style={{ textAlign: 'center', position: 'relative' }}>
+                {activeView === 'calendar' ? (
+                  <button
+                    type="button"
+                    onClick={handleCloseCalendarDay}
+                    aria-label={text.close}
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: -4,
+                      width: 38,
+                      height: 38,
+                      borderRadius: 999,
+                      border: '2px solid #111111',
+                      background: '#ffffff',
+                      color: '#17130f',
+                      fontSize: 22,
+                      lineHeight: 1,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                      zIndex: 3,
+                    }}
+                  >
+                    ×
+                  </button>
+                ) : null}
+
+                <div
+                  style={{
+                    fontSize: activeView === 'tomorrow' ? 24 : 26,
+                    lineHeight: 1.1,
+                    fontWeight: 900,
+                    color: '#17130f',
+                    textTransform: language === 'EN' ? 'capitalize' : 'none',
+                    paddingRight: activeView === 'calendar' ? 38 : 0,
+                    paddingLeft: activeView === 'calendar' ? 38 : 0,
+                  }}
+                >
+                  {dateTitle}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 13,
+                    fontWeight: 800,
+                    color: '#7b7268',
+                  }}
+                >
+                  {text.daySubtitle}
+                </div>
               </div>
 
               <div
                 style={{
-                  marginTop: 6,
-                  fontSize: 13,
-                  fontWeight: 800,
+                  marginTop: 18,
+                  display: 'grid',
+                  gridTemplateColumns: '58px minmax(0, 1fr) 58px 74px',
+                  gap: 8,
+                  padding: '0 4px',
+                  fontSize: 11,
+                  fontWeight: 900,
                   color: '#7b7268',
                 }}
               >
-                {text.daySubtitle}
+                <div>{text.time}</div>
+                <div>{text.clientProcedure}</div>
+                <div>{text.price}</div>
+                <div>{text.notes}</div>
               </div>
-            </div>
 
-            <div
-              style={{
-                marginTop: 18,
-                display: 'grid',
-                gridTemplateColumns: '58px minmax(0, 1fr) 58px 74px',
-                gap: 8,
-                padding: '0 4px',
-                fontSize: 11,
-                fontWeight: 900,
-                color: '#7b7268',
-              }}
-            >
-              <div>{text.time}</div>
-              <div>{text.clientProcedure}</div>
-              <div>{text.price}</div>
-              <div>{text.notes}</div>
-            </div>
-
-            <div style={{ marginTop: 8, display: 'grid', gap: 9 }}>
-              {visibleSlots.length === 0 ? (
-                <div
-                  style={{
-                    minHeight: 120,
-                    borderRadius: 22,
-                    border: '2px dashed #d9d9d9',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#7b7268',
-                    fontSize: 15,
-                    fontWeight: 900,
-                  }}
-                >
-                  {text.noBookings}
-                </div>
-              ) : null}
-
-              {visibleSlots.map((slot) => {
-                const style = getSlotStyle(slot.status);
-                const isEmpty = slot.status === 'free' || slot.status === 'blocked';
-                const isDone = slot.status === 'completed';
-                const isPending = slot.status === 'pending';
-                const isConfirmed = slot.status === 'confirmed';
-
-                return (
-                  <article
-                    key={slot.id}
-                    draggable={!isEmpty}
-                    onDragStart={() => setDraggingSlotId(slot.id)}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={() => handleDropOnSlot(slot)}
-                    onClick={() => {
-                      if (slot.status === 'free' || slot.status === 'blocked') {
-                        handleOpenTimeModal(slot);
-                        return;
-                      }
-
-                      setSelectedSlotId(slot.id);
-                      setNoteDraft(slot.notes);
-                    }}
+              <div style={{ marginTop: 8, display: 'grid', gap: 9 }}>
+                {visibleSlots.length === 0 ? (
+                  <div
                     style={{
-                      minHeight: 74,
-                      display: 'grid',
-                      gridTemplateColumns: '58px minmax(0, 1fr) 58px 74px',
-                      gap: 8,
+                      minHeight: 120,
+                      borderRadius: 22,
+                      border: '2px dashed #d9d9d9',
+                      display: 'flex',
                       alignItems: 'center',
-                      cursor: 'pointer',
+                      justifyContent: 'center',
+                      color: '#7b7268',
+                      fontSize: 15,
+                      fontWeight: 900,
                     }}
                   >
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleOpenTimeModal(slot);
+                    {text.noBookings}
+                  </div>
+                ) : null}
+
+                {visibleSlots.map((slot) => {
+                  const style = getSlotStyle(slot.status);
+                  const isEmpty = slot.status === 'free' || slot.status === 'blocked';
+                  const isDone = slot.status === 'completed';
+                  const isPending = slot.status === 'pending';
+                  const isConfirmed = slot.status === 'confirmed';
+
+                  return (
+                    <article
+                      key={slot.id}
+                      draggable={!isEmpty}
+                      onDragStart={() => setDraggingSlotId(slot.id)}
+                      onDragOver={(event) => event.preventDefault()}
+                      onDrop={() => handleDropOnSlot(slot)}
+                      onClick={() => {
+                        if (slot.status === 'free' || slot.status === 'blocked') {
+                          handleOpenTimeModal(slot);
+                          return;
+                        }
+
+                        setSelectedSlotId(slot.id);
+                        setNoteDraft(slot.notes);
                       }}
                       style={{
-                        minHeight: 58,
-                        border: 'none',
-                        borderLeft: `6px solid ${style.side}`,
-                        background: '#ffffff',
-                        color: '#17130f',
-                        fontSize: 15,
-                        fontWeight: 900,
+                        minHeight: 74,
+                        display: 'grid',
+                        gridTemplateColumns: '58px minmax(0, 1fr) 58px 74px',
+                        gap: 8,
+                        alignItems: 'center',
                         cursor: 'pointer',
-                        textAlign: 'left',
-                        paddingLeft: 9,
                       }}
                     >
-                      {slot.time}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleOpenTimeModal(slot);
+                        }}
+                        style={{
+                          minHeight: 58,
+                          border: 'none',
+                          borderLeft: `6px solid ${style.side}`,
+                          background: '#ffffff',
+                          color: '#17130f',
+                          fontSize: 15,
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          paddingLeft: 9,
+                        }}
+                      >
+                        {slot.time}
+                      </button>
 
-                    <div
-                      style={{
-                        minHeight: 68,
-                        borderRadius: 13,
-                        border: `2px solid ${style.border}`,
-                        background: style.bg,
-                        padding: '10px 10px',
-                        boxSizing: 'border-box',
-                        overflow: 'hidden',
-                        position: 'relative',
-                      }}
-                    >
-                      {slot.status === 'free' ? (
-                        <div
-                          style={{
-                            height: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            fontSize: 15,
-                            fontWeight: 800,
-                            color: '#6f675f',
-                          }}
-                        >
-                          {text.freeSlot}
-                        </div>
-                      ) : slot.status === 'blocked' ? (
-                        <div
-                          style={{
-                            height: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            fontSize: 15,
-                            fontWeight: 900,
-                            color: '#d91f4f',
-                          }}
-                        >
-                          {text.unavailable}
-                        </div>
-                      ) : (
-                        <>
-                          {isDone ? (
-                            <span
-                              style={{
-                                position: 'absolute',
-                                right: 8,
-                                top: 8,
-                                width: 28,
-                                height: 28,
-                                borderRadius: 999,
-                                border: '2px solid #111111',
-                                background: '#24c45a',
-                                color: '#ffffff',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: 18,
-                                fontWeight: 900,
-                                boxShadow: '0 4px 12px rgba(36,196,90,0.25)',
-                                zIndex: 2,
-                              }}
-                            >
-                              ✓
-                            </span>
-                          ) : null}
-
-                          {isPending ? (
-                            <span
-                              style={{
-                                position: 'absolute',
-                                left: 8,
-                                top: 8,
-                                maxWidth: 100,
-                                height: 24,
-                                borderRadius: 999,
-                                border: '2px solid #111111',
-                                background: '#ff2456',
-                                color: '#ffffff',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                padding: '0 8px',
-                                fontSize: 10,
-                                fontWeight: 900,
-                                zIndex: 2,
-                              }}
-                            >
-                              ! {text.needsAction}
-                            </span>
-                          ) : null}
-
-                          {isConfirmed ? (
-                            <span
-                              style={{
-                                position: 'absolute',
-                                right: 8,
-                                top: 8,
-                                width: 24,
-                                height: 24,
-                                borderRadius: 999,
-                                border: '2px solid #24c45a',
-                                background: '#ffffff',
-                                color: '#24c45a',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: 15,
-                                fontWeight: 900,
-                              }}
-                            >
-                              ✓
-                            </span>
-                          ) : null}
-
+                      <div
+                        style={{
+                          minHeight: 68,
+                          borderRadius: 13,
+                          border: `2px solid ${style.border}`,
+                          background: style.bg,
+                          padding: '10px 10px',
+                          boxSizing: 'border-box',
+                          overflow: 'hidden',
+                          position: 'relative',
+                        }}
+                      >
+                        {slot.status === 'free' ? (
                           <div
                             style={{
+                              height: '100%',
+                              display: 'flex',
+                              alignItems: 'center',
                               fontSize: 15,
-                              fontWeight: 900,
-                              color: '#17130f',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              paddingRight: isDone || isConfirmed ? 30 : 0,
-                              paddingTop: isPending ? 24 : 0,
-                            }}
-                          >
-                            {slot.clientName}
-                          </div>
-                          <div
-                            style={{
-                              marginTop: 3,
-                              fontSize: 12.5,
                               fontWeight: 800,
                               color: '#6f675f',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
                             }}
                           >
-                            {slot.serviceName}
+                            {text.freeSlot}
                           </div>
+                        ) : slot.status === 'blocked' ? (
                           <div
                             style={{
-                              marginTop: 6,
-                              display: 'inline-flex',
-                              minHeight: 22,
-                              padding: '0 10px',
+                              height: '100%',
+                              display: 'flex',
                               alignItems: 'center',
-                              borderRadius: 999,
-                              border: `1.5px solid ${style.border}`,
-                              background: '#ffffffcc',
-                              color: style.color,
-                              fontSize: 10.5,
+                              fontSize: 15,
                               fontWeight: 900,
+                              color: '#d91f4f',
                             }}
                           >
-                            {getSlotStatusLabel(slot.status, text)}
+                            {text.unavailable}
                           </div>
-                        </>
-                      )}
-                    </div>
+                        ) : (
+                          <>
+                            {isDone ? (
+                              <span
+                                style={{
+                                  position: 'absolute',
+                                  right: 8,
+                                  top: 8,
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: 999,
+                                  border: '2px solid #111111',
+                                  background: '#24c45a',
+                                  color: '#ffffff',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: 18,
+                                  fontWeight: 900,
+                                  boxShadow: '0 4px 12px rgba(36,196,90,0.25)',
+                                  zIndex: 2,
+                                }}
+                              >
+                                ✓
+                              </span>
+                            ) : null}
 
-                    <div
-                      style={{
-                        minHeight: 64,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 21,
-                        fontWeight: 900,
-                        color: slot.price > 0 ? '#ff2456' : '#9ca3af',
-                      }}
-                    >
-                      {slot.price > 0 ? money(slot.price) : '—'}
-                    </div>
+                            {isPending ? (
+                              <span
+                                style={{
+                                  position: 'absolute',
+                                  left: 8,
+                                  top: 8,
+                                  maxWidth: 100,
+                                  height: 24,
+                                  borderRadius: 999,
+                                  border: '2px solid #111111',
+                                  background: '#ff2456',
+                                  color: '#ffffff',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  padding: '0 8px',
+                                  fontSize: 10,
+                                  fontWeight: 900,
+                                  zIndex: 2,
+                                }}
+                              >
+                                ! {text.needsAction}
+                              </span>
+                            ) : null}
 
-                    <div
-                      style={{
-                        minHeight: 64,
-                        display: 'flex',
-                        alignItems: 'center',
-                        fontSize: 11.5,
-                        lineHeight: 1.25,
-                        fontWeight: 900,
-                        color: slot.notes ? '#d2a300' : '#9ca3af',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      {slot.notes || '—'}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </section>
+                            {isConfirmed ? (
+                              <span
+                                style={{
+                                  position: 'absolute',
+                                  right: 8,
+                                  top: 8,
+                                  width: 24,
+                                  height: 24,
+                                  borderRadius: 999,
+                                  border: '2px solid #24c45a',
+                                  background: '#ffffff',
+                                  color: '#24c45a',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: 15,
+                                  fontWeight: 900,
+                                }}
+                              >
+                                ✓
+                              </span>
+                            ) : null}
+
+                            <div
+                              style={{
+                                fontSize: 15,
+                                fontWeight: 900,
+                                color: '#17130f',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                paddingRight: isDone || isConfirmed ? 30 : 0,
+                                paddingTop: isPending ? 24 : 0,
+                              }}
+                            >
+                              {slot.clientName}
+                            </div>
+                            <div
+                              style={{
+                                marginTop: 3,
+                                fontSize: 12.5,
+                                fontWeight: 800,
+                                color: '#6f675f',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {slot.serviceName}
+                            </div>
+                            <div
+                              style={{
+                                marginTop: 6,
+                                display: 'inline-flex',
+                                minHeight: 22,
+                                padding: '0 10px',
+                                alignItems: 'center',
+                                borderRadius: 999,
+                                border: `1.5px solid ${style.border}`,
+                                background: '#ffffffcc',
+                                color: style.color,
+                                fontSize: 10.5,
+                                fontWeight: 900,
+                              }}
+                            >
+                              {getSlotStatusLabel(slot.status, text)}
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <div
+                        style={{
+                          minHeight: 64,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 21,
+                          fontWeight: 900,
+                          color: slot.price > 0 ? '#ff2456' : '#9ca3af',
+                        }}
+                      >
+                        {slot.price > 0 ? money(slot.price) : '—'}
+                      </div>
+
+                      <div
+                        style={{
+                          minHeight: 64,
+                          display: 'flex',
+                          alignItems: 'center',
+                          fontSize: 11.5,
+                          lineHeight: 1.25,
+                          fontWeight: 900,
+                          color: slot.notes ? '#d2a300' : '#9ca3af',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {slot.notes || '—'}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          )}
         </div>
 
         <BottomNav active="clients" />
