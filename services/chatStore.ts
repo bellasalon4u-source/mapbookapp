@@ -38,7 +38,7 @@ const olamepSupportThread: ChatThread = {
       text: 'Welcome to Olamep. If you need help with bookings, services, ads or payments, our support team is here.',
       sentAt: '2026-04-25T09:00:00.000Z',
       deliveredAt: '2026-04-25T09:00:05.000Z',
-      seenAt: '2026-04-25T09:01:00.000Z',
+      seenAt: '2026-04-25T09:00:10.000Z',
       status: 'seen',
     },
   ],
@@ -89,7 +89,7 @@ const demoThreads: ChatThread[] = [
         text: 'Great, see you tomorrow ✨',
         sentAt: '2026-03-17T21:20:00.000Z',
         deliveredAt: '2026-03-17T21:20:20.000Z',
-        seenAt: '2026-03-17T21:22:00.000Z',
+        seenAt: '2026-03-17T21:21:00.000Z',
         status: 'seen',
       },
       {
@@ -156,105 +156,72 @@ function cloneThreads(threads: ChatThread[]) {
 }
 
 function isValidChatThreads(value: unknown): value is ChatThread[] {
-  if (!Array.isArray(value)) return false;
-
-  return value.every((thread) => {
-    return (
-      thread &&
-      typeof thread === 'object' &&
-      typeof (thread as ChatThread).id === 'string' &&
-      typeof (thread as ChatThread).providerName === 'string' &&
-      Array.isArray((thread as ChatThread).messages)
-    );
-  });
+  return Array.isArray(value);
 }
 
-function calculateThreadUnreadCount(thread: ChatThread) {
-  return thread.messages.filter((message) => {
-    return message.sender === 'provider' && message.status !== 'seen';
-  }).length;
+function makeSafeThreadId(value: string) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9а-яёіїєґ_-]+/gi, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
-function normalizeThread(thread: ChatThread): ChatThread {
-  const messages = Array.isArray(thread.messages) ? thread.messages : [];
-
-  const normalizedMessages = messages.map((message) => {
-    const safeStatus: ChatMessageStatus =
-      message.status === 'sent' || message.status === 'delivered' || message.status === 'seen'
-        ? message.status
-        : message.seenAt
-        ? 'seen'
-        : 'delivered';
-
-    return {
-      ...message,
-      status: safeStatus,
-    };
-  });
-
-  const normalizedThread: ChatThread = {
-    ...thread,
-    providerAvatar: thread.providerAvatar || '',
-    category: thread.category || 'Service',
-    unreadCount: 0,
-    messages: normalizedMessages,
-  };
+function ensureThreadReadState(thread: ChatThread): ChatThread {
+  const unreadFromProvider = thread.messages.filter(
+    (message) => message.sender === 'provider' && message.status !== 'seen'
+  ).length;
 
   return {
-    ...normalizedThread,
-    unreadCount: calculateThreadUnreadCount(normalizedThread),
+    ...thread,
+    unreadCount: unreadFromProvider,
   };
-}
-
-function normalizeThreads(threads: ChatThread[]) {
-  return threads.map(normalizeThread);
 }
 
 function ensureSystemThreads(threads: ChatThread[]) {
-  const normalizedThreads = normalizeThreads(threads);
+  const normalizedThreads = threads.map((thread) => {
+    if (thread.id !== olamepSupportThread.id) {
+      return ensureThreadReadState(thread);
+    }
+
+    return {
+      ...thread,
+      providerName: 'Olamep Support',
+      providerAvatar: '',
+      category: 'Olamep Internal',
+      online: true,
+      lastSeenText: 'Online',
+      unreadCount: 0,
+      messages: thread.messages.map((message) => ({
+        ...message,
+        status: 'seen' as ChatMessageStatus,
+        seenAt: message.seenAt || new Date().toISOString(),
+      })),
+    };
+  });
+
   const hasOlamepSupport = normalizedThreads.some(
     (thread) => thread.id === olamepSupportThread.id
   );
 
   if (hasOlamepSupport) {
-    return normalizedThreads.map((thread) => {
-      if (thread.id !== olamepSupportThread.id) return thread;
-
-      const fixedThread: ChatThread = {
-        ...thread,
-        providerName: 'Olamep Support',
-        providerAvatar: '',
-        category: 'Olamep Internal',
-        online: true,
-        lastSeenText: 'Online',
-      };
-
-      return {
-        ...fixedThread,
-        unreadCount: calculateThreadUnreadCount(fixedThread),
-      };
-    });
+    return normalizedThreads;
   }
 
-  return [normalizeThread(olamepSupportThread), ...normalizedThreads];
-}
-
-function writeThreadsToStorage(threads: ChatThread[]) {
-  if (!canUseStorage()) return;
-
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(threads));
+  return [olamepSupportThread, ...normalizedThreads];
 }
 
 export function getChatThreads(): ChatThread[] {
   if (!canUseStorage()) {
-    return cloneThreads(normalizeThreads(demoThreads));
+    return cloneThreads(demoThreads.map(ensureThreadReadState));
   }
 
   const raw = window.localStorage.getItem(STORAGE_KEY);
 
   if (!raw) {
-    const initialThreads = normalizeThreads(demoThreads);
-    writeThreadsToStorage(initialThreads);
+    const initialThreads = ensureSystemThreads(demoThreads);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(initialThreads));
     return cloneThreads(initialThreads);
   }
 
@@ -262,18 +229,21 @@ export function getChatThreads(): ChatThread[] {
     const parsed = JSON.parse(raw) as unknown;
 
     if (!isValidChatThreads(parsed)) {
-      const initialThreads = normalizeThreads(demoThreads);
-      writeThreadsToStorage(initialThreads);
+      const initialThreads = ensureSystemThreads(demoThreads);
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(initialThreads));
       return cloneThreads(initialThreads);
     }
 
     const withSystemThreads = ensureSystemThreads(parsed);
-    writeThreadsToStorage(withSystemThreads);
+
+    if (JSON.stringify(withSystemThreads) !== JSON.stringify(parsed)) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(withSystemThreads));
+    }
 
     return cloneThreads(withSystemThreads);
   } catch {
-    const initialThreads = normalizeThreads(demoThreads);
-    writeThreadsToStorage(initialThreads);
+    const initialThreads = ensureSystemThreads(demoThreads);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(initialThreads));
     return cloneThreads(initialThreads);
   }
 }
@@ -282,7 +252,7 @@ export function saveChatThreads(threads: ChatThread[]) {
   if (!canUseStorage()) return;
 
   const withSystemThreads = ensureSystemThreads(threads);
-  writeThreadsToStorage(withSystemThreads);
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(withSystemThreads));
 }
 
 export function getChatThreadById(id: string): ChatThread | null {
@@ -290,35 +260,89 @@ export function getChatThreadById(id: string): ChatThread | null {
   return threads.find((thread) => thread.id === id) ?? null;
 }
 
+export function getOrCreateChatThread(params: {
+  threadId?: string;
+  providerName?: string;
+  providerAvatar?: string;
+  category?: string;
+  online?: boolean;
+  lastSeenText?: string;
+}): ChatThread {
+  const threads = getChatThreads();
+
+  const safeId =
+    makeSafeThreadId(params.threadId || '') ||
+    makeSafeThreadId(params.providerName || '') ||
+    `thread-${Date.now()}`;
+
+  const existingThread = threads.find((thread) => thread.id === safeId);
+
+  if (existingThread) {
+    return existingThread;
+  }
+
+  const now = new Date().toISOString();
+
+  const newThread: ChatThread = {
+    id: safeId,
+    providerName: params.providerName || 'Specialist',
+    providerAvatar:
+      params.providerAvatar ||
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    category: params.category || 'Service',
+    online: params.online ?? true,
+    lastSeenText: params.lastSeenText || 'Online',
+    unreadCount: 0,
+    messages: [
+      {
+        id: `welcome_${Date.now()}`,
+        sender: 'provider',
+        text: 'Hi, you can write here about your booking.',
+        sentAt: now,
+        deliveredAt: now,
+        seenAt: now,
+        status: 'seen',
+      },
+    ],
+  };
+
+  const updatedThreads = [newThread, ...threads];
+  saveChatThreads(updatedThreads);
+  notifyChatStoreChanged();
+
+  return newThread;
+}
+
 export function getUnreadMessagesCount(): number {
   return getChatThreads().reduce((sum, thread) => {
-    return sum + calculateThreadUnreadCount(thread);
+    const unreadFromProvider = thread.messages.filter(
+      (message) => message.sender === 'provider' && message.status !== 'seen'
+    ).length;
+
+    return sum + unreadFromProvider;
   }, 0);
 }
 
 export function markThreadAsRead(id: string) {
   const threads = getChatThreads();
-  const now = new Date().toISOString();
 
   const updated = threads.map((thread) => {
     if (thread.id !== id) return thread;
 
-    const updatedMessages = thread.messages.map((message) => {
-      if (message.sender === 'provider' && message.status !== 'seen') {
-        return {
-          ...message,
-          status: 'seen' as ChatMessageStatus,
-          seenAt: now,
-        };
-      }
-
-      return message;
-    });
-
     return {
       ...thread,
       unreadCount: 0,
-      messages: updatedMessages,
+      messages: thread.messages.map((message) => {
+        if (message.sender === 'provider' && message.status !== 'seen') {
+          return {
+            ...message,
+            status: 'seen' as ChatMessageStatus,
+            seenAt: new Date().toISOString(),
+          };
+        }
+
+        return message;
+      }),
     };
   });
 
@@ -328,27 +352,22 @@ export function markThreadAsRead(id: string) {
 
 export function markAllThreadsAsRead() {
   const threads = getChatThreads();
-  const now = new Date().toISOString();
 
-  const updated = threads.map((thread) => {
-    const updatedMessages = thread.messages.map((message) => {
+  const updated = threads.map((thread) => ({
+    ...thread,
+    unreadCount: 0,
+    messages: thread.messages.map((message) => {
       if (message.sender === 'provider' && message.status !== 'seen') {
         return {
           ...message,
           status: 'seen' as ChatMessageStatus,
-          seenAt: now,
+          seenAt: new Date().toISOString(),
         };
       }
 
       return message;
-    });
-
-    return {
-      ...thread,
-      unreadCount: 0,
-      messages: updatedMessages,
-    };
-  });
+    }),
+  }));
 
   saveChatThreads(updated);
   notifyChatStoreChanged();
@@ -377,7 +396,6 @@ export function sendChatMessage(threadId: string, text: string) {
     return {
       ...thread,
       messages: [...thread.messages, newMessage],
-      unreadCount: calculateThreadUnreadCount(thread),
     };
   });
 
@@ -409,7 +427,6 @@ export function subscribeToChatStore(callback: () => void) {
 
 export function notifyChatStoreChanged() {
   if (typeof window === 'undefined') return;
-
   window.dispatchEvent(new Event('mapbook-chat-store-changed'));
 }
 
