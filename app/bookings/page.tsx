@@ -8,6 +8,7 @@ import {
   subscribeToLanguageChange,
   type AppLanguage,
 } from '../../services/i18n';
+import { getOrCreateChatThread } from '../../services/chatStore';
 import {
   getBookings,
   subscribeToBookingsStore,
@@ -354,6 +355,16 @@ function canOpenChat(booking: BookingItem) {
   return booking.status !== 'cancelled' && isBookingPaid(booking);
 }
 
+function getBookingChatThreadId(booking: BookingItem) {
+  const masterId = String(booking.masterId || '').trim();
+  const bookingId = String(booking.id || '').trim();
+
+  if (masterId) return `booking-master-${masterId}`;
+  if (bookingId) return `booking-${bookingId}`;
+
+  return `booking-chat-${Date.now()}`;
+}
+
 function IconBox({
   icon,
   bg,
@@ -473,14 +484,18 @@ export default function BookingsPage() {
   const handleOpenChat = (booking: BookingItem) => {
     if (!canOpenChat(booking)) return;
 
-    const safeMasterId = String(booking.masterId || '').trim();
+    const chatThread = getOrCreateChatThread({
+      threadId: getBookingChatThreadId(booking),
+      providerName: booking.masterName || text.provider,
+      providerAvatar:
+        booking.masterAvatar ||
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+      category: booking.serviceName || 'Booking',
+      online: true,
+      lastSeenText: 'Online',
+    });
 
-    if (safeMasterId) {
-      router.push(`/messages/${encodeURIComponent(safeMasterId)}`);
-      return;
-    }
-
-    router.push('/messages');
+    router.push(`/messages/${encodeURIComponent(chatThread.id)}`);
   };
 
   return (
