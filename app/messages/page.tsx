@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import BottomNav from '../../components/common/BottomNav';
 import {
   getSavedLanguage,
@@ -70,46 +70,54 @@ const messagesTexts = {
     noChats: 'Brak czatów',
     noChatsHint: 'Gdy zaczniesz pisać do specjalistów, Twoje czaty pojawią się tutaj.',
   },
-} as const;
-
-function normalizeValue(value: unknown) {
-  return String(value || '').trim().toLowerCase();
-}
-
-function doesThreadMatchDirectOpen(
-  thread: ChatThread,
-  bookingId: string,
-  masterId: string,
-  threadId: string
-) {
-  const item = thread as any;
-
-  const wantedBookingId = normalizeValue(bookingId);
-  const wantedMasterId = normalizeValue(masterId);
-  const wantedThreadId = normalizeValue(threadId);
-
-  const threadValues = [
-    item.id,
-    item.threadId,
-    item.chatId,
-    item.bookingId,
-    item.booking_id,
-    item.masterId,
-    item.master_id,
-    item.providerId,
-    item.provider_id,
-    item.professionalId,
-    item.professional_id,
-    item.listingId,
-    item.listing_id,
-  ].map(normalizeValue);
-
-  if (wantedThreadId && threadValues.includes(wantedThreadId)) return true;
-  if (wantedBookingId && threadValues.includes(wantedBookingId)) return true;
-  if (wantedMasterId && threadValues.includes(wantedMasterId)) return true;
-
-  return false;
-}
+  UA: {
+    title: 'Повідомлення',
+    allCaughtUp: 'Усі повідомлення прочитані',
+    unreadSingle: 'непрочитане повідомлення',
+    unreadPlural: 'непрочитаних повідомлень',
+    searchPlaceholder: 'Пошук чатів...',
+    noChats: 'Чатів поки немає',
+    noChatsHint: 'Коли ви почнете писати спеціалістам, ваші чати з’являться тут.',
+  },
+  IT: {
+    title: 'Messaggi',
+    allCaughtUp: 'Tutto letto',
+    unreadSingle: 'messaggio non letto',
+    unreadPlural: 'messaggi non letti',
+    searchPlaceholder: 'Cerca chat...',
+    noChats: 'Ancora nessuna chat',
+    noChatsHint: 'Quando inizierai a scrivere ai professionisti, le chat appariranno qui.',
+  },
+  FR: {
+    title: 'Messages',
+    allCaughtUp: 'Tout est lu',
+    unreadSingle: 'message non lu',
+    unreadPlural: 'messages non lus',
+    searchPlaceholder: 'Rechercher des chats...',
+    noChats: 'Aucun chat pour le moment',
+    noChatsHint: 'Quand vous commencerez à écrire aux professionnels, vos chats apparaîtront ici.',
+  },
+  AR: {
+    title: 'الرسائل',
+    allCaughtUp: 'كل الرسائل مقروءة',
+    unreadSingle: 'رسالة غير مقروءة',
+    unreadPlural: 'رسائل غير مقروءة',
+    searchPlaceholder: 'البحث في الدردشات...',
+    noChats: 'لا توجد دردشات بعد',
+    noChatsHint: 'عندما تبدأ بمراسلة المختصين، ستظهر دردشاتك هنا.',
+  },
+} satisfies Record<
+  AppLanguage,
+  {
+    title: string;
+    allCaughtUp: string;
+    unreadSingle: string;
+    unreadPlural: string;
+    searchPlaceholder: string;
+    noChats: string;
+    noChatsHint: string;
+  }
+>;
 
 function isOlamepInternalThread(thread: ChatThread) {
   const name = thread.providerName.toLowerCase();
@@ -280,13 +288,8 @@ function getLastMessageTime(lastMessage: any) {
   return lastMessage.time || '';
 }
 
-export default function MessagesPage() {
+function MessagesPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const bookingId = searchParams.get('bookingId') || '';
-  const masterId = searchParams.get('masterId') || '';
-  const threadId = searchParams.get('threadId') || '';
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [threads, setThreads] = useState<ChatThread[]>([]);
@@ -299,35 +302,36 @@ export default function MessagesPage() {
 
     load();
     const unsubscribe = subscribeToChatStore(load);
-    return unsubscribe;
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
-    setLanguage(getSavedLanguage());
+    const syncLanguage = () => {
+      setLanguage(getSavedLanguage());
+    };
+
+    syncLanguage();
 
     const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
 
+    window.addEventListener('focus', syncLanguage);
+    window.addEventListener('pageshow', syncLanguage);
+    window.addEventListener('storage', syncLanguage);
+
     return () => {
       unsubLanguage();
+      window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('pageshow', syncLanguage);
+      window.removeEventListener('storage', syncLanguage);
     };
   }, []);
 
-  useEffect(() => {
-    if (!bookingId && !masterId && !threadId) return;
-    if (!threads.length) return;
-
-    const targetThread = threads.find((thread) =>
-      doesThreadMatchDirectOpen(thread, bookingId, masterId, threadId)
-    );
-
-    if (!targetThread) return;
-
-    router.replace(`/messages/${targetThread.id}`);
-  }, [bookingId, masterId, threadId, threads, router]);
-
-  const text = messagesTexts[language as keyof typeof messagesTexts] || messagesTexts.EN;
+  const text = messagesTexts[language] || messagesTexts.EN;
 
   const unreadTotal = useMemo(() => {
     return getUnreadMessagesCount();
@@ -362,6 +366,10 @@ export default function MessagesPage() {
       return `${unreadTotal} ${text.unreadPlural}`;
     }
 
+    if (language === 'UA') {
+      return `${unreadTotal} ${text.unreadPlural}`;
+    }
+
     return `${unreadTotal} ${text.unreadPlural}`;
   }, [language, text, unreadTotal]);
 
@@ -371,10 +379,13 @@ export default function MessagesPage() {
 
     return threads.filter((thread) => {
       const lastMessage = thread.messages[thread.messages.length - 1];
+
       return (
         thread.providerName.toLowerCase().includes(q) ||
         thread.category.toLowerCase().includes(q) ||
-        String(lastMessage?.text || '').toLowerCase().includes(q)
+        String(lastMessage?.text || '')
+          .toLowerCase()
+          .includes(q)
       );
     });
   }, [threads, search]);
@@ -690,5 +701,31 @@ export default function MessagesPage() {
 
       <BottomNav active="messages" />
     </main>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense
+      fallback={
+        <main
+          style={{
+            minHeight: '100vh',
+            background: '#f7f4ee',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#1b2537',
+            fontFamily: 'Arial, sans-serif',
+            fontSize: 20,
+            fontWeight: 900,
+          }}
+        >
+          Messages...
+        </main>
+      }
+    >
+      <MessagesPageContent />
+    </Suspense>
   );
 }
