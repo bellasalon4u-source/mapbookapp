@@ -8,13 +8,8 @@ export type BookingItem = {
   serviceName: string;
   category?: string;
 
-  // Для клиента всегда храним безопасную локацию
   location: string;
-
-  // Безопасный район / зона показа
   areaLabel?: string;
-
-  // Точный адрес — только для внутреннего хранения, не показывать напрямую
   exactAddress?: string;
 
   dateLabel: string;
@@ -22,13 +17,11 @@ export type BookingItem = {
   price: number;
   status: BookingStatus;
 
-  // Старое поле оставляем для совместимости
   unlockFeePaid: boolean;
 
   usedWelcomeBonus?: boolean;
   usedReferralCredit?: boolean;
 
-  // Новый блок правил доступа
   bookingConfirmedByMaster?: boolean;
   clientPaid?: boolean;
   paymentReceivedByPlatform?: boolean;
@@ -190,7 +183,8 @@ function normalizeBooking(booking: BookingItem): BookingItem {
     areaLabel: booking.areaLabel || booking.location,
     bookingConfirmedByMaster: booking.bookingConfirmedByMaster ?? false,
     clientPaid: booking.clientPaid ?? booking.unlockFeePaid ?? false,
-    paymentReceivedByPlatform: booking.paymentReceivedByPlatform ?? false,
+    paymentReceivedByPlatform:
+      booking.paymentReceivedByPlatform ?? booking.unlockFeePaid ?? false,
     promotionPaidByMaster: booking.promotionPaidByMaster ?? false,
   };
 }
@@ -257,7 +251,7 @@ export function addBooking(booking: BookingItem) {
 
 export function updateBookingStatus(bookingId: string, status: BookingStatus) {
   bookingsState = bookingsState.map((booking) =>
-    booking.id === bookingId ? { ...booking, status } : booking
+    booking.id === bookingId ? normalizeBooking({ ...booking, status }) : booking
   );
   emitChange();
 }
@@ -283,7 +277,16 @@ export function confirmBookingByMaster(bookingId: string) {
 
   patchBooking(bookingId, {
     bookingConfirmedByMaster: true,
+    promotionPaidByMaster: true,
     status: booking.status === 'pending' ? 'upcoming' : booking.status,
+  });
+}
+
+export function declineBookingByMaster(bookingId: string) {
+  patchBooking(bookingId, {
+    bookingConfirmedByMaster: false,
+    promotionPaidByMaster: false,
+    status: 'cancelled',
   });
 }
 
@@ -295,7 +298,8 @@ export function setMasterPromotionPaid(bookingId: string, value: boolean) {
 
 export function canShowExactAddress(booking: BookingItem) {
   return Boolean(
-    booking.clientPaid &&
+    booking.bookingConfirmedByMaster &&
+      booking.clientPaid &&
       booking.paymentReceivedByPlatform &&
       booking.promotionPaidByMaster
   );
