@@ -117,6 +117,14 @@ const addMenuTexts: Record<
   PL: { ad: 'Reklama', service: 'Usługa', deal: 'Zniżka', close: 'Zamknij' },
 };
 
+const navItems: NavItem[] = [
+  { key: 'profile', href: '/profile' },
+  { key: 'clients', href: '/bookings/clients' },
+  { key: 'add', href: '/add' },
+  { key: 'bookings', href: '/bookings' },
+  { key: 'messages', href: '/messages' },
+];
+
 function getLabel(language: AppLanguage, key: NavKey) {
   return navLabels[language]?.[key] || navLabels.EN[key];
 }
@@ -125,19 +133,23 @@ function getAddText(language: AppLanguage) {
   return addMenuTexts[language] || addMenuTexts.EN;
 }
 
+function getActiveColor(key: NavKey) {
+  if (key === 'clients') return '#f1b900';
+  if (key === 'bookings') return '#2578ff';
+  if (key === 'messages') return '#55c75f';
+  if (key === 'add') return '#55c75f';
+  return '#55c75f';
+}
+
 function ProfileIcon({ active }: { active: boolean }) {
+  const color = active ? '#55c75f' : '#202020';
+
   return (
     <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-      <circle
-        cx="12"
-        cy="8"
-        r="3.2"
-        stroke={active ? '#55c75f' : '#202020'}
-        strokeWidth="1.9"
-      />
+      <circle cx="12" cy="8" r="3.2" stroke={color} strokeWidth="1.9" />
       <path
         d="M5.5 19C6.5 15.8 8.8 14.5 12 14.5C15.2 14.5 17.5 15.8 18.5 19"
-        stroke={active ? '#55c75f' : '#202020'}
+        stroke={color}
         strokeWidth="1.9"
         strokeLinecap="round"
       />
@@ -146,82 +158,49 @@ function ProfileIcon({ active }: { active: boolean }) {
 }
 
 function ClientsIcon({ active }: { active: boolean }) {
+  const color = active ? '#f1b900' : '#202020';
+
   return (
     <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-      <rect
-        x="4"
-        y="7"
-        width="16"
-        height="12"
-        rx="2.4"
-        stroke={active ? '#f1b900' : '#202020'}
-        strokeWidth="1.9"
-      />
+      <rect x="4" y="7" width="16" height="12" rx="2.4" stroke={color} strokeWidth="1.9" />
       <path
         d="M9 7V5.8C9 4.8 9.8 4 10.8 4H13.2C14.2 4 15 4.8 15 5.8V7"
-        stroke={active ? '#f1b900' : '#202020'}
+        stroke={color}
         strokeWidth="1.9"
         strokeLinecap="round"
       />
-      <path
-        d="M8 12H16"
-        stroke={active ? '#f1b900' : '#202020'}
-        strokeWidth="1.9"
-        strokeLinecap="round"
-      />
+      <path d="M8 12H16" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
     </svg>
   );
 }
 
 function CalendarIcon({ active }: { active: boolean }) {
+  const color = active ? '#2578ff' : '#202020';
+
   return (
     <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-      <rect
-        x="4"
-        y="6"
-        width="16"
-        height="14"
-        rx="2"
-        stroke={active ? '#2578ff' : '#202020'}
-        strokeWidth="1.9"
-      />
-      <path
-        d="M8 3V8"
-        stroke={active ? '#2578ff' : '#202020'}
-        strokeWidth="1.9"
-        strokeLinecap="round"
-      />
-      <path
-        d="M16 3V8"
-        stroke={active ? '#2578ff' : '#202020'}
-        strokeWidth="1.9"
-        strokeLinecap="round"
-      />
-      <path d="M4 10H20" stroke={active ? '#2578ff' : '#202020'} strokeWidth="1.9" />
+      <rect x="4" y="6" width="16" height="14" rx="2" stroke={color} strokeWidth="1.9" />
+      <path d="M8 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
+      <path d="M16 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
+      <path d="M4 10H20" stroke={color} strokeWidth="1.9" />
     </svg>
   );
 }
 
 function MessageIcon({ active }: { active: boolean }) {
+  const color = active ? '#55c75f' : '#202020';
+
   return (
     <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
       <path
         d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
-        stroke={active ? '#55c75f' : '#202020'}
+        stroke={color}
         strokeWidth="1.9"
         strokeLinejoin="round"
       />
     </svg>
   );
 }
-
-const navItems: NavItem[] = [
-  { key: 'profile', href: '/profile' },
-  { key: 'clients', href: '/bookings/clients' },
-  { key: 'add', href: '/add' },
-  { key: 'bookings', href: '/bookings' },
-  { key: 'messages', href: '/messages' },
-];
 
 export default function BottomNav({ active: activeProp }: BottomNavProps) {
   const router = useRouter();
@@ -289,7 +268,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       if (!addMenuOpen) {
         setNavVisible(false);
       }
-    }, 3200);
+    }, 4200);
   };
 
   useEffect(() => {
@@ -323,11 +302,11 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
     };
   }, [addMenuOpen]);
 
-  const getIsActive = (key: BottomNavProps['active'], href: string) => {
-    if (activeProp) return activeProp === key;
+  const getIsActive = (key: NavKey, href: string) => {
+    if (addMenuOpen && key === 'add') return true;
 
-    if (key === 'profile') {
-      return pathname === '/profile' || pathname?.startsWith('/profile/');
+    if (activeProp) {
+      return activeProp === key;
     }
 
     if (key === 'clients') {
@@ -335,18 +314,23 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
     }
 
     if (key === 'bookings') {
-      return pathname === '/bookings';
+      return pathname === '/bookings' || pathname?.startsWith('/bookings/');
+    }
+
+    if (key === 'profile') {
+      return pathname === '/profile' || pathname?.startsWith('/profile/');
     }
 
     if (key === 'messages') {
-      return pathname?.startsWith('/messages');
+      return pathname === '/messages' || pathname?.startsWith('/messages/');
     }
 
     if (key === 'add') {
       return (
+        pathname === '/add' ||
+        pathname?.startsWith('/add/') ||
         pathname?.startsWith('/profile/promotions/new') ||
-        pathname?.startsWith('/profile/deals/new') ||
-        pathname?.startsWith('/add')
+        pathname?.startsWith('/profile/deals/new')
       );
     }
 
@@ -392,7 +376,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
-            padding: '0 26px 150px',
+            padding: '0 22px 128px',
             boxSizing: 'border-box',
           }}
         >
@@ -419,19 +403,19 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 type="button"
                 onClick={handleCreateAd}
                 style={{
-                  minHeight: 122,
+                  minHeight: 112,
                   border: 'none',
                   borderRight: '3px solid #111111',
                   background: '#ffe44d',
                   color: '#17130f',
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: 900,
                   cursor: 'pointer',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 12,
+                  gap: 10,
                 }}
               >
                 <span style={{ fontSize: 34 }}>📣</span>
@@ -442,19 +426,19 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 type="button"
                 onClick={handleCreateService}
                 style={{
-                  minHeight: 122,
+                  minHeight: 112,
                   border: 'none',
                   borderRight: '3px solid #111111',
                   background: '#41c83f',
                   color: '#ffffff',
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: 900,
                   cursor: 'pointer',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 12,
+                  gap: 10,
                 }}
               >
                 <span style={{ fontSize: 40, lineHeight: 1 }}>+</span>
@@ -465,11 +449,11 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 type="button"
                 onClick={handleCreateDeal}
                 style={{
-                  minHeight: 122,
+                  minHeight: 112,
                   border: 'none',
                   background: '#ff4b52',
                   color: '#ffffff',
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: 900,
                   cursor: 'pointer',
                   position: 'relative',
@@ -477,16 +461,16 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 12,
+                  gap: 10,
                 }}
               >
                 <span
                   style={{
                     position: 'absolute',
-                    top: 14,
-                    right: 14,
-                    minWidth: 46,
-                    height: 32,
+                    top: 12,
+                    right: 12,
+                    minWidth: 42,
+                    height: 30,
                     borderRadius: 999,
                     border: '3px solid #111111',
                     background: '#ffffff',
@@ -494,13 +478,13 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: 900,
                   }}
                 >
                   £1
                 </span>
-                <span style={{ fontSize: 42, lineHeight: 1 }}>%</span>
+                <span style={{ fontSize: 40, lineHeight: 1 }}>%</span>
                 <span>{addText.deal}</span>
               </button>
             </div>
@@ -510,11 +494,11 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
               onClick={() => setAddMenuOpen(false)}
               style={{
                 width: '100%',
-                minHeight: 62,
+                minHeight: 58,
                 border: 'none',
                 background: '#ffffff',
                 color: '#17130f',
-                fontSize: 20,
+                fontSize: 19,
                 fontWeight: 900,
                 cursor: 'pointer',
               }}
@@ -531,8 +515,8 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
           position: 'fixed',
           left: '50%',
           bottom: navVisible
-            ? 'calc(16px + env(safe-area-inset-bottom))'
-            : 'calc(-82px + env(safe-area-inset-bottom))',
+            ? 'calc(10px + env(safe-area-inset-bottom))'
+            : 'calc(-72px + env(safe-area-inset-bottom))',
           transform: 'translateX(-50%)',
           width: 'calc(100% - 46px)',
           maxWidth: 364,
@@ -548,7 +532,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
             border: '2px solid #111111',
             borderRadius: 26,
             boxShadow: '0 12px 28px rgba(15,23,42,0.12)',
-            padding: '11px 10px 10px',
+            padding: '9px 9px 8px',
             display: 'grid',
             gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
             alignItems: 'end',
@@ -560,10 +544,10 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
             style={{
               position: 'absolute',
               left: '50%',
-              top: -24,
+              top: -20,
               transform: 'translateX(-50%)',
-              width: 88,
-              height: 50,
+              width: 78,
+              height: 44,
               background: '#fffefa',
               border: '2px solid #111111',
               borderBottom: 'none',
@@ -576,6 +560,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
             const isActive = getIsActive(item.key, item.href);
             const isAdd = item.key === 'add';
             const label = labels[item.key] || getLabel(language, item.key);
+            const activeColor = getActiveColor(item.key);
             const badge =
               item.key === 'messages' && unreadMessagesCount > 0 ? unreadMessagesCount : 0;
 
@@ -595,7 +580,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                   justifyContent: 'flex-end',
                   gap: 4,
                   position: 'relative',
-                  minHeight: 60,
+                  minHeight: 58,
                   width: '100%',
                   minWidth: 0,
                   maxWidth: '100%',
@@ -606,19 +591,21 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 {isAdd ? (
                   <span
                     style={{
-                      width: 72,
-                      height: 72,
+                      width: 64,
+                      height: 64,
                       borderRadius: '50%',
-                      background: '#55c75f',
+                      background: isActive ? '#41c83f' : '#55c75f',
                       color: '#ffffff',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 40,
+                      fontSize: 38,
                       fontWeight: 500,
                       lineHeight: 1,
-                      boxShadow: '0 10px 22px rgba(85,199,95,0.24)',
-                      transform: 'translateY(-20px)',
+                      boxShadow: isActive
+                        ? '0 10px 24px rgba(65,200,63,0.36)'
+                        : '0 10px 22px rgba(85,199,95,0.24)',
+                      transform: 'translateY(-17px)',
                       flexShrink: 0,
                     }}
                   >
@@ -630,8 +617,8 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      height: 32,
-                      width: 32,
+                      height: 31,
+                      width: 31,
                       flexShrink: 0,
                     }}
                   >
@@ -669,7 +656,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 <span
                   title={label}
                   style={{
-                    marginTop: isAdd ? -19 : 0,
+                    marginTop: isAdd ? -17 : 0,
                     width: '100%',
                     maxWidth: 62,
                     minWidth: 0,
@@ -684,7 +671,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                         ? 10.2
                         : 11,
                     fontWeight: 900,
-                    color: isActive ? '#55c75f' : '#202020',
+                    color: isActive ? activeColor : '#202020',
                     lineHeight: 1.05,
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
