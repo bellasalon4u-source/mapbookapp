@@ -57,7 +57,6 @@ type PageText = {
   history: string;
   activeToday: string;
   requestsCount: string;
-  doneToday: string;
   search: string;
   dayTitle: string;
   daySubtitle: string;
@@ -113,8 +112,6 @@ type PageText = {
   openChat: string;
   pendingRequestInfo: string;
   confirmedRequestInfo: string;
-  doneBadge: string;
-  needsAction: string;
 };
 
 const EN_TEXT: PageText = {
@@ -125,9 +122,8 @@ const EN_TEXT: PageText = {
   requests: 'Requests',
   calendar: 'Calendar',
   history: 'History',
-  activeToday: 'Active',
+  activeToday: 'Active today',
   requestsCount: 'Requests',
-  doneToday: 'Done',
   search: 'Search client, service, amount',
   dayTitle: 'Friday, 18 April 2026',
   daySubtitle: 'Booking management',
@@ -187,8 +183,6 @@ const EN_TEXT: PageText = {
     'This request is waiting for your confirmation. After accepting, the client will get address/contact access according to booking rules.',
   confirmedRequestInfo:
     'Booking is confirmed. Contacts and chat are available according to access rules.',
-  doneBadge: 'Done',
-  needsAction: 'Needs action',
 };
 
 const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
@@ -200,9 +194,8 @@ const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
     requests: 'Запросы',
     calendar: 'Календарь',
     history: 'История',
-    activeToday: 'Активно',
+    activeToday: 'Активно сегодня',
     requestsCount: 'Запросы',
-    doneToday: 'Готово',
     search: 'Поиск: клиент, услуга, сумма',
     dayTitle: 'Пятница, 18 апреля 2026',
     daySubtitle: 'Управление бронями',
@@ -262,8 +255,6 @@ const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
       'Эта заявка ждёт вашего подтверждения. После подтверждения клиент получит доступ к адресу и контактам по правилам брони.',
     confirmedRequestInfo:
       'Бронь подтверждена. Чат и контакты доступны по правилам доступа.',
-    doneBadge: 'Готово',
-    needsAction: 'Нужно действие',
   },
 };
 
@@ -480,12 +471,11 @@ function getSlotStyle(status: SlotStatus) {
   };
 }
 
-function getCornerBadge(status: SlotStatus, text: PageText) {
+function getSlotCornerBadge(status: SlotStatus) {
   if (status === 'completed') {
     return {
-      icon: '✓',
-      label: text.doneBadge,
-      bg: '#25b65a',
+      text: '✓',
+      bg: '#35bf55',
       color: '#ffffff',
       border: '#111111',
     };
@@ -493,21 +483,10 @@ function getCornerBadge(status: SlotStatus, text: PageText) {
 
   if (status === 'pending') {
     return {
-      icon: '!',
-      label: text.needsAction,
+      text: '!',
       bg: '#ff4b52',
       color: '#ffffff',
       border: '#111111',
-    };
-  }
-
-  if (status === 'confirmed') {
-    return {
-      icon: '✓',
-      label: text.confirmed,
-      bg: '#ffffff',
-      color: '#25a653',
-      border: '#55c75f',
     };
   }
 
@@ -796,8 +775,6 @@ export default function ProviderClientsPage() {
 
   const requestCount = slots.filter((slot) => slot.status === 'pending').length;
 
-  const completedCount = slots.filter((slot) => slot.status === 'completed').length;
-
   const handleOpenTimeModal = (slot: ProviderSlot) => {
     const [hour, minute] = slot.time.split(':');
     setEditHour(hour || '09');
@@ -933,11 +910,11 @@ export default function ProviderClientsPage() {
           minHeight: '100vh',
           background: '#ffffff',
           color: '#17130f',
-          paddingBottom: 118,
+          paddingBottom: 150,
           fontFamily: 'Arial, sans-serif',
         }}
       >
-        <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 120px' }}>
+        <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 160px' }}>
           <header
             style={{
               display: 'grid',
@@ -1020,82 +997,95 @@ export default function ProviderClientsPage() {
                 borderRadius: 24,
                 border: '2px solid #111111',
                 background: '#ffffff',
-                padding: 10,
+                padding: 12,
               }}
             >
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 1fr',
-                  gap: 8,
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 10,
                 }}
               >
                 <div
                   style={{
-                    minHeight: 76,
+                    minHeight: 74,
                     borderRadius: 18,
                     border: '2px solid #111111',
                     background: '#fff0da',
-                    padding: '10px 12px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
+                    padding: '11px 13px',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto',
+                    alignItems: 'center',
+                    gap: 10,
                   }}
                 >
-                  <div style={{ fontSize: 11, color: '#8b7355', fontWeight: 900 }}>
-                    {text.activeToday}
+                  <div>
+                    <div style={{ fontSize: 12, color: '#8b7355', fontWeight: 900 }}>
+                      {text.activeToday}
+                    </div>
+                    <div style={{ marginTop: 4, fontSize: 13, color: '#8b7355', fontWeight: 800 }}>
+                      ✓ confirmed
+                    </div>
                   </div>
-                  <div style={{ fontSize: 27, fontWeight: 900, color: '#17130f' }}>
+
+                  <div style={{ fontSize: 34, fontWeight: 900, color: '#17130f' }}>
                     {activeTodayCount}
                   </div>
                 </div>
 
                 <div
                   style={{
-                    minHeight: 76,
+                    minHeight: 74,
                     borderRadius: 18,
                     border: '2px solid #111111',
-                    background: requestCount > 0 ? '#ffe1e7' : '#fff3f5',
-                    padding: '10px 12px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
+                    background: requestCount > 0 ? '#ffe1e7' : '#eef4ff',
+                    padding: '11px 13px',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto',
+                    alignItems: 'center',
+                    gap: 10,
                   }}
                 >
-                  <div style={{ fontSize: 11, color: '#cf3344', fontWeight: 900 }}>
-                    {text.requestsCount}
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: requestCount > 0 ? '#cf3344' : '#2559b7',
+                        fontWeight: 900,
+                      }}
+                    >
+                      {text.requestsCount}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 4,
+                        fontSize: 13,
+                        color: requestCount > 0 ? '#cf3344' : '#2559b7',
+                        fontWeight: 800,
+                      }}
+                    >
+                      {requestCount > 0 ? '! action' : 'clear'}
+                    </div>
                   </div>
-                  <div style={{ fontSize: 27, fontWeight: 900, color: '#ff3b4e' }}>
-                    {requestCount}
-                  </div>
-                </div>
 
-                <div
-                  style={{
-                    minHeight: 76,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: '#e3f8ea',
-                    padding: '10px 12px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <div style={{ fontSize: 11, color: '#1f8c3f', fontWeight: 900 }}>
-                    {text.doneToday}
-                  </div>
-                  <div style={{ fontSize: 27, fontWeight: 900, color: '#25a653' }}>
-                    {completedCount}
+                  <div
+                    style={{
+                      fontSize: 34,
+                      fontWeight: 900,
+                      color: requestCount > 0 ? '#cf3344' : '#17130f',
+                    }}
+                  >
+                    {requestCount}
                   </div>
                 </div>
               </div>
 
               <div
                 style={{
-                  marginTop: 10,
-                  height: 48,
-                  borderRadius: 17,
+                  marginTop: 12,
+                  height: 50,
+                  borderRadius: 18,
                   border: '2px solid #111111',
                   background: '#ffffff',
                   display: 'flex',
@@ -1426,7 +1416,7 @@ export default function ProviderClientsPage() {
             <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
               {visibleSlots.map((slot) => {
                 const style = getSlotStyle(slot.status);
-                const badge = getCornerBadge(slot.status, text);
+                const badge = getSlotCornerBadge(slot.status);
                 const isEmpty = slot.status === 'free' || slot.status === 'blocked';
 
                 return (
@@ -1478,54 +1468,40 @@ export default function ProviderClientsPage() {
 
                     <div
                       style={{
+                        position: 'relative',
                         minHeight: 64,
                         borderRadius: 13,
                         border: `2px solid ${style.border}`,
                         background: style.bg,
-                        padding: '10px 12px',
+                        padding: badge ? '10px 34px 10px 12px' : '10px 12px',
                         boxSizing: 'border-box',
                         overflow: 'hidden',
-                        position: 'relative',
                       }}
                     >
                       {badge ? (
-                        <div
+                        <span
                           style={{
                             position: 'absolute',
-                            top: 6,
-                            right: 6,
-                            minWidth: 24,
-                            height: 24,
+                            top: 7,
+                            right: 7,
+                            width: 28,
+                            height: 28,
                             borderRadius: 999,
-                            border: `1.5px solid ${badge.border}`,
+                            border: `2px solid ${badge.border}`,
                             background: badge.bg,
                             color: badge.color,
-                            display: 'inline-flex',
+                            display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            gap: 4,
-                            padding: '0 7px',
-                            fontSize: 10,
-                            fontWeight: 900,
+                            fontSize: 16,
                             lineHeight: 1,
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.10)',
+                            fontWeight: 900,
+                            boxSizing: 'border-box',
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.12)',
                           }}
-                          title={badge.label}
                         >
-                          <span>{badge.icon}</span>
-                          {slot.status === 'completed' || slot.status === 'pending' ? (
-                            <span
-                              style={{
-                                maxWidth: 54,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
-                              {badge.label}
-                            </span>
-                          ) : null}
-                        </div>
+                          {badge.text}
+                        </span>
                       ) : null}
 
                       {slot.status === 'free' ? (
@@ -1558,7 +1534,6 @@ export default function ProviderClientsPage() {
                         <>
                           <div
                             style={{
-                              paddingRight: badge ? 34 : 0,
                               fontSize: 15,
                               fontWeight: 900,
                               color: '#17130f',
