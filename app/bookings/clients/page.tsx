@@ -13,7 +13,6 @@ import {
   subscribeToBookingsStore,
   patchBooking,
   confirmBookingByMaster,
-  declineBookingByMaster,
   canShowDirectContacts,
   getProtectedBookingContact,
   type BookingItem,
@@ -549,8 +548,8 @@ function mapBookingsToSlots(bookings: BookingItem[], language: AppLanguage): Pro
       contactMode: 'quick',
     },
     {
-      id: 'slot_blocked_1500',
-      time: '15:00',
+      id: 'slot_blocked_1800',
+      time: '18:00',
       duration: '60 min',
       clientName: '',
       serviceName: '',
@@ -812,7 +811,11 @@ export default function ProviderClientsPage() {
   const handleDeclineBooking = (slot: ProviderSlot) => {
     if (!slot.sourceBooking) return;
 
-    declineBookingByMaster(slot.sourceBooking.id);
+    patchBooking(slot.sourceBooking.id, {
+      status: 'cancelled',
+      bookingConfirmedByMaster: false,
+    });
+
     setSelectedSlotId(null);
   };
 
@@ -1522,7 +1525,7 @@ export default function ProviderClientsPage() {
           </section>
         </div>
 
-        <BottomNav active="bookings" />
+        <BottomNav active="clients" />
       </main>
 
       {selectedSlot ? (
@@ -1603,7 +1606,7 @@ function ClientCardModal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 300,
+        zIndex: 3000,
         background: 'rgba(17,17,17,0.22)',
         display: 'flex',
         alignItems: 'flex-end',
@@ -1997,7 +2000,7 @@ function TimeModal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 340,
+        zIndex: 3100,
         background: 'rgba(17,17,17,0.38)',
         display: 'flex',
         alignItems: 'flex-end',
@@ -2223,7 +2226,7 @@ function PriceRangeModal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 360,
+        zIndex: 3200,
         background: 'rgba(17,17,17,0.34)',
         display: 'flex',
         alignItems: 'flex-end',
