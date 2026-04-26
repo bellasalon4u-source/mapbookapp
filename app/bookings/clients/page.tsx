@@ -114,6 +114,12 @@ type PageText = {
   pendingRequestInfo: string;
   confirmedRequestInfo: string;
   noBookings: string;
+  calendarPickerTitle: string;
+  year: string;
+  month: string;
+  selectedDay: string;
+  clear: string;
+  needsAction: string;
 };
 
 const EN_TEXT: PageText = {
@@ -186,7 +192,13 @@ const EN_TEXT: PageText = {
     'This request is waiting for your confirmation. After accepting, the client will get address/contact access according to booking rules.',
   confirmedRequestInfo:
     'Booking is confirmed. Contacts and chat are available according to access rules.',
-  noBookings: 'No bookings for this view',
+  noBookings: 'No bookings for this day',
+  calendarPickerTitle: 'Calendar planner',
+  year: 'Year',
+  month: 'Month',
+  selectedDay: 'Selected day',
+  clear: 'Clear',
+  needsAction: 'Needs action',
 };
 
 const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
@@ -260,7 +272,13 @@ const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
       'Эта заявка ждёт вашего подтверждения. После подтверждения клиент получит доступ к адресу и контактам по правилам брони.',
     confirmedRequestInfo:
       'Бронь подтверждена. Чат и контакты доступны по правилам доступа.',
-    noBookings: 'Для этого раздела броней нет',
+    noBookings: 'На этот день броней нет',
+    calendarPickerTitle: 'Календарь мастера',
+    year: 'Год',
+    month: 'Месяц',
+    selectedDay: 'Выбранный день',
+    clear: 'Чисто',
+    needsAction: 'Нужно действие',
   },
 };
 
@@ -345,12 +363,16 @@ function money(value: number) {
   return `£${Number(value || 0).toFixed(0)}`;
 }
 
+function startOfDay(date: Date) {
+  const next = new Date(date);
+  next.setHours(0, 0, 0, 0);
+  return next;
+}
+
 function isSameDay(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
+  const left = startOfDay(a);
+  const right = startOfDay(b);
+  return left.getTime() === right.getTime();
 }
 
 function addDays(date: Date, days: number) {
@@ -365,32 +387,55 @@ function safeDate(value?: string) {
   return date;
 }
 
-function formatDateTitle(date: Date, language: AppLanguage) {
-  const locale =
-    language === 'RU'
-      ? 'ru-RU'
-      : language === 'UA'
-      ? 'uk-UA'
-      : language === 'CZ'
-      ? 'cs-CZ'
-      : language === 'ES'
-      ? 'es-ES'
-      : language === 'DE'
-      ? 'de-DE'
-      : language === 'FR'
-      ? 'fr-FR'
-      : language === 'IT'
-      ? 'it-IT'
-      : language === 'PL'
-      ? 'pl-PL'
-      : 'en-GB';
+function getLocale(language: AppLanguage) {
+  if (language === 'RU') return 'ru-RU';
+  if (language === 'UA') return 'uk-UA';
+  if (language === 'CZ') return 'cs-CZ';
+  if (language === 'ES') return 'es-ES';
+  if (language === 'DE') return 'de-DE';
+  if (language === 'FR') return 'fr-FR';
+  if (language === 'IT') return 'it-IT';
+  if (language === 'PL') return 'pl-PL';
+  if (language === 'AR') return 'ar';
+  return 'en-GB';
+}
 
-  return new Intl.DateTimeFormat(locale, {
+function formatDateTitle(date: Date, language: AppLanguage) {
+  return new Intl.DateTimeFormat(getLocale(language), {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   }).format(date);
+}
+
+function getMonthName(monthIndex: number, language: AppLanguage) {
+  return new Intl.DateTimeFormat(getLocale(language), {
+    month: 'long',
+  }).format(new Date(2026, monthIndex, 1));
+}
+
+function getShortWeekDays(language: AppLanguage) {
+  const base = new Date(2026, 3, 20);
+  return Array.from({ length: 7 }, (_, index) =>
+    new Intl.DateTimeFormat(getLocale(language), { weekday: 'short' }).format(
+      addDays(base, index)
+    )
+  );
+}
+
+function getCalendarCells(year: number, month: number) {
+  const firstDay = new Date(year, month, 1);
+  const firstWeekDay = (firstDay.getDay() + 6) % 7;
+  const start = addDays(firstDay, -firstWeekDay);
+
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = addDays(start, index);
+    return {
+      date,
+      currentMonth: date.getMonth() === month,
+    };
+  });
 }
 
 function getSlotStatusLabel(status: SlotStatus, text: PageText) {
@@ -426,33 +471,33 @@ function getFilterStyle(filter: FilterKey, active: boolean) {
 
   if (filter === 'confirmed') {
     return {
-      background: '#e3f8ea',
-      color: '#1f8c3f',
-      border: '#55c75f',
+      background: '#dcffe8',
+      color: '#008f3a',
+      border: '#24c45a',
     };
   }
 
   if (filter === 'completed') {
     return {
-      background: '#e8f1ff',
-      color: '#2364c8',
-      border: '#2f80ed',
+      background: '#dcecff',
+      color: '#0e73d8',
+      border: '#0e73d8',
     };
   }
 
   if (filter === 'cancelled' || filter === 'blocked') {
     return {
-      background: '#ffe1e7',
-      color: '#cf3344',
-      border: '#ff5a6b',
+      background: '#ffe0e8',
+      color: '#ff2456',
+      border: '#ff2456',
     };
   }
 
   if (filter === 'pending') {
     return {
-      background: '#fff3d6',
-      color: '#ad7200',
-      border: '#f0b429',
+      background: '#fff1bf',
+      color: '#b87500',
+      border: '#ffbf1f',
     };
   }
 
@@ -474,46 +519,46 @@ function getFilterStyle(filter: FilterKey, active: boolean) {
 function getSlotStyle(status: SlotStatus) {
   if (status === 'confirmed') {
     return {
-      bg: '#e3f8ea',
-      border: '#55c75f',
-      color: '#1f8c3f',
-      side: '#35bf55',
+      bg: '#dcffe8',
+      border: '#24c45a',
+      color: '#008f3a',
+      side: '#24c45a',
     };
   }
 
   if (status === 'completed') {
     return {
-      bg: '#e8f1ff',
-      border: '#2f80ed',
-      color: '#2364c8',
-      side: '#2f80ed',
+      bg: '#dcecff',
+      border: '#0e73d8',
+      color: '#0e73d8',
+      side: '#0e73d8',
     };
   }
 
   if (status === 'cancelled') {
     return {
-      bg: 'linear-gradient(135deg, #ffffff 0%, #ffffff 48%, #ffd6dc 49%, #ffd6dc 100%)',
-      border: '#ff7a85',
-      color: '#cf3344',
-      side: '#ff3b4e',
+      bg: 'linear-gradient(135deg, #ffffff 0%, #ffffff 48%, #ffd2dd 49%, #ffd2dd 100%)',
+      border: '#ff4b72',
+      color: '#d91f4f',
+      side: '#ff2456',
     };
   }
 
   if (status === 'blocked') {
     return {
-      bg: '#ffd8df',
-      border: '#ff5a6b',
-      color: '#c6283b',
-      side: '#ff3b4e',
+      bg: '#ffd2dd',
+      border: '#ff4b72',
+      color: '#d91f4f',
+      side: '#ff2456',
     };
   }
 
   if (status === 'pending') {
     return {
-      bg: '#fff3d6',
-      border: '#f0b429',
-      color: '#ad7200',
-      side: '#f0b429',
+      bg: '#fff1bf',
+      border: '#ffbf1f',
+      color: '#b87500',
+      side: '#ffbf1f',
     };
   }
 
@@ -588,13 +633,15 @@ function mapBookingsToSlots(bookings: BookingItem[], language: AppLanguage): Pro
   return mapped.sort((a, b) => a.time.localeCompare(b.time));
 }
 
-function createDemoSlotsForView(view: ProviderView): ProviderSlot[] {
-  if (view === 'requests' || view === 'history') return [];
+function createDemoSlotsForDate(date: Date, activeView: ProviderView): ProviderSlot[] {
+  if (activeView === 'requests' || activeView === 'history') return [];
+
+  const isTomorrowLike = activeView === 'tomorrow';
 
   return [
     {
-      id: `slot_free_1200_${view}`,
-      time: view === 'tomorrow' ? '10:00' : '12:00',
+      id: `slot_free_${date.toISOString()}_1`,
+      time: isTomorrowLike ? '10:00' : '12:00',
       duration: '60 min',
       clientName: '',
       serviceName: '',
@@ -605,7 +652,7 @@ function createDemoSlotsForView(view: ProviderView): ProviderSlot[] {
       contactMode: 'quick',
     },
     {
-      id: `slot_blocked_1500_${view}`,
+      id: `slot_blocked_${date.toISOString()}_1`,
       time: '15:00',
       duration: '60 min',
       clientName: '',
@@ -617,7 +664,7 @@ function createDemoSlotsForView(view: ProviderView): ProviderSlot[] {
       contactMode: 'quick',
     },
     {
-      id: `slot_free_1900_${view}`,
+      id: `slot_free_${date.toISOString()}_2`,
       time: '19:00',
       duration: '60 min',
       clientName: '',
@@ -657,7 +704,7 @@ function OlamepLogo() {
           position: 'relative',
           borderRadius: '50% 50% 58% 58%',
           background:
-            'conic-gradient(from 210deg, #0e73d8 0deg, #2fc96d 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
+            'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
           boxShadow: '0 8px 18px rgba(14,115,216,0.2)',
         }}
       >
@@ -710,9 +757,12 @@ export default function ProviderClientsPage() {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
-  const now = useMemo(() => new Date(), []);
-  const todayDate = now;
-  const tomorrowDate = addDays(now, 1);
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth());
+  const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(() => startOfDay(new Date()));
+
+  const todayDate = useMemo(() => startOfDay(new Date()), []);
+  const tomorrowDate = useMemo(() => addDays(todayDate, 1), [todayDate]);
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -749,11 +799,16 @@ export default function ProviderClientsPage() {
   const selectedSlot = slots.find((slot) => slot.id === selectedSlotId) || null;
   const timeSlot = slots.find((slot) => slot.id === timeSlotId) || null;
 
-  const selectedDate = activeView === 'tomorrow' ? tomorrowDate : todayDate;
+  const activeDate = useMemo(() => {
+    if (activeView === 'tomorrow') return tomorrowDate;
+    if (activeView === 'calendar') return selectedCalendarDate;
+    return todayDate;
+  }, [activeView, selectedCalendarDate, todayDate, tomorrowDate]);
+
   const dateTitle =
     activeView === 'tomorrow'
       ? `${text.tomorrow} · ${formatDateTitle(tomorrowDate, language)}`
-      : formatDateTitle(selectedDate, language);
+      : formatDateTitle(activeDate, language);
 
   const visibleSlots = useMemo(() => {
     let source = slots;
@@ -772,19 +827,19 @@ export default function ProviderClientsPage() {
       });
     }
 
+    if (activeView === 'calendar') {
+      source = source.filter((slot) => {
+        const bookingDate = safeDate(slot.sourceBooking?.dateTime);
+        return bookingDate ? isSameDay(bookingDate, selectedCalendarDate) : false;
+      });
+    }
+
     if (activeView === 'requests') {
       source = source.filter((slot) => slot.status === 'pending');
     }
 
     if (activeView === 'history') {
       source = source.filter((slot) => slot.status === 'completed' || slot.status === 'cancelled');
-    }
-
-    if (activeView === 'calendar') {
-      source = source.filter((slot) => {
-        const bookingDate = safeDate(slot.sourceBooking?.dateTime);
-        return bookingDate ? bookingDate >= todayDate || slot.status === 'completed' : false;
-      });
     }
 
     if (filtersEnabled && activeFilter !== 'all') {
@@ -819,7 +874,11 @@ export default function ProviderClientsPage() {
       });
     }
 
-    const withDemo = [...source, ...createDemoSlotsForView(activeView)];
+    const withDemo = [...source];
+
+    if (activeView === 'today' || activeView === 'tomorrow' || activeView === 'calendar') {
+      withDemo.push(...createDemoSlotsForDate(activeDate, activeView));
+    }
 
     return withDemo.sort((a, b) => {
       if (filtersEnabled && sortKey === 'name') return a.clientName.localeCompare(b.clientName);
@@ -829,12 +888,14 @@ export default function ProviderClientsPage() {
       return a.time.localeCompare(b.time);
     });
   }, [
+    activeDate,
     activeFilter,
     activeView,
     filtersEnabled,
     maxPrice,
     minPrice,
     search,
+    selectedCalendarDate,
     slots,
     sortKey,
     todayDate,
@@ -858,6 +919,18 @@ export default function ProviderClientsPage() {
     const bookingDate = safeDate(slot.sourceBooking?.dateTime);
     return bookingDate && isSameDay(bookingDate, todayDate) && slot.status === 'confirmed';
   }).length;
+
+  const years = useMemo(() => {
+    const current = new Date().getFullYear();
+    return Array.from({ length: 7 }, (_, index) => current - 2 + index);
+  }, []);
+
+  const handleSelectCalendarDay = (date: Date) => {
+    const next = startOfDay(date);
+    setSelectedCalendarDate(next);
+    setCalendarMonth(next.getMonth());
+    setCalendarYear(next.getFullYear());
+  };
 
   const handleOpenTimeModal = (slot: ProviderSlot) => {
     const [hour, minute] = slot.time.split(':');
@@ -1103,10 +1176,10 @@ export default function ProviderClientsPage() {
                 <SummaryCard
                   title={text.requestsCount}
                   value={requestCount}
-                  bottom={requestCount > 0 ? 'Needs action' : 'Clear'}
+                  bottom={requestCount > 0 ? text.needsAction : text.clear}
                   bg={requestCount > 0 ? '#ffe1e7' : '#e6efff'}
-                  color={requestCount > 0 ? '#cf3344' : '#17130f'}
-                  accent={requestCount > 0 ? '#ff4b52' : '#2559b7'}
+                  color={requestCount > 0 ? '#d91f4f' : '#17130f'}
+                  accent={requestCount > 0 ? '#ff2456' : '#0e73d8'}
                 />
               </div>
 
@@ -1221,7 +1294,7 @@ export default function ProviderClientsPage() {
                       marginTop: 4,
                       fontSize: 13,
                       fontWeight: 900,
-                      color: filtersEnabled ? '#1f8c3f' : '#7b7268',
+                      color: filtersEnabled ? '#008f3a' : '#7b7268',
                     }}
                   >
                     {filtersEnabled ? text.on : text.off}
@@ -1249,7 +1322,7 @@ export default function ProviderClientsPage() {
                     style={{
                       fontSize: 12,
                       fontWeight: 900,
-                      color: filtersEnabled ? '#1f8c3f' : '#7b7268',
+                      color: filtersEnabled ? '#008f3a' : '#7b7268',
                       lineHeight: 1.15,
                     }}
                   >
@@ -1264,7 +1337,7 @@ export default function ProviderClientsPage() {
                       height: 36,
                       borderRadius: 999,
                       border: '2px solid #111111',
-                      background: filtersEnabled ? '#35c63f' : '#eeeeee',
+                      background: filtersEnabled ? '#24c45a' : '#eeeeee',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: filtersEnabled ? 'flex-end' : 'flex-start',
@@ -1351,9 +1424,9 @@ export default function ProviderClientsPage() {
                             flexShrink: 0,
                             minHeight: 36,
                             borderRadius: 999,
-                            border: active ? '2px solid #2f80ed' : '2px solid #111111',
-                            background: active ? '#e8f1ff' : '#ffffff',
-                            color: active ? '#2364c8' : '#17130f',
+                            border: active ? '2px solid #0e73d8' : '2px solid #111111',
+                            background: active ? '#dcecff' : '#ffffff',
+                            color: active ? '#0e73d8' : '#17130f',
                             padding: '0 13px',
                             fontSize: 12,
                             fontWeight: 900,
@@ -1373,9 +1446,9 @@ export default function ProviderClientsPage() {
                         minHeight: 36,
                         borderRadius: 999,
                         border:
-                          minPrice || maxPrice ? '2px solid #ff3b3b' : '2px solid #111111',
+                          minPrice || maxPrice ? '2px solid #ff2456' : '2px solid #111111',
                         background: minPrice || maxPrice ? '#fff2f2' : '#ffffff',
-                        color: minPrice || maxPrice ? '#ff3b3b' : '#17130f',
+                        color: minPrice || maxPrice ? '#ff2456' : '#17130f',
                         padding: '0 13px',
                         fontSize: 12,
                         fontWeight: 900,
@@ -1391,6 +1464,21 @@ export default function ProviderClientsPage() {
               ) : null}
             </div>
           </section>
+
+          {activeView === 'calendar' ? (
+            <CalendarPlanner
+              text={text}
+              language={language}
+              bookings={bookings}
+              selectedDate={selectedCalendarDate}
+              calendarMonth={calendarMonth}
+              calendarYear={calendarYear}
+              years={years}
+              onSelectDate={handleSelectCalendarDay}
+              onChangeMonth={setCalendarMonth}
+              onChangeYear={setCalendarYear}
+            />
+          ) : null}
 
           <section
             style={{
@@ -1551,7 +1639,7 @@ export default function ProviderClientsPage() {
                             alignItems: 'center',
                             fontSize: 15,
                             fontWeight: 900,
-                            color: '#c6283b',
+                            color: '#d91f4f',
                           }}
                         >
                           {text.unavailable}
@@ -1568,14 +1656,14 @@ export default function ProviderClientsPage() {
                                 height: 28,
                                 borderRadius: 999,
                                 border: '2px solid #111111',
-                                background: '#35bf55',
+                                background: '#24c45a',
                                 color: '#ffffff',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 fontSize: 18,
                                 fontWeight: 900,
-                                boxShadow: '0 4px 12px rgba(53,191,85,0.25)',
+                                boxShadow: '0 4px 12px rgba(36,196,90,0.25)',
                                 zIndex: 2,
                               }}
                             >
@@ -1589,11 +1677,11 @@ export default function ProviderClientsPage() {
                                 position: 'absolute',
                                 left: 8,
                                 top: 8,
-                                maxWidth: 98,
+                                maxWidth: 100,
                                 height: 24,
                                 borderRadius: 999,
                                 border: '2px solid #111111',
-                                background: '#ff4b52',
+                                background: '#ff2456',
                                 color: '#ffffff',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -1604,7 +1692,7 @@ export default function ProviderClientsPage() {
                                 zIndex: 2,
                               }}
                             >
-                              ! Needs action
+                              ! {text.needsAction}
                             </span>
                           ) : null}
 
@@ -1617,9 +1705,9 @@ export default function ProviderClientsPage() {
                                 width: 24,
                                 height: 24,
                                 borderRadius: 999,
-                                border: '2px solid #55c75f',
+                                border: '2px solid #24c45a',
                                 background: '#ffffff',
-                                color: '#35bf55',
+                                color: '#24c45a',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -1687,7 +1775,7 @@ export default function ProviderClientsPage() {
                         justifyContent: 'center',
                         fontSize: 21,
                         fontWeight: 900,
-                        color: slot.price > 0 ? '#ff3b3b' : '#9ca3af',
+                        color: slot.price > 0 ? '#ff2456' : '#9ca3af',
                       }}
                     >
                       {slot.price > 0 ? money(slot.price) : '—'}
@@ -1790,9 +1878,7 @@ function SummaryCard({
         alignContent: 'space-between',
       }}
     >
-      <div style={{ fontSize: 12, color: accent, fontWeight: 900 }}>
-        {title}
-      </div>
+      <div style={{ fontSize: 12, color: accent, fontWeight: 900 }}>{title}</div>
 
       <div
         style={{
@@ -1803,9 +1889,7 @@ function SummaryCard({
           gap: 8,
         }}
       >
-        <div style={{ fontSize: 30, lineHeight: 1, fontWeight: 900, color }}>
-          {value}
-        </div>
+        <div style={{ fontSize: 30, lineHeight: 1, fontWeight: 900, color }}>{value}</div>
 
         <div
           style={{
@@ -1821,6 +1905,270 @@ function SummaryCard({
         </div>
       </div>
     </div>
+  );
+}
+
+function CalendarPlanner({
+  text,
+  language,
+  bookings,
+  selectedDate,
+  calendarMonth,
+  calendarYear,
+  years,
+  onSelectDate,
+  onChangeMonth,
+  onChangeYear,
+}: {
+  text: PageText;
+  language: AppLanguage;
+  bookings: BookingItem[];
+  selectedDate: Date;
+  calendarMonth: number;
+  calendarYear: number;
+  years: number[];
+  onSelectDate: (date: Date) => void;
+  onChangeMonth: (month: number) => void;
+  onChangeYear: (year: number) => void;
+}) {
+  const weekDays = getShortWeekDays(language);
+  const cells = getCalendarCells(calendarYear, calendarMonth);
+  const months = Array.from({ length: 12 }, (_, index) => getMonthName(index, language));
+
+  return (
+    <section
+      style={{
+        marginTop: 14,
+        borderRadius: 30,
+        border: '2px solid #111111',
+        background: '#f8fbff',
+        padding: 14,
+      }}
+    >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr auto',
+          gap: 12,
+          alignItems: 'center',
+        }}
+      >
+        <div>
+          <div
+            style={{
+              fontSize: 24,
+              lineHeight: 1.05,
+              fontWeight: 900,
+              color: '#08245c',
+            }}
+          >
+            {text.calendarPickerTitle}
+          </div>
+
+          <div
+            style={{
+              marginTop: 5,
+              fontSize: 12,
+              lineHeight: 1.25,
+              fontWeight: 900,
+              color: '#6f675f',
+            }}
+          >
+            {text.selectedDay}: {formatDateTitle(selectedDate, language)}
+          </div>
+        </div>
+
+        <div
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: 18,
+            border: '2px solid #111111',
+            background:
+              'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
+            boxShadow: '0 10px 20px rgba(14,115,216,0.18)',
+          }}
+        />
+      </div>
+
+      <div
+        style={{
+          marginTop: 14,
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 10,
+        }}
+      >
+        <label
+          style={{
+            borderRadius: 18,
+            border: '2px solid #111111',
+            background: '#ffffff',
+            padding: '9px 12px',
+          }}
+        >
+          <div style={{ fontSize: 11, fontWeight: 900, color: '#7b7268' }}>{text.year}</div>
+          <select
+            value={calendarYear}
+            onChange={(event) => onChangeYear(Number(event.target.value))}
+            style={{
+              marginTop: 4,
+              width: '100%',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+            }}
+          >
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label
+          style={{
+            borderRadius: 18,
+            border: '2px solid #111111',
+            background: '#ffffff',
+            padding: '9px 12px',
+          }}
+        >
+          <div style={{ fontSize: 11, fontWeight: 900, color: '#7b7268' }}>{text.month}</div>
+          <select
+            value={calendarMonth}
+            onChange={(event) => onChangeMonth(Number(event.target.value))}
+            style={{
+              marginTop: 4,
+              width: '100%',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+              fontSize: 18,
+              fontWeight: 900,
+              color: '#17130f',
+              textTransform: 'capitalize',
+            }}
+          >
+            {months.map((month, index) => (
+              <option key={month} value={index}>
+                {month}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div
+        style={{
+          marginTop: 12,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          gap: 5,
+        }}
+      >
+        {weekDays.map((day) => (
+          <div
+            key={day}
+            style={{
+              height: 26,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 10,
+              fontWeight: 900,
+              color: '#7b7268',
+              textTransform: 'capitalize',
+            }}
+          >
+            {day}
+          </div>
+        ))}
+
+        {cells.map(({ date, currentMonth }) => {
+          const dayBookings = bookings.filter((booking) => {
+            const bookingDate = safeDate(booking.dateTime);
+            return bookingDate ? isSameDay(bookingDate, date) : false;
+          });
+
+          const hasPending = dayBookings.some((booking) => booking.status === 'pending');
+          const hasCompleted = dayBookings.some((booking) => booking.status === 'completed');
+          const hasUpcoming = dayBookings.some((booking) => booking.status === 'upcoming');
+          const selected = isSameDay(date, selectedDate);
+          const today = isSameDay(date, new Date());
+
+          return (
+            <button
+              key={date.toISOString()}
+              type="button"
+              onClick={() => onSelectDate(date)}
+              style={{
+                minHeight: 52,
+                borderRadius: 16,
+                border: selected
+                  ? '2px solid #111111'
+                  : today
+                  ? '2px solid #0e73d8'
+                  : '1.5px solid #e0e0e0',
+                background: selected ? '#17130f' : currentMonth ? '#ffffff' : '#f3f3f3',
+                color: selected ? '#ffffff' : currentMonth ? '#17130f' : '#a0a0a0',
+                cursor: 'pointer',
+                padding: 5,
+                display: 'grid',
+                alignContent: 'space-between',
+                justifyItems: 'center',
+              }}
+            >
+              <span style={{ fontSize: 14, fontWeight: 900 }}>{date.getDate()}</span>
+
+              <span
+                style={{
+                  minHeight: 13,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 3,
+                }}
+              >
+                {hasPending ? <CalendarDot color="#ff2456" /> : null}
+                {hasUpcoming ? <CalendarDot color="#24c45a" /> : null}
+                {hasCompleted ? <CalendarDot color="#0e73d8" /> : null}
+                {dayBookings.length > 0 ? (
+                  <span
+                    style={{
+                      marginLeft: 2,
+                      fontSize: 9,
+                      fontWeight: 900,
+                      color: selected ? '#ffffff' : '#7b7268',
+                    }}
+                  >
+                    {dayBookings.length}
+                  </span>
+                ) : null}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function CalendarDot({ color }: { color: string }) {
+  return (
+    <span
+      style={{
+        width: 7,
+        height: 7,
+        borderRadius: 999,
+        background: color,
+        display: 'inline-block',
+      }}
+    />
   );
 }
 
@@ -1905,8 +2253,8 @@ function ClientCardModal({
               padding: '0 14px',
               borderRadius: 999,
               border: '2px solid #111111',
-              background: '#e8f1ff',
-              color: '#2364c8',
+              background: '#dcecff',
+              color: '#0e73d8',
               fontSize: 13,
               fontWeight: 900,
               cursor: 'pointer',
@@ -1957,7 +2305,7 @@ function ClientCardModal({
                   width: 24,
                   height: 24,
                   borderRadius: 999,
-                  background: isPending ? '#f0b429' : '#25b65a',
+                  background: isPending ? '#ffbf1f' : '#24c45a',
                   color: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
@@ -2011,7 +2359,7 @@ function ClientCardModal({
                   marginTop: 10,
                   fontSize: 34,
                   fontWeight: 900,
-                  color: '#ff3b3b',
+                  color: '#ff2456',
                 }}
               >
                 {money(slot.price)}
@@ -2024,12 +2372,12 @@ function ClientCardModal({
               marginTop: 16,
               borderRadius: 18,
               border: '2px solid #111111',
-              background: isPending ? '#fff3d6' : '#f2fff6',
+              background: isPending ? '#fff1bf' : '#dcffe8',
               padding: 12,
               fontSize: 13,
               lineHeight: 1.45,
               fontWeight: 900,
-              color: isPending ? '#ad7200' : '#1f8c3f',
+              color: isPending ? '#b87500' : '#008f3a',
             }}
           >
             {isPending ? text.pendingRequestInfo : text.confirmedRequestInfo}
@@ -2053,7 +2401,7 @@ function ClientCardModal({
                       minHeight: 54,
                       borderRadius: 18,
                       border: '2px solid #111111',
-                      background: '#41c83f',
+                      background: '#24c45a',
                       color: '#ffffff',
                       fontSize: 15,
                       fontWeight: 900,
@@ -2069,9 +2417,9 @@ function ClientCardModal({
                     style={{
                       minHeight: 54,
                       borderRadius: 18,
-                      border: '2px solid #ff4b52',
+                      border: '2px solid #ff2456',
                       background: '#fff2f4',
-                      color: '#ff4b52',
+                      color: '#ff2456',
                       fontSize: 15,
                       fontWeight: 900,
                       cursor: 'pointer',
@@ -2131,7 +2479,7 @@ function ClientCardModal({
                   style={{
                     fontSize: 14,
                     fontWeight: 800,
-                    color: label === text.price ? '#ff3b3b' : '#17130f',
+                    color: label === text.price ? '#ff2456' : '#17130f',
                     textAlign: 'right',
                   }}
                 >
@@ -2196,7 +2544,7 @@ function ClientCardModal({
               color: '#17130f',
             }}
           >
-            <span style={{ color: '#25b65a' }}>⬟</span>
+            <span style={{ color: '#24c45a' }}>⬟</span>
             {text.contacts}
           </div>
 
@@ -2364,8 +2712,8 @@ function TimeModal({
                       width: '100%',
                       minHeight: 34,
                       border: 'none',
-                      background: active ? '#e8f1ff' : '#ffffff',
-                      color: active ? '#2364c8' : '#9ca3af',
+                      background: active ? '#dcecff' : '#ffffff',
+                      color: active ? '#0e73d8' : '#9ca3af',
                       fontSize: active ? 22 : 17,
                       fontWeight: 900,
                       cursor: 'pointer',
@@ -2389,7 +2737,7 @@ function TimeModal({
           }}
         >
           {text.newTime}:{' '}
-          <span style={{ color: '#2364c8' }}>
+          <span style={{ color: '#0e73d8' }}>
             {editHour}:{editMinute}
           </span>
         </div>
@@ -2400,7 +2748,7 @@ function TimeModal({
             textAlign: 'center',
             fontSize: 14,
             fontWeight: 800,
-            color: '#25a653',
+            color: '#008f3a',
           }}
         >
           ✓ {text.synced}
@@ -2420,9 +2768,9 @@ function TimeModal({
             style={{
               minHeight: 56,
               borderRadius: 18,
-              border: '2px solid #ff4b52',
+              border: '2px solid #ff2456',
               background: '#fff2f4',
-              color: '#ff4b52',
+              color: '#ff2456',
               fontSize: 16,
               fontWeight: 900,
               cursor: 'pointer',
@@ -2438,7 +2786,7 @@ function TimeModal({
               minHeight: 56,
               borderRadius: 18,
               border: '2px solid #111111',
-              background: '#41c83f',
+              background: '#24c45a',
               color: '#ffffff',
               fontSize: 16,
               fontWeight: 900,
@@ -2550,7 +2898,7 @@ function PriceRangeModal({
                 outline: 'none',
                 fontSize: 28,
                 fontWeight: 900,
-                color: '#ff3b3b',
+                color: '#ff2456',
               }}
             />
           </label>
@@ -2578,7 +2926,7 @@ function PriceRangeModal({
                 outline: 'none',
                 fontSize: 28,
                 fontWeight: 900,
-                color: '#ff3b3b',
+                color: '#ff2456',
               }}
             />
           </label>
@@ -2614,9 +2962,9 @@ function PriceRangeModal({
             style={{
               minHeight: 56,
               borderRadius: 18,
-              border: '2px solid #ff4b52',
+              border: '2px solid #ff2456',
               background: '#fff2f4',
-              color: '#ff4b52',
+              color: '#ff2456',
               fontSize: 16,
               fontWeight: 900,
               cursor: 'pointer',
@@ -2632,7 +2980,7 @@ function PriceRangeModal({
               minHeight: 56,
               borderRadius: 18,
               border: '2px solid #111111',
-              background: '#41c83f',
+              background: '#24c45a',
               color: '#ffffff',
               fontSize: 16,
               fontWeight: 900,
@@ -2762,7 +3110,7 @@ function ContactRow({
       <div
         style={{
           fontSize: 21,
-          color: isYellow ? '#d2a300' : '#25a653',
+          color: isYellow ? '#d2a300' : '#008f3a',
         }}
       >
         {icon}
@@ -2789,9 +3137,9 @@ function ContactRow({
           minHeight: 38,
           padding: '0 12px',
           borderRadius: 12,
-          border: `2px solid ${isYellow ? '#f2c94c' : '#55c75f'}`,
+          border: `2px solid ${isYellow ? '#f2c94c' : '#24c45a'}`,
           background: isYellow ? '#fff7cf' : '#ffffff',
-          color: isYellow ? '#b28a00' : '#25a653',
+          color: isYellow ? '#b28a00' : '#008f3a',
           fontSize: 12,
           fontWeight: 900,
           cursor: onClick ? 'pointer' : 'default',
