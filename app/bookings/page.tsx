@@ -23,6 +23,7 @@ import {
 } from '../services/bookingsStore';
 
 type BookingTab = 'upcoming' | 'completed' | 'cancelled';
+type BookingFilter = 'all' | 'confirmed' | 'pending' | 'paid' | 'openContacts';
 
 type PageTexts = {
   title: string;
@@ -78,6 +79,19 @@ type PageTexts = {
   tomorrowAt: string;
   doneBadge: string;
   needsAction: string;
+  calendarTitle: string;
+  selectedDay: string;
+  today: string;
+  month: string;
+  year: string;
+  searchPlaceholder: string;
+  all: string;
+  paidOnly: string;
+  openContacts: string;
+  clearDate: string;
+  noBookingsForDate: string;
+  selectedDatePanel: string;
+  showAllMonth: string;
 };
 
 const BRAND = {
@@ -94,7 +108,7 @@ const BRAND = {
 const texts: Partial<Record<AppLanguage, PageTexts>> = {
   EN: {
     title: 'My bookings',
-    subtitle: 'Booking status, chat, address and contact access',
+    subtitle: 'Calendar, filters, booking status, chat and contact access',
     upcoming: 'Upcoming',
     completed: 'Completed',
     cancelled: 'Cancelled',
@@ -147,10 +161,23 @@ const texts: Partial<Record<AppLanguage, PageTexts>> = {
     tomorrowAt: 'Tomorrow at',
     doneBadge: 'Done',
     needsAction: 'Needs action',
+    calendarTitle: 'Booking calendar',
+    selectedDay: 'Selected day',
+    today: 'Today',
+    month: 'Month',
+    year: 'Year',
+    searchPlaceholder: 'Search master, service, area',
+    all: 'All',
+    paidOnly: 'Deposit paid',
+    openContacts: 'Contacts open',
+    clearDate: 'Close day',
+    noBookingsForDate: 'No bookings for this date',
+    selectedDatePanel: 'Bookings for selected date',
+    showAllMonth: 'Show month',
   },
   RU: {
     title: 'Мои бронирования',
-    subtitle: 'Статус брони, чат, адрес и доступ к контактам',
+    subtitle: 'Календарь, фильтры, статус брони, чат и доступ к контактам',
     upcoming: 'Предстоящие',
     completed: 'Завершённые',
     cancelled: 'Отменённые',
@@ -203,10 +230,23 @@ const texts: Partial<Record<AppLanguage, PageTexts>> = {
     tomorrowAt: 'Завтра в',
     doneBadge: 'Готово',
     needsAction: 'Нужно действие',
+    calendarTitle: 'Календарь бронирований',
+    selectedDay: 'Выбранный день',
+    today: 'Сегодня',
+    month: 'Месяц',
+    year: 'Год',
+    searchPlaceholder: 'Поиск: мастер, услуга, район',
+    all: 'Все',
+    paidOnly: 'Депозит оплачен',
+    openContacts: 'Контакты открыты',
+    clearDate: 'Закрыть день',
+    noBookingsForDate: 'На эту дату броней нет',
+    selectedDatePanel: 'Брони выбранной даты',
+    showAllMonth: 'Показать месяц',
   },
   UA: {
     title: 'Мої бронювання',
-    subtitle: 'Статус бронювання, чат, адреса і доступ до контактів',
+    subtitle: 'Календар, фільтри, статус бронювання, чат і доступ до контактів',
     upcoming: 'Майбутні',
     completed: 'Завершені',
     cancelled: 'Скасовані',
@@ -259,6 +299,19 @@ const texts: Partial<Record<AppLanguage, PageTexts>> = {
     tomorrowAt: 'Завтра о',
     doneBadge: 'Готово',
     needsAction: 'Потрібна дія',
+    calendarTitle: 'Календар бронювань',
+    selectedDay: 'Обраний день',
+    today: 'Сьогодні',
+    month: 'Місяць',
+    year: 'Рік',
+    searchPlaceholder: 'Пошук: майстер, послуга, район',
+    all: 'Усі',
+    paidOnly: 'Депозит оплачено',
+    openContacts: 'Контакти відкриті',
+    clearDate: 'Закрити день',
+    noBookingsForDate: 'На цю дату бронювань немає',
+    selectedDatePanel: 'Бронювання обраної дати',
+    showAllMonth: 'Показати місяць',
   },
 };
 
@@ -296,6 +349,81 @@ function canChat(booking: BookingItem) {
 
 function chatThreadId(booking: BookingItem) {
   return `booking-master-${booking.masterId || booking.id}`;
+}
+
+function getLocale(language: AppLanguage) {
+  if (language === 'RU') return 'ru-RU';
+  if (language === 'UA') return 'uk-UA';
+  if (language === 'CZ') return 'cs-CZ';
+  if (language === 'ES') return 'es-ES';
+  if (language === 'DE') return 'de-DE';
+  if (language === 'FR') return 'fr-FR';
+  if (language === 'IT') return 'it-IT';
+  if (language === 'PL') return 'pl-PL';
+  if (language === 'AR') return 'ar';
+  return 'en-GB';
+}
+
+function startOfDay(date: Date) {
+  const next = new Date(date);
+  next.setHours(0, 0, 0, 0);
+  return next;
+}
+
+function isSameDay(a: Date, b: Date) {
+  return startOfDay(a).getTime() === startOfDay(b).getTime();
+}
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function safeDate(value?: string) {
+  const date = new Date(value || '');
+  if (Number.isNaN(date.getTime())) return null;
+  return date;
+}
+
+function formatCalendarTitle(date: Date, language: AppLanguage) {
+  return new Intl.DateTimeFormat(getLocale(language), {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
+
+function getMonthName(monthIndex: number, language: AppLanguage) {
+  return new Intl.DateTimeFormat(getLocale(language), { month: 'long' }).format(
+    new Date(2026, monthIndex, 1)
+  );
+}
+
+function getWeekDays(language: AppLanguage) {
+  const monday = new Date(2026, 3, 20);
+
+  return Array.from({ length: 7 }, (_, index) =>
+    new Intl.DateTimeFormat(getLocale(language), { weekday: 'short' }).format(
+      addDays(monday, index)
+    )
+  );
+}
+
+function getCalendarCells(year: number, month: number) {
+  const firstDay = new Date(year, month, 1);
+  const firstWeekDay = (firstDay.getDay() + 6) % 7;
+  const firstCell = addDays(firstDay, -firstWeekDay);
+
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = addDays(firstCell, index);
+
+    return {
+      date,
+      currentMonth: date.getMonth() === month,
+    };
+  });
 }
 
 function formatDateLabel(value: string, text: PageTexts) {
@@ -352,6 +480,33 @@ function statusMeta(status: BookingStatus, text: PageTexts) {
   };
 }
 
+function bookingMatchesTab(booking: BookingItem, tab: BookingTab) {
+  if (tab === 'upcoming') return booking.status === 'pending' || booking.status === 'upcoming';
+  if (tab === 'completed') return booking.status === 'completed';
+  return booking.status === 'cancelled';
+}
+
+function bookingMatchesFilter(booking: BookingItem, filter: BookingFilter) {
+  if (filter === 'all') return true;
+  if (filter === 'confirmed') return booking.status === 'upcoming';
+  if (filter === 'pending') return booking.status === 'pending';
+  if (filter === 'paid') return isPaid(booking);
+  if (filter === 'openContacts') return isUnlocked(booking);
+  return true;
+}
+
+function getBookingDate(booking: BookingItem) {
+  return safeDate(booking.dateTime);
+}
+
+function sortBookingsByDate(items: BookingItem[]) {
+  return [...items].sort((a, b) => {
+    const left = getBookingDate(a)?.getTime() || 0;
+    const right = getBookingDate(b)?.getTime() || 0;
+    return left - right;
+  });
+}
+
 function OlamepLogo() {
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
@@ -399,8 +554,15 @@ export default function BookingsPage() {
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [bookings, setBookings] = useState<BookingItem[]>(getBookings());
   const [activeTab, setActiveTab] = useState<BookingTab>('upcoming');
+  const [activeFilter, setActiveFilter] = useState<BookingFilter>('all');
+  const [search, setSearch] = useState('');
   const [menuBookingId, setMenuBookingId] = useState<string | null>(null);
   const [detailsBookingId, setDetailsBookingId] = useState<string | null>(null);
+
+  const today = useMemo(() => startOfDay(new Date()), []);
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth());
+  const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -427,17 +589,49 @@ export default function BookingsPage() {
 
   const text = useMemo(() => getTexts(language), [language]);
 
+  const monthBookings = useMemo(() => {
+    return bookings.filter((booking) => {
+      const date = getBookingDate(booking);
+      return date && date.getFullYear() === calendarYear && date.getMonth() === calendarMonth;
+    });
+  }, [bookings, calendarMonth, calendarYear]);
+
   const filteredBookings = useMemo(() => {
-    if (activeTab === 'upcoming') {
-      return bookings.filter((item) => item.status === 'pending' || item.status === 'upcoming');
+    const q = search.trim().toLowerCase();
+
+    let source = bookings.filter((booking) => bookingMatchesTab(booking, activeTab));
+
+    if (selectedDate) {
+      source = source.filter((booking) => {
+        const date = getBookingDate(booking);
+        return date ? isSameDay(date, selectedDate) : false;
+      });
+    } else {
+      source = source.filter((booking) => {
+        const date = getBookingDate(booking);
+        return date && date.getFullYear() === calendarYear && date.getMonth() === calendarMonth;
+      });
     }
 
-    if (activeTab === 'completed') {
-      return bookings.filter((item) => item.status === 'completed');
+    source = source.filter((booking) => bookingMatchesFilter(booking, activeFilter));
+
+    if (q) {
+      source = source.filter((booking) => {
+        const location = `${booking.location || ''} ${booking.areaLabel || ''} ${
+          booking.exactAddress || ''
+        }`.toLowerCase();
+
+        return (
+          booking.masterName.toLowerCase().includes(q) ||
+          booking.serviceName.toLowerCase().includes(q) ||
+          location.includes(q) ||
+          String(booking.price).includes(q)
+        );
+      });
     }
 
-    return bookings.filter((item) => item.status === 'cancelled');
-  }, [activeTab, bookings]);
+    return sortBookingsByDate(source);
+  }, [activeFilter, activeTab, bookings, calendarMonth, calendarYear, search, selectedDate]);
 
   const activeNowCount = bookings.filter(
     (item) => item.status === 'pending' || item.status === 'upcoming'
@@ -447,11 +641,18 @@ export default function BookingsPage() {
   const detailsBooking = bookings.find((booking) => booking.id === detailsBookingId) || null;
 
   const emptyText =
-    activeTab === 'upcoming'
+    selectedDate
+      ? text.noBookingsForDate
+      : activeTab === 'upcoming'
       ? text.emptyUpcoming
       : activeTab === 'completed'
       ? text.emptyCompleted
       : text.emptyCancelled;
+
+  const years = useMemo(() => {
+    const current = new Date().getFullYear();
+    return Array.from({ length: 7 }, (_, index) => current - 2 + index);
+  }, []);
 
   const openChat = (booking: BookingItem) => {
     if (!canChat(booking)) return;
@@ -474,6 +675,19 @@ export default function BookingsPage() {
     updateBookingStatus(booking.id, 'cancelled');
     setMenuBookingId(null);
     if (detailsBookingId === booking.id) setDetailsBookingId(null);
+  };
+
+  const handleSelectDate = (date: Date) => {
+    const next = startOfDay(date);
+    setSelectedDate(next);
+    setCalendarMonth(next.getMonth());
+    setCalendarYear(next.getFullYear());
+  };
+
+  const handleCloseSelectedDate = () => {
+    setSelectedDate(null);
+    setCalendarMonth(today.getMonth());
+    setCalendarYear(today.getFullYear());
   };
 
   return (
@@ -592,6 +806,37 @@ export default function BookingsPage() {
                 accent={BRAND.blue}
               />
             </div>
+
+            <div
+              style={{
+                marginTop: 11,
+                height: 48,
+                borderRadius: 18,
+                border: `2px solid ${BRAND.border}`,
+                background: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '0 13px',
+              }}
+            >
+              <span style={{ fontSize: 18, color: '#9ca3af' }}>⌕</span>
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder={text.searchPlaceholder}
+                style={{
+                  flex: 1,
+                  border: 'none',
+                  outline: 'none',
+                  background: 'transparent',
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: BRAND.navy,
+                  minWidth: 0,
+                }}
+              />
+            </div>
           </section>
 
           <section
@@ -634,6 +879,304 @@ export default function BookingsPage() {
               );
             })}
           </section>
+
+          <section
+            style={{
+              marginTop: 14,
+              borderRadius: 30,
+              border: `2px solid ${BRAND.border}`,
+              background: '#f8fbff',
+              padding: 14,
+            }}
+          >
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr auto',
+                gap: 12,
+                alignItems: 'center',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: 25,
+                    lineHeight: 1.05,
+                    fontWeight: 900,
+                    color: BRAND.navy,
+                  }}
+                >
+                  {text.calendarTitle}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 5,
+                    fontSize: 12.5,
+                    lineHeight: 1.3,
+                    fontWeight: 900,
+                    color: BRAND.muted,
+                  }}
+                >
+                  {selectedDate
+                    ? `${text.selectedDay}: ${formatCalendarTitle(selectedDate, language)}`
+                    : `${getMonthName(calendarMonth, language)} ${calendarYear}`}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setCalendarMonth(today.getMonth());
+                  setCalendarYear(today.getFullYear());
+                  setSelectedDate(null);
+                }}
+                style={{
+                  width: 58,
+                  height: 58,
+                  borderRadius: 20,
+                  border: `2px solid ${BRAND.border}`,
+                  background:
+                    'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
+                  boxShadow: '0 10px 20px rgba(14,115,216,0.18)',
+                  color: '#ffffff',
+                  fontSize: 18,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {text.today}
+              </button>
+            </div>
+
+            <div
+              style={{
+                marginTop: 14,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
+              }}
+            >
+              <label
+                style={{
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.border}`,
+                  background: '#ffffff',
+                  padding: '9px 12px',
+                }}
+              >
+                <div style={{ fontSize: 11, fontWeight: 900, color: BRAND.muted }}>
+                  {text.year}
+                </div>
+                <select
+                  value={calendarYear}
+                  onChange={(event) => {
+                    setCalendarYear(Number(event.target.value));
+                    setSelectedDate(null);
+                  }}
+                  style={{
+                    marginTop: 4,
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontSize: 18,
+                    fontWeight: 900,
+                    color: BRAND.navy,
+                  }}
+                >
+                  {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label
+                style={{
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.border}`,
+                  background: '#ffffff',
+                  padding: '9px 12px',
+                }}
+              >
+                <div style={{ fontSize: 11, fontWeight: 900, color: BRAND.muted }}>
+                  {text.month}
+                </div>
+                <select
+                  value={calendarMonth}
+                  onChange={(event) => {
+                    setCalendarMonth(Number(event.target.value));
+                    setSelectedDate(null);
+                  }}
+                  style={{
+                    marginTop: 4,
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontSize: 18,
+                    fontWeight: 900,
+                    color: BRAND.navy,
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {Array.from({ length: 12 }, (_, index) => (
+                    <option key={index} value={index}>
+                      {getMonthName(index, language)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <CalendarGrid
+              language={language}
+              bookings={monthBookings}
+              selectedDate={selectedDate}
+              today={today}
+              month={calendarMonth}
+              year={calendarYear}
+              onSelectDate={handleSelectDate}
+            />
+          </section>
+
+          <section
+            style={{
+              marginTop: 14,
+              borderRadius: 24,
+              border: `2px solid ${BRAND.border}`,
+              background: '#ffffff',
+              padding: 10,
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                gap: 8,
+                overflowX: 'auto',
+                paddingBottom: 2,
+              }}
+            >
+              {([
+                ['all', text.all],
+                ['confirmed', text.confirmed],
+                ['pending', text.pending],
+                ['paid', text.paidOnly],
+                ['openContacts', text.openContacts],
+              ] as const).map(([filter, label]) => {
+                const active = activeFilter === filter;
+
+                return (
+                  <button
+                    key={filter}
+                    type="button"
+                    onClick={() => setActiveFilter(filter)}
+                    style={{
+                      flexShrink: 0,
+                      minHeight: 38,
+                      borderRadius: 999,
+                      border: `2px solid ${
+                        active
+                          ? filter === 'pending'
+                            ? BRAND.yellow
+                            : filter === 'confirmed' ||
+                              filter === 'paid' ||
+                              filter === 'openContacts'
+                            ? BRAND.green
+                            : BRAND.border
+                          : BRAND.border
+                      }`,
+                      background: active
+                        ? filter === 'pending'
+                          ? '#fff1bf'
+                          : filter === 'confirmed' ||
+                            filter === 'paid' ||
+                            filter === 'openContacts'
+                          ? '#dcffe8'
+                          : BRAND.navy
+                        : '#ffffff',
+                      color: active
+                        ? filter === 'pending'
+                          ? '#b87500'
+                          : filter === 'confirmed' ||
+                            filter === 'paid' ||
+                            filter === 'openContacts'
+                          ? '#008f3a'
+                          : '#ffffff'
+                        : BRAND.navy,
+                      padding: '0 13px',
+                      fontSize: 12,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {selectedDate ? (
+            <section
+              style={{
+                marginTop: 14,
+                borderRadius: 24,
+                border: `2px solid ${BRAND.border}`,
+                background: '#fffefa',
+                padding: 14,
+                display: 'grid',
+                gridTemplateColumns: '1fr auto',
+                gap: 12,
+                alignItems: 'center',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: 18,
+                    lineHeight: 1.1,
+                    fontWeight: 900,
+                    color: BRAND.navy,
+                  }}
+                >
+                  {text.selectedDatePanel}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 4,
+                    fontSize: 12.5,
+                    lineHeight: 1.25,
+                    fontWeight: 900,
+                    color: BRAND.muted,
+                  }}
+                >
+                  {formatCalendarTitle(selectedDate, language)}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCloseSelectedDate}
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 999,
+                  border: `2px solid ${BRAND.border}`,
+                  background: '#ffffff',
+                  color: BRAND.navy,
+                  fontSize: 22,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                ×
+              </button>
+            </section>
+          ) : null}
 
           <section style={{ marginTop: 16 }}>
             {filteredBookings.length === 0 ? (
@@ -702,6 +1245,137 @@ export default function BookingsPage() {
         />
       ) : null}
     </>
+  );
+}
+
+function CalendarGrid({
+  language,
+  bookings,
+  selectedDate,
+  today,
+  month,
+  year,
+  onSelectDate,
+}: {
+  language: AppLanguage;
+  bookings: BookingItem[];
+  selectedDate: Date | null;
+  today: Date;
+  month: number;
+  year: number;
+  onSelectDate: (date: Date) => void;
+}) {
+  const weekDays = getWeekDays(language);
+  const cells = getCalendarCells(year, month);
+
+  return (
+    <div
+      style={{
+        marginTop: 14,
+        display: 'grid',
+        gridTemplateColumns: 'repeat(7, 1fr)',
+        gap: 5,
+      }}
+    >
+      {weekDays.map((day) => (
+        <div
+          key={day}
+          style={{
+            height: 26,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 10,
+            fontWeight: 900,
+            color: BRAND.muted,
+            textTransform: 'capitalize',
+          }}
+        >
+          {day}
+        </div>
+      ))}
+
+      {cells.map(({ date, currentMonth }) => {
+        const dayBookings = bookings.filter((booking) => {
+          const bookingDate = getBookingDate(booking);
+          return bookingDate ? isSameDay(bookingDate, date) : false;
+        });
+
+        const hasPending = dayBookings.some((booking) => booking.status === 'pending');
+        const hasConfirmed = dayBookings.some((booking) => booking.status === 'upcoming');
+        const hasCompleted = dayBookings.some((booking) => booking.status === 'completed');
+        const hasCancelled = dayBookings.some((booking) => booking.status === 'cancelled');
+        const selected = selectedDate ? isSameDay(date, selectedDate) : false;
+        const currentToday = isSameDay(date, today);
+
+        return (
+          <button
+            key={date.toISOString()}
+            type="button"
+            onClick={() => onSelectDate(date)}
+            style={{
+              minHeight: 54,
+              borderRadius: 16,
+              border: selected
+                ? `2px solid ${BRAND.border}`
+                : currentToday
+                ? `2px solid ${BRAND.blue}`
+                : '1.5px solid #e0e0e0',
+              background: selected ? BRAND.navy : currentMonth ? '#ffffff' : '#f3f3f3',
+              color: selected ? '#ffffff' : currentMonth ? BRAND.navy : '#a0a0a0',
+              cursor: 'pointer',
+              padding: 5,
+              display: 'grid',
+              alignContent: 'space-between',
+              justifyItems: 'center',
+            }}
+          >
+            <span style={{ fontSize: 14, fontWeight: 900 }}>{date.getDate()}</span>
+
+            <span
+              style={{
+                minHeight: 13,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 3,
+              }}
+            >
+              {hasPending ? <CalendarDot color={BRAND.red} /> : null}
+              {hasConfirmed ? <CalendarDot color={BRAND.green} /> : null}
+              {hasCompleted ? <CalendarDot color={BRAND.blue} /> : null}
+              {hasCancelled ? <CalendarDot color="#9ca3af" /> : null}
+              {dayBookings.length > 0 ? (
+                <span
+                  style={{
+                    marginLeft: 2,
+                    fontSize: 9,
+                    fontWeight: 900,
+                    color: selected ? '#ffffff' : BRAND.muted,
+                  }}
+                >
+                  {dayBookings.length}
+                </span>
+              ) : null}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function CalendarDot({ color }: { color: string }) {
+  return (
+    <span
+      style={{
+        width: 7,
+        height: 7,
+        borderRadius: 999,
+        background: color,
+        display: 'inline-block',
+      }}
+    />
   );
 }
 
@@ -1411,10 +2085,30 @@ function BookingDetailsModal({
           </h3>
 
           <div style={{ marginTop: 13, display: 'grid', gap: 10 }}>
-            <ContactLine icon="📍" label={unlocked ? text.exactAddress : text.area} value={unlocked ? visibleAddress : publicArea} locked={false} />
-            <ContactLine icon="📞" label={text.phone} value={unlocked ? contacts.phone || text.lockedValue : text.lockedValue} locked={!unlocked} />
-            <ContactLine icon="✉️" label={text.email} value={unlocked ? contacts.email || text.lockedValue : text.lockedValue} locked={!unlocked} />
-            <ContactLine icon="💬" label={text.social} value={unlocked ? social || text.lockedValue : text.lockedValue} locked={!unlocked} />
+            <ContactLine
+              icon="📍"
+              label={unlocked ? text.exactAddress : text.area}
+              value={unlocked ? visibleAddress : publicArea}
+              locked={false}
+            />
+            <ContactLine
+              icon="📞"
+              label={text.phone}
+              value={unlocked ? contacts.phone || text.lockedValue : text.lockedValue}
+              locked={!unlocked}
+            />
+            <ContactLine
+              icon="✉️"
+              label={text.email}
+              value={unlocked ? contacts.email || text.lockedValue : text.lockedValue}
+              locked={!unlocked}
+            />
+            <ContactLine
+              icon="💬"
+              label={text.social}
+              value={unlocked ? social || text.lockedValue : text.lockedValue}
+              locked={!unlocked}
+            />
           </div>
 
           <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -1506,7 +2200,7 @@ function BookingDetailsModal({
           {text.closeDetails}
         </button>
 
-        {(booking.status === 'completed' || booking.status === 'cancelled') ? (
+        {booking.status === 'completed' || booking.status === 'cancelled' ? (
           <button
             type="button"
             onClick={onRebook}
