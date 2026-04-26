@@ -384,28 +384,6 @@ function IconBox({
   );
 }
 
-function ChatIcon() {
-  return (
-    <div
-      style={{
-        width: 42,
-        height: 42,
-        borderRadius: 999,
-        border: `2px solid ${BRAND.green}`,
-        color: BRAND.green,
-        background: '#ffffff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 23,
-        fontWeight: 900,
-      }}
-    >
-      💬
-    </div>
-  );
-}
-
 export default function BookingsPage() {
   const router = useRouter();
 
@@ -495,11 +473,14 @@ export default function BookingsPage() {
   const handleOpenChat = (booking: BookingItem) => {
     if (!canOpenChat(booking)) return;
 
-    router.push(
-      `/messages?bookingId=${encodeURIComponent(booking.id)}&masterId=${encodeURIComponent(
-        booking.masterId
-      )}`
-    );
+    const safeMasterId = String(booking.masterId || '').trim();
+
+    if (safeMasterId) {
+      router.push(`/messages/${encodeURIComponent(safeMasterId)}`);
+      return;
+    }
+
+    router.push('/messages');
   };
 
   return (
