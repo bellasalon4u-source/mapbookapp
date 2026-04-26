@@ -57,8 +57,9 @@ type PageText = {
   history: string;
   activeToday: string;
   requestsCount: string;
+  confirmedShort: string;
+  completedShort: string;
   search: string;
-  dayTitle: string;
   daySubtitle: string;
   time: string;
   clientProcedure: string;
@@ -112,6 +113,7 @@ type PageText = {
   openChat: string;
   pendingRequestInfo: string;
   confirmedRequestInfo: string;
+  noBookings: string;
 };
 
 const EN_TEXT: PageText = {
@@ -124,8 +126,9 @@ const EN_TEXT: PageText = {
   history: 'History',
   activeToday: 'Active today',
   requestsCount: 'Requests',
+  confirmedShort: 'Confirmed',
+  completedShort: 'Done',
   search: 'Search client, service, amount',
-  dayTitle: 'Friday, 18 April 2026',
   daySubtitle: 'Booking management',
   time: 'Time',
   clientProcedure: 'Client / Procedure',
@@ -183,6 +186,7 @@ const EN_TEXT: PageText = {
     'This request is waiting for your confirmation. After accepting, the client will get address/contact access according to booking rules.',
   confirmedRequestInfo:
     'Booking is confirmed. Contacts and chat are available according to access rules.',
+  noBookings: 'No bookings for this view',
 };
 
 const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
@@ -196,8 +200,9 @@ const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
     history: 'История',
     activeToday: 'Активно сегодня',
     requestsCount: 'Запросы',
+    confirmedShort: 'Подтверждено',
+    completedShort: 'Готово',
     search: 'Поиск: клиент, услуга, сумма',
-    dayTitle: 'Пятница, 18 апреля 2026',
     daySubtitle: 'Управление бронями',
     time: 'Время',
     clientProcedure: 'Клиент / Процедура',
@@ -255,6 +260,7 @@ const textOverrides: Partial<Record<AppLanguage, Partial<PageText>>> = {
       'Эта заявка ждёт вашего подтверждения. После подтверждения клиент получит доступ к адресу и контактам по правилам брони.',
     confirmedRequestInfo:
       'Бронь подтверждена. Чат и контакты доступны по правилам доступа.',
+    noBookings: 'Для этого раздела броней нет',
   },
 };
 
@@ -337,6 +343,54 @@ function translateService(value: string, language: AppLanguage) {
 
 function money(value: number) {
   return `£${Number(value || 0).toFixed(0)}`;
+}
+
+function isSameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function safeDate(value?: string) {
+  const date = new Date(value || '');
+  if (Number.isNaN(date.getTime())) return null;
+  return date;
+}
+
+function formatDateTitle(date: Date, language: AppLanguage) {
+  const locale =
+    language === 'RU'
+      ? 'ru-RU'
+      : language === 'UA'
+      ? 'uk-UA'
+      : language === 'CZ'
+      ? 'cs-CZ'
+      : language === 'ES'
+      ? 'es-ES'
+      : language === 'DE'
+      ? 'de-DE'
+      : language === 'FR'
+      ? 'fr-FR'
+      : language === 'IT'
+      ? 'it-IT'
+      : language === 'PL'
+      ? 'pl-PL'
+      : 'en-GB';
+
+  return new Intl.DateTimeFormat(locale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
 }
 
 function getSlotStatusLabel(status: SlotStatus, text: PageText) {
@@ -471,33 +525,9 @@ function getSlotStyle(status: SlotStatus) {
   };
 }
 
-function getSlotCornerBadge(status: SlotStatus) {
-  if (status === 'completed') {
-    return {
-      text: '✓',
-      bg: '#35bf55',
-      color: '#ffffff',
-      border: '#111111',
-    };
-  }
-
-  if (status === 'pending') {
-    return {
-      text: '!',
-      bg: '#ff4b52',
-      color: '#ffffff',
-      border: '#111111',
-    };
-  }
-
-  return null;
-}
-
 function parseTimeFromDateTime(value?: string) {
-  if (!value) return '09:00';
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '09:00';
+  const date = safeDate(value);
+  if (!date) return '09:00';
 
   return date.toLocaleTimeString('en-GB', {
     hour: '2-digit',
@@ -514,39 +544,37 @@ function mapBookingStatusToSlotStatus(booking: BookingItem): SlotStatus {
   return 'confirmed';
 }
 
+function getDemoClientName(index: number) {
+  if (index === 0) return 'Lucie Hlavová';
+  if (index === 1) return 'Janička Andělová';
+  if (index === 2) return 'Klára Nováková';
+  if (index === 3) return 'Lenka Bohatová';
+  return 'Barbora Bendová';
+}
+
+function getDemoNote(index: number) {
+  if (index === 0) return 'чёлка короче, слои по бокам';
+  if (index === 1) return 'готово';
+  if (index === 2) return 'частично / отменено';
+  if (index === 3) return 'холодный блонд';
+  return 'новые пряди';
+}
+
 function mapBookingsToSlots(bookings: BookingItem[], language: AppLanguage): ProviderSlot[] {
-  const mapped = bookings.slice(0, 5).map((booking, index) => {
+  const mapped = bookings.slice(0, 20).map((booking, index) => {
     const directContactsAvailable = canShowDirectContacts(booking);
 
     return {
       id: booking.id,
       time: parseTimeFromDateTime(booking.dateTime),
       duration: index === 0 ? '60 min' : index === 1 ? '45 min' : '60 min',
-      clientName:
-        index === 0
-          ? 'Lucie Hlavová'
-          : index === 1
-          ? 'Janička Andělová'
-          : index === 2
-          ? 'Klára Nováková'
-          : index === 3
-          ? 'Lenka Bohatová'
-          : 'Barbora Bendová',
+      clientName: getDemoClientName(index),
       clientAvatar: booking.masterAvatar || demoAvatar,
       serviceName: translateService(booking.serviceName, language),
       price: booking.price,
       status: mapBookingStatusToSlotStatus(booking),
       paymentMethod: index === 0 ? 'OlaCash' : index === 1 ? 'Card' : index === 2 ? 'QR' : 'Cash',
-      notes:
-        index === 0
-          ? 'чёлка короче, слои по бокам'
-          : index === 1
-          ? 'готово'
-          : index === 2
-          ? 'частично / отменено'
-          : index === 3
-          ? 'холодный блонд'
-          : 'новые пряди',
+      notes: getDemoNote(index),
       contactMode: directContactsAvailable ? 'full' : 'quick',
       sourceBooking: booking,
       contactPhone: booking.contactPhone,
@@ -557,10 +585,16 @@ function mapBookingsToSlots(bookings: BookingItem[], language: AppLanguage): Pro
     } satisfies ProviderSlot;
   });
 
-  const demoSlots: ProviderSlot[] = [
+  return mapped.sort((a, b) => a.time.localeCompare(b.time));
+}
+
+function createDemoSlotsForView(view: ProviderView): ProviderSlot[] {
+  if (view === 'requests' || view === 'history') return [];
+
+  return [
     {
-      id: 'slot_free_1200',
-      time: '12:00',
+      id: `slot_free_1200_${view}`,
+      time: view === 'tomorrow' ? '10:00' : '12:00',
       duration: '60 min',
       clientName: '',
       serviceName: '',
@@ -571,7 +605,7 @@ function mapBookingsToSlots(bookings: BookingItem[], language: AppLanguage): Pro
       contactMode: 'quick',
     },
     {
-      id: 'slot_blocked_1500',
+      id: `slot_blocked_1500_${view}`,
       time: '15:00',
       duration: '60 min',
       clientName: '',
@@ -583,7 +617,7 @@ function mapBookingsToSlots(bookings: BookingItem[], language: AppLanguage): Pro
       contactMode: 'quick',
     },
     {
-      id: 'slot_free_1900',
+      id: `slot_free_1900_${view}`,
       time: '19:00',
       duration: '60 min',
       clientName: '',
@@ -595,8 +629,6 @@ function mapBookingsToSlots(bookings: BookingItem[], language: AppLanguage): Pro
       contactMode: 'quick',
     },
   ];
-
-  return [...mapped, ...demoSlots].sort((a, b) => a.time.localeCompare(b.time));
 }
 
 function cleanMoneyInput(value: string) {
@@ -678,6 +710,10 @@ export default function ProviderClientsPage() {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
+  const now = useMemo(() => new Date(), []);
+  const todayDate = now;
+  const tomorrowDate = addDays(now, 1);
+
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
     const syncBookings = () => setBookings(getBookings());
@@ -692,11 +728,15 @@ export default function ProviderClientsPage() {
     const unsubscribeBookings = subscribeToBookingsStore(syncBookings);
 
     window.addEventListener('focus', syncLanguage);
+    window.addEventListener('pageshow', syncBookings);
+    window.addEventListener('storage', syncBookings);
 
     return () => {
       unsubscribeLanguage();
       unsubscribeBookings();
       window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('pageshow', syncBookings);
+      window.removeEventListener('storage', syncBookings);
     };
   }, []);
 
@@ -709,15 +749,27 @@ export default function ProviderClientsPage() {
   const selectedSlot = slots.find((slot) => slot.id === selectedSlotId) || null;
   const timeSlot = slots.find((slot) => slot.id === timeSlotId) || null;
 
+  const selectedDate = activeView === 'tomorrow' ? tomorrowDate : todayDate;
+  const dateTitle =
+    activeView === 'tomorrow'
+      ? `${text.tomorrow} · ${formatDateTitle(tomorrowDate, language)}`
+      : formatDateTitle(selectedDate, language);
+
   const visibleSlots = useMemo(() => {
     let source = slots;
 
+    if (activeView === 'today') {
+      source = source.filter((slot) => {
+        const bookingDate = safeDate(slot.sourceBooking?.dateTime);
+        return bookingDate ? isSameDay(bookingDate, todayDate) : false;
+      });
+    }
+
     if (activeView === 'tomorrow') {
-      source = slots.map((slot, index) => ({
-        ...slot,
-        id: `${slot.id}_tomorrow`,
-        time: index === 0 ? '10:00' : index === 1 ? '11:30' : index === 2 ? '14:00' : slot.time,
-      }));
+      source = source.filter((slot) => {
+        const bookingDate = safeDate(slot.sourceBooking?.dateTime);
+        return bookingDate ? isSameDay(bookingDate, tomorrowDate) : false;
+      });
     }
 
     if (activeView === 'requests') {
@@ -726,6 +778,13 @@ export default function ProviderClientsPage() {
 
     if (activeView === 'history') {
       source = source.filter((slot) => slot.status === 'completed' || slot.status === 'cancelled');
+    }
+
+    if (activeView === 'calendar') {
+      source = source.filter((slot) => {
+        const bookingDate = safeDate(slot.sourceBooking?.dateTime);
+        return bookingDate ? bookingDate >= todayDate || slot.status === 'completed' : false;
+      });
     }
 
     if (filtersEnabled && activeFilter !== 'all') {
@@ -760,20 +819,45 @@ export default function ProviderClientsPage() {
       });
     }
 
-    return [...source].sort((a, b) => {
+    const withDemo = [...source, ...createDemoSlotsForView(activeView)];
+
+    return withDemo.sort((a, b) => {
       if (filtersEnabled && sortKey === 'name') return a.clientName.localeCompare(b.clientName);
       if (filtersEnabled && sortKey === 'procedure') return a.serviceName.localeCompare(b.serviceName);
       if (filtersEnabled && sortKey === 'priceAsc') return a.price - b.price;
       if (filtersEnabled && sortKey === 'priceDesc') return b.price - a.price;
       return a.time.localeCompare(b.time);
     });
-  }, [activeFilter, activeView, filtersEnabled, maxPrice, minPrice, search, slots, sortKey]);
+  }, [
+    activeFilter,
+    activeView,
+    filtersEnabled,
+    maxPrice,
+    minPrice,
+    search,
+    slots,
+    sortKey,
+    todayDate,
+    tomorrowDate,
+  ]);
 
-  const activeTodayCount = slots.filter(
-    (slot) => slot.status === 'confirmed' || slot.status === 'pending'
-  ).length;
+  const activeTodayCount = slots.filter((slot) => {
+    const bookingDate = safeDate(slot.sourceBooking?.dateTime);
+    const isTodayBooking = bookingDate ? isSameDay(bookingDate, todayDate) : false;
+    return isTodayBooking && (slot.status === 'confirmed' || slot.status === 'pending');
+  }).length;
 
   const requestCount = slots.filter((slot) => slot.status === 'pending').length;
+
+  const completedCount = slots.filter((slot) => {
+    const bookingDate = safeDate(slot.sourceBooking?.dateTime);
+    return bookingDate && isSameDay(bookingDate, todayDate) && slot.status === 'completed';
+  }).length;
+
+  const confirmedCount = slots.filter((slot) => {
+    const bookingDate = safeDate(slot.sourceBooking?.dateTime);
+    return bookingDate && isSameDay(bookingDate, todayDate) && slot.status === 'confirmed';
+  }).length;
 
   const handleOpenTimeModal = (slot: ProviderSlot) => {
     const [hour, minute] = slot.time.split(':');
@@ -801,7 +885,7 @@ export default function ProviderClientsPage() {
         currentDate.setHours(hours, minutes, 0, 0);
         patchBooking(slot.sourceBooking.id, {
           dateTime: currentDate.toISOString(),
-          dateLabel: `${text.today} ${nextTime}`,
+          dateLabel: `${formatDateTitle(currentDate, language)} ${nextTime}`,
         });
       }
     }
@@ -994,7 +1078,7 @@ export default function ProviderClientsPage() {
           <section style={{ marginTop: 16 }}>
             <div
               style={{
-                borderRadius: 24,
+                borderRadius: 28,
                 border: '2px solid #111111',
                 background: '#ffffff',
                 padding: 12,
@@ -1004,87 +1088,32 @@ export default function ProviderClientsPage() {
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr',
-                  gap: 10,
+                  gap: 9,
                 }}
               >
-                <div
-                  style={{
-                    minHeight: 74,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: '#fff0da',
-                    padding: '11px 13px',
-                    display: 'grid',
-                    gridTemplateColumns: '1fr auto',
-                    alignItems: 'center',
-                    gap: 10,
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 12, color: '#8b7355', fontWeight: 900 }}>
-                      {text.activeToday}
-                    </div>
-                    <div style={{ marginTop: 4, fontSize: 13, color: '#8b7355', fontWeight: 800 }}>
-                      ✓ confirmed
-                    </div>
-                  </div>
+                <SummaryCard
+                  title={text.activeToday}
+                  value={activeTodayCount}
+                  bottom={`✓ ${confirmedCount} ${text.confirmedShort} · ${completedCount} ${text.completedShort}`}
+                  bg="#fff0da"
+                  color="#17130f"
+                  accent="#8b7355"
+                />
 
-                  <div style={{ fontSize: 34, fontWeight: 900, color: '#17130f' }}>
-                    {activeTodayCount}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    minHeight: 74,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: requestCount > 0 ? '#ffe1e7' : '#eef4ff',
-                    padding: '11px 13px',
-                    display: 'grid',
-                    gridTemplateColumns: '1fr auto',
-                    alignItems: 'center',
-                    gap: 10,
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: requestCount > 0 ? '#cf3344' : '#2559b7',
-                        fontWeight: 900,
-                      }}
-                    >
-                      {text.requestsCount}
-                    </div>
-                    <div
-                      style={{
-                        marginTop: 4,
-                        fontSize: 13,
-                        color: requestCount > 0 ? '#cf3344' : '#2559b7',
-                        fontWeight: 800,
-                      }}
-                    >
-                      {requestCount > 0 ? '! action' : 'clear'}
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: 34,
-                      fontWeight: 900,
-                      color: requestCount > 0 ? '#cf3344' : '#17130f',
-                    }}
-                  >
-                    {requestCount}
-                  </div>
-                </div>
+                <SummaryCard
+                  title={text.requestsCount}
+                  value={requestCount}
+                  bottom={requestCount > 0 ? 'Needs action' : 'Clear'}
+                  bg={requestCount > 0 ? '#ffe1e7' : '#e6efff'}
+                  color={requestCount > 0 ? '#cf3344' : '#17130f'}
+                  accent={requestCount > 0 ? '#ff4b52' : '#2559b7'}
+                />
               </div>
 
               <div
                 style={{
-                  marginTop: 12,
-                  height: 50,
+                  marginTop: 11,
+                  height: 48,
                   borderRadius: 18,
                   border: '2px solid #111111',
                   background: '#ffffff',
@@ -1370,22 +1399,25 @@ export default function ProviderClientsPage() {
               border: '2px solid #111111',
               background: '#fff',
               padding: 14,
+              overflow: 'hidden',
             }}
           >
             <div style={{ textAlign: 'center' }}>
               <div
                 style={{
-                  fontSize: 22,
+                  fontSize: activeView === 'tomorrow' ? 24 : 26,
+                  lineHeight: 1.1,
                   fontWeight: 900,
                   color: '#17130f',
+                  textTransform: language === 'EN' ? 'capitalize' : 'none',
                 }}
               >
-                {activeView === 'tomorrow' ? text.tomorrow : text.dayTitle}
+                {dateTitle}
               </div>
 
               <div
                 style={{
-                  marginTop: 4,
+                  marginTop: 6,
                   fontSize: 13,
                   fontWeight: 800,
                   color: '#7b7268',
@@ -1399,7 +1431,7 @@ export default function ProviderClientsPage() {
               style={{
                 marginTop: 18,
                 display: 'grid',
-                gridTemplateColumns: '64px 1fr 68px 78px',
+                gridTemplateColumns: '58px minmax(0, 1fr) 58px 74px',
                 gap: 8,
                 padding: '0 4px',
                 fontSize: 11,
@@ -1413,11 +1445,31 @@ export default function ProviderClientsPage() {
               <div>{text.notes}</div>
             </div>
 
-            <div style={{ marginTop: 8, display: 'grid', gap: 8 }}>
+            <div style={{ marginTop: 8, display: 'grid', gap: 9 }}>
+              {visibleSlots.length === 0 ? (
+                <div
+                  style={{
+                    minHeight: 120,
+                    borderRadius: 22,
+                    border: '2px dashed #d9d9d9',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#7b7268',
+                    fontSize: 15,
+                    fontWeight: 900,
+                  }}
+                >
+                  {text.noBookings}
+                </div>
+              ) : null}
+
               {visibleSlots.map((slot) => {
                 const style = getSlotStyle(slot.status);
-                const badge = getSlotCornerBadge(slot.status);
                 const isEmpty = slot.status === 'free' || slot.status === 'blocked';
+                const isDone = slot.status === 'completed';
+                const isPending = slot.status === 'pending';
+                const isConfirmed = slot.status === 'confirmed';
 
                 return (
                   <article
@@ -1436,9 +1488,9 @@ export default function ProviderClientsPage() {
                       setNoteDraft(slot.notes);
                     }}
                     style={{
-                      minHeight: 72,
+                      minHeight: 74,
                       display: 'grid',
-                      gridTemplateColumns: '64px 1fr 68px 78px',
+                      gridTemplateColumns: '58px minmax(0, 1fr) 58px 74px',
                       gap: 8,
                       alignItems: 'center',
                       cursor: 'pointer',
@@ -1468,42 +1520,16 @@ export default function ProviderClientsPage() {
 
                     <div
                       style={{
-                        position: 'relative',
-                        minHeight: 64,
+                        minHeight: 68,
                         borderRadius: 13,
                         border: `2px solid ${style.border}`,
                         background: style.bg,
-                        padding: badge ? '10px 34px 10px 12px' : '10px 12px',
+                        padding: '10px 10px',
                         boxSizing: 'border-box',
                         overflow: 'hidden',
+                        position: 'relative',
                       }}
                     >
-                      {badge ? (
-                        <span
-                          style={{
-                            position: 'absolute',
-                            top: 7,
-                            right: 7,
-                            width: 28,
-                            height: 28,
-                            borderRadius: 999,
-                            border: `2px solid ${badge.border}`,
-                            background: badge.bg,
-                            color: badge.color,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 16,
-                            lineHeight: 1,
-                            fontWeight: 900,
-                            boxSizing: 'border-box',
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.12)',
-                          }}
-                        >
-                          {badge.text}
-                        </span>
-                      ) : null}
-
                       {slot.status === 'free' ? (
                         <div
                           style={{
@@ -1532,6 +1558,79 @@ export default function ProviderClientsPage() {
                         </div>
                       ) : (
                         <>
+                          {isDone ? (
+                            <span
+                              style={{
+                                position: 'absolute',
+                                right: 8,
+                                top: 8,
+                                width: 28,
+                                height: 28,
+                                borderRadius: 999,
+                                border: '2px solid #111111',
+                                background: '#35bf55',
+                                color: '#ffffff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: 18,
+                                fontWeight: 900,
+                                boxShadow: '0 4px 12px rgba(53,191,85,0.25)',
+                                zIndex: 2,
+                              }}
+                            >
+                              ✓
+                            </span>
+                          ) : null}
+
+                          {isPending ? (
+                            <span
+                              style={{
+                                position: 'absolute',
+                                left: 8,
+                                top: 8,
+                                maxWidth: 98,
+                                height: 24,
+                                borderRadius: 999,
+                                border: '2px solid #111111',
+                                background: '#ff4b52',
+                                color: '#ffffff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '0 8px',
+                                fontSize: 10,
+                                fontWeight: 900,
+                                zIndex: 2,
+                              }}
+                            >
+                              ! Needs action
+                            </span>
+                          ) : null}
+
+                          {isConfirmed ? (
+                            <span
+                              style={{
+                                position: 'absolute',
+                                right: 8,
+                                top: 8,
+                                width: 24,
+                                height: 24,
+                                borderRadius: 999,
+                                border: '2px solid #55c75f',
+                                background: '#ffffff',
+                                color: '#35bf55',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: 15,
+                                fontWeight: 900,
+                              }}
+                            >
+                              ✓
+                            </span>
+                          ) : null}
+
                           <div
                             style={{
                               fontSize: 15,
@@ -1540,6 +1639,8 @@ export default function ProviderClientsPage() {
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
+                              paddingRight: isDone || isConfirmed ? 30 : 0,
+                              paddingTop: isPending ? 24 : 0,
                             }}
                           >
                             {slot.clientName}
@@ -1584,7 +1685,7 @@ export default function ProviderClientsPage() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 24,
+                        fontSize: 21,
                         fontWeight: 900,
                         color: slot.price > 0 ? '#ff3b3b' : '#9ca3af',
                       }}
@@ -1597,7 +1698,7 @@ export default function ProviderClientsPage() {
                         minHeight: 64,
                         display: 'flex',
                         alignItems: 'center',
-                        fontSize: 12,
+                        fontSize: 11.5,
                         lineHeight: 1.25,
                         fontWeight: 900,
                         color: slot.notes ? '#d2a300' : '#9ca3af',
@@ -1613,7 +1714,7 @@ export default function ProviderClientsPage() {
           </section>
         </div>
 
-        <BottomNav active="bookings" />
+        <BottomNav active="clients" />
       </main>
 
       {selectedSlot ? (
@@ -1659,6 +1760,67 @@ export default function ProviderClientsPage() {
         />
       ) : null}
     </>
+  );
+}
+
+function SummaryCard({
+  title,
+  value,
+  bottom,
+  bg,
+  color,
+  accent,
+}: {
+  title: string;
+  value: number;
+  bottom: string;
+  bg: string;
+  color: string;
+  accent: string;
+}) {
+  return (
+    <div
+      style={{
+        borderRadius: 20,
+        border: '2px solid #111111',
+        background: bg,
+        padding: '12px 13px',
+        minHeight: 86,
+        display: 'grid',
+        alignContent: 'space-between',
+      }}
+    >
+      <div style={{ fontSize: 12, color: accent, fontWeight: 900 }}>
+        {title}
+      </div>
+
+      <div
+        style={{
+          marginTop: 5,
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          gap: 8,
+        }}
+      >
+        <div style={{ fontSize: 30, lineHeight: 1, fontWeight: 900, color }}>
+          {value}
+        </div>
+
+        <div
+          style={{
+            maxWidth: 96,
+            fontSize: 10.5,
+            lineHeight: 1.15,
+            fontWeight: 900,
+            color: accent,
+            textAlign: 'right',
+          }}
+        >
+          {bottom}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1841,7 +2003,7 @@ function ClientCardModal({
                   color: '#6f675f',
                 }}
               >
-                18 апреля 2026 · {slot.time}
+                {slot.time}
               </div>
 
               <div
