@@ -17,12 +17,11 @@ import {
 type TransactionType = 'income' | 'payment';
 type TransactionStatus = 'completed' | 'pending';
 type TransactionFilter = 'all' | 'income' | 'payment';
-type DateFilter = 'today' | '7days' | '30days' | 'all';
+type DateFilter = 'today' | '7days' | '30days' | 'all' | 'custom';
 
 type WalletTextShape = {
   title: string;
   subtitle: string;
-  balance: string;
   available: string;
   appAccount: string;
   appAccountHint: string;
@@ -37,6 +36,9 @@ type WalletTextShape = {
   sevenDays: string;
   thirtyDays: string;
   allTime: string;
+  customPeriod: string;
+  from: string;
+  to: string;
   noTransactions: string;
   noTransactionsHint: string;
   pending: string;
@@ -58,20 +60,18 @@ type TransactionItem = {
   amount: number;
   type: TransactionType;
   status: TransactionStatus;
+  date: string;
   daysAgo: number;
   icon: string;
   bg: string;
-  color: string;
 };
 
 const BRAND = {
   navy: '#071b46',
   blue: '#0e73d8',
   green: '#24c45a',
-  red: '#ff2456',
   yellow: '#ffd629',
   pink: '#ff4f9a',
-  cream: '#fff7ee',
   softBlue: '#dcecff',
   softGreen: '#dcffe8',
   softPink: '#ffe9f2',
@@ -86,7 +86,6 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
   EN: {
     title: 'App account',
     subtitle: 'Balance, top ups and activity inside Olamep',
-    balance: 'Balance',
     available: 'Available now',
     appAccount: 'Your Olamep balance',
     appAccountHint: 'Use it for bookings, ads, deals and secure payments.',
@@ -101,6 +100,9 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     sevenDays: '7 days',
     thirtyDays: '30 days',
     allTime: 'All time',
+    customPeriod: 'Custom period',
+    from: 'From',
+    to: 'To',
     noTransactions: 'No transactions',
     noTransactionsHint: 'Change filters or make your first payment.',
     pending: 'Pending',
@@ -117,7 +119,6 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
   RU: {
     title: 'Счёт приложения',
     subtitle: 'Баланс, пополнения и операции внутри Olamep',
-    balance: 'Баланс',
     available: 'Доступно сейчас',
     appAccount: 'Ваш баланс Olamep',
     appAccountHint: 'Используйте его для бронирований, рекламы, скидок и безопасных платежей.',
@@ -132,6 +133,9 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     sevenDays: '7 дней',
     thirtyDays: '30 дней',
     allTime: 'За всё время',
+    customPeriod: 'Свой период',
+    from: 'От',
+    to: 'До',
     noTransactions: 'Нет операций',
     noTransactionsHint: 'Измените фильтр или сделайте первый платёж.',
     pending: 'В обработке',
@@ -148,7 +152,6 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
   UA: {
     title: 'Рахунок застосунку',
     subtitle: 'Баланс, поповнення та операції всередині Olamep',
-    balance: 'Баланс',
     available: 'Доступно зараз',
     appAccount: 'Ваш баланс Olamep',
     appAccountHint: 'Використовуйте його для бронювань, реклами, знижок і безпечних платежів.',
@@ -163,6 +166,9 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     sevenDays: '7 днів',
     thirtyDays: '30 днів',
     allTime: 'За весь час',
+    customPeriod: 'Свій період',
+    from: 'Від',
+    to: 'До',
     noTransactions: 'Немає операцій',
     noTransactionsHint: 'Змініть фільтр або зробіть перший платіж.',
     pending: 'В обробці',
@@ -179,7 +185,6 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
   ES: {
     title: 'Cuenta de la app',
     subtitle: 'Saldo, recargas y actividad dentro de Olamep',
-    balance: 'Saldo',
     available: 'Disponible ahora',
     appAccount: 'Tu saldo Olamep',
     appAccountHint: 'Úsalo para reservas, anuncios, ofertas y pagos seguros.',
@@ -194,6 +199,9 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     sevenDays: '7 días',
     thirtyDays: '30 días',
     allTime: 'Todo',
+    customPeriod: 'Periodo',
+    from: 'Desde',
+    to: 'Hasta',
     noTransactions: 'Sin transacciones',
     noTransactionsHint: 'Cambia los filtros o realiza tu primer pago.',
     pending: 'Pendiente',
@@ -210,7 +218,6 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
   CZ: {
     title: 'Účet aplikace',
     subtitle: 'Zůstatek, dobití a aktivita v Olamep',
-    balance: 'Zůstatek',
     available: 'Dostupné nyní',
     appAccount: 'Váš zůstatek Olamep',
     appAccountHint: 'Použijte ho pro rezervace, reklamy, slevy a bezpečné platby.',
@@ -225,6 +232,9 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     sevenDays: '7 dní',
     thirtyDays: '30 dní',
     allTime: 'Celkem',
+    customPeriod: 'Vlastní období',
+    from: 'Od',
+    to: 'Do',
     noTransactions: 'Žádné transakce',
     noTransactionsHint: 'Změňte filtry nebo proveďte první platbu.',
     pending: 'Čeká',
@@ -241,7 +251,6 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
   DE: {
     title: 'App-Konto',
     subtitle: 'Guthaben, Aufladungen und Aktivität in Olamep',
-    balance: 'Guthaben',
     available: 'Jetzt verfügbar',
     appAccount: 'Dein Olamep-Guthaben',
     appAccountHint: 'Nutze es für Buchungen, Anzeigen, Deals und sichere Zahlungen.',
@@ -256,6 +265,9 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     sevenDays: '7 Tage',
     thirtyDays: '30 Tage',
     allTime: 'Gesamt',
+    customPeriod: 'Zeitraum',
+    from: 'Von',
+    to: 'Bis',
     noTransactions: 'Keine Transaktionen',
     noTransactionsHint: 'Ändere Filter oder mache deine erste Zahlung.',
     pending: 'Ausstehend',
@@ -272,7 +284,6 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
   IT: {
     title: 'Account app',
     subtitle: 'Saldo, ricariche e attività dentro Olamep',
-    balance: 'Saldo',
     available: 'Disponibile ora',
     appAccount: 'Il tuo saldo Olamep',
     appAccountHint: 'Usalo per prenotazioni, annunci, offerte e pagamenti sicuri.',
@@ -287,6 +298,9 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     sevenDays: '7 giorni',
     thirtyDays: '30 giorni',
     allTime: 'Sempre',
+    customPeriod: 'Periodo',
+    from: 'Da',
+    to: 'A',
     noTransactions: 'Nessuna transazione',
     noTransactionsHint: 'Cambia filtri o fai il primo pagamento.',
     pending: 'In attesa',
@@ -303,7 +317,6 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
   FR: {
     title: 'Compte app',
     subtitle: 'Solde, recharges et activité dans Olamep',
-    balance: 'Solde',
     available: 'Disponible maintenant',
     appAccount: 'Votre solde Olamep',
     appAccountHint: 'Utilisez-le pour les réservations, publicités, offres et paiements sécurisés.',
@@ -318,6 +331,9 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     sevenDays: '7 jours',
     thirtyDays: '30 jours',
     allTime: 'Toujours',
+    customPeriod: 'Période',
+    from: 'Du',
+    to: 'Au',
     noTransactions: 'Aucune transaction',
     noTransactionsHint: 'Changez les filtres ou effectuez votre premier paiement.',
     pending: 'En attente',
@@ -334,7 +350,6 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
   PL: {
     title: 'Konto aplikacji',
     subtitle: 'Saldo, doładowania i aktywność w Olamep',
-    balance: 'Saldo',
     available: 'Dostępne teraz',
     appAccount: 'Twoje saldo Olamep',
     appAccountHint: 'Używaj go do rezerwacji, reklam, ofert i bezpiecznych płatności.',
@@ -349,6 +364,9 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     sevenDays: '7 dni',
     thirtyDays: '30 dni',
     allTime: 'Całość',
+    customPeriod: 'Własny okres',
+    from: 'Od',
+    to: 'Do',
     noTransactions: 'Brak transakcji',
     noTransactionsHint: 'Zmień filtry albo wykonaj pierwszą płatność.',
     pending: 'Oczekuje',
@@ -365,7 +383,6 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
   AR: {
     title: 'حساب التطبيق',
     subtitle: 'الرصيد، الشحن والعمليات داخل Olamep',
-    balance: 'الرصيد',
     available: 'متاح الآن',
     appAccount: 'رصيدك في Olamep',
     appAccountHint: 'استخدمه للحجوزات والإعلانات والعروض والمدفوعات الآمنة.',
@@ -380,6 +397,9 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     sevenDays: '7 أيام',
     thirtyDays: '30 يوم',
     allTime: 'كل الوقت',
+    customPeriod: 'فترة مخصصة',
+    from: 'من',
+    to: 'إلى',
     noTransactions: 'لا توجد عمليات',
     noTransactionsHint: 'غيّر الفلاتر أو قم بأول عملية دفع.',
     pending: 'قيد المعالجة',
@@ -397,6 +417,17 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
 
 function getText(language: AppLanguage) {
   return walletTexts[language] || walletTexts.EN;
+}
+
+function getDateDaysAgo(daysAgo: number) {
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  return date.toISOString().slice(0, 10);
+}
+
+function formatSignedAmount(amount: number) {
+  const prefix = amount >= 0 ? '+' : '-';
+  return `${prefix} £${Math.abs(amount).toFixed(2)}`;
 }
 
 function WalletIcon() {
@@ -441,11 +472,6 @@ function SmallIcon({ icon, bg }: { icon: string; bg: string }) {
   );
 }
 
-function formatSignedAmount(amount: number) {
-  const prefix = amount >= 0 ? '+' : '-';
-  return `${prefix} £${Math.abs(amount).toFixed(2)}`;
-}
-
 export default function WalletPage() {
   const router = useRouter();
 
@@ -453,6 +479,8 @@ export default function WalletPage() {
   const [wallet, setWallet] = useState<WalletState>(getWalletState());
   const [transactionFilter, setTransactionFilter] = useState<TransactionFilter>('all');
   const [dateFilter, setDateFilter] = useState<DateFilter>('all');
+  const [fromDate, setFromDate] = useState(getDateDaysAgo(30));
+  const [toDate, setToDate] = useState(getDateDaysAgo(0));
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -488,10 +516,10 @@ export default function WalletPage() {
         amount: 25,
         type: 'income',
         status: 'completed',
+        date: getDateDaysAgo(0),
         daysAgo: 0,
         icon: '＋',
         bg: BRAND.softGreen,
-        color: BRAND.green,
       },
       {
         id: 'service',
@@ -500,10 +528,10 @@ export default function WalletPage() {
         amount: 12,
         type: 'income',
         status: 'pending',
+        date: getDateDaysAgo(0),
         daysAgo: 0,
         icon: '💼',
         bg: BRAND.softBlue,
-        color: BRAND.blue,
       },
       {
         id: 'booking',
@@ -512,10 +540,10 @@ export default function WalletPage() {
         amount: -5,
         type: 'payment',
         status: 'completed',
+        date: getDateDaysAgo(0),
         daysAgo: 0,
         icon: '📅',
         bg: BRAND.softBlue,
-        color: BRAND.blue,
       },
       {
         id: 'promotion',
@@ -524,10 +552,10 @@ export default function WalletPage() {
         amount: -1,
         type: 'payment',
         status: 'completed',
+        date: getDateDaysAgo(1),
         daysAgo: 1,
         icon: '📣',
         bg: BRAND.softPink,
-        color: BRAND.pink,
       },
       {
         id: 'fee',
@@ -536,10 +564,10 @@ export default function WalletPage() {
         amount: -0.5,
         type: 'payment',
         status: 'completed',
+        date: getDateDaysAgo(1),
         daysAgo: 1,
         icon: '🛡️',
         bg: BRAND.softViolet,
-        color: BRAND.navy,
       },
       {
         id: 'payout',
@@ -548,10 +576,22 @@ export default function WalletPage() {
         amount: -18,
         type: 'payment',
         status: 'pending',
+        date: getDateDaysAgo(12),
         daysAgo: 12,
         icon: '↗',
         bg: BRAND.softOrange,
-        color: '#b47b00',
+      },
+      {
+        id: 'old-income',
+        title: text.servicePayment,
+        subtitle: text.allTime,
+        amount: 38,
+        type: 'income',
+        status: 'completed',
+        date: getDateDaysAgo(55),
+        daysAgo: 55,
+        icon: '💼',
+        bg: BRAND.softGreen,
       },
     ],
     [text],
@@ -575,9 +615,13 @@ export default function WalletPage() {
         dateMatch = item.daysAgo <= 30;
       }
 
+      if (dateFilter === 'custom') {
+        dateMatch = item.date >= fromDate && item.date <= toDate;
+      }
+
       return typeMatch && dateMatch;
     });
-  }, [transactions, transactionFilter, dateFilter]);
+  }, [transactions, transactionFilter, dateFilter, fromDate, toDate]);
 
   const transactionFilterOptions: { id: TransactionFilter; label: string }[] = [
     { id: 'all', label: text.all },
@@ -590,6 +634,7 @@ export default function WalletPage() {
     { id: '7days', label: text.sevenDays },
     { id: '30days', label: text.thirtyDays },
     { id: 'all', label: text.allTime },
+    { id: 'custom', label: text.customPeriod },
   ];
 
   return (
@@ -707,13 +752,7 @@ export default function WalletPage() {
               <WalletIcon />
 
               <div style={{ minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: 15,
-                    fontWeight: 900,
-                    color: BRAND.blue,
-                  }}
-                >
+                <div style={{ fontSize: 15, fontWeight: 900, color: BRAND.blue }}>
                   {text.appAccount}
                 </div>
 
@@ -730,14 +769,7 @@ export default function WalletPage() {
                   £{wallet.availableBalance.toFixed(2)}
                 </div>
 
-                <div
-                  style={{
-                    marginTop: 7,
-                    fontSize: 13,
-                    fontWeight: 900,
-                    color: BRAND.muted,
-                  }}
-                >
+                <div style={{ marginTop: 7, fontSize: 13, fontWeight: 900, color: BRAND.muted }}>
                   {text.available}
                 </div>
               </div>
@@ -840,15 +872,7 @@ export default function WalletPage() {
             {text.transactions}
           </h2>
 
-          <div
-            style={{
-              display: 'flex',
-              gap: 8,
-              overflowX: 'auto',
-              paddingBottom: 8,
-              scrollbarWidth: 'none',
-            }}
-          >
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8 }}>
             {transactionFilterOptions.map((item) => {
               const active = transactionFilter === item.id;
 
@@ -868,7 +892,6 @@ export default function WalletPage() {
                     fontWeight: 900,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
-                    boxShadow: active ? '0 4px 0 rgba(0,0,0,0.12)' : 'none',
                   }}
                 >
                   {item.label}
@@ -877,15 +900,7 @@ export default function WalletPage() {
             })}
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              gap: 8,
-              overflowX: 'auto',
-              paddingBottom: 10,
-              scrollbarWidth: 'none',
-            }}
-          >
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 10 }}>
             {dateFilterOptions.map((item) => {
               const active = dateFilter === item.id;
 
@@ -912,6 +927,73 @@ export default function WalletPage() {
               );
             })}
           </div>
+
+          {dateFilter === 'custom' ? (
+            <div
+              style={{
+                marginBottom: 12,
+                borderRadius: 22,
+                border: `2.5px solid ${BRAND.border}`,
+                background: BRAND.softOrange,
+                padding: 12,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
+              }}
+            >
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 900, color: BRAND.navy }}>
+                  {text.from}
+                </span>
+                <input
+                  type="date"
+                  value={fromDate}
+                  onChange={(event) => {
+                    setFromDate(event.target.value);
+                    setDateFilter('custom');
+                  }}
+                  style={{
+                    width: '100%',
+                    minHeight: 44,
+                    borderRadius: 15,
+                    border: `2.5px solid ${BRAND.border}`,
+                    background: '#ffffff',
+                    color: BRAND.navy,
+                    fontSize: 13,
+                    fontWeight: 900,
+                    padding: '0 9px',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </label>
+
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 900, color: BRAND.navy }}>
+                  {text.to}
+                </span>
+                <input
+                  type="date"
+                  value={toDate}
+                  onChange={(event) => {
+                    setToDate(event.target.value);
+                    setDateFilter('custom');
+                  }}
+                  style={{
+                    width: '100%',
+                    minHeight: 44,
+                    borderRadius: 15,
+                    border: `2.5px solid ${BRAND.border}`,
+                    background: '#ffffff',
+                    color: BRAND.navy,
+                    fontSize: 13,
+                    fontWeight: 900,
+                    padding: '0 9px',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </label>
+            </div>
+          ) : null}
 
           <div
             style={{
@@ -971,7 +1053,7 @@ export default function WalletPage() {
                           color: BRAND.muted,
                         }}
                       >
-                        {item.subtitle}
+                        {item.date}
                       </span>
 
                       <span
@@ -1008,12 +1090,7 @@ export default function WalletPage() {
                 </div>
               ))
             ) : (
-              <div
-                style={{
-                  padding: 22,
-                  textAlign: 'center',
-                }}
-              >
+              <div style={{ padding: 22, textAlign: 'center' }}>
                 <div style={{ fontSize: 36 }}>🧾</div>
                 <div
                   style={{
@@ -1051,13 +1128,7 @@ export default function WalletPage() {
             padding: 15,
           }}
         >
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 900,
-              color: BRAND.navy,
-            }}
-          >
+          <div style={{ fontSize: 18, fontWeight: 900, color: BRAND.navy }}>
             🧾 {text.comingSoon}
           </div>
 
