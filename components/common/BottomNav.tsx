@@ -14,86 +14,25 @@ import {
 
 type BottomNavProps = {
   active?: 'home' | 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
+  onAddClick?: () => void;
 };
 
 type NavKey = 'home' | 'messages' | 'add' | 'bookings' | 'profile';
 
 type NavItem = {
   key: NavKey;
+  label: Record<AppLanguage, string>;
   href: string;
+  accent?: boolean;
 };
 
-const navLabels: Record<AppLanguage, Record<NavKey, string>> = {
-  EN: {
-    home: 'Home',
-    messages: 'Messages',
-    add: 'Add',
-    bookings: 'Bookings',
-    profile: 'Profile',
-  },
-  ES: {
-    home: 'Inicio',
-    messages: 'Mensajes',
-    add: 'Añadir',
-    bookings: 'Reservas',
-    profile: 'Perfil',
-  },
-  RU: {
-    home: 'Главная',
-    messages: 'Сообщения',
-    add: 'Добавить',
-    bookings: 'Мои брони',
-    profile: 'Профиль',
-  },
-  UA: {
-    home: 'Головна',
-    messages: 'Повідомл.',
-    add: 'Додати',
-    bookings: 'Мої броні',
-    profile: 'Профіль',
-  },
-  CZ: {
-    home: 'Domů',
-    messages: 'Zprávy',
-    add: 'Přidat',
-    bookings: 'Rezervace',
-    profile: 'Profil',
-  },
-  DE: {
-    home: 'Start',
-    messages: 'Nachr.',
-    add: 'Plus',
-    bookings: 'Buchung',
-    profile: 'Profil',
-  },
-  IT: {
-    home: 'Home',
-    messages: 'Messaggi',
-    add: 'Aggiungi',
-    bookings: 'Prenota',
-    profile: 'Profilo',
-  },
-  FR: {
-    home: 'Accueil',
-    messages: 'Messages',
-    add: 'Ajouter',
-    bookings: 'Réserv.',
-    profile: 'Profil',
-  },
-  AR: {
-    home: 'الرئيسية',
-    messages: 'رسائل',
-    add: 'إضافة',
-    bookings: 'حجوزات',
-    profile: 'حسابي',
-  },
-  PL: {
-    home: 'Start',
-    messages: 'Wiadom.',
-    add: 'Dodaj',
-    bookings: 'Rezerw.',
-    profile: 'Profil',
-  },
+const BRAND = {
+  border: '#050505',
+  navy: '#071b46',
+  green: '#55c75f',
+  blue: '#2578ff',
+  pink: '#ff4fa0',
+  cream: '#fffdf8',
 };
 
 const addMenuTexts: Record<
@@ -117,48 +56,140 @@ const addMenuTexts: Record<
   PL: { ad: 'Reklama', service: 'Usługa', deal: 'Zniżka', close: 'Zamknij' },
 };
 
-const navItems: NavItem[] = [
-  { key: 'home', href: '/' },
-  { key: 'messages', href: '/messages' },
-  { key: 'add', href: '/add' },
-  { key: 'bookings', href: '/bookings' },
-  { key: 'profile', href: '/profile' },
+const items: NavItem[] = [
+  {
+    key: 'home',
+    href: '/',
+    label: {
+      EN: 'Home',
+      ES: 'Inicio',
+      RU: 'Главная',
+      UA: 'Головна',
+      CZ: 'Domů',
+      DE: 'Home',
+      IT: 'Home',
+      FR: 'Accueil',
+      AR: 'الرئيسية',
+      PL: 'Start',
+    },
+  },
+  {
+    key: 'messages',
+    href: '/messages',
+    label: {
+      EN: 'Messages',
+      ES: 'Mensajes',
+      RU: 'Сообщения',
+      UA: 'Повідомл.',
+      CZ: 'Zprávy',
+      DE: 'Nachr.',
+      IT: 'Messaggi',
+      FR: 'Messages',
+      AR: 'رسائل',
+      PL: 'Wiadom.',
+    },
+  },
+  {
+    key: 'add',
+    href: '/add',
+    accent: true,
+    label: {
+      EN: 'Add',
+      ES: 'Añadir',
+      RU: 'Добавить',
+      UA: 'Додати',
+      CZ: 'Přidat',
+      DE: 'Plus',
+      IT: 'Aggiungi',
+      FR: 'Ajouter',
+      AR: 'إضافة',
+      PL: 'Dodaj',
+    },
+  },
+  {
+    key: 'bookings',
+    href: '/bookings',
+    label: {
+      EN: 'Bookings',
+      ES: 'Reservas',
+      RU: 'Брони',
+      UA: 'Броні',
+      CZ: 'Rezervace',
+      DE: 'Buchung',
+      IT: 'Prenota',
+      FR: 'Réserv.',
+      AR: 'حجوزات',
+      PL: 'Rezerw.',
+    },
+  },
+  {
+    key: 'profile',
+    href: '/profile',
+    label: {
+      EN: 'Profile',
+      ES: 'Perfil',
+      RU: 'Профиль',
+      UA: 'Профіль',
+      CZ: 'Profil',
+      DE: 'Profil',
+      IT: 'Profilo',
+      FR: 'Profil',
+      AR: 'حسابي',
+      PL: 'Profil',
+    },
+  },
 ];
-
-function getLabel(language: AppLanguage, key: NavKey) {
-  return navLabels[language]?.[key] || navLabels.EN[key];
-}
 
 function getAddText(language: AppLanguage) {
   return addMenuTexts[language] || addMenuTexts.EN;
 }
 
+function getLabel(item: NavItem, language: AppLanguage) {
+  return item.label[language] || item.label.EN;
+}
+
 function getActiveColor(key: NavKey) {
-  if (key === 'home') return '#55c75f';
-  if (key === 'messages') return '#55c75f';
-  if (key === 'bookings') return '#2578ff';
-  if (key === 'profile') return '#55c75f';
-  if (key === 'add') return '#55c75f';
-  return '#55c75f';
+  if (key === 'bookings') return BRAND.blue;
+  return BRAND.green;
 }
 
 function HomeIcon({ active }: { active: boolean }) {
-  const color = active ? '#55c75f' : '#202020';
+  const color = active ? BRAND.green : '#171717';
 
   return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
       <path
-        d="M4.5 11.2L12 5L19.5 11.2"
+        d="M4 10.5L12 4L20 10.5V20H4V10.5Z"
         stroke={color}
         strokeWidth="1.9"
-        strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+function CalendarIcon({ active }: { active: boolean }) {
+  const color = active ? BRAND.blue : '#171717';
+
+  return (
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="6" width="16" height="14" rx="2.4" stroke={color} strokeWidth="1.9" />
+      <path d="M8 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
+      <path d="M16 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
+      <path d="M4 10H20" stroke={color} strokeWidth="1.9" />
+    </svg>
+  );
+}
+
+function MessageIcon({ active }: { active: boolean }) {
+  const color = active ? BRAND.green : '#171717';
+
+  return (
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
       <path
-        d="M6.5 10.5V19H10V14.5H14V19H17.5V10.5"
+        d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
         stroke={color}
         strokeWidth="1.9"
-        strokeLinecap="round"
         strokeLinejoin="round"
       />
     </svg>
@@ -166,10 +197,10 @@ function HomeIcon({ active }: { active: boolean }) {
 }
 
 function ProfileIcon({ active }: { active: boolean }) {
-  const color = active ? '#55c75f' : '#202020';
+  const color = active ? BRAND.green : '#171717';
 
   return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="8" r="3.2" stroke={color} strokeWidth="1.9" />
       <path
         d="M5.5 19C6.5 15.8 8.8 14.5 12 14.5C15.2 14.5 17.5 15.8 18.5 19"
@@ -181,45 +212,15 @@ function ProfileIcon({ active }: { active: boolean }) {
   );
 }
 
-function CalendarIcon({ active }: { active: boolean }) {
-  const color = active ? '#2578ff' : '#202020';
-
-  return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-      <rect x="4" y="6" width="16" height="14" rx="2" stroke={color} strokeWidth="1.9" />
-      <path d="M8 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
-      <path d="M16 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
-      <path d="M4 10H20" stroke={color} strokeWidth="1.9" />
-    </svg>
-  );
-}
-
-function MessageIcon({ active }: { active: boolean }) {
-  const color = active ? '#55c75f' : '#202020';
-
-  return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
-        stroke={color}
-        strokeWidth="1.9"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-export default function BottomNav({ active: activeProp }: BottomNavProps) {
+export default function BottomNav({ active: activeProp, onAddClick }: BottomNavProps) {
   const router = useRouter();
   const pathname = usePathname();
 
   const [language, setLanguage] = useState<AppLanguage>('EN');
   const [addMenuOpen, setAddMenuOpen] = useState(false);
-  const [navVisible, setNavVisible] = useState(true);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastScrollYRef = useRef(0);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -258,67 +259,28 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
     };
   }, []);
 
-  const labels = useMemo(() => {
-    return navLabels[language] || navLabels.EN;
-  }, [language]);
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
 
   const addText = useMemo(() => getAddText(language), [language]);
 
-  const showNavForMoment = () => {
-    setNavVisible(true);
-
-    if (hideTimerRef.current) {
-      clearTimeout(hideTimerRef.current);
-    }
-
-    hideTimerRef.current = setTimeout(() => {
-      if (!addMenuOpen) {
-        setNavVisible(false);
-      }
-    }, 4200);
-  };
-
-  useEffect(() => {
-    showNavForMoment();
-
-    const handleScroll = () => {
-      const currentY = window.scrollY;
-      const diff = Math.abs(currentY - lastScrollYRef.current);
-
-      if (diff > 8) {
-        showNavForMoment();
-      }
-
-      lastScrollYRef.current = currentY;
-    };
-
-    const handleTouchStart = () => {
-      showNavForMoment();
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('touchstart', handleTouchStart, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('touchstart', handleTouchStart);
-
-      if (hideTimerRef.current) {
-        clearTimeout(hideTimerRef.current);
-      }
-    };
-  }, [addMenuOpen]);
-
-  const getIsActive = (key: NavKey) => {
+  const getIsActive = (key: NavKey, href: string) => {
     if (addMenuOpen && key === 'add') return true;
 
     if (activeProp) {
-      if (activeProp === 'clients' && key === 'bookings') return false;
+      if (activeProp === 'clients') return false;
       return activeProp === key;
     }
 
-    if (key === 'home') {
-      return pathname === '/';
+    if (key === 'home') return pathname === '/';
+
+    if (key === 'messages') {
+      return pathname === '/messages' || pathname?.startsWith('/messages/');
     }
 
     if (key === 'bookings') {
@@ -327,10 +289,6 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
 
     if (key === 'profile') {
       return pathname === '/profile' || pathname?.startsWith('/profile/');
-    }
-
-    if (key === 'messages') {
-      return pathname === '/messages' || pathname?.startsWith('/messages/');
     }
 
     if (key === 'add') {
@@ -342,18 +300,16 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       );
     }
 
-    return false;
+    return pathname?.startsWith(href);
   };
 
-  const handleNavClick = (item: NavItem) => {
-    setNavVisible(true);
-
-    if (item.key === 'add') {
-      setAddMenuOpen(true);
+  const handleAddClick = () => {
+    if (onAddClick) {
+      onAddClick();
       return;
     }
 
-    router.push(item.href);
+    setAddMenuOpen(true);
   };
 
   const handleCreateAd = () => {
@@ -394,7 +350,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
               width: '100%',
               maxWidth: 390,
               background: '#ffffff',
-              border: '3px solid #111111',
+              border: `3px solid ${BRAND.border}`,
               borderRadius: 28,
               overflow: 'hidden',
               boxShadow: '0 20px 44px rgba(0,0,0,0.22)',
@@ -404,7 +360,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr 1fr',
-                borderBottom: '3px solid #111111',
+                borderBottom: `3px solid ${BRAND.border}`,
               }}
             >
               <button
@@ -413,7 +369,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 style={{
                   minHeight: 112,
                   border: 'none',
-                  borderRight: '3px solid #111111',
+                  borderRight: `3px solid ${BRAND.border}`,
                   background: '#ffe44d',
                   color: '#17130f',
                   fontSize: 17,
@@ -436,8 +392,8 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                 style={{
                   minHeight: 112,
                   border: 'none',
-                  borderRight: '3px solid #111111',
-                  background: '#41c83f',
+                  borderRight: `3px solid ${BRAND.border}`,
+                  background: BRAND.green,
                   color: '#ffffff',
                   fontSize: 17,
                   fontWeight: 900,
@@ -480,7 +436,7 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                     minWidth: 42,
                     height: 30,
                     borderRadius: 999,
-                    border: '3px solid #111111',
+                    border: `3px solid ${BRAND.border}`,
                     background: '#ffffff',
                     color: '#ff4b52',
                     display: 'flex',
@@ -518,116 +474,152 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
       ) : null}
 
       <div
-        onClick={() => setNavVisible(true)}
         style={{
           position: 'fixed',
           left: '50%',
-          bottom: navVisible
-            ? 'calc(10px + env(safe-area-inset-bottom))'
-            : 'calc(-72px + env(safe-area-inset-bottom))',
+          bottom: 'calc(18px + env(safe-area-inset-bottom))',
           transform: 'translateX(-50%)',
-          width: 'calc(100% - 46px)',
-          maxWidth: 364,
+          width: 'calc(100% - 34px)',
+          maxWidth: 398,
           zIndex: 1200,
-          transition: 'bottom 260ms ease, opacity 260ms ease',
-          opacity: navVisible ? 1 : 0.82,
+          pointerEvents: 'auto',
         }}
       >
-        <div
-          style={{
-            position: 'relative',
-            background: '#fffefa',
-            border: '2px solid #111111',
-            borderRadius: 26,
-            boxShadow: '0 12px 28px rgba(15,23,42,0.12)',
-            padding: '9px 9px 8px',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
-            alignItems: 'end',
-            gap: 0,
-            overflow: 'visible',
-          }}
-        >
+        <div style={{ position: 'relative', height: 96 }}>
           <div
             style={{
               position: 'absolute',
               left: '50%',
-              top: -20,
+              top: -25,
               transform: 'translateX(-50%)',
-              width: 78,
-              height: 44,
-              background: '#fffefa',
-              border: '2px solid #111111',
-              borderBottom: 'none',
-              borderRadius: '76px 76px 0 0',
-              zIndex: 0,
+              width: 116,
+              height: 64,
+              borderTopLeftRadius: 999,
+              borderTopRightRadius: 999,
+              background: BRAND.cream,
+              borderTop: `2px solid ${BRAND.border}`,
+              borderLeft: `2px solid ${BRAND.border}`,
+              borderRight: `2px solid ${BRAND.border}`,
+              zIndex: 1,
             }}
           />
 
-          {navItems.map((item) => {
-            const isActive = getIsActive(item.key);
-            const isAdd = item.key === 'add';
-            const label = labels[item.key] || getLabel(language, item.key);
-            const activeColor = getActiveColor(item.key);
-            const badge =
-              item.key === 'messages' && unreadMessagesCount > 0 ? unreadMessagesCount : 0;
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: BRAND.cream,
+              border: `2px solid ${BRAND.border}`,
+              borderRadius: 32,
+              boxShadow: '0 10px 26px rgba(15,23,42,0.08)',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+              alignItems: 'end',
+              padding: '13px 8px 13px',
+              boxSizing: 'border-box',
+              zIndex: 2,
+            }}
+          >
+            {items.map((item) => {
+              const isActive = getIsActive(item.key, item.href);
+              const label = getLabel(item, language);
+              const activeColor = getActiveColor(item.key);
+              const badge =
+                item.key === 'messages' && unreadMessagesCount > 0 ? unreadMessagesCount : 0;
 
-            return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => handleNavClick(item)}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  padding: 0,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  gap: 4,
-                  position: 'relative',
-                  minHeight: 58,
-                  width: '100%',
-                  minWidth: 0,
-                  maxWidth: '100%',
-                  zIndex: 2,
-                  overflow: 'visible',
-                }}
-              >
-                {isAdd ? (
-                  <span
+              if (item.accent) {
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={handleAddClick}
                     style={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: '50%',
-                      background: isActive ? '#41c83f' : '#55c75f',
-                      color: '#ffffff',
-                      display: 'inline-flex',
+                      border: 'none',
+                      background: 'transparent',
+                      padding: 0,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 38,
-                      fontWeight: 500,
-                      lineHeight: 1,
-                      boxShadow: isActive
-                        ? '0 10px 24px rgba(65,200,63,0.36)'
-                        : '0 10px 22px rgba(85,199,95,0.24)',
-                      transform: 'translateY(-17px)',
-                      flexShrink: 0,
+                      justifyContent: 'flex-end',
+                      gap: 4,
+                      position: 'relative',
+                      zIndex: 5,
+                      minHeight: 84,
+                      minWidth: 0,
+                      overflow: 'visible',
                     }}
                   >
-                    +
-                  </span>
-                ) : (
+                    <span
+                      style={{
+                        width: 78,
+                        height: 78,
+                        borderRadius: '50%',
+                        background: BRAND.green,
+                        color: '#ffffff',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 44,
+                        fontWeight: 600,
+                        lineHeight: 1,
+                        boxShadow: '0 12px 28px rgba(85,199,95,0.34)',
+                        transform: 'translateY(-22px)',
+                        flexShrink: 0,
+                      }}
+                    >
+                      +
+                    </span>
+
+                    <span
+                      title={label}
+                      style={{
+                        marginTop: -22,
+                        width: '100%',
+                        maxWidth: 68,
+                        display: 'block',
+                        textAlign: 'center',
+                        fontSize: language === 'RU' || language === 'UA' ? 10.5 : 12,
+                        fontWeight: 900,
+                        color: isActive ? activeColor : '#171717',
+                        lineHeight: 1,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {label}
+                    </span>
+                  </button>
+                );
+              }
+
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => router.push(item.href)}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    padding: 0,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    gap: 5,
+                    position: 'relative',
+                    minHeight: 70,
+                    minWidth: 0,
+                  }}
+                >
                   <span
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      height: 31,
-                      width: 31,
-                      flexShrink: 0,
+                      height: 32,
                     }}
                   >
                     {item.key === 'home' && <HomeIcon active={isActive} />}
@@ -635,62 +627,62 @@ export default function BottomNav({ active: activeProp }: BottomNavProps) {
                     {item.key === 'bookings' && <CalendarIcon active={isActive} />}
                     {item.key === 'profile' && <ProfileIcon active={isActive} />}
                   </span>
-                )}
 
-                {badge > 0 ? (
+                  {badge > 0 ? (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: 8,
+                        right: '18%',
+                        minWidth: 24,
+                        height: 24,
+                        padding: '0 6px',
+                        borderRadius: 999,
+                        background: BRAND.pink,
+                        color: '#ffffff',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '2px solid #ffffff',
+                        boxSizing: 'border-box',
+                        boxShadow: '0 4px 10px rgba(255,79,160,0.28)',
+                      }}
+                    >
+                      {badge > 99 ? '99+' : badge}
+                    </span>
+                  ) : null}
+
                   <span
+                    title={label}
                     style={{
-                      position: 'absolute',
-                      top: 0,
-                      right: 5,
-                      minWidth: 20,
-                      height: 20,
-                      padding: '0 6px',
-                      borderRadius: 999,
-                      background: '#ff4fa0',
-                      color: '#ffffff',
-                      fontSize: 11,
+                      width: '100%',
+                      maxWidth: 66,
+                      display: 'block',
+                      textAlign: 'center',
+                      fontSize:
+                        language === 'RU' ||
+                        language === 'UA' ||
+                        language === 'DE' ||
+                        language === 'IT' ||
+                        language === 'FR'
+                          ? 10.5
+                          : 12,
                       fontWeight: 900,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 3px 8px rgba(255,79,160,0.26)',
+                      color: isActive ? activeColor : '#171717',
+                      lineHeight: 1,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                     }}
                   >
-                    {badge > 99 ? '99+' : badge}
+                    {label}
                   </span>
-                ) : null}
-
-                <span
-                  title={label}
-                  style={{
-                    marginTop: isAdd ? -17 : 0,
-                    width: '100%',
-                    maxWidth: 62,
-                    minWidth: 0,
-                    display: 'block',
-                    textAlign: 'center',
-                    fontSize:
-                      language === 'UA' ||
-                      language === 'DE' ||
-                      language === 'IT' ||
-                      language === 'CZ' ||
-                      language === 'FR'
-                        ? 10.2
-                        : 11,
-                    fontWeight: 900,
-                    color: isActive ? activeColor : '#202020',
-                    lineHeight: 1.05,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {label}
-                </span>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </>
