@@ -27,20 +27,20 @@ type ProfileTextShape = {
   trustScore: string;
   excellentLevel: string;
   balance: string;
+  walletHint: string;
   available: string;
   topUp: string;
   myQrCode: string;
-  editProfile: string;
-  quickActions: string;
+  workHub: string;
   bookings: string;
   bookingsHint: string;
-  myListings: string;
-  myListingsHint: string;
+  myServices: string;
+  myServicesHint: string;
   priceList: string;
   priceListHint: string;
   clients: string;
   clientsHint: string;
-  bonusesSaved: string;
+  savedSpace: string;
   promotions: string;
   promotionsHint: string;
   invite: string;
@@ -84,7 +84,7 @@ const BRAND = {
   red: '#ff2456',
   yellow: '#ffd629',
   pink: '#ff4f9a',
-  cream: '#fff4dc',
+  cream: '#fff7ee',
   softBlue: '#dcecff',
   softGreen: '#dcffe8',
   softPink: '#ffe9f2',
@@ -92,32 +92,32 @@ const BRAND = {
   softOrange: '#fff0da',
   bg: '#ffffff',
   border: '#050505',
-  muted: '#657080',
+  muted: '#6c7686',
 };
 
 const profileTexts: Record<AppLanguage, ProfileTextShape> = {
   EN: {
     title: 'Profile',
-    subtitle: 'Your account, listings, bookings and settings',
+    subtitle: 'Your account, wallet, services and settings',
     profileActive: 'Profile active',
     verified: 'Verified',
     trustScore: 'Trust Score',
     excellentLevel: 'Excellent level',
     balance: 'Balance',
+    walletHint: 'Wallet & account activity',
     available: 'Available',
-    topUp: 'Top up balance',
+    topUp: 'Top up',
     myQrCode: 'My QR code',
-    editProfile: 'Edit profile',
-    quickActions: 'My work hub',
+    workHub: 'My work hub',
     bookings: 'My bookings',
     bookingsHint: 'All your bookings',
-    myListings: 'My services',
-    myListingsHint: 'Manage your offers',
+    myServices: 'My services',
+    myServicesHint: 'Manage your offers',
     priceList: 'Price list',
     priceListHint: 'Services and prices',
     clients: 'My clients',
     clientsHint: 'Orders and requests',
-    bonusesSaved: 'My saved space',
+    savedSpace: 'My saved space',
     promotions: 'Promotions',
     promotionsHint: 'Discounts and bonuses',
     invite: 'Invite friends',
@@ -137,26 +137,26 @@ const profileTexts: Record<AppLanguage, ProfileTextShape> = {
   },
   RU: {
     title: 'Профиль',
-    subtitle: 'Ваш аккаунт, объявления, бронирования и настройки',
+    subtitle: 'Ваш аккаунт, счёт, услуги и настройки',
     profileActive: 'Профиль активен',
     verified: 'Проверено',
     trustScore: 'Trust Score',
     excellentLevel: 'Отличный уровень',
     balance: 'Баланс',
+    walletHint: 'Счёт и история операций',
     available: 'Доступно',
-    topUp: 'Пополнить баланс',
+    topUp: 'Пополнить',
     myQrCode: 'Мой QR-код',
-    editProfile: 'Редактировать',
-    quickActions: 'Рабочий кабинет',
+    workHub: 'Мой рабочий блок',
     bookings: 'Мои бронирования',
     bookingsHint: 'Все ваши брони',
-    myListings: 'Мои услуги',
-    myListingsHint: 'Управление предложениями',
+    myServices: 'Мои услуги',
+    myServicesHint: 'Управление предложениями',
     priceList: 'Прайс-лист',
     priceListHint: 'Услуги и цены',
     clients: 'Мои клиенты',
     clientsHint: 'Заказы и заявки',
-    bonusesSaved: 'Мои сохранения',
+    savedSpace: 'Моё сохранённое',
     promotions: 'Промоакции',
     promotionsHint: 'Скидки и бонусы',
     invite: 'Пригласить друзей',
@@ -176,26 +176,26 @@ const profileTexts: Record<AppLanguage, ProfileTextShape> = {
   },
   UA: {
     title: 'Профіль',
-    subtitle: 'Ваш акаунт, оголошення, бронювання і налаштування',
+    subtitle: 'Ваш акаунт, рахунок, послуги та налаштування',
     profileActive: 'Профіль активний',
     verified: 'Перевірено',
     trustScore: 'Trust Score',
     excellentLevel: 'Відмінний рівень',
     balance: 'Баланс',
+    walletHint: 'Рахунок та історія операцій',
     available: 'Доступно',
-    topUp: 'Поповнити баланс',
+    topUp: 'Поповнити',
     myQrCode: 'Мій QR-код',
-    editProfile: 'Редагувати',
-    quickActions: 'Робочий кабінет',
+    workHub: 'Мій робочий блок',
     bookings: 'Мої бронювання',
     bookingsHint: 'Усі ваші броні',
-    myListings: 'Мої послуги',
-    myListingsHint: 'Керування пропозиціями',
+    myServices: 'Мої послуги',
+    myServicesHint: 'Керування пропозиціями',
     priceList: 'Прайс-лист',
     priceListHint: 'Послуги та ціни',
     clients: 'Мої клієнти',
     clientsHint: 'Замовлення і заявки',
-    bonusesSaved: 'Мої збереження',
+    savedSpace: 'Моє збережене',
     promotions: 'Промоакції',
     promotionsHint: 'Знижки і бонуси',
     invite: 'Запросити друзів',
@@ -215,26 +215,26 @@ const profileTexts: Record<AppLanguage, ProfileTextShape> = {
   },
   ES: {
     title: 'Perfil',
-    subtitle: 'Tu cuenta, anuncios, reservas y ajustes',
+    subtitle: 'Tu cuenta, saldo, servicios y ajustes',
     profileActive: 'Perfil activo',
     verified: 'Verificado',
     trustScore: 'Trust Score',
     excellentLevel: 'Nivel excelente',
     balance: 'Saldo',
+    walletHint: 'Billetera y actividad',
     available: 'Disponible',
-    topUp: 'Recargar saldo',
+    topUp: 'Recargar',
     myQrCode: 'Mi QR',
-    editProfile: 'Editar perfil',
-    quickActions: 'Mi centro de trabajo',
+    workHub: 'Mi espacio de trabajo',
     bookings: 'Mis reservas',
     bookingsHint: 'Todas tus reservas',
-    myListings: 'Mis servicios',
-    myListingsHint: 'Gestiona tus ofertas',
+    myServices: 'Mis servicios',
+    myServicesHint: 'Gestiona tus ofertas',
     priceList: 'Lista de precios',
     priceListHint: 'Servicios y precios',
     clients: 'Mis clientes',
     clientsHint: 'Pedidos y solicitudes',
-    bonusesSaved: 'Mis guardados',
+    savedSpace: 'Mi espacio guardado',
     promotions: 'Promociones',
     promotionsHint: 'Descuentos y bonos',
     invite: 'Invitar amigos',
@@ -254,26 +254,26 @@ const profileTexts: Record<AppLanguage, ProfileTextShape> = {
   },
   CZ: {
     title: 'Profil',
-    subtitle: 'Váš účet, inzeráty, rezervace a nastavení',
+    subtitle: 'Váš účet, zůstatek, služby a nastavení',
     profileActive: 'Profil aktivní',
     verified: 'Ověřeno',
     trustScore: 'Trust Score',
     excellentLevel: 'Výborná úroveň',
     balance: 'Zůstatek',
+    walletHint: 'Peněženka a historie',
     available: 'Dostupné',
-    topUp: 'Dobít zůstatek',
+    topUp: 'Dobít',
     myQrCode: 'Můj QR kód',
-    editProfile: 'Upravit profil',
-    quickActions: 'Pracovní centrum',
+    workHub: 'Moje pracovní část',
     bookings: 'Moje rezervace',
     bookingsHint: 'Všechny rezervace',
-    myListings: 'Moje služby',
-    myListingsHint: 'Správa nabídek',
+    myServices: 'Moje služby',
+    myServicesHint: 'Správa nabídek',
     priceList: 'Ceník',
     priceListHint: 'Služby a ceny',
     clients: 'Moji klienti',
     clientsHint: 'Objednávky a poptávky',
-    bonusesSaved: 'Moje uložené',
+    savedSpace: 'Moje uložené',
     promotions: 'Promo akce',
     promotionsHint: 'Slevy a bonusy',
     invite: 'Pozvat přátele',
@@ -293,26 +293,26 @@ const profileTexts: Record<AppLanguage, ProfileTextShape> = {
   },
   DE: {
     title: 'Profil',
-    subtitle: 'Dein Konto, Anzeigen, Buchungen und Einstellungen',
+    subtitle: 'Dein Konto, Guthaben, Services und Einstellungen',
     profileActive: 'Profil aktiv',
     verified: 'Verifiziert',
     trustScore: 'Trust Score',
     excellentLevel: 'Sehr gutes Level',
     balance: 'Guthaben',
+    walletHint: 'Wallet & Verlauf',
     available: 'Verfügbar',
-    topUp: 'Guthaben aufladen',
+    topUp: 'Aufladen',
     myQrCode: 'Mein QR-Code',
-    editProfile: 'Profil bearbeiten',
-    quickActions: 'Arbeitsbereich',
+    workHub: 'Mein Arbeitsbereich',
     bookings: 'Meine Buchungen',
     bookingsHint: 'Alle Buchungen',
-    myListings: 'Meine Services',
-    myListingsHint: 'Angebote verwalten',
+    myServices: 'Meine Services',
+    myServicesHint: 'Angebote verwalten',
     priceList: 'Preisliste',
     priceListHint: 'Services und Preise',
     clients: 'Meine Kunden',
     clientsHint: 'Aufträge und Anfragen',
-    bonusesSaved: 'Meine Favoriten',
+    savedSpace: 'Mein Gespeichertes',
     promotions: 'Aktionen',
     promotionsHint: 'Rabatte und Boni',
     invite: 'Freunde einladen',
@@ -332,26 +332,26 @@ const profileTexts: Record<AppLanguage, ProfileTextShape> = {
   },
   IT: {
     title: 'Profilo',
-    subtitle: 'Il tuo account, annunci, prenotazioni e impostazioni',
+    subtitle: 'Il tuo account, saldo, servizi e impostazioni',
     profileActive: 'Profilo attivo',
     verified: 'Verificato',
     trustScore: 'Trust Score',
     excellentLevel: 'Livello eccellente',
     balance: 'Saldo',
+    walletHint: 'Portafoglio e attività',
     available: 'Disponibile',
-    topUp: 'Ricarica saldo',
+    topUp: 'Ricarica',
     myQrCode: 'Il mio QR',
-    editProfile: 'Modifica profilo',
-    quickActions: 'Area lavoro',
+    workHub: 'La mia area lavoro',
     bookings: 'Le mie prenotazioni',
     bookingsHint: 'Tutte le prenotazioni',
-    myListings: 'I miei servizi',
-    myListingsHint: 'Gestisci offerte',
+    myServices: 'I miei servizi',
+    myServicesHint: 'Gestisci le offerte',
     priceList: 'Listino prezzi',
     priceListHint: 'Servizi e prezzi',
     clients: 'I miei clienti',
     clientsHint: 'Ordini e richieste',
-    bonusesSaved: 'I miei salvati',
+    savedSpace: 'I miei salvataggi',
     promotions: 'Promozioni',
     promotionsHint: 'Sconti e bonus',
     invite: 'Invita amici',
@@ -371,26 +371,26 @@ const profileTexts: Record<AppLanguage, ProfileTextShape> = {
   },
   FR: {
     title: 'Profil',
-    subtitle: 'Votre compte, annonces, réservations et paramètres',
+    subtitle: 'Votre compte, solde, services et paramètres',
     profileActive: 'Profil actif',
     verified: 'Vérifié',
     trustScore: 'Trust Score',
     excellentLevel: 'Excellent niveau',
     balance: 'Solde',
+    walletHint: 'Portefeuille et activité',
     available: 'Disponible',
-    topUp: 'Recharger le solde',
+    topUp: 'Recharger',
     myQrCode: 'Mon QR code',
-    editProfile: 'Modifier',
-    quickActions: 'Espace pro',
+    workHub: 'Mon espace de travail',
     bookings: 'Mes réservations',
     bookingsHint: 'Toutes vos réservations',
-    myListings: 'Mes services',
-    myListingsHint: 'Gérer vos offres',
+    myServices: 'Mes services',
+    myServicesHint: 'Gérer vos offres',
     priceList: 'Liste de prix',
     priceListHint: 'Services et prix',
     clients: 'Mes clients',
     clientsHint: 'Commandes et demandes',
-    bonusesSaved: 'Mes favoris',
+    savedSpace: 'Mon espace enregistré',
     promotions: 'Promotions',
     promotionsHint: 'Réductions et bonus',
     invite: 'Inviter des amis',
@@ -410,26 +410,26 @@ const profileTexts: Record<AppLanguage, ProfileTextShape> = {
   },
   PL: {
     title: 'Profil',
-    subtitle: 'Twoje konto, ogłoszenia, rezerwacje i ustawienia',
+    subtitle: 'Twoje konto, saldo, usługi i ustawienia',
     profileActive: 'Profil aktywny',
     verified: 'Zweryfikowano',
     trustScore: 'Trust Score',
     excellentLevel: 'Świetny poziom',
     balance: 'Saldo',
+    walletHint: 'Portfel i historia',
     available: 'Dostępne',
-    topUp: 'Doładuj saldo',
+    topUp: 'Doładuj',
     myQrCode: 'Mój kod QR',
-    editProfile: 'Edytuj profil',
-    quickActions: 'Panel pracy',
+    workHub: 'Moja strefa pracy',
     bookings: 'Moje rezerwacje',
     bookingsHint: 'Wszystkie rezerwacje',
-    myListings: 'Moje usługi',
-    myListingsHint: 'Zarządzaj ofertami',
+    myServices: 'Moje usługi',
+    myServicesHint: 'Zarządzaj ofertami',
     priceList: 'Cennik',
     priceListHint: 'Usługi i ceny',
     clients: 'Moi klienci',
     clientsHint: 'Zamówienia i zapytania',
-    bonusesSaved: 'Moje zapisane',
+    savedSpace: 'Moje zapisane',
     promotions: 'Promocje',
     promotionsHint: 'Zniżki i bonusy',
     invite: 'Zaproś znajomych',
@@ -449,26 +449,26 @@ const profileTexts: Record<AppLanguage, ProfileTextShape> = {
   },
   AR: {
     title: 'الملف الشخصي',
-    subtitle: 'حسابك، الإعلانات، الحجوزات والإعدادات',
+    subtitle: 'حسابك، رصيدك، خدماتك والإعدادات',
     profileActive: 'الملف نشط',
     verified: 'موثّق',
     trustScore: 'Trust Score',
     excellentLevel: 'مستوى ممتاز',
     balance: 'الرصيد',
+    walletHint: 'المحفظة وسجل العمليات',
     available: 'متاح',
-    topUp: 'شحن الرصيد',
+    topUp: 'شحن',
     myQrCode: 'رمز QR الخاص بي',
-    editProfile: 'تعديل الملف',
-    quickActions: 'مركز العمل',
+    workHub: 'مساحة العمل',
     bookings: 'حجوزاتي',
     bookingsHint: 'كل الحجوزات',
-    myListings: 'خدماتي',
-    myListingsHint: 'إدارة العروض',
+    myServices: 'خدماتي',
+    myServicesHint: 'إدارة العروض',
     priceList: 'قائمة الأسعار',
     priceListHint: 'الخدمات والأسعار',
     clients: 'عملائي',
     clientsHint: 'الطلبات والرسائل',
-    bonusesSaved: 'محفوظاتي',
+    savedSpace: 'المحفوظات',
     promotions: 'العروض',
     promotionsHint: 'خصومات ومكافآت',
     invite: 'دعوة الأصدقاء',
@@ -497,13 +497,14 @@ function OlamepLogo() {
     <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
       <div
         style={{
-          width: 34,
-          height: 42,
+          width: 32,
+          height: 40,
           borderRadius: '50% 50% 58% 58%',
           background:
             'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
           position: 'relative',
           boxShadow: '0 8px 18px rgba(14,115,216,0.2)',
+          flexShrink: 0,
         }}
       >
         <div
@@ -511,8 +512,8 @@ function OlamepLogo() {
             position: 'absolute',
             left: 8,
             top: 8,
-            width: 17,
-            height: 17,
+            width: 16,
+            height: 16,
             borderRadius: 999,
             background: '#ffffff',
           }}
@@ -521,10 +522,11 @@ function OlamepLogo() {
 
       <div
         style={{
-          fontSize: 29,
+          fontSize: 28,
           fontWeight: 900,
           color: BRAND.navy,
           letterSpacing: '-1px',
+          lineHeight: 1,
         }}
       >
         Olamep
@@ -533,23 +535,21 @@ function OlamepLogo() {
   );
 }
 
-function BlueVerifiedBadge() {
+function VerifiedBadge() {
   return (
     <span
-      aria-label="Verified"
       style={{
-        width: 26,
-        height: 26,
+        width: 24,
+        height: 24,
         borderRadius: 999,
         background: BRAND.blue,
         color: '#ffffff',
+        border: `2px solid ${BRAND.border}`,
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: 900,
-        border: `2px solid ${BRAND.border}`,
-        boxShadow: '0 3px 0 rgba(0,0,0,0.10)',
         flexShrink: 0,
       }}
     >
@@ -565,12 +565,12 @@ function RealisticIcon({ icon, bg }: { icon: string; bg: string }) {
         width: 58,
         height: 58,
         borderRadius: 18,
-        border: `2px solid ${BRAND.border}`,
+        border: `2.5px solid ${BRAND.border}`,
         background: bg,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: 29,
+        fontSize: 28,
         boxShadow: '0 5px 0 rgba(0,0,0,0.06)',
         flexShrink: 0,
       }}
@@ -584,8 +584,8 @@ function QrIcon() {
   return (
     <span
       style={{
-        width: 31,
-        height: 31,
+        width: 28,
+        height: 28,
         borderRadius: 8,
         background: '#ffffff',
         border: `2px solid ${BRAND.border}`,
@@ -660,9 +660,9 @@ export default function ProfilePage() {
       bg: BRAND.softBlue,
     },
     {
-      id: 'listings',
-      title: text.myListings,
-      hint: text.myListingsHint,
+      id: 'services',
+      title: text.myServices,
+      hint: text.myServicesHint,
       route: '/profile/listings',
       icon: '💼',
       bg: BRAND.softGreen,
@@ -685,7 +685,7 @@ export default function ProfilePage() {
     },
   ];
 
-  const bonusActions: ListAction[] = [
+  const savedActions: ListAction[] = [
     {
       id: 'promotions',
       title: text.promotions,
@@ -857,7 +857,7 @@ export default function ProfilePage() {
         <section
           style={{
             marginTop: 17,
-            borderRadius: 26,
+            borderRadius: 28,
             border: `2.5px solid ${BRAND.border}`,
             background: '#ffffff',
             padding: 13,
@@ -939,7 +939,7 @@ export default function ProfilePage() {
                   {profile.fullName}
                 </div>
 
-                {profile.isVerified ? <BlueVerifiedBadge /> : null}
+                {profile.isVerified ? <VerifiedBadge /> : null}
               </div>
 
               <div
@@ -1012,7 +1012,7 @@ export default function ProfilePage() {
                 border: `2.5px solid ${BRAND.border}`,
                 background: '#ffffff',
                 padding: 12,
-                minHeight: 98,
+                minHeight: 104,
               }}
             >
               <div
@@ -1053,13 +1053,18 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div
+            <button
+              type="button"
+              onClick={() => router.push('/profile/wallet')}
               style={{
                 borderRadius: 20,
                 border: `2.5px solid ${BRAND.border}`,
                 background: BRAND.softOrange,
                 padding: 12,
-                minHeight: 98,
+                minHeight: 104,
+                textAlign: 'left',
+                cursor: 'pointer',
+                position: 'relative',
               }}
             >
               <div
@@ -1092,104 +1097,82 @@ export default function ProfilePage() {
                   color: BRAND.muted,
                 }}
               >
-                {text.available}
+                {text.walletHint}
               </div>
-            </div>
+
+              <span
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: 12,
+                  fontSize: 24,
+                  fontWeight: 900,
+                  color: BRAND.border,
+                  lineHeight: 1,
+                }}
+              >
+                ›
+              </span>
+            </button>
           </div>
 
-          <div style={{ marginTop: 12 }}>
+          <div
+            style={{
+              marginTop: 11,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 10,
+            }}
+          >
             <button
               type="button"
               onClick={() => router.push('/profile/top-up')}
               style={{
-                width: '100%',
-                minHeight: 64,
-                borderRadius: 20,
-                border: `3px solid ${BRAND.border}`,
-                background: '#ffffff',
-                color: BRAND.navy,
-                fontSize: 16,
+                minHeight: 56,
+                borderRadius: 18,
+                border: `2.5px solid ${BRAND.border}`,
+                background: BRAND.green,
+                color: '#ffffff',
+                fontSize: 15,
                 fontWeight: 900,
                 cursor: 'pointer',
-                boxShadow: `0 5px 0 ${BRAND.border}`,
-                display: 'grid',
-                gridTemplateColumns: '42px 1fr 34px',
+                boxShadow: '0 4px 0 rgba(0,0,0,0.10)',
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: 10,
-                padding: '9px 13px',
-                textAlign: 'left',
+                justifyContent: 'center',
+                gap: 9,
               }}
             >
-              <span
-                style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 15,
-                  background:
-                    'linear-gradient(135deg, #dcecff 0%, #dcffe8 48%, #fff0da 100%)',
-                  border: `2.5px solid ${BRAND.border}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxSizing: 'border-box',
-                }}
-              >
-                <QrIcon />
-              </span>
+              <span style={{ fontSize: 22 }}>＋</span>
+              {text.topUp}
+            </button>
 
-              <span
-                style={{
-                  minWidth: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 2,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 17,
-                    lineHeight: 1.05,
-                    fontWeight: 900,
-                    color: BRAND.navy,
-                  }}
-                >
-                  {text.topUp}
-                </span>
-                <span
-                  style={{
-                    fontSize: 12,
-                    lineHeight: 1.15,
-                    fontWeight: 800,
-                    color: BRAND.muted,
-                  }}
-                >
-                  QR / card / wallet
-                </span>
-              </span>
-
-              <span
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 999,
-                  background: BRAND.yellow,
-                  border: `2px solid ${BRAND.border}`,
-                  color: BRAND.border,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 20,
-                  fontWeight: 900,
-                  boxSizing: 'border-box',
-                }}
-              >
-                →
-              </span>
+            <button
+              type="button"
+              onClick={() => router.push('/profile/qr-code')}
+              style={{
+                minHeight: 56,
+                borderRadius: 18,
+                border: `2.5px solid ${BRAND.border}`,
+                background: BRAND.yellow,
+                color: BRAND.navy,
+                fontSize: 15,
+                fontWeight: 900,
+                cursor: 'pointer',
+                boxShadow: '0 4px 0 rgba(0,0,0,0.10)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 9,
+              }}
+            >
+              <QrIcon />
+              {text.myQrCode}
             </button>
           </div>
         </section>
 
-        <SectionTitle title={text.quickActions} />
+        <SectionTitle title={text.workHub} />
 
         <section
           style={{
@@ -1259,9 +1242,9 @@ export default function ProfilePage() {
           ))}
         </section>
 
-        <SectionTitle title={text.bonusesSaved} />
+        <SectionTitle title={text.savedSpace} />
 
-        <ListSection items={bonusActions} openText={text.open} router={router} />
+        <ListSection items={savedActions} openText={text.open} router={router} />
 
         <SectionTitle title={text.settings} />
 
@@ -1297,7 +1280,7 @@ function ListSection({
 }: {
   items: ListAction[];
   openText: string;
-  router: ReturnType<typeof useRouter>;
+  router: { push: (href: string) => void };
 }) {
   return (
     <section
