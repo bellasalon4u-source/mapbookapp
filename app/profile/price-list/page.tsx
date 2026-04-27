@@ -9,36 +9,41 @@ import {
   type AppLanguage,
 } from '../../../services/i18n';
 
+type PriceStatus = 'active' | 'draft';
+
+type PriceRow = {
+  id: string;
+  service: string;
+  priceFrom: string;
+  priceTo: string;
+  duration: string;
+  deposit: string;
+  status: PriceStatus;
+};
+
 type PriceTextShape = {
   title: string;
   subtitle: string;
-  addService: string;
-  edit: string;
+  tableTitle: string;
+  addRow: string;
+  save: string;
+  rowNumber: string;
+  service: string;
+  priceFrom: string;
+  priceTo: string;
+  duration: string;
+  deposit: string;
+  status: string;
   active: string;
   draft: string;
-  popular: string;
-  priceList: string;
-  services: string;
-  packages: string;
-  discounts: string;
-  duration: string;
-  deposit: string;
-  from: string;
+  delete: string;
+  uploadPhoto: string;
   comingSoon: string;
-  comingSoonHint: string;
-};
-
-type PriceItem = {
-  id: string;
-  title: string;
-  category: string;
-  price: string;
-  duration: string;
-  deposit: string;
-  status: 'active' | 'draft';
-  badge?: 'popular';
-  icon: string;
-  bg: string;
+  photoHint: string;
+  summaryServices: string;
+  summaryActive: string;
+  summaryDrafts: string;
+  saved: string;
 };
 
 const BRAND = {
@@ -60,214 +65,319 @@ const BRAND = {
 const priceTexts: Record<AppLanguage, PriceTextShape> = {
   EN: {
     title: 'Price list',
-    subtitle: 'Manage your services, prices, deposits and packages',
-    addService: 'Add service',
-    edit: 'Edit',
+    subtitle: 'Create your services table for clients',
+    tableTitle: 'My price table',
+    addRow: 'Add row',
+    save: 'Save price list',
+    rowNumber: '№',
+    service: 'Service',
+    priceFrom: 'Price from',
+    priceTo: 'Price to',
+    duration: 'Time',
+    deposit: 'Deposit',
+    status: 'Status',
     active: 'Active',
     draft: 'Draft',
-    popular: 'Popular',
-    priceList: 'Price list',
-    services: 'Services',
-    packages: 'Packages',
-    discounts: 'Discounts',
-    duration: 'Duration',
-    deposit: 'Deposit',
-    from: 'from',
-    comingSoon: 'Smart pricing coming soon',
-    comingSoonHint: 'Olamep will help suggest prices based on category, area and demand.',
+    delete: 'Delete',
+    uploadPhoto: 'Upload price photo',
+    comingSoon: 'Coming soon',
+    photoHint: 'Later Olamep will convert a photo of your price list into this table automatically.',
+    summaryServices: 'Services',
+    summaryActive: 'Active',
+    summaryDrafts: 'Drafts',
+    saved: 'Saved',
   },
   RU: {
     title: 'Прайс-лист',
-    subtitle: 'Управляйте услугами, ценами, депозитами и пакетами',
-    addService: 'Добавить услугу',
-    edit: 'Изменить',
-    active: 'Активно',
-    draft: 'Черновик',
-    popular: 'Популярно',
-    priceList: 'Прайс-лист',
-    services: 'Услуги',
-    packages: 'Пакеты',
-    discounts: 'Скидки',
+    subtitle: 'Создайте таблицу услуг для клиентов',
+    tableTitle: 'Моя таблица цен',
+    addRow: 'Добавить строку',
+    save: 'Сохранить прайс',
+    rowNumber: '№',
+    service: 'Услуга',
+    priceFrom: 'Цена от',
+    priceTo: 'Цена до',
     duration: 'Время',
     deposit: 'Депозит',
-    from: 'от',
-    comingSoon: 'Умные цены скоро',
-    comingSoonHint: 'Olamep будет подсказывать цены по категории, району и спросу.',
+    status: 'Статус',
+    active: 'Активно',
+    draft: 'Черновик',
+    delete: 'Удалить',
+    uploadPhoto: 'Загрузить фото прайса',
+    comingSoon: 'Скоро',
+    photoHint: 'Позже Olamep сможет превращать фото вашего прайса в такую таблицу автоматически.',
+    summaryServices: 'Услуги',
+    summaryActive: 'Активно',
+    summaryDrafts: 'Черновики',
+    saved: 'Сохранено',
   },
   UA: {
     title: 'Прайс-лист',
-    subtitle: 'Керуйте послугами, цінами, депозитами та пакетами',
-    addService: 'Додати послугу',
-    edit: 'Змінити',
-    active: 'Активно',
-    draft: 'Чернетка',
-    popular: 'Популярно',
-    priceList: 'Прайс-лист',
-    services: 'Послуги',
-    packages: 'Пакети',
-    discounts: 'Знижки',
+    subtitle: 'Створіть таблицю послуг для клієнтів',
+    tableTitle: 'Моя таблиця цін',
+    addRow: 'Додати рядок',
+    save: 'Зберегти прайс',
+    rowNumber: '№',
+    service: 'Послуга',
+    priceFrom: 'Ціна від',
+    priceTo: 'Ціна до',
     duration: 'Час',
     deposit: 'Депозит',
-    from: 'від',
-    comingSoon: 'Розумні ціни скоро',
-    comingSoonHint: 'Olamep буде підказувати ціни за категорією, районом і попитом.',
+    status: 'Статус',
+    active: 'Активно',
+    draft: 'Чернетка',
+    delete: 'Видалити',
+    uploadPhoto: 'Завантажити фото прайса',
+    comingSoon: 'Скоро',
+    photoHint: 'Пізніше Olamep зможе автоматично перетворювати фото прайса в таку таблицю.',
+    summaryServices: 'Послуги',
+    summaryActive: 'Активно',
+    summaryDrafts: 'Чернетки',
+    saved: 'Збережено',
   },
   ES: {
     title: 'Lista de precios',
-    subtitle: 'Gestiona servicios, precios, depósitos y paquetes',
-    addService: 'Añadir servicio',
-    edit: 'Editar',
+    subtitle: 'Crea tu tabla de servicios para clientes',
+    tableTitle: 'Mi tabla de precios',
+    addRow: 'Añadir fila',
+    save: 'Guardar lista',
+    rowNumber: '№',
+    service: 'Servicio',
+    priceFrom: 'Precio desde',
+    priceTo: 'Precio hasta',
+    duration: 'Tiempo',
+    deposit: 'Depósito',
+    status: 'Estado',
     active: 'Activo',
     draft: 'Borrador',
-    popular: 'Popular',
-    priceList: 'Lista de precios',
-    services: 'Servicios',
-    packages: 'Paquetes',
-    discounts: 'Descuentos',
-    duration: 'Duración',
-    deposit: 'Depósito',
-    from: 'desde',
-    comingSoon: 'Precios inteligentes pronto',
-    comingSoonHint: 'Olamep sugerirá precios según categoría, zona y demanda.',
+    delete: 'Eliminar',
+    uploadPhoto: 'Subir foto del precio',
+    comingSoon: 'Próximamente',
+    photoHint: 'Más tarde Olamep convertirá una foto de tu lista en esta tabla automáticamente.',
+    summaryServices: 'Servicios',
+    summaryActive: 'Activos',
+    summaryDrafts: 'Borradores',
+    saved: 'Guardado',
   },
   CZ: {
     title: 'Ceník',
-    subtitle: 'Spravujte služby, ceny, zálohy a balíčky',
-    addService: 'Přidat službu',
-    edit: 'Upravit',
+    subtitle: 'Vytvořte tabulku služeb pro klienty',
+    tableTitle: 'Moje tabulka cen',
+    addRow: 'Přidat řádek',
+    save: 'Uložit ceník',
+    rowNumber: '№',
+    service: 'Služba',
+    priceFrom: 'Cena od',
+    priceTo: 'Cena do',
+    duration: 'Čas',
+    deposit: 'Záloha',
+    status: 'Stav',
     active: 'Aktivní',
     draft: 'Koncept',
-    popular: 'Populární',
-    priceList: 'Ceník',
-    services: 'Služby',
-    packages: 'Balíčky',
-    discounts: 'Slevy',
-    duration: 'Délka',
-    deposit: 'Záloha',
-    from: 'od',
-    comingSoon: 'Chytré ceny již brzy',
-    comingSoonHint: 'Olamep bude navrhovat ceny podle kategorie, oblasti a poptávky.',
+    delete: 'Smazat',
+    uploadPhoto: 'Nahrát foto ceníku',
+    comingSoon: 'Brzy',
+    photoHint: 'Později Olamep automaticky převede fotku ceníku do této tabulky.',
+    summaryServices: 'Služby',
+    summaryActive: 'Aktivní',
+    summaryDrafts: 'Koncepty',
+    saved: 'Uloženo',
   },
   DE: {
     title: 'Preisliste',
-    subtitle: 'Services, Preise, Anzahlungen und Pakete verwalten',
-    addService: 'Service hinzufügen',
-    edit: 'Bearbeiten',
+    subtitle: 'Erstelle deine Servicetabelle für Kunden',
+    tableTitle: 'Meine Preistabelle',
+    addRow: 'Zeile hinzufügen',
+    save: 'Preisliste speichern',
+    rowNumber: '№',
+    service: 'Service',
+    priceFrom: 'Preis ab',
+    priceTo: 'Preis bis',
+    duration: 'Zeit',
+    deposit: 'Anzahlung',
+    status: 'Status',
     active: 'Aktiv',
     draft: 'Entwurf',
-    popular: 'Beliebt',
-    priceList: 'Preisliste',
-    services: 'Services',
-    packages: 'Pakete',
-    discounts: 'Rabatte',
-    duration: 'Dauer',
-    deposit: 'Anzahlung',
-    from: 'ab',
-    comingSoon: 'Smarte Preise bald',
-    comingSoonHint: 'Olamep schlägt Preise nach Kategorie, Gebiet und Nachfrage vor.',
+    delete: 'Löschen',
+    uploadPhoto: 'Preisfoto hochladen',
+    comingSoon: 'Bald',
+    photoHint: 'Später wandelt Olamep ein Foto deiner Preisliste automatisch in diese Tabelle um.',
+    summaryServices: 'Services',
+    summaryActive: 'Aktiv',
+    summaryDrafts: 'Entwürfe',
+    saved: 'Gespeichert',
   },
   IT: {
     title: 'Listino prezzi',
-    subtitle: 'Gestisci servizi, prezzi, depositi e pacchetti',
-    addService: 'Aggiungi servizio',
-    edit: 'Modifica',
+    subtitle: 'Crea la tabella dei servizi per i clienti',
+    tableTitle: 'La mia tabella prezzi',
+    addRow: 'Aggiungi riga',
+    save: 'Salva listino',
+    rowNumber: '№',
+    service: 'Servizio',
+    priceFrom: 'Prezzo da',
+    priceTo: 'Prezzo a',
+    duration: 'Tempo',
+    deposit: 'Deposito',
+    status: 'Stato',
     active: 'Attivo',
     draft: 'Bozza',
-    popular: 'Popolare',
-    priceList: 'Listino prezzi',
-    services: 'Servizi',
-    packages: 'Pacchetti',
-    discounts: 'Sconti',
-    duration: 'Durata',
-    deposit: 'Deposito',
-    from: 'da',
-    comingSoon: 'Prezzi smart presto',
-    comingSoonHint: 'Olamep suggerirà prezzi per categoria, zona e domanda.',
+    delete: 'Elimina',
+    uploadPhoto: 'Carica foto listino',
+    comingSoon: 'Presto',
+    photoHint: 'Più tardi Olamep convertirà una foto del listino in questa tabella automaticamente.',
+    summaryServices: 'Servizi',
+    summaryActive: 'Attivi',
+    summaryDrafts: 'Bozze',
+    saved: 'Salvato',
   },
   FR: {
     title: 'Liste de prix',
-    subtitle: 'Gérez services, prix, dépôts et forfaits',
-    addService: 'Ajouter service',
-    edit: 'Modifier',
+    subtitle: 'Créez votre tableau de services pour les clients',
+    tableTitle: 'Mon tableau de prix',
+    addRow: 'Ajouter ligne',
+    save: 'Enregistrer',
+    rowNumber: '№',
+    service: 'Service',
+    priceFrom: 'Prix dès',
+    priceTo: 'Prix max',
+    duration: 'Temps',
+    deposit: 'Dépôt',
+    status: 'Statut',
     active: 'Actif',
     draft: 'Brouillon',
-    popular: 'Populaire',
-    priceList: 'Liste de prix',
-    services: 'Services',
-    packages: 'Forfaits',
-    discounts: 'Réductions',
-    duration: 'Durée',
-    deposit: 'Dépôt',
-    from: 'dès',
-    comingSoon: 'Prix intelligents bientôt',
-    comingSoonHint: 'Olamep suggérera des prix selon catégorie, zone et demande.',
+    delete: 'Supprimer',
+    uploadPhoto: 'Télécharger photo',
+    comingSoon: 'Bientôt',
+    photoHint: 'Plus tard Olamep transformera automatiquement une photo de votre liste en tableau.',
+    summaryServices: 'Services',
+    summaryActive: 'Actifs',
+    summaryDrafts: 'Brouillons',
+    saved: 'Enregistré',
   },
   PL: {
     title: 'Cennik',
-    subtitle: 'Zarządzaj usługami, cenami, depozytami i pakietami',
-    addService: 'Dodaj usługę',
-    edit: 'Edytuj',
-    active: 'Aktywne',
-    draft: 'Szkic',
-    popular: 'Popularne',
-    priceList: 'Cennik',
-    services: 'Usługi',
-    packages: 'Pakiety',
-    discounts: 'Zniżki',
+    subtitle: 'Utwórz tabelę usług dla klientów',
+    tableTitle: 'Moja tabela cen',
+    addRow: 'Dodaj wiersz',
+    save: 'Zapisz cennik',
+    rowNumber: '№',
+    service: 'Usługa',
+    priceFrom: 'Cena od',
+    priceTo: 'Cena do',
     duration: 'Czas',
     deposit: 'Depozyt',
-    from: 'od',
-    comingSoon: 'Inteligentne ceny wkrótce',
-    comingSoonHint: 'Olamep zasugeruje ceny według kategorii, obszaru i popytu.',
+    status: 'Status',
+    active: 'Aktywne',
+    draft: 'Szkic',
+    delete: 'Usuń',
+    uploadPhoto: 'Wgraj zdjęcie cennika',
+    comingSoon: 'Wkrótce',
+    photoHint: 'Później Olamep automatycznie zamieni zdjęcie cennika w taką tabelę.',
+    summaryServices: 'Usługi',
+    summaryActive: 'Aktywne',
+    summaryDrafts: 'Szkice',
+    saved: 'Zapisano',
   },
   AR: {
     title: 'قائمة الأسعار',
-    subtitle: 'إدارة الخدمات والأسعار والعربون والباقات',
-    addService: 'إضافة خدمة',
-    edit: 'تعديل',
+    subtitle: 'أنشئ جدول خدماتك للعملاء',
+    tableTitle: 'جدول أسعاري',
+    addRow: 'إضافة صف',
+    save: 'حفظ القائمة',
+    rowNumber: '№',
+    service: 'الخدمة',
+    priceFrom: 'السعر من',
+    priceTo: 'السعر إلى',
+    duration: 'الوقت',
+    deposit: 'العربون',
+    status: 'الحالة',
     active: 'نشط',
     draft: 'مسودة',
-    popular: 'شائع',
-    priceList: 'قائمة الأسعار',
-    services: 'الخدمات',
-    packages: 'الباقات',
-    discounts: 'الخصومات',
-    duration: 'المدة',
-    deposit: 'العربون',
-    from: 'من',
-    comingSoon: 'تسعير ذكي قريباً',
-    comingSoonHint: 'سيقوم Olamep باقتراح الأسعار حسب الفئة والمنطقة والطلب.',
+    delete: 'حذف',
+    uploadPhoto: 'رفع صورة السعر',
+    comingSoon: 'قريباً',
+    photoHint: 'لاحقاً سيحوّل Olamep صورة قائمة الأسعار إلى هذا الجدول تلقائياً.',
+    summaryServices: 'الخدمات',
+    summaryActive: 'نشط',
+    summaryDrafts: 'مسودات',
+    saved: 'تم الحفظ',
   },
 };
+
+const initialRows: PriceRow[] = [
+  {
+    id: 'row-1',
+    service: 'Hair extensions',
+    priceFrom: '120',
+    priceTo: '250',
+    duration: '2h 30m',
+    deposit: '25',
+    status: 'active',
+  },
+  {
+    id: 'row-2',
+    service: 'Relax massage',
+    priceFrom: '65',
+    priceTo: '90',
+    duration: '1h',
+    deposit: '10',
+    status: 'active',
+  },
+  {
+    id: 'row-3',
+    service: 'Evening makeup',
+    priceFrom: '80',
+    priceTo: '140',
+    duration: '1h 20m',
+    deposit: '15',
+    status: 'draft',
+  },
+];
 
 function getText(language: AppLanguage) {
   return priceTexts[language] || priceTexts.EN;
 }
 
-function SmallIcon({ icon, bg }: { icon: string; bg: string }) {
+function FieldInput({
+  value,
+  placeholder,
+  onChange,
+  type = 'text',
+}: {
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+  type?: string;
+}) {
   return (
-    <span
+    <input
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      onChange={(event) => onChange(event.target.value)}
       style={{
-        width: 58,
-        height: 58,
-        borderRadius: 18,
-        border: `2.5px solid ${BRAND.border}`,
-        background: bg,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 28,
-        flexShrink: 0,
+        width: '100%',
+        minHeight: 44,
+        borderRadius: 15,
+        border: `2px solid ${BRAND.border}`,
+        background: '#ffffff',
+        color: BRAND.navy,
+        fontSize: 14,
+        fontWeight: 900,
+        padding: '0 10px',
+        boxSizing: 'border-box',
+        outline: 'none',
       }}
-    >
-      {icon}
-    </span>
+    />
   );
 }
 
 export default function PriceListPage() {
   const router = useRouter();
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [rows, setRows] = useState<PriceRow[]>(initialRows);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -284,42 +394,41 @@ export default function PriceListPage() {
 
   const text = useMemo(() => getText(language), [language]);
 
-  const priceItems: PriceItem[] = [
-    {
-      id: 'hair',
-      title: 'Hair extensions',
-      category: 'Beauty',
-      price: '£120',
-      duration: '2h 30m',
-      deposit: '£25',
-      status: 'active',
-      badge: 'popular',
-      icon: '💇‍♀️',
-      bg: BRAND.softPink,
-    },
-    {
-      id: 'massage',
-      title: 'Relax massage',
-      category: 'Wellness',
-      price: '£65',
-      duration: '1h',
-      deposit: '£10',
-      status: 'active',
-      icon: '💆‍♀️',
-      bg: BRAND.softGreen,
-    },
-    {
-      id: 'makeup',
-      title: 'Evening makeup',
-      category: 'Beauty',
-      price: '£80',
-      duration: '1h 20m',
-      deposit: '£15',
-      status: 'draft',
-      icon: '💄',
-      bg: BRAND.softOrange,
-    },
-  ];
+  const activeCount = rows.filter((row) => row.status === 'active').length;
+  const draftCount = rows.filter((row) => row.status === 'draft').length;
+
+  const updateRow = (id: string, patch: Partial<PriceRow>) => {
+    setSaved(false);
+    setRows((currentRows) =>
+      currentRows.map((row) => (row.id === id ? { ...row, ...patch } : row)),
+    );
+  };
+
+  const addRow = () => {
+    setSaved(false);
+    setRows((currentRows) => [
+      ...currentRows,
+      {
+        id: `row-${Date.now()}`,
+        service: '',
+        priceFrom: '',
+        priceTo: '',
+        duration: '',
+        deposit: '',
+        status: 'draft',
+      },
+    ]);
+  };
+
+  const deleteRow = (id: string) => {
+    setSaved(false);
+    setRows((currentRows) => currentRows.filter((row) => row.id !== id));
+  };
+
+  const saveRows = () => {
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 1800);
+  };
 
   return (
     <main
@@ -424,9 +533,9 @@ export default function PriceListPage() {
             }}
           >
             {[
-              { label: text.services, value: '3', bg: '#ffffff' },
-              { label: text.packages, value: '2', bg: BRAND.yellow },
-              { label: text.discounts, value: '1', bg: BRAND.softPink },
+              { label: text.summaryServices, value: rows.length, bg: '#ffffff' },
+              { label: text.summaryActive, value: activeCount, bg: BRAND.softGreen },
+              { label: text.summaryDrafts, value: draftCount, bg: BRAND.softOrange },
             ].map((item) => (
               <div
                 key={item.label}
@@ -466,7 +575,7 @@ export default function PriceListPage() {
 
           <button
             type="button"
-            onClick={() => router.push('/add')}
+            onClick={addRow}
             style={{
               marginTop: 12,
               width: '100%',
@@ -481,7 +590,7 @@ export default function PriceListPage() {
               boxShadow: '0 5px 0 rgba(0,0,0,0.12)',
             }}
           >
-            ＋ {text.addService}
+            ＋ {text.addRow}
           </button>
         </section>
 
@@ -495,161 +604,229 @@ export default function PriceListPage() {
               letterSpacing: '-0.7px',
             }}
           >
-            {text.priceList}
+            {text.tableTitle}
           </h2>
 
-          <div
-            style={{
-              borderRadius: 26,
-              border: `2.5px solid ${BRAND.border}`,
-              background: '#ffffff',
-              overflow: 'hidden',
-              boxShadow: '0 8px 20px rgba(7,27,70,0.05)',
-            }}
-          >
-            {priceItems.map((item, index) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => router.push('/add')}
+          <div style={{ display: 'grid', gap: 12 }}>
+            {rows.map((row, index) => (
+              <div
+                key={row.id}
                 style={{
-                  width: '100%',
-                  minHeight: 116,
-                  display: 'grid',
-                  gridTemplateColumns: '58px minmax(0, 1fr) auto',
-                  gap: 12,
-                  alignItems: 'center',
-                  padding: '13px',
-                  border: 'none',
-                  borderTop: index === 0 ? 'none' : `2px solid ${BRAND.border}`,
+                  borderRadius: 26,
+                  border: `2.5px solid ${BRAND.border}`,
                   background: '#ffffff',
-                  textAlign: 'left',
-                  cursor: 'pointer',
+                  padding: 13,
+                  boxShadow: '0 8px 20px rgba(7,27,70,0.05)',
                 }}
               >
-                <SmallIcon icon={item.icon} bg={item.bg} />
-
-                <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '48px 1fr auto',
+                    alignItems: 'center',
+                    gap: 10,
+                    marginBottom: 12,
+                  }}
+                >
                   <div
                     style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 16,
+                      border: `2.5px solid ${BRAND.border}`,
+                      background: BRAND.yellow,
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 7,
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: 17,
-                        lineHeight: 1.1,
-                        fontWeight: 900,
-                        color: BRAND.navy,
-                      }}
-                    >
-                      {item.title}
-                    </div>
-
-                    {item.badge === 'popular' ? (
-                      <span
-                        style={{
-                          minHeight: 23,
-                          padding: '0 8px',
-                          borderRadius: 999,
-                          border: `2px solid ${BRAND.border}`,
-                          background: BRAND.yellow,
-                          color: BRAND.navy,
-                          fontSize: 10.5,
-                          fontWeight: 900,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                        }}
-                      >
-                        {text.popular}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 5,
-                      fontSize: 12.5,
-                      lineHeight: 1.2,
-                      fontWeight: 800,
-                      color: BRAND.muted,
-                    }}
-                  >
-                    {item.category} · {text.duration}: {item.duration}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 7,
-                      display: 'flex',
-                      gap: 7,
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <span
-                      style={{
-                        minHeight: 25,
-                        padding: '0 9px',
-                        borderRadius: 999,
-                        background: item.status === 'active' ? BRAND.softGreen : BRAND.softOrange,
-                        color: item.status === 'active' ? '#11883d' : '#b47b00',
-                        border: `2px solid ${BRAND.border}`,
-                        fontSize: 11,
-                        fontWeight: 900,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                      }}
-                    >
-                      {item.status === 'active' ? text.active : text.draft}
-                    </span>
-
-                    <span
-                      style={{
-                        minHeight: 25,
-                        padding: '0 9px',
-                        borderRadius: 999,
-                        background: BRAND.softBlue,
-                        color: BRAND.navy,
-                        border: `2px solid ${BRAND.border}`,
-                        fontSize: 11,
-                        fontWeight: 900,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                      }}
-                    >
-                      {text.deposit}: {item.deposit}
-                    </span>
-                  </div>
-                </div>
-
-                <div style={{ textAlign: 'right' }}>
-                  <div
-                    style={{
-                      fontSize: 21,
+                      justifyContent: 'center',
+                      fontSize: 18,
                       fontWeight: 900,
                       color: BRAND.navy,
-                      whiteSpace: 'nowrap',
                     }}
                   >
-                    {item.price}
+                    {index + 1}
                   </div>
+
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 900,
+                        color: BRAND.muted,
+                      }}
+                    >
+                      {text.rowNumber} {index + 1}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 2,
+                        fontSize: 17,
+                        fontWeight: 900,
+                        color: BRAND.navy,
+                      }}
+                    >
+                      {row.service || text.service}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => deleteRow(row.id)}
+                    style={{
+                      minHeight: 36,
+                      padding: '0 11px',
+                      borderRadius: 999,
+                      border: `2px solid ${BRAND.border}`,
+                      background: BRAND.softPink,
+                      color: BRAND.pink,
+                      fontSize: 11,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {text.delete}
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gap: 10 }}>
+                  <label style={{ display: 'grid', gap: 6 }}>
+                    <span style={{ fontSize: 12, fontWeight: 900, color: BRAND.navy }}>
+                      {text.service}
+                    </span>
+                    <FieldInput
+                      value={row.service}
+                      placeholder={text.service}
+                      onChange={(value) => updateRow(row.id, { service: value })}
+                    />
+                  </label>
+
                   <div
                     style={{
-                      marginTop: 6,
-                      fontSize: 12,
-                      fontWeight: 900,
-                      color: BRAND.blue,
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: 10,
                     }}
                   >
-                    {text.edit}
+                    <label style={{ display: 'grid', gap: 6 }}>
+                      <span style={{ fontSize: 12, fontWeight: 900, color: BRAND.navy }}>
+                        {text.priceFrom}
+                      </span>
+                      <FieldInput
+                        value={row.priceFrom}
+                        placeholder="0"
+                        type="number"
+                        onChange={(value) => updateRow(row.id, { priceFrom: value })}
+                      />
+                    </label>
+
+                    <label style={{ display: 'grid', gap: 6 }}>
+                      <span style={{ fontSize: 12, fontWeight: 900, color: BRAND.navy }}>
+                        {text.priceTo}
+                      </span>
+                      <FieldInput
+                        value={row.priceTo}
+                        placeholder="0"
+                        type="number"
+                        onChange={(value) => updateRow(row.id, { priceTo: value })}
+                      />
+                    </label>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: 10,
+                    }}
+                  >
+                    <label style={{ display: 'grid', gap: 6 }}>
+                      <span style={{ fontSize: 12, fontWeight: 900, color: BRAND.navy }}>
+                        {text.duration}
+                      </span>
+                      <FieldInput
+                        value={row.duration}
+                        placeholder="1h"
+                        onChange={(value) => updateRow(row.id, { duration: value })}
+                      />
+                    </label>
+
+                    <label style={{ display: 'grid', gap: 6 }}>
+                      <span style={{ fontSize: 12, fontWeight: 900, color: BRAND.navy }}>
+                        {text.deposit}
+                      </span>
+                      <FieldInput
+                        value={row.deposit}
+                        placeholder="0"
+                        type="number"
+                        onChange={(value) => updateRow(row.id, { deposit: value })}
+                      />
+                    </label>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: 10,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => updateRow(row.id, { status: 'active' })}
+                      style={{
+                        minHeight: 44,
+                        borderRadius: 15,
+                        border: `2.5px solid ${BRAND.border}`,
+                        background: row.status === 'active' ? BRAND.green : BRAND.softGreen,
+                        color: row.status === 'active' ? '#ffffff' : '#11883d',
+                        fontSize: 13,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {text.active}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => updateRow(row.id, { status: 'draft' })}
+                      style={{
+                        minHeight: 44,
+                        borderRadius: 15,
+                        border: `2.5px solid ${BRAND.border}`,
+                        background: row.status === 'draft' ? BRAND.yellow : BRAND.softOrange,
+                        color: BRAND.navy,
+                        fontSize: 13,
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {text.draft}
+                    </button>
                   </div>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={saveRows}
+            style={{
+              marginTop: 14,
+              width: '100%',
+              minHeight: 58,
+              borderRadius: 20,
+              border: `3px solid ${BRAND.border}`,
+              background: saved ? BRAND.yellow : BRAND.navy,
+              color: saved ? BRAND.navy : '#ffffff',
+              fontSize: 16,
+              fontWeight: 900,
+              cursor: 'pointer',
+              boxShadow: `0 5px 0 ${BRAND.border}`,
+            }}
+          >
+            {saved ? `✓ ${text.saved}` : text.save}
+          </button>
         </section>
 
         <section
@@ -662,7 +839,7 @@ export default function PriceListPage() {
           }}
         >
           <div style={{ fontSize: 18, fontWeight: 900, color: BRAND.navy }}>
-            ✨ {text.comingSoon}
+            📷 {text.uploadPhoto} — {text.comingSoon}
           </div>
 
           <p
@@ -674,7 +851,7 @@ export default function PriceListPage() {
               color: BRAND.muted,
             }}
           >
-            {text.comingSoonHint}
+            {text.photoHint}
           </p>
         </section>
       </div>
