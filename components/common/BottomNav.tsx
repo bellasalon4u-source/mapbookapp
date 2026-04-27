@@ -56,91 +56,7 @@ const addMenuTexts: Record<
   PL: { ad: 'Reklama', service: 'Usługa', deal: 'Zniżka', close: 'Zamknij' },
 };
 
-const publicItems: NavItem[] = [
-  {
-    key: 'home',
-    href: '/',
-    label: {
-      EN: 'Home',
-      ES: 'Inicio',
-      RU: 'Home',
-      UA: 'Home',
-      CZ: 'Home',
-      DE: 'Home',
-      IT: 'Home',
-      FR: 'Home',
-      AR: 'Home',
-      PL: 'Home',
-    },
-  },
-  {
-    key: 'messages',
-    href: '/messages',
-    label: {
-      EN: 'Messages',
-      ES: 'Messages',
-      RU: 'Messages',
-      UA: 'Messages',
-      CZ: 'Messages',
-      DE: 'Messages',
-      IT: 'Messages',
-      FR: 'Messages',
-      AR: 'Messages',
-      PL: 'Messages',
-    },
-  },
-  {
-    key: 'add',
-    href: '/add',
-    accent: true,
-    label: {
-      EN: 'Add',
-      ES: 'Add',
-      RU: 'Add',
-      UA: 'Add',
-      CZ: 'Add',
-      DE: 'Add',
-      IT: 'Add',
-      FR: 'Add',
-      AR: 'Add',
-      PL: 'Add',
-    },
-  },
-  {
-    key: 'bookings',
-    href: '/bookings',
-    label: {
-      EN: 'Bookings',
-      ES: 'Bookings',
-      RU: 'Bookings',
-      UA: 'Bookings',
-      CZ: 'Bookings',
-      DE: 'Bookings',
-      IT: 'Bookings',
-      FR: 'Bookings',
-      AR: 'Bookings',
-      PL: 'Bookings',
-    },
-  },
-  {
-    key: 'profile',
-    href: '/profile',
-    label: {
-      EN: 'Profile',
-      ES: 'Profile',
-      RU: 'Profile',
-      UA: 'Profile',
-      CZ: 'Profile',
-      DE: 'Profile',
-      IT: 'Profile',
-      FR: 'Profile',
-      AR: 'Profile',
-      PL: 'Profile',
-    },
-  },
-];
-
-const profileItems: NavItem[] = [
+const navItems: NavItem[] = [
   {
     key: 'profile',
     href: '/profile',
@@ -192,7 +108,7 @@ const profileItems: NavItem[] = [
   },
   {
     key: 'bookings',
-    href: '/profile/bookings',
+    href: '/bookings',
     label: {
       EN: 'My bookings',
       ES: 'Reservas',
@@ -235,21 +151,6 @@ function getLabel(item: NavItem, language: AppLanguage) {
 function getActiveColor(key: NavKey) {
   if (key === 'bookings') return BRAND.blue;
   return BRAND.green;
-}
-
-function HomeIcon({ active }: { active: boolean }) {
-  const color = active ? BRAND.green : BRAND.black;
-
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M4 10.5L12 4L20 10.5V20H4V10.5Z"
-        stroke={color}
-        strokeWidth="1.9"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
 }
 
 function CalendarIcon({ active }: { active: boolean }) {
@@ -313,7 +214,6 @@ function ClientsIcon({ active }: { active: boolean }) {
 }
 
 function NavIcon({ itemKey, active }: { itemKey: NavKey; active: boolean }) {
-  if (itemKey === 'home') return <HomeIcon active={active} />;
   if (itemKey === 'bookings') return <CalendarIcon active={active} />;
   if (itemKey === 'messages') return <MessageIcon active={active} />;
   if (itemKey === 'profile') return <ProfileIcon active={active} />;
@@ -432,23 +332,23 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   }, [addMenuOpen]);
 
   const addText = useMemo(() => getAddText(language), [language]);
-  const items = isProfileArea ? profileItems : publicItems;
   const shouldShowNav = !isProfileArea || profileNavVisible || addMenuOpen;
 
-  const getIsActive = (key: NavKey, href: string) => {
+  const getIsActive = (key: NavKey) => {
     if (addMenuOpen && key === 'add') return true;
 
     if (activeProp) {
       if (activeProp === 'add') return key === 'add';
       if (activeProp === 'clients') return key === 'clients';
       if (activeProp === 'bookings') return key === 'bookings';
-      return activeProp === key;
+      if (activeProp === 'messages') return key === 'messages';
+      if (activeProp === 'profile') return key === 'profile';
+      if (activeProp === 'home') return pathname === '/';
     }
 
-    if (key === 'home') return pathname === '/';
-    if (key === 'profile') return pathname === '/profile' || pathname?.startsWith('/profile/');
-    if (key === 'clients') return pathname === '/profile/clients';
-    if (key === 'messages') return pathname === '/messages' || pathname?.startsWith('/messages/');
+    if (key === 'clients') {
+      return pathname === '/profile/clients' || pathname?.startsWith('/profile/clients/');
+    }
 
     if (key === 'bookings') {
       return (
@@ -457,6 +357,10 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
         pathname === '/profile/bookings' ||
         pathname?.startsWith('/profile/bookings/')
       );
+    }
+
+    if (key === 'messages') {
+      return pathname === '/messages' || pathname?.startsWith('/messages/');
     }
 
     if (key === 'add') {
@@ -468,7 +372,18 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
       );
     }
 
-    return pathname?.startsWith(href);
+    if (key === 'profile') {
+      return (
+        pathname === '/profile' ||
+        (pathname?.startsWith('/profile/') &&
+          !pathname?.startsWith('/profile/clients') &&
+          !pathname?.startsWith('/profile/bookings') &&
+          !pathname?.startsWith('/profile/promotions/new') &&
+          !pathname?.startsWith('/profile/deals/new'))
+      );
+    }
+
+    return false;
   };
 
   const handleAddClick = () => {
@@ -650,8 +565,8 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
               zIndex: 2,
             }}
           >
-            {items.map((item) => {
-              const isActive = getIsActive(item.key, item.href);
+            {navItems.map((item) => {
+              const isActive = getIsActive(item.key);
               const label = getLabel(item, language);
               const activeColor = getActiveColor(item.key);
               const badge =
@@ -784,7 +699,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     title={label}
                     style={{
                       width: '100%',
-                      maxWidth: isProfileArea ? 72 : 66,
+                      maxWidth: 72,
                       display: 'block',
                       textAlign: 'center',
                       fontSize:
