@@ -35,6 +35,8 @@ const BRAND = {
   pink: '#ff4fa0',
 };
 
+const AUTO_HIDE_MS = 3000;
+
 const addMenuTexts: Record<
   AppLanguage,
   {
@@ -56,7 +58,91 @@ const addMenuTexts: Record<
   PL: { ad: 'Reklama', service: 'Usługa', deal: 'Zniżka', close: 'Zamknij' },
 };
 
-const navItems: NavItem[] = [
+const publicItems: NavItem[] = [
+  {
+    key: 'home',
+    href: '/',
+    label: {
+      EN: 'Home',
+      ES: 'Inicio',
+      RU: 'Home',
+      UA: 'Home',
+      CZ: 'Home',
+      DE: 'Home',
+      IT: 'Home',
+      FR: 'Home',
+      AR: 'Home',
+      PL: 'Home',
+    },
+  },
+  {
+    key: 'messages',
+    href: '/messages',
+    label: {
+      EN: 'Messages',
+      ES: 'Messages',
+      RU: 'Messages',
+      UA: 'Messages',
+      CZ: 'Messages',
+      DE: 'Messages',
+      IT: 'Messages',
+      FR: 'Messages',
+      AR: 'Messages',
+      PL: 'Messages',
+    },
+  },
+  {
+    key: 'add',
+    href: '/add',
+    accent: true,
+    label: {
+      EN: 'Add',
+      ES: 'Add',
+      RU: 'Add',
+      UA: 'Add',
+      CZ: 'Add',
+      DE: 'Add',
+      IT: 'Add',
+      FR: 'Add',
+      AR: 'Add',
+      PL: 'Add',
+    },
+  },
+  {
+    key: 'bookings',
+    href: '/bookings',
+    label: {
+      EN: 'Bookings',
+      ES: 'Bookings',
+      RU: 'Bookings',
+      UA: 'Bookings',
+      CZ: 'Bookings',
+      DE: 'Bookings',
+      IT: 'Bookings',
+      FR: 'Bookings',
+      AR: 'Bookings',
+      PL: 'Bookings',
+    },
+  },
+  {
+    key: 'profile',
+    href: '/profile',
+    label: {
+      EN: 'Profile',
+      ES: 'Profile',
+      RU: 'Profile',
+      UA: 'Profile',
+      CZ: 'Profile',
+      DE: 'Profile',
+      IT: 'Profile',
+      FR: 'Profile',
+      AR: 'Profile',
+      PL: 'Profile',
+    },
+  },
+];
+
+const profileItems: NavItem[] = [
   {
     key: 'profile',
     href: '/profile',
@@ -108,7 +194,7 @@ const navItems: NavItem[] = [
   },
   {
     key: 'bookings',
-    href: '/bookings',
+    href: '/profile/bookings',
     label: {
       EN: 'My bookings',
       ES: 'Reservas',
@@ -151,6 +237,21 @@ function getLabel(item: NavItem, language: AppLanguage) {
 function getActiveColor(key: NavKey) {
   if (key === 'bookings') return BRAND.blue;
   return BRAND.green;
+}
+
+function HomeIcon({ active }: { active: boolean }) {
+  const color = active ? BRAND.green : BRAND.black;
+
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M4 10.5L12 4L20 10.5V20H4V10.5Z"
+        stroke={color}
+        strokeWidth="1.9"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 function CalendarIcon({ active }: { active: boolean }) {
@@ -214,6 +315,7 @@ function ClientsIcon({ active }: { active: boolean }) {
 }
 
 function NavIcon({ itemKey, active }: { itemKey: NavKey; active: boolean }) {
+  if (itemKey === 'home') return <HomeIcon active={active} />;
   if (itemKey === 'bookings') return <CalendarIcon active={active} />;
   if (itemKey === 'messages') return <MessageIcon active={active} />;
   if (itemKey === 'profile') return <ProfileIcon active={active} />;
@@ -227,7 +329,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
 
   const [language, setLanguage] = useState<AppLanguage>('EN');
   const [addMenuOpen, setAddMenuOpen] = useState(false);
-  const [profileNavVisible, setProfileNavVisible] = useState(true);
+  const [navVisible, setNavVisible] = useState(true);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -275,23 +377,45 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
     activeProp === 'profile' ||
     activeProp === 'clients';
 
-  const showProfileNavTemporarily = () => {
-    if (!isProfileArea) return;
-
-    setProfileNavVisible(true);
+  const showNavTemporarily = () => {
+    setNavVisible(true);
 
     if (hideTimerRef.current) {
       clearTimeout(hideTimerRef.current);
     }
 
+    if (addMenuOpen) return;
+
     hideTimerRef.current = setTimeout(() => {
-      setProfileNavVisible(false);
-    }, 2600);
+      setNavVisible(false);
+    }, AUTO_HIDE_MS);
   };
 
   useEffect(() => {
-    if (!isProfileArea) {
-      setProfileNavVisible(true);
+    showNavTemporarily();
+
+    window.addEventListener('scroll', showNavTemporarily, { passive: true });
+    window.addEventListener('touchstart', showNavTemporarily, { passive: true });
+    window.addEventListener('mousedown', showNavTemporarily);
+    window.addEventListener('focus', showNavTemporarily);
+    window.addEventListener('pageshow', showNavTemporarily);
+
+    return () => {
+      window.removeEventListener('scroll', showNavTemporarily);
+      window.removeEventListener('touchstart', showNavTemporarily);
+      window.removeEventListener('mousedown', showNavTemporarily);
+      window.removeEventListener('focus', showNavTemporarily);
+      window.removeEventListener('pageshow', showNavTemporarily);
+
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+    };
+  }, [pathname, addMenuOpen]);
+
+  useEffect(() => {
+    if (addMenuOpen) {
+      setNavVisible(true);
 
       if (hideTimerRef.current) {
         clearTimeout(hideTimerRef.current);
@@ -300,55 +424,27 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
       return;
     }
 
-    showProfileNavTemporarily();
-
-    window.addEventListener('scroll', showProfileNavTemporarily, { passive: true });
-    window.addEventListener('touchstart', showProfileNavTemporarily, { passive: true });
-    window.addEventListener('focus', showProfileNavTemporarily);
-    window.addEventListener('pageshow', showProfileNavTemporarily);
-
-    return () => {
-      window.removeEventListener('scroll', showProfileNavTemporarily);
-      window.removeEventListener('touchstart', showProfileNavTemporarily);
-      window.removeEventListener('focus', showProfileNavTemporarily);
-      window.removeEventListener('pageshow', showProfileNavTemporarily);
-
-      if (hideTimerRef.current) {
-        clearTimeout(hideTimerRef.current);
-      }
-    };
-  }, [pathname, isProfileArea]);
-
-  useEffect(() => {
-    if (addMenuOpen) {
-      setProfileNavVisible(true);
-
-      if (hideTimerRef.current) {
-        clearTimeout(hideTimerRef.current);
-      }
-    } else if (isProfileArea) {
-      showProfileNavTemporarily();
-    }
+    showNavTemporarily();
   }, [addMenuOpen]);
 
   const addText = useMemo(() => getAddText(language), [language]);
-  const shouldShowNav = !isProfileArea || profileNavVisible || addMenuOpen;
+  const items = isProfileArea ? profileItems : publicItems;
+  const shouldShowNav = navVisible || addMenuOpen;
 
-  const getIsActive = (key: NavKey) => {
+  const getIsActive = (key: NavKey, href: string) => {
     if (addMenuOpen && key === 'add') return true;
 
     if (activeProp) {
       if (activeProp === 'add') return key === 'add';
       if (activeProp === 'clients') return key === 'clients';
       if (activeProp === 'bookings') return key === 'bookings';
-      if (activeProp === 'messages') return key === 'messages';
-      if (activeProp === 'profile') return key === 'profile';
-      if (activeProp === 'home') return pathname === '/';
+      return activeProp === key;
     }
 
-    if (key === 'clients') {
-      return pathname === '/profile/clients' || pathname?.startsWith('/profile/clients/');
-    }
+    if (key === 'home') return pathname === '/';
+    if (key === 'profile') return pathname === '/profile' || pathname?.startsWith('/profile/');
+    if (key === 'clients') return pathname === '/profile/clients';
+    if (key === 'messages') return pathname === '/messages' || pathname?.startsWith('/messages/');
 
     if (key === 'bookings') {
       return (
@@ -357,10 +453,6 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
         pathname === '/profile/bookings' ||
         pathname?.startsWith('/profile/bookings/')
       );
-    }
-
-    if (key === 'messages') {
-      return pathname === '/messages' || pathname?.startsWith('/messages/');
     }
 
     if (key === 'add') {
@@ -372,21 +464,12 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
       );
     }
 
-    if (key === 'profile') {
-      return (
-        pathname === '/profile' ||
-        (pathname?.startsWith('/profile/') &&
-          !pathname?.startsWith('/profile/clients') &&
-          !pathname?.startsWith('/profile/bookings') &&
-          !pathname?.startsWith('/profile/promotions/new') &&
-          !pathname?.startsWith('/profile/deals/new'))
-      );
-    }
-
-    return false;
+    return pathname?.startsWith(href);
   };
 
   const handleAddClick = () => {
+    setNavVisible(true);
+
     if (onAddClick) {
       onAddClick();
       return;
@@ -412,6 +495,28 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
 
   return (
     <>
+      {!shouldShowNav && !addMenuOpen ? (
+        <button
+          type="button"
+          aria-label="Open navigation"
+          onClick={showNavTemporarily}
+          style={{
+            position: 'fixed',
+            left: '50%',
+            bottom: 'calc(10px + env(safe-area-inset-bottom))',
+            transform: 'translateX(-50%)',
+            width: 82,
+            height: 26,
+            borderRadius: 999,
+            border: `2px solid ${BRAND.border}`,
+            background: 'rgba(255,253,248,0.95)',
+            zIndex: 1198,
+            cursor: 'pointer',
+            boxShadow: '0 8px 18px rgba(15,23,42,0.10)',
+          }}
+        />
+      ) : null}
+
       {addMenuOpen ? (
         <div
           onClick={() => setAddMenuOpen(false)}
@@ -515,13 +620,15 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
       ) : null}
 
       <div
+        onMouseEnter={showNavTemporarily}
+        onTouchStart={showNavTemporarily}
         style={{
           position: 'fixed',
           left: '50%',
           bottom: 'calc(18px + env(safe-area-inset-bottom))',
           transform: shouldShowNav
             ? 'translateX(-50%) translateY(0)'
-            : 'translateX(-50%) translateY(130px)',
+            : 'translateX(-50%) translateY(150px)',
           opacity: shouldShowNav ? 1 : 0,
           width: 'calc(100% - 44px)',
           maxWidth: 384,
@@ -565,8 +672,8 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
               zIndex: 2,
             }}
           >
-            {navItems.map((item) => {
-              const isActive = getIsActive(item.key);
+            {items.map((item) => {
+              const isActive = getIsActive(item.key, item.href);
               const label = getLabel(item, language);
               const activeColor = getActiveColor(item.key);
               const badge =
@@ -699,7 +806,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     title={label}
                     style={{
                       width: '100%',
-                      maxWidth: 72,
+                      maxWidth: isProfileArea ? 72 : 66,
                       display: 'block',
                       textAlign: 'center',
                       fontSize:
