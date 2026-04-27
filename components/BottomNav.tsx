@@ -6,11 +6,11 @@ import {
   getSavedLanguage,
   subscribeToLanguageChange,
   type AppLanguage,
-} from '../../services/i18n';
+} from '../services/i18n';
 import {
   getUnreadMessagesCount,
   subscribeToChatStore,
-} from '../../services/chatStore';
+} from '../services/chatStore';
 
 type BottomNavProps = {
   active?: 'home' | 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
