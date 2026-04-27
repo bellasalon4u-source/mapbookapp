@@ -14,6 +14,11 @@ import {
   type WalletState,
 } from '../../services/walletStore';
 
+type TransactionType = 'income' | 'payment';
+type TransactionStatus = 'completed' | 'pending';
+type TransactionFilter = 'all' | 'income' | 'payment';
+type DateFilter = 'today' | '7days' | '30days' | 'all';
+
 type WalletTextShape = {
   title: string;
   subtitle: string;
@@ -26,16 +31,37 @@ type WalletTextShape = {
   qrCode: string;
   transactions: string;
   income: string;
-  outcome: string;
+  payments: string;
+  all: string;
+  today: string;
+  sevenDays: string;
+  thirtyDays: string;
+  allTime: string;
+  noTransactions: string;
+  noTransactionsHint: string;
   pending: string;
   completed: string;
   bookingDeposit: string;
   servicePayment: string;
   promotionPayment: string;
   platformFee: string;
-  today: string;
+  payoutRequest: string;
   yesterday: string;
   comingSoon: string;
+  statementHint: string;
+};
+
+type TransactionItem = {
+  id: string;
+  title: string;
+  subtitle: string;
+  amount: number;
+  type: TransactionType;
+  status: TransactionStatus;
+  daysAgo: number;
+  icon: string;
+  bg: string;
+  color: string;
 };
 
 const BRAND = {
@@ -69,16 +95,24 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     qrCode: 'QR code',
     transactions: 'Account activity',
     income: 'Income',
-    outcome: 'Payment',
+    payments: 'Payments',
+    all: 'All',
+    today: 'Today',
+    sevenDays: '7 days',
+    thirtyDays: '30 days',
+    allTime: 'All time',
+    noTransactions: 'No transactions',
+    noTransactionsHint: 'Change filters or make your first payment.',
     pending: 'Pending',
     completed: 'Completed',
     bookingDeposit: 'Booking deposit',
     servicePayment: 'Service payment',
     promotionPayment: 'Promotion payment',
     platformFee: 'Platform fee',
-    today: 'Today',
+    payoutRequest: 'Payout request',
     yesterday: 'Yesterday',
     comingSoon: 'Coming soon',
+    statementHint: 'Full statements, payout reports, refunds and invoices will appear here.',
   },
   RU: {
     title: 'Счёт приложения',
@@ -91,17 +125,25 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     withdraw: 'Вывести',
     qrCode: 'QR-код',
     transactions: 'История счёта',
-    income: 'Поступление',
-    outcome: 'Платёж',
+    income: 'Поступления',
+    payments: 'Расходы',
+    all: 'Все',
+    today: 'Сегодня',
+    sevenDays: '7 дней',
+    thirtyDays: '30 дней',
+    allTime: 'За всё время',
+    noTransactions: 'Нет операций',
+    noTransactionsHint: 'Измените фильтр или сделайте первый платёж.',
     pending: 'В обработке',
     completed: 'Завершено',
     bookingDeposit: 'Депозит бронирования',
     servicePayment: 'Оплата услуги',
     promotionPayment: 'Оплата рекламы',
     platformFee: 'Комиссия платформы',
-    today: 'Сегодня',
+    payoutRequest: 'Заявка на вывод',
     yesterday: 'Вчера',
     comingSoon: 'Скоро',
+    statementHint: 'Здесь появятся выписки, отчёты по выплатам, возвраты и инвойсы.',
   },
   UA: {
     title: 'Рахунок застосунку',
@@ -115,16 +157,24 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     qrCode: 'QR-код',
     transactions: 'Історія рахунку',
     income: 'Надходження',
-    outcome: 'Платіж',
+    payments: 'Витрати',
+    all: 'Усі',
+    today: 'Сьогодні',
+    sevenDays: '7 днів',
+    thirtyDays: '30 днів',
+    allTime: 'За весь час',
+    noTransactions: 'Немає операцій',
+    noTransactionsHint: 'Змініть фільтр або зробіть перший платіж.',
     pending: 'В обробці',
     completed: 'Завершено',
     bookingDeposit: 'Депозит бронювання',
     servicePayment: 'Оплата послуги',
     promotionPayment: 'Оплата реклами',
     platformFee: 'Комісія платформи',
-    today: 'Сьогодні',
+    payoutRequest: 'Заявка на вивід',
     yesterday: 'Вчора',
     comingSoon: 'Скоро',
+    statementHint: 'Тут з’являться виписки, звіти по виплатах, повернення та інвойси.',
   },
   ES: {
     title: 'Cuenta de la app',
@@ -137,17 +187,25 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     withdraw: 'Retirar',
     qrCode: 'Código QR',
     transactions: 'Actividad de cuenta',
-    income: 'Ingreso',
-    outcome: 'Pago',
+    income: 'Ingresos',
+    payments: 'Pagos',
+    all: 'Todo',
+    today: 'Hoy',
+    sevenDays: '7 días',
+    thirtyDays: '30 días',
+    allTime: 'Todo',
+    noTransactions: 'Sin transacciones',
+    noTransactionsHint: 'Cambia los filtros o realiza tu primer pago.',
     pending: 'Pendiente',
     completed: 'Completado',
     bookingDeposit: 'Depósito de reserva',
     servicePayment: 'Pago de servicio',
     promotionPayment: 'Pago de promoción',
     platformFee: 'Comisión de plataforma',
-    today: 'Hoy',
+    payoutRequest: 'Solicitud de retiro',
     yesterday: 'Ayer',
     comingSoon: 'Próximamente',
+    statementHint: 'Aquí aparecerán extractos, informes de pagos, reembolsos e invoices.',
   },
   CZ: {
     title: 'Účet aplikace',
@@ -160,17 +218,25 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     withdraw: 'Vybrat',
     qrCode: 'QR kód',
     transactions: 'Historie účtu',
-    income: 'Příjem',
-    outcome: 'Platba',
+    income: 'Příjmy',
+    payments: 'Platby',
+    all: 'Vše',
+    today: 'Dnes',
+    sevenDays: '7 dní',
+    thirtyDays: '30 dní',
+    allTime: 'Celkem',
+    noTransactions: 'Žádné transakce',
+    noTransactionsHint: 'Změňte filtry nebo proveďte první platbu.',
     pending: 'Čeká',
     completed: 'Dokončeno',
     bookingDeposit: 'Rezervační záloha',
     servicePayment: 'Platba za službu',
     promotionPayment: 'Platba za reklamu',
     platformFee: 'Poplatek platformy',
-    today: 'Dnes',
+    payoutRequest: 'Žádost o výplatu',
     yesterday: 'Včera',
     comingSoon: 'Brzy',
+    statementHint: 'Zde se zobrazí výpisy, reporty výplat, vratky a faktury.',
   },
   DE: {
     title: 'App-Konto',
@@ -183,17 +249,25 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     withdraw: 'Auszahlen',
     qrCode: 'QR-Code',
     transactions: 'Kontoaktivität',
-    income: 'Eingang',
-    outcome: 'Zahlung',
+    income: 'Eingänge',
+    payments: 'Zahlungen',
+    all: 'Alle',
+    today: 'Heute',
+    sevenDays: '7 Tage',
+    thirtyDays: '30 Tage',
+    allTime: 'Gesamt',
+    noTransactions: 'Keine Transaktionen',
+    noTransactionsHint: 'Ändere Filter oder mache deine erste Zahlung.',
     pending: 'Ausstehend',
     completed: 'Abgeschlossen',
     bookingDeposit: 'Buchungsanzahlung',
     servicePayment: 'Servicezahlung',
     promotionPayment: 'Promozahlung',
     platformFee: 'Plattformgebühr',
-    today: 'Heute',
+    payoutRequest: 'Auszahlungsanfrage',
     yesterday: 'Gestern',
     comingSoon: 'Bald',
+    statementHint: 'Hier erscheinen Kontoauszüge, Auszahlungsberichte, Rückerstattungen und Rechnungen.',
   },
   IT: {
     title: 'Account app',
@@ -206,17 +280,25 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     withdraw: 'Preleva',
     qrCode: 'Codice QR',
     transactions: 'Attività account',
-    income: 'Entrata',
-    outcome: 'Pagamento',
+    income: 'Entrate',
+    payments: 'Pagamenti',
+    all: 'Tutto',
+    today: 'Oggi',
+    sevenDays: '7 giorni',
+    thirtyDays: '30 giorni',
+    allTime: 'Sempre',
+    noTransactions: 'Nessuna transazione',
+    noTransactionsHint: 'Cambia filtri o fai il primo pagamento.',
     pending: 'In attesa',
     completed: 'Completato',
     bookingDeposit: 'Deposito prenotazione',
     servicePayment: 'Pagamento servizio',
     promotionPayment: 'Pagamento promozione',
     platformFee: 'Commissione piattaforma',
-    today: 'Oggi',
+    payoutRequest: 'Richiesta prelievo',
     yesterday: 'Ieri',
     comingSoon: 'Presto',
+    statementHint: 'Qui appariranno estratti conto, report pagamenti, rimborsi e fatture.',
   },
   FR: {
     title: 'Compte app',
@@ -229,17 +311,25 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     withdraw: 'Retirer',
     qrCode: 'QR code',
     transactions: 'Activité du compte',
-    income: 'Revenu',
-    outcome: 'Paiement',
+    income: 'Revenus',
+    payments: 'Paiements',
+    all: 'Tout',
+    today: 'Aujourd’hui',
+    sevenDays: '7 jours',
+    thirtyDays: '30 jours',
+    allTime: 'Toujours',
+    noTransactions: 'Aucune transaction',
+    noTransactionsHint: 'Changez les filtres ou effectuez votre premier paiement.',
     pending: 'En attente',
     completed: 'Terminé',
     bookingDeposit: 'Dépôt de réservation',
     servicePayment: 'Paiement du service',
     promotionPayment: 'Paiement promotion',
     platformFee: 'Frais plateforme',
-    today: 'Aujourd’hui',
+    payoutRequest: 'Demande de retrait',
     yesterday: 'Hier',
     comingSoon: 'Bientôt',
+    statementHint: 'Les relevés, rapports de paiement, remboursements et factures apparaîtront ici.',
   },
   PL: {
     title: 'Konto aplikacji',
@@ -252,17 +342,25 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     withdraw: 'Wypłać',
     qrCode: 'Kod QR',
     transactions: 'Aktywność konta',
-    income: 'Wpływ',
-    outcome: 'Płatność',
+    income: 'Wpływy',
+    payments: 'Wydatki',
+    all: 'Wszystko',
+    today: 'Dzisiaj',
+    sevenDays: '7 dni',
+    thirtyDays: '30 dni',
+    allTime: 'Całość',
+    noTransactions: 'Brak transakcji',
+    noTransactionsHint: 'Zmień filtry albo wykonaj pierwszą płatność.',
     pending: 'Oczekuje',
     completed: 'Zakończono',
     bookingDeposit: 'Depozyt rezerwacji',
     servicePayment: 'Płatność za usługę',
     promotionPayment: 'Płatność za promocję',
     platformFee: 'Opłata platformy',
-    today: 'Dzisiaj',
+    payoutRequest: 'Wniosek o wypłatę',
     yesterday: 'Wczoraj',
     comingSoon: 'Wkrótce',
+    statementHint: 'Tutaj pojawią się wyciągi, raporty wypłat, zwroty i faktury.',
   },
   AR: {
     title: 'حساب التطبيق',
@@ -275,17 +373,25 @@ const walletTexts: Record<AppLanguage, WalletTextShape> = {
     withdraw: 'سحب',
     qrCode: 'رمز QR',
     transactions: 'نشاط الحساب',
-    income: 'دخل',
-    outcome: 'دفع',
+    income: 'الدخل',
+    payments: 'المدفوعات',
+    all: 'الكل',
+    today: 'اليوم',
+    sevenDays: '7 أيام',
+    thirtyDays: '30 يوم',
+    allTime: 'كل الوقت',
+    noTransactions: 'لا توجد عمليات',
+    noTransactionsHint: 'غيّر الفلاتر أو قم بأول عملية دفع.',
     pending: 'قيد المعالجة',
     completed: 'مكتمل',
     bookingDeposit: 'عربون الحجز',
     servicePayment: 'دفع الخدمة',
     promotionPayment: 'دفع الإعلان',
     platformFee: 'رسوم المنصة',
-    today: 'اليوم',
+    payoutRequest: 'طلب سحب',
     yesterday: 'أمس',
     comingSoon: 'قريباً',
+    statementHint: 'ستظهر هنا الكشوفات وتقارير السحب والاستردادات والفواتير.',
   },
 };
 
@@ -335,11 +441,18 @@ function SmallIcon({ icon, bg }: { icon: string; bg: string }) {
   );
 }
 
+function formatSignedAmount(amount: number) {
+  const prefix = amount >= 0 ? '+' : '-';
+  return `${prefix} £${Math.abs(amount).toFixed(2)}`;
+}
+
 export default function WalletPage() {
   const router = useRouter();
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [wallet, setWallet] = useState<WalletState>(getWalletState());
+  const [transactionFilter, setTransactionFilter] = useState<TransactionFilter>('all');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('all');
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -366,47 +479,117 @@ export default function WalletPage() {
 
   const text = useMemo(() => getText(language), [language]);
 
-  const transactions = [
-    {
-      id: 'topup',
-      title: text.topUp,
-      subtitle: text.today,
-      amount: '+ £25.00',
-      status: text.completed,
-      icon: '＋',
-      bg: BRAND.softGreen,
-      color: BRAND.green,
-    },
-    {
-      id: 'booking',
-      title: text.bookingDeposit,
-      subtitle: text.today,
-      amount: '- £5.00',
-      status: text.completed,
-      icon: '📅',
-      bg: BRAND.softBlue,
-      color: BRAND.blue,
-    },
-    {
-      id: 'promotion',
-      title: text.promotionPayment,
-      subtitle: text.yesterday,
-      amount: '- £1.00',
-      status: text.completed,
-      icon: '📣',
-      bg: BRAND.softPink,
-      color: BRAND.pink,
-    },
-    {
-      id: 'fee',
-      title: text.platformFee,
-      subtitle: text.yesterday,
-      amount: '- £0.50',
-      status: text.completed,
-      icon: '🛡️',
-      bg: BRAND.softViolet,
-      color: BRAND.navy,
-    },
+  const transactions: TransactionItem[] = useMemo(
+    () => [
+      {
+        id: 'topup',
+        title: text.topUp,
+        subtitle: text.today,
+        amount: 25,
+        type: 'income',
+        status: 'completed',
+        daysAgo: 0,
+        icon: '＋',
+        bg: BRAND.softGreen,
+        color: BRAND.green,
+      },
+      {
+        id: 'service',
+        title: text.servicePayment,
+        subtitle: text.today,
+        amount: 12,
+        type: 'income',
+        status: 'pending',
+        daysAgo: 0,
+        icon: '💼',
+        bg: BRAND.softBlue,
+        color: BRAND.blue,
+      },
+      {
+        id: 'booking',
+        title: text.bookingDeposit,
+        subtitle: text.today,
+        amount: -5,
+        type: 'payment',
+        status: 'completed',
+        daysAgo: 0,
+        icon: '📅',
+        bg: BRAND.softBlue,
+        color: BRAND.blue,
+      },
+      {
+        id: 'promotion',
+        title: text.promotionPayment,
+        subtitle: text.yesterday,
+        amount: -1,
+        type: 'payment',
+        status: 'completed',
+        daysAgo: 1,
+        icon: '📣',
+        bg: BRAND.softPink,
+        color: BRAND.pink,
+      },
+      {
+        id: 'fee',
+        title: text.platformFee,
+        subtitle: text.yesterday,
+        amount: -0.5,
+        type: 'payment',
+        status: 'completed',
+        daysAgo: 1,
+        icon: '🛡️',
+        bg: BRAND.softViolet,
+        color: BRAND.navy,
+      },
+      {
+        id: 'payout',
+        title: text.payoutRequest,
+        subtitle: text.thirtyDays,
+        amount: -18,
+        type: 'payment',
+        status: 'pending',
+        daysAgo: 12,
+        icon: '↗',
+        bg: BRAND.softOrange,
+        color: '#b47b00',
+      },
+    ],
+    [text],
+  );
+
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((item) => {
+      const typeMatch = transactionFilter === 'all' || item.type === transactionFilter;
+
+      let dateMatch = true;
+
+      if (dateFilter === 'today') {
+        dateMatch = item.daysAgo === 0;
+      }
+
+      if (dateFilter === '7days') {
+        dateMatch = item.daysAgo <= 7;
+      }
+
+      if (dateFilter === '30days') {
+        dateMatch = item.daysAgo <= 30;
+      }
+
+      return typeMatch && dateMatch;
+    });
+  }, [transactions, transactionFilter, dateFilter]);
+
+  const transactionFilterOptions: { id: TransactionFilter; label: string }[] = [
+    { id: 'all', label: text.all },
+    { id: 'income', label: text.income },
+    { id: 'payment', label: text.payments },
+  ];
+
+  const dateFilterOptions: { id: DateFilter; label: string }[] = [
+    { id: 'today', label: text.today },
+    { id: '7days', label: text.sevenDays },
+    { id: '30days', label: text.thirtyDays },
+    { id: 'all', label: text.allTime },
   ];
 
   return (
@@ -659,6 +842,79 @@ export default function WalletPage() {
 
           <div
             style={{
+              display: 'flex',
+              gap: 8,
+              overflowX: 'auto',
+              paddingBottom: 8,
+              scrollbarWidth: 'none',
+            }}
+          >
+            {transactionFilterOptions.map((item) => {
+              const active = transactionFilter === item.id;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setTransactionFilter(item.id)}
+                  style={{
+                    minHeight: 38,
+                    padding: '0 14px',
+                    borderRadius: 999,
+                    border: `2.5px solid ${BRAND.border}`,
+                    background: active ? BRAND.navy : '#ffffff',
+                    color: active ? '#ffffff' : BRAND.navy,
+                    fontSize: 13,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    boxShadow: active ? '0 4px 0 rgba(0,0,0,0.12)' : 'none',
+                  }}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: 8,
+              overflowX: 'auto',
+              paddingBottom: 10,
+              scrollbarWidth: 'none',
+            }}
+          >
+            {dateFilterOptions.map((item) => {
+              const active = dateFilter === item.id;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setDateFilter(item.id)}
+                  style={{
+                    minHeight: 36,
+                    padding: '0 12px',
+                    borderRadius: 999,
+                    border: `2px solid ${BRAND.border}`,
+                    background: active ? BRAND.yellow : BRAND.softBlue,
+                    color: BRAND.navy,
+                    fontSize: 12,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div
+            style={{
               borderRadius: 26,
               border: `2.5px solid ${BRAND.border}`,
               background: '#ffffff',
@@ -666,62 +922,123 @@ export default function WalletPage() {
               boxShadow: '0 8px 20px rgba(7,27,70,0.05)',
             }}
           >
-            {transactions.map((item, index) => (
-              <div
-                key={item.id}
-                style={{
-                  minHeight: 86,
-                  display: 'grid',
-                  gridTemplateColumns: '52px minmax(0, 1fr) auto',
-                  gap: 12,
-                  alignItems: 'center',
-                  padding: '13px',
-                  borderTop: index === 0 ? 'none' : `2px solid ${BRAND.border}`,
-                  boxSizing: 'border-box',
-                }}
-              >
-                <SmallIcon icon={item.icon} bg={item.bg} />
+            {filteredTransactions.length > 0 ? (
+              filteredTransactions.map((item, index) => (
+                <div
+                  key={item.id}
+                  style={{
+                    minHeight: 88,
+                    display: 'grid',
+                    gridTemplateColumns: '52px minmax(0, 1fr) auto',
+                    gap: 12,
+                    alignItems: 'center',
+                    padding: '13px',
+                    borderTop: index === 0 ? 'none' : `2px solid ${BRAND.border}`,
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <SmallIcon icon={item.icon} bg={item.bg} />
 
-                <div style={{ minWidth: 0 }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 16,
+                        lineHeight: 1.15,
+                        fontWeight: 900,
+                        color: BRAND.navy,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {item.title}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 6,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 7,
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 12.5,
+                          lineHeight: 1.2,
+                          fontWeight: 800,
+                          color: BRAND.muted,
+                        }}
+                      >
+                        {item.subtitle}
+                      </span>
+
+                      <span
+                        style={{
+                          minHeight: 24,
+                          padding: '0 9px',
+                          borderRadius: 999,
+                          border: `2px solid ${BRAND.border}`,
+                          background:
+                            item.status === 'completed' ? BRAND.softGreen : BRAND.softOrange,
+                          color: item.status === 'completed' ? '#11883d' : '#b47b00',
+                          fontSize: 11,
+                          fontWeight: 900,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {item.status === 'completed' ? text.completed : text.pending}
+                      </span>
+                    </div>
+                  </div>
+
                   <div
                     style={{
                       fontSize: 16,
-                      lineHeight: 1.15,
                       fontWeight: 900,
-                      color: BRAND.navy,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
+                      color: item.amount >= 0 ? BRAND.green : BRAND.pink,
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {item.title}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 5,
-                      fontSize: 12.5,
-                      lineHeight: 1.2,
-                      fontWeight: 800,
-                      color: BRAND.muted,
-                    }}
-                  >
-                    {item.subtitle} · {item.status}
+                    {formatSignedAmount(item.amount)}
                   </div>
                 </div>
-
+              ))
+            ) : (
+              <div
+                style={{
+                  padding: 22,
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ fontSize: 36 }}>🧾</div>
                 <div
                   style={{
-                    fontSize: 16,
+                    marginTop: 8,
+                    fontSize: 18,
                     fontWeight: 900,
-                    color: item.color,
-                    whiteSpace: 'nowrap',
+                    color: BRAND.navy,
                   }}
                 >
-                  {item.amount}
+                  {text.noTransactions}
                 </div>
+                <p
+                  style={{
+                    margin: '7px auto 0',
+                    maxWidth: 260,
+                    fontSize: 13,
+                    lineHeight: 1.35,
+                    fontWeight: 800,
+                    color: BRAND.muted,
+                  }}
+                >
+                  {text.noTransactionsHint}
+                </p>
               </div>
-            ))}
+            )}
           </div>
         </section>
 
@@ -753,7 +1070,7 @@ export default function WalletPage() {
               color: BRAND.muted,
             }}
           >
-            Full statements, payout reports, refunds and invoices will appear here.
+            {text.statementHint}
           </p>
         </section>
       </div>
