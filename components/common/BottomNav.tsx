@@ -1,12 +1,16 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   getSavedLanguage,
   subscribeToLanguageChange,
   type AppLanguage,
 } from '../../services/i18n';
+import {
+  getUnreadMessagesCount,
+  subscribeToChatStore,
+} from '../../services/chatStore';
 
 type BottomNavProps = {
   active?: 'home' | 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
@@ -236,7 +240,7 @@ function HomeIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
       <path
         d="M4 10.5L12 4L20 10.5V20H4V10.5Z"
         stroke={color}
@@ -251,7 +255,7 @@ function CalendarIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.blue : BRAND.black;
 
   return (
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
       <rect x="4" y="6" width="16" height="14" rx="2.4" stroke={color} strokeWidth="1.9" />
       <path d="M8 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
       <path d="M16 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
@@ -264,7 +268,7 @@ function MessageIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
       <path
         d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
         stroke={color}
@@ -279,7 +283,7 @@ function ProfileIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="8" r="3.2" stroke={color} strokeWidth="1.9" />
       <path
         d="M5.5 19C6.5 15.8 8.8 14.5 12 14.5C15.2 14.5 17.5 15.8 18.5 19"
@@ -295,7 +299,7 @@ function ClientsIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
       <rect x="5" y="7" width="14" height="11" rx="2.4" stroke={color} strokeWidth="1.9" />
       <path
         d="M9 7V5.8C9 4.8 9.8 4 10.8 4H13.2C14.2 4 15 4.8 15 5.8V7"
@@ -323,6 +327,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   const [language, setLanguage] = useState<AppLanguage>('EN');
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [profileNavVisible, setProfileNavVisible] = useState(true);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -338,13 +343,36 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
     };
   }, []);
 
+  useEffect(() => {
+    const syncUnread = () => {
+      try {
+        setUnreadMessagesCount(getUnreadMessagesCount());
+      } catch {
+        setUnreadMessagesCount(0);
+      }
+    };
+
+    syncUnread();
+
+    const unsubscribe = subscribeToChatStore(syncUnread);
+
+    window.addEventListener('focus', syncUnread);
+    window.addEventListener('pageshow', syncUnread);
+    window.addEventListener('storage', syncUnread);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('focus', syncUnread);
+      window.removeEventListener('pageshow', syncUnread);
+      window.removeEventListener('storage', syncUnread);
+    };
+  }, []);
+
   const isProfileArea =
     pathname === '/profile' ||
     pathname?.startsWith('/profile/') ||
     activeProp === 'profile' ||
     activeProp === 'clients';
-
-  const isPublicArea = !isProfileArea;
 
   const showProfileNavTemporarily = () => {
     if (!isProfileArea) return;
@@ -357,7 +385,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
 
     hideTimerRef.current = setTimeout(() => {
       setProfileNavVisible(false);
-    }, 2800);
+    }, 2600);
   };
 
   useEffect(() => {
@@ -404,8 +432,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
 
   const addText = useMemo(() => getAddText(language), [language]);
   const items = isProfileArea ? profileItems : publicItems;
-
-  const shouldShowNav = isPublicArea || profileNavVisible || addMenuOpen;
+  const shouldShowNav = !isProfileArea || profileNavVisible || addMenuOpen;
 
   const getIsActive = (key: NavKey, href: string) => {
     if (addMenuOpen && key === 'add') return true;
@@ -480,7 +507,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
-            padding: '0 22px 128px',
+            padding: '0 22px 118px',
             boxSizing: 'border-box',
           }}
         >
@@ -503,17 +530,29 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                 borderBottom: `3px solid ${BRAND.border}`,
               }}
             >
-              <button type="button" onClick={handleCreateAd} style={addTileStyle('#ffe44d')}>
+              <button
+                type="button"
+                onClick={handleCreateAd}
+                style={addTileStyle('#ffe44d', BRAND.black, true)}
+              >
                 <span style={{ fontSize: 34 }}>📣</span>
                 <span>{addText.ad}</span>
               </button>
 
-              <button type="button" onClick={handleCreateService} style={addTileStyle('#41c83f', '#ffffff')}>
+              <button
+                type="button"
+                onClick={handleCreateService}
+                style={addTileStyle('#41c83f', '#ffffff', true)}
+              >
                 <span style={{ fontSize: 40, lineHeight: 1 }}>+</span>
                 <span>{addText.service}</span>
               </button>
 
-              <button type="button" onClick={handleCreateDeal} style={addTileStyle('#ff4b52', '#ffffff', false)}>
+              <button
+                type="button"
+                onClick={handleCreateDeal}
+                style={addTileStyle('#ff4b52', '#ffffff', false)}
+              >
                 <span
                   style={{
                     position: 'absolute',
@@ -563,25 +602,27 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
         style={{
           position: 'fixed',
           left: '50%',
-          bottom: 'calc(18px + env(safe-area-inset-bottom))',
-          transform: shouldShowNav ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(126px)',
+          bottom: 'calc(8px + env(safe-area-inset-bottom))',
+          transform: shouldShowNav
+            ? 'translateX(-50%) translateY(0)'
+            : 'translateX(-50%) translateY(120px)',
           opacity: shouldShowNav ? 1 : 0,
-          width: 'calc(100% - 34px)',
-          maxWidth: 398,
+          width: 'calc(100% - 38px)',
+          maxWidth: 388,
           zIndex: 1200,
           pointerEvents: shouldShowNav ? 'auto' : 'none',
           transition: 'transform 0.35s ease, opacity 0.25s ease',
         }}
       >
-        <div style={{ position: 'relative', height: 96 }}>
+        <div style={{ position: 'relative', height: 82 }}>
           <div
             style={{
               position: 'absolute',
               left: '50%',
-              top: -25,
+              top: -21,
               transform: 'translateX(-50%)',
-              width: 116,
-              height: 64,
+              width: 100,
+              height: 50,
               borderTopLeftRadius: 999,
               borderTopRightRadius: 999,
               background: BRAND.cream,
@@ -598,12 +639,12 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
               inset: 0,
               background: BRAND.cream,
               border: `2px solid ${BRAND.border}`,
-              borderRadius: 32,
-              boxShadow: '0 10px 26px rgba(15,23,42,0.08)',
+              borderRadius: 28,
+              boxShadow: '0 10px 24px rgba(15,23,42,0.08)',
               display: 'grid',
               gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
               alignItems: 'end',
-              padding: '13px 8px 13px',
+              padding: '10px 8px 10px',
               boxSizing: 'border-box',
               zIndex: 2,
             }}
@@ -612,6 +653,8 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
               const isActive = getIsActive(item.key, item.href);
               const label = getLabel(item, language);
               const activeColor = getActiveColor(item.key);
+              const badge =
+                item.key === 'messages' && unreadMessagesCount > 0 ? unreadMessagesCount : 0;
 
               if (item.accent) {
                 return (
@@ -628,29 +671,29 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'flex-end',
-                      gap: 4,
+                      gap: 3,
                       position: 'relative',
                       zIndex: 5,
-                      minHeight: 84,
+                      minHeight: 70,
                       minWidth: 0,
                       overflow: 'visible',
                     }}
                   >
                     <span
                       style={{
-                        width: 78,
-                        height: 78,
+                        width: 66,
+                        height: 66,
                         borderRadius: '50%',
                         background: BRAND.green,
                         color: '#ffffff',
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 44,
+                        fontSize: 38,
                         fontWeight: 700,
                         lineHeight: 1,
-                        boxShadow: '0 12px 28px rgba(85,199,95,0.34)',
-                        transform: 'translateY(-22px)',
+                        boxShadow: '0 10px 24px rgba(85,199,95,0.30)',
+                        transform: 'translateY(-18px)',
                         flexShrink: 0,
                       }}
                     >
@@ -660,13 +703,13 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     <span
                       title={label}
                       style={{
-                        marginTop: -22,
+                        marginTop: -18,
                         width: '100%',
                         maxWidth: 68,
                         minWidth: 0,
                         display: 'block',
                         textAlign: 'center',
-                        fontSize: language === 'RU' || language === 'UA' ? 10.5 : 12,
+                        fontSize: language === 'RU' || language === 'UA' ? 10 : 11.5,
                         fontWeight: 900,
                         color: isActive ? activeColor : BRAND.black,
                         lineHeight: 1,
@@ -695,9 +738,9 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'flex-end',
-                    gap: 5,
+                    gap: 4,
                     position: 'relative',
-                    minHeight: 70,
+                    minHeight: 62,
                     minWidth: 0,
                   }}
                 >
@@ -706,17 +749,42 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      height: 32,
+                      height: 29,
                     }}
                   >
                     <NavIcon itemKey={item.key} active={isActive} />
                   </span>
 
+                  {badge > 0 ? (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: 4,
+                        right: '16%',
+                        minWidth: 22,
+                        height: 22,
+                        padding: '0 5px',
+                        borderRadius: 999,
+                        background: '#ff4fa0',
+                        color: '#ffffff',
+                        fontSize: 11,
+                        fontWeight: 900,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '2px solid #ffffff',
+                        boxSizing: 'border-box',
+                      }}
+                    >
+                      {badge > 99 ? '99+' : badge}
+                    </span>
+                  ) : null}
+
                   <span
                     title={label}
                     style={{
                       width: '100%',
-                      maxWidth: isProfileArea ? 72 : 66,
+                      maxWidth: isProfileArea ? 70 : 64,
                       minWidth: 0,
                       display: 'block',
                       textAlign: 'center',
@@ -726,8 +794,8 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                         language === 'DE' ||
                         language === 'IT' ||
                         language === 'FR'
-                          ? 10.5
-                          : 12,
+                          ? 10
+                          : 11.5,
                       fontWeight: 900,
                       color: isActive ? activeColor : BRAND.black,
                       lineHeight: 1,
@@ -748,7 +816,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   );
 }
 
-function addTileStyle(bg: string, color = BRAND.black, withRightBorder = true): CSSProperties {
+function addTileStyle(bg: string, color: string, withRightBorder: boolean): React.CSSProperties {
   return {
     minHeight: 112,
     border: 'none',
