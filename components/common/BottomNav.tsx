@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   getSavedLanguage,
@@ -37,101 +37,18 @@ const addMenuTexts: Record<
     service: string;
     deal: string;
     close: string;
-    adSub: string;
-    serviceSub: string;
-    dealSub: string;
   }
 > = {
-  EN: {
-    ad: 'Ad',
-    service: 'Service',
-    deal: 'Deal',
-    close: 'Close',
-    adSub: 'Create paid promotion',
-    serviceSub: 'Add new service',
-    dealSub: 'Create discount',
-  },
-  RU: {
-    ad: 'Реклама',
-    service: 'Услуга',
-    deal: 'Скидка',
-    close: 'Закрыть',
-    adSub: 'Создать платную рекламу',
-    serviceSub: 'Добавить новую услугу',
-    dealSub: 'Создать скидку',
-  },
-  UA: {
-    ad: 'Реклама',
-    service: 'Послуга',
-    deal: 'Знижка',
-    close: 'Закрити',
-    adSub: 'Створити платну рекламу',
-    serviceSub: 'Додати нову послугу',
-    dealSub: 'Створити знижку',
-  },
-  ES: {
-    ad: 'Anuncio',
-    service: 'Servicio',
-    deal: 'Descuento',
-    close: 'Cerrar',
-    adSub: 'Crear promoción pagada',
-    serviceSub: 'Añadir servicio',
-    dealSub: 'Crear descuento',
-  },
-  CZ: {
-    ad: 'Reklama',
-    service: 'Služba',
-    deal: 'Sleva',
-    close: 'Zavřít',
-    adSub: 'Vytvořit placenou reklamu',
-    serviceSub: 'Přidat službu',
-    dealSub: 'Vytvořit slevu',
-  },
-  DE: {
-    ad: 'Anzeige',
-    service: 'Service',
-    deal: 'Rabatt',
-    close: 'Schließen',
-    adSub: 'Bezahlte Werbung erstellen',
-    serviceSub: 'Service hinzufügen',
-    dealSub: 'Rabatt erstellen',
-  },
-  IT: {
-    ad: 'Pubblicità',
-    service: 'Servizio',
-    deal: 'Sconto',
-    close: 'Chiudi',
-    adSub: 'Crea promozione',
-    serviceSub: 'Aggiungi servizio',
-    dealSub: 'Crea sconto',
-  },
-  FR: {
-    ad: 'Pub',
-    service: 'Service',
-    deal: 'Réduction',
-    close: 'Fermer',
-    adSub: 'Créer promotion payante',
-    serviceSub: 'Ajouter service',
-    dealSub: 'Créer réduction',
-  },
-  PL: {
-    ad: 'Reklama',
-    service: 'Usługa',
-    deal: 'Zniżka',
-    close: 'Zamknij',
-    adSub: 'Utwórz płatną promocję',
-    serviceSub: 'Dodaj usługę',
-    dealSub: 'Utwórz zniżkę',
-  },
-  AR: {
-    ad: 'إعلان',
-    service: 'خدمة',
-    deal: 'خصم',
-    close: 'إغلاق',
-    adSub: 'إنشاء إعلان مدفوع',
-    serviceSub: 'إضافة خدمة',
-    dealSub: 'إنشاء خصم',
-  },
+  EN: { ad: 'Ad', service: 'Service', deal: 'Deal', close: 'Close' },
+  ES: { ad: 'Anuncio', service: 'Servicio', deal: 'Descuento', close: 'Cerrar' },
+  RU: { ad: 'Реклама', service: 'Услуга', deal: 'Скидка', close: 'Закрыть' },
+  UA: { ad: 'Реклама', service: 'Послуга', deal: 'Знижка', close: 'Закрити' },
+  CZ: { ad: 'Reklama', service: 'Služba', deal: 'Sleva', close: 'Zavřít' },
+  DE: { ad: 'Anzeige', service: 'Service', deal: 'Rabatt', close: 'Schließen' },
+  IT: { ad: 'Pubblicità', service: 'Servizio', deal: 'Sconto', close: 'Chiudi' },
+  FR: { ad: 'Pub', service: 'Service', deal: 'Réduction', close: 'Fermer' },
+  AR: { ad: 'إعلان', service: 'خدمة', deal: 'خصم', close: 'إغلاق' },
+  PL: { ad: 'Reklama', service: 'Usługa', deal: 'Zniżka', close: 'Zamknij' },
 };
 
 const publicItems: NavItem[] = [
@@ -140,15 +57,15 @@ const publicItems: NavItem[] = [
     href: '/',
     label: {
       EN: 'Home',
+      ES: 'Inicio',
       RU: 'Главная',
       UA: 'Головна',
-      ES: 'Inicio',
       CZ: 'Domů',
       DE: 'Home',
       IT: 'Home',
       FR: 'Accueil',
-      PL: 'Start',
       AR: 'الرئيسية',
+      PL: 'Start',
     },
   },
   {
@@ -156,15 +73,15 @@ const publicItems: NavItem[] = [
     href: '/messages',
     label: {
       EN: 'Messages',
+      ES: 'Mensajes',
       RU: 'Сообщения',
       UA: 'Повідомл.',
-      ES: 'Mensajes',
       CZ: 'Zprávy',
       DE: 'Nachr.',
       IT: 'Messaggi',
       FR: 'Messages',
-      PL: 'Wiadom.',
       AR: 'رسائل',
+      PL: 'Wiadom.',
     },
   },
   {
@@ -173,15 +90,15 @@ const publicItems: NavItem[] = [
     accent: true,
     label: {
       EN: 'Add',
+      ES: 'Añadir',
       RU: 'Добавить',
       UA: 'Додати',
-      ES: 'Añadir',
       CZ: 'Přidat',
       DE: 'Plus',
       IT: 'Aggiungi',
       FR: 'Ajouter',
-      PL: 'Dodaj',
       AR: 'إضافة',
+      PL: 'Dodaj',
     },
   },
   {
@@ -189,15 +106,15 @@ const publicItems: NavItem[] = [
     href: '/bookings',
     label: {
       EN: 'Bookings',
+      ES: 'Reservas',
       RU: 'Брони',
       UA: 'Броні',
-      ES: 'Reservas',
       CZ: 'Rezervace',
       DE: 'Buchung',
       IT: 'Prenota',
       FR: 'Réserv.',
-      PL: 'Rezerw.',
       AR: 'حجوزات',
+      PL: 'Rezerw.',
     },
   },
   {
@@ -205,15 +122,15 @@ const publicItems: NavItem[] = [
     href: '/profile',
     label: {
       EN: 'Profile',
+      ES: 'Perfil',
       RU: 'Профиль',
       UA: 'Профіль',
-      ES: 'Perfil',
       CZ: 'Profil',
       DE: 'Profil',
       IT: 'Profilo',
       FR: 'Profil',
-      PL: 'Profil',
       AR: 'حسابي',
+      PL: 'Profil',
     },
   },
 ];
@@ -224,15 +141,15 @@ const profileItems: NavItem[] = [
     href: '/profile',
     label: {
       EN: 'Profile',
+      ES: 'Perfil',
       RU: 'Профиль',
       UA: 'Профіль',
-      ES: 'Perfil',
       CZ: 'Profil',
       DE: 'Profil',
       IT: 'Profilo',
       FR: 'Profil',
-      PL: 'Profil',
       AR: 'حسابي',
+      PL: 'Profil',
     },
   },
   {
@@ -240,15 +157,15 @@ const profileItems: NavItem[] = [
     href: '/profile/clients',
     label: {
       EN: 'My clients',
+      ES: 'Clientes',
       RU: 'Мои клиенты',
       UA: 'Мої клієнти',
-      ES: 'Clientes',
       CZ: 'Klienti',
       DE: 'Kunden',
       IT: 'Clienti',
       FR: 'Clients',
-      PL: 'Klienci',
       AR: 'عملائي',
+      PL: 'Klienci',
     },
   },
   {
@@ -257,15 +174,15 @@ const profileItems: NavItem[] = [
     accent: true,
     label: {
       EN: 'Add',
+      ES: 'Añadir',
       RU: 'Добавить',
       UA: 'Додати',
-      ES: 'Añadir',
       CZ: 'Přidat',
       DE: 'Plus',
       IT: 'Aggiungi',
       FR: 'Ajouter',
-      PL: 'Dodaj',
       AR: 'إضافة',
+      PL: 'Dodaj',
     },
   },
   {
@@ -273,15 +190,15 @@ const profileItems: NavItem[] = [
     href: '/profile/bookings',
     label: {
       EN: 'My bookings',
+      ES: 'Reservas',
       RU: 'Мои брони',
       UA: 'Мої броні',
-      ES: 'Reservas',
       CZ: 'Rezervace',
       DE: 'Buchungen',
       IT: 'Prenot.',
       FR: 'Réserv.',
-      PL: 'Rezerw.',
       AR: 'حجوزاتي',
+      PL: 'Rezerw.',
     },
   },
   {
@@ -289,15 +206,15 @@ const profileItems: NavItem[] = [
     href: '/messages',
     label: {
       EN: 'Messages',
+      ES: 'Mensajes',
       RU: 'Сообщения',
       UA: 'Повідомл.',
-      ES: 'Mensajes',
       CZ: 'Zprávy',
       DE: 'Nachr.',
       IT: 'Messaggi',
       FR: 'Messages',
-      PL: 'Wiadom.',
       AR: 'رسائل',
+      PL: 'Wiadom.',
     },
   },
 ];
@@ -405,6 +322,9 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
 
   const [language, setLanguage] = useState<AppLanguage>('EN');
   const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [profileNavVisible, setProfileNavVisible] = useState(true);
+
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -418,15 +338,74 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
     };
   }, []);
 
-  const addText = useMemo(() => getAddText(language), [language]);
-
   const isProfileArea =
     pathname === '/profile' ||
     pathname?.startsWith('/profile/') ||
     activeProp === 'profile' ||
     activeProp === 'clients';
 
+  const isPublicArea = !isProfileArea;
+
+  const showProfileNavTemporarily = () => {
+    if (!isProfileArea) return;
+
+    setProfileNavVisible(true);
+
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+    }
+
+    hideTimerRef.current = setTimeout(() => {
+      setProfileNavVisible(false);
+    }, 2800);
+  };
+
+  useEffect(() => {
+    if (!isProfileArea) {
+      setProfileNavVisible(true);
+
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+
+      return;
+    }
+
+    showProfileNavTemporarily();
+
+    window.addEventListener('scroll', showProfileNavTemporarily, { passive: true });
+    window.addEventListener('touchstart', showProfileNavTemporarily, { passive: true });
+    window.addEventListener('focus', showProfileNavTemporarily);
+    window.addEventListener('pageshow', showProfileNavTemporarily);
+
+    return () => {
+      window.removeEventListener('scroll', showProfileNavTemporarily);
+      window.removeEventListener('touchstart', showProfileNavTemporarily);
+      window.removeEventListener('focus', showProfileNavTemporarily);
+      window.removeEventListener('pageshow', showProfileNavTemporarily);
+
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+    };
+  }, [pathname, isProfileArea]);
+
+  useEffect(() => {
+    if (addMenuOpen) {
+      setProfileNavVisible(true);
+
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+    } else if (isProfileArea) {
+      showProfileNavTemporarily();
+    }
+  }, [addMenuOpen]);
+
+  const addText = useMemo(() => getAddText(language), [language]);
   const items = isProfileArea ? profileItems : publicItems;
+
+  const shouldShowNav = isPublicArea || profileNavVisible || addMenuOpen;
 
   const getIsActive = (key: NavKey, href: string) => {
     if (addMenuOpen && key === 'add') return true;
@@ -434,6 +413,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
     if (activeProp) {
       if (activeProp === 'add') return key === 'add';
       if (activeProp === 'clients') return key === 'clients';
+      if (activeProp === 'bookings') return key === 'bookings';
       return activeProp === key;
     }
 
@@ -441,6 +421,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
     if (key === 'profile') return pathname === '/profile' || pathname?.startsWith('/profile/');
     if (key === 'clients') return pathname === '/profile/clients';
     if (key === 'messages') return pathname === '/messages' || pathname?.startsWith('/messages/');
+
     if (key === 'bookings') {
       return (
         pathname === '/bookings' ||
@@ -515,33 +496,48 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
               boxShadow: '0 20px 44px rgba(0,0,0,0.22)',
             }}
           >
-            <AddMenuButton
-              icon="📣"
-              title={addText.ad}
-              subtitle={addText.adSub}
-              bg="#ffe44d"
-              borderBottom
-              onClick={handleCreateAd}
-            />
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                borderBottom: `3px solid ${BRAND.border}`,
+              }}
+            >
+              <button type="button" onClick={handleCreateAd} style={addTileStyle('#ffe44d')}>
+                <span style={{ fontSize: 34 }}>📣</span>
+                <span>{addText.ad}</span>
+              </button>
 
-            <AddMenuButton
-              icon="+"
-              title={addText.service}
-              subtitle={addText.serviceSub}
-              bg="#41c83f"
-              color="#ffffff"
-              borderBottom
-              onClick={handleCreateService}
-            />
+              <button type="button" onClick={handleCreateService} style={addTileStyle('#41c83f', '#ffffff')}>
+                <span style={{ fontSize: 40, lineHeight: 1 }}>+</span>
+                <span>{addText.service}</span>
+              </button>
 
-            <AddMenuButton
-              icon="%"
-              title={addText.deal}
-              subtitle={addText.dealSub}
-              bg="#ff4b52"
-              color="#ffffff"
-              onClick={handleCreateDeal}
-            />
+              <button type="button" onClick={handleCreateDeal} style={addTileStyle('#ff4b52', '#ffffff', false)}>
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 12,
+                    right: 12,
+                    minWidth: 42,
+                    height: 30,
+                    borderRadius: 999,
+                    border: `3px solid ${BRAND.border}`,
+                    background: '#ffffff',
+                    color: '#ff4b52',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 14,
+                    fontWeight: 900,
+                  }}
+                >
+                  £1
+                </span>
+                <span style={{ fontSize: 40, lineHeight: 1 }}>%</span>
+                <span>{addText.deal}</span>
+              </button>
+            </div>
 
             <button
               type="button"
@@ -550,7 +546,6 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                 width: '100%',
                 minHeight: 58,
                 border: 'none',
-                borderTop: `3px solid ${BRAND.border}`,
                 background: '#ffffff',
                 color: BRAND.black,
                 fontSize: 19,
@@ -569,11 +564,13 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
           position: 'fixed',
           left: '50%',
           bottom: 'calc(18px + env(safe-area-inset-bottom))',
-          transform: 'translateX(-50%)',
+          transform: shouldShowNav ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(126px)',
+          opacity: shouldShowNav ? 1 : 0,
           width: 'calc(100% - 34px)',
           maxWidth: 398,
           zIndex: 1200,
-          pointerEvents: 'auto',
+          pointerEvents: shouldShowNav ? 'auto' : 'none',
+          transition: 'transform 0.35s ease, opacity 0.25s ease',
         }}
       >
         <div style={{ position: 'relative', height: 96 }}>
@@ -751,87 +748,21 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   );
 }
 
-function AddMenuButton({
-  icon,
-  title,
-  subtitle,
-  bg,
-  color = BRAND.black,
-  borderBottom = false,
-  onClick,
-}: {
-  icon: string;
-  title: string;
-  subtitle: string;
-  bg: string;
-  color?: string;
-  borderBottom?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        width: '100%',
-        minHeight: 88,
-        border: 'none',
-        borderBottom: borderBottom ? `3px solid ${BRAND.border}` : 'none',
-        background: bg,
-        color,
-        padding: '14px 16px',
-        display: 'grid',
-        gridTemplateColumns: '54px 1fr',
-        gap: 12,
-        alignItems: 'center',
-        textAlign: 'left',
-        cursor: 'pointer',
-      }}
-    >
-      <span
-        style={{
-          width: 54,
-          height: 54,
-          borderRadius: 18,
-          border: `3px solid ${BRAND.border}`,
-          background: '#ffffff',
-          color: BRAND.black,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: icon === '+' ? 35 : 27,
-          fontWeight: 900,
-          boxSizing: 'border-box',
-        }}
-      >
-        {icon}
-      </span>
-
-      <span>
-        <span
-          style={{
-            display: 'block',
-            fontSize: 18,
-            lineHeight: 1.05,
-            fontWeight: 900,
-          }}
-        >
-          {title}
-        </span>
-
-        <span
-          style={{
-            display: 'block',
-            marginTop: 5,
-            fontSize: 12,
-            lineHeight: 1.2,
-            fontWeight: 800,
-            opacity: 0.86,
-          }}
-        >
-          {subtitle}
-        </span>
-      </span>
-    </button>
-  );
+function addTileStyle(bg: string, color = BRAND.black, withRightBorder = true): CSSProperties {
+  return {
+    minHeight: 112,
+    border: 'none',
+    borderRight: withRightBorder ? `3px solid ${BRAND.border}` : 'none',
+    background: bg,
+    color,
+    fontSize: 17,
+    fontWeight: 900,
+    cursor: 'pointer',
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  };
 }
