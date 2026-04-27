@@ -14,6 +14,15 @@ import {
   type PaymentsState,
 } from '../../services/paymentsStore';
 
+type LocalCard = {
+  id: string;
+  brand: string;
+  last4: string;
+  expiry: string;
+  holderName: string;
+  isDefault: boolean;
+};
+
 type PaymentTextShape = {
   title: string;
   subtitle: string;
@@ -38,6 +47,13 @@ type PaymentTextShape = {
   disabled: string;
   verified: string;
   addNew: string;
+  addCard: string;
+  saveCard: string;
+  cancel: string;
+  cardBrand: string;
+  last4: string;
+  expiry: string;
+  cardHolder: string;
   edit: string;
   remove: string;
   setPrimary: string;
@@ -49,6 +65,7 @@ type PaymentTextShape = {
   bankAvailable: string;
   comingSoon: string;
   addHint: string;
+  primaryHint: string;
 };
 
 const BRAND = {
@@ -78,7 +95,7 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     instantCheckout: 'Instant checkout ready',
     readyLabel: 'Ready to pay',
     cards: 'Saved cards',
-    cardsHint: 'Primary card, secure checkout and billing methods',
+    cardsHint: 'Add several cards and choose one primary card for payments',
     paypal: 'PayPal',
     paypalHint: 'Connected account for fast checkout',
     mobilePayments: 'Apple Pay & Google Pay',
@@ -92,6 +109,13 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     disabled: 'Disabled',
     verified: 'Verified',
     addNew: 'Add new',
+    addCard: 'Add card',
+    saveCard: 'Save card',
+    cancel: 'Cancel',
+    cardBrand: 'Card brand',
+    last4: 'Last 4 digits',
+    expiry: 'Expiry',
+    cardHolder: 'Card holder',
     edit: 'Edit',
     remove: 'Remove',
     setPrimary: 'Set primary',
@@ -102,7 +126,8 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     verificationNeeded: 'Verification recommended',
     bankAvailable: 'Business and manual transfer available',
     comingSoon: 'Coming soon',
-    addHint: 'Adding new real payment methods will be connected to Stripe later.',
+    addHint: 'Real card saving will later be connected through Stripe.',
+    primaryHint: 'Only one card can be primary at the same time.',
   },
   RU: {
     title: 'Способы оплаты',
@@ -114,7 +139,7 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     instantCheckout: 'Быстрая оплата готова',
     readyLabel: 'Готово к оплате',
     cards: 'Сохранённые карты',
-    cardsHint: 'Основная карта, безопасная оплата и платёжные методы',
+    cardsHint: 'Добавляйте несколько карт и выбирайте одну основную для оплаты',
     paypal: 'PayPal',
     paypalHint: 'Подключённый аккаунт для быстрой оплаты',
     mobilePayments: 'Apple Pay и Google Pay',
@@ -128,6 +153,13 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     disabled: 'Выключено',
     verified: 'Проверено',
     addNew: 'Добавить',
+    addCard: 'Добавить карту',
+    saveCard: 'Сохранить карту',
+    cancel: 'Отмена',
+    cardBrand: 'Тип карты',
+    last4: 'Последние 4 цифры',
+    expiry: 'Срок',
+    cardHolder: 'Владелец карты',
     edit: 'Изменить',
     remove: 'Удалить',
     setPrimary: 'Сделать основной',
@@ -138,7 +170,8 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     verificationNeeded: 'Рекомендуется верификация',
     bankAvailable: 'Доступны ручной и бизнес-перевод',
     comingSoon: 'Скоро',
-    addHint: 'Добавление настоящих способов оплаты позже подключим через Stripe.',
+    addHint: 'Настоящее сохранение карт позже подключим через Stripe.',
+    primaryHint: 'Одновременно основной может быть только одна карта.',
   },
   UA: {
     title: 'Способи оплати',
@@ -150,7 +183,7 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     instantCheckout: 'Швидка оплата готова',
     readyLabel: 'Готово до оплати',
     cards: 'Збережені картки',
-    cardsHint: 'Основна картка, безпечна оплата та платіжні методи',
+    cardsHint: 'Додавайте кілька карток і вибирайте одну основну',
     paypal: 'PayPal',
     paypalHint: 'Підключений акаунт для швидкої оплати',
     mobilePayments: 'Apple Pay і Google Pay',
@@ -164,6 +197,13 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     disabled: 'Вимкнено',
     verified: 'Перевірено',
     addNew: 'Додати',
+    addCard: 'Додати картку',
+    saveCard: 'Зберегти картку',
+    cancel: 'Скасувати',
+    cardBrand: 'Тип картки',
+    last4: 'Останні 4 цифри',
+    expiry: 'Термін',
+    cardHolder: 'Власник картки',
     edit: 'Змінити',
     remove: 'Видалити',
     setPrimary: 'Зробити основною',
@@ -174,7 +214,8 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     verificationNeeded: 'Рекомендована верифікація',
     bankAvailable: 'Доступний ручний і бізнес-переказ',
     comingSoon: 'Скоро',
-    addHint: 'Додавання справжніх способів оплати пізніше підключимо через Stripe.',
+    addHint: 'Справжнє збереження карток пізніше підключимо через Stripe.',
+    primaryHint: 'Одночасно основною може бути тільки одна картка.',
   },
   ES: {
     title: 'Métodos de pago',
@@ -186,7 +227,7 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     instantCheckout: 'Pago instantáneo listo',
     readyLabel: 'Listo para pagar',
     cards: 'Tarjetas guardadas',
-    cardsHint: 'Tarjeta principal, pago seguro y métodos de facturación',
+    cardsHint: 'Añade varias tarjetas y elige una principal',
     paypal: 'PayPal',
     paypalHint: 'Cuenta conectada para pago rápido',
     mobilePayments: 'Apple Pay y Google Pay',
@@ -200,6 +241,13 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     disabled: 'Desactivado',
     verified: 'Verificado',
     addNew: 'Añadir',
+    addCard: 'Añadir tarjeta',
+    saveCard: 'Guardar tarjeta',
+    cancel: 'Cancelar',
+    cardBrand: 'Marca',
+    last4: 'Últimos 4 dígitos',
+    expiry: 'Caducidad',
+    cardHolder: 'Titular',
     edit: 'Editar',
     remove: 'Eliminar',
     setPrimary: 'Hacer principal',
@@ -210,7 +258,8 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     verificationNeeded: 'Se recomienda verificación',
     bankAvailable: 'Transferencia manual y pagos para empresas disponibles',
     comingSoon: 'Próximamente',
-    addHint: 'Los métodos reales se conectarán más tarde con Stripe.',
+    addHint: 'El guardado real de tarjetas se conectará después con Stripe.',
+    primaryHint: 'Solo una tarjeta puede ser principal al mismo tiempo.',
   },
   CZ: {
     title: 'Platební metody',
@@ -222,7 +271,7 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     instantCheckout: 'Rychlá platba připravena',
     readyLabel: 'Připraveno k platbě',
     cards: 'Uložené karty',
-    cardsHint: 'Hlavní karta, bezpečná platba a platební metody',
+    cardsHint: 'Přidejte více karet a jednu nastavte jako hlavní',
     paypal: 'PayPal',
     paypalHint: 'Připojený účet pro rychlou platbu',
     mobilePayments: 'Apple Pay a Google Pay',
@@ -236,6 +285,13 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     disabled: 'Vypnuto',
     verified: 'Ověřeno',
     addNew: 'Přidat',
+    addCard: 'Přidat kartu',
+    saveCard: 'Uložit kartu',
+    cancel: 'Zrušit',
+    cardBrand: 'Typ karty',
+    last4: 'Poslední 4 čísla',
+    expiry: 'Platnost',
+    cardHolder: 'Držitel karty',
     edit: 'Upravit',
     remove: 'Odstranit',
     setPrimary: 'Nastavit jako hlavní',
@@ -246,7 +302,8 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     verificationNeeded: 'Doporučena verifikace',
     bankAvailable: 'Dostupný ruční a firemní převod',
     comingSoon: 'Brzy',
-    addHint: 'Skutečné platební metody později připojíme přes Stripe.',
+    addHint: 'Skutečné ukládání karet později připojíme přes Stripe.',
+    primaryHint: 'Hlavní může být současně pouze jedna karta.',
   },
   DE: {
     title: 'Zahlungsmethoden',
@@ -258,7 +315,7 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     instantCheckout: 'Sofort-Checkout bereit',
     readyLabel: 'Bereit zum Bezahlen',
     cards: 'Gespeicherte Karten',
-    cardsHint: 'Primäre Karte, sicherer Checkout und Abrechnungsmethoden',
+    cardsHint: 'Füge mehrere Karten hinzu und wähle eine Hauptkarte',
     paypal: 'PayPal',
     paypalHint: 'Verbundenes Konto für schnellen Checkout',
     mobilePayments: 'Apple Pay und Google Pay',
@@ -272,6 +329,13 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     disabled: 'Inaktiv',
     verified: 'Verifiziert',
     addNew: 'Hinzufügen',
+    addCard: 'Karte hinzufügen',
+    saveCard: 'Karte speichern',
+    cancel: 'Abbrechen',
+    cardBrand: 'Kartentyp',
+    last4: 'Letzte 4 Ziffern',
+    expiry: 'Ablauf',
+    cardHolder: 'Karteninhaber',
     edit: 'Bearbeiten',
     remove: 'Entfernen',
     setPrimary: 'Als primär setzen',
@@ -282,7 +346,8 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     verificationNeeded: 'Verifizierung empfohlen',
     bankAvailable: 'Manuelle und Business-Überweisung verfügbar',
     comingSoon: 'Bald',
-    addHint: 'Echte Zahlungsmethoden werden später über Stripe verbunden.',
+    addHint: 'Echtes Speichern von Karten wird später über Stripe verbunden.',
+    primaryHint: 'Nur eine Karte kann gleichzeitig primär sein.',
   },
   IT: {
     title: 'Metodi di pagamento',
@@ -294,7 +359,7 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     instantCheckout: 'Checkout rapido pronto',
     readyLabel: 'Pronto a pagare',
     cards: 'Carte salvate',
-    cardsHint: 'Carta principale, checkout sicuro e metodi di fatturazione',
+    cardsHint: 'Aggiungi più carte e scegli una principale',
     paypal: 'PayPal',
     paypalHint: 'Account collegato per checkout rapido',
     mobilePayments: 'Apple Pay e Google Pay',
@@ -308,6 +373,13 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     disabled: 'Disattivo',
     verified: 'Verificato',
     addNew: 'Aggiungi',
+    addCard: 'Aggiungi carta',
+    saveCard: 'Salva carta',
+    cancel: 'Annulla',
+    cardBrand: 'Tipo carta',
+    last4: 'Ultime 4 cifre',
+    expiry: 'Scadenza',
+    cardHolder: 'Titolare',
     edit: 'Modifica',
     remove: 'Rimuovi',
     setPrimary: 'Imposta principale',
@@ -318,7 +390,8 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     verificationNeeded: 'Verifica consigliata',
     bankAvailable: 'Bonifico manuale e business disponibile',
     comingSoon: 'Presto',
-    addHint: 'I metodi reali saranno collegati più tardi con Stripe.',
+    addHint: 'Il salvataggio reale delle carte sarà collegato più tardi con Stripe.',
+    primaryHint: 'Solo una carta può essere principale allo stesso tempo.',
   },
   FR: {
     title: 'Moyens de paiement',
@@ -330,7 +403,7 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     instantCheckout: 'Paiement instantané prêt',
     readyLabel: 'Prêt à payer',
     cards: 'Cartes enregistrées',
-    cardsHint: 'Carte principale, paiement sécurisé et facturation',
+    cardsHint: 'Ajoutez plusieurs cartes et choisissez une principale',
     paypal: 'PayPal',
     paypalHint: 'Compte connecté pour paiement rapide',
     mobilePayments: 'Apple Pay et Google Pay',
@@ -344,6 +417,13 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     disabled: 'Désactivé',
     verified: 'Vérifié',
     addNew: 'Ajouter',
+    addCard: 'Ajouter carte',
+    saveCard: 'Enregistrer carte',
+    cancel: 'Annuler',
+    cardBrand: 'Type de carte',
+    last4: '4 derniers chiffres',
+    expiry: 'Expiration',
+    cardHolder: 'Titulaire',
     edit: 'Modifier',
     remove: 'Supprimer',
     setPrimary: 'Définir principal',
@@ -354,7 +434,8 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     verificationNeeded: 'Vérification recommandée',
     bankAvailable: 'Virement manuel et business disponible',
     comingSoon: 'Bientôt',
-    addHint: 'Les vrais moyens de paiement seront connectés plus tard avec Stripe.',
+    addHint: 'L’enregistrement réel des cartes sera connecté plus tard avec Stripe.',
+    primaryHint: 'Une seule carte peut être principale à la fois.',
   },
   PL: {
     title: 'Metody płatności',
@@ -366,7 +447,7 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     instantCheckout: 'Szybka płatność gotowa',
     readyLabel: 'Gotowe do płatności',
     cards: 'Zapisane karty',
-    cardsHint: 'Karta główna, bezpieczna płatność i rozliczenia',
+    cardsHint: 'Dodaj kilka kart i wybierz jedną główną',
     paypal: 'PayPal',
     paypalHint: 'Połączone konto do szybkiej płatności',
     mobilePayments: 'Apple Pay i Google Pay',
@@ -380,6 +461,13 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     disabled: 'Wyłączone',
     verified: 'Zweryfikowano',
     addNew: 'Dodaj',
+    addCard: 'Dodaj kartę',
+    saveCard: 'Zapisz kartę',
+    cancel: 'Anuluj',
+    cardBrand: 'Typ karty',
+    last4: 'Ostatnie 4 cyfry',
+    expiry: 'Ważność',
+    cardHolder: 'Właściciel karty',
     edit: 'Edytuj',
     remove: 'Usuń',
     setPrimary: 'Ustaw jako główną',
@@ -390,7 +478,8 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     verificationNeeded: 'Zalecana weryfikacja',
     bankAvailable: 'Dostępny przelew ręczny i firmowy',
     comingSoon: 'Wkrótce',
-    addHint: 'Prawdziwe metody płatności podłączymy później przez Stripe.',
+    addHint: 'Prawdziwe zapisywanie kart podłączymy później przez Stripe.',
+    primaryHint: 'Tylko jedna karta może być główna jednocześnie.',
   },
   AR: {
     title: 'طرق الدفع',
@@ -402,7 +491,7 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     instantCheckout: 'الدفع السريع جاهز',
     readyLabel: 'جاهز للدفع',
     cards: 'البطاقات المحفوظة',
-    cardsHint: 'البطاقة الرئيسية والدفع الآمن وطرق الفوترة',
+    cardsHint: 'أضف عدة بطاقات واختر بطاقة رئيسية واحدة',
     paypal: 'PayPal',
     paypalHint: 'حساب متصل للدفع السريع',
     mobilePayments: 'Apple Pay و Google Pay',
@@ -416,6 +505,13 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     disabled: 'معطل',
     verified: 'موثق',
     addNew: 'إضافة',
+    addCard: 'إضافة بطاقة',
+    saveCard: 'حفظ البطاقة',
+    cancel: 'إلغاء',
+    cardBrand: 'نوع البطاقة',
+    last4: 'آخر 4 أرقام',
+    expiry: 'الصلاحية',
+    cardHolder: 'صاحب البطاقة',
     edit: 'تعديل',
     remove: 'حذف',
     setPrimary: 'تعيين كرئيسي',
@@ -426,7 +522,8 @@ const paymentTexts: Record<AppLanguage, PaymentTextShape> = {
     verificationNeeded: 'يوصى بالتحقق',
     bankAvailable: 'التحويل اليدوي والتجاري متاح',
     comingSoon: 'قريباً',
-    addHint: 'سيتم ربط طرق الدفع الحقيقية لاحقاً عبر Stripe.',
+    addHint: 'سيتم ربط حفظ البطاقات الحقيقي لاحقاً عبر Stripe.',
+    primaryHint: 'يمكن أن تكون بطاقة واحدة فقط رئيسية في نفس الوقت.',
   },
 };
 
@@ -485,10 +582,57 @@ function SmallIcon({ icon, bg }: { icon: string; bg: string }) {
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: 28,
+        fontWeight: 900,
         flexShrink: 0,
       }}
     >
       {icon}
+    </span>
+  );
+}
+
+function ApplePayIcon() {
+  return (
+    <span
+      style={{
+        width: 74,
+        height: 42,
+        borderRadius: 13,
+        border: `2.5px solid ${BRAND.border}`,
+        background: '#ffffff',
+        color: '#050505',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 18,
+        fontWeight: 900,
+        letterSpacing: '-0.5px',
+      }}
+    >
+      Pay
+    </span>
+  );
+}
+
+function GooglePayIcon() {
+  return (
+    <span
+      style={{
+        width: 82,
+        height: 42,
+        borderRadius: 13,
+        border: `2.5px solid ${BRAND.border}`,
+        background: '#ffffff',
+        color: '#050505',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 17,
+        fontWeight: 900,
+        letterSpacing: '-0.3px',
+      }}
+    >
+      G Pay
     </span>
   );
 }
@@ -521,15 +665,69 @@ function SectionTitle({ title, subtitle }: { title: string; subtitle: string }) 
   );
 }
 
+function FieldInput({
+  value,
+  placeholder,
+  onChange,
+  maxLength,
+}: {
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+  maxLength?: number;
+}) {
+  return (
+    <input
+      value={value}
+      placeholder={placeholder}
+      maxLength={maxLength}
+      onChange={(event) => onChange(event.target.value)}
+      style={{
+        width: '100%',
+        minHeight: 44,
+        borderRadius: 15,
+        border: `2px solid ${BRAND.border}`,
+        background: '#ffffff',
+        color: BRAND.navy,
+        fontSize: 14,
+        fontWeight: 900,
+        padding: '0 10px',
+        boxSizing: 'border-box',
+        outline: 'none',
+      }}
+    />
+  );
+}
+
 export default function PaymentsPage() {
   const router = useRouter();
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [payments, setPayments] = useState<PaymentsState>(getPaymentsState());
+  const [localCards, setLocalCards] = useState<LocalCard[]>([]);
+  const [showAddCard, setShowAddCard] = useState(false);
+  const [cardBrand, setCardBrand] = useState('Visa');
+  const [cardLast4, setCardLast4] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardHolder, setCardHolder] = useState('');
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
-    const syncPayments = () => setPayments(getPaymentsState());
+    const syncPayments = () => {
+      const nextPayments = getPaymentsState();
+      setPayments(nextPayments);
+
+      const cards = (nextPayments.savedCards || []).map((card) => ({
+        id: card.id,
+        brand: card.brand,
+        last4: card.last4,
+        expiry: card.expiry,
+        holderName: card.holderName,
+        isDefault: card.isDefault,
+      }));
+
+      setLocalCards(cards);
+    };
 
     syncLanguage();
     syncPayments();
@@ -551,17 +749,63 @@ export default function PaymentsPage() {
   }, []);
 
   const text = useMemo(() => getText(language), [language]);
-
-  const savedCards = payments.savedCards || [];
   const cryptoWallets = payments.cryptoWallets || [];
 
   const totalMethods =
-    savedCards.length +
+    localCards.length +
     (payments.paypalEmail ? 1 : 0) +
     (payments.googlePayEnabled ? 1 : 0) +
     (payments.applePayEnabled ? 1 : 0) +
     cryptoWallets.length +
     (payments.bankTransferEnabled ? 1 : 0);
+
+  const setPrimaryCard = (id: string) => {
+    setLocalCards((cards) =>
+      cards.map((card) => ({
+        ...card,
+        isDefault: card.id === id,
+      })),
+    );
+  };
+
+  const removeCard = (id: string) => {
+    setLocalCards((cards) => {
+      const nextCards = cards.filter((card) => card.id !== id);
+
+      if (!nextCards.some((card) => card.isDefault) && nextCards.length > 0) {
+        return nextCards.map((card, index) => ({
+          ...card,
+          isDefault: index === 0,
+        }));
+      }
+
+      return nextCards;
+    });
+  };
+
+  const addCard = () => {
+    const cleanLast4 = cardLast4.replace(/\D/g, '').slice(0, 4);
+
+    if (!cleanLast4 || cleanLast4.length < 4) {
+      return;
+    }
+
+    const newCard: LocalCard = {
+      id: `local-card-${Date.now()}`,
+      brand: cardBrand || 'Card',
+      last4: cleanLast4,
+      expiry: cardExpiry || 'MM/YY',
+      holderName: cardHolder || 'Card holder',
+      isDefault: localCards.length === 0,
+    };
+
+    setLocalCards((cards) => [...cards, newCard]);
+    setCardBrand('Visa');
+    setCardLast4('');
+    setCardExpiry('');
+    setCardHolder('');
+    setShowAddCard(false);
+  };
 
   return (
     <main
@@ -757,7 +1001,7 @@ export default function PaymentsPage() {
                 color: BRAND.navy,
               }}
             >
-              ＋ {text.addNew} — {text.comingSoon}
+              {text.primaryHint}
             </div>
 
             <div
@@ -777,18 +1021,114 @@ export default function PaymentsPage() {
         <section style={{ marginTop: 20 }}>
           <SectionTitle title={text.cards} subtitle={text.cardsHint} />
 
-          <div style={{ marginTop: 10, display: 'grid', gap: 12 }}>
-            {savedCards.map((card, index) => (
+          <button
+            type="button"
+            onClick={() => setShowAddCard((value) => !value)}
+            style={{
+              marginTop: 10,
+              width: '100%',
+              minHeight: 54,
+              borderRadius: 18,
+              border: `2.5px solid ${BRAND.border}`,
+              background: BRAND.green,
+              color: '#ffffff',
+              fontSize: 15,
+              fontWeight: 900,
+              cursor: 'pointer',
+              boxShadow: '0 5px 0 rgba(0,0,0,0.12)',
+            }}
+          >
+            ＋ {text.addCard}
+          </button>
+
+          {showAddCard ? (
+            <div
+              style={{
+                marginTop: 12,
+                borderRadius: 24,
+                border: `2.5px solid ${BRAND.border}`,
+                background: BRAND.softBlue,
+                padding: 13,
+                display: 'grid',
+                gap: 10,
+              }}
+            >
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 900 }}>{text.cardBrand}</span>
+                <FieldInput value={cardBrand} placeholder="Visa" onChange={setCardBrand} />
+              </label>
+
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 900 }}>{text.last4}</span>
+                <FieldInput
+                  value={cardLast4}
+                  placeholder="4242"
+                  maxLength={4}
+                  onChange={(value) => setCardLast4(value.replace(/\D/g, '').slice(0, 4))}
+                />
+              </label>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 900 }}>{text.expiry}</span>
+                  <FieldInput value={cardExpiry} placeholder="09/27" onChange={setCardExpiry} />
+                </label>
+
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 900 }}>{text.cardHolder}</span>
+                  <FieldInput value={cardHolder} placeholder="Alex Carter" onChange={setCardHolder} />
+                </label>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <button
+                  type="button"
+                  onClick={addCard}
+                  style={{
+                    minHeight: 48,
+                    borderRadius: 17,
+                    border: `2.5px solid ${BRAND.border}`,
+                    background: BRAND.navy,
+                    color: '#ffffff',
+                    fontSize: 14,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.saveCard}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAddCard(false)}
+                  style={{
+                    minHeight: 48,
+                    borderRadius: 17,
+                    border: `2.5px solid ${BRAND.border}`,
+                    background: '#ffffff',
+                    color: BRAND.navy,
+                    fontSize: 14,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {text.cancel}
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
+            {localCards.map((card) => (
               <article
                 key={card.id}
                 style={{
                   borderRadius: 26,
                   border: `2.5px solid ${BRAND.border}`,
-                  background:
-                    index === 0
-                      ? 'linear-gradient(135deg, #071b46 0%, #0e73d8 100%)'
-                      : '#ffffff',
-                  color: index === 0 ? '#ffffff' : BRAND.navy,
+                  background: card.isDefault
+                    ? 'linear-gradient(135deg, #071b46 0%, #0e73d8 100%)'
+                    : '#ffffff',
+                  color: card.isDefault ? '#ffffff' : BRAND.navy,
                   padding: 14,
                   boxShadow: '0 8px 20px rgba(7,27,70,0.05)',
                 }}
@@ -806,7 +1146,7 @@ export default function PaymentsPage() {
                       style={{
                         fontSize: 15,
                         fontWeight: 900,
-                        opacity: index === 0 ? 0.95 : 1,
+                        opacity: card.isDefault ? 0.95 : 1,
                       }}
                     >
                       {card.brand}
@@ -829,7 +1169,7 @@ export default function PaymentsPage() {
                         marginTop: 8,
                         fontSize: 13,
                         fontWeight: 800,
-                        color: index === 0 ? '#dcecff' : BRAND.muted,
+                        color: card.isDefault ? '#dcecff' : BRAND.muted,
                       }}
                     >
                       {card.expiry} · {card.holderName}
@@ -838,12 +1178,10 @@ export default function PaymentsPage() {
 
                   <div style={{ display: 'grid', gap: 7, justifyItems: 'end' }}>
                     {card.isDefault ? (
-                      <StatusBadge kind={index === 0 ? 'green' : 'orange'}>
-                        {text.defaultLabel}
-                      </StatusBadge>
+                      <StatusBadge kind="green">{text.defaultLabel}</StatusBadge>
                     ) : null}
 
-                    <StatusBadge kind={index === 0 ? 'blue' : 'pink'}>{text.verified}</StatusBadge>
+                    <StatusBadge kind={card.isDefault ? 'blue' : 'pink'}>{text.verified}</StatusBadge>
                   </div>
                 </div>
 
@@ -851,34 +1189,138 @@ export default function PaymentsPage() {
                   style={{
                     marginTop: 15,
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr 1fr',
+                    gridTemplateColumns: '1fr 1fr',
                     gap: 8,
                   }}
                 >
-                  {[text.edit, text.setPrimary, text.remove].map((label, actionIndex) => (
+                  {!card.isDefault ? (
                     <button
-                      key={label}
                       type="button"
+                      onClick={() => setPrimaryCard(card.id)}
                       style={{
                         minHeight: 44,
                         borderRadius: 15,
                         border: `2px solid ${BRAND.border}`,
-                        background:
-                          index === 0
-                            ? 'rgba(255,255,255,0.14)'
-                            : actionIndex === 2
-                              ? BRAND.softPink
-                              : '#ffffff',
-                        color: index === 0 ? '#ffffff' : actionIndex === 2 ? BRAND.pink : BRAND.navy,
+                        background: BRAND.yellow,
+                        color: BRAND.navy,
                         fontSize: 12,
                         fontWeight: 900,
                         cursor: 'pointer',
                       }}
                     >
-                      {label}
+                      {text.setPrimary}
                     </button>
-                  ))}
+                  ) : (
+                    <button
+                      type="button"
+                      style={{
+                        minHeight: 44,
+                        borderRadius: 15,
+                        border: `2px solid ${BRAND.border}`,
+                        background: 'rgba(255,255,255,0.14)',
+                        color: '#ffffff',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        cursor: 'default',
+                      }}
+                    >
+                      ✓ {text.defaultLabel}
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => removeCard(card.id)}
+                    style={{
+                      minHeight: 44,
+                      borderRadius: 15,
+                      border: `2px solid ${BRAND.border}`,
+                      background: card.isDefault ? 'rgba(255,255,255,0.14)' : BRAND.softPink,
+                      color: card.isDefault ? '#ffffff' : BRAND.pink,
+                      fontSize: 12,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {text.remove}
+                  </button>
                 </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section style={{ marginTop: 20 }}>
+          <SectionTitle title={text.mobilePayments} subtitle={text.mobileHint} />
+
+          <div style={{ marginTop: 10, display: 'grid', gap: 10 }}>
+            {[
+              {
+                name: 'Apple Pay',
+                enabled: payments.applePayEnabled,
+                logo: <ApplePayIcon />,
+                bg: BRAND.softGreen,
+              },
+              {
+                name: 'Google Pay',
+                enabled: payments.googlePayEnabled,
+                logo: <GooglePayIcon />,
+                bg: BRAND.softBlue,
+              },
+            ].map((item) => (
+              <article
+                key={item.name}
+                style={{
+                  borderRadius: 24,
+                  border: `2.5px solid ${BRAND.border}`,
+                  background: '#ffffff',
+                  padding: 13,
+                  display: 'grid',
+                  gridTemplateColumns: '92px minmax(0, 1fr) auto',
+                  gap: 12,
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: 92,
+                    height: 62,
+                    borderRadius: 18,
+                    border: `2.5px solid ${BRAND.border}`,
+                    background: item.bg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {item.logo}
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 900,
+                      color: BRAND.navy,
+                    }}
+                  >
+                    {item.name}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 5,
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: BRAND.muted,
+                    }}
+                  >
+                    {text.instantCheckout}
+                  </div>
+                </div>
+
+                <StatusBadge kind={item.enabled ? 'green' : 'neutral'}>
+                  {item.enabled ? text.enabled : text.disabled}
+                </StatusBadge>
               </article>
             ))}
           </div>
@@ -938,101 +1380,7 @@ export default function PaymentsPage() {
                 {payments.paypalEmail ? text.connected : text.notConnected}
               </StatusBadge>
             </div>
-
-            <div
-              style={{
-                marginTop: 12,
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 9,
-              }}
-            >
-              <button
-                type="button"
-                style={{
-                  minHeight: 48,
-                  borderRadius: 17,
-                  border: `2.5px solid ${BRAND.border}`,
-                  background: BRAND.navy,
-                  color: '#ffffff',
-                  fontSize: 14,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.edit}
-              </button>
-
-              <button
-                type="button"
-                style={{
-                  minHeight: 48,
-                  borderRadius: 17,
-                  border: `2.5px solid ${BRAND.border}`,
-                  background: BRAND.yellow,
-                  color: BRAND.navy,
-                  fontSize: 14,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.setPrimary}
-              </button>
-            </div>
           </article>
-        </section>
-
-        <section style={{ marginTop: 20 }}>
-          <SectionTitle title={text.mobilePayments} subtitle={text.mobileHint} />
-
-          <div style={{ marginTop: 10, display: 'grid', gap: 10 }}>
-            {[
-              { name: 'Apple Pay', enabled: payments.applePayEnabled, icon: '', bg: BRAND.softGreen },
-              { name: 'Google Pay', enabled: payments.googlePayEnabled, icon: 'G', bg: BRAND.softBlue },
-            ].map((item) => (
-              <article
-                key={item.name}
-                style={{
-                  borderRadius: 24,
-                  border: `2.5px solid ${BRAND.border}`,
-                  background: '#ffffff',
-                  padding: 13,
-                  display: 'grid',
-                  gridTemplateColumns: '58px minmax(0, 1fr) auto',
-                  gap: 12,
-                  alignItems: 'center',
-                }}
-              >
-                <SmallIcon icon={item.icon} bg={item.bg} />
-
-                <div>
-                  <div
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 900,
-                      color: BRAND.navy,
-                    }}
-                  >
-                    {item.name}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 5,
-                      fontSize: 13,
-                      fontWeight: 800,
-                      color: BRAND.muted,
-                    }}
-                  >
-                    {text.instantCheckout}
-                  </div>
-                </div>
-
-                <StatusBadge kind={item.enabled ? 'green' : 'neutral'}>
-                  {item.enabled ? text.enabled : text.disabled}
-                </StatusBadge>
-              </article>
-            ))}
-          </div>
         </section>
 
         <section style={{ marginTop: 20 }}>
@@ -1086,47 +1434,6 @@ export default function PaymentsPage() {
                   {wallet.isDefault ? (
                     <StatusBadge kind="pink">{text.defaultLabel}</StatusBadge>
                   ) : null}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 12,
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: 9,
-                  }}
-                >
-                  <button
-                    type="button"
-                    style={{
-                      minHeight: 46,
-                      borderRadius: 16,
-                      border: `2px solid ${BRAND.border}`,
-                      background: '#ffffff',
-                      color: BRAND.navy,
-                      fontSize: 13,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {wallet.isDefault ? text.edit : text.setPrimary}
-                  </button>
-
-                  <button
-                    type="button"
-                    style={{
-                      minHeight: 46,
-                      borderRadius: 16,
-                      border: `2px solid ${BRAND.border}`,
-                      background: BRAND.softPink,
-                      color: BRAND.pink,
-                      fontSize: 13,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {text.remove}
-                  </button>
                 </div>
               </article>
             ))}
