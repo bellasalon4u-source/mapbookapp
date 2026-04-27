@@ -157,7 +157,7 @@ function CalendarIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.blue : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
       <rect x="4" y="6" width="16" height="14" rx="2.4" stroke={color} strokeWidth="2" />
       <path d="M8 3V8" stroke={color} strokeWidth="2" strokeLinecap="round" />
       <path d="M16 3V8" stroke={color} strokeWidth="2" strokeLinecap="round" />
@@ -170,7 +170,7 @@ function MessageIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
       <path
         d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
         stroke={color}
@@ -185,7 +185,7 @@ function ProfileIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="8" r="3.2" stroke={color} strokeWidth="2" />
       <path
         d="M5.5 19C6.5 15.8 8.8 14.5 12 14.5C15.2 14.5 17.5 15.8 18.5 19"
@@ -201,7 +201,7 @@ function ClientsIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
       <rect x="5" y="7" width="14" height="11" rx="2.4" stroke={color} strokeWidth="2" />
       <path
         d="M9 7V5.8C9 4.8 9.8 4 10.8 4H13.2C14.2 4 15 4.8 15 5.8V7"
@@ -505,7 +505,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
         style={{
           position: 'fixed',
           left: '50%',
-          bottom: 'calc(18px + env(safe-area-inset-bottom))',
+          bottom: 'calc(28px + env(safe-area-inset-bottom))',
           transform: shouldShowNav
             ? 'translateX(-50%) translateY(0)'
             : 'translateX(-50%) translateY(135px)',
@@ -517,15 +517,15 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
           transition: 'transform 0.34s ease, opacity 0.22s ease',
         }}
       >
-        <div style={{ position: 'relative', height: 96 }}>
+        <div style={{ position: 'relative', height: 86 }}>
           <div
             style={{
               position: 'absolute',
               left: '50%',
-              top: -7,
+              top: -4,
               transform: 'translateX(-50%)',
-              width: 122,
-              height: 42,
+              width: 104,
+              height: 32,
               background: BRAND.cream,
               zIndex: 3,
               pointerEvents: 'none',
@@ -536,10 +536,10 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
             style={{
               position: 'absolute',
               left: '50%',
-              top: -38,
+              top: -34,
               transform: 'translateX(-50%)',
-              width: 122,
-              height: 78,
+              width: 112,
+              height: 68,
               borderTopLeftRadius: 999,
               borderTopRightRadius: 999,
               borderTop: `3px solid ${BRAND.border}`,
@@ -563,9 +563,10 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
               display: 'grid',
               gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
               alignItems: 'center',
-              padding: '13px 8px 8px',
+              padding: '12px 8px 7px',
               boxSizing: 'border-box',
               zIndex: 2,
+              overflow: 'visible',
             }}
           >
             {navItems.map((item) => {
@@ -589,30 +590,30 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 2,
+                      justifyContent: 'flex-start',
+                      gap: 0,
                       position: 'relative',
                       zIndex: 8,
-                      height: 84,
+                      height: 86,
                       minWidth: 0,
                       overflow: 'visible',
                     }}
                   >
                     <span
                       style={{
-                        width: 78,
-                        height: 78,
+                        width: 72,
+                        height: 72,
                         borderRadius: '50%',
                         background: BRAND.green,
                         color: '#ffffff',
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 45,
-                        fontWeight: 700,
+                        fontSize: 44,
+                        fontWeight: 900,
                         lineHeight: 1,
                         boxShadow: '0 12px 28px rgba(85,199,95,0.34)',
-                        transform: 'translateY(-20px)',
+                        transform: 'translateY(-15px)',
                         flexShrink: 0,
                       }}
                     >
@@ -622,7 +623,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     <span
                       title={label}
                       style={{
-                        marginTop: -22,
+                        marginTop: -12,
                         width: '100%',
                         maxWidth: 76,
                         display: 'block',
@@ -652,12 +653,12 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     background: 'transparent',
                     padding: 0,
                     cursor: 'pointer',
-                    height: 70,
+                    height: 66,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 5,
+                    gap: 4,
                     position: 'relative',
                     minWidth: 0,
                     zIndex: 6,
@@ -665,7 +666,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                 >
                   <span
                     style={{
-                      height: 31,
+                      height: 29,
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
