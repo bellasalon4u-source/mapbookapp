@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   getSavedLanguage,
@@ -24,7 +17,7 @@ type BottomNavProps = {
   onAddClick?: () => void;
 };
 
-type NavKey = 'home' | 'messages' | 'add' | 'bookings' | 'profile' | 'clients';
+type NavKey = 'messages' | 'add' | 'bookings' | 'profile' | 'clients';
 
 type NavItem = {
   key: NavKey;
@@ -63,91 +56,7 @@ const addMenuTexts: Record<
   PL: { ad: 'Reklama', service: 'Usługa', deal: 'Zniżka', close: 'Zamknij' },
 };
 
-const publicItems: NavItem[] = [
-  {
-    key: 'home',
-    href: '/',
-    label: {
-      EN: 'Home',
-      ES: 'Inicio',
-      RU: 'Главная',
-      UA: 'Головна',
-      CZ: 'Domů',
-      DE: 'Home',
-      IT: 'Home',
-      FR: 'Accueil',
-      AR: 'الرئيسية',
-      PL: 'Home',
-    },
-  },
-  {
-    key: 'messages',
-    href: '/messages',
-    label: {
-      EN: 'Messages',
-      ES: 'Mensajes',
-      RU: 'Сообщения',
-      UA: 'Повідомл.',
-      CZ: 'Zprávy',
-      DE: 'Nachr.',
-      IT: 'Messaggi',
-      FR: 'Messages',
-      AR: 'رسائل',
-      PL: 'Wiadom.',
-    },
-  },
-  {
-    key: 'add',
-    href: '/add',
-    accent: true,
-    label: {
-      EN: 'Add',
-      ES: 'Añadir',
-      RU: 'Добавить',
-      UA: 'Додати',
-      CZ: 'Přidat',
-      DE: 'Plus',
-      IT: 'Aggiungi',
-      FR: 'Ajouter',
-      AR: 'إضافة',
-      PL: 'Dodaj',
-    },
-  },
-  {
-    key: 'bookings',
-    href: '/bookings',
-    label: {
-      EN: 'Bookings',
-      ES: 'Reservas',
-      RU: 'Брони',
-      UA: 'Броні',
-      CZ: 'Rezervace',
-      DE: 'Buchungen',
-      IT: 'Prenot.',
-      FR: 'Réserv.',
-      AR: 'حجوزات',
-      PL: 'Rezerw.',
-    },
-  },
-  {
-    key: 'profile',
-    href: '/profile',
-    label: {
-      EN: 'Profile',
-      ES: 'Perfil',
-      RU: 'Профиль',
-      UA: 'Профіль',
-      CZ: 'Profil',
-      DE: 'Profil',
-      IT: 'Profilo',
-      FR: 'Profil',
-      AR: 'حسابي',
-      PL: 'Profil',
-    },
-  },
-];
-
-const profileItems: NavItem[] = [
+const navItems: NavItem[] = [
   {
     key: 'profile',
     href: '/profile',
@@ -199,7 +108,7 @@ const profileItems: NavItem[] = [
   },
   {
     key: 'bookings',
-    href: '/profile/bookings',
+    href: '/bookings',
     label: {
       EN: 'My bookings',
       ES: 'Reservas',
@@ -244,30 +153,15 @@ function getActiveColor(key: NavKey) {
   return BRAND.green;
 }
 
-function HomeIcon({ active }: { active: boolean }) {
-  const color = active ? BRAND.green : BRAND.black;
-
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M4 10.5L12 4L20 10.5V20H4V10.5Z"
-        stroke={color}
-        strokeWidth="1.9"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 function CalendarIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.blue : BRAND.black;
 
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-      <rect x="4" y="6" width="16" height="14" rx="2.4" stroke={color} strokeWidth="1.9" />
-      <path d="M8 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
-      <path d="M16 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
-      <path d="M4 10H20" stroke={color} strokeWidth="1.9" />
+    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="6" width="16" height="14" rx="2.4" stroke={color} strokeWidth="2" />
+      <path d="M8 3V8" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      <path d="M16 3V8" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      <path d="M4 10H20" stroke={color} strokeWidth="2" />
     </svg>
   );
 }
@@ -276,11 +170,11 @@ function MessageIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
       <path
         d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
         stroke={color}
-        strokeWidth="1.9"
+        strokeWidth="2"
         strokeLinejoin="round"
       />
     </svg>
@@ -291,12 +185,12 @@ function ProfileIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="8" r="3.2" stroke={color} strokeWidth="1.9" />
+    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="8" r="3.2" stroke={color} strokeWidth="2" />
       <path
         d="M5.5 19C6.5 15.8 8.8 14.5 12 14.5C15.2 14.5 17.5 15.8 18.5 19"
         stroke={color}
-        strokeWidth="1.9"
+        strokeWidth="2"
         strokeLinecap="round"
       />
     </svg>
@@ -307,12 +201,12 @@ function ClientsIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-      <rect x="5" y="7" width="14" height="11" rx="2.4" stroke={color} strokeWidth="1.9" />
+    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+      <rect x="5" y="7" width="14" height="11" rx="2.4" stroke={color} strokeWidth="2" />
       <path
         d="M9 7V5.8C9 4.8 9.8 4 10.8 4H13.2C14.2 4 15 4.8 15 5.8V7"
         stroke={color}
-        strokeWidth="1.9"
+        strokeWidth="2"
         strokeLinecap="round"
       />
     </svg>
@@ -320,55 +214,11 @@ function ClientsIcon({ active }: { active: boolean }) {
 }
 
 function NavIcon({ itemKey, active }: { itemKey: NavKey; active: boolean }) {
-  if (itemKey === 'home') return <HomeIcon active={active} />;
   if (itemKey === 'bookings') return <CalendarIcon active={active} />;
   if (itemKey === 'messages') return <MessageIcon active={active} />;
   if (itemKey === 'profile') return <ProfileIcon active={active} />;
   if (itemKey === 'clients') return <ClientsIcon active={active} />;
   return null;
-}
-
-function NavShellShape() {
-  return (
-    <svg
-      viewBox="0 0 384 98"
-      preserveAspectRatio="none"
-      style={{
-        position: 'absolute',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        overflow: 'visible',
-        filter: 'drop-shadow(0 10px 24px rgba(15,23,42,0.08))',
-        zIndex: 1,
-        pointerEvents: 'none',
-      }}
-    >
-      <path
-        d="
-          M 30 24
-          H 136
-          C 143 24 148 20 151 14
-          C 158 -1 172 -10 192 -10
-          C 212 -10 226 -1 233 14
-          C 236 20 241 24 248 24
-          H 354
-          C 370 24 382 37 382 53
-          V 68
-          C 382 84 369 96 354 96
-          H 30
-          C 14 96 2 84 2 68
-          V 53
-          C 2 37 14 24 30 24
-          Z
-        "
-        fill={BRAND.cream}
-        stroke={BRAND.border}
-        strokeWidth="3"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
 }
 
 export default function BottomNav({ active: activeProp, onAddClick }: BottomNavProps) {
@@ -377,10 +227,17 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
 
   const [language, setLanguage] = useState<AppLanguage>('EN');
   const [addMenuOpen, setAddMenuOpen] = useState(false);
-  const [profileNavVisible, setProfileNavVisible] = useState(true);
+  const [navVisible, setNavVisible] = useState(true);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const shouldAutoHide =
+    pathname === '/profile' ||
+    pathname?.startsWith('/profile/') ||
+    pathname === '/bookings' ||
+    pathname?.startsWith('/bookings/') ||
+    pathname?.startsWith('/booking/');
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -419,29 +276,23 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
     };
   }, []);
 
-  const isProfileArea =
-    pathname === '/profile' ||
-    pathname?.startsWith('/profile/') ||
-    activeProp === 'profile' ||
-    activeProp === 'clients';
-
-  const showProfileNavTemporarily = useCallback(() => {
-    if (!isProfileArea) return;
-
-    setProfileNavVisible(true);
+  const showNavTemporarily = () => {
+    setNavVisible(true);
 
     if (hideTimerRef.current) {
       clearTimeout(hideTimerRef.current);
     }
 
-    hideTimerRef.current = setTimeout(() => {
-      setProfileNavVisible(false);
-    }, 3000);
-  }, [isProfileArea]);
+    if (shouldAutoHide && !addMenuOpen) {
+      hideTimerRef.current = setTimeout(() => {
+        setNavVisible(false);
+      }, 3000);
+    }
+  };
 
   useEffect(() => {
-    if (!isProfileArea) {
-      setProfileNavVisible(true);
+    if (!shouldAutoHide) {
+      setNavVisible(true);
 
       if (hideTimerRef.current) {
         clearTimeout(hideTimerRef.current);
@@ -450,57 +301,53 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
       return;
     }
 
-    showProfileNavTemporarily();
+    showNavTemporarily();
 
-    window.addEventListener('scroll', showProfileNavTemporarily, { passive: true });
-    window.addEventListener('touchstart', showProfileNavTemporarily, { passive: true });
-    window.addEventListener('focus', showProfileNavTemporarily);
-    window.addEventListener('pageshow', showProfileNavTemporarily);
+    window.addEventListener('scroll', showNavTemporarily, { passive: true });
+    window.addEventListener('touchstart', showNavTemporarily, { passive: true });
+    window.addEventListener('focus', showNavTemporarily);
+    window.addEventListener('pageshow', showNavTemporarily);
 
     return () => {
-      window.removeEventListener('scroll', showProfileNavTemporarily);
-      window.removeEventListener('touchstart', showProfileNavTemporarily);
-      window.removeEventListener('focus', showProfileNavTemporarily);
-      window.removeEventListener('pageshow', showProfileNavTemporarily);
+      window.removeEventListener('scroll', showNavTemporarily);
+      window.removeEventListener('touchstart', showNavTemporarily);
+      window.removeEventListener('focus', showNavTemporarily);
+      window.removeEventListener('pageshow', showNavTemporarily);
 
       if (hideTimerRef.current) {
         clearTimeout(hideTimerRef.current);
       }
     };
-  }, [pathname, isProfileArea, showProfileNavTemporarily]);
+  }, [pathname, shouldAutoHide, addMenuOpen]);
 
   useEffect(() => {
     if (addMenuOpen) {
-      setProfileNavVisible(true);
+      setNavVisible(true);
 
       if (hideTimerRef.current) {
         clearTimeout(hideTimerRef.current);
       }
-
-      return;
+    } else if (shouldAutoHide) {
+      showNavTemporarily();
     }
-
-    if (isProfileArea) {
-      showProfileNavTemporarily();
-    }
-  }, [addMenuOpen, isProfileArea, showProfileNavTemporarily]);
+  }, [addMenuOpen]);
 
   const addText = useMemo(() => getAddText(language), [language]);
-  const items = isProfileArea ? profileItems : publicItems;
-  const shouldShowNav = !isProfileArea || profileNavVisible || addMenuOpen;
+
+  const shouldShowNav = navVisible || addMenuOpen || !shouldAutoHide;
 
   const getIsActive = (key: NavKey, href: string) => {
     if (addMenuOpen && key === 'add') return true;
 
     if (activeProp) {
-      if (activeProp === 'add') return key === 'add';
       if (activeProp === 'clients') return key === 'clients';
       if (activeProp === 'bookings') return key === 'bookings';
-      return activeProp === key;
+      if (activeProp === 'profile') return key === 'profile';
+      if (activeProp === 'messages') return key === 'messages';
+      if (activeProp === 'add') return key === 'add';
     }
 
-    if (key === 'home') return pathname === '/';
-    if (key === 'profile') return pathname === '/profile' || pathname?.startsWith('/profile/');
+    if (key === 'profile') return pathname === '/profile';
     if (key === 'clients') return pathname === '/profile/clients';
     if (key === 'messages') return pathname === '/messages' || pathname?.startsWith('/messages/');
 
@@ -509,7 +356,8 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
         pathname === '/bookings' ||
         pathname?.startsWith('/bookings/') ||
         pathname === '/profile/bookings' ||
-        pathname?.startsWith('/profile/bookings/')
+        pathname?.startsWith('/profile/bookings/') ||
+        pathname?.startsWith('/booking/')
       );
     }
 
@@ -660,7 +508,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
           bottom: 'calc(18px + env(safe-area-inset-bottom))',
           transform: shouldShowNav
             ? 'translateX(-50%) translateY(0)'
-            : 'translateX(-50%) translateY(132px)',
+            : 'translateX(-50%) translateY(135px)',
           opacity: shouldShowNav ? 1 : 0,
           width: 'calc(100% - 44px)',
           maxWidth: 384,
@@ -669,25 +517,58 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
           transition: 'transform 0.34s ease, opacity 0.22s ease',
         }}
       >
-        <div style={{ position: 'relative', height: 98 }}>
-          <NavShellShape />
+        <div style={{ position: 'relative', height: 96 }}>
+          <div
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: -7,
+              transform: 'translateX(-50%)',
+              width: 122,
+              height: 42,
+              background: BRAND.cream,
+              zIndex: 3,
+              pointerEvents: 'none',
+            }}
+          />
 
           <div
             style={{
               position: 'absolute',
-              left: 0,
-              right: 0,
-              top: 24,
-              height: 72,
+              left: '50%',
+              top: -38,
+              transform: 'translateX(-50%)',
+              width: 122,
+              height: 78,
+              borderTopLeftRadius: 999,
+              borderTopRightRadius: 999,
+              borderTop: `3px solid ${BRAND.border}`,
+              borderLeft: `3px solid ${BRAND.border}`,
+              borderRight: `3px solid ${BRAND.border}`,
+              background: BRAND.cream,
+              zIndex: 4,
+              pointerEvents: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: BRAND.cream,
+              border: `3px solid ${BRAND.border}`,
+              borderRadius: 30,
+              boxShadow: '0 10px 24px rgba(15,23,42,0.08)',
               display: 'grid',
               gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
               alignItems: 'center',
-              padding: '7px 8px 6px',
+              padding: '13px 8px 8px',
               boxSizing: 'border-box',
-              zIndex: 3,
+              zIndex: 2,
             }}
           >
-            {items.map((item) => {
+            {navItems.map((item) => {
               const isActive = getIsActive(item.key, item.href);
               const label = getLabel(item, language);
               const activeColor = getActiveColor(item.key);
@@ -711,11 +592,10 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                       justifyContent: 'center',
                       gap: 2,
                       position: 'relative',
-                      zIndex: 5,
-                      height: 88,
+                      zIndex: 8,
+                      height: 84,
                       minWidth: 0,
                       overflow: 'visible',
-                      transform: 'translateY(-18px)',
                     }}
                   >
                     <span
@@ -728,10 +608,11 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 46,
+                        fontSize: 45,
                         fontWeight: 700,
                         lineHeight: 1,
                         boxShadow: '0 12px 28px rgba(85,199,95,0.34)',
+                        transform: 'translateY(-20px)',
                         flexShrink: 0,
                       }}
                     >
@@ -741,9 +622,9 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     <span
                       title={label}
                       style={{
-                        marginTop: -12,
+                        marginTop: -22,
                         width: '100%',
-                        maxWidth: 78,
+                        maxWidth: 76,
                         display: 'block',
                         textAlign: 'center',
                         fontSize: language === 'RU' || language === 'UA' ? 10.5 : 12,
@@ -771,7 +652,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     background: 'transparent',
                     padding: 0,
                     cursor: 'pointer',
-                    height: 68,
+                    height: 70,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -779,11 +660,12 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     gap: 5,
                     position: 'relative',
                     minWidth: 0,
+                    zIndex: 6,
                   }}
                 >
                   <span
                     style={{
-                      height: 30,
+                      height: 31,
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -797,7 +679,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                       style={{
                         position: 'absolute',
                         top: 2,
-                        right: '17%',
+                        right: '16%',
                         minWidth: 22,
                         height: 22,
                         padding: '0 5px',
@@ -821,7 +703,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     title={label}
                     style={{
                       width: '100%',
-                      maxWidth: isProfileArea ? 72 : 66,
+                      maxWidth: 72,
                       display: 'block',
                       textAlign: 'center',
                       fontSize:
