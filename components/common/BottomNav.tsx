@@ -1,23 +1,19 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   getSavedLanguage,
   subscribeToLanguageChange,
   type AppLanguage,
 } from '../../services/i18n';
-import {
-  getUnreadMessagesCount,
-  subscribeToChatStore,
-} from '../../services/chatStore';
 
 type BottomNavProps = {
   active?: 'home' | 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
   onAddClick?: () => void;
 };
 
-type NavKey = 'home' | 'messages' | 'add' | 'bookings' | 'profile';
+type NavKey = 'home' | 'messages' | 'add' | 'bookings' | 'profile' | 'clients';
 
 type NavItem = {
   key: NavKey;
@@ -27,12 +23,11 @@ type NavItem = {
 };
 
 const BRAND = {
-  border: '#050505',
-  navy: '#071b46',
   green: '#55c75f',
   blue: '#2578ff',
-  pink: '#ff4fa0',
+  black: '#171717',
   cream: '#fffdf8',
+  border: '#111111',
 };
 
 const addMenuTexts: Record<
@@ -42,35 +37,118 @@ const addMenuTexts: Record<
     service: string;
     deal: string;
     close: string;
+    adSub: string;
+    serviceSub: string;
+    dealSub: string;
   }
 > = {
-  EN: { ad: 'Ad', service: 'Service', deal: 'Deal', close: 'Close' },
-  ES: { ad: 'Anuncio', service: 'Servicio', deal: 'Descuento', close: 'Cerrar' },
-  RU: { ad: 'Реклама', service: 'Услуга', deal: 'Скидка', close: 'Закрыть' },
-  UA: { ad: 'Реклама', service: 'Послуга', deal: 'Знижка', close: 'Закрити' },
-  CZ: { ad: 'Reklama', service: 'Služba', deal: 'Sleva', close: 'Zavřít' },
-  DE: { ad: 'Anzeige', service: 'Service', deal: 'Rabatt', close: 'Schließen' },
-  IT: { ad: 'Pubblicità', service: 'Servizio', deal: 'Sconto', close: 'Chiudi' },
-  FR: { ad: 'Pub', service: 'Service', deal: 'Réduction', close: 'Fermer' },
-  AR: { ad: 'إعلان', service: 'خدمة', deal: 'خصم', close: 'إغلاق' },
-  PL: { ad: 'Reklama', service: 'Usługa', deal: 'Zniżka', close: 'Zamknij' },
+  EN: {
+    ad: 'Ad',
+    service: 'Service',
+    deal: 'Deal',
+    close: 'Close',
+    adSub: 'Create paid promotion',
+    serviceSub: 'Add new service',
+    dealSub: 'Create discount',
+  },
+  RU: {
+    ad: 'Реклама',
+    service: 'Услуга',
+    deal: 'Скидка',
+    close: 'Закрыть',
+    adSub: 'Создать платную рекламу',
+    serviceSub: 'Добавить новую услугу',
+    dealSub: 'Создать скидку',
+  },
+  UA: {
+    ad: 'Реклама',
+    service: 'Послуга',
+    deal: 'Знижка',
+    close: 'Закрити',
+    adSub: 'Створити платну рекламу',
+    serviceSub: 'Додати нову послугу',
+    dealSub: 'Створити знижку',
+  },
+  ES: {
+    ad: 'Anuncio',
+    service: 'Servicio',
+    deal: 'Descuento',
+    close: 'Cerrar',
+    adSub: 'Crear promoción pagada',
+    serviceSub: 'Añadir servicio',
+    dealSub: 'Crear descuento',
+  },
+  CZ: {
+    ad: 'Reklama',
+    service: 'Služba',
+    deal: 'Sleva',
+    close: 'Zavřít',
+    adSub: 'Vytvořit placenou reklamu',
+    serviceSub: 'Přidat službu',
+    dealSub: 'Vytvořit slevu',
+  },
+  DE: {
+    ad: 'Anzeige',
+    service: 'Service',
+    deal: 'Rabatt',
+    close: 'Schließen',
+    adSub: 'Bezahlte Werbung erstellen',
+    serviceSub: 'Service hinzufügen',
+    dealSub: 'Rabatt erstellen',
+  },
+  IT: {
+    ad: 'Pubblicità',
+    service: 'Servizio',
+    deal: 'Sconto',
+    close: 'Chiudi',
+    adSub: 'Crea promozione',
+    serviceSub: 'Aggiungi servizio',
+    dealSub: 'Crea sconto',
+  },
+  FR: {
+    ad: 'Pub',
+    service: 'Service',
+    deal: 'Réduction',
+    close: 'Fermer',
+    adSub: 'Créer promotion payante',
+    serviceSub: 'Ajouter service',
+    dealSub: 'Créer réduction',
+  },
+  PL: {
+    ad: 'Reklama',
+    service: 'Usługa',
+    deal: 'Zniżka',
+    close: 'Zamknij',
+    adSub: 'Utwórz płatną promocję',
+    serviceSub: 'Dodaj usługę',
+    dealSub: 'Utwórz zniżkę',
+  },
+  AR: {
+    ad: 'إعلان',
+    service: 'خدمة',
+    deal: 'خصم',
+    close: 'إغلاق',
+    adSub: 'إنشاء إعلان مدفوع',
+    serviceSub: 'إضافة خدمة',
+    dealSub: 'إنشاء خصم',
+  },
 };
 
-const items: NavItem[] = [
+const publicItems: NavItem[] = [
   {
     key: 'home',
     href: '/',
     label: {
       EN: 'Home',
-      ES: 'Inicio',
       RU: 'Главная',
       UA: 'Головна',
+      ES: 'Inicio',
       CZ: 'Domů',
       DE: 'Home',
       IT: 'Home',
       FR: 'Accueil',
-      AR: 'الرئيسية',
       PL: 'Start',
+      AR: 'الرئيسية',
     },
   },
   {
@@ -78,15 +156,15 @@ const items: NavItem[] = [
     href: '/messages',
     label: {
       EN: 'Messages',
-      ES: 'Mensajes',
       RU: 'Сообщения',
       UA: 'Повідомл.',
+      ES: 'Mensajes',
       CZ: 'Zprávy',
       DE: 'Nachr.',
       IT: 'Messaggi',
       FR: 'Messages',
-      AR: 'رسائل',
       PL: 'Wiadom.',
+      AR: 'رسائل',
     },
   },
   {
@@ -95,15 +173,15 @@ const items: NavItem[] = [
     accent: true,
     label: {
       EN: 'Add',
-      ES: 'Añadir',
       RU: 'Добавить',
       UA: 'Додати',
+      ES: 'Añadir',
       CZ: 'Přidat',
       DE: 'Plus',
       IT: 'Aggiungi',
       FR: 'Ajouter',
-      AR: 'إضافة',
       PL: 'Dodaj',
+      AR: 'إضافة',
     },
   },
   {
@@ -111,15 +189,15 @@ const items: NavItem[] = [
     href: '/bookings',
     label: {
       EN: 'Bookings',
-      ES: 'Reservas',
       RU: 'Брони',
       UA: 'Броні',
+      ES: 'Reservas',
       CZ: 'Rezervace',
       DE: 'Buchung',
       IT: 'Prenota',
       FR: 'Réserv.',
-      AR: 'حجوزات',
       PL: 'Rezerw.',
+      AR: 'حجوزات',
     },
   },
   {
@@ -127,15 +205,99 @@ const items: NavItem[] = [
     href: '/profile',
     label: {
       EN: 'Profile',
-      ES: 'Perfil',
       RU: 'Профиль',
       UA: 'Профіль',
+      ES: 'Perfil',
       CZ: 'Profil',
       DE: 'Profil',
       IT: 'Profilo',
       FR: 'Profil',
-      AR: 'حسابي',
       PL: 'Profil',
+      AR: 'حسابي',
+    },
+  },
+];
+
+const profileItems: NavItem[] = [
+  {
+    key: 'profile',
+    href: '/profile',
+    label: {
+      EN: 'Profile',
+      RU: 'Профиль',
+      UA: 'Профіль',
+      ES: 'Perfil',
+      CZ: 'Profil',
+      DE: 'Profil',
+      IT: 'Profilo',
+      FR: 'Profil',
+      PL: 'Profil',
+      AR: 'حسابي',
+    },
+  },
+  {
+    key: 'clients',
+    href: '/profile/clients',
+    label: {
+      EN: 'My clients',
+      RU: 'Мои клиенты',
+      UA: 'Мої клієнти',
+      ES: 'Clientes',
+      CZ: 'Klienti',
+      DE: 'Kunden',
+      IT: 'Clienti',
+      FR: 'Clients',
+      PL: 'Klienci',
+      AR: 'عملائي',
+    },
+  },
+  {
+    key: 'add',
+    href: '/add',
+    accent: true,
+    label: {
+      EN: 'Add',
+      RU: 'Добавить',
+      UA: 'Додати',
+      ES: 'Añadir',
+      CZ: 'Přidat',
+      DE: 'Plus',
+      IT: 'Aggiungi',
+      FR: 'Ajouter',
+      PL: 'Dodaj',
+      AR: 'إضافة',
+    },
+  },
+  {
+    key: 'bookings',
+    href: '/profile/bookings',
+    label: {
+      EN: 'My bookings',
+      RU: 'Мои брони',
+      UA: 'Мої броні',
+      ES: 'Reservas',
+      CZ: 'Rezervace',
+      DE: 'Buchungen',
+      IT: 'Prenot.',
+      FR: 'Réserv.',
+      PL: 'Rezerw.',
+      AR: 'حجوزاتي',
+    },
+  },
+  {
+    key: 'messages',
+    href: '/messages',
+    label: {
+      EN: 'Messages',
+      RU: 'Сообщения',
+      UA: 'Повідомл.',
+      ES: 'Mensajes',
+      CZ: 'Zprávy',
+      DE: 'Nachr.',
+      IT: 'Messaggi',
+      FR: 'Messages',
+      PL: 'Wiadom.',
+      AR: 'رسائل',
     },
   },
 ];
@@ -154,7 +316,7 @@ function getActiveColor(key: NavKey) {
 }
 
 function HomeIcon({ active }: { active: boolean }) {
-  const color = active ? BRAND.green : '#171717';
+  const color = active ? BRAND.green : BRAND.black;
 
   return (
     <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
@@ -169,7 +331,7 @@ function HomeIcon({ active }: { active: boolean }) {
 }
 
 function CalendarIcon({ active }: { active: boolean }) {
-  const color = active ? BRAND.blue : '#171717';
+  const color = active ? BRAND.blue : BRAND.black;
 
   return (
     <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
@@ -182,7 +344,7 @@ function CalendarIcon({ active }: { active: boolean }) {
 }
 
 function MessageIcon({ active }: { active: boolean }) {
-  const color = active ? BRAND.green : '#171717';
+  const color = active ? BRAND.green : BRAND.black;
 
   return (
     <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
@@ -197,7 +359,7 @@ function MessageIcon({ active }: { active: boolean }) {
 }
 
 function ProfileIcon({ active }: { active: boolean }) {
-  const color = active ? BRAND.green : '#171717';
+  const color = active ? BRAND.green : BRAND.black;
 
   return (
     <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
@@ -212,15 +374,37 @@ function ProfileIcon({ active }: { active: boolean }) {
   );
 }
 
+function ClientsIcon({ active }: { active: boolean }) {
+  const color = active ? BRAND.green : BRAND.black;
+
+  return (
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+      <rect x="5" y="7" width="14" height="11" rx="2.4" stroke={color} strokeWidth="1.9" />
+      <path
+        d="M9 7V5.8C9 4.8 9.8 4 10.8 4H13.2C14.2 4 15 4.8 15 5.8V7"
+        stroke={color}
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function NavIcon({ itemKey, active }: { itemKey: NavKey; active: boolean }) {
+  if (itemKey === 'home') return <HomeIcon active={active} />;
+  if (itemKey === 'bookings') return <CalendarIcon active={active} />;
+  if (itemKey === 'messages') return <MessageIcon active={active} />;
+  if (itemKey === 'profile') return <ProfileIcon active={active} />;
+  if (itemKey === 'clients') return <ClientsIcon active={active} />;
+  return null;
+}
+
 export default function BottomNav({ active: activeProp, onAddClick }: BottomNavProps) {
   const router = useRouter();
   const pathname = usePathname();
 
   const [language, setLanguage] = useState<AppLanguage>('EN');
   const [addMenuOpen, setAddMenuOpen] = useState(false);
-  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
-
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -234,61 +418,36 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
     };
   }, []);
 
-  useEffect(() => {
-    const syncUnread = () => {
-      try {
-        setUnreadMessagesCount(getUnreadMessagesCount());
-      } catch {
-        setUnreadMessagesCount(0);
-      }
-    };
-
-    syncUnread();
-
-    const unsubscribe = subscribeToChatStore(syncUnread);
-
-    window.addEventListener('focus', syncUnread);
-    window.addEventListener('pageshow', syncUnread);
-    window.addEventListener('storage', syncUnread);
-
-    return () => {
-      unsubscribe();
-      window.removeEventListener('focus', syncUnread);
-      window.removeEventListener('pageshow', syncUnread);
-      window.removeEventListener('storage', syncUnread);
-    };
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (closeTimerRef.current) {
-        clearTimeout(closeTimerRef.current);
-      }
-    };
-  }, []);
-
   const addText = useMemo(() => getAddText(language), [language]);
+
+  const isProfileArea =
+    pathname === '/profile' ||
+    pathname?.startsWith('/profile/') ||
+    activeProp === 'profile' ||
+    activeProp === 'clients';
+
+  const items = isProfileArea ? profileItems : publicItems;
 
   const getIsActive = (key: NavKey, href: string) => {
     if (addMenuOpen && key === 'add') return true;
 
     if (activeProp) {
-      if (activeProp === 'clients') return false;
+      if (activeProp === 'add') return key === 'add';
+      if (activeProp === 'clients') return key === 'clients';
       return activeProp === key;
     }
 
     if (key === 'home') return pathname === '/';
-
-    if (key === 'messages') {
-      return pathname === '/messages' || pathname?.startsWith('/messages/');
-    }
-
+    if (key === 'profile') return pathname === '/profile' || pathname?.startsWith('/profile/');
+    if (key === 'clients') return pathname === '/profile/clients';
+    if (key === 'messages') return pathname === '/messages' || pathname?.startsWith('/messages/');
     if (key === 'bookings') {
-      return pathname === '/bookings' || pathname?.startsWith('/bookings/');
-    }
-
-    if (key === 'profile') {
-      return pathname === '/profile' || pathname?.startsWith('/profile/');
+      return (
+        pathname === '/bookings' ||
+        pathname?.startsWith('/bookings/') ||
+        pathname === '/profile/bookings' ||
+        pathname?.startsWith('/profile/bookings/')
+      );
     }
 
     if (key === 'add') {
@@ -335,7 +494,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(17,17,17,0.42)',
+            background: 'rgba(17,17,17,0.38)',
             zIndex: 1190,
             display: 'flex',
             alignItems: 'flex-end',
@@ -356,102 +515,33 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
               boxShadow: '0 20px 44px rgba(0,0,0,0.22)',
             }}
           >
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                borderBottom: `3px solid ${BRAND.border}`,
-              }}
-            >
-              <button
-                type="button"
-                onClick={handleCreateAd}
-                style={{
-                  minHeight: 112,
-                  border: 'none',
-                  borderRight: `3px solid ${BRAND.border}`,
-                  background: '#ffe44d',
-                  color: '#17130f',
-                  fontSize: 17,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 10,
-                }}
-              >
-                <span style={{ fontSize: 34 }}>📣</span>
-                <span>{addText.ad}</span>
-              </button>
+            <AddMenuButton
+              icon="📣"
+              title={addText.ad}
+              subtitle={addText.adSub}
+              bg="#ffe44d"
+              borderBottom
+              onClick={handleCreateAd}
+            />
 
-              <button
-                type="button"
-                onClick={handleCreateService}
-                style={{
-                  minHeight: 112,
-                  border: 'none',
-                  borderRight: `3px solid ${BRAND.border}`,
-                  background: BRAND.green,
-                  color: '#ffffff',
-                  fontSize: 17,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 10,
-                }}
-              >
-                <span style={{ fontSize: 40, lineHeight: 1 }}>+</span>
-                <span>{addText.service}</span>
-              </button>
+            <AddMenuButton
+              icon="+"
+              title={addText.service}
+              subtitle={addText.serviceSub}
+              bg="#41c83f"
+              color="#ffffff"
+              borderBottom
+              onClick={handleCreateService}
+            />
 
-              <button
-                type="button"
-                onClick={handleCreateDeal}
-                style={{
-                  minHeight: 112,
-                  border: 'none',
-                  background: '#ff4b52',
-                  color: '#ffffff',
-                  fontSize: 17,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  position: 'relative',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 10,
-                }}
-              >
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: 12,
-                    right: 12,
-                    minWidth: 42,
-                    height: 30,
-                    borderRadius: 999,
-                    border: `3px solid ${BRAND.border}`,
-                    background: '#ffffff',
-                    color: '#ff4b52',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 14,
-                    fontWeight: 900,
-                  }}
-                >
-                  £1
-                </span>
-                <span style={{ fontSize: 40, lineHeight: 1 }}>%</span>
-                <span>{addText.deal}</span>
-              </button>
-            </div>
+            <AddMenuButton
+              icon="%"
+              title={addText.deal}
+              subtitle={addText.dealSub}
+              bg="#ff4b52"
+              color="#ffffff"
+              onClick={handleCreateDeal}
+            />
 
             <button
               type="button"
@@ -460,8 +550,9 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                 width: '100%',
                 minHeight: 58,
                 border: 'none',
+                borderTop: `3px solid ${BRAND.border}`,
                 background: '#ffffff',
-                color: '#17130f',
+                color: BRAND.black,
                 fontSize: 19,
                 fontWeight: 900,
                 cursor: 'pointer',
@@ -524,8 +615,6 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
               const isActive = getIsActive(item.key, item.href);
               const label = getLabel(item, language);
               const activeColor = getActiveColor(item.key);
-              const badge =
-                item.key === 'messages' && unreadMessagesCount > 0 ? unreadMessagesCount : 0;
 
               if (item.accent) {
                 return (
@@ -561,7 +650,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: 44,
-                        fontWeight: 600,
+                        fontWeight: 700,
                         lineHeight: 1,
                         boxShadow: '0 12px 28px rgba(85,199,95,0.34)',
                         transform: 'translateY(-22px)',
@@ -577,11 +666,12 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                         marginTop: -22,
                         width: '100%',
                         maxWidth: 68,
+                        minWidth: 0,
                         display: 'block',
                         textAlign: 'center',
                         fontSize: language === 'RU' || language === 'UA' ? 10.5 : 12,
                         fontWeight: 900,
-                        color: isActive ? activeColor : '#171717',
+                        color: isActive ? activeColor : BRAND.black,
                         lineHeight: 1,
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
@@ -622,43 +712,15 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                       height: 32,
                     }}
                   >
-                    {item.key === 'home' && <HomeIcon active={isActive} />}
-                    {item.key === 'messages' && <MessageIcon active={isActive} />}
-                    {item.key === 'bookings' && <CalendarIcon active={isActive} />}
-                    {item.key === 'profile' && <ProfileIcon active={isActive} />}
+                    <NavIcon itemKey={item.key} active={isActive} />
                   </span>
-
-                  {badge > 0 ? (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: 8,
-                        right: '18%',
-                        minWidth: 24,
-                        height: 24,
-                        padding: '0 6px',
-                        borderRadius: 999,
-                        background: BRAND.pink,
-                        color: '#ffffff',
-                        fontSize: 12,
-                        fontWeight: 900,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: '2px solid #ffffff',
-                        boxSizing: 'border-box',
-                        boxShadow: '0 4px 10px rgba(255,79,160,0.28)',
-                      }}
-                    >
-                      {badge > 99 ? '99+' : badge}
-                    </span>
-                  ) : null}
 
                   <span
                     title={label}
                     style={{
                       width: '100%',
-                      maxWidth: 66,
+                      maxWidth: isProfileArea ? 72 : 66,
+                      minWidth: 0,
                       display: 'block',
                       textAlign: 'center',
                       fontSize:
@@ -670,7 +732,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                           ? 10.5
                           : 12,
                       fontWeight: 900,
-                      color: isActive ? activeColor : '#171717',
+                      color: isActive ? activeColor : BRAND.black,
                       lineHeight: 1,
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
@@ -686,5 +748,90 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
         </div>
       </div>
     </>
+  );
+}
+
+function AddMenuButton({
+  icon,
+  title,
+  subtitle,
+  bg,
+  color = BRAND.black,
+  borderBottom = false,
+  onClick,
+}: {
+  icon: string;
+  title: string;
+  subtitle: string;
+  bg: string;
+  color?: string;
+  borderBottom?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        width: '100%',
+        minHeight: 88,
+        border: 'none',
+        borderBottom: borderBottom ? `3px solid ${BRAND.border}` : 'none',
+        background: bg,
+        color,
+        padding: '14px 16px',
+        display: 'grid',
+        gridTemplateColumns: '54px 1fr',
+        gap: 12,
+        alignItems: 'center',
+        textAlign: 'left',
+        cursor: 'pointer',
+      }}
+    >
+      <span
+        style={{
+          width: 54,
+          height: 54,
+          borderRadius: 18,
+          border: `3px solid ${BRAND.border}`,
+          background: '#ffffff',
+          color: BRAND.black,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: icon === '+' ? 35 : 27,
+          fontWeight: 900,
+          boxSizing: 'border-box',
+        }}
+      >
+        {icon}
+      </span>
+
+      <span>
+        <span
+          style={{
+            display: 'block',
+            fontSize: 18,
+            lineHeight: 1.05,
+            fontWeight: 900,
+          }}
+        >
+          {title}
+        </span>
+
+        <span
+          style={{
+            display: 'block',
+            marginTop: 5,
+            fontSize: 12,
+            lineHeight: 1.2,
+            fontWeight: 800,
+            opacity: 0.86,
+          }}
+        >
+          {subtitle}
+        </span>
+      </span>
+    </button>
   );
 }
