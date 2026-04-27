@@ -598,7 +598,7 @@ export default function ProfileClientsPage() {
         </section>
       </div>
 
-      <BottomNav active="clients" />
+      <BottomNav active="profile" />
     </main>
   );
 }
