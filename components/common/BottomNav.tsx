@@ -63,14 +63,14 @@ const publicItems: NavItem[] = [
     label: {
       EN: 'Home',
       ES: 'Inicio',
-      RU: 'Главная',
-      UA: 'Головна',
-      CZ: 'Domů',
+      RU: 'Home',
+      UA: 'Home',
+      CZ: 'Home',
       DE: 'Home',
       IT: 'Home',
-      FR: 'Accueil',
-      AR: 'الرئيسية',
-      PL: 'Start',
+      FR: 'Home',
+      AR: 'Home',
+      PL: 'Home',
     },
   },
   {
@@ -78,15 +78,15 @@ const publicItems: NavItem[] = [
     href: '/messages',
     label: {
       EN: 'Messages',
-      ES: 'Mensajes',
-      RU: 'Сообщения',
-      UA: 'Повідомл.',
-      CZ: 'Zprávy',
-      DE: 'Nachr.',
-      IT: 'Messaggi',
+      ES: 'Messages',
+      RU: 'Messages',
+      UA: 'Messages',
+      CZ: 'Messages',
+      DE: 'Messages',
+      IT: 'Messages',
       FR: 'Messages',
-      AR: 'رسائل',
-      PL: 'Wiadom.',
+      AR: 'Messages',
+      PL: 'Messages',
     },
   },
   {
@@ -95,15 +95,15 @@ const publicItems: NavItem[] = [
     accent: true,
     label: {
       EN: 'Add',
-      ES: 'Añadir',
-      RU: 'Добавить',
-      UA: 'Додати',
-      CZ: 'Přidat',
-      DE: 'Plus',
-      IT: 'Aggiungi',
-      FR: 'Ajouter',
-      AR: 'إضافة',
-      PL: 'Dodaj',
+      ES: 'Add',
+      RU: 'Add',
+      UA: 'Add',
+      CZ: 'Add',
+      DE: 'Add',
+      IT: 'Add',
+      FR: 'Add',
+      AR: 'Add',
+      PL: 'Add',
     },
   },
   {
@@ -111,15 +111,15 @@ const publicItems: NavItem[] = [
     href: '/bookings',
     label: {
       EN: 'Bookings',
-      ES: 'Reservas',
+      ES: 'Bookings',
       RU: 'Bookings',
-      UA: 'Броні',
-      CZ: 'Rezervace',
-      DE: 'Buchung',
-      IT: 'Prenota',
-      FR: 'Réserv.',
-      AR: 'حجوزات',
-      PL: 'Rezerw.',
+      UA: 'Bookings',
+      CZ: 'Bookings',
+      DE: 'Bookings',
+      IT: 'Bookings',
+      FR: 'Bookings',
+      AR: 'Bookings',
+      PL: 'Bookings',
     },
   },
   {
@@ -127,15 +127,15 @@ const publicItems: NavItem[] = [
     href: '/profile',
     label: {
       EN: 'Profile',
-      ES: 'Perfil',
+      ES: 'Profile',
       RU: 'Profile',
-      UA: 'Профіль',
-      CZ: 'Profil',
-      DE: 'Profil',
-      IT: 'Profilo',
-      FR: 'Profil',
-      AR: 'حسابي',
-      PL: 'Profil',
+      UA: 'Profile',
+      CZ: 'Profile',
+      DE: 'Profile',
+      IT: 'Profile',
+      FR: 'Profile',
+      AR: 'Profile',
+      PL: 'Profile',
     },
   },
 ];
@@ -163,8 +163,8 @@ const profileItems: NavItem[] = [
     label: {
       EN: 'My clients',
       ES: 'Clientes',
-      RU: 'Мои клиенты',
-      UA: 'Мої клієнти',
+      RU: 'Мои клие...',
+      UA: 'Мої кліє...',
       CZ: 'Klienti',
       DE: 'Kunden',
       IT: 'Clienti',
@@ -241,7 +241,7 @@ function HomeIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
       <path
         d="M4 10.5L12 4L20 10.5V20H4V10.5Z"
         stroke={color}
@@ -256,7 +256,7 @@ function CalendarIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.blue : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
       <rect x="4" y="6" width="16" height="14" rx="2.4" stroke={color} strokeWidth="1.9" />
       <path d="M8 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
       <path d="M16 3V8" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
@@ -269,7 +269,7 @@ function MessageIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
       <path
         d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
         stroke={color}
@@ -284,7 +284,7 @@ function ProfileIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="8" r="3.2" stroke={color} strokeWidth="1.9" />
       <path
         d="M5.5 19C6.5 15.8 8.8 14.5 12 14.5C15.2 14.5 17.5 15.8 18.5 19"
@@ -300,7 +300,7 @@ function ClientsIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
       <rect x="5" y="7" width="14" height="11" rx="2.4" stroke={color} strokeWidth="1.9" />
       <path
         d="M9 7V5.8C9 4.8 9.8 4 10.8 4H13.2C14.2 4 15 4.8 15 5.8V7"
@@ -606,7 +606,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
           bottom: 'calc(18px + env(safe-area-inset-bottom))',
           transform: shouldShowNav
             ? 'translateX(-50%) translateY(0)'
-            : 'translateX(-50%) translateY(128px)',
+            : 'translateX(-50%) translateY(130px)',
           opacity: shouldShowNav ? 1 : 0,
           width: 'calc(100% - 44px)',
           maxWidth: 384,
@@ -615,21 +615,21 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
           transition: 'transform 0.34s ease, opacity 0.22s ease',
         }}
       >
-        <div style={{ position: 'relative', height: 86 }}>
+        <div style={{ position: 'relative', height: 92 }}>
           <div
             style={{
               position: 'absolute',
               left: '50%',
-              top: -25,
+              top: -24,
               transform: 'translateX(-50%)',
-              width: 106,
-              height: 58,
+              width: 108,
+              height: 62,
               borderTopLeftRadius: 999,
               borderTopRightRadius: 999,
               background: BRAND.cream,
-              borderTop: `2.5px solid ${BRAND.border}`,
-              borderLeft: `2.5px solid ${BRAND.border}`,
-              borderRight: `2.5px solid ${BRAND.border}`,
+              borderTop: `3px solid ${BRAND.border}`,
+              borderLeft: `3px solid ${BRAND.border}`,
+              borderRight: `3px solid ${BRAND.border}`,
               zIndex: 1,
             }}
           />
@@ -639,13 +639,13 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
               position: 'absolute',
               inset: 0,
               background: BRAND.cream,
-              border: `2.5px solid ${BRAND.border}`,
-              borderRadius: 31,
+              border: `3px solid ${BRAND.border}`,
+              borderRadius: 30,
               boxShadow: '0 10px 24px rgba(15,23,42,0.08)',
               display: 'grid',
               gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
-              alignItems: 'end',
-              padding: '12px 8px 13px',
+              alignItems: 'center',
+              padding: '12px 8px 8px',
               boxSizing: 'border-box',
               zIndex: 2,
             }}
@@ -671,11 +671,11 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      justifyContent: 'flex-end',
-                      gap: 4,
+                      justifyContent: 'center',
+                      gap: 2,
                       position: 'relative',
                       zIndex: 5,
-                      minHeight: 76,
+                      height: 78,
                       minWidth: 0,
                       overflow: 'visible',
                     }}
@@ -694,7 +694,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                         fontWeight: 700,
                         lineHeight: 1,
                         boxShadow: '0 11px 25px rgba(85,199,95,0.32)',
-                        transform: 'translateY(-22px)',
+                        transform: 'translateY(-17px)',
                         flexShrink: 0,
                       }}
                     >
@@ -704,16 +704,15 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     <span
                       title={label}
                       style={{
-                        marginTop: -22,
+                        marginTop: -18,
                         width: '100%',
-                        maxWidth: 70,
-                        minWidth: 0,
+                        maxWidth: 76,
                         display: 'block',
                         textAlign: 'center',
                         fontSize: language === 'RU' || language === 'UA' ? 10.5 : 12,
                         fontWeight: 900,
                         color: isActive ? activeColor : BRAND.black,
-                        lineHeight: 1,
+                        lineHeight: 1.05,
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
@@ -735,22 +734,22 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     background: 'transparent',
                     padding: 0,
                     cursor: 'pointer',
+                    height: 68,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'flex-end',
+                    justifyContent: 'center',
                     gap: 5,
                     position: 'relative',
-                    minHeight: 66,
                     minWidth: 0,
                   }}
                 >
                   <span
                     style={{
+                      height: 30,
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      height: 31,
                     }}
                   >
                     <NavIcon itemKey={item.key} active={isActive} />
@@ -760,8 +759,8 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     <span
                       style={{
                         position: 'absolute',
-                        top: 4,
-                        right: '16%',
+                        top: 3,
+                        right: '17%',
                         minWidth: 22,
                         height: 22,
                         padding: '0 5px',
@@ -786,7 +785,6 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     style={{
                       width: '100%',
                       maxWidth: isProfileArea ? 72 : 66,
-                      minWidth: 0,
                       display: 'block',
                       textAlign: 'center',
                       fontSize:
@@ -799,7 +797,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                           : 12,
                       fontWeight: 900,
                       color: isActive ? activeColor : BRAND.black,
-                      lineHeight: 1,
+                      lineHeight: 1.05,
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
