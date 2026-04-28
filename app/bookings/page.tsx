@@ -91,11 +91,12 @@ type PageTexts = {
   closeDay: string;
   noBookingsForDate: string;
   selectedDatePanel: string;
+  urgentTitle: string;
+  urgentSubtitle: string;
   filters: string;
-  sync: string;
-  freeSlots: string;
-  onlyRequests: string;
-  records: string;
+  showFilters: string;
+  hideFilters: string;
+  monthView: string;
 };
 
 const BRAND = {
@@ -104,11 +105,9 @@ const BRAND = {
   green: '#24c45a',
   red: '#ff2456',
   yellow: '#ffd629',
-  orange: '#ff9f1c',
   pink: '#ff4f9a',
   border: '#111111',
   muted: '#657080',
-  cream: '#fffdf8',
 };
 
 const texts: Partial<Record<AppLanguage, PageTexts>> = {
@@ -166,7 +165,7 @@ const texts: Partial<Record<AppLanguage, PageTexts>> = {
     todayAt: 'Today at',
     tomorrowAt: 'Tomorrow at',
     doneBadge: 'Done',
-    needsAction: 'Needs attention',
+    needsAction: 'Needs action',
     calendarTitle: 'Booking calendar',
     selectedDay: 'Selected day',
     today: 'Today',
@@ -179,18 +178,19 @@ const texts: Partial<Record<AppLanguage, PageTexts>> = {
     closeDay: 'Close day',
     noBookingsForDate: 'No bookings for this date',
     selectedDatePanel: 'Bookings for selected date',
+    urgentTitle: 'Today & tomorrow',
+    urgentSubtitle: 'Urgent bookings shown first',
     filters: 'Filters',
-    sync: 'Synchronized',
-    freeSlots: 'Free slots',
-    onlyRequests: 'Only requests',
-    records: 'records',
+    showFilters: 'Show filters',
+    hideFilters: 'Hide filters',
+    monthView: 'Month view',
   },
   RU: {
-    title: 'Мои брони',
+    title: 'Мои бронирования',
     subtitle: 'Календарь, фильтры, статус брони, чат и доступ к контактам',
-    upcoming: 'Будущие',
-    completed: 'Готовые',
-    cancelled: 'Отменены',
+    upcoming: 'Предстоящие',
+    completed: 'Завершённые',
+    cancelled: 'Отменённые',
     pending: 'Ждёт мастера',
     confirmed: 'Подтверждено',
     completedStatus: 'Завершено',
@@ -199,7 +199,7 @@ const texts: Partial<Record<AppLanguage, PageTexts>> = {
     closeDetails: 'Закрыть',
     cancelBooking: 'Отменить бронь',
     rebook: 'Повторить бронь',
-    emptyUpcoming: 'Пока нет будущих бронирований',
+    emptyUpcoming: 'Пока нет предстоящих бронирований',
     emptyCompleted: 'Пока нет завершённых бронирований',
     emptyCancelled: 'Пока нет отменённых бронирований',
     back: 'Назад',
@@ -239,7 +239,7 @@ const texts: Partial<Record<AppLanguage, PageTexts>> = {
     todayAt: 'Сегодня в',
     tomorrowAt: 'Завтра в',
     doneBadge: 'Готово',
-    needsAction: 'Требует внимания',
+    needsAction: 'Нужно действие',
     calendarTitle: 'Календарь бронирований',
     selectedDay: 'Выбранный день',
     today: 'Сегодня',
@@ -252,17 +252,18 @@ const texts: Partial<Record<AppLanguage, PageTexts>> = {
     closeDay: 'Закрыть день',
     noBookingsForDate: 'На эту дату броней нет',
     selectedDatePanel: 'Брони выбранной даты',
+    urgentTitle: 'Сегодня и завтра',
+    urgentSubtitle: 'Срочные брони показываются сверху',
     filters: 'Фильтры',
-    sync: 'Синхронизировано',
-    freeSlots: 'Свободные окна',
-    onlyRequests: 'Только запросы',
-    records: 'записи',
+    showFilters: 'Включить фильтры',
+    hideFilters: 'Скрыть фильтры',
+    monthView: 'Весь месяц',
   },
   UA: {
-    title: 'Мої броні',
+    title: 'Мої бронювання',
     subtitle: 'Календар, фільтри, статус бронювання, чат і доступ до контактів',
     upcoming: 'Майбутні',
-    completed: 'Готові',
+    completed: 'Завершені',
     cancelled: 'Скасовані',
     pending: 'Очікує майстра',
     confirmed: 'Підтверджено',
@@ -325,11 +326,12 @@ const texts: Partial<Record<AppLanguage, PageTexts>> = {
     closeDay: 'Закрити день',
     noBookingsForDate: 'На цю дату бронювань немає',
     selectedDatePanel: 'Бронювання обраної дати',
+    urgentTitle: 'Сьогодні та завтра',
+    urgentSubtitle: 'Термінові бронювання зверху',
     filters: 'Фільтри',
-    sync: 'Синхронізовано',
-    freeSlots: 'Вільні вікна',
-    onlyRequests: 'Тільки запити',
-    records: 'записи',
+    showFilters: 'Увімкнути фільтри',
+    hideFilters: 'Сховати фільтри',
+    monthView: 'Весь місяць',
   },
 };
 
@@ -436,6 +438,7 @@ function getCalendarCells(year: number, month: number) {
 
   return Array.from({ length: 42 }, (_, index) => {
     const date = addDays(firstCell, index);
+
     return {
       date,
       currentMonth: date.getMonth() === month,
@@ -464,7 +467,7 @@ function statusMeta(status: BookingStatus, text: PageTexts) {
       bg: '#fff1bf',
       color: '#b87500',
       border: '#ffbf1f',
-      icon: '⏳',
+      icon: '!',
     };
   }
 
@@ -524,6 +527,15 @@ function sortBookingsByDate(items: BookingItem[]) {
   });
 }
 
+function isTodayOrTomorrow(booking: BookingItem, today: Date) {
+  const date = getBookingDate(booking);
+  if (!date) return false;
+
+  const tomorrow = addDays(today, 1);
+
+  return isSameDay(date, today) || isSameDay(date, tomorrow);
+}
+
 function OlamepLogo() {
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
@@ -572,6 +584,7 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState<BookingItem[]>(getBookings());
   const [activeTab, setActiveTab] = useState<BookingTab>('upcoming');
   const [activeFilter, setActiveFilter] = useState<BookingFilter>('all');
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [menuBookingId, setMenuBookingId] = useState<string | null>(null);
   const [detailsBookingId, setDetailsBookingId] = useState<string | null>(null);
@@ -579,7 +592,7 @@ export default function BookingsPage() {
   const today = useMemo(() => startOfDay(new Date()), []);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth());
   const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(today);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -605,6 +618,17 @@ export default function BookingsPage() {
   }, []);
 
   const text = useMemo(() => getTexts(language), [language]);
+
+  const urgentBookings = useMemo(() => {
+    return sortBookingsByDate(
+      bookings.filter((booking) => {
+        return (
+          isTodayOrTomorrow(booking, today) &&
+          (booking.status === 'pending' || booking.status === 'upcoming')
+        );
+      })
+    );
+  }, [bookings, today]);
 
   const monthBookings = useMemo(() => {
     return bookings.filter((booking) => {
@@ -657,14 +681,18 @@ export default function BookingsPage() {
   const menuBooking = bookings.find((booking) => booking.id === menuBookingId) || null;
   const detailsBooking = bookings.find((booking) => booking.id === detailsBookingId) || null;
 
-  const emptyText =
-    selectedDate
-      ? text.noBookingsForDate
-      : activeTab === 'upcoming'
-      ? text.emptyUpcoming
-      : activeTab === 'completed'
-      ? text.emptyCompleted
-      : text.emptyCancelled;
+  const emptyText = selectedDate
+    ? text.noBookingsForDate
+    : activeTab === 'upcoming'
+    ? text.emptyUpcoming
+    : activeTab === 'completed'
+    ? text.emptyCompleted
+    : text.emptyCancelled;
+
+  const years = useMemo(() => {
+    const current = new Date().getFullYear();
+    return Array.from({ length: 7 }, (_, index) => current - 2 + index);
+  }, []);
 
   const openChat = (booking: BookingItem) => {
     if (!canChat(booking)) return;
@@ -696,6 +724,12 @@ export default function BookingsPage() {
     setCalendarYear(next.getFullYear());
   };
 
+  const handleCloseSelectedDate = () => {
+    setSelectedDate(null);
+    setCalendarMonth(today.getMonth());
+    setCalendarYear(today.getFullYear());
+  };
+
   return (
     <>
       <main
@@ -703,12 +737,11 @@ export default function BookingsPage() {
           minHeight: '100vh',
           background: '#ffffff',
           color: BRAND.navy,
-          paddingBottom: 190,
+          paddingBottom: 140,
           fontFamily: 'Arial, sans-serif',
-          overflowX: 'hidden',
         }}
       >
-        <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 190px' }}>
+        <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 150px' }}>
           <header
             style={{
               display: 'grid',
@@ -742,7 +775,7 @@ export default function BookingsPage() {
 
             <button
               type="button"
-              onClick={() => router.push('/profile')}
+              onClick={() => router.push('/')}
               aria-label={text.home}
               style={{
                 width: 48,
@@ -764,10 +797,10 @@ export default function BookingsPage() {
             <h1
               style={{
                 margin: 0,
-                fontSize: 36,
-                lineHeight: 1,
+                fontSize: 34,
+                lineHeight: 1.02,
                 fontWeight: 900,
-                letterSpacing: '-1.4px',
+                letterSpacing: '-1.2px',
                 color: BRAND.navy,
               }}
             >
@@ -787,21 +820,114 @@ export default function BookingsPage() {
             </p>
           </section>
 
+          {urgentBookings.length > 0 ? (
+            <section
+              style={{
+                marginTop: 14,
+                borderRadius: 26,
+                border: `2px solid ${BRAND.border}`,
+                background: '#fff0f3',
+                padding: 12,
+                boxShadow: '0 10px 22px rgba(255,36,86,0.1)',
+              }}
+            >
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '42px 1fr auto',
+                  gap: 10,
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 16,
+                    border: `2px solid ${BRAND.border}`,
+                    background: BRAND.red,
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 24,
+                    fontWeight: 900,
+                  }}
+                >
+                  !
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 19,
+                      lineHeight: 1.05,
+                      fontWeight: 900,
+                      color: BRAND.navy,
+                    }}
+                  >
+                    {text.urgentTitle}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 3,
+                      fontSize: 12,
+                      fontWeight: 900,
+                      color: BRAND.red,
+                    }}
+                  >
+                    {text.urgentSubtitle}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    minWidth: 36,
+                    height: 36,
+                    borderRadius: 999,
+                    border: `2px solid ${BRAND.border}`,
+                    background: '#ffffff',
+                    color: BRAND.red,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 17,
+                    fontWeight: 900,
+                  }}
+                >
+                  {urgentBookings.length}
+                </div>
+              </div>
+
+              <div style={{ marginTop: 10, display: 'grid', gap: 9 }}>
+                {urgentBookings.slice(0, 3).map((booking) => (
+                  <UrgentBookingRow
+                    key={booking.id}
+                    booking={booking}
+                    text={text}
+                    language={language}
+                    onOpen={() => setDetailsBookingId(booking.id)}
+                  />
+                ))}
+              </div>
+            </section>
+          ) : null}
+
           <section
             style={{
               marginTop: 14,
-              borderRadius: 26,
-              border: `2.4px solid ${BRAND.border}`,
+              borderRadius: 22,
+              border: `2px solid ${BRAND.border}`,
               background: '#ffffff',
               padding: 9,
-              boxShadow: '0 8px 18px rgba(7,27,70,0.04)',
             }}
           >
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
+                gridTemplateColumns: '1fr 1fr auto',
                 gap: 8,
+                alignItems: 'center',
               }}
             >
               <SummaryMiniBox
@@ -819,45 +945,158 @@ export default function BookingsPage() {
                 color={BRAND.blue}
                 accent={BRAND.blue}
               />
+
+              <button
+                type="button"
+                onClick={() => setFiltersOpen((prev) => !prev)}
+                style={{
+                  width: 54,
+                  height: 54,
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.border}`,
+                  background: filtersOpen ? BRAND.navy : '#ffffff',
+                  color: filtersOpen ? '#ffffff' : BRAND.navy,
+                  fontSize: 24,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  position: 'relative',
+                }}
+                aria-label={filtersOpen ? text.hideFilters : text.showFilters}
+              >
+                ⚙
+                {activeFilter !== 'all' || search.trim() ? (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      right: -5,
+                      top: -7,
+                      width: 22,
+                      height: 22,
+                      borderRadius: 999,
+                      border: `2px solid ${BRAND.border}`,
+                      background: BRAND.red,
+                      color: '#ffffff',
+                      fontSize: 14,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 900,
+                    }}
+                  >
+                    !
+                  </span>
+                ) : null}
+              </button>
             </div>
 
-            <div
-              style={{
-                marginTop: 9,
-                height: 44,
-                borderRadius: 16,
-                border: `2px solid ${BRAND.border}`,
-                background: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '0 12px',
-              }}
-            >
-              <span style={{ fontSize: 18, color: '#9ca3af' }}>⌕</span>
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={text.searchPlaceholder}
-                style={{
-                  flex: 1,
-                  border: 'none',
-                  outline: 'none',
-                  background: 'transparent',
-                  fontSize: 13,
-                  fontWeight: 800,
-                  color: BRAND.navy,
-                  minWidth: 0,
-                }}
-              />
-            </div>
+            {filtersOpen ? (
+              <div style={{ marginTop: 10 }}>
+                <div
+                  style={{
+                    height: 46,
+                    borderRadius: 17,
+                    border: `2px solid ${BRAND.border}`,
+                    background: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '0 12px',
+                  }}
+                >
+                  <span style={{ fontSize: 18, color: '#9ca3af' }}>⌕</span>
+                  <input
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder={text.searchPlaceholder}
+                    style={{
+                      flex: 1,
+                      border: 'none',
+                      outline: 'none',
+                      background: 'transparent',
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: BRAND.navy,
+                      minWidth: 0,
+                    }}
+                  />
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 9,
+                    display: 'flex',
+                    gap: 8,
+                    overflowX: 'auto',
+                    paddingBottom: 2,
+                  }}
+                >
+                  {([
+                    ['all', text.all],
+                    ['confirmed', text.confirmed],
+                    ['pending', text.pending],
+                    ['paid', text.paidOnly],
+                    ['openContacts', text.openContacts],
+                  ] as const).map(([filter, label]) => {
+                    const active = activeFilter === filter;
+
+                    return (
+                      <button
+                        key={filter}
+                        type="button"
+                        onClick={() => setActiveFilter(filter)}
+                        style={{
+                          flexShrink: 0,
+                          minHeight: 38,
+                          borderRadius: 999,
+                          border: `2px solid ${
+                            active
+                              ? filter === 'pending'
+                                ? BRAND.yellow
+                                : filter === 'confirmed' ||
+                                  filter === 'paid' ||
+                                  filter === 'openContacts'
+                                ? BRAND.green
+                                : BRAND.border
+                              : BRAND.border
+                          }`,
+                          background: active
+                            ? filter === 'pending'
+                              ? '#fff1bf'
+                              : filter === 'confirmed' ||
+                                filter === 'paid' ||
+                                filter === 'openContacts'
+                              ? '#dcffe8'
+                              : BRAND.navy
+                            : '#ffffff',
+                          color: active
+                            ? filter === 'pending'
+                              ? '#b87500'
+                              : filter === 'confirmed' ||
+                                filter === 'paid' ||
+                                filter === 'openContacts'
+                              ? '#008f3a'
+                              : '#ffffff'
+                            : BRAND.navy,
+                          padding: '0 13px',
+                          fontSize: 12,
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
           </section>
 
           <section
             style={{
               marginTop: 14,
               borderRadius: 24,
-              border: `2.4px solid ${BRAND.border}`,
+              border: `2px solid ${BRAND.border}`,
               background: '#ffffff',
               padding: 7,
               display: 'grid',
@@ -897,73 +1136,153 @@ export default function BookingsPage() {
           <section
             style={{
               marginTop: 14,
-              borderRadius: 26,
-              border: `2.4px solid ${BRAND.border}`,
-              background: '#ffffff',
-              padding: 12,
-              overflow: 'hidden',
+              borderRadius: 30,
+              border: `2px solid ${BRAND.border}`,
+              background: '#f8fbff',
+              padding: 14,
             }}
           >
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr auto auto',
-                gap: 8,
+                gridTemplateColumns: '1fr auto',
+                gap: 12,
                 alignItems: 'center',
               }}
             >
-              <div
-                style={{
-                  fontSize: 24,
-                  lineHeight: 1.05,
-                  fontWeight: 900,
-                  color: BRAND.navy,
-                  textTransform: 'capitalize',
-                }}
-              >
-                {getMonthName(calendarMonth, language)} {calendarYear}
-              </div>
+              <div>
+                <div
+                  style={{
+                    fontSize: 24,
+                    lineHeight: 1.05,
+                    fontWeight: 900,
+                    color: BRAND.navy,
+                  }}
+                >
+                  {text.calendarTitle}
+                </div>
 
-              <button
-                type="button"
-                onClick={() => setActiveFilter((prev) => (prev === 'all' ? 'paid' : 'all'))}
-                style={{
-                  minHeight: 42,
-                  borderRadius: 16,
-                  border: `2px solid ${BRAND.border}`,
-                  background: activeFilter !== 'all' ? BRAND.navy : '#ffffff',
-                  color: activeFilter !== 'all' ? '#ffffff' : BRAND.navy,
-                  padding: '0 12px',
-                  fontSize: 12,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                ⛃ {text.filters}
-              </button>
+                <div
+                  style={{
+                    marginTop: 5,
+                    fontSize: 12.5,
+                    lineHeight: 1.3,
+                    fontWeight: 900,
+                    color: BRAND.muted,
+                  }}
+                >
+                  {selectedDate
+                    ? `${text.selectedDay}: ${formatCalendarTitle(selectedDate, language)}`
+                    : `${getMonthName(calendarMonth, language)} ${calendarYear}`}
+                </div>
+              </div>
 
               <button
                 type="button"
                 onClick={() => {
                   setCalendarMonth(today.getMonth());
                   setCalendarYear(today.getFullYear());
-                  setSelectedDate(today);
+                  setSelectedDate(null);
                 }}
                 style={{
-                  minWidth: 58,
-                  height: 50,
-                  borderRadius: 18,
+                  minWidth: 62,
+                  height: 54,
+                  borderRadius: 20,
                   border: `2px solid ${BRAND.border}`,
                   background:
                     'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
+                  boxShadow: '0 10px 20px rgba(14,115,216,0.18)',
                   color: '#ffffff',
                   fontSize: 12,
                   fontWeight: 900,
                   cursor: 'pointer',
+                  padding: '0 8px',
                 }}
               >
                 {text.today}
               </button>
+            </div>
+
+            <div
+              style={{
+                marginTop: 12,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
+              }}
+            >
+              <label
+                style={{
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.border}`,
+                  background: '#ffffff',
+                  padding: '8px 11px',
+                }}
+              >
+                <div style={{ fontSize: 10.5, fontWeight: 900, color: BRAND.muted }}>
+                  {text.year}
+                </div>
+                <select
+                  value={calendarYear}
+                  onChange={(event) => {
+                    setCalendarYear(Number(event.target.value));
+                    setSelectedDate(null);
+                  }}
+                  style={{
+                    marginTop: 3,
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontSize: 17,
+                    fontWeight: 900,
+                    color: BRAND.navy,
+                  }}
+                >
+                  {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label
+                style={{
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.border}`,
+                  background: '#ffffff',
+                  padding: '8px 11px',
+                }}
+              >
+                <div style={{ fontSize: 10.5, fontWeight: 900, color: BRAND.muted }}>
+                  {text.month}
+                </div>
+                <select
+                  value={calendarMonth}
+                  onChange={(event) => {
+                    setCalendarMonth(Number(event.target.value));
+                    setSelectedDate(null);
+                  }}
+                  style={{
+                    marginTop: 3,
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontSize: 17,
+                    fontWeight: 900,
+                    color: BRAND.navy,
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {Array.from({ length: 12 }, (_, index) => (
+                    <option key={index} value={index}>
+                      {getMonthName(index, language)}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
 
             <CalendarGrid
@@ -977,128 +1296,67 @@ export default function BookingsPage() {
             />
           </section>
 
-          <section
-            style={{
-              marginTop: 12,
-              borderRadius: 22,
-              border: `2.4px solid ${BRAND.border}`,
-              background: '#eef6ff',
-              padding: 10,
-              display: 'grid',
-              gridTemplateColumns: '42px 1fr auto',
-              gap: 10,
-              alignItems: 'center',
-            }}
-          >
-            <div
+          {selectedDate ? (
+            <section
               style={{
-                width: 42,
-                height: 42,
-                borderRadius: 14,
+                marginTop: 14,
+                borderRadius: 24,
                 border: `2px solid ${BRAND.border}`,
-                background: BRAND.blue,
-                color: '#ffffff',
-                display: 'flex',
+                background: '#fffefa',
+                padding: 13,
+                display: 'grid',
+                gridTemplateColumns: '1fr auto',
+                gap: 12,
                 alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 22,
-                fontWeight: 900,
               }}
             >
-              📅
-            </div>
-
-            <div>
-              <div
-                style={{
-                  fontSize: 16,
-                  lineHeight: 1.12,
-                  fontWeight: 900,
-                  color: BRAND.navy,
-                  textTransform: 'capitalize',
-                }}
-              >
-                {selectedDate
-                  ? formatCalendarTitle(selectedDate, language)
-                  : `${getMonthName(calendarMonth, language)} ${calendarYear}`}
-              </div>
-              <div
-                style={{
-                  marginTop: 3,
-                  fontSize: 12,
-                  fontWeight: 900,
-                  color: BRAND.muted,
-                }}
-              >
-                {filteredBookings.length} {text.records}
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setSelectedDate(null)}
-              style={{
-                width: 42,
-                height: 42,
-                borderRadius: 999,
-                border: `2px solid ${BRAND.border}`,
-                background: '#ffffff',
-                color: BRAND.navy,
-                fontSize: 22,
-                fontWeight: 900,
-                cursor: 'pointer',
-              }}
-            >
-              ×
-            </button>
-          </section>
-
-          <section
-            style={{
-              marginTop: 12,
-              borderRadius: 24,
-              border: `2.4px solid ${BRAND.border}`,
-              background: '#ffffff',
-              padding: 7,
-              display: 'flex',
-              gap: 8,
-              overflowX: 'auto',
-            }}
-          >
-            {([
-              ['all', text.all],
-              ['confirmed', text.confirmed],
-              ['pending', text.pending],
-              ['paid', text.paidOnly],
-              ['openContacts', text.openContacts],
-            ] as const).map(([filter, label]) => {
-              const active = activeFilter === filter;
-
-              return (
-                <button
-                  key={filter}
-                  type="button"
-                  onClick={() => setActiveFilter(filter)}
+              <div>
+                <div
                   style={{
-                    flexShrink: 0,
-                    minHeight: 42,
-                    borderRadius: 999,
-                    border: `2px solid ${BRAND.border}`,
-                    background: active ? BRAND.navy : '#ffffff',
-                    color: active ? '#ffffff' : BRAND.navy,
-                    padding: '0 16px',
-                    fontSize: 12,
+                    fontSize: 18,
+                    lineHeight: 1.1,
                     fontWeight: 900,
-                    cursor: 'pointer',
+                    color: BRAND.navy,
                   }}
                 >
-                  {label}
-                </button>
-              );
-            })}
-          </section>
+                  {text.selectedDatePanel}
+                </div>
 
-          <section style={{ marginTop: 14, paddingBottom: 90 }}>
+                <div
+                  style={{
+                    marginTop: 4,
+                    fontSize: 12.5,
+                    lineHeight: 1.25,
+                    fontWeight: 900,
+                    color: BRAND.muted,
+                  }}
+                >
+                  {formatCalendarTitle(selectedDate, language)}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCloseSelectedDate}
+                aria-label={text.closeDay}
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 999,
+                  border: `2px solid ${BRAND.border}`,
+                  background: '#ffffff',
+                  color: BRAND.navy,
+                  fontSize: 22,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                ×
+              </button>
+            </section>
+          ) : null}
+
+          <section style={{ marginTop: 16 }}>
             {filteredBookings.length === 0 ? (
               <div
                 style={{
@@ -1118,7 +1376,7 @@ export default function BookingsPage() {
                 {emptyText}
               </div>
             ) : (
-              <div style={{ display: 'grid', gap: 12 }}>
+              <div style={{ display: 'grid', gap: 14 }}>
                 {filteredBookings.map((booking) => (
                   <BookingCard
                     key={booking.id}
@@ -1168,6 +1426,127 @@ export default function BookingsPage() {
   );
 }
 
+function UrgentBookingRow({
+  booking,
+  text,
+  language,
+  onOpen,
+}: {
+  booking: BookingItem;
+  text: PageTexts;
+  language: AppLanguage;
+  onOpen: () => void;
+}) {
+  const meta = statusMeta(booking.status, text);
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      style={{
+        width: '100%',
+        minHeight: 72,
+        borderRadius: 20,
+        border: `2px solid ${BRAND.border}`,
+        background: '#ffffff',
+        padding: 10,
+        display: 'grid',
+        gridTemplateColumns: '48px minmax(0, 1fr) auto',
+        gap: 10,
+        alignItems: 'center',
+        cursor: 'pointer',
+        textAlign: 'left',
+      }}
+    >
+      <img
+        src={
+          booking.masterAvatar ||
+          'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=400&q=80'
+        }
+        alt={booking.masterName}
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: 16,
+          objectFit: 'cover',
+          border: '1.5px solid #eeeeee',
+        }}
+      />
+
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 14,
+            lineHeight: 1.12,
+            fontWeight: 900,
+            color: BRAND.navy,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {booking.masterName}
+        </div>
+
+        <div
+          style={{
+            marginTop: 3,
+            fontSize: 12,
+            fontWeight: 800,
+            color: BRAND.muted,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {serviceName(booking.serviceName, language)}
+        </div>
+
+        <div
+          style={{
+            marginTop: 4,
+            fontSize: 12,
+            fontWeight: 900,
+            color: BRAND.red,
+          }}
+        >
+          📅 {formatDateLabel(booking.dateLabel, text)}
+        </div>
+      </div>
+
+      <div style={{ textAlign: 'right' }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            minHeight: 26,
+            padding: '0 8px',
+            borderRadius: 999,
+            border: `2px solid ${meta.border}`,
+            background: meta.bg,
+            color: meta.color,
+            alignItems: 'center',
+            fontSize: 10.5,
+            fontWeight: 900,
+          }}
+        >
+          {meta.icon}
+        </div>
+
+        <div
+          style={{
+            marginTop: 5,
+            fontSize: 15,
+            fontWeight: 900,
+            color: BRAND.red,
+          }}
+        >
+          {money(booking.price)}
+        </div>
+      </div>
+    </button>
+  );
+}
+
 function CalendarGrid({
   language,
   bookings,
@@ -1191,17 +1570,17 @@ function CalendarGrid({
   return (
     <div
       style={{
-        marginTop: 12,
+        marginTop: 14,
         display: 'grid',
         gridTemplateColumns: 'repeat(7, 1fr)',
-        gap: 4,
+        gap: 5,
       }}
     >
       {weekDays.map((day) => (
         <div
           key={day}
           style={{
-            height: 23,
+            height: 24,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -1234,37 +1613,50 @@ function CalendarGrid({
             type="button"
             onClick={() => onSelectDate(date)}
             style={{
-              minHeight: 46,
-              borderRadius: 14,
+              minHeight: 52,
+              borderRadius: 16,
               border: selected
-                ? `2px solid ${BRAND.blue}`
+                ? `2px solid ${BRAND.border}`
                 : currentToday
                 ? `2px solid ${BRAND.blue}`
-                : '1.4px solid #e2e2e2',
-              background: selected ? '#eaf4ff' : currentMonth ? '#ffffff' : '#f3f3f3',
-              color: currentMonth ? BRAND.navy : '#a0a0a0',
+                : '1.5px solid #e0e0e0',
+              background: selected ? BRAND.navy : currentMonth ? '#ffffff' : '#f3f3f3',
+              color: selected ? '#ffffff' : currentMonth ? BRAND.navy : '#a0a0a0',
               cursor: 'pointer',
-              padding: 4,
+              padding: 5,
               display: 'grid',
               alignContent: 'space-between',
               justifyItems: 'center',
+              boxShadow: currentToday && !selected ? '0 0 0 3px rgba(14,115,216,0.1)' : 'none',
             }}
           >
             <span style={{ fontSize: 14, fontWeight: 900 }}>{date.getDate()}</span>
 
             <span
               style={{
-                minHeight: 12,
+                minHeight: 13,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 2,
+                gap: 3,
               }}
             >
-              {hasPending ? <CalendarDot color={BRAND.yellow} /> : null}
+              {hasPending ? <CalendarDot color={BRAND.red} /> : null}
               {hasConfirmed ? <CalendarDot color={BRAND.green} /> : null}
               {hasCompleted ? <CalendarDot color={BRAND.blue} /> : null}
-              {hasCancelled ? <CalendarDot color={BRAND.red} /> : null}
+              {hasCancelled ? <CalendarDot color="#9ca3af" /> : null}
+              {dayBookings.length > 0 ? (
+                <span
+                  style={{
+                    marginLeft: 2,
+                    fontSize: 9,
+                    fontWeight: 900,
+                    color: selected ? '#ffffff' : BRAND.muted,
+                  }}
+                >
+                  {dayBookings.length}
+                </span>
+              ) : null}
             </span>
           </button>
         );
@@ -1277,8 +1669,8 @@ function CalendarDot({ color }: { color: string }) {
   return (
     <span
       style={{
-        width: 6,
-        height: 6,
+        width: 7,
+        height: 7,
         borderRadius: 999,
         background: color,
         display: 'inline-block',
@@ -1303,19 +1695,21 @@ function SummaryMiniBox({
   return (
     <div
       style={{
-        borderRadius: 19,
+        borderRadius: 18,
         border: `2px solid ${BRAND.border}`,
         background: bg,
-        padding: '13px 15px',
-        minHeight: 78,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
+        padding: '8px 10px',
+        minHeight: 54,
+        display: 'grid',
+        gridTemplateColumns: '1fr auto',
+        alignItems: 'center',
+        gap: 8,
       }}
     >
       <div
         style={{
-          fontSize: 12,
+          minWidth: 0,
+          fontSize: 11,
           lineHeight: 1.15,
           fontWeight: 900,
           color: accent,
@@ -1323,9 +1717,7 @@ function SummaryMiniBox({
       >
         {title}
       </div>
-      <div style={{ marginTop: 8, fontSize: 28, lineHeight: 1, fontWeight: 900, color }}>
-        {value}
-      </div>
+      <div style={{ fontSize: 24, lineHeight: 1, fontWeight: 900, color }}>{value}</div>
     </div>
   );
 }
@@ -1360,11 +1752,11 @@ function BookingCard({
     <article
       style={{
         position: 'relative',
-        borderRadius: 25,
-        border: `2.4px solid ${BRAND.border}`,
+        borderRadius: 26,
+        border: `2px solid ${BRAND.border}`,
         background: '#ffffff',
         padding: 13,
-        boxShadow: '0 10px 24px rgba(7,27,70,0.06)',
+        boxShadow: '0 10px 24px rgba(7,27,70,0.07)',
         overflow: 'hidden',
       }}
     >
@@ -1372,10 +1764,10 @@ function BookingCard({
         <div
           style={{
             position: 'absolute',
-            right: 13,
-            top: 13,
-            width: 38,
-            height: 38,
+            right: 12,
+            top: 12,
+            width: 34,
+            height: 34,
             borderRadius: 999,
             border: `2px solid ${BRAND.border}`,
             background: BRAND.green,
@@ -1383,45 +1775,70 @@ function BookingCard({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 24,
+            fontSize: 21,
             fontWeight: 900,
             zIndex: 2,
-            boxShadow: '4px 4px 0 rgba(0,0,0,0.14)',
           }}
         >
           ✓
         </div>
       ) : null}
 
-      <button
-        type="button"
-        onClick={onOpenMenu}
+      {booking.status === 'pending' ? (
+        <div
+          style={{
+            position: 'absolute',
+            left: 12,
+            top: 12,
+            minHeight: 30,
+            padding: '0 10px',
+            borderRadius: 999,
+            border: `2px solid ${BRAND.border}`,
+            background: BRAND.red,
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: 11,
+            fontWeight: 900,
+            zIndex: 2,
+          }}
+        >
+          ! {text.needsAction}
+        </div>
+      ) : null}
+
+      <div
         style={{
-          position: 'absolute',
-          right: 12,
-          top: 12,
-          width: 38,
-          height: 38,
-          borderRadius: 999,
-          border: `2px solid ${BRAND.border}`,
-          background: '#ffffff',
-          color: BRAND.navy,
-          fontSize: 18,
-          fontWeight: 900,
-          cursor: 'pointer',
-          zIndex: 3,
+          display: 'flex',
+          justifyContent: 'flex-end',
+          marginBottom: booking.status === 'pending' ? 34 : 12,
         }}
       >
-        ⋯
-      </button>
+        <button
+          type="button"
+          onClick={onOpenMenu}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 999,
+            border: `2px solid ${BRAND.border}`,
+            background: '#ffffff',
+            color: BRAND.navy,
+            fontSize: 20,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          ⋯
+        </button>
+      </div>
 
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '94px minmax(0, 1fr)',
+          gridTemplateColumns: '92px minmax(0, 1fr)',
           gap: 12,
           alignItems: 'center',
-          paddingTop: 8,
         }}
       >
         <img
@@ -1431,21 +1848,21 @@ function BookingCard({
           }
           alt={booking.masterName}
           style={{
-            width: 94,
-            height: 94,
+            width: 92,
+            height: 92,
             objectFit: 'cover',
             borderRadius: 20,
             border: '1.5px solid #eeeeee',
           }}
         />
 
-        <div style={{ minWidth: 0, paddingRight: 34 }}>
+        <div style={{ minWidth: 0 }}>
           <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 6,
-              minHeight: 29,
+              gap: 7,
+              minHeight: 30,
               padding: '0 10px',
               borderRadius: 999,
               border: `2px solid ${meta.border}`,
@@ -1465,6 +1882,7 @@ function BookingCard({
               lineHeight: 1.08,
               fontWeight: 900,
               color: BRAND.navy,
+              paddingRight: booking.status === 'completed' ? 24 : 0,
             }}
           >
             {booking.masterName}
@@ -1540,17 +1958,17 @@ function BookingCard({
         </div>
       </div>
 
-      <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div style={{ marginTop: 13, display: 'grid', gap: 9 }}>
         <button
           type="button"
           onClick={onOpenDetails}
           style={{
-            minHeight: 44,
-            borderRadius: 15,
+            minHeight: 52,
+            borderRadius: 17,
             border: `2px solid ${BRAND.border}`,
             background: '#ffffff',
             color: BRAND.navy,
-            fontSize: 13,
+            fontSize: 15,
             fontWeight: 900,
             cursor: 'pointer',
           }}
@@ -1563,33 +1981,30 @@ function BookingCard({
           disabled={!chatEnabled}
           onClick={onOpenChat}
           style={{
-            minHeight: 44,
-            borderRadius: 15,
+            minHeight: 52,
+            borderRadius: 17,
             border: `2px solid ${chatEnabled ? BRAND.green : '#d7ded9'}`,
             background: chatEnabled ? BRAND.green : '#edf2ee',
             color: chatEnabled ? '#ffffff' : '#8b968e',
-            fontSize: 13,
+            fontSize: 15,
             fontWeight: 900,
             cursor: chatEnabled ? 'pointer' : 'not-allowed',
           }}
         >
           💬 {chatEnabled ? text.openChat : text.chatLocked}
         </button>
-      </div>
 
-      <div style={{ marginTop: 8 }}>
         {canCancel ? (
           <button
             type="button"
             onClick={onCancel}
             style={{
-              width: '100%',
-              minHeight: 44,
-              borderRadius: 15,
+              minHeight: 50,
+              borderRadius: 17,
               border: `2px solid ${BRAND.border}`,
               background: '#ffe0e8',
               color: '#d91f4f',
-              fontSize: 13,
+              fontSize: 15,
               fontWeight: 900,
               cursor: 'pointer',
             }}
@@ -1601,13 +2016,12 @@ function BookingCard({
             type="button"
             onClick={onRebook}
             style={{
-              width: '100%',
-              minHeight: 44,
-              borderRadius: 15,
+              minHeight: 50,
+              borderRadius: 17,
               border: `2px solid ${BRAND.border}`,
               background: '#dcecff',
               color: BRAND.blue,
-              fontSize: 13,
+              fontSize: 15,
               fontWeight: 900,
               cursor: 'pointer',
             }}
@@ -1624,7 +2038,7 @@ function MiniPill({ label, bg, color }: { label: string; bg: string; color: stri
   return (
     <span
       style={{
-        minHeight: 29,
+        minHeight: 30,
         padding: '0 9px',
         borderRadius: 999,
         border: `1.8px solid ${BRAND.border}`,
@@ -1632,7 +2046,7 @@ function MiniPill({ label, bg, color }: { label: string; bg: string; color: stri
         color,
         display: 'inline-flex',
         alignItems: 'center',
-        fontSize: 10.5,
+        fontSize: 11,
         lineHeight: 1.1,
         fontWeight: 900,
       }}
@@ -1666,7 +2080,7 @@ function BookingMenu({
         position: 'fixed',
         inset: 0,
         background: 'rgba(17,17,17,0.25)',
-        zIndex: 2500,
+        zIndex: 250,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'center',
@@ -1771,7 +2185,7 @@ function BookingDetailsModal({
         position: 'fixed',
         inset: 0,
         background: 'rgba(17,17,17,0.25)',
-        zIndex: 2700,
+        zIndex: 270,
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'center',
