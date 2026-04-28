@@ -21,7 +21,7 @@ import {
 } from '../../../services/bookingsStore';
 
 type ViewMode = 'today' | 'tomorrow' | 'requests' | 'calendar' | 'history';
-type CalendarMode = 'month' | 'week' | 'day' | 'list';
+type CalendarMode = 'year' | 'month' | 'week' | 'day' | 'list';
 type StatusFilter = 'all' | BookingStatus;
 type PaymentFilter = 'all' | 'paid' | 'unpaid' | 'platform' | 'notPlatform';
 
@@ -33,6 +33,7 @@ type PageText = {
   requests: string;
   calendar: string;
   history: string;
+  year: string;
   month: string;
   week: string;
   day: string;
@@ -47,26 +48,22 @@ type PageText = {
   cancelled: string;
   unavailable: string;
   available: string;
-  selectedDay: string;
   bookings: string;
   noBookings: string;
   details: string;
   openChat: string;
   markDone: string;
-  price: string;
-  notes: string;
   back: string;
   close: string;
   active: string;
   total: string;
   revenue: string;
   done: string;
-  year: string;
+  time: string;
+  clientProcedure: string;
+  price: string;
+  notes: string;
   allStatuses: string;
-  statusLegendDone: string;
-  statusLegendConfirmed: string;
-  statusLegendUnavailable: string;
-  statusLegendAttention: string;
   searchClient: string;
   fromDate: string;
   toDate: string;
@@ -80,7 +77,7 @@ type PageText = {
   notPlatformPaid: string;
   resetFilters: string;
   dateRange: string;
-  period: string;
+  tapHint: string;
 };
 
 const BRAND = {
@@ -109,6 +106,7 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     requests: 'Requests',
     calendar: 'Calendar',
     history: 'History',
+    year: 'Year',
     month: 'Month',
     week: 'Week',
     day: 'Day',
@@ -116,33 +114,29 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     filters: 'Filters',
     freeWindows: 'Free windows',
     onlyRequests: 'Only requests',
-    synced: 'Synced',
+    synced: 'Auto sync · no conflicts',
     confirmed: 'Confirmed',
     waiting: 'Waiting',
     completed: 'Done',
     cancelled: 'Cancelled',
     unavailable: 'Unavailable',
-    available: 'Free slot',
-    selectedDay: 'Selected day',
+    available: 'Free window',
     bookings: 'bookings',
     noBookings: 'No bookings for this date',
-    details: 'Booking details',
-    openChat: 'Open chat',
+    details: 'Details',
+    openChat: 'Chat',
     markDone: 'Mark done',
-    price: 'Price',
-    notes: 'Notes',
     back: 'Back',
     close: 'Close',
     active: 'Active',
     total: 'Total',
     revenue: 'Revenue',
     done: 'Done',
-    year: 'Year',
+    time: 'Time',
+    clientProcedure: 'Client / Procedure',
+    price: 'Price',
+    notes: 'Notes',
     allStatuses: 'All statuses',
-    statusLegendDone: 'Done',
-    statusLegendConfirmed: 'Confirmed',
-    statusLegendUnavailable: 'Unavailable',
-    statusLegendAttention: 'Needs attention',
     searchClient: 'Client or service',
     fromDate: 'From date',
     toDate: 'To date',
@@ -156,7 +150,7 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     notPlatformPaid: 'Not platform',
     resetFilters: 'Reset filters',
     dateRange: 'Date range',
-    period: 'Period',
+    tapHint: 'Tap a row to edit · hold and drag to change time',
   },
   RU: {
     title: 'Мои клиенты',
@@ -166,6 +160,7 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     requests: 'Запросы',
     calendar: 'Календарь',
     history: 'История',
+    year: 'Год',
     month: 'Месяц',
     week: 'Неделя',
     day: 'День',
@@ -173,33 +168,29 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     filters: 'Фильтры',
     freeWindows: 'Свободные окна',
     onlyRequests: 'Только запросы',
-    synced: 'Синхронизировано',
+    synced: 'Автосинхронизация · без конфликтов',
     confirmed: 'Подтверждено',
-    waiting: 'Ожидает подтверждения',
+    waiting: 'Ожидает',
     completed: 'Готово',
     cancelled: 'Отменено',
     unavailable: 'Недоступно',
     available: 'Свободное окно',
-    selectedDay: 'Выбранный день',
     bookings: 'записи',
     noBookings: 'На эту дату записей нет',
-    details: 'Детали брони',
-    openChat: 'Открыть чат',
+    details: 'Детали',
+    openChat: 'Чат',
     markDone: 'Отметить готово',
-    price: 'Цена',
-    notes: 'Заметки',
     back: 'Назад',
     close: 'Закрыть',
     active: 'Активные',
     total: 'Всего',
     revenue: 'Доход',
     done: 'Готово',
-    year: 'Год',
+    time: 'Время',
+    clientProcedure: 'Клиент / Процедура',
+    price: 'Цена',
+    notes: 'Заметки',
     allStatuses: 'Все статусы',
-    statusLegendDone: 'Готово',
-    statusLegendConfirmed: 'Подтверждено',
-    statusLegendUnavailable: 'Недоступно',
-    statusLegendAttention: 'Требует внимания',
     searchClient: 'Клиент или услуга',
     fromDate: 'Дата от',
     toDate: 'Дата до',
@@ -209,11 +200,11 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     allPayments: 'Все оплаты',
     paid: 'Оплачено',
     unpaid: 'Не оплачено',
-    platformPaid: 'Оплачено через платформу',
+    platformPaid: 'Через платформу',
     notPlatformPaid: 'Не через платформу',
     resetFilters: 'Сбросить фильтры',
     dateRange: 'Диапазон дат',
-    period: 'Период',
+    tapHint: 'Тап по строке — редактировать · удержание и перетаскивание — изменить время',
   },
   UA: {
     title: 'Мої клієнти',
@@ -223,6 +214,7 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     requests: 'Запити',
     calendar: 'Календар',
     history: 'Історія',
+    year: 'Рік',
     month: 'Місяць',
     week: 'Тиждень',
     day: 'День',
@@ -230,33 +222,29 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     filters: 'Фільтри',
     freeWindows: 'Вільні вікна',
     onlyRequests: 'Тільки запити',
-    synced: 'Синхронізовано',
+    synced: 'Автосинхронізація · без конфліктів',
     confirmed: 'Підтверджено',
-    waiting: 'Очікує підтвердження',
+    waiting: 'Очікує',
     completed: 'Готово',
     cancelled: 'Скасовано',
     unavailable: 'Недоступно',
     available: 'Вільне вікно',
-    selectedDay: 'Обраний день',
     bookings: 'записи',
     noBookings: 'На цю дату записів немає',
-    details: 'Деталі бронювання',
-    openChat: 'Відкрити чат',
+    details: 'Деталі',
+    openChat: 'Чат',
     markDone: 'Позначити готово',
-    price: 'Ціна',
-    notes: 'Нотатки',
     back: 'Назад',
     close: 'Закрити',
     active: 'Активні',
     total: 'Усього',
     revenue: 'Дохід',
     done: 'Готово',
-    year: 'Рік',
+    time: 'Час',
+    clientProcedure: 'Клієнт / Процедура',
+    price: 'Ціна',
+    notes: 'Нотатки',
     allStatuses: 'Усі статуси',
-    statusLegendDone: 'Готово',
-    statusLegendConfirmed: 'Підтверджено',
-    statusLegendUnavailable: 'Недоступно',
-    statusLegendAttention: 'Потребує уваги',
     searchClient: 'Клієнт або послуга',
     fromDate: 'Дата від',
     toDate: 'Дата до',
@@ -266,11 +254,11 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     allPayments: 'Усі оплати',
     paid: 'Оплачено',
     unpaid: 'Не оплачено',
-    platformPaid: 'Оплачено через платформу',
+    platformPaid: 'Через платформу',
     notPlatformPaid: 'Не через платформу',
     resetFilters: 'Скинути фільтри',
     dateRange: 'Діапазон дат',
-    period: 'Період',
+    tapHint: 'Тап по рядку — редагувати · утримання і перетягування — змінити час',
   },
 };
 
@@ -352,7 +340,7 @@ function dateFromInput(value: string) {
   return date;
 }
 
-function getMonthName(date: Date, language: AppLanguage) {
+function getMonthTitle(date: Date, language: AppLanguage) {
   return new Intl.DateTimeFormat(getLocale(language), {
     month: 'long',
     year: 'numeric',
@@ -411,6 +399,13 @@ function getMonthRange(date: Date) {
   };
 }
 
+function getYearRange(date: Date) {
+  return {
+    from: startOfDay(new Date(date.getFullYear(), 0, 1)),
+    to: endOfDay(new Date(date.getFullYear(), 11, 31)),
+  };
+}
+
 function statusLabel(booking: BookingItem, text: PageText) {
   if (booking.status === 'completed') return text.completed;
   if (booking.status === 'pending') return text.waiting;
@@ -420,7 +415,7 @@ function statusLabel(booking: BookingItem, text: PageText) {
 
 function statusColor(booking: BookingItem) {
   if (booking.status === 'completed') return BRAND.blue;
-  if (booking.status === 'pending') return BRAND.orange;
+  if (booking.status === 'pending') return BRAND.yellow;
   if (booking.status === 'cancelled') return BRAND.red;
   return BRAND.green;
 }
@@ -506,7 +501,7 @@ export default function ProfileClientsPage() {
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('today');
-  const [calendarMode, setCalendarMode] = useState<CalendarMode>('month');
+  const [calendarMode, setCalendarMode] = useState<CalendarMode>('day');
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
   const [calendarDate, setCalendarDate] = useState<Date>(() => startOfDay(new Date()));
   const [showOnlyRequests, setShowOnlyRequests] = useState(false);
@@ -523,9 +518,7 @@ export default function ProfileClientsPage() {
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
-    const syncBookings = () => {
-      setBookings(getBookings());
-    };
+    const syncBookings = () => setBookings(getBookings());
 
     syncLanguage();
     syncBookings();
@@ -547,7 +540,6 @@ export default function ProfileClientsPage() {
   }, []);
 
   const text = useMemo(() => getText(language), [language]);
-
   const today = useMemo(() => startOfDay(new Date()), []);
   const tomorrow = useMemo(() => addDays(today, 1), [today]);
 
@@ -577,18 +569,22 @@ export default function ProfileClientsPage() {
     }
 
     if (viewMode === 'calendar') {
-      if (calendarMode === 'month' || calendarMode === 'list') {
-        return getMonthRange(calendarDate);
-      }
-
-      if (calendarMode === 'week') {
-        return getWeekRange(selectedDate);
-      }
+      if (calendarMode === 'year') return getYearRange(calendarDate);
+      if (calendarMode === 'month' || calendarMode === 'list') return getMonthRange(calendarDate);
+      if (calendarMode === 'week') return getWeekRange(selectedDate);
 
       return {
         from: startOfDay(selectedDate),
         to: endOfDay(selectedDate),
       };
+    }
+
+    if (viewMode === 'history') {
+      return null;
+    }
+
+    if (viewMode === 'requests') {
+      return null;
     }
 
     return null;
@@ -615,18 +611,9 @@ export default function ProfileClientsPage() {
       source = source.filter((booking) => booking.status === statusFilter);
     }
 
-    if (paymentFilter === 'paid') {
-      source = source.filter((booking) => isPaid(booking));
-    }
-
-    if (paymentFilter === 'unpaid') {
-      source = source.filter((booking) => !isPaid(booking));
-    }
-
-    if (paymentFilter === 'platform') {
-      source = source.filter((booking) => isPlatformPaid(booking));
-    }
-
+    if (paymentFilter === 'paid') source = source.filter((booking) => isPaid(booking));
+    if (paymentFilter === 'unpaid') source = source.filter((booking) => !isPaid(booking));
+    if (paymentFilter === 'platform') source = source.filter((booking) => isPlatformPaid(booking));
     if (paymentFilter === 'notPlatform') {
       source = source.filter((booking) => !isPlatformPaid(booking));
     }
@@ -691,7 +678,7 @@ export default function ProfileClientsPage() {
 
   const years = useMemo(() => {
     const current = new Date().getFullYear();
-    return Array.from({ length: 7 }, (_, index) => current - 2 + index);
+    return Array.from({ length: 8 }, (_, index) => current - 2 + index);
   }, []);
 
   const markDone = (booking: BookingItem) => {
@@ -718,11 +705,17 @@ export default function ProfileClientsPage() {
     if (mode === 'today') {
       setSelectedDate(today);
       setCalendarDate(today);
+      setCalendarMode('day');
     }
 
     if (mode === 'tomorrow') {
       setSelectedDate(tomorrow);
       setCalendarDate(tomorrow);
+      setCalendarMode('day');
+    }
+
+    if (mode === 'calendar') {
+      setCalendarMode('month');
     }
   };
 
@@ -732,6 +725,7 @@ export default function ProfileClientsPage() {
     setSelectedDate(today);
     setCalendarDate(today);
     setViewMode('today');
+    setCalendarMode('day');
   };
 
   const periodLabel = selectedRange
@@ -749,20 +743,8 @@ export default function ProfileClientsPage() {
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 145px' }}>
-        <header
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '48px 1fr 48px',
-            alignItems: 'center',
-            gap: 10,
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => router.back()}
-            aria-label={text.back}
-            style={headerCircleButtonStyle}
-          >
+        <header style={headerStyle}>
+          <button type="button" onClick={() => router.back()} aria-label={text.back} style={headerCircleButtonStyle}>
             ←
           </button>
 
@@ -770,55 +752,17 @@ export default function ProfileClientsPage() {
             <OlamepLogo />
           </div>
 
-          <button
-            type="button"
-            onClick={() => router.push('/profile')}
-            aria-label={text.close}
-            style={headerCircleButtonStyle}
-          >
+          <button type="button" onClick={() => router.push('/profile')} aria-label={text.close} style={headerCircleButtonStyle}>
             ×
           </button>
         </header>
 
         <section style={{ marginTop: 16 }}>
-          <h1
-            style={{
-              margin: 0,
-              fontSize: 38,
-              lineHeight: 1,
-              fontWeight: 900,
-              letterSpacing: '-1.4px',
-              color: BRAND.navy,
-            }}
-          >
-            {text.title}
-          </h1>
-
-          <p
-            style={{
-              margin: '8px 0 0',
-              fontSize: 14,
-              lineHeight: 1.35,
-              fontWeight: 800,
-              color: BRAND.muted,
-            }}
-          >
-            {text.subtitle}
-          </p>
+          <h1 style={titleStyle}>{text.title}</h1>
+          <p style={subtitleStyle}>{text.subtitle}</p>
         </section>
 
-        <section
-          style={{
-            marginTop: 15,
-            borderRadius: 24,
-            border: `2.5px solid ${BRAND.border}`,
-            background: '#ffffff',
-            padding: 7,
-            display: 'grid',
-            gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
-            gap: 6,
-          }}
-        >
+        <section style={topTabsShellStyle}>
           {([
             ['today', text.today],
             ['tomorrow', text.tomorrow],
@@ -834,17 +778,9 @@ export default function ProfileClientsPage() {
                 type="button"
                 onClick={() => setMode(mode)}
                 style={{
-                  minHeight: 42,
-                  borderRadius: 15,
-                  border: `2px solid ${BRAND.border}`,
+                  ...topTabStyle,
                   background: active ? BRAND.navy : '#ffffff',
                   color: active ? '#ffffff' : BRAND.navy,
-                  fontSize: 11,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
                 }}
               >
                 {label}
@@ -853,15 +789,7 @@ export default function ProfileClientsPage() {
           })}
         </section>
 
-        <section
-          style={{
-            marginTop: 13,
-            borderRadius: 25,
-            border: `2.5px solid ${BRAND.border}`,
-            background: '#ffffff',
-            padding: 12,
-          }}
-        >
+        <section style={statsShellStyle}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <StatBox title={text.active} value={String(activeCount)} bg={BRAND.softGreen} />
             <StatBox title={text.total} value={String(visibleBookings.length)} bg={BRAND.softBlue} />
@@ -870,28 +798,14 @@ export default function ProfileClientsPage() {
           </div>
         </section>
 
-        <section
-          style={{
-            marginTop: 13,
-            borderRadius: 28,
-            border: `2.5px solid ${BRAND.border}`,
-            background: '#ffffff',
-            padding: 10,
-          }}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'auto 1fr auto',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
+        <section style={calendarShellStyle}>
+          <div style={calendarHeaderStyle}>
             <button
               type="button"
               onClick={() => {
                 const next = new Date(calendarDate);
-                next.setMonth(next.getMonth() - 1);
+                if (calendarMode === 'year') next.setFullYear(next.getFullYear() - 1);
+                else next.setMonth(next.getMonth() - 1);
                 setCalendarDate(next);
                 setViewMode('calendar');
               }}
@@ -900,23 +814,16 @@ export default function ProfileClientsPage() {
               ‹
             </button>
 
-            <div
-              style={{
-                textAlign: 'center',
-                fontSize: 22,
-                fontWeight: 900,
-                color: BRAND.navy,
-                textTransform: 'capitalize',
-              }}
-            >
-              {getMonthName(calendarDate, language)}
+            <div style={calendarTitleStyle}>
+              {calendarMode === 'year' ? calendarDate.getFullYear() : getMonthTitle(calendarDate, language)}
             </div>
 
             <button
               type="button"
               onClick={() => {
                 const next = new Date(calendarDate);
-                next.setMonth(next.getMonth() + 1);
+                if (calendarMode === 'year') next.setFullYear(next.getFullYear() + 1);
+                else next.setMonth(next.getMonth() + 1);
                 setCalendarDate(next);
                 setViewMode('calendar');
               }}
@@ -926,14 +833,7 @@ export default function ProfileClientsPage() {
             </button>
           </div>
 
-          <div
-            style={{
-              marginTop: 10,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1.5fr 1fr',
-              gap: 8,
-            }}
-          >
+          <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1.5fr 1fr', gap: 8 }}>
             <select
               value={calendarDate.getFullYear()}
               onChange={(event) => {
@@ -973,15 +873,9 @@ export default function ProfileClientsPage() {
             </button>
           </div>
 
-          <div
-            style={{
-              marginTop: 10,
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: 7,
-            }}
-          >
+          <div style={calendarModeTabsStyle}>
             {([
+              ['year', text.year],
               ['month', text.month],
               ['week', text.week],
               ['day', text.day],
@@ -1000,14 +894,9 @@ export default function ProfileClientsPage() {
                     setRangeTo('');
                   }}
                   style={{
-                    minHeight: 38,
-                    borderRadius: 999,
-                    border: `2px solid ${BRAND.border}`,
+                    ...calendarModeButtonStyle,
                     background: active ? BRAND.navy : '#ffffff',
                     color: active ? '#ffffff' : BRAND.navy,
-                    fontSize: 12,
-                    fontWeight: 900,
-                    cursor: 'pointer',
                   }}
                 >
                   {label}
@@ -1015,6 +904,23 @@ export default function ProfileClientsPage() {
               );
             })}
           </div>
+
+          {calendarMode === 'year' ? (
+            <YearGrid
+              year={calendarDate.getFullYear()}
+              language={language}
+              bookings={bookings}
+              onSelectMonth={(month) => {
+                const next = new Date(calendarDate);
+                next.setMonth(month);
+                next.setDate(1);
+                setCalendarDate(next);
+                setSelectedDate(next);
+                setCalendarMode('month');
+                setViewMode('calendar');
+              }}
+            />
+          ) : null}
 
           {calendarMode === 'month' ? (
             <CalendarGrid
@@ -1049,12 +955,7 @@ export default function ProfileClientsPage() {
           ) : null}
 
           {calendarMode === 'day' ? (
-            <DayFocus
-              date={selectedDate}
-              language={language}
-              bookings={visibleBookings}
-              text={text}
-            />
+            <DayFocus date={selectedDate} language={language} bookings={visibleBookings} text={text} />
           ) : null}
 
           {calendarMode === 'list' ? (
@@ -1073,15 +974,7 @@ export default function ProfileClientsPage() {
             />
           ) : null}
 
-          <div
-            style={{
-              marginTop: 12,
-              display: 'flex',
-              gap: 8,
-              overflowX: 'auto',
-              paddingBottom: 2,
-            }}
-          >
+          <div style={filterButtonsScrollStyle}>
             <FilterButton
               active={filtersOpen}
               label={`☰ ${text.filters}`}
@@ -1097,46 +990,12 @@ export default function ProfileClientsPage() {
               label={`♙ ${text.onlyRequests}`}
               onClick={() => setShowOnlyRequests((prev) => !prev)}
             />
-            <div
-              style={{
-                flexShrink: 0,
-                minHeight: 40,
-                borderRadius: 999,
-                border: `2px solid ${BRAND.border}`,
-                background: BRAND.softGreen,
-                color: '#008f3a',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0 13px',
-                gap: 7,
-                fontSize: 12,
-                fontWeight: 900,
-              }}
-            >
-              ☁ {text.synced}
-            </div>
+            <div style={syncPillStyle}>✓ {text.synced}</div>
           </div>
 
           {filtersOpen ? (
-            <div
-              style={{
-                marginTop: 10,
-                borderRadius: 20,
-                border: `2px solid ${BRAND.border}`,
-                background: '#fbfbfb',
-                padding: 10,
-                display: 'grid',
-                gap: 10,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 900,
-                  color: BRAND.navy,
-                }}
-              >
+            <div style={filtersPanelStyle}>
+              <div style={{ fontSize: 13, fontWeight: 900, color: BRAND.navy }}>
                 {text.dateRange}: {periodLabel}
               </div>
 
@@ -1237,86 +1096,40 @@ export default function ProfileClientsPage() {
               <button type="button" onClick={resetFilters} style={resetButtonStyle}>
                 {text.resetFilters}
               </button>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 7 }}>
-                <LegendDot color={BRAND.blue} label={text.statusLegendDone} />
-                <LegendDot color={BRAND.green} label={text.statusLegendConfirmed} />
-                <LegendDot color={BRAND.red} label={text.statusLegendUnavailable} />
-                <LegendDot color={BRAND.yellow} label={text.statusLegendAttention} />
-              </div>
             </div>
           ) : null}
+
+          <LegendBar text={text} />
         </section>
 
-        <section
-          style={{
-            marginTop: 13,
-            borderRadius: 24,
-            border: `2.5px solid ${BRAND.border}`,
-            background: '#f8fbff',
-            padding: 11,
-          }}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto',
-              gap: 10,
-              alignItems: 'center',
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: 20,
-                  fontWeight: 900,
-                  lineHeight: 1.05,
-                  color: BRAND.navy,
-                  textTransform: 'capitalize',
-                }}
-              >
-                {selectedRange
-                  ? `${inputDateValue(selectedRange.from)} — ${inputDateValue(selectedRange.to)}`
-                  : getDateTitle(selectedDate, language)}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 4,
-                  fontSize: 12,
-                  fontWeight: 900,
-                  color: BRAND.muted,
-                }}
-              >
-                {visibleBookings.length} {text.bookings}
-              </div>
+        <section style={dayTitlePanelStyle}>
+          <div>
+            <div style={dayTitleStyle}>
+              {selectedRange
+                ? `${inputDateValue(selectedRange.from)} — ${inputDateValue(selectedRange.to)}`
+                : getDateTitle(selectedDate, language)}
             </div>
 
-            <button type="button" onClick={goToday} style={todayGradientButtonStyle}>
-              {text.today}
-            </button>
+            <div style={dayCountStyle}>
+              {visibleBookings.length} {text.bookings}
+            </div>
           </div>
+
+          <button type="button" onClick={goToday} style={todayGradientButtonStyle}>
+            {text.today}
+          </button>
         </section>
 
-        <section style={{ marginTop: 13, display: 'grid', gap: 10 }}>
+        <section style={notebookShellStyle}>
+          <div style={notebookHeaderStyle}>
+            <span>{text.time}</span>
+            <span>{text.clientProcedure}</span>
+            <span>{text.price}</span>
+            <span>{text.notes}</span>
+          </div>
+
           {visibleBookings.length === 0 && !showFreeWindows ? (
-            <div
-              style={{
-                minHeight: 112,
-                borderRadius: 24,
-                border: `2px dashed #d7dce4`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                padding: 18,
-                color: BRAND.muted,
-                fontSize: 15,
-                fontWeight: 900,
-              }}
-            >
-              {text.noBookings}
-            </div>
+            <div style={emptyNotebookStyle}>{text.noBookings}</div>
           ) : null}
 
           {visibleBookings.map((booking) => (
@@ -1330,12 +1143,85 @@ export default function ProfileClientsPage() {
             />
           ))}
 
-          {showFreeWindows ? <FreeWindowRow time="19:00" text={text} /> : null}
+          {showFreeWindows ? (
+            <>
+              <FreeWindowRow time="12:00" text={text} />
+              <FreeWindowRow time="19:00" text={text} />
+            </>
+          ) : null}
+
+          <div style={hintStyle}>ⓘ {text.tapHint}</div>
         </section>
       </div>
 
       <BottomNav active="clients" />
     </main>
+  );
+}
+
+function YearGrid({
+  year,
+  language,
+  bookings,
+  onSelectMonth,
+}: {
+  year: number;
+  language: AppLanguage;
+  bookings: BookingItem[];
+  onSelectMonth: (month: number) => void;
+}) {
+  return (
+    <div style={yearGridStyle}>
+      {Array.from({ length: 12 }, (_, month) => {
+        const monthItems = bookings.filter((booking) => {
+          const date = getBookingDate(booking);
+          return date && date.getFullYear() === year && date.getMonth() === month;
+        });
+
+        return (
+          <button key={month} type="button" onClick={() => onSelectMonth(month)} style={miniMonthStyle}>
+            <div style={miniMonthTitleStyle}>{getOnlyMonthName(month, language)}</div>
+            <MiniMonthCalendar year={year} month={month} bookings={monthItems} />
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function MiniMonthCalendar({
+  year,
+  month,
+  bookings,
+}: {
+  year: number;
+  month: number;
+  bookings: BookingItem[];
+}) {
+  const cells = getCalendarCells(year, month).slice(0, 35);
+
+  return (
+    <div style={miniMonthGridStyle}>
+      {cells.map(({ date, currentMonth }) => {
+        const hasBooking = bookings.some((booking) => {
+          const bookingDate = getBookingDate(booking);
+          return bookingDate ? isSameDay(bookingDate, date) : false;
+        });
+
+        return (
+          <span
+            key={date.toISOString()}
+            style={{
+              fontSize: 7.5,
+              fontWeight: 900,
+              color: hasBooking ? BRAND.red : currentMonth ? BRAND.navy : '#c9c9c9',
+            }}
+          >
+            {date.getDate()}
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
@@ -1356,37 +1242,10 @@ function CalendarGrid({
   const cells = getCalendarCells(calendarDate.getFullYear(), calendarDate.getMonth());
 
   return (
-    <div
-      style={{
-        marginTop: 12,
-        borderRadius: 22,
-        border: '1.5px solid #e3e3e3',
-        overflow: 'hidden',
-        background: '#ffffff',
-      }}
-    >
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-          borderBottom: '1.5px solid #e3e3e3',
-          background: '#fbfbfb',
-        }}
-      >
+    <div style={monthGridShellStyle}>
+      <div style={weekHeaderStyle}>
         {weekDays.map((day) => (
-          <div
-            key={day}
-            style={{
-              height: 31,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 11,
-              fontWeight: 900,
-              color: BRAND.muted,
-              textTransform: 'capitalize',
-            }}
-          >
+          <div key={day} style={weekHeaderCellStyle}>
             {day}
           </div>
         ))}
@@ -1415,7 +1274,7 @@ function CalendarGrid({
                 border: 'none',
                 borderRight: '1px solid #eeeeee',
                 borderBottom: '1px solid #eeeeee',
-                background: selected ? BRAND.blue : currentMonth ? '#ffffff' : '#f5f5f5',
+                background: selected ? '#111111' : currentMonth ? '#ffffff' : '#f5f5f5',
                 color: selected ? '#ffffff' : currentMonth ? BRAND.navy : '#a8a8a8',
                 cursor: 'pointer',
                 padding: 5,
@@ -1455,14 +1314,7 @@ function WeekStrip({
   const dates = getWeekDates(selectedDate);
 
   return (
-    <div
-      style={{
-        marginTop: 12,
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        gap: 6,
-      }}
-    >
+    <div style={weekStripStyle}>
       {dates.map((date, index) => {
         const selected = isSameDay(date, selectedDate);
         const count = bookings.filter((booking) => {
@@ -1479,7 +1331,7 @@ function WeekStrip({
               minHeight: 74,
               borderRadius: 18,
               border: `2px solid ${selected ? BRAND.border : '#e0e0e0'}`,
-              background: selected ? BRAND.blue : '#ffffff',
+              background: selected ? BRAND.navy : '#ffffff',
               color: selected ? '#ffffff' : BRAND.navy,
               cursor: 'pointer',
               display: 'grid',
@@ -1488,13 +1340,7 @@ function WeekStrip({
               gap: 5,
             }}
           >
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 900,
-                color: selected ? '#ffffff' : BRAND.muted,
-              }}
-            >
+            <span style={{ fontSize: 10, fontWeight: 900, color: selected ? '#ffffff' : BRAND.muted }}>
               {weekDays[index]}
             </span>
             <span style={{ fontSize: 18, fontWeight: 900 }}>{date.getDate()}</span>
@@ -1518,23 +1364,8 @@ function DayFocus({
   text: PageText;
 }) {
   return (
-    <div
-      style={{
-        marginTop: 12,
-        borderRadius: 22,
-        border: `2px solid ${BRAND.border}`,
-        background: BRAND.softBlue,
-        padding: 13,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 19,
-          fontWeight: 900,
-          color: BRAND.navy,
-          textTransform: 'capitalize',
-        }}
-      >
+    <div style={dayFocusStyle}>
+      <div style={{ fontSize: 19, fontWeight: 900, color: BRAND.navy, textTransform: 'capitalize' }}>
         {getDateTitle(date, language)}
       </div>
       <div style={{ marginTop: 5, fontSize: 13, fontWeight: 900, color: BRAND.muted }}>
@@ -1566,23 +1397,7 @@ function MonthList({
 
   return (
     <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
-      {groupedDates.length === 0 ? (
-        <div
-          style={{
-            minHeight: 70,
-            borderRadius: 18,
-            border: '1.5px dashed #d7dce4',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: BRAND.muted,
-            fontSize: 13,
-            fontWeight: 900,
-          }}
-        >
-          {text.noBookings}
-        </div>
-      ) : null}
+      {groupedDates.length === 0 ? <div style={smallEmptyStyle}>{text.noBookings}</div> : null}
 
       {groupedDates.map((date) => {
         const count = bookings.filter((booking) => {
@@ -1591,51 +1406,11 @@ function MonthList({
         }).length;
 
         return (
-          <button
-            key={date.toISOString()}
-            type="button"
-            onClick={() => onSelect(date)}
-            style={{
-              minHeight: 54,
-              borderRadius: 18,
-              border: `2px solid ${BRAND.border}`,
-              background: '#ffffff',
-              color: BRAND.navy,
-              display: 'grid',
-              gridTemplateColumns: '1fr auto',
-              alignItems: 'center',
-              gap: 10,
-              padding: '0 12px',
-              cursor: 'pointer',
-              textAlign: 'left',
-            }}
-          >
-            <span
-              style={{
-                fontSize: 13,
-                fontWeight: 900,
-                textTransform: 'capitalize',
-              }}
-            >
+          <button key={date.toISOString()} type="button" onClick={() => onSelect(date)} style={monthListButtonStyle}>
+            <span style={{ fontSize: 13, fontWeight: 900, textTransform: 'capitalize' }}>
               {getDateTitle(date, language)}
             </span>
-            <span
-              style={{
-                minHeight: 28,
-                borderRadius: 999,
-                border: `2px solid ${BRAND.border}`,
-                background: BRAND.softBlue,
-                color: BRAND.blue,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0 10px',
-                fontSize: 12,
-                fontWeight: 900,
-              }}
-            >
-              {count}
-            </span>
+            <span style={countBadgeStyle}>{count}</span>
           </button>
         );
       })}
@@ -1664,247 +1439,67 @@ function ScheduleRow({
     ? getVisibleBookingLocation(booking)
     : getPublicBookingLocation(booking);
 
-  return (
-    <article
-      style={{
-        position: 'relative',
-        borderRadius: 24,
-        border: `2.5px solid ${BRAND.border}`,
-        background:
-          'repeating-linear-gradient(180deg, #ffffff 0px, #ffffff 31px, #edf1f6 32px, #ffffff 33px)',
-        padding: 12,
-        display: 'grid',
-        gridTemplateColumns: '64px minmax(0, 1fr)',
-        gap: 12,
-        boxShadow: '0 8px 20px rgba(7,27,70,0.05)',
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: 7,
-          background: color,
-        }}
-      />
+  const note = cancelled
+    ? text.unavailable
+    : isPlatformPaid(booking)
+    ? text.platformPaid
+    : isPaid(booking)
+    ? text.paid
+    : text.unpaid;
 
-      {done ? (
-        <div
-          style={{
-            position: 'absolute',
-            right: 11,
-            top: 11,
-            width: 34,
-            height: 34,
-            borderRadius: 999,
-            border: `2px solid ${BRAND.border}`,
-            background: BRAND.green,
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 21,
-            fontWeight: 900,
-          }}
-        >
-          ✓
+  return (
+    <article style={scheduleRowOuterStyle}>
+      <div style={{ ...timelineLineStyle, background: color }} />
+
+      <button type="button" onClick={onDetails} style={{ ...scheduleRowInnerStyle, background: bg }}>
+        <div style={timeCellStyle}>{getTimeLabel(booking)}</div>
+
+        <div style={{ minWidth: 0 }}>
+          <div style={clientNameStyle}>{cancelled ? text.unavailable : booking.masterName}</div>
+          {!cancelled ? (
+            <>
+              <div style={serviceNameStyle}>{booking.serviceName || 'Service'}</div>
+              <div style={locationStyle}>📍 {location || 'London'}</div>
+              <div style={{ marginTop: 6 }}>
+                <Pill label={statusLabel(booking, text)} color={color} bg="#ffffff" />
+              </div>
+            </>
+          ) : null}
+        </div>
+
+        <div style={{ ...priceCellStyle, color: cancelled ? BRAND.red : color }}>
+          {cancelled ? '—' : money(Number(booking.price || 0))}
+        </div>
+
+        <div style={notesCellStyle}>
+          <span>{note}</span>
+          <span style={{ fontSize: 22, lineHeight: 1 }}>≡</span>
+        </div>
+      </button>
+
+      {!done && !cancelled ? (
+        <div style={rowActionsStyle}>
+          <button type="button" onClick={onChat} style={greenButtonStyle}>
+            💬 {text.openChat}
+          </button>
+          <button type="button" onClick={onDone} style={outlineButtonStyle}>
+            ✓ {text.markDone}
+          </button>
         </div>
       ) : null}
-
-      <div
-        style={{
-          fontSize: 24,
-          fontWeight: 900,
-          color: BRAND.navy,
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'center',
-          paddingTop: 12,
-        }}
-      >
-        {getTimeLabel(booking)}
-      </div>
-
-      <div style={{ minWidth: 0, paddingRight: done ? 38 : 0 }}>
-        <div
-          style={{
-            display: 'inline-flex',
-            minHeight: 28,
-            alignItems: 'center',
-            borderRadius: 999,
-            border: `2px solid ${color}`,
-            background: bg,
-            color,
-            padding: '0 9px',
-            fontSize: 11,
-            fontWeight: 900,
-            marginBottom: 7,
-          }}
-        >
-          {done ? '✓ ' : cancelled ? '× ' : ''}
-          {statusLabel(booking, text)}
-        </div>
-
-        <div
-          style={{
-            fontSize: 18,
-            lineHeight: 1.1,
-            fontWeight: 900,
-            color: cancelled ? BRAND.red : BRAND.navy,
-          }}
-        >
-          {cancelled ? text.unavailable : booking.masterName}
-        </div>
-
-        {!cancelled ? (
-          <>
-            <div
-              style={{
-                marginTop: 4,
-                fontSize: 13,
-                fontWeight: 800,
-                color: BRAND.muted,
-              }}
-            >
-              {booking.serviceName || 'Service'}
-            </div>
-
-            <div
-              style={{
-                marginTop: 6,
-                fontSize: 13,
-                fontWeight: 900,
-                color: BRAND.blue,
-              }}
-            >
-              📍 {location || 'London'}
-            </div>
-
-            <div
-              style={{
-                marginTop: 8,
-                display: 'grid',
-                gridTemplateColumns: '1fr auto',
-                gap: 8,
-                alignItems: 'center',
-              }}
-            >
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                <Pill
-                  label={isPaid(booking) ? text.paid : text.unpaid}
-                  color={isPaid(booking) ? '#008f3a' : '#b87500'}
-                  bg={isPaid(booking) ? BRAND.softGreen : BRAND.softYellow}
-                />
-                <Pill
-                  label={isPlatformPaid(booking) ? text.platformPaid : text.notPlatformPaid}
-                  color={isPlatformPaid(booking) ? BRAND.blue : BRAND.muted}
-                  bg={isPlatformPaid(booking) ? BRAND.softBlue : '#f3f4f6'}
-                />
-              </div>
-
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 900,
-                  color: BRAND.red,
-                }}
-              >
-                {money(Number(booking.price || 0))}
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 10,
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 8,
-              }}
-            >
-              <button type="button" onClick={onDetails} style={outlineButtonStyle}>
-                {text.details}
-              </button>
-
-              <button type="button" onClick={onChat} style={greenButtonStyle}>
-                💬 {text.openChat}
-              </button>
-            </div>
-
-            {booking.status !== 'completed' ? (
-              <button
-                type="button"
-                onClick={onDone}
-                style={{
-                  marginTop: 8,
-                  width: '100%',
-                  minHeight: 42,
-                  borderRadius: 15,
-                  border: `2px solid ${BRAND.border}`,
-                  background: BRAND.softBlue,
-                  color: BRAND.blue,
-                  fontSize: 13,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                ✓ {text.markDone}
-              </button>
-            ) : null}
-          </>
-        ) : (
-          <div
-            style={{
-              marginTop: 5,
-              fontSize: 13,
-              fontWeight: 800,
-              color: BRAND.muted,
-            }}
-          >
-            {text.available}
-          </div>
-        )}
-      </div>
     </article>
   );
 }
 
 function FreeWindowRow({ time, text }: { time: string; text: PageText }) {
   return (
-    <article
-      style={{
-        borderRadius: 22,
-        border: `2px solid #d2d2d2`,
-        background:
-          'repeating-linear-gradient(180deg, #f8f8f8 0px, #f8f8f8 31px, #e1e1e1 32px, #f8f8f8 33px)',
-        padding: 12,
-        display: 'grid',
-        gridTemplateColumns: '64px minmax(0, 1fr)',
-        gap: 12,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 24,
-          fontWeight: 900,
-          color: '#7b8490',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {time}
-      </div>
-
-      <div>
-        <div style={{ fontSize: 17, fontWeight: 900, color: BRAND.navy }}>
-          {text.available}
-        </div>
-        <div style={{ marginTop: 4, fontSize: 13, fontWeight: 800, color: BRAND.muted }}>
-          Available for booking
-        </div>
+    <article style={freeWindowOuterStyle}>
+      <div style={freeTimelineStyle} />
+      <div style={freeWindowInnerStyle}>
+        <div style={timeCellStyle}>{time}</div>
+        <div style={{ fontSize: 15, fontWeight: 900, color: BRAND.muted }}>{text.available}</div>
+        <div />
+        <div style={notesCellStyle}>≡</div>
       </div>
     </article>
   );
@@ -1912,17 +1507,7 @@ function FreeWindowRow({ time, text }: { time: string; text: PageText }) {
 
 function StatBox({ title, value, bg }: { title: string; value: string; bg: string }) {
   return (
-    <div
-      style={{
-        minHeight: 78,
-        borderRadius: 20,
-        border: `2.5px solid ${BRAND.border}`,
-        background: bg,
-        padding: 11,
-        display: 'grid',
-        alignContent: 'space-between',
-      }}
-    >
+    <div style={{ ...statBoxStyle, background: bg }}>
       <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.muted }}>{title}</div>
       <div style={{ fontSize: 25, fontWeight: 900, color: BRAND.navy }}>{value}</div>
     </div>
@@ -1960,20 +1545,20 @@ function FilterButton({
   );
 }
 
+function LegendBar({ text }: { text: PageText }) {
+  return (
+    <div style={legendBarStyle}>
+      <LegendDot color={BRAND.blue} label={text.completed} />
+      <LegendDot color={BRAND.green} label={text.confirmed} />
+      <LegendDot color={BRAND.red} label={text.unavailable} />
+      <LegendDot color={BRAND.yellow} label={text.waiting} />
+    </div>
+  );
+}
+
 function LegendDot({ color, label }: { color: string; label: string }) {
   return (
-    <div
-      style={{
-        minWidth: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 5,
-        fontSize: 9,
-        fontWeight: 900,
-        color: BRAND.navy,
-      }}
-    >
+    <div style={legendItemStyle}>
       <Dot color={color} />
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {label}
@@ -1986,10 +1571,10 @@ function Pill({ label, color, bg }: { label: string; color: string; bg: string }
   return (
     <span
       style={{
-        minHeight: 26,
+        minHeight: 23,
         padding: '0 8px',
         borderRadius: 999,
-        border: `1.8px solid ${color}`,
+        border: `1.5px solid ${color}`,
         background: bg,
         color,
         display: 'inline-flex',
@@ -2018,6 +1603,13 @@ function Dot({ color }: { color: string }) {
   );
 }
 
+const headerStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '48px 1fr 48px',
+  alignItems: 'center',
+  gap: 10,
+};
+
 const headerCircleButtonStyle: CSSProperties = {
   width: 48,
   height: 48,
@@ -2028,6 +1620,86 @@ const headerCircleButtonStyle: CSSProperties = {
   fontSize: 25,
   fontWeight: 900,
   cursor: 'pointer',
+};
+
+const titleStyle: CSSProperties = {
+  margin: 0,
+  fontSize: 38,
+  lineHeight: 1,
+  fontWeight: 900,
+  letterSpacing: '-1.4px',
+  color: BRAND.navy,
+};
+
+const subtitleStyle: CSSProperties = {
+  margin: '8px 0 0',
+  fontSize: 14,
+  lineHeight: 1.35,
+  fontWeight: 800,
+  color: BRAND.muted,
+};
+
+const topTabsShellStyle: CSSProperties = {
+  marginTop: 15,
+  borderRadius: 24,
+  border: `2.5px solid ${BRAND.border}`,
+  background: '#ffffff',
+  padding: 7,
+  display: 'grid',
+  gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+  gap: 6,
+};
+
+const topTabStyle: CSSProperties = {
+  minHeight: 42,
+  borderRadius: 15,
+  border: `2px solid ${BRAND.border}`,
+  fontSize: 11,
+  fontWeight: 900,
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
+
+const statsShellStyle: CSSProperties = {
+  marginTop: 13,
+  borderRadius: 25,
+  border: `2.5px solid ${BRAND.border}`,
+  background: '#ffffff',
+  padding: 12,
+};
+
+const statBoxStyle: CSSProperties = {
+  minHeight: 78,
+  borderRadius: 20,
+  border: `2.5px solid ${BRAND.border}`,
+  padding: 11,
+  display: 'grid',
+  alignContent: 'space-between',
+};
+
+const calendarShellStyle: CSSProperties = {
+  marginTop: 13,
+  borderRadius: 28,
+  border: `2.5px solid ${BRAND.border}`,
+  background: '#ffffff',
+  padding: 10,
+};
+
+const calendarHeaderStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'auto 1fr auto',
+  alignItems: 'center',
+  gap: 8,
+};
+
+const calendarTitleStyle: CSSProperties = {
+  textAlign: 'center',
+  fontSize: 25,
+  fontWeight: 900,
+  color: BRAND.navy,
+  textTransform: 'capitalize',
 };
 
 const roundButtonStyle: CSSProperties = {
@@ -2066,39 +1738,168 @@ const smallOutlineButtonStyle: CSSProperties = {
   cursor: 'pointer',
 };
 
-const todayGradientButtonStyle: CSSProperties = {
-  minWidth: 72,
-  height: 46,
-  borderRadius: 17,
+const calendarModeTabsStyle: CSSProperties = {
+  marginTop: 10,
+  display: 'grid',
+  gridTemplateColumns: 'repeat(5, 1fr)',
+  gap: 7,
+};
+
+const calendarModeButtonStyle: CSSProperties = {
+  minHeight: 38,
+  borderRadius: 999,
   border: `2px solid ${BRAND.border}`,
-  background:
-    'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
-  color: '#ffffff',
-  fontSize: 13,
+  fontSize: 11,
   fontWeight: 900,
   cursor: 'pointer',
 };
 
-const outlineButtonStyle: CSSProperties = {
-  minHeight: 42,
-  borderRadius: 15,
+const yearGridStyle: CSSProperties = {
+  marginTop: 12,
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
+  gap: 9,
+};
+
+const miniMonthStyle: CSSProperties = {
+  minHeight: 118,
+  borderRadius: 18,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  padding: 8,
+  cursor: 'pointer',
+  textAlign: 'left',
+};
+
+const miniMonthTitleStyle: CSSProperties = {
+  fontSize: 11,
+  fontWeight: 900,
+  color: BRAND.navy,
+  textTransform: 'capitalize',
+  marginBottom: 5,
+};
+
+const miniMonthGridStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(7, 1fr)',
+  gap: 2,
+  textAlign: 'center',
+};
+
+const monthGridShellStyle: CSSProperties = {
+  marginTop: 12,
+  borderRadius: 22,
+  border: '1.5px solid #e3e3e3',
+  overflow: 'hidden',
+  background: '#ffffff',
+};
+
+const weekHeaderStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(7, 1fr)',
+  borderBottom: '1.5px solid #e3e3e3',
+  background: '#fbfbfb',
+};
+
+const weekHeaderCellStyle: CSSProperties = {
+  height: 31,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: 11,
+  fontWeight: 900,
+  color: BRAND.muted,
+  textTransform: 'capitalize',
+};
+
+const weekStripStyle: CSSProperties = {
+  marginTop: 12,
+  display: 'grid',
+  gridTemplateColumns: 'repeat(7, 1fr)',
+  gap: 6,
+};
+
+const dayFocusStyle: CSSProperties = {
+  marginTop: 12,
+  borderRadius: 22,
+  border: `2px solid ${BRAND.border}`,
+  background: BRAND.softBlue,
+  padding: 13,
+};
+
+const smallEmptyStyle: CSSProperties = {
+  minHeight: 70,
+  borderRadius: 18,
+  border: '1.5px dashed #d7dce4',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: BRAND.muted,
+  fontSize: 13,
+  fontWeight: 900,
+};
+
+const monthListButtonStyle: CSSProperties = {
+  minHeight: 54,
+  borderRadius: 18,
   border: `2px solid ${BRAND.border}`,
   background: '#ffffff',
   color: BRAND.navy,
-  fontSize: 13,
-  fontWeight: 900,
+  display: 'grid',
+  gridTemplateColumns: '1fr auto',
+  alignItems: 'center',
+  gap: 10,
+  padding: '0 12px',
   cursor: 'pointer',
+  textAlign: 'left',
 };
 
-const greenButtonStyle: CSSProperties = {
-  minHeight: 42,
-  borderRadius: 15,
-  border: `2px solid ${BRAND.green}`,
-  background: BRAND.green,
-  color: '#ffffff',
-  fontSize: 13,
+const countBadgeStyle: CSSProperties = {
+  minHeight: 28,
+  borderRadius: 999,
+  border: `2px solid ${BRAND.border}`,
+  background: BRAND.softBlue,
+  color: BRAND.blue,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '0 10px',
+  fontSize: 12,
   fontWeight: 900,
-  cursor: 'pointer',
+};
+
+const filterButtonsScrollStyle: CSSProperties = {
+  marginTop: 12,
+  display: 'flex',
+  gap: 8,
+  overflowX: 'auto',
+  paddingBottom: 2,
+};
+
+const syncPillStyle: CSSProperties = {
+  flexShrink: 0,
+  minHeight: 40,
+  borderRadius: 999,
+  border: `2px solid ${BRAND.border}`,
+  background: BRAND.softGreen,
+  color: '#008f3a',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '0 13px',
+  gap: 7,
+  fontSize: 12,
+  fontWeight: 900,
+};
+
+const filtersPanelStyle: CSSProperties = {
+  marginTop: 10,
+  borderRadius: 20,
+  border: `2px solid ${BRAND.border}`,
+  background: '#fbfbfb',
+  padding: 10,
+  display: 'grid',
+  gap: 10,
 };
 
 const filterLabelStyle: CSSProperties = {
@@ -2134,4 +1935,258 @@ const resetButtonStyle: CSSProperties = {
   fontSize: 13,
   fontWeight: 900,
   cursor: 'pointer',
+};
+
+const legendBarStyle: CSSProperties = {
+  marginTop: 10,
+  minHeight: 42,
+  borderRadius: 18,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, 1fr)',
+  gap: 5,
+  padding: '0 8px',
+  alignItems: 'center',
+};
+
+const legendItemStyle: CSSProperties = {
+  minWidth: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 5,
+  fontSize: 9,
+  fontWeight: 900,
+  color: BRAND.navy,
+};
+
+const dayTitlePanelStyle: CSSProperties = {
+  marginTop: 13,
+  borderRadius: 24,
+  border: `2.5px solid ${BRAND.border}`,
+  background: '#f8fbff',
+  padding: 11,
+  display: 'grid',
+  gridTemplateColumns: '1fr auto',
+  gap: 10,
+  alignItems: 'center',
+};
+
+const dayTitleStyle: CSSProperties = {
+  fontSize: 20,
+  fontWeight: 900,
+  lineHeight: 1.05,
+  color: BRAND.navy,
+  textTransform: 'capitalize',
+};
+
+const dayCountStyle: CSSProperties = {
+  marginTop: 4,
+  fontSize: 12,
+  fontWeight: 900,
+  color: BRAND.muted,
+};
+
+const todayGradientButtonStyle: CSSProperties = {
+  minWidth: 72,
+  height: 46,
+  borderRadius: 17,
+  border: `2px solid ${BRAND.border}`,
+  background:
+    'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
+  color: '#ffffff',
+  fontSize: 13,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const notebookShellStyle: CSSProperties = {
+  marginTop: 13,
+  borderRadius: 26,
+  border: `2.5px solid ${BRAND.border}`,
+  background:
+    'repeating-linear-gradient(180deg, #ffffff 0px, #ffffff 37px, #eef2f6 38px, #ffffff 39px)',
+  padding: 10,
+  display: 'grid',
+  gap: 9,
+  overflow: 'hidden',
+};
+
+const notebookHeaderStyle: CSSProperties = {
+  minHeight: 30,
+  display: 'grid',
+  gridTemplateColumns: '64px 1fr 70px 68px',
+  gap: 8,
+  alignItems: 'center',
+  color: BRAND.muted,
+  fontSize: 10.5,
+  fontWeight: 900,
+  padding: '0 6px',
+};
+
+const emptyNotebookStyle: CSSProperties = {
+  minHeight: 90,
+  borderRadius: 18,
+  border: '2px dashed #d7dce4',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: BRAND.muted,
+  fontSize: 14,
+  fontWeight: 900,
+  textAlign: 'center',
+};
+
+const scheduleRowOuterStyle: CSSProperties = {
+  position: 'relative',
+  borderRadius: 18,
+  overflow: 'hidden',
+};
+
+const scheduleRowInnerStyle: CSSProperties = {
+  width: '100%',
+  minHeight: 76,
+  border: '1.5px solid rgba(0,0,0,0.08)',
+  borderRadius: 18,
+  padding: '9px 8px 9px 13px',
+  display: 'grid',
+  gridTemplateColumns: '64px minmax(0, 1fr) 70px 68px',
+  gap: 8,
+  alignItems: 'center',
+  textAlign: 'left',
+  cursor: 'pointer',
+};
+
+const timelineLineStyle: CSSProperties = {
+  position: 'absolute',
+  left: 0,
+  top: 9,
+  bottom: 9,
+  width: 5,
+  borderRadius: 999,
+  zIndex: 2,
+};
+
+const timeCellStyle: CSSProperties = {
+  fontSize: 17,
+  fontWeight: 900,
+  color: BRAND.navy,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+const clientNameStyle: CSSProperties = {
+  fontSize: 15.5,
+  lineHeight: 1.05,
+  fontWeight: 900,
+  color: BRAND.navy,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const serviceNameStyle: CSSProperties = {
+  marginTop: 3,
+  fontSize: 12.5,
+  fontWeight: 800,
+  color: '#2d3748',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const locationStyle: CSSProperties = {
+  marginTop: 3,
+  fontSize: 10.5,
+  fontWeight: 800,
+  color: BRAND.muted,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const priceCellStyle: CSSProperties = {
+  fontSize: 21,
+  fontWeight: 900,
+  textAlign: 'center',
+};
+
+const notesCellStyle: CSSProperties = {
+  minWidth: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: 6,
+  fontSize: 11.5,
+  lineHeight: 1.1,
+  fontWeight: 800,
+  color: '#3f4752',
+};
+
+const rowActionsStyle: CSSProperties = {
+  marginTop: 6,
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: 8,
+};
+
+const outlineButtonStyle: CSSProperties = {
+  minHeight: 38,
+  borderRadius: 14,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 12,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const greenButtonStyle: CSSProperties = {
+  minHeight: 38,
+  borderRadius: 14,
+  border: `2px solid ${BRAND.green}`,
+  background: BRAND.green,
+  color: '#ffffff',
+  fontSize: 12,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const freeWindowOuterStyle: CSSProperties = {
+  position: 'relative',
+  borderRadius: 18,
+  overflow: 'hidden',
+};
+
+const freeTimelineStyle: CSSProperties = {
+  position: 'absolute',
+  left: 0,
+  top: 9,
+  bottom: 9,
+  width: 5,
+  borderRadius: 999,
+  background: '#bfc5cc',
+  zIndex: 2,
+};
+
+const freeWindowInnerStyle: CSSProperties = {
+  minHeight: 56,
+  borderRadius: 18,
+  border: '1.5px dashed #cfd5dd',
+  background: 'rgba(255,255,255,0.78)',
+  padding: '8px 8px 8px 13px',
+  display: 'grid',
+  gridTemplateColumns: '64px minmax(0, 1fr) 70px 68px',
+  gap: 8,
+  alignItems: 'center',
+};
+
+const hintStyle: CSSProperties = {
+  marginTop: 3,
+  fontSize: 11.5,
+  lineHeight: 1.35,
+  fontWeight: 800,
+  color: BRAND.muted,
 };
