@@ -21,9 +21,16 @@ import {
 } from '../../../services/bookingsStore';
 
 type ViewMode = 'today' | 'tomorrow' | 'requests' | 'calendar' | 'history';
-type CalendarMode = 'year' | 'month' | 'week' | 'day' | 'list';
+type CalendarMode = 'month' | 'week' | 'day' | 'list';
+type PaidFilter = 'all' | 'paid' | 'unpaid';
 type StatusFilter = 'all' | BookingStatus;
-type PaymentFilter = 'all' | 'paid' | 'unpaid' | 'platform' | 'notPlatform';
+type PaymentMethodFilter = 'all' | 'card' | 'cash' | 'platform';
+
+type BookingWithPayment = BookingItem & {
+  paymentMethod?: 'card' | 'cash' | 'platform';
+  notes?: string;
+  clientSurname?: string;
+};
 
 type PageText = {
   title: string;
@@ -33,12 +40,13 @@ type PageText = {
   requests: string;
   calendar: string;
   history: string;
-  year: string;
   month: string;
   week: string;
   day: string;
   list: string;
+  year: string;
   filters: string;
+  hideFilters: string;
   freeWindows: string;
   onlyRequests: string;
   synced: string;
@@ -48,36 +56,40 @@ type PageText = {
   cancelled: string;
   unavailable: string;
   available: string;
+  selectedDay: string;
   bookings: string;
   noBookings: string;
   details: string;
   openChat: string;
   markDone: string;
+  price: string;
+  notes: string;
   back: string;
   close: string;
   active: string;
   total: string;
   revenue: string;
   done: string;
-  time: string;
-  clientProcedure: string;
-  price: string;
-  notes: string;
-  allStatuses: string;
-  searchClient: string;
-  fromDate: string;
-  toDate: string;
+  dateFrom: string;
+  dateTo: string;
+  clientName: string;
+  status: string;
+  payment: string;
+  paymentMethod: string;
   priceFrom: string;
   priceTo: string;
-  payment: string;
-  allPayments: string;
+  all: string;
   paid: string;
   unpaid: string;
-  platformPaid: string;
-  notPlatformPaid: string;
-  resetFilters: string;
-  dateRange: string;
-  tapHint: string;
+  card: string;
+  cash: string;
+  platform: string;
+  reset: string;
+  range: string;
+  statusLegendDone: string;
+  statusLegendConfirmed: string;
+  statusLegendUnavailable: string;
+  statusLegendAttention: string;
 };
 
 const BRAND = {
@@ -93,8 +105,8 @@ const BRAND = {
   softGreen: '#dcffe8',
   softYellow: '#fff4c7',
   softRed: '#ffe3ea',
-  softPurple: '#f3edff',
   cream: '#fffdf8',
+  softViolet: '#f3edff',
 };
 
 const texts: Partial<Record<AppLanguage, PageText>> = {
@@ -106,51 +118,56 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     requests: 'Requests',
     calendar: 'Calendar',
     history: 'History',
-    year: 'Year',
     month: 'Month',
     week: 'Week',
     day: 'Day',
     list: 'List',
+    year: 'Year',
     filters: 'Filters',
+    hideFilters: 'Hide filters',
     freeWindows: 'Free windows',
     onlyRequests: 'Only requests',
-    synced: 'Auto sync · no conflicts',
+    synced: 'Synced',
     confirmed: 'Confirmed',
     waiting: 'Waiting',
     completed: 'Done',
     cancelled: 'Cancelled',
     unavailable: 'Unavailable',
-    available: 'Free window',
+    available: 'Free slot',
+    selectedDay: 'Selected day',
     bookings: 'bookings',
     noBookings: 'No bookings for this date',
-    details: 'Details',
-    openChat: 'Chat',
+    details: 'Booking details',
+    openChat: 'Open chat',
     markDone: 'Mark done',
+    price: 'Price',
+    notes: 'Notes',
     back: 'Back',
     close: 'Close',
     active: 'Active',
     total: 'Total',
     revenue: 'Revenue',
     done: 'Done',
-    time: 'Time',
-    clientProcedure: 'Client / Procedure',
-    price: 'Price',
-    notes: 'Notes',
-    allStatuses: 'All statuses',
-    searchClient: 'Client or service',
-    fromDate: 'From date',
-    toDate: 'To date',
+    dateFrom: 'Date from',
+    dateTo: 'Date to',
+    clientName: 'Client surname or name',
+    status: 'Readiness status',
+    payment: 'Payment status',
+    paymentMethod: 'Payment method',
     priceFrom: 'Price from',
     priceTo: 'Price to',
-    payment: 'Payment',
-    allPayments: 'All payments',
+    all: 'All',
     paid: 'Paid',
     unpaid: 'Unpaid',
-    platformPaid: 'Paid through platform',
-    notPlatformPaid: 'Not platform',
-    resetFilters: 'Reset filters',
-    dateRange: 'Date range',
-    tapHint: 'Tap a row to edit · hold and drag to change time',
+    card: 'Card',
+    cash: 'Cash',
+    platform: 'Platform',
+    reset: 'Reset',
+    range: 'Range',
+    statusLegendDone: 'Done',
+    statusLegendConfirmed: 'Confirmed',
+    statusLegendUnavailable: 'Unavailable',
+    statusLegendAttention: 'Needs attention',
   },
   RU: {
     title: 'Мои клиенты',
@@ -160,51 +177,56 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     requests: 'Запросы',
     calendar: 'Календарь',
     history: 'История',
-    year: 'Год',
     month: 'Месяц',
     week: 'Неделя',
     day: 'День',
     list: 'Список',
+    year: 'Год',
     filters: 'Фильтры',
+    hideFilters: 'Скрыть фильтры',
     freeWindows: 'Свободные окна',
     onlyRequests: 'Только запросы',
-    synced: 'Автосинхронизация · без конфликтов',
+    synced: 'Синхронизировано',
     confirmed: 'Подтверждено',
-    waiting: 'Ожидает',
+    waiting: 'Ожидает подтверждения',
     completed: 'Готово',
     cancelled: 'Отменено',
     unavailable: 'Недоступно',
     available: 'Свободное окно',
+    selectedDay: 'Выбранный день',
     bookings: 'записи',
     noBookings: 'На эту дату записей нет',
-    details: 'Детали',
-    openChat: 'Чат',
+    details: 'Детали брони',
+    openChat: 'Открыть чат',
     markDone: 'Отметить готово',
+    price: 'Цена',
+    notes: 'Заметки',
     back: 'Назад',
     close: 'Закрыть',
     active: 'Активные',
     total: 'Всего',
     revenue: 'Доход',
     done: 'Готово',
-    time: 'Время',
-    clientProcedure: 'Клиент / Процедура',
-    price: 'Цена',
-    notes: 'Заметки',
-    allStatuses: 'Все статусы',
-    searchClient: 'Клиент или услуга',
-    fromDate: 'Дата от',
-    toDate: 'Дата до',
+    dateFrom: 'Дата от',
+    dateTo: 'Дата до',
+    clientName: 'Фамилия или имя клиента',
+    status: 'Статус готовности',
+    payment: 'Статус оплаты',
+    paymentMethod: 'Вид оплаты',
     priceFrom: 'Цена от',
     priceTo: 'Цена до',
-    payment: 'Оплата',
-    allPayments: 'Все оплаты',
+    all: 'Все',
     paid: 'Оплачено',
     unpaid: 'Не оплачено',
-    platformPaid: 'Через платформу',
-    notPlatformPaid: 'Не через платформу',
-    resetFilters: 'Сбросить фильтры',
-    dateRange: 'Диапазон дат',
-    tapHint: 'Тап по строке — редактировать · удержание и перетаскивание — изменить время',
+    card: 'Карта',
+    cash: 'Наличные',
+    platform: 'Платформа',
+    reset: 'Сбросить',
+    range: 'Диапазон',
+    statusLegendDone: 'Готово',
+    statusLegendConfirmed: 'Подтверждено',
+    statusLegendUnavailable: 'Недоступно',
+    statusLegendAttention: 'Требует внимания',
   },
   UA: {
     title: 'Мої клієнти',
@@ -214,53 +236,171 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     requests: 'Запити',
     calendar: 'Календар',
     history: 'Історія',
-    year: 'Рік',
     month: 'Місяць',
     week: 'Тиждень',
     day: 'День',
     list: 'Список',
+    year: 'Рік',
     filters: 'Фільтри',
+    hideFilters: 'Сховати фільтри',
     freeWindows: 'Вільні вікна',
     onlyRequests: 'Тільки запити',
-    synced: 'Автосинхронізація · без конфліктів',
+    synced: 'Синхронізовано',
     confirmed: 'Підтверджено',
-    waiting: 'Очікує',
+    waiting: 'Очікує підтвердження',
     completed: 'Готово',
     cancelled: 'Скасовано',
     unavailable: 'Недоступно',
     available: 'Вільне вікно',
+    selectedDay: 'Обраний день',
     bookings: 'записи',
     noBookings: 'На цю дату записів немає',
-    details: 'Деталі',
-    openChat: 'Чат',
+    details: 'Деталі бронювання',
+    openChat: 'Відкрити чат',
     markDone: 'Позначити готово',
+    price: 'Ціна',
+    notes: 'Нотатки',
     back: 'Назад',
     close: 'Закрити',
     active: 'Активні',
     total: 'Усього',
     revenue: 'Дохід',
     done: 'Готово',
-    time: 'Час',
-    clientProcedure: 'Клієнт / Процедура',
-    price: 'Ціна',
-    notes: 'Нотатки',
-    allStatuses: 'Усі статуси',
-    searchClient: 'Клієнт або послуга',
-    fromDate: 'Дата від',
-    toDate: 'Дата до',
+    dateFrom: 'Дата від',
+    dateTo: 'Дата до',
+    clientName: 'Прізвище або імʼя клієнта',
+    status: 'Статус готовності',
+    payment: 'Статус оплати',
+    paymentMethod: 'Тип оплати',
     priceFrom: 'Ціна від',
     priceTo: 'Ціна до',
-    payment: 'Оплата',
-    allPayments: 'Усі оплати',
+    all: 'Усі',
     paid: 'Оплачено',
     unpaid: 'Не оплачено',
-    platformPaid: 'Через платформу',
-    notPlatformPaid: 'Не через платформу',
-    resetFilters: 'Скинути фільтри',
-    dateRange: 'Діапазон дат',
-    tapHint: 'Тап по рядку — редагувати · утримання і перетягування — змінити час',
+    card: 'Картка',
+    cash: 'Готівка',
+    platform: 'Платформа',
+    reset: 'Скинути',
+    range: 'Діапазон',
+    statusLegendDone: 'Готово',
+    statusLegendConfirmed: 'Підтверджено',
+    statusLegendUnavailable: 'Недоступно',
+    statusLegendAttention: 'Потребує уваги',
   },
 };
+
+const demoSchedule: BookingWithPayment[] = [
+  {
+    id: 'client-demo-1',
+    masterId: 'client-lucie',
+    masterName: 'Lucie Hlavová',
+    clientSurname: 'Hlavová',
+    masterAvatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    serviceName: 'Стрижка волос',
+    price: 35,
+    status: 'upcoming',
+    dateTime: setDemoTime(9, 0),
+    dateLabel: 'Today at 09:00',
+    location: 'Camden, London',
+    areaLabel: 'Camden',
+    exactAddress: '21 Camden High Street, London',
+    clientPaid: true,
+    paymentReceivedByPlatform: true,
+    unlockFeePaid: true,
+    paymentMethod: 'card',
+    notes: 'чёлка короче',
+  },
+  {
+    id: 'client-demo-2',
+    masterId: 'client-janicka',
+    masterName: 'Janička Andělová',
+    clientSurname: 'Andělová',
+    masterAvatar:
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+    serviceName: 'Маникюр',
+    price: 30,
+    status: 'completed',
+    dateTime: setDemoTime(10, 30),
+    dateLabel: 'Today at 10:30',
+    location: 'Soho, London',
+    areaLabel: 'Soho',
+    exactAddress: '18 Greek Street, Soho, London',
+    clientPaid: true,
+    paymentReceivedByPlatform: true,
+    unlockFeePaid: true,
+    paymentMethod: 'platform',
+    notes: 'готово',
+  },
+  {
+    id: 'client-demo-3',
+    masterId: 'client-klara',
+    masterName: 'Klára Nováková',
+    clientSurname: 'Nováková',
+    masterAvatar:
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
+    serviceName: 'Массаж',
+    price: 60,
+    status: 'pending',
+    dateTime: setDemoTime(13, 0),
+    dateLabel: 'Today at 13:00',
+    location: 'Chelsea, London',
+    areaLabel: 'Chelsea',
+    exactAddress: '11 King’s Road, Chelsea, London',
+    clientPaid: false,
+    paymentReceivedByPlatform: false,
+    unlockFeePaid: false,
+    paymentMethod: 'cash',
+    notes: 'частично / отменено',
+  },
+  {
+    id: 'client-demo-4',
+    masterId: 'blocked-slot',
+    masterName: 'Недоступно',
+    clientSurname: 'Недоступно',
+    masterAvatar: '',
+    serviceName: '',
+    price: 0,
+    status: 'cancelled',
+    dateTime: setDemoTime(15, 0),
+    dateLabel: 'Today at 15:00',
+    location: '',
+    areaLabel: '',
+    exactAddress: '',
+    clientPaid: false,
+    paymentReceivedByPlatform: false,
+    unlockFeePaid: false,
+    paymentMethod: 'cash',
+    notes: '',
+  },
+  {
+    id: 'client-demo-5',
+    masterId: 'client-lenka',
+    masterName: 'Lenka Bohatá',
+    clientSurname: 'Bohatá',
+    masterAvatar:
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+    serviceName: 'Окрашивание',
+    price: 85,
+    status: 'upcoming',
+    dateTime: setDemoTime(16, 0),
+    dateLabel: 'Today at 16:00',
+    location: 'Camden, London',
+    areaLabel: 'Camden',
+    exactAddress: '21 Camden High Street, London',
+    clientPaid: true,
+    paymentReceivedByPlatform: true,
+    unlockFeePaid: true,
+    paymentMethod: 'card',
+    notes: 'холодный блонд',
+  },
+];
+
+function setDemoTime(hour: number, minute: number) {
+  const date = new Date();
+  date.setHours(hour, minute, 0, 0);
+  return date.toISOString();
+}
 
 function getText(language: AppLanguage) {
   return texts[language] || texts.EN!;
@@ -302,6 +442,39 @@ function addDays(date: Date, days: number) {
   return next;
 }
 
+function startOfWeek(date: Date) {
+  const next = startOfDay(date);
+  const day = (next.getDay() + 6) % 7;
+  next.setDate(next.getDate() - day);
+  return next;
+}
+
+function endOfWeek(date: Date) {
+  return endOfDay(addDays(startOfWeek(date), 6));
+}
+
+function startOfMonth(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function endOfMonth(date: Date) {
+  return endOfDay(new Date(date.getFullYear(), date.getMonth() + 1, 0));
+}
+
+function dateToInput(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function inputToDate(value: string) {
+  if (!value) return null;
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  return date;
+}
+
 function isSameDay(a: Date, b: Date) {
   return startOfDay(a).getTime() === startOfDay(b).getTime();
 }
@@ -326,31 +499,17 @@ function getTimeLabel(booking: BookingItem) {
   }).format(date);
 }
 
-function inputDateValue(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function dateFromInput(value: string) {
-  if (!value) return null;
-  const date = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return null;
-  return date;
-}
-
-function getMonthTitle(date: Date, language: AppLanguage) {
+function getMonthName(date: Date, language: AppLanguage) {
   return new Intl.DateTimeFormat(getLocale(language), {
     month: 'long',
     year: 'numeric',
   }).format(date);
 }
 
-function getOnlyMonthName(monthIndex: number, language: AppLanguage) {
-  return new Intl.DateTimeFormat(getLocale(language), {
-    month: 'long',
-  }).format(new Date(2026, monthIndex, 1));
+function getShortMonthName(monthIndex: number, language: AppLanguage) {
+  return new Intl.DateTimeFormat(getLocale(language), { month: 'long' }).format(
+    new Date(2026, monthIndex, 1)
+  );
 }
 
 function getWeekDays(language: AppLanguage) {
@@ -378,34 +537,6 @@ function getCalendarCells(year: number, month: number) {
   });
 }
 
-function getWeekDates(selectedDate: Date) {
-  const weekDay = (selectedDate.getDay() + 6) % 7;
-  const monday = addDays(selectedDate, -weekDay);
-  return Array.from({ length: 7 }, (_, index) => addDays(monday, index));
-}
-
-function getWeekRange(selectedDate: Date) {
-  const dates = getWeekDates(selectedDate);
-  return {
-    from: startOfDay(dates[0]),
-    to: endOfDay(dates[6]),
-  };
-}
-
-function getMonthRange(date: Date) {
-  return {
-    from: startOfDay(new Date(date.getFullYear(), date.getMonth(), 1)),
-    to: endOfDay(new Date(date.getFullYear(), date.getMonth() + 1, 0)),
-  };
-}
-
-function getYearRange(date: Date) {
-  return {
-    from: startOfDay(new Date(date.getFullYear(), 0, 1)),
-    to: endOfDay(new Date(date.getFullYear(), 11, 31)),
-  };
-}
-
 function statusLabel(booking: BookingItem, text: PageText) {
   if (booking.status === 'completed') return text.completed;
   if (booking.status === 'pending') return text.waiting;
@@ -415,7 +546,7 @@ function statusLabel(booking: BookingItem, text: PageText) {
 
 function statusColor(booking: BookingItem) {
   if (booking.status === 'completed') return BRAND.blue;
-  if (booking.status === 'pending') return BRAND.yellow;
+  if (booking.status === 'pending') return BRAND.orange;
   if (booking.status === 'cancelled') return BRAND.red;
   return BRAND.green;
 }
@@ -431,24 +562,22 @@ function isPaid(booking: BookingItem) {
   return Boolean(booking.clientPaid || booking.paymentReceivedByPlatform || booking.unlockFeePaid);
 }
 
-function isPlatformPaid(booking: BookingItem) {
-  return Boolean(booking.paymentReceivedByPlatform);
-}
-
 function isUnlocked(booking: BookingItem) {
   return canShowExactAddress(booking) && canShowDirectContacts(booking);
 }
 
-function getDateTitle(date: Date, language: AppLanguage) {
-  return new Intl.DateTimeFormat(getLocale(language), {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(date);
+function paymentMethodOf(booking: BookingItem): PaymentMethodFilter {
+  const value = (booking as BookingWithPayment).paymentMethod;
+  if (value === 'card' || value === 'cash' || value === 'platform') return value;
+  if (booking.paymentReceivedByPlatform) return 'platform';
+  return 'card';
 }
 
-function isInsideRange(booking: BookingItem, from: Date, to: Date) {
+function isCancelledLike(booking: BookingItem) {
+  return booking.status === 'cancelled' || booking.status === 'pending';
+}
+
+function inRange(booking: BookingItem, from: Date, to: Date) {
   const date = getBookingDate(booking);
   if (!date) return false;
   return date.getTime() >= from.getTime() && date.getTime() <= to.getTime();
@@ -499,7 +628,7 @@ export default function ProfileClientsPage() {
   const router = useRouter();
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
-  const [bookings, setBookings] = useState<BookingItem[]>([]);
+  const [bookings, setBookings] = useState<BookingWithPayment[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('today');
   const [calendarMode, setCalendarMode] = useState<CalendarMode>('day');
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
@@ -507,18 +636,21 @@ export default function ProfileClientsPage() {
   const [showOnlyRequests, setShowOnlyRequests] = useState(false);
   const [showFreeWindows, setShowFreeWindows] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
-
-  const [search, setSearch] = useState('');
+  const [nameQuery, setNameQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('all');
+  const [paidFilter, setPaidFilter] = useState<PaidFilter>('all');
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState<PaymentMethodFilter>('all');
   const [priceFrom, setPriceFrom] = useState('');
   const [priceTo, setPriceTo] = useState('');
-  const [rangeFrom, setRangeFrom] = useState('');
-  const [rangeTo, setRangeTo] = useState('');
+  const [dateFrom, setDateFrom] = useState(() => dateToInput(startOfDay(new Date())));
+  const [dateTo, setDateTo] = useState(() => dateToInput(startOfDay(new Date())));
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
-    const syncBookings = () => setBookings(getBookings());
+    const syncBookings = () => {
+      const saved = getBookings() as BookingWithPayment[];
+      setBookings(saved.length > 0 ? saved : demoSchedule);
+    };
 
     syncLanguage();
     syncBookings();
@@ -540,64 +672,55 @@ export default function ProfileClientsPage() {
   }, []);
 
   const text = useMemo(() => getText(language), [language]);
+
   const today = useMemo(() => startOfDay(new Date()), []);
   const tomorrow = useMemo(() => addDays(today, 1), [today]);
 
-  const selectedRange = useMemo(() => {
-    const customFrom = dateFromInput(rangeFrom);
-    const customTo = dateFromInput(rangeTo);
+  const years = useMemo(() => {
+    const current = new Date().getFullYear();
+    return Array.from({ length: 7 }, (_, index) => current - 2 + index);
+  }, []);
 
-    if (customFrom && customTo) {
-      return {
-        from: startOfDay(customFrom),
-        to: endOfDay(customTo),
-      };
-    }
-
-    if (viewMode === 'today') {
-      return {
-        from: startOfDay(today),
-        to: endOfDay(today),
-      };
-    }
-
-    if (viewMode === 'tomorrow') {
-      return {
-        from: startOfDay(tomorrow),
-        to: endOfDay(tomorrow),
-      };
-    }
+  const baseDateRange = useMemo(() => {
+    if (viewMode === 'today') return { from: today, to: endOfDay(today) };
+    if (viewMode === 'tomorrow') return { from: tomorrow, to: endOfDay(tomorrow) };
 
     if (viewMode === 'calendar') {
-      if (calendarMode === 'year') return getYearRange(calendarDate);
-      if (calendarMode === 'month' || calendarMode === 'list') return getMonthRange(calendarDate);
-      if (calendarMode === 'week') return getWeekRange(selectedDate);
+      if (calendarMode === 'month') {
+        return { from: startOfMonth(calendarDate), to: endOfMonth(calendarDate) };
+      }
 
-      return {
-        from: startOfDay(selectedDate),
-        to: endOfDay(selectedDate),
-      };
+      if (calendarMode === 'week') {
+        return { from: startOfWeek(selectedDate), to: endOfWeek(selectedDate) };
+      }
+
+      if (calendarMode === 'list') {
+        const from = inputToDate(dateFrom) || selectedDate;
+        const to = inputToDate(dateTo) || selectedDate;
+        return { from: startOfDay(from), to: endOfDay(to) };
+      }
+
+      return { from: selectedDate, to: endOfDay(selectedDate) };
     }
 
-    if (viewMode === 'history') {
-      return null;
+    if (viewMode === 'requests' || viewMode === 'history') {
+      const from = inputToDate(dateFrom);
+      const to = inputToDate(dateTo);
+      if (from && to) return { from: startOfDay(from), to: endOfDay(to) };
+      return { from: new Date(2020, 0, 1), to: new Date(2035, 11, 31) };
     }
 
-    if (viewMode === 'requests') {
-      return null;
-    }
-
-    return null;
-  }, [calendarDate, calendarMode, rangeFrom, rangeTo, selectedDate, today, tomorrow, viewMode]);
+    return { from: selectedDate, to: endOfDay(selectedDate) };
+  }, [calendarDate, calendarMode, dateFrom, dateTo, selectedDate, today, tomorrow, viewMode]);
 
   const visibleBookings = useMemo(() => {
-    let source = [...bookings];
+    const query = nameQuery.trim().toLowerCase();
+    const min = priceFrom.trim() ? Number(priceFrom) : null;
+    const max = priceTo.trim() ? Number(priceTo) : null;
 
-    if (selectedRange) {
-      source = source.filter((booking) => isInsideRange(booking, selectedRange.from, selectedRange.to));
-    }
+    let source = bookings.filter((booking) => inRange(booking, baseDateRange.from, baseDateRange.to));
 
-    if (viewMode === 'requests' || showOnlyRequests) {
+    if (viewMode === 'requests') {
       source = source.filter((booking) => booking.status === 'pending');
     }
 
@@ -607,39 +730,42 @@ export default function ProfileClientsPage() {
       );
     }
 
+    if (showOnlyRequests) {
+      source = source.filter((booking) => booking.status === 'pending');
+    }
+
+    if (query) {
+      source = source.filter((booking) => {
+        const full = `${booking.masterName || ''} ${booking.clientSurname || ''} ${
+          booking.serviceName || ''
+        } ${booking.areaLabel || ''}`.toLowerCase();
+
+        return full.includes(query);
+      });
+    }
+
     if (statusFilter !== 'all') {
       source = source.filter((booking) => booking.status === statusFilter);
     }
 
-    if (paymentFilter === 'paid') source = source.filter((booking) => isPaid(booking));
-    if (paymentFilter === 'unpaid') source = source.filter((booking) => !isPaid(booking));
-    if (paymentFilter === 'platform') source = source.filter((booking) => isPlatformPaid(booking));
-    if (paymentFilter === 'notPlatform') {
-      source = source.filter((booking) => !isPlatformPaid(booking));
+    if (paidFilter === 'paid') {
+      source = source.filter((booking) => isPaid(booking));
     }
 
-    const minPrice = Number(priceFrom);
-    const maxPrice = Number(priceTo);
-
-    if (priceFrom.trim() && !Number.isNaN(minPrice)) {
-      source = source.filter((booking) => Number(booking.price || 0) >= minPrice);
+    if (paidFilter === 'unpaid') {
+      source = source.filter((booking) => !isPaid(booking));
     }
 
-    if (priceTo.trim() && !Number.isNaN(maxPrice)) {
-      source = source.filter((booking) => Number(booking.price || 0) <= maxPrice);
+    if (paymentMethodFilter !== 'all') {
+      source = source.filter((booking) => paymentMethodOf(booking) === paymentMethodFilter);
     }
 
-    const q = search.trim().toLowerCase();
+    if (min !== null && !Number.isNaN(min)) {
+      source = source.filter((booking) => Number(booking.price || 0) >= min);
+    }
 
-    if (q) {
-      source = source.filter((booking) => {
-        return (
-          booking.masterName.toLowerCase().includes(q) ||
-          booking.serviceName.toLowerCase().includes(q) ||
-          String(booking.location || '').toLowerCase().includes(q) ||
-          String(booking.areaLabel || '').toLowerCase().includes(q)
-        );
-      });
+    if (max !== null && !Number.isNaN(max)) {
+      source = source.filter((booking) => Number(booking.price || 0) <= max);
     }
 
     return source.sort((a, b) => {
@@ -648,12 +774,13 @@ export default function ProfileClientsPage() {
       return left - right;
     });
   }, [
+    baseDateRange,
     bookings,
-    paymentFilter,
+    nameQuery,
+    paidFilter,
+    paymentMethodFilter,
     priceFrom,
     priceTo,
-    search,
-    selectedRange,
     showOnlyRequests,
     statusFilter,
     viewMode,
@@ -676,61 +803,61 @@ export default function ProfileClientsPage() {
   ).length;
   const completedCount = visibleBookings.filter((booking) => booking.status === 'completed').length;
 
-  const years = useMemo(() => {
-    const current = new Date().getFullYear();
-    return Array.from({ length: 8 }, (_, index) => current - 2 + index);
-  }, []);
+  const selectedDateLabel = new Intl.DateTimeFormat(getLocale(language), {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(selectedDate);
 
-  const markDone = (booking: BookingItem) => {
-    updateBookingStatus(booking.id, 'completed');
+  const periodLabel = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(getLocale(language), {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+
+    if (isSameDay(baseDateRange.from, baseDateRange.to)) {
+      return formatter.format(baseDateRange.from);
+    }
+
+    return `${formatter.format(baseDateRange.from)} — ${formatter.format(baseDateRange.to)}`;
+  }, [baseDateRange, language]);
+
+  const selectToday = () => {
+    const now = startOfDay(new Date());
+    setViewMode('today');
+    setCalendarMode('day');
+    setSelectedDate(now);
+    setCalendarDate(now);
+    setDateFrom(dateToInput(now));
+    setDateTo(dateToInput(now));
+  };
+
+  const selectTomorrow = () => {
+    const next = addDays(startOfDay(new Date()), 1);
+    setViewMode('tomorrow');
+    setCalendarMode('day');
+    setSelectedDate(next);
+    setCalendarDate(next);
+    setDateFrom(dateToInput(next));
+    setDateTo(dateToInput(next));
   };
 
   const resetFilters = () => {
-    setSearch('');
+    setNameQuery('');
     setStatusFilter('all');
-    setPaymentFilter('all');
+    setPaidFilter('all');
+    setPaymentMethodFilter('all');
     setPriceFrom('');
     setPriceTo('');
-    setRangeFrom('');
-    setRangeTo('');
     setShowOnlyRequests(false);
     setShowFreeWindows(false);
   };
 
-  const setMode = (mode: ViewMode) => {
-    setViewMode(mode);
-    setRangeFrom('');
-    setRangeTo('');
-
-    if (mode === 'today') {
-      setSelectedDate(today);
-      setCalendarDate(today);
-      setCalendarMode('day');
-    }
-
-    if (mode === 'tomorrow') {
-      setSelectedDate(tomorrow);
-      setCalendarDate(tomorrow);
-      setCalendarMode('day');
-    }
-
-    if (mode === 'calendar') {
-      setCalendarMode('month');
-    }
+  const markDone = (booking: BookingItem) => {
+    updateBookingStatus(booking.id, 'completed');
   };
-
-  const goToday = () => {
-    setRangeFrom('');
-    setRangeTo('');
-    setSelectedDate(today);
-    setCalendarDate(today);
-    setViewMode('today');
-    setCalendarMode('day');
-  };
-
-  const periodLabel = selectedRange
-    ? `${inputDateValue(selectedRange.from)} — ${inputDateValue(selectedRange.to)}`
-    : text.allStatuses;
 
   return (
     <main
@@ -744,7 +871,12 @@ export default function ProfileClientsPage() {
     >
       <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 145px' }}>
         <header style={headerStyle}>
-          <button type="button" onClick={() => router.back()} aria-label={text.back} style={headerCircleButtonStyle}>
+          <button
+            type="button"
+            onClick={() => router.back()}
+            aria-label={text.back}
+            style={circleButtonStyle}
+          >
             ←
           </button>
 
@@ -752,7 +884,12 @@ export default function ProfileClientsPage() {
             <OlamepLogo />
           </div>
 
-          <button type="button" onClick={() => router.push('/profile')} aria-label={text.close} style={headerCircleButtonStyle}>
+          <button
+            type="button"
+            onClick={() => router.push('/profile')}
+            aria-label={text.close}
+            style={circleButtonStyle}
+          >
             ×
           </button>
         </header>
@@ -762,7 +899,7 @@ export default function ProfileClientsPage() {
           <p style={subtitleStyle}>{text.subtitle}</p>
         </section>
 
-        <section style={topTabsShellStyle}>
+        <section style={topTabsStyle}>
           {([
             ['today', text.today],
             ['tomorrow', text.tomorrow],
@@ -776,9 +913,21 @@ export default function ProfileClientsPage() {
               <button
                 key={mode}
                 type="button"
-                onClick={() => setMode(mode)}
+                onClick={() => {
+                  if (mode === 'today') {
+                    selectToday();
+                    return;
+                  }
+
+                  if (mode === 'tomorrow') {
+                    selectTomorrow();
+                    return;
+                  }
+
+                  setViewMode(mode);
+                }}
                 style={{
-                  ...topTabStyle,
+                  ...tabButtonStyle,
                   background: active ? BRAND.navy : '#ffffff',
                   color: active ? '#ffffff' : BRAND.navy,
                 }}
@@ -789,12 +938,12 @@ export default function ProfileClientsPage() {
           })}
         </section>
 
-        <section style={statsShellStyle}>
+        <section style={statsSectionStyle}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <StatBox title={text.active} value={String(activeCount)} bg={BRAND.softGreen} />
             <StatBox title={text.total} value={String(visibleBookings.length)} bg={BRAND.softBlue} />
             <StatBox title={text.revenue} value={money(totalRevenue)} bg="#fff0da" />
-            <StatBox title={text.done} value={String(completedCount)} bg={BRAND.softPurple} />
+            <StatBox title={text.done} value={String(completedCount)} bg={BRAND.softViolet} />
           </div>
         </section>
 
@@ -804,28 +953,22 @@ export default function ProfileClientsPage() {
               type="button"
               onClick={() => {
                 const next = new Date(calendarDate);
-                if (calendarMode === 'year') next.setFullYear(next.getFullYear() - 1);
-                else next.setMonth(next.getMonth() - 1);
+                next.setMonth(next.getMonth() - 1);
                 setCalendarDate(next);
-                setViewMode('calendar');
               }}
               style={roundButtonStyle}
             >
               ‹
             </button>
 
-            <div style={calendarTitleStyle}>
-              {calendarMode === 'year' ? calendarDate.getFullYear() : getMonthTitle(calendarDate, language)}
-            </div>
+            <div style={calendarTitleStyle}>{getMonthName(calendarDate, language)}</div>
 
             <button
               type="button"
               onClick={() => {
                 const next = new Date(calendarDate);
-                if (calendarMode === 'year') next.setFullYear(next.getFullYear() + 1);
-                else next.setMonth(next.getMonth() + 1);
+                next.setMonth(next.getMonth() + 1);
                 setCalendarDate(next);
-                setViewMode('calendar');
               }}
               style={roundButtonStyle}
             >
@@ -833,14 +976,13 @@ export default function ProfileClientsPage() {
             </button>
           </div>
 
-          <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1.5fr 1fr', gap: 8 }}>
+          <div style={dateControlsStyle}>
             <select
               value={calendarDate.getFullYear()}
               onChange={(event) => {
                 const next = new Date(calendarDate);
                 next.setFullYear(Number(event.target.value));
                 setCalendarDate(next);
-                setViewMode('calendar');
               }}
               style={selectStyle}
             >
@@ -857,25 +999,23 @@ export default function ProfileClientsPage() {
                 const next = new Date(calendarDate);
                 next.setMonth(Number(event.target.value));
                 setCalendarDate(next);
-                setViewMode('calendar');
               }}
               style={selectStyle}
             >
               {Array.from({ length: 12 }, (_, index) => (
                 <option key={index} value={index}>
-                  {getOnlyMonthName(index, language)}
+                  {getShortMonthName(index, language)}
                 </option>
               ))}
             </select>
 
-            <button type="button" onClick={goToday} style={smallOutlineButtonStyle}>
+            <button type="button" onClick={selectToday} style={todayButtonStyle}>
               {text.today}
             </button>
           </div>
 
-          <div style={calendarModeTabsStyle}>
+          <div style={modeTabsStyle}>
             {([
-              ['year', text.year],
               ['month', text.month],
               ['week', text.week],
               ['day', text.day],
@@ -890,11 +1030,13 @@ export default function ProfileClientsPage() {
                   onClick={() => {
                     setCalendarMode(mode);
                     setViewMode('calendar');
-                    setRangeFrom('');
-                    setRangeTo('');
+                    if (mode === 'list') {
+                      setDateFrom(dateToInput(baseDateRange.from));
+                      setDateTo(dateToInput(baseDateRange.to));
+                    }
                   }}
                   style={{
-                    ...calendarModeButtonStyle,
+                    ...modeButtonStyle,
                     background: active ? BRAND.navy : '#ffffff',
                     color: active ? '#ffffff' : BRAND.navy,
                   }}
@@ -905,23 +1047,6 @@ export default function ProfileClientsPage() {
             })}
           </div>
 
-          {calendarMode === 'year' ? (
-            <YearGrid
-              year={calendarDate.getFullYear()}
-              language={language}
-              bookings={bookings}
-              onSelectMonth={(month) => {
-                const next = new Date(calendarDate);
-                next.setMonth(month);
-                next.setDate(1);
-                setCalendarDate(next);
-                setSelectedDate(next);
-                setCalendarMode('month');
-                setViewMode('calendar');
-              }}
-            />
-          ) : null}
-
           {calendarMode === 'month' ? (
             <CalendarGrid
               language={language}
@@ -929,12 +1054,13 @@ export default function ProfileClientsPage() {
               selectedDate={selectedDate}
               bookings={monthBookings}
               onSelect={(date) => {
-                setSelectedDate(startOfDay(date));
-                setCalendarDate(startOfDay(date));
+                const next = startOfDay(date);
+                setSelectedDate(next);
+                setCalendarDate(next);
                 setViewMode('calendar');
                 setCalendarMode('day');
-                setRangeFrom('');
-                setRangeTo('');
+                setDateFrom(dateToInput(next));
+                setDateTo(dateToInput(next));
               }}
             />
           ) : null}
@@ -945,191 +1071,81 @@ export default function ProfileClientsPage() {
               selectedDate={selectedDate}
               bookings={bookings}
               onSelect={(date) => {
-                setSelectedDate(startOfDay(date));
-                setCalendarDate(startOfDay(date));
+                const next = startOfDay(date);
+                setSelectedDate(next);
+                setCalendarDate(next);
                 setViewMode('calendar');
-                setRangeFrom('');
-                setRangeTo('');
               }}
             />
           ) : null}
 
-          {calendarMode === 'day' ? (
-            <DayFocus date={selectedDate} language={language} bookings={visibleBookings} text={text} />
+          {calendarMode === 'day' || calendarMode === 'list' ? (
+            <div style={selectedPeriodStyle}>
+              <div>
+                <div style={selectedPeriodTitleStyle}>
+                  {calendarMode === 'list' ? text.range : selectedDateLabel}
+                </div>
+                <div style={selectedPeriodSubStyle}>
+                  {periodLabel} · {visibleBookings.length} {text.bookings}
+                </div>
+              </div>
+              <div style={periodCountStyle}>{visibleBookings.length}</div>
+            </div>
           ) : null}
 
-          {calendarMode === 'list' ? (
-            <MonthList
-              bookings={monthBookings}
-              language={language}
-              text={text}
-              onSelect={(date) => {
-                setSelectedDate(startOfDay(date));
-                setCalendarDate(startOfDay(date));
-                setCalendarMode('day');
-                setViewMode('calendar');
-                setRangeFrom('');
-                setRangeTo('');
-              }}
-            />
-          ) : null}
-
-          <div style={filterButtonsScrollStyle}>
-            <FilterButton
+          <div style={filterActionsStyle}>
+            <ToggleButton
               active={filtersOpen}
-              label={`☰ ${text.filters}`}
+              label={filtersOpen ? text.hideFilters : text.filters}
               onClick={() => setFiltersOpen((prev) => !prev)}
             />
-            <FilterButton
+            <ToggleButton
               active={showFreeWindows}
-              label={`◷ ${text.freeWindows}`}
+              label={text.freeWindows}
               onClick={() => setShowFreeWindows((prev) => !prev)}
             />
-            <FilterButton
+            <ToggleButton
               active={showOnlyRequests}
-              label={`♙ ${text.onlyRequests}`}
+              label={text.onlyRequests}
               onClick={() => setShowOnlyRequests((prev) => !prev)}
             />
-            <div style={syncPillStyle}>✓ {text.synced}</div>
           </div>
 
           {filtersOpen ? (
-            <div style={filtersPanelStyle}>
-              <div style={{ fontSize: 13, fontWeight: 900, color: BRAND.navy }}>
-                {text.dateRange}: {periodLabel}
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <label style={filterLabelStyle}>
-                  <span>{text.fromDate}</span>
-                  <input
-                    type="date"
-                    value={rangeFrom}
-                    onChange={(event) => {
-                      setRangeFrom(event.target.value);
-                      setViewMode('calendar');
-                    }}
-                    style={filterInputStyle}
-                  />
-                </label>
-
-                <label style={filterLabelStyle}>
-                  <span>{text.toDate}</span>
-                  <input
-                    type="date"
-                    value={rangeTo}
-                    onChange={(event) => {
-                      setRangeTo(event.target.value);
-                      setViewMode('calendar');
-                    }}
-                    style={filterInputStyle}
-                  />
-                </label>
-              </div>
-
-              <label style={filterLabelStyle}>
-                <span>{text.searchClient}</span>
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder={text.searchClient}
-                  style={filterInputStyle}
-                />
-              </label>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <label style={filterLabelStyle}>
-                  <span>{text.priceFrom}</span>
-                  <input
-                    value={priceFrom}
-                    onChange={(event) => setPriceFrom(event.target.value)}
-                    inputMode="numeric"
-                    placeholder="0"
-                    style={filterInputStyle}
-                  />
-                </label>
-
-                <label style={filterLabelStyle}>
-                  <span>{text.priceTo}</span>
-                  <input
-                    value={priceTo}
-                    onChange={(event) => setPriceTo(event.target.value)}
-                    inputMode="numeric"
-                    placeholder="999"
-                    style={filterInputStyle}
-                  />
-                </label>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <label style={filterLabelStyle}>
-                  <span>{text.allStatuses}</span>
-                  <select
-                    value={statusFilter}
-                    onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
-                    style={filterInputStyle}
-                  >
-                    <option value="all">{text.allStatuses}</option>
-                    <option value="upcoming">{text.confirmed}</option>
-                    <option value="pending">{text.waiting}</option>
-                    <option value="completed">{text.completed}</option>
-                    <option value="cancelled">{text.cancelled}</option>
-                  </select>
-                </label>
-
-                <label style={filterLabelStyle}>
-                  <span>{text.payment}</span>
-                  <select
-                    value={paymentFilter}
-                    onChange={(event) => setPaymentFilter(event.target.value as PaymentFilter)}
-                    style={filterInputStyle}
-                  >
-                    <option value="all">{text.allPayments}</option>
-                    <option value="paid">{text.paid}</option>
-                    <option value="unpaid">{text.unpaid}</option>
-                    <option value="platform">{text.platformPaid}</option>
-                    <option value="notPlatform">{text.notPlatformPaid}</option>
-                  </select>
-                </label>
-              </div>
-
-              <button type="button" onClick={resetFilters} style={resetButtonStyle}>
-                {text.resetFilters}
-              </button>
-            </div>
+            <FiltersPanel
+              text={text}
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              nameQuery={nameQuery}
+              statusFilter={statusFilter}
+              paidFilter={paidFilter}
+              paymentMethodFilter={paymentMethodFilter}
+              priceFrom={priceFrom}
+              priceTo={priceTo}
+              setDateFrom={setDateFrom}
+              setDateTo={setDateTo}
+              setNameQuery={setNameQuery}
+              setStatusFilter={setStatusFilter}
+              setPaidFilter={setPaidFilter}
+              setPaymentMethodFilter={setPaymentMethodFilter}
+              setPriceFrom={setPriceFrom}
+              setPriceTo={setPriceTo}
+              onReset={resetFilters}
+              onUseRange={() => {
+                setViewMode('calendar');
+                setCalendarMode('list');
+              }}
+            />
           ) : null}
 
-          <LegendBar text={text} />
+          <Legend text={text} />
         </section>
 
-        <section style={dayTitlePanelStyle}>
-          <div>
-            <div style={dayTitleStyle}>
-              {selectedRange
-                ? `${inputDateValue(selectedRange.from)} — ${inputDateValue(selectedRange.to)}`
-                : getDateTitle(selectedDate, language)}
-            </div>
-
-            <div style={dayCountStyle}>
-              {visibleBookings.length} {text.bookings}
-            </div>
-          </div>
-
-          <button type="button" onClick={goToday} style={todayGradientButtonStyle}>
-            {text.today}
-          </button>
-        </section>
-
-        <section style={notebookShellStyle}>
-          <div style={notebookHeaderStyle}>
-            <span>{text.time}</span>
-            <span>{text.clientProcedure}</span>
-            <span>{text.price}</span>
-            <span>{text.notes}</span>
-          </div>
+        <section style={{ marginTop: 13, display: 'grid', gap: 10 }}>
+          <NotebookHeader text={text} />
 
           {visibleBookings.length === 0 && !showFreeWindows ? (
-            <div style={emptyNotebookStyle}>{text.noBookings}</div>
+            <div style={emptyStyle}>{text.noBookings}</div>
           ) : null}
 
           {visibleBookings.map((booking) => (
@@ -1143,14 +1159,8 @@ export default function ProfileClientsPage() {
             />
           ))}
 
-          {showFreeWindows ? (
-            <>
-              <FreeWindowRow time="12:00" text={text} />
-              <FreeWindowRow time="19:00" text={text} />
-            </>
-          ) : null}
-
-          <div style={hintStyle}>ⓘ {text.tapHint}</div>
+          {showFreeWindows ? <FreeWindowRow time="12:00" text={text} /> : null}
+          {showFreeWindows ? <FreeWindowRow time="19:00" text={text} /> : null}
         </section>
       </div>
 
@@ -1159,69 +1169,162 @@ export default function ProfileClientsPage() {
   );
 }
 
-function YearGrid({
-  year,
-  language,
-  bookings,
-  onSelectMonth,
+function FiltersPanel({
+  text,
+  dateFrom,
+  dateTo,
+  nameQuery,
+  statusFilter,
+  paidFilter,
+  paymentMethodFilter,
+  priceFrom,
+  priceTo,
+  setDateFrom,
+  setDateTo,
+  setNameQuery,
+  setStatusFilter,
+  setPaidFilter,
+  setPaymentMethodFilter,
+  setPriceFrom,
+  setPriceTo,
+  onReset,
+  onUseRange,
 }: {
-  year: number;
-  language: AppLanguage;
-  bookings: BookingItem[];
-  onSelectMonth: (month: number) => void;
+  text: PageText;
+  dateFrom: string;
+  dateTo: string;
+  nameQuery: string;
+  statusFilter: StatusFilter;
+  paidFilter: PaidFilter;
+  paymentMethodFilter: PaymentMethodFilter;
+  priceFrom: string;
+  priceTo: string;
+  setDateFrom: (value: string) => void;
+  setDateTo: (value: string) => void;
+  setNameQuery: (value: string) => void;
+  setStatusFilter: (value: StatusFilter) => void;
+  setPaidFilter: (value: PaidFilter) => void;
+  setPaymentMethodFilter: (value: PaymentMethodFilter) => void;
+  setPriceFrom: (value: string) => void;
+  setPriceTo: (value: string) => void;
+  onReset: () => void;
+  onUseRange: () => void;
 }) {
   return (
-    <div style={yearGridStyle}>
-      {Array.from({ length: 12 }, (_, month) => {
-        const monthItems = bookings.filter((booking) => {
-          const date = getBookingDate(booking);
-          return date && date.getFullYear() === year && date.getMonth() === month;
-        });
+    <div style={filtersPanelStyle}>
+      <div style={twoColStyle}>
+        <Field label={text.dateFrom}>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(event) => {
+              setDateFrom(event.target.value);
+              onUseRange();
+            }}
+            style={inputStyle}
+          />
+        </Field>
 
-        return (
-          <button key={month} type="button" onClick={() => onSelectMonth(month)} style={miniMonthStyle}>
-            <div style={miniMonthTitleStyle}>{getOnlyMonthName(month, language)}</div>
-            <MiniMonthCalendar year={year} month={month} bookings={monthItems} />
-          </button>
-        );
-      })}
+        <Field label={text.dateTo}>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(event) => {
+              setDateTo(event.target.value);
+              onUseRange();
+            }}
+            style={inputStyle}
+          />
+        </Field>
+      </div>
+
+      <Field label={text.clientName}>
+        <input
+          value={nameQuery}
+          onChange={(event) => setNameQuery(event.target.value)}
+          placeholder={text.clientName}
+          style={inputStyle}
+        />
+      </Field>
+
+      <div style={twoColStyle}>
+        <Field label={text.status}>
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+            style={inputStyle}
+          >
+            <option value="all">{text.all}</option>
+            <option value="upcoming">{text.confirmed}</option>
+            <option value="pending">{text.waiting}</option>
+            <option value="completed">{text.completed}</option>
+            <option value="cancelled">{text.cancelled}</option>
+          </select>
+        </Field>
+
+        <Field label={text.payment}>
+          <select
+            value={paidFilter}
+            onChange={(event) => setPaidFilter(event.target.value as PaidFilter)}
+            style={inputStyle}
+          >
+            <option value="all">{text.all}</option>
+            <option value="paid">{text.paid}</option>
+            <option value="unpaid">{text.unpaid}</option>
+          </select>
+        </Field>
+      </div>
+
+      <div style={twoColStyle}>
+        <Field label={text.priceFrom}>
+          <input
+            value={priceFrom}
+            onChange={(event) => setPriceFrom(event.target.value)}
+            type="number"
+            inputMode="numeric"
+            placeholder="0"
+            style={inputStyle}
+          />
+        </Field>
+
+        <Field label={text.priceTo}>
+          <input
+            value={priceTo}
+            onChange={(event) => setPriceTo(event.target.value)}
+            type="number"
+            inputMode="numeric"
+            placeholder="999"
+            style={inputStyle}
+          />
+        </Field>
+      </div>
+
+      <Field label={text.paymentMethod}>
+        <select
+          value={paymentMethodFilter}
+          onChange={(event) => setPaymentMethodFilter(event.target.value as PaymentMethodFilter)}
+          style={inputStyle}
+        >
+          <option value="all">{text.all}</option>
+          <option value="card">{text.card}</option>
+          <option value="cash">{text.cash}</option>
+          <option value="platform">{text.platform}</option>
+        </select>
+      </Field>
+
+      <button type="button" onClick={onReset} style={resetButtonStyle}>
+        {text.reset}
+      </button>
     </div>
   );
 }
 
-function MiniMonthCalendar({
-  year,
-  month,
-  bookings,
-}: {
-  year: number;
-  month: number;
-  bookings: BookingItem[];
-}) {
-  const cells = getCalendarCells(year, month).slice(0, 35);
-
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={miniMonthGridStyle}>
-      {cells.map(({ date, currentMonth }) => {
-        const hasBooking = bookings.some((booking) => {
-          const bookingDate = getBookingDate(booking);
-          return bookingDate ? isSameDay(bookingDate, date) : false;
-        });
-
-        return (
-          <span
-            key={date.toISOString()}
-            style={{
-              fontSize: 7.5,
-              fontWeight: 900,
-              color: hasBooking ? BRAND.red : currentMonth ? BRAND.navy : '#c9c9c9',
-            }}
-          >
-            {date.getDate()}
-          </span>
-        );
-      })}
-    </div>
+    <label style={{ display: 'grid', gap: 5 }}>
+      <span style={{ fontSize: 11, fontWeight: 900, color: BRAND.muted }}>{label}</span>
+      {children}
+    </label>
   );
 }
 
@@ -1242,16 +1345,16 @@ function CalendarGrid({
   const cells = getCalendarCells(calendarDate.getFullYear(), calendarDate.getMonth());
 
   return (
-    <div style={monthGridShellStyle}>
-      <div style={weekHeaderStyle}>
+    <div style={calendarGridShellStyle}>
+      <div style={weekHeaderGridStyle}>
         {weekDays.map((day) => (
-          <div key={day} style={weekHeaderCellStyle}>
+          <div key={day} style={weekDayStyle}>
             {day}
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+      <div style={calendarDaysGridStyle}>
         {cells.map(({ date, currentMonth }) => {
           const dayBookings = bookings.filter((booking) => {
             const bookingDate = getBookingDate(booking);
@@ -1270,11 +1373,11 @@ function CalendarGrid({
               type="button"
               onClick={() => onSelect(date)}
               style={{
-                minHeight: 52,
+                minHeight: 58,
                 border: 'none',
                 borderRight: '1px solid #eeeeee',
                 borderBottom: '1px solid #eeeeee',
-                background: selected ? '#111111' : currentMonth ? '#ffffff' : '#f5f5f5',
+                background: selected ? BRAND.blue : currentMonth ? '#ffffff' : '#f5f5f5',
                 color: selected ? '#ffffff' : currentMonth ? BRAND.navy : '#a8a8a8',
                 cursor: 'pointer',
                 padding: 5,
@@ -1310,12 +1413,12 @@ function WeekStrip({
   bookings: BookingItem[];
   onSelect: (date: Date) => void;
 }) {
-  const weekDays = getWeekDays(language);
-  const dates = getWeekDates(selectedDate);
+  const weekStart = startOfWeek(selectedDate);
+  const days = Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));
 
   return (
-    <div style={weekStripStyle}>
-      {dates.map((date, index) => {
+    <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
+      {days.map((date) => {
         const selected = isSameDay(date, selectedDate);
         const count = bookings.filter((booking) => {
           const bookingDate = getBookingDate(booking);
@@ -1328,23 +1431,22 @@ function WeekStrip({
             type="button"
             onClick={() => onSelect(date)}
             style={{
-              minHeight: 74,
+              minHeight: 70,
               borderRadius: 18,
-              border: `2px solid ${selected ? BRAND.border : '#e0e0e0'}`,
+              border: `2px solid ${BRAND.border}`,
               background: selected ? BRAND.navy : '#ffffff',
               color: selected ? '#ffffff' : BRAND.navy,
               cursor: 'pointer',
               display: 'grid',
               alignContent: 'center',
-              justifyItems: 'center',
-              gap: 5,
+              gap: 4,
             }}
           >
-            <span style={{ fontSize: 10, fontWeight: 900, color: selected ? '#ffffff' : BRAND.muted }}>
-              {weekDays[index]}
+            <span style={{ fontSize: 10, fontWeight: 900, textTransform: 'capitalize' }}>
+              {new Intl.DateTimeFormat(getLocale(language), { weekday: 'short' }).format(date)}
             </span>
-            <span style={{ fontSize: 18, fontWeight: 900 }}>{date.getDate()}</span>
-            {count > 0 ? <Dot color={selected ? '#ffffff' : BRAND.green} /> : null}
+            <span style={{ fontSize: 19, fontWeight: 900 }}>{date.getDate()}</span>
+            <span style={{ fontSize: 10, fontWeight: 900 }}>{count}</span>
           </button>
         );
       })}
@@ -1352,68 +1454,13 @@ function WeekStrip({
   );
 }
 
-function DayFocus({
-  date,
-  language,
-  bookings,
-  text,
-}: {
-  date: Date;
-  language: AppLanguage;
-  bookings: BookingItem[];
-  text: PageText;
-}) {
+function NotebookHeader({ text }: { text: PageText }) {
   return (
-    <div style={dayFocusStyle}>
-      <div style={{ fontSize: 19, fontWeight: 900, color: BRAND.navy, textTransform: 'capitalize' }}>
-        {getDateTitle(date, language)}
-      </div>
-      <div style={{ marginTop: 5, fontSize: 13, fontWeight: 900, color: BRAND.muted }}>
-        {bookings.length} {text.bookings}
-      </div>
-    </div>
-  );
-}
-
-function MonthList({
-  bookings,
-  language,
-  text,
-  onSelect,
-}: {
-  bookings: BookingItem[];
-  language: AppLanguage;
-  text: PageText;
-  onSelect: (date: Date) => void;
-}) {
-  const groupedDates = Array.from(
-    new Set(
-      bookings
-        .map((booking) => getBookingDate(booking))
-        .filter((date): date is Date => Boolean(date))
-        .map((date) => startOfDay(date).toISOString())
-    )
-  ).map((iso) => new Date(iso));
-
-  return (
-    <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
-      {groupedDates.length === 0 ? <div style={smallEmptyStyle}>{text.noBookings}</div> : null}
-
-      {groupedDates.map((date) => {
-        const count = bookings.filter((booking) => {
-          const bookingDate = getBookingDate(booking);
-          return bookingDate ? isSameDay(bookingDate, date) : false;
-        }).length;
-
-        return (
-          <button key={date.toISOString()} type="button" onClick={() => onSelect(date)} style={monthListButtonStyle}>
-            <span style={{ fontSize: 13, fontWeight: 900, textTransform: 'capitalize' }}>
-              {getDateTitle(date, language)}
-            </span>
-            <span style={countBadgeStyle}>{count}</span>
-          </button>
-        );
-      })}
+    <div style={notebookHeaderStyle}>
+      <div>{text.today}</div>
+      <div>Клиент / Процедура</div>
+      <div>{text.price}</div>
+      <div>{text.notes}</div>
     </div>
   );
 }
@@ -1425,7 +1472,7 @@ function ScheduleRow({
   onDetails,
   onChat,
 }: {
-  booking: BookingItem;
+  booking: BookingWithPayment;
   text: PageText;
   onDone: () => void;
   onDetails: () => void;
@@ -1435,56 +1482,72 @@ function ScheduleRow({
   const bg = statusBg(booking);
   const done = booking.status === 'completed';
   const cancelled = booking.status === 'cancelled';
+  const problem = isCancelledLike(booking);
   const location = isUnlocked(booking)
     ? getVisibleBookingLocation(booking)
     : getPublicBookingLocation(booking);
 
-  const note = cancelled
-    ? text.unavailable
-    : isPlatformPaid(booking)
-    ? text.platformPaid
-    : isPaid(booking)
-    ? text.paid
-    : text.unpaid;
-
   return (
-    <article style={scheduleRowOuterStyle}>
-      <div style={{ ...timelineLineStyle, background: color }} />
+    <article style={scheduleOuterStyle}>
+      <div style={{ ...timeRailStyle, background: color }} />
 
-      <button type="button" onClick={onDetails} style={{ ...scheduleRowInnerStyle, background: bg }}>
-        <div style={timeCellStyle}>{getTimeLabel(booking)}</div>
+      <div style={timeCellStyle}>{getTimeLabel(booking)}</div>
 
+      <div
+        style={{
+          ...notebookRowStyle,
+          background: problem
+            ? `linear-gradient(135deg, #ffffff 0%, #ffffff 48%, ${bg} 49%, ${bg} 100%)`
+            : bg,
+          borderColor: problem ? color : '#d7e6dc',
+        }}
+      >
         <div style={{ minWidth: 0 }}>
-          <div style={clientNameStyle}>{cancelled ? text.unavailable : booking.masterName}</div>
+          <div style={{ ...clientNameStyle, color: cancelled ? BRAND.red : BRAND.navy }}>
+            {cancelled ? text.unavailable : booking.masterName}
+          </div>
+
+          <div style={serviceStyle}>{cancelled ? text.available : booking.serviceName || 'Service'}</div>
+
           {!cancelled ? (
-            <>
-              <div style={serviceNameStyle}>{booking.serviceName || 'Service'}</div>
-              <div style={locationStyle}>📍 {location || 'London'}</div>
-              <div style={{ marginTop: 6 }}>
-                <Pill label={statusLabel(booking, text)} color={color} bg="#ffffff" />
-              </div>
-            </>
+            <div style={miniLocationStyle}>📍 {location || 'London'}</div>
           ) : null}
+
+          <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+            <SmallBadge label={statusLabel(booking, text)} color={color} bg={bg} />
+            <SmallBadge
+              label={isPaid(booking) ? text.paid : text.unpaid}
+              color={isPaid(booking) ? '#008f3a' : '#b87500'}
+              bg={isPaid(booking) ? BRAND.softGreen : BRAND.softYellow}
+            />
+          </div>
         </div>
 
-        <div style={{ ...priceCellStyle, color: cancelled ? BRAND.red : color }}>
-          {cancelled ? '—' : money(Number(booking.price || 0))}
-        </div>
+        <div style={priceCellStyle}>{money(Number(booking.price || 0))}</div>
 
         <div style={notesCellStyle}>
-          <span>{note}</span>
-          <span style={{ fontSize: 22, lineHeight: 1 }}>≡</span>
+          <div>{booking.notes || (cancelled ? '—' : text.notes)}</div>
+          <button type="button" onClick={onDetails} style={rowMenuButtonStyle}>
+            ≡
+          </button>
         </div>
-      </button>
+      </div>
 
-      {!done && !cancelled ? (
+      {!cancelled ? (
         <div style={rowActionsStyle}>
+          <button type="button" onClick={onDetails} style={outlineButtonStyle}>
+            {text.details}
+          </button>
+
           <button type="button" onClick={onChat} style={greenButtonStyle}>
             💬 {text.openChat}
           </button>
-          <button type="button" onClick={onDone} style={outlineButtonStyle}>
-            ✓ {text.markDone}
-          </button>
+
+          {!done ? (
+            <button type="button" onClick={onDone} style={doneButtonStyle}>
+              ✓ {text.markDone}
+            </button>
+          ) : null}
         </div>
       ) : null}
     </article>
@@ -1493,13 +1556,22 @@ function ScheduleRow({
 
 function FreeWindowRow({ time, text }: { time: string; text: PageText }) {
   return (
-    <article style={freeWindowOuterStyle}>
-      <div style={freeTimelineStyle} />
-      <div style={freeWindowInnerStyle}>
-        <div style={timeCellStyle}>{time}</div>
-        <div style={{ fontSize: 15, fontWeight: 900, color: BRAND.muted }}>{text.available}</div>
-        <div />
-        <div style={notesCellStyle}>≡</div>
+    <article style={scheduleOuterStyle}>
+      <div style={{ ...timeRailStyle, background: '#c7c7c7' }} />
+      <div style={timeCellStyle}>{time}</div>
+      <div
+        style={{
+          ...notebookRowStyle,
+          background: '#ffffff',
+          border: '2px dashed #d2d2d2',
+        }}
+      >
+        <div>
+          <div style={clientNameStyle}>{text.available}</div>
+          <div style={serviceStyle}>Available for booking</div>
+        </div>
+        <div style={priceCellStyle}>—</div>
+        <div style={notesCellStyle}>—</div>
       </div>
     </article>
   );
@@ -1514,7 +1586,7 @@ function StatBox({ title, value, bg }: { title: string; value: string; bg: strin
   );
 }
 
-function FilterButton({
+function ToggleButton({
   active,
   label,
   onClick,
@@ -1528,16 +1600,16 @@ function FilterButton({
       type="button"
       onClick={onClick}
       style={{
-        flexShrink: 0,
         minHeight: 40,
         borderRadius: 999,
         border: `2px solid ${BRAND.border}`,
         background: active ? BRAND.navy : '#ffffff',
         color: active ? '#ffffff' : BRAND.navy,
-        padding: '0 13px',
         fontSize: 12,
         fontWeight: 900,
         cursor: 'pointer',
+        padding: '0 13px',
+        whiteSpace: 'nowrap',
       }}
     >
       {label}
@@ -1545,41 +1617,19 @@ function FilterButton({
   );
 }
 
-function LegendBar({ text }: { text: PageText }) {
-  return (
-    <div style={legendBarStyle}>
-      <LegendDot color={BRAND.blue} label={text.completed} />
-      <LegendDot color={BRAND.green} label={text.confirmed} />
-      <LegendDot color={BRAND.red} label={text.unavailable} />
-      <LegendDot color={BRAND.yellow} label={text.waiting} />
-    </div>
-  );
-}
-
-function LegendDot({ color, label }: { color: string; label: string }) {
-  return (
-    <div style={legendItemStyle}>
-      <Dot color={color} />
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function Pill({ label, color, bg }: { label: string; color: string; bg: string }) {
+function SmallBadge({ label, color, bg }: { label: string; color: string; bg: string }) {
   return (
     <span
       style={{
-        minHeight: 23,
-        padding: '0 8px',
+        minHeight: 22,
+        padding: '0 7px',
         borderRadius: 999,
         border: `1.5px solid ${color}`,
         background: bg,
         color,
         display: 'inline-flex',
         alignItems: 'center',
-        fontSize: 10.5,
+        fontSize: 10,
         fontWeight: 900,
       }}
     >
@@ -1588,12 +1638,32 @@ function Pill({ label, color, bg }: { label: string; color: string; bg: string }
   );
 }
 
+function Legend({ text }: { text: PageText }) {
+  return (
+    <div style={legendStyle}>
+      <LegendItem color={BRAND.blue} label={text.statusLegendDone} />
+      <LegendItem color={BRAND.green} label={text.statusLegendConfirmed} />
+      <LegendItem color={BRAND.red} label={text.statusLegendUnavailable} />
+      <LegendItem color={BRAND.yellow} label={text.statusLegendAttention} />
+    </div>
+  );
+}
+
+function LegendItem({ color, label }: { color: string; label: string }) {
+  return (
+    <span style={legendItemStyle}>
+      <Dot color={color} />
+      <span>{label}</span>
+    </span>
+  );
+}
+
 function Dot({ color }: { color: string }) {
   return (
     <span
       style={{
-        width: 7,
-        height: 7,
+        width: 8,
+        height: 8,
         borderRadius: 999,
         background: color,
         display: 'inline-block',
@@ -1610,7 +1680,7 @@ const headerStyle: CSSProperties = {
   gap: 10,
 };
 
-const headerCircleButtonStyle: CSSProperties = {
+const circleButtonStyle: CSSProperties = {
   width: 48,
   height: 48,
   borderRadius: 999,
@@ -1639,7 +1709,7 @@ const subtitleStyle: CSSProperties = {
   color: BRAND.muted,
 };
 
-const topTabsShellStyle: CSSProperties = {
+const topTabsStyle: CSSProperties = {
   marginTop: 15,
   borderRadius: 24,
   border: `2.5px solid ${BRAND.border}`,
@@ -1650,7 +1720,7 @@ const topTabsShellStyle: CSSProperties = {
   gap: 6,
 };
 
-const topTabStyle: CSSProperties = {
+const tabButtonStyle: CSSProperties = {
   minHeight: 42,
   borderRadius: 15,
   border: `2px solid ${BRAND.border}`,
@@ -1662,7 +1732,7 @@ const topTabStyle: CSSProperties = {
   textOverflow: 'ellipsis',
 };
 
-const statsShellStyle: CSSProperties = {
+const statsSectionStyle: CSSProperties = {
   marginTop: 13,
   borderRadius: 25,
   border: `2.5px solid ${BRAND.border}`,
@@ -1696,7 +1766,7 @@ const calendarHeaderStyle: CSSProperties = {
 
 const calendarTitleStyle: CSSProperties = {
   textAlign: 'center',
-  fontSize: 25,
+  fontSize: 22,
   fontWeight: 900,
   color: BRAND.navy,
   textTransform: 'capitalize',
@@ -1714,8 +1784,27 @@ const roundButtonStyle: CSSProperties = {
   cursor: 'pointer',
 };
 
+const dateControlsStyle: CSSProperties = {
+  marginTop: 10,
+  display: 'grid',
+  gridTemplateColumns: '0.8fr 1.2fr 0.8fr',
+  gap: 7,
+};
+
 const selectStyle: CSSProperties = {
-  minWidth: 0,
+  minHeight: 42,
+  borderRadius: 15,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 14,
+  fontWeight: 900,
+  padding: '0 10px',
+  outline: 'none',
+};
+
+const inputStyle: CSSProperties = {
+  width: '100%',
   minHeight: 42,
   borderRadius: 15,
   border: `2px solid ${BRAND.border}`,
@@ -1723,70 +1812,39 @@ const selectStyle: CSSProperties = {
   color: BRAND.navy,
   fontSize: 13,
   fontWeight: 900,
-  padding: '0 8px',
+  padding: '0 10px',
   outline: 'none',
+  boxSizing: 'border-box',
 };
 
-const smallOutlineButtonStyle: CSSProperties = {
+const todayButtonStyle: CSSProperties = {
   minHeight: 42,
   borderRadius: 15,
   border: `2px solid ${BRAND.border}`,
   background: '#ffffff',
   color: BRAND.navy,
+  fontSize: 13,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const modeTabsStyle: CSSProperties = {
+  marginTop: 10,
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, 1fr)',
+  gap: 7,
+};
+
+const modeButtonStyle: CSSProperties = {
+  minHeight: 38,
+  borderRadius: 999,
+  border: `2px solid ${BRAND.border}`,
   fontSize: 12,
   fontWeight: 900,
   cursor: 'pointer',
 };
 
-const calendarModeTabsStyle: CSSProperties = {
-  marginTop: 10,
-  display: 'grid',
-  gridTemplateColumns: 'repeat(5, 1fr)',
-  gap: 7,
-};
-
-const calendarModeButtonStyle: CSSProperties = {
-  minHeight: 38,
-  borderRadius: 999,
-  border: `2px solid ${BRAND.border}`,
-  fontSize: 11,
-  fontWeight: 900,
-  cursor: 'pointer',
-};
-
-const yearGridStyle: CSSProperties = {
-  marginTop: 12,
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
-  gap: 9,
-};
-
-const miniMonthStyle: CSSProperties = {
-  minHeight: 118,
-  borderRadius: 18,
-  border: `2px solid ${BRAND.border}`,
-  background: '#ffffff',
-  padding: 8,
-  cursor: 'pointer',
-  textAlign: 'left',
-};
-
-const miniMonthTitleStyle: CSSProperties = {
-  fontSize: 11,
-  fontWeight: 900,
-  color: BRAND.navy,
-  textTransform: 'capitalize',
-  marginBottom: 5,
-};
-
-const miniMonthGridStyle: CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(7, 1fr)',
-  gap: 2,
-  textAlign: 'center',
-};
-
-const monthGridShellStyle: CSSProperties = {
+const calendarGridShellStyle: CSSProperties = {
   marginTop: 12,
   borderRadius: 22,
   border: '1.5px solid #e3e3e3',
@@ -1794,14 +1852,14 @@ const monthGridShellStyle: CSSProperties = {
   background: '#ffffff',
 };
 
-const weekHeaderStyle: CSSProperties = {
+const weekHeaderGridStyle: CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(7, 1fr)',
   borderBottom: '1.5px solid #e3e3e3',
   background: '#fbfbfb',
 };
 
-const weekHeaderCellStyle: CSSProperties = {
+const weekDayStyle: CSSProperties = {
   height: 31,
   display: 'flex',
   alignItems: 'center',
@@ -1812,118 +1870,74 @@ const weekHeaderCellStyle: CSSProperties = {
   textTransform: 'capitalize',
 };
 
-const weekStripStyle: CSSProperties = {
-  marginTop: 12,
+const calendarDaysGridStyle: CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(7, 1fr)',
-  gap: 6,
 };
 
-const dayFocusStyle: CSSProperties = {
+const selectedPeriodStyle: CSSProperties = {
   marginTop: 12,
-  borderRadius: 22,
-  border: `2px solid ${BRAND.border}`,
-  background: BRAND.softBlue,
-  padding: 13,
-};
-
-const smallEmptyStyle: CSSProperties = {
-  minHeight: 70,
-  borderRadius: 18,
-  border: '1.5px dashed #d7dce4',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: BRAND.muted,
-  fontSize: 13,
-  fontWeight: 900,
-};
-
-const monthListButtonStyle: CSSProperties = {
-  minHeight: 54,
-  borderRadius: 18,
+  minHeight: 74,
+  borderRadius: 20,
   border: `2px solid ${BRAND.border}`,
   background: '#ffffff',
-  color: BRAND.navy,
+  padding: '10px 12px',
   display: 'grid',
   gridTemplateColumns: '1fr auto',
-  alignItems: 'center',
   gap: 10,
-  padding: '0 12px',
-  cursor: 'pointer',
-  textAlign: 'left',
+  alignItems: 'center',
 };
 
-const countBadgeStyle: CSSProperties = {
-  minHeight: 28,
+const selectedPeriodTitleStyle: CSSProperties = {
+  fontSize: 18,
+  fontWeight: 900,
+  color: BRAND.navy,
+  lineHeight: 1.1,
+};
+
+const selectedPeriodSubStyle: CSSProperties = {
+  marginTop: 4,
+  fontSize: 12,
+  fontWeight: 900,
+  color: BRAND.muted,
+};
+
+const periodCountStyle: CSSProperties = {
+  width: 42,
+  height: 42,
   borderRadius: 999,
   border: `2px solid ${BRAND.border}`,
   background: BRAND.softBlue,
-  color: BRAND.blue,
-  display: 'inline-flex',
+  color: BRAND.navy,
+  display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '0 10px',
-  fontSize: 12,
+  fontSize: 17,
   fontWeight: 900,
 };
 
-const filterButtonsScrollStyle: CSSProperties = {
+const filterActionsStyle: CSSProperties = {
   marginTop: 12,
   display: 'flex',
   gap: 8,
   overflowX: 'auto',
-  paddingBottom: 2,
-};
-
-const syncPillStyle: CSSProperties = {
-  flexShrink: 0,
-  minHeight: 40,
-  borderRadius: 999,
-  border: `2px solid ${BRAND.border}`,
-  background: BRAND.softGreen,
-  color: '#008f3a',
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '0 13px',
-  gap: 7,
-  fontSize: 12,
-  fontWeight: 900,
+  paddingBottom: 3,
 };
 
 const filtersPanelStyle: CSSProperties = {
   marginTop: 10,
-  borderRadius: 20,
+  borderRadius: 22,
   border: `2px solid ${BRAND.border}`,
-  background: '#fbfbfb',
-  padding: 10,
+  background: '#f8fbff',
+  padding: 11,
   display: 'grid',
   gap: 10,
 };
 
-const filterLabelStyle: CSSProperties = {
-  minWidth: 0,
+const twoColStyle: CSSProperties = {
   display: 'grid',
-  gap: 5,
-  fontSize: 10.5,
-  fontWeight: 900,
-  color: BRAND.muted,
-};
-
-const filterInputStyle: CSSProperties = {
-  width: '100%',
-  minWidth: 0,
-  height: 42,
-  borderRadius: 15,
-  border: `2px solid ${BRAND.border}`,
-  background: '#ffffff',
-  color: BRAND.navy,
-  fontSize: 13,
-  fontWeight: 900,
-  padding: '0 10px',
-  outline: 'none',
-  boxSizing: 'border-box',
+  gridTemplateColumns: '1fr 1fr',
+  gap: 9,
 };
 
 const resetButtonStyle: CSSProperties = {
@@ -1937,199 +1951,151 @@ const resetButtonStyle: CSSProperties = {
   cursor: 'pointer',
 };
 
-const legendBarStyle: CSSProperties = {
+const legendStyle: CSSProperties = {
   marginTop: 10,
-  minHeight: 42,
-  borderRadius: 18,
+  minHeight: 40,
+  borderRadius: 999,
   border: `2px solid ${BRAND.border}`,
   background: '#ffffff',
-  display: 'grid',
-  gridTemplateColumns: 'repeat(4, 1fr)',
-  gap: 5,
-  padding: '0 8px',
+  display: 'flex',
   alignItems: 'center',
+  gap: 10,
+  overflowX: 'auto',
+  padding: '0 12px',
 };
 
 const legendItemStyle: CSSProperties = {
-  minWidth: 0,
-  display: 'flex',
+  display: 'inline-flex',
   alignItems: 'center',
-  justifyContent: 'center',
-  gap: 5,
-  fontSize: 9,
+  gap: 6,
+  fontSize: 10.5,
   fontWeight: 900,
   color: BRAND.navy,
-};
-
-const dayTitlePanelStyle: CSSProperties = {
-  marginTop: 13,
-  borderRadius: 24,
-  border: `2.5px solid ${BRAND.border}`,
-  background: '#f8fbff',
-  padding: 11,
-  display: 'grid',
-  gridTemplateColumns: '1fr auto',
-  gap: 10,
-  alignItems: 'center',
-};
-
-const dayTitleStyle: CSSProperties = {
-  fontSize: 20,
-  fontWeight: 900,
-  lineHeight: 1.05,
-  color: BRAND.navy,
-  textTransform: 'capitalize',
-};
-
-const dayCountStyle: CSSProperties = {
-  marginTop: 4,
-  fontSize: 12,
-  fontWeight: 900,
-  color: BRAND.muted,
-};
-
-const todayGradientButtonStyle: CSSProperties = {
-  minWidth: 72,
-  height: 46,
-  borderRadius: 17,
-  border: `2px solid ${BRAND.border}`,
-  background:
-    'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
-  color: '#ffffff',
-  fontSize: 13,
-  fontWeight: 900,
-  cursor: 'pointer',
-};
-
-const notebookShellStyle: CSSProperties = {
-  marginTop: 13,
-  borderRadius: 26,
-  border: `2.5px solid ${BRAND.border}`,
-  background:
-    'repeating-linear-gradient(180deg, #ffffff 0px, #ffffff 37px, #eef2f6 38px, #ffffff 39px)',
-  padding: 10,
-  display: 'grid',
-  gap: 9,
-  overflow: 'hidden',
+  whiteSpace: 'nowrap',
 };
 
 const notebookHeaderStyle: CSSProperties = {
-  minHeight: 30,
   display: 'grid',
-  gridTemplateColumns: '64px 1fr 70px 68px',
+  gridTemplateColumns: '64px 1fr 58px 70px',
   gap: 8,
-  alignItems: 'center',
+  padding: '0 8px',
   color: BRAND.muted,
-  fontSize: 10.5,
+  fontSize: 11,
   fontWeight: 900,
-  padding: '0 6px',
 };
 
-const emptyNotebookStyle: CSSProperties = {
-  minHeight: 90,
-  borderRadius: 18,
-  border: '2px dashed #d7dce4',
+const emptyStyle: CSSProperties = {
+  minHeight: 112,
+  borderRadius: 24,
+  border: `2px dashed #d7dce4`,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  color: BRAND.muted,
-  fontSize: 14,
-  fontWeight: 900,
   textAlign: 'center',
+  padding: 18,
+  color: BRAND.muted,
+  fontSize: 15,
+  fontWeight: 900,
 };
 
-const scheduleRowOuterStyle: CSSProperties = {
+const scheduleOuterStyle: CSSProperties = {
   position: 'relative',
-  borderRadius: 18,
-  overflow: 'hidden',
-};
-
-const scheduleRowInnerStyle: CSSProperties = {
-  width: '100%',
-  minHeight: 76,
-  border: '1.5px solid rgba(0,0,0,0.08)',
-  borderRadius: 18,
-  padding: '9px 8px 9px 13px',
   display: 'grid',
-  gridTemplateColumns: '64px minmax(0, 1fr) 70px 68px',
+  gridTemplateColumns: '64px minmax(0, 1fr)',
   gap: 8,
-  alignItems: 'center',
-  textAlign: 'left',
-  cursor: 'pointer',
+  alignItems: 'stretch',
 };
 
-const timelineLineStyle: CSSProperties = {
+const timeRailStyle: CSSProperties = {
   position: 'absolute',
   left: 0,
-  top: 9,
-  bottom: 9,
+  top: 8,
+  bottom: 8,
   width: 5,
   borderRadius: 999,
-  zIndex: 2,
 };
 
 const timeCellStyle: CSSProperties = {
-  fontSize: 17,
+  fontSize: 22,
   fontWeight: 900,
   color: BRAND.navy,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  paddingLeft: 7,
+};
+
+const notebookRowStyle: CSSProperties = {
+  minHeight: 84,
+  borderRadius: 16,
+  border: '2px solid #d7e6dc',
+  padding: '10px 10px',
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr) 58px 70px',
+  gap: 8,
+  alignItems: 'center',
+  boxShadow: '0 4px 12px rgba(7,27,70,0.04)',
 };
 
 const clientNameStyle: CSSProperties = {
-  fontSize: 15.5,
-  lineHeight: 1.05,
+  fontSize: 16,
   fontWeight: 900,
-  color: BRAND.navy,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
+  lineHeight: 1.1,
 };
 
-const serviceNameStyle: CSSProperties = {
+const serviceStyle: CSSProperties = {
   marginTop: 3,
-  fontSize: 12.5,
-  fontWeight: 800,
-  color: '#2d3748',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-};
-
-const locationStyle: CSSProperties = {
-  marginTop: 3,
-  fontSize: 10.5,
+  fontSize: 12,
   fontWeight: 800,
   color: BRAND.muted,
+};
+
+const miniLocationStyle: CSSProperties = {
+  marginTop: 4,
+  fontSize: 11,
+  fontWeight: 900,
+  color: BRAND.blue,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
 };
 
 const priceCellStyle: CSSProperties = {
-  fontSize: 21,
+  fontSize: 20,
   fontWeight: 900,
-  textAlign: 'center',
+  color: BRAND.red,
+  textAlign: 'right',
 };
 
 const notesCellStyle: CSSProperties = {
   minWidth: 0,
-  display: 'flex',
+  display: 'grid',
+  gridTemplateColumns: '1fr 22px',
+  gap: 4,
   alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: 6,
-  fontSize: 11.5,
-  lineHeight: 1.1,
+  color: BRAND.navy,
+  fontSize: 11,
+  lineHeight: 1.15,
   fontWeight: 800,
-  color: '#3f4752',
+};
+
+const rowMenuButtonStyle: CSSProperties = {
+  width: 22,
+  height: 22,
+  border: 'none',
+  background: 'transparent',
+  color: BRAND.muted,
+  fontSize: 18,
+  fontWeight: 900,
+  cursor: 'pointer',
 };
 
 const rowActionsStyle: CSSProperties = {
-  marginTop: 6,
+  gridColumn: '2 / 3',
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
   gap: 8,
+  marginTop: -2,
 };
 
 const outlineButtonStyle: CSSProperties = {
@@ -2154,39 +2120,14 @@ const greenButtonStyle: CSSProperties = {
   cursor: 'pointer',
 };
 
-const freeWindowOuterStyle: CSSProperties = {
-  position: 'relative',
-  borderRadius: 18,
-  overflow: 'hidden',
-};
-
-const freeTimelineStyle: CSSProperties = {
-  position: 'absolute',
-  left: 0,
-  top: 9,
-  bottom: 9,
-  width: 5,
-  borderRadius: 999,
-  background: '#bfc5cc',
-  zIndex: 2,
-};
-
-const freeWindowInnerStyle: CSSProperties = {
-  minHeight: 56,
-  borderRadius: 18,
-  border: '1.5px dashed #cfd5dd',
-  background: 'rgba(255,255,255,0.78)',
-  padding: '8px 8px 8px 13px',
-  display: 'grid',
-  gridTemplateColumns: '64px minmax(0, 1fr) 70px 68px',
-  gap: 8,
-  alignItems: 'center',
-};
-
-const hintStyle: CSSProperties = {
-  marginTop: 3,
-  fontSize: 11.5,
-  lineHeight: 1.35,
-  fontWeight: 800,
-  color: BRAND.muted,
+const doneButtonStyle: CSSProperties = {
+  gridColumn: '1 / 3',
+  minHeight: 38,
+  borderRadius: 14,
+  border: `2px solid ${BRAND.border}`,
+  background: BRAND.softBlue,
+  color: BRAND.blue,
+  fontSize: 12,
+  fontWeight: 900,
+  cursor: 'pointer',
 };
