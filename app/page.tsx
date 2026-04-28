@@ -440,77 +440,6 @@ function getTickerBackground(language: AppLanguage) {
   }
 }
 
-function ActionCountButton({
-  icon,
-  title,
-  count,
-  active,
-  onClick,
-}: {
-  icon: ReactNode;
-  title: string;
-  count: number;
-  active?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        minHeight: 54,
-        border: active ? '2px solid #111111' : '1.2px solid #cfc8be',
-        borderRadius: 18,
-        background: active ? '#fff8d8' : '#ffffff',
-        color: '#151515',
-        cursor: 'pointer',
-        display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1fr) 34px',
-        alignItems: 'center',
-        gap: 8,
-        padding: '0 10px 0 12px',
-        boxShadow: active ? '0 3px 0 rgba(0,0,0,0.10)' : '0 1px 2px rgba(0,0,0,0.03)',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          {icon}
-        </span>
-
-        <span
-          style={{
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            fontSize: 12,
-            fontWeight: 800,
-          }}
-        >
-          {title}
-        </span>
-      </div>
-
-      <span
-        style={{
-          width: 34,
-          height: 34,
-          borderRadius: 999,
-          border: '1.4px solid #151515',
-          background: '#ffffff',
-          color: '#151515',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 12,
-          fontWeight: 900,
-          flexShrink: 0,
-        }}
-      >
-        {count}
-      </span>
-    </button>
-  );
-}
-
 function BrightTicker({ language }: { language: AppLanguage }) {
   const logo = '/ui/logo/logo.png';
   const messages = tickerMessages[language] || tickerMessages.EN;
@@ -519,15 +448,15 @@ function BrightTicker({ language }: { language: AppLanguage }) {
   return (
     <div
       style={{
-        height: 34,
-        borderTop: '1px solid rgba(0,0,0,0.05)',
-        borderBottom: '1px solid rgba(0,0,0,0.05)',
+        height: 30,
+        border: '2px solid #111111',
         background: getTickerBackground(language),
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
         padding: '0 8px',
-        borderRadius: 10,
+        borderRadius: 14,
+        boxShadow: '0 2px 0 rgba(0,0,0,0.04)',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, marginRight: 12 }}>
@@ -553,7 +482,7 @@ function BrightTicker({ language }: { language: AppLanguage }) {
             whiteSpace: 'nowrap',
             color: '#151515',
             fontSize: 11,
-            fontWeight: 600,
+            fontWeight: 700,
             paddingLeft: '100%',
             animation: 'olamepTickerMove 18s linear infinite',
           }}
@@ -565,6 +494,265 @@ function BrightTicker({ language }: { language: AppLanguage }) {
             </span>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function QuickActionsPanel({
+  open,
+  onToggle,
+  onShare,
+  onQrTopUp,
+  onInvite,
+  onFavourite,
+  onAllFavourite,
+  onHotOffers,
+  onAllHotOffers,
+  favouriteCount,
+  allFavouriteCount,
+  hotOffersCount,
+  allHotOffersCount,
+  favouriteActive,
+  allFavouriteActive,
+  hotOffersActive,
+  allHotOffersActive,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  onShare: () => void;
+  onQrTopUp: () => void;
+  onInvite: () => void;
+  onFavourite: () => void;
+  onAllFavourite: () => void;
+  onHotOffers: () => void;
+  onAllHotOffers: () => void;
+  favouriteCount: number;
+  allFavouriteCount: number;
+  hotOffersCount: number;
+  allHotOffersCount: number;
+  favouriteActive: boolean;
+  allFavouriteActive: boolean;
+  hotOffersActive: boolean;
+  allHotOffersActive: boolean;
+}) {
+  const items = [
+    {
+      key: 'share',
+      label: 'Share app',
+      icon: '⤴',
+      color: '#ff3b58',
+      onClick: onShare,
+    },
+    {
+      key: 'qr',
+      label: 'QR top-up',
+      icon: '▦',
+      color: '#2378ff',
+      onClick: onQrTopUp,
+    },
+    {
+      key: 'invite',
+      label: 'Invite',
+      icon: '👥',
+      color: '#2378ff',
+      onClick: onInvite,
+    },
+    {
+      key: 'favourite',
+      label: 'Favourite',
+      icon: '♥',
+      color: '#ff3b58',
+      count: favouriteCount,
+      active: favouriteActive,
+      onClick: onFavourite,
+    },
+    {
+      key: 'allFavourite',
+      label: 'All favourite',
+      icon: '♥♥♥',
+      color: '#ff3b58',
+      count: allFavouriteCount,
+      active: allFavouriteActive,
+      onClick: onAllFavourite,
+    },
+    {
+      key: 'hotOffers',
+      label: 'Hot offers',
+      icon: '%',
+      color: '#171717',
+      count: hotOffersCount,
+      active: hotOffersActive,
+      onClick: onHotOffers,
+      yellow: true,
+    },
+    {
+      key: 'allHotOffers',
+      label: 'All hot offers',
+      icon: '%',
+      color: '#171717',
+      count: allHotOffersCount,
+      active: allHotOffersActive,
+      onClick: onAllHotOffers,
+      yellow: true,
+    },
+  ];
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 18,
+        right: open ? 8 : -78,
+        width: 96,
+        zIndex: 850,
+        transition: 'right 0.28s ease',
+        pointerEvents: 'auto',
+      }}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-label="Toggle quick actions"
+        style={{
+          position: 'absolute',
+          left: -38,
+          top: 66,
+          width: 42,
+          height: 86,
+          borderTopLeftRadius: 22,
+          borderBottomLeftRadius: 22,
+          border: '2.4px solid #111111',
+          borderRight: 'none',
+          background: '#fffdf8',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.13)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 5,
+          cursor: 'pointer',
+          padding: 0,
+        }}
+      >
+        <img
+          src="/ui/logo/logo.png"
+          alt="Olamep"
+          style={{
+            width: 28,
+            height: 28,
+            objectFit: 'contain',
+            display: 'block',
+          }}
+        />
+        <span
+          style={{
+            fontSize: 14,
+            fontWeight: 900,
+            color: '#111111',
+            lineHeight: 1,
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.25s ease',
+          }}
+        >
+          ◂
+        </span>
+      </button>
+
+      <div
+        style={{
+          width: 96,
+          borderRadius: 24,
+          border: '2.4px solid #111111',
+          background: 'rgba(255,253,248,0.98)',
+          boxShadow: '0 14px 30px rgba(0,0,0,0.16)',
+          padding: '10px 7px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 7,
+          boxSizing: 'border-box',
+          backdropFilter: 'blur(10px)',
+        }}
+      >
+        {items.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            onClick={item.onClick}
+            style={{
+              minHeight: 58,
+              borderRadius: 17,
+              border: item.active ? '2px solid #111111' : '1.4px solid #ded7ce',
+              background: item.active ? '#fff7d8' : '#ffffff',
+              boxShadow: item.active ? '0 4px 0 rgba(0,0,0,0.08)' : '0 2px 8px rgba(0,0,0,0.04)',
+              color: '#111111',
+              cursor: 'pointer',
+              padding: '6px 4px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 4,
+              position: 'relative',
+            }}
+          >
+            <span
+              style={{
+                minWidth: item.yellow ? 30 : 'auto',
+                height: item.yellow ? 30 : 'auto',
+                borderRadius: item.yellow ? '50%' : 0,
+                background: item.yellow ? '#ffe44d' : 'transparent',
+                color: item.color,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: item.key === 'allFavourite' ? 15 : 22,
+                fontWeight: 900,
+                lineHeight: 1,
+              }}
+            >
+              {item.icon}
+            </span>
+
+            <span
+              style={{
+                maxWidth: 78,
+                fontSize: 10.5,
+                fontWeight: 900,
+                lineHeight: 1.05,
+                textAlign: 'center',
+                color: '#171717',
+              }}
+            >
+              {item.label}
+            </span>
+
+            {typeof item.count === 'number' ? (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: -6,
+                  right: -5,
+                  minWidth: 20,
+                  height: 20,
+                  padding: '0 5px',
+                  borderRadius: 999,
+                  border: '1.5px solid #111111',
+                  background: '#ffffff',
+                  color: '#111111',
+                  fontSize: 10,
+                  fontWeight: 900,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxSizing: 'border-box',
+                }}
+              >
+                {item.count > 99 ? '99+' : item.count}
+              </span>
+            ) : null}
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -600,7 +788,7 @@ function PromoCard({
       style={{
         minWidth: 150,
         maxWidth: 150,
-        border: '1.2px solid #cfc8be',
+        border: '2px solid #111111',
         borderRadius: 16,
         background: '#ffffff',
         overflow: 'hidden',
@@ -608,7 +796,7 @@ function PromoCard({
         padding: 0,
         textAlign: 'left',
         cursor: 'pointer',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
       }}
     >
       <div style={{ position: 'relative' }}>
@@ -736,9 +924,9 @@ function MasterMiniCard({
         left: 10,
         right: 10,
         bottom: 10,
-        zIndex: 800,
+        zIndex: 900,
         borderRadius: 22,
-        border: '1.8px solid #111111',
+        border: '2px solid #111111',
         background: '#ffffff',
         boxShadow: '0 12px 28px rgba(0,0,0,0.18)',
         padding: 10,
@@ -994,6 +1182,7 @@ export default function HomePage() {
   const [locationLabel, setLocationLabel] = useState(getEffectiveSearchLocation().label);
   const [regionVersion, setRegionVersion] = useState(0);
   const [currencyVersion, setCurrencyVersion] = useState(0);
+  const [quickPanelOpen, setQuickPanelOpen] = useState(false);
 
   const tr = t(language);
   const pageBackground = getAppBackground(language);
@@ -1345,6 +1534,27 @@ export default function HomePage() {
     ? String(selectedMaster.discountBadge)
     : promotionBadgeTextByMasterId[String(selectedMaster?.id || '')];
 
+  const shareApp = async () => {
+    const shareUrl = 'https://olamep.com';
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({
+          title: 'Olamep',
+          text: 'Olamep',
+          url: shareUrl,
+        });
+        return;
+      }
+
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(shareUrl);
+      }
+    } catch {
+      // Safe fallback: do nothing, UI stays stable.
+    }
+  };
+
   const selectSearchResult = (result: SearchResult) => {
     if (result.type === 'smart') {
       setActiveCategory(result.categoryId);
@@ -1419,7 +1629,8 @@ export default function HomePage() {
         background: pageBackground,
         fontFamily: 'Arial, sans-serif',
         color: '#17130f',
-        paddingBottom: 128,
+        paddingBottom: 120,
+        overflowX: 'hidden',
       }}
     >
       <style jsx global>{`
@@ -1440,31 +1651,31 @@ export default function HomePage() {
           background: pageBackground,
         }}
       >
-        <section style={{ padding: '8px 12px 0' }}>
+        <section style={{ padding: '7px 10px 0' }}>
           <div ref={searchWrapperRef} style={{ position: 'relative', zIndex: 1300 }}>
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(0,1fr) 46px 46px 46px',
-                gap: 7,
+                gridTemplateColumns: 'minmax(0,1fr) 42px 42px 42px',
+                gap: 6,
                 alignItems: 'center',
               }}
             >
               <div
                 style={{
-                  height: 48,
-                  borderRadius: 19,
-                  border: '1.2px solid #d8d2c8',
+                  height: 42,
+                  borderRadius: 17,
+                  border: '2px solid #111111',
                   background: '#ffffff',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
-                  padding: '0 13px',
+                  gap: 7,
+                  padding: '0 12px',
                   minWidth: 0,
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                  boxShadow: '0 2px 0 rgba(0,0,0,0.04)',
                 }}
               >
-                <span style={{ fontSize: 18, lineHeight: 1, color: '#9ca3af' }}>⌕</span>
+                <span style={{ fontSize: 17, lineHeight: 1, color: '#9ca3af' }}>⌕</span>
 
                 <input
                   value={search}
@@ -1499,7 +1710,7 @@ export default function HomePage() {
                     background: 'transparent',
                     fontSize: 10.5,
                     color: '#2b2f36',
-                    fontWeight: 600,
+                    fontWeight: 700,
                   }}
                 />
 
@@ -1526,14 +1737,14 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/language')}
                 style={{
-                  width: 46,
-                  height: 48,
+                  width: 42,
+                  height: 42,
                   borderRadius: 15,
-                  border: '1.2px solid #d8d2c8',
+                  border: '2px solid #111111',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 8.5,
+                  fontSize: 8,
                   fontWeight: 900,
                   display: 'inline-flex',
                   flexDirection: 'column',
@@ -1541,30 +1752,30 @@ export default function HomePage() {
                   justifyContent: 'center',
                   gap: 0,
                   cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                  boxShadow: '0 2px 0 rgba(0,0,0,0.04)',
                 }}
               >
-                <span style={{ fontSize: 16, lineHeight: 1 }}>{languageFlag(language)}</span>
+                <span style={{ fontSize: 15, lineHeight: 1 }}>{languageFlag(language)}</span>
                 <span>{language}</span>
               </button>
 
               <button
                 onClick={() => router.push('/profile/currency')}
                 style={{
-                  width: 46,
-                  height: 48,
+                  width: 42,
+                  height: 42,
                   borderRadius: 15,
-                  border: '1.2px solid #d8d2c8',
+                  border: '2px solid #111111',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 20,
+                  fontSize: 19,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                  boxShadow: '0 2px 0 rgba(0,0,0,0.04)',
                 }}
               >
                 {currencySymbol}
@@ -1573,27 +1784,27 @@ export default function HomePage() {
               <button
                 onClick={() => router.push('/profile/location')}
                 style={{
-                  width: 46,
-                  height: 48,
+                  width: 42,
+                  height: 42,
                   borderRadius: 15,
-                  border: '1.2px solid #d8d2c8',
+                  border: '2px solid #111111',
                   background: '#ffffff',
                   color: '#111111',
                   padding: 0,
-                  fontSize: 17,
+                  fontSize: 16,
                   fontWeight: 900,
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                  boxShadow: '0 2px 0 rgba(0,0,0,0.04)',
                 }}
               >
                 ⌖
               </button>
             </div>
 
-            <div style={{ marginTop: 8 }}>
+            <div style={{ marginTop: 7 }}>
               <BrightTicker language={language} />
             </div>
 
@@ -1605,7 +1816,7 @@ export default function HomePage() {
                   right: 0,
                   top: 'calc(100% + 8px)',
                   background: 'rgba(255,255,255,0.98)',
-                  border: '1.3px solid #d0c8bd',
+                  border: '2px solid #111111',
                   borderRadius: 22,
                   boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
                   padding: 12,
@@ -1634,7 +1845,7 @@ export default function HomePage() {
                               key={item}
                               onClick={() => runQuickSearch(item)}
                               style={{
-                                border: '1.2px solid #d0c8bd',
+                                border: '1.4px solid #111111',
                                 background: '#fff',
                                 borderRadius: 999,
                                 padding: '8px 12px',
@@ -1669,7 +1880,7 @@ export default function HomePage() {
                             key={item}
                             onClick={() => runQuickSearch(item)}
                             style={{
-                              border: '1.2px solid #f1c7d8',
+                              border: '1.4px solid #111111',
                               background: '#fff7fb',
                               borderRadius: 999,
                               padding: '8px 12px',
@@ -1710,7 +1921,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1.2px solid #edd7df',
+                                border: '1.4px solid #111111',
                                 background: '#fff7fb',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1745,7 +1956,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1.2px solid #d0c8bd',
+                                border: '1.4px solid #111111',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1777,7 +1988,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1.2px solid #d0c8bd',
+                                border: '1.4px solid #111111',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1812,7 +2023,7 @@ export default function HomePage() {
                               key={item.id}
                               onClick={() => selectSearchResult(item)}
                               style={{
-                                border: '1.2px solid #d0c8bd',
+                                border: '1.4px solid #111111',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '10px 12px',
@@ -1841,7 +2052,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{ padding: '6px 0 0' }}>
+        <section style={{ padding: '5px 0 0' }}>
           <TopCategoriesBar
             language={language}
             activeCategory={activeCategory}
@@ -1870,111 +2081,26 @@ export default function HomePage() {
           />
         </section>
 
-        <section style={{ padding: '10px 12px 0' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <ActionCountButton
-              active={likedFilterMode === 'category'}
-              onClick={() => {
-                setDealFilterMode('none');
-                setSelectedMaster(null);
-                setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
-              }}
-              icon={<span style={{ fontSize: 18, color: '#ff3b58', lineHeight: 1 }}>♥</span>}
-              title="Favourite"
-              count={displayLikedInCategoryCount}
-            />
-
-            <ActionCountButton
-              active={dealFilterMode === 'category'}
-              onClick={() => {
-                setLikedFilterMode('none');
-                setSelectedMaster(null);
-                setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
-              }}
-              icon={
-                <span
-                  style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: '50%',
-                    background: '#f5d84e',
-                    color: '#111111',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 12,
-                    fontWeight: 900,
-                    lineHeight: 1,
-                  }}
-                >
-                  %
-                </span>
-              }
-              title="Hot offers"
-              count={displayCategoryDealsCount}
-            />
-
-            <ActionCountButton
-              active={likedFilterMode === 'all'}
-              onClick={() => {
-                setDealFilterMode('none');
-                setSelectedMaster(null);
-                setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
-              }}
-              icon={
-                <span style={{ display: 'inline-flex', gap: 1, color: '#ff3b58' }}>
-                  <span style={{ fontSize: 13, lineHeight: 1 }}>♥</span>
-                  <span style={{ fontSize: 12, lineHeight: 1 }}>♥</span>
-                  <span style={{ fontSize: 11, lineHeight: 1 }}>♥</span>
-                </span>
-              }
-              title="All favourite"
-              count={displayLikedAllCount}
-            />
-
-            <ActionCountButton
-              active={dealFilterMode === 'all'}
-              onClick={() => {
-                setLikedFilterMode('none');
-                setSelectedMaster(null);
-                setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
-              }}
-              icon={
-                <span
-                  style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: '50%',
-                    background: '#f5d84e',
-                    color: '#111111',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 12,
-                    fontWeight: 900,
-                    lineHeight: 1,
-                  }}
-                >
-                  %
-                </span>
-              }
-              title="All hot offers"
-              count={displayAllDealsCount}
-            />
-          </div>
-        </section>
-
-        <section style={{ padding: '12px 12px 0' }}>
+        <section style={{ padding: '8px 4px 0' }}>
           <div
             style={{
-              borderRadius: 26,
-              overflow: 'hidden',
-              border: '1.2px solid #d8d2c8',
+              borderRadius: 24,
+              border: '2.4px solid #111111',
               background: '#ffffff',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+              boxShadow: '0 8px 22px rgba(0,0,0,0.08)',
+              position: 'relative',
+              overflow: 'visible',
             }}
           >
-            <div style={{ height: 438, position: 'relative', overflow: 'hidden' }}>
+            <div
+              style={{
+                height: 'clamp(520px, calc(100vh - 286px), 660px)',
+                minHeight: 520,
+                position: 'relative',
+                overflow: 'hidden',
+                borderRadius: 22,
+              }}
+            >
               <RealMap
                 masters={mapMasters}
                 mapMode={mapMode}
@@ -1999,6 +2125,49 @@ export default function HomePage() {
                 onBookMaster={(master) => {
                   router.push(`/booking/${master.id}`);
                 }}
+              />
+
+              <QuickActionsPanel
+                open={quickPanelOpen}
+                onToggle={() => setQuickPanelOpen((prev) => !prev)}
+                onShare={() => {
+                  void shareApp();
+                }}
+                onQrTopUp={() => {
+                  setQuickPanelOpen(false);
+                  router.push('/profile');
+                }}
+                onInvite={() => {
+                  void shareApp();
+                }}
+                onFavourite={() => {
+                  setDealFilterMode('none');
+                  setSelectedMaster(null);
+                  setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
+                }}
+                onAllFavourite={() => {
+                  setDealFilterMode('none');
+                  setSelectedMaster(null);
+                  setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
+                }}
+                onHotOffers={() => {
+                  setLikedFilterMode('none');
+                  setSelectedMaster(null);
+                  setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
+                }}
+                onAllHotOffers={() => {
+                  setLikedFilterMode('none');
+                  setSelectedMaster(null);
+                  setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
+                }}
+                favouriteCount={displayLikedInCategoryCount}
+                allFavouriteCount={displayLikedAllCount}
+                hotOffersCount={displayCategoryDealsCount}
+                allHotOffersCount={displayAllDealsCount}
+                favouriteActive={likedFilterMode === 'category'}
+                allFavouriteActive={likedFilterMode === 'all'}
+                hotOffersActive={dealFilterMode === 'category'}
+                allHotOffersActive={dealFilterMode === 'all'}
               />
 
               {selectedMaster ? (
