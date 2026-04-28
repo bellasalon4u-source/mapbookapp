@@ -8,8 +8,15 @@ import {
   subscribeToLanguageChange,
   type AppLanguage,
 } from '../../../services/i18n';
+import { getOrCreateChatThread } from '../../../services/chatStore';
+import {
+  getBookings,
+  subscribeToBookingsStore,
+  type BookingItem,
+} from '../../../services/bookingsStore';
 
 type ClientStatus = 'active' | 'new' | 'returning' | 'completed';
+type ClientFilter = 'all' | 'active' | 'returning' | 'new' | 'completed';
 
 type ClientItem = {
   id: string;
@@ -20,7 +27,9 @@ type ClientItem = {
   totalSpent: number;
   bookingsCount: number;
   status: ClientStatus;
-  phone?: string;
+  completed: boolean;
+  lastBookingId?: string;
+  masterId?: string;
 };
 
 type ClientsText = {
@@ -31,6 +40,7 @@ type ClientsText = {
   activeClients: string;
   totalRevenue: string;
   repeatClients: string;
+  allLabel: string;
   newLabel: string;
   activeLabel: string;
   returningLabel: string;
@@ -42,6 +52,12 @@ type ClientsText = {
   viewBookings: string;
   noClients: string;
   noClientsHint: string;
+  back: string;
+  close: string;
+  calendarLinked: string;
+  synced: string;
+  requests: string;
+  history: string;
 };
 
 const BRAND = {
@@ -65,15 +81,16 @@ const BRAND = {
 const clientsTexts: Record<AppLanguage, ClientsText> = {
   EN: {
     title: 'My clients',
-    subtitle: 'People who booked or contacted you through Olamep',
+    subtitle: 'Bookings, requests, calendar and quick client history',
     search: 'Search clients, services...',
     totalClients: 'Total clients',
     activeClients: 'Active',
     totalRevenue: 'Revenue',
     repeatClients: 'Repeat clients',
+    allLabel: 'All',
     newLabel: 'New',
     activeLabel: 'Active',
-    returningLabel: 'Returning',
+    returningLabel: 'Repeat',
     completedLabel: 'Completed',
     bookings: 'bookings',
     spent: 'spent',
@@ -82,58 +99,79 @@ const clientsTexts: Record<AppLanguage, ClientsText> = {
     viewBookings: 'Bookings',
     noClients: 'No clients yet',
     noClientsHint: 'When someone books your service, clients will appear here.',
+    back: 'Back',
+    close: 'Close',
+    calendarLinked: 'Calendar linked',
+    synced: 'Synchronized',
+    requests: 'Requests',
+    history: 'History',
   },
   RU: {
     title: 'Мои клиенты',
-    subtitle: 'Люди, которые бронировали или писали вам через Olamep',
+    subtitle: 'Брони у меня, запросы, календарь и быстрая история клиентов',
     search: 'Поиск клиентов, услуг...',
     totalClients: 'Всего клиентов',
     activeClients: 'Активные',
     totalRevenue: 'Доход',
     repeatClients: 'Повторные',
-    newLabel: 'Новый',
-    activeLabel: 'Активный',
-    returningLabel: 'Повторный',
-    completedLabel: 'Завершено',
-    bookings: 'бронирований',
+    allLabel: 'Все',
+    newLabel: 'Новые',
+    activeLabel: 'Активные',
+    returningLabel: 'Повторные',
+    completedLabel: 'Готовые',
+    bookings: 'брони',
     spent: 'потрачено',
     lastBooking: 'Последняя бронь',
     message: 'Сообщение',
     viewBookings: 'Брони',
     noClients: 'Клиентов пока нет',
     noClientsHint: 'Когда кто-то забронирует вашу услугу, клиенты появятся здесь.',
+    back: 'Назад',
+    close: 'Закрыть',
+    calendarLinked: 'Связано с календарём',
+    synced: 'Синхронизировано',
+    requests: 'Запросы',
+    history: 'История',
   },
   UA: {
     title: 'Мої клієнти',
-    subtitle: 'Люди, які бронювали або писали вам через Olamep',
+    subtitle: 'Бронювання у мене, запити, календар і швидка історія клієнтів',
     search: 'Пошук клієнтів, послуг...',
     totalClients: 'Усього клієнтів',
     activeClients: 'Активні',
     totalRevenue: 'Дохід',
     repeatClients: 'Повторні',
-    newLabel: 'Новий',
-    activeLabel: 'Активний',
-    returningLabel: 'Повторний',
-    completedLabel: 'Завершено',
-    bookings: 'бронювань',
+    allLabel: 'Усі',
+    newLabel: 'Нові',
+    activeLabel: 'Активні',
+    returningLabel: 'Повторні',
+    completedLabel: 'Готові',
+    bookings: 'броні',
     spent: 'витрачено',
     lastBooking: 'Остання бронь',
     message: 'Повідомлення',
     viewBookings: 'Броні',
     noClients: 'Клієнтів поки немає',
     noClientsHint: 'Коли хтось забронює вашу послугу, клієнти зʼявляться тут.',
+    back: 'Назад',
+    close: 'Закрити',
+    calendarLinked: 'Повʼязано з календарем',
+    synced: 'Синхронізовано',
+    requests: 'Запити',
+    history: 'Історія',
   },
   ES: {
     title: 'Mis clientes',
-    subtitle: 'Personas que reservaron o te escribieron por Olamep',
+    subtitle: 'Reservas, solicitudes, calendario e historial rápido',
     search: 'Buscar clientes, servicios...',
     totalClients: 'Clientes',
     activeClients: 'Activos',
     totalRevenue: 'Ingresos',
     repeatClients: 'Repetidos',
+    allLabel: 'Todo',
     newLabel: 'Nuevo',
     activeLabel: 'Activo',
-    returningLabel: 'Recurrente',
+    returningLabel: 'Repite',
     completedLabel: 'Completado',
     bookings: 'reservas',
     spent: 'gastado',
@@ -142,18 +180,25 @@ const clientsTexts: Record<AppLanguage, ClientsText> = {
     viewBookings: 'Reservas',
     noClients: 'Aún no hay clientes',
     noClientsHint: 'Cuando alguien reserve tu servicio, aparecerá aquí.',
+    back: 'Atrás',
+    close: 'Cerrar',
+    calendarLinked: 'Calendario conectado',
+    synced: 'Sincronizado',
+    requests: 'Solicitudes',
+    history: 'Historial',
   },
   CZ: {
     title: 'Moji klienti',
-    subtitle: 'Lidé, kteří si rezervovali nebo vám napsali přes Olamep',
+    subtitle: 'Rezervace, žádosti, kalendář a rychlá historie klientů',
     search: 'Hledat klienty, služby...',
     totalClients: 'Klienti',
     activeClients: 'Aktivní',
     totalRevenue: 'Příjem',
     repeatClients: 'Opakovaní',
+    allLabel: 'Vše',
     newLabel: 'Nový',
     activeLabel: 'Aktivní',
-    returningLabel: 'Vrací se',
+    returningLabel: 'Opakuje',
     completedLabel: 'Dokončeno',
     bookings: 'rezervací',
     spent: 'utraceno',
@@ -162,15 +207,22 @@ const clientsTexts: Record<AppLanguage, ClientsText> = {
     viewBookings: 'Rezervace',
     noClients: 'Zatím žádní klienti',
     noClientsHint: 'Jakmile si někdo rezervuje vaši službu, klienti se zobrazí zde.',
+    back: 'Zpět',
+    close: 'Zavřít',
+    calendarLinked: 'Propojeno s kalendářem',
+    synced: 'Synchronizováno',
+    requests: 'Žádosti',
+    history: 'Historie',
   },
   DE: {
     title: 'Meine Kunden',
-    subtitle: 'Personen, die über Olamep gebucht oder geschrieben haben',
+    subtitle: 'Buchungen, Anfragen, Kalender und schnelle Kundenhistorie',
     search: 'Kunden, Services suchen...',
     totalClients: 'Kunden',
     activeClients: 'Aktiv',
     totalRevenue: 'Umsatz',
     repeatClients: 'Wiederkehrend',
+    allLabel: 'Alle',
     newLabel: 'Neu',
     activeLabel: 'Aktiv',
     returningLabel: 'Wiederkehrend',
@@ -182,18 +234,25 @@ const clientsTexts: Record<AppLanguage, ClientsText> = {
     viewBookings: 'Buchungen',
     noClients: 'Noch keine Kunden',
     noClientsHint: 'Wenn jemand deinen Service bucht, erscheinen Kunden hier.',
+    back: 'Zurück',
+    close: 'Schließen',
+    calendarLinked: 'Kalender verbunden',
+    synced: 'Synchronisiert',
+    requests: 'Anfragen',
+    history: 'Historie',
   },
   IT: {
     title: 'I miei clienti',
-    subtitle: 'Persone che hanno prenotato o scritto tramite Olamep',
+    subtitle: 'Prenotazioni, richieste, calendario e cronologia clienti',
     search: 'Cerca clienti, servizi...',
     totalClients: 'Clienti',
     activeClients: 'Attivi',
     totalRevenue: 'Entrate',
     repeatClients: 'Ricorrenti',
+    allLabel: 'Tutti',
     newLabel: 'Nuovo',
     activeLabel: 'Attivo',
-    returningLabel: 'Ritorna',
+    returningLabel: 'Ricorrente',
     completedLabel: 'Completato',
     bookings: 'prenotazioni',
     spent: 'speso',
@@ -202,15 +261,22 @@ const clientsTexts: Record<AppLanguage, ClientsText> = {
     viewBookings: 'Prenotazioni',
     noClients: 'Ancora nessun cliente',
     noClientsHint: 'Quando qualcuno prenota il tuo servizio, apparirà qui.',
+    back: 'Indietro',
+    close: 'Chiudi',
+    calendarLinked: 'Calendario collegato',
+    synced: 'Sincronizzato',
+    requests: 'Richieste',
+    history: 'Cronologia',
   },
   FR: {
     title: 'Mes clients',
-    subtitle: 'Personnes qui ont réservé ou écrit via Olamep',
+    subtitle: 'Réservations, demandes, calendrier et historique rapide',
     search: 'Rechercher clients, services...',
     totalClients: 'Clients',
     activeClients: 'Actifs',
     totalRevenue: 'Revenus',
     repeatClients: 'Fidèles',
+    allLabel: 'Tous',
     newLabel: 'Nouveau',
     activeLabel: 'Actif',
     returningLabel: 'Fidèle',
@@ -222,15 +288,22 @@ const clientsTexts: Record<AppLanguage, ClientsText> = {
     viewBookings: 'Réservations',
     noClients: 'Aucun client pour le moment',
     noClientsHint: 'Quand quelqu’un réservera votre service, il apparaîtra ici.',
+    back: 'Retour',
+    close: 'Fermer',
+    calendarLinked: 'Calendrier lié',
+    synced: 'Synchronisé',
+    requests: 'Demandes',
+    history: 'Historique',
   },
   PL: {
     title: 'Moi klienci',
-    subtitle: 'Osoby, które rezerwowały lub pisały przez Olamep',
+    subtitle: 'Rezerwacje, zapytania, kalendarz i szybka historia klientów',
     search: 'Szukaj klientów, usług...',
     totalClients: 'Klienci',
     activeClients: 'Aktywni',
     totalRevenue: 'Przychód',
     repeatClients: 'Powracający',
+    allLabel: 'Wszystko',
     newLabel: 'Nowy',
     activeLabel: 'Aktywny',
     returningLabel: 'Powracający',
@@ -242,15 +315,22 @@ const clientsTexts: Record<AppLanguage, ClientsText> = {
     viewBookings: 'Rezerwacje',
     noClients: 'Brak klientów',
     noClientsHint: 'Gdy ktoś zarezerwuje usługę, klienci pojawią się tutaj.',
+    back: 'Wstecz',
+    close: 'Zamknij',
+    calendarLinked: 'Połączono z kalendarzem',
+    synced: 'Zsynchronizowano',
+    requests: 'Zapytania',
+    history: 'Historia',
   },
   AR: {
     title: 'عملائي',
-    subtitle: 'الأشخاص الذين حجزوا أو تواصلوا معك عبر Olamep',
+    subtitle: 'الحجوزات والطلبات والتقويم وسجل العملاء السريع',
     search: 'ابحث عن العملاء أو الخدمات...',
     totalClients: 'العملاء',
     activeClients: 'نشطون',
     totalRevenue: 'الإيراد',
     repeatClients: 'متكررون',
+    allLabel: 'الكل',
     newLabel: 'جديد',
     activeLabel: 'نشط',
     returningLabel: 'متكرر',
@@ -262,10 +342,16 @@ const clientsTexts: Record<AppLanguage, ClientsText> = {
     viewBookings: 'الحجوزات',
     noClients: 'لا يوجد عملاء بعد',
     noClientsHint: 'عندما يحجز شخص خدمتك، سيظهر العملاء هنا.',
+    back: 'رجوع',
+    close: 'إغلاق',
+    calendarLinked: 'مرتبط بالتقويم',
+    synced: 'متزامن',
+    requests: 'الطلبات',
+    history: 'السجل',
   },
 };
 
-const demoClients: ClientItem[] = [
+const fallbackClients: ClientItem[] = [
   {
     id: 'client-1',
     name: 'Sophie Williams',
@@ -276,6 +362,7 @@ const demoClients: ClientItem[] = [
     totalSpent: 180,
     bookingsCount: 3,
     status: 'active',
+    completed: false,
   },
   {
     id: 'client-2',
@@ -287,6 +374,7 @@ const demoClients: ClientItem[] = [
     totalSpent: 95,
     bookingsCount: 2,
     status: 'returning',
+    completed: false,
   },
   {
     id: 'client-3',
@@ -298,6 +386,7 @@ const demoClients: ClientItem[] = [
     totalSpent: 45,
     bookingsCount: 1,
     status: 'new',
+    completed: false,
   },
 ];
 
@@ -323,6 +412,69 @@ function statusMeta(status: ClientStatus, text: ClientsText) {
 
 function money(value: number) {
   return `£${Number(value || 0).toFixed(2)}`;
+}
+
+function bookingDateValue(booking: BookingItem) {
+  const date = new Date(booking.dateTime || '');
+  return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+}
+
+function buildClientsFromBookings(bookings: BookingItem[]): ClientItem[] {
+  if (!bookings.length) return fallbackClients;
+
+  const map = new Map<string, ClientItem & { latestTime: number }>();
+
+  bookings.forEach((booking) => {
+    const key = String(booking.masterId || booking.masterName || booking.id);
+    const latestTime = bookingDateValue(booking);
+    const previous = map.get(key);
+    const isCompleted = booking.status === 'completed';
+    const bookingPrice = Number(booking.price || 0);
+
+    if (!previous) {
+      map.set(key, {
+        id: key,
+        name: booking.masterName || 'Client',
+        avatar:
+          booking.masterAvatar ||
+          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+        service: booking.serviceName || 'Service',
+        lastBooking: booking.dateLabel || '',
+        totalSpent: bookingPrice,
+        bookingsCount: 1,
+        status: isCompleted ? 'completed' : booking.status === 'pending' ? 'new' : 'active',
+        completed: isCompleted,
+        lastBookingId: booking.id,
+        masterId: booking.masterId,
+        latestTime,
+      });
+      return;
+    }
+
+    previous.totalSpent += bookingPrice;
+    previous.bookingsCount += 1;
+
+    if (latestTime >= previous.latestTime) {
+      previous.latestTime = latestTime;
+      previous.service = booking.serviceName || previous.service;
+      previous.lastBooking = booking.dateLabel || previous.lastBooking;
+      previous.lastBookingId = booking.id;
+      previous.masterId = booking.masterId;
+      previous.completed = isCompleted;
+    }
+
+    if (previous.bookingsCount > 1 && previous.status !== 'completed') {
+      previous.status = 'returning';
+    }
+
+    if (isCompleted) {
+      previous.status = 'completed';
+    }
+  });
+
+  return Array.from(map.values())
+    .sort((a, b) => b.latestTime - a.latestTime)
+    .map(({ latestTime, ...client }) => client);
 }
 
 function OlamepLogo() {
@@ -370,50 +522,80 @@ export default function ProfileClientsPage() {
   const router = useRouter();
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [bookings, setBookings] = useState<BookingItem[]>(getBookings());
   const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState<ClientFilter>('all');
 
   useEffect(() => {
     const syncLanguage = () => {
       setLanguage(getSavedLanguage());
     };
 
-    syncLanguage();
+    const syncBookings = () => {
+      setBookings(getBookings());
+    };
 
-    const unsubscribe = subscribeToLanguageChange((nextLanguage) => {
+    syncLanguage();
+    syncBookings();
+
+    const unsubscribeLanguage = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
 
+    const unsubscribeBookings = subscribeToBookingsStore(syncBookings);
+
     window.addEventListener('focus', syncLanguage);
-    window.addEventListener('pageshow', syncLanguage);
-    window.addEventListener('storage', syncLanguage);
+    window.addEventListener('pageshow', syncBookings);
+    window.addEventListener('storage', syncBookings);
 
     return () => {
-      unsubscribe();
+      unsubscribeLanguage();
+      unsubscribeBookings();
       window.removeEventListener('focus', syncLanguage);
-      window.removeEventListener('pageshow', syncLanguage);
-      window.removeEventListener('storage', syncLanguage);
+      window.removeEventListener('pageshow', syncBookings);
+      window.removeEventListener('storage', syncBookings);
     };
   }, []);
 
   const text = useMemo(() => getText(language), [language]);
 
+  const clients = useMemo(() => buildClientsFromBookings(bookings), [bookings]);
+
   const filteredClients = useMemo(() => {
     const q = search.trim().toLowerCase();
 
-    if (!q) return demoClients;
+    return clients.filter((client) => {
+      const matchesFilter =
+        activeFilter === 'all' ||
+        client.status === activeFilter ||
+        (activeFilter === 'returning' && client.bookingsCount > 1);
 
-    return demoClients.filter((client) => {
-      return (
+      const matchesSearch =
+        !q ||
         client.name.toLowerCase().includes(q) ||
         client.service.toLowerCase().includes(q) ||
-        client.lastBooking.toLowerCase().includes(q)
-      );
-    });
-  }, [search]);
+        client.lastBooking.toLowerCase().includes(q);
 
-  const totalRevenue = demoClients.reduce((sum, client) => sum + client.totalSpent, 0);
-  const activeCount = demoClients.filter((client) => client.status === 'active').length;
-  const repeatCount = demoClients.filter((client) => client.bookingsCount > 1).length;
+      return matchesFilter && matchesSearch;
+    });
+  }, [clients, search, activeFilter]);
+
+  const totalRevenue = clients.reduce((sum, client) => sum + client.totalSpent, 0);
+  const activeCount = clients.filter((client) => client.status === 'active').length;
+  const repeatCount = clients.filter((client) => client.bookingsCount > 1).length;
+
+  const openMessage = (client: ClientItem) => {
+    const thread = getOrCreateChatThread({
+      threadId: `client-${client.id}`,
+      providerName: client.name,
+      providerAvatar: client.avatar,
+      category: client.service,
+      online: true,
+      lastSeenText: 'Online',
+    });
+
+    router.push(`/messages/${encodeURIComponent(thread.id)}`);
+  };
 
   return (
     <main
@@ -421,11 +603,12 @@ export default function ProfileClientsPage() {
         minHeight: '100vh',
         background: BRAND.bg,
         color: BRAND.navy,
-        paddingBottom: 136,
+        paddingBottom: 210,
         fontFamily: 'Arial, sans-serif',
+        overflowX: 'hidden',
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 142px' }}>
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 210px' }}>
         <header
           style={{
             display: 'grid',
@@ -437,6 +620,7 @@ export default function ProfileClientsPage() {
           <button
             type="button"
             onClick={() => router.back()}
+            aria-label={text.back}
             style={{
               width: 48,
               height: 48,
@@ -459,6 +643,7 @@ export default function ProfileClientsPage() {
           <button
             type="button"
             onClick={() => router.push('/profile')}
+            aria-label={text.close}
             style={{
               width: 48,
               height: 48,
@@ -519,7 +704,7 @@ export default function ProfileClientsPage() {
               gap: 10,
             }}
           >
-            <StatCard title={text.totalClients} value={String(demoClients.length)} bg={BRAND.softBlue} />
+            <StatCard title={text.totalClients} value={String(clients.length)} bg={BRAND.softBlue} />
             <StatCard title={text.activeClients} value={String(activeCount)} bg={BRAND.softGreen} />
             <StatCard title={text.totalRevenue} value={money(totalRevenue)} bg={BRAND.softOrange} />
             <StatCard title={text.repeatClients} value={String(repeatCount)} bg={BRAND.softPink} />
@@ -557,7 +742,70 @@ export default function ProfileClientsPage() {
           </div>
         </section>
 
-        <section style={{ marginTop: 16, display: 'grid', gap: 12 }}>
+        <section
+          style={{
+            marginTop: 13,
+            borderRadius: 24,
+            border: `2.5px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 7,
+            display: 'flex',
+            gap: 8,
+            overflowX: 'auto',
+          }}
+        >
+          {([
+            ['all', text.allLabel],
+            ['active', text.activeLabel],
+            ['returning', text.returningLabel],
+            ['new', text.newLabel],
+            ['completed', text.completedLabel],
+          ] as const).map(([filter, label]) => {
+            const active = activeFilter === filter;
+
+            return (
+              <button
+                key={filter}
+                type="button"
+                onClick={() => setActiveFilter(filter)}
+                style={{
+                  flexShrink: 0,
+                  minHeight: 42,
+                  borderRadius: 999,
+                  border: `2px solid ${BRAND.border}`,
+                  background: active ? BRAND.navy : '#ffffff',
+                  color: active ? '#ffffff' : BRAND.navy,
+                  padding: '0 16px',
+                  fontSize: 12,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </section>
+
+        <section
+          style={{
+            marginTop: 13,
+            borderRadius: 24,
+            border: `2.5px solid ${BRAND.border}`,
+            background: '#f8fbff',
+            padding: 10,
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 8,
+          }}
+        >
+          <MiniSyncBadge icon="📅" label={text.calendarLinked} />
+          <MiniSyncBadge icon="✅" label={text.synced} />
+          <MiniSyncBadge icon="📩" label={text.requests} />
+          <MiniSyncBadge icon="🕘" label={text.history} />
+        </section>
+
+        <section style={{ marginTop: 16, display: 'grid', gap: 12, paddingBottom: 90 }}>
           {filteredClients.length === 0 ? (
             <div
               style={{
@@ -590,7 +838,7 @@ export default function ProfileClientsPage() {
                 key={client.id}
                 client={client}
                 text={text}
-                onMessage={() => router.push('/messages')}
+                onMessage={() => openMessage(client)}
                 onBookings={() => router.push('/bookings')}
               />
             ))
@@ -598,7 +846,7 @@ export default function ProfileClientsPage() {
         </section>
       </div>
 
-      <BottomNav active="profile" />
+      <BottomNav active="clients" />
     </main>
   );
 }
@@ -632,6 +880,37 @@ function StatCard({ title, value, bg }: { title: string; value: string; bg: stri
   );
 }
 
+function MiniSyncBadge({ icon, label }: { icon: string; label: string }) {
+  return (
+    <div
+      style={{
+        minHeight: 42,
+        borderRadius: 15,
+        border: `2px solid ${BRAND.border}`,
+        background: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '0 10px',
+        fontSize: 11,
+        fontWeight: 900,
+        color: BRAND.navy,
+      }}
+    >
+      <span style={{ fontSize: 16 }}>{icon}</span>
+      <span
+        style={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
+
 function ClientCard({
   client,
   text,
@@ -648,19 +927,47 @@ function ClientCard({
   return (
     <div
       style={{
+        position: 'relative',
         borderRadius: 26,
         border: `2.5px solid ${BRAND.border}`,
         background: '#ffffff',
         padding: 13,
         boxShadow: '0 8px 20px rgba(7,27,70,0.05)',
+        overflow: 'hidden',
       }}
     >
+      {client.completed ? (
+        <div
+          style={{
+            position: 'absolute',
+            top: 13,
+            right: 13,
+            width: 38,
+            height: 38,
+            borderRadius: 999,
+            border: `2px solid ${BRAND.border}`,
+            background: BRAND.green,
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 24,
+            fontWeight: 900,
+            boxShadow: '4px 4px 0 rgba(0,0,0,0.14)',
+            zIndex: 2,
+          }}
+        >
+          ✓
+        </div>
+      ) : null}
+
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: '74px minmax(0, 1fr)',
           gap: 12,
           alignItems: 'center',
+          paddingRight: client.completed ? 38 : 0,
         }}
       >
         <img
@@ -712,6 +1019,7 @@ function ClientCard({
                 fontSize: 11,
                 fontWeight: 900,
                 whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               {meta.label}
@@ -740,7 +1048,7 @@ function ClientCard({
               color: BRAND.blue,
             }}
           >
-            {text.lastBooking}: {client.lastBooking}
+            {text.lastBooking}: {client.lastBooking || '—'}
           </div>
         </div>
       </div>
