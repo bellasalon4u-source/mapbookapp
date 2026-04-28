@@ -21,6 +21,7 @@ import {
 
 type ViewMode = 'today' | 'tomorrow' | 'week' | 'calendar' | 'history';
 type CalendarMode = 'month' | 'week' | 'day' | 'list';
+type CalendarStage = 'year' | 'months' | 'month';
 type StatusFilter = 'all' | 'completed' | 'upcoming' | 'pending' | 'cancelled';
 type PaymentFilter = 'all' | 'paid' | 'unpaid';
 
@@ -32,9 +33,12 @@ type PageText = {
   week: string;
   calendar: string;
   history: string;
+  year: string;
   month: string;
   day: string;
   list: string;
+  chooseYear: string;
+  chooseMonth: string;
   management: string;
   freeWindows: string;
   onlyRequests: string;
@@ -114,9 +118,12 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     week: 'Week',
     calendar: 'Calendar',
     history: 'History',
+    year: 'Year',
     month: 'Month',
     day: 'Day',
     list: 'List',
+    chooseYear: 'Choose year',
+    chooseMonth: 'Choose month',
     management: 'Management',
     freeWindows: 'Free windows',
     onlyRequests: 'Only requests',
@@ -177,9 +184,12 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     week: 'Неделя',
     calendar: 'Календарь',
     history: 'История',
+    year: 'Год',
     month: 'Месяц',
     day: 'День',
     list: 'Список',
+    chooseYear: 'Выбери год',
+    chooseMonth: 'Выбери месяц',
     management: 'Управление',
     freeWindows: 'Свободные окна',
     onlyRequests: 'Только запросы',
@@ -240,9 +250,12 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     week: 'Тиждень',
     calendar: 'Календар',
     history: 'Історія',
+    year: 'Рік',
     month: 'Місяць',
     day: 'День',
     list: 'Список',
+    chooseYear: 'Обери рік',
+    chooseMonth: 'Обери місяць',
     management: 'Керування',
     freeWindows: 'Вільні вікна',
     onlyRequests: 'Тільки запити',
@@ -384,24 +397,11 @@ function getTimeLabel(date: Date | null) {
   }).format(date);
 }
 
-function getHourLabel(hour: number) {
-  return `${String(hour).padStart(2, '0')}:00`;
-}
-
 function getDateTitle(date: Date, language: AppLanguage) {
   return new Intl.DateTimeFormat(getLocale(language), {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
-    year: 'numeric',
-  }).format(date);
-}
-
-function getLongDateTitle(date: Date, language: AppLanguage) {
-  return new Intl.DateTimeFormat(getLocale(language), {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
     year: 'numeric',
   }).format(date);
 }
@@ -487,6 +487,11 @@ function getPaymentMethod(booking: BookingItem) {
   if (id.includes('2') || id.includes('card')) return 'card';
   if (id.includes('5') || id.includes('app')) return 'app';
   return 'cash';
+}
+
+function statusMatches(booking: BookingItem, statusFilter: StatusFilter) {
+  if (statusFilter === 'all') return true;
+  return booking.status === statusFilter;
 }
 
 function makeBooking(
@@ -687,6 +692,7 @@ export default function ProfileClientsPage() {
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('today');
   const [calendarMode, setCalendarMode] = useState<CalendarMode>('day');
+  const [calendarStage, setCalendarStage] = useState<CalendarStage>('month');
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
   const [calendarDate, setCalendarDate] = useState<Date>(() => startOfDay(new Date()));
   const [showFreeWindows, setShowFreeWindows] = useState(true);
@@ -776,7 +782,12 @@ export default function ProfileClientsPage() {
     }
 
     if (viewMode === 'calendar') {
-      if (calendarMode === 'month') {
+      if (calendarStage === 'year' || calendarStage === 'months') {
+        source = source.filter((booking) => {
+          const date = getEffectiveDate(booking);
+          return date ? date.getFullYear() === calendarDate.getFullYear() : false;
+        });
+      } else if (calendarMode === 'month') {
         source = source.filter((booking) => {
           const date = getEffectiveDate(booking);
           return (
@@ -785,17 +796,7 @@ export default function ProfileClientsPage() {
             date.getMonth() === calendarDate.getMonth()
           );
         });
-      }
-
-      if (calendarMode === 'week') {
-        const week = getWeekDates(selectedDate);
-        source = source.filter((booking) => {
-          const date = getEffectiveDate(booking);
-          return date ? week.some((item) => isSameDay(item, date)) : false;
-        });
-      }
-
-      if (calendarMode === 'day' || calendarMode === 'list') {
+      } else if (calendarMode === 'day' || calendarMode === 'list') {
         source = source.filter((booking) => {
           const date = getEffectiveDate(booking);
           return date ? isSameDay(date, selectedDate) : false;
@@ -820,6 +821,7 @@ export default function ProfileClientsPage() {
     bookings,
     calendarDate,
     calendarMode,
+    calendarStage,
     rangeFrom,
     rangeTo,
     selectedDate,
@@ -897,14 +899,15 @@ export default function ProfileClientsPage() {
       return (
         date &&
         date.getMonth() === calendarDate.getMonth() &&
-        date.getFullYear() === calendarDate.getFullYear()
+        date.getFullYear() === calendarDate.getFullYear() &&
+        statusMatches(booking, statusFilter)
       );
     });
-  }, [bookings, calendarDate, timeOverrides]);
+  }, [bookings, calendarDate, statusFilter, timeOverrides]);
 
   const years = useMemo(() => {
     const current = new Date().getFullYear();
-    return Array.from({ length: 7 }, (_, index) => current - 2 + index);
+    return Array.from({ length: 9 }, (_, index) => current - 3 + index);
   }, []);
 
   const weekDates = useMemo(() => getWeekDates(selectedDate), [selectedDate]);
@@ -919,6 +922,7 @@ export default function ProfileClientsPage() {
       setSelectedDate(now);
       setCalendarDate(now);
       setCalendarMode('day');
+      setCalendarStage('month');
       setRangeFrom(toInputDate(now));
       setRangeTo(toInputDate(now));
     }
@@ -928,6 +932,7 @@ export default function ProfileClientsPage() {
       setSelectedDate(next);
       setCalendarDate(next);
       setCalendarMode('day');
+      setCalendarStage('month');
       setRangeFrom(toInputDate(next));
       setRangeTo(toInputDate(next));
     }
@@ -937,15 +942,18 @@ export default function ProfileClientsPage() {
       setSelectedDate(now);
       setCalendarDate(now);
       setCalendarMode('week');
+      setCalendarStage('month');
     }
 
     if (mode === 'calendar') {
       setCalendarMode('month');
-      setManagementOpen(true);
+      setCalendarStage('year');
+      setManagementOpen(false);
     }
 
     if (mode === 'history') {
       setCalendarMode('list');
+      setCalendarStage('month');
       setManagementOpen(true);
     }
   };
@@ -958,7 +966,21 @@ export default function ProfileClientsPage() {
       return;
     }
 
-    if (viewMode === 'calendar' && calendarMode === 'month') {
+    if (viewMode === 'calendar' && calendarStage === 'year') {
+      const next = new Date(calendarDate);
+      next.setFullYear(next.getFullYear() + direction);
+      setCalendarDate(next);
+      return;
+    }
+
+    if (viewMode === 'calendar' && calendarStage === 'months') {
+      const next = new Date(calendarDate);
+      next.setFullYear(next.getFullYear() + direction);
+      setCalendarDate(next);
+      return;
+    }
+
+    if (viewMode === 'calendar' && calendarStage === 'month' && calendarMode === 'month') {
       const next = new Date(calendarDate);
       next.setMonth(next.getMonth() + direction);
       setCalendarDate(next);
@@ -972,6 +994,7 @@ export default function ProfileClientsPage() {
     if (viewMode === 'today' || viewMode === 'tomorrow') {
       setViewMode('calendar');
       setCalendarMode('day');
+      setCalendarStage('month');
     }
   };
 
@@ -1033,6 +1056,12 @@ export default function ProfileClientsPage() {
   const activeTitle =
     viewMode === 'week'
       ? `${getDateTitle(weekDates[0], language)} — ${getDateTitle(weekDates[6], language)}`
+      : viewMode === 'calendar' && calendarStage === 'year'
+      ? text.chooseYear
+      : viewMode === 'calendar' && calendarStage === 'months'
+      ? `${text.chooseMonth} · ${calendarDate.getFullYear()}`
+      : viewMode === 'calendar' && calendarStage === 'month' && calendarMode === 'month'
+      ? getMonthTitle(calendarDate, language)
       : getDateTitle(activeDate, language);
 
   return (
@@ -1228,11 +1257,62 @@ export default function ProfileClientsPage() {
             />
           ) : null}
 
+          {viewMode === 'calendar' && calendarStage === 'year' ? (
+            <YearPicker
+              years={years}
+              calendarDate={calendarDate}
+              bookings={bookings}
+              statusFilter={statusFilter}
+              timeOverrides={timeOverrides}
+              onSelect={(year) => {
+                const next = new Date(calendarDate);
+                next.setFullYear(year);
+                setCalendarDate(next);
+                setCalendarStage('months');
+                setCalendarMode('month');
+              }}
+            />
+          ) : null}
+
+          {viewMode === 'calendar' && calendarStage === 'months' ? (
+            <MonthPicker
+              language={language}
+              year={calendarDate.getFullYear()}
+              bookings={bookings}
+              statusFilter={statusFilter}
+              timeOverrides={timeOverrides}
+              onSelect={(month) => {
+                const next = new Date(calendarDate);
+                next.setMonth(month);
+                setCalendarDate(next);
+                setCalendarStage('month');
+                setCalendarMode('month');
+              }}
+            />
+          ) : null}
+
+          {viewMode === 'calendar' && calendarStage === 'month' && calendarMode === 'month' ? (
+            <MonthGrid
+              language={language}
+              calendarDate={calendarDate}
+              selectedDate={selectedDate}
+              bookings={monthBookings}
+              timeOverrides={timeOverrides}
+              onSelect={(date) => {
+                setSelectedDate(startOfDay(date));
+                setCalendarDate(startOfDay(date));
+                setViewMode('calendar');
+                setCalendarMode('day');
+                setCalendarStage('month');
+              }}
+            />
+          ) : null}
+
           {managementOpen ? (
             <div style={managementBoxStyle}>
               <div style={managementGridStyle}>
                 <label style={fieldLabelStyle}>
-                  <span>Year</span>
+                  <span>{text.year}</span>
                   <select
                     value={calendarDate.getFullYear()}
                     onChange={(event) => {
@@ -1251,7 +1331,7 @@ export default function ProfileClientsPage() {
                 </label>
 
                 <label style={fieldLabelStyle}>
-                  <span>Month</span>
+                  <span>{text.month}</span>
                   <select
                     value={calendarDate.getMonth()}
                     onChange={(event) => {
@@ -1285,6 +1365,7 @@ export default function ProfileClientsPage() {
                       type="button"
                       onClick={() => {
                         setCalendarMode(mode);
+                        setCalendarStage('month');
                         setViewMode(mode === 'week' ? 'week' : 'calendar');
                       }}
                       style={{
@@ -1298,22 +1379,6 @@ export default function ProfileClientsPage() {
                   );
                 })}
               </div>
-
-              {calendarMode === 'month' ? (
-                <MonthGrid
-                  language={language}
-                  calendarDate={calendarDate}
-                  selectedDate={selectedDate}
-                  bookings={monthBookings}
-                  timeOverrides={timeOverrides}
-                  onSelect={(date) => {
-                    setSelectedDate(startOfDay(date));
-                    setCalendarDate(startOfDay(date));
-                    setViewMode('calendar');
-                    setCalendarMode('day');
-                  }}
-                />
-              ) : null}
 
               <div style={{ marginTop: 10, ...managementGridStyle }}>
                 <label style={fieldLabelStyle}>
@@ -1476,6 +1541,177 @@ export default function ProfileClientsPage() {
   );
 }
 
+function YearPicker({
+  years,
+  calendarDate,
+  bookings,
+  statusFilter,
+  timeOverrides,
+  onSelect,
+}: {
+  years: number[];
+  calendarDate: Date;
+  bookings: BookingItem[];
+  statusFilter: StatusFilter;
+  timeOverrides: Record<string, string>;
+  onSelect: (year: number) => void;
+}) {
+  return (
+    <div style={yearGridStyle}>
+      {years.map((year) => {
+        const yearBookings = bookings.filter((booking) => {
+          const override = timeOverrides[booking.id];
+          const date = override ? safeDate(override) : getBookingDate(booking);
+
+          return date && date.getFullYear() === year && statusMatches(booking, statusFilter);
+        });
+
+        const selected = calendarDate.getFullYear() === year;
+
+        return (
+          <button
+            key={year}
+            type="button"
+            onClick={() => onSelect(year)}
+            style={{
+              minHeight: 82,
+              borderRadius: 22,
+              border: `2.5px solid ${BRAND.border}`,
+              background: selected ? BRAND.navy : '#ffffff',
+              color: selected ? '#ffffff' : BRAND.navy,
+              cursor: 'pointer',
+              display: 'grid',
+              alignContent: 'center',
+              justifyItems: 'center',
+              gap: 6,
+              fontWeight: 900,
+            }}
+          >
+            <span style={{ fontSize: 26 }}>{year}</span>
+            <span
+              style={{
+                minWidth: 30,
+                minHeight: 24,
+                borderRadius: 999,
+                background: selected ? '#ffffff' : BRAND.softBlue,
+                color: selected ? BRAND.navy : BRAND.blue,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 13,
+                fontWeight: 900,
+                padding: '0 8px',
+              }}
+            >
+              {yearBookings.length}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function MonthPicker({
+  language,
+  year,
+  bookings,
+  statusFilter,
+  timeOverrides,
+  onSelect,
+}: {
+  language: AppLanguage;
+  year: number;
+  bookings: BookingItem[];
+  statusFilter: StatusFilter;
+  timeOverrides: Record<string, string>;
+  onSelect: (month: number) => void;
+}) {
+  return (
+    <div style={monthCardsGridStyle}>
+      {Array.from({ length: 12 }, (_, month) => {
+        const monthBookings = bookings.filter((booking) => {
+          const override = timeOverrides[booking.id];
+          const date = override ? safeDate(override) : getBookingDate(booking);
+
+          return (
+            date &&
+            date.getFullYear() === year &&
+            date.getMonth() === month &&
+            statusMatches(booking, statusFilter)
+          );
+        });
+
+        return (
+          <button
+            key={month}
+            type="button"
+            onClick={() => onSelect(month)}
+            style={{
+              minHeight: 90,
+              borderRadius: 23,
+              border: `2.5px solid ${BRAND.border}`,
+              background: monthBookings.length > 0 ? BRAND.softGreen : '#ffffff',
+              color: BRAND.navy,
+              cursor: 'pointer',
+              display: 'grid',
+              alignContent: 'center',
+              justifyItems: 'center',
+              gap: 7,
+              fontWeight: 900,
+              padding: 8,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 15,
+                lineHeight: 1.1,
+                textTransform: 'capitalize',
+                textAlign: 'center',
+              }}
+            >
+              {getShortMonthName(month, language)}
+            </span>
+
+            <span
+              style={{
+                minWidth: 34,
+                minHeight: 28,
+                borderRadius: 999,
+                border: `2px solid ${BRAND.border}`,
+                background: monthBookings.length > 0 ? BRAND.green : '#ffffff',
+                color: monthBookings.length > 0 ? '#ffffff' : BRAND.muted,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 14,
+                fontWeight: 900,
+                padding: '0 8px',
+              }}
+            >
+              {monthBookings.length}
+            </span>
+
+            <span style={{ display: 'flex', gap: 3 }}>
+              {monthBookings.slice(0, 4).map((booking) => (
+                <span
+                  key={booking.id}
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: 999,
+                    background: statusColor(booking.status),
+                  }}
+                />
+              ))}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function StatusFilterBar({
   text,
   activeFilter,
@@ -1595,7 +1831,10 @@ function NotebookSchedule({
   onDetails: (booking: BookingItem) => void;
   onNote: (booking: BookingItem) => void;
 }) {
-  const baseHours = Array.from({ length: 20 }, (_, index) => `${String(index + 5).padStart(2, '0')}:00`);
+  const baseHours = Array.from(
+    { length: 20 },
+    (_, index) => `${String(index + 5).padStart(2, '0')}:00`
+  );
   const times = [...new Set([...baseHours, ...extraTimes])].sort();
 
   return (
@@ -1614,7 +1853,9 @@ function NotebookSchedule({
             ? timeBookings
             : bookings.filter((booking) => {
                 const date = getEffectiveDate(booking);
-                return date ? isSameDay(date, activeDate) && date.getHours() === hour && time.endsWith(':00') : false;
+                return date
+                  ? isSameDay(date, activeDate) && date.getHours() === hour && time.endsWith(':00')
+                  : false;
               });
 
         if (hourBookings.length === 0 && !showFreeWindows) return null;
@@ -2598,6 +2839,20 @@ const smallRedButtonStyle: CSSProperties = {
   fontSize: 16,
   fontWeight: 900,
   cursor: 'pointer',
+};
+
+const yearGridStyle: CSSProperties = {
+  marginTop: 14,
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
+  gap: 9,
+};
+
+const monthCardsGridStyle: CSSProperties = {
+  marginTop: 14,
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
+  gap: 9,
 };
 
 const monthGridWrapStyle: CSSProperties = {
