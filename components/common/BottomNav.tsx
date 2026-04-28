@@ -173,7 +173,7 @@ function HomeIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
       <path
         d="M4.8 10.6L12 4.5L19.2 10.6V19.5H6.3C5.5 19.5 4.8 18.8 4.8 18V10.6Z"
         stroke={color}
@@ -189,7 +189,7 @@ function CalendarIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.blue : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
       <rect x="4" y="6" width="16" height="14" rx="2.4" stroke={color} strokeWidth="2" />
       <path d="M8 3V8" stroke={color} strokeWidth="2" strokeLinecap="round" />
       <path d="M16 3V8" stroke={color} strokeWidth="2" strokeLinecap="round" />
@@ -202,7 +202,7 @@ function MessageIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
       <path
         d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
         stroke={color}
@@ -217,7 +217,7 @@ function ProfileIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="8" r="3.2" stroke={color} strokeWidth="2" />
       <path
         d="M5.5 19C6.5 15.8 8.8 14.5 12 14.5C15.2 14.5 17.5 15.8 18.5 19"
@@ -233,7 +233,7 @@ function ClientsIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
       <rect x="5" y="7" width="14" height="11" rx="2.4" stroke={color} strokeWidth="2" />
       <path
         d="M9 7V5.8C9 4.8 9.8 4 10.8 4H13.2C14.2 4 15 4.8 15 5.8V7"
@@ -461,7 +461,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
-            padding: '0 22px 118px',
+            padding: '0 22px 108px',
             boxSizing: 'border-box',
           }}
         >
@@ -469,10 +469,10 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
             onClick={(event) => event.stopPropagation()}
             style={{
               width: '100%',
-              maxWidth: 390,
+              maxWidth: 370,
               background: '#ffffff',
               border: `3px solid ${BRAND.border}`,
-              borderRadius: 28,
+              borderRadius: 26,
               overflow: 'hidden',
               boxShadow: '0 20px 44px rgba(0,0,0,0.22)',
             }}
@@ -489,7 +489,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                 onClick={handleCreateAd}
                 style={addTileStyle('#ffe44d', BRAND.black, true)}
               >
-                <span style={{ fontSize: 34 }}>📣</span>
+                <span style={{ fontSize: 32 }}>📣</span>
                 <span>{addText.ad}</span>
               </button>
 
@@ -498,7 +498,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                 onClick={handleCreateService}
                 style={addTileStyle('#41c83f', '#ffffff', true)}
               >
-                <span style={{ fontSize: 40, lineHeight: 1 }}>+</span>
+                <span style={{ fontSize: 38, lineHeight: 1 }}>+</span>
                 <span>{addText.service}</span>
               </button>
 
@@ -510,10 +510,10 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                 <span
                   style={{
                     position: 'absolute',
-                    top: 12,
-                    right: 12,
-                    minWidth: 42,
-                    height: 30,
+                    top: 10,
+                    right: 10,
+                    minWidth: 38,
+                    height: 28,
                     borderRadius: 999,
                     border: `3px solid ${BRAND.border}`,
                     background: '#ffffff',
@@ -521,13 +521,13 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: 900,
                   }}
                 >
                   £1
                 </span>
-                <span style={{ fontSize: 40, lineHeight: 1 }}>%</span>
+                <span style={{ fontSize: 38, lineHeight: 1 }}>%</span>
                 <span>{addText.deal}</span>
               </button>
             </div>
@@ -537,11 +537,11 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
               onClick={() => setAddMenuOpen(false)}
               style={{
                 width: '100%',
-                minHeight: 58,
+                minHeight: 54,
                 border: 'none',
                 background: '#ffffff',
                 color: BRAND.black,
-                fontSize: 19,
+                fontSize: 18,
                 fontWeight: 900,
                 cursor: 'pointer',
               }}
@@ -556,48 +556,40 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
         style={{
           position: 'fixed',
           left: '50%',
-          bottom: 'calc(18px + env(safe-area-inset-bottom))',
+          bottom: 'calc(14px + env(safe-area-inset-bottom))',
           transform: shouldShowNav
             ? 'translateX(-50%) translateY(0)'
-            : 'translateX(-50%) translateY(130px)',
+            : 'translateX(-50%) translateY(120px)',
           opacity: shouldShowNav ? 1 : 0,
-          width: 'calc(100% - 44px)',
-          maxWidth: 392,
+          width: 'calc(100% - 58px)',
+          maxWidth: 358,
           zIndex: 1200,
           pointerEvents: shouldShowNav ? 'auto' : 'none',
           transition: 'transform 0.34s ease, opacity 0.22s ease',
         }}
       >
-        <div style={{ position: 'relative', height: 82 }}>
+        <div
+          style={{
+            position: 'relative',
+            height: 72,
+            overflow: 'visible',
+          }}
+        >
           <div
             style={{
               position: 'absolute',
               left: '50%',
-              top: -1,
+              top: -25,
               transform: 'translateX(-50%)',
-              width: 104,
-              height: 30,
-              background: BRAND.cream,
-              zIndex: 3,
-              pointerEvents: 'none',
-            }}
-          />
-
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: -31,
-              transform: 'translateX(-50%)',
-              width: 108,
-              height: 64,
+              width: 96,
+              height: 54,
               borderTopLeftRadius: 999,
               borderTopRightRadius: 999,
               borderTop: `3px solid ${BRAND.border}`,
               borderLeft: `3px solid ${BRAND.border}`,
               borderRight: `3px solid ${BRAND.border}`,
               background: BRAND.cream,
-              zIndex: 4,
+              zIndex: 1,
               pointerEvents: 'none',
               boxSizing: 'border-box',
             }}
@@ -609,12 +601,12 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
               inset: 0,
               background: BRAND.cream,
               border: `3px solid ${BRAND.border}`,
-              borderRadius: 29,
+              borderRadius: 28,
               boxShadow: '0 10px 24px rgba(15,23,42,0.08)',
               display: 'grid',
               gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
               alignItems: 'center',
-              padding: '10px 8px 6px',
+              padding: '8px 7px 5px',
               boxSizing: 'border-box',
               zIndex: 2,
               overflow: 'visible',
@@ -644,27 +636,29 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                       justifyContent: 'flex-start',
                       gap: 0,
                       position: 'relative',
-                      zIndex: 8,
-                      height: 82,
+                      zIndex: 30,
+                      height: 72,
                       minWidth: 0,
                       overflow: 'visible',
                     }}
                   >
                     <span
                       style={{
-                        width: 72,
-                        height: 72,
+                        position: 'relative',
+                        zIndex: 40,
+                        width: 62,
+                        height: 62,
                         borderRadius: '50%',
                         background: BRAND.green,
                         color: '#ffffff',
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 44,
+                        fontSize: 40,
                         fontWeight: 900,
                         lineHeight: 1,
-                        boxShadow: '0 12px 28px rgba(85,199,95,0.34)',
-                        transform: 'translateY(-18px)',
+                        boxShadow: '0 10px 24px rgba(85,199,95,0.34)',
+                        transform: 'translateY(-15px)',
                         flexShrink: 0,
                       }}
                     >
@@ -674,12 +668,14 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     <span
                       title={label}
                       style={{
-                        marginTop: -15,
+                        position: 'relative',
+                        zIndex: 40,
+                        marginTop: -12,
                         width: '100%',
-                        maxWidth: 78,
+                        maxWidth: 72,
                         display: 'block',
                         textAlign: 'center',
-                        fontSize: language === 'RU' || language === 'UA' ? 10.5 : 12,
+                        fontSize: language === 'RU' || language === 'UA' ? 10 : 11,
                         fontWeight: 900,
                         color: isActive ? activeColor : BRAND.black,
                         lineHeight: 1.05,
@@ -704,20 +700,20 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     background: 'transparent',
                     padding: 0,
                     cursor: 'pointer',
-                    height: 64,
+                    height: 58,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 3,
+                    gap: 2,
                     position: 'relative',
                     minWidth: 0,
-                    zIndex: 6,
+                    zIndex: 8,
                   }}
                 >
                   <span
                     style={{
-                      height: 30,
+                      height: 28,
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -730,15 +726,15 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     <span
                       style={{
                         position: 'absolute',
-                        top: 0,
-                        right: '16%',
-                        minWidth: 22,
-                        height: 22,
+                        top: -1,
+                        right: '14%',
+                        minWidth: 21,
+                        height: 21,
                         padding: '0 5px',
                         borderRadius: 999,
                         background: BRAND.pink,
                         color: '#ffffff',
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: 900,
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -755,7 +751,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     title={label}
                     style={{
                       width: '100%',
-                      maxWidth: 74,
+                      maxWidth: 66,
                       display: 'block',
                       textAlign: 'center',
                       fontSize:
@@ -764,8 +760,8 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                         language === 'DE' ||
                         language === 'IT' ||
                         language === 'FR'
-                          ? 10.5
-                          : 12,
+                          ? 10
+                          : 11,
                       fontWeight: 900,
                       color: isActive ? activeColor : BRAND.black,
                       lineHeight: 1.05,
@@ -788,12 +784,12 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
 
 function addTileStyle(bg: string, color: string, withRightBorder: boolean): CSSProperties {
   return {
-    minHeight: 112,
+    minHeight: 104,
     border: 'none',
     borderRight: withRightBorder ? `3px solid ${BRAND.border}` : 'none',
     background: bg,
     color,
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: 900,
     cursor: 'pointer',
     position: 'relative',
@@ -801,6 +797,6 @@ function addTileStyle(bg: string, color: string, withRightBorder: boolean): CSSP
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: 9,
   };
 }
