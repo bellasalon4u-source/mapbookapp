@@ -20,9 +20,11 @@ import {
   canShowDirectContacts,
   type BookingItem,
 } from '../../../services/bookingsStore';
+import { getOrCreateChatThread } from '../../../services/chatStore';
 
 type ViewMode = 'today' | 'tomorrow' | 'requests' | 'calendar' | 'history';
-type CalendarMode = 'month' | 'week' | 'day' | 'list';
+type CalendarMode = 'day' | 'week' | 'month' | 'list';
+type PaymentMethod = 'cash' | 'card' | 'app' | 'transfer';
 
 type PageText = {
   title: string;
@@ -32,44 +34,50 @@ type PageText = {
   requests: string;
   calendar: string;
   history: string;
-  month: string;
-  year: string;
-  week: string;
   day: string;
+  week: string;
+  month: string;
   list: string;
   filters: string;
   freeWindows: string;
   onlyRequests: string;
-  synced: string;
+  active: string;
+  total: string;
+  revenue: string;
+  done: string;
   confirmed: string;
   waiting: string;
   completed: string;
   cancelled: string;
   unavailable: string;
   available: string;
-  selectedDay: string;
   bookings: string;
   noBookings: string;
   details: string;
   openChat: string;
   markDone: string;
+  confirm: string;
+  decline: string;
   price: string;
   notes: string;
   back: string;
   close: string;
-  active: string;
-  total: string;
-  revenue: string;
-  done: string;
   dateRange: string;
   from: string;
   to: string;
-  surname: string;
+  clientName: string;
   minPrice: string;
   maxPrice: string;
+  payment: string;
+  allPayments: string;
   paidOnly: string;
   unpaidOnly: string;
-  allPayments: string;
+  paymentMethod: string;
+  allMethods: string;
+  cash: string;
+  card: string;
+  app: string;
+  transfer: string;
   reset: string;
   apply: string;
   addBefore: string;
@@ -79,11 +87,18 @@ type PageText = {
   status: string;
   repeatClient: string;
   specialNote: string;
-  addCustomTime: string;
-  confirmRequest: string;
-  declineRequest: string;
-  chatAllowed: string;
-  protectedInfo: string;
+  addMinute: string;
+  chooseMinute: string;
+  hourFixed: string;
+  newTime: string;
+  clientCard: string;
+  contactLocked: string;
+  contactLockedText: string;
+  contactsOpen: string;
+  address: string;
+  phone: string;
+  email: string;
+  paymentIcon: string;
 };
 
 const BRAND = {
@@ -113,44 +128,50 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     requests: 'Requests',
     calendar: 'Calendar',
     history: 'History',
-    month: 'Month',
-    year: 'Year',
-    week: 'Week',
     day: 'Day',
+    week: 'Week',
+    month: 'Month',
     list: 'List',
     filters: 'Filters',
     freeWindows: 'Free windows',
     onlyRequests: 'Only requests',
-    synced: 'Synced',
+    active: 'Active',
+    total: 'Total',
+    revenue: 'Revenue',
+    done: 'Done',
     confirmed: 'Confirmed',
     waiting: 'Waiting',
     completed: 'Done',
     cancelled: 'Cancelled',
     unavailable: 'Unavailable',
     available: 'Free slot',
-    selectedDay: 'Selected day',
     bookings: 'bookings',
     noBookings: 'No bookings for this date',
     details: 'Details',
     openChat: 'Chat',
     markDone: 'Mark done',
+    confirm: 'Confirm',
+    decline: 'Decline',
     price: 'Price',
     notes: 'Notes',
     back: 'Back',
     close: 'Close',
-    active: 'Active',
-    total: 'Total',
-    revenue: 'Revenue',
-    done: 'Done',
     dateRange: 'Date range',
     from: 'From',
     to: 'To',
-    surname: 'Client name',
+    clientName: 'Client name',
     minPrice: 'Min price',
     maxPrice: 'Max price',
+    payment: 'Payment',
+    allPayments: 'All payments',
     paidOnly: 'Paid only',
     unpaidOnly: 'Unpaid only',
-    allPayments: 'All payments',
+    paymentMethod: 'Method',
+    allMethods: 'All methods',
+    cash: 'Cash',
+    card: 'Card',
+    app: 'App',
+    transfer: 'Transfer',
     reset: 'Reset',
     apply: 'Apply',
     addBefore: '+ Add time before 05:00',
@@ -160,11 +181,19 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     status: 'Status',
     repeatClient: 'Regular client',
     specialNote: 'Special note',
-    addCustomTime: 'Add custom time',
-    confirmRequest: 'Confirm',
-    declineRequest: 'Decline',
-    chatAllowed: 'Chat allowed',
-    protectedInfo: 'Contacts, address and location stay blurred until confirmation',
+    addMinute: 'Add minutes',
+    chooseMinute: 'Choose minutes',
+    hourFixed: 'Hour fixed',
+    newTime: 'New time',
+    clientCard: 'Client card',
+    contactLocked: 'Contacts locked',
+    contactLockedText:
+      'Chat and photos are available now. Phone, address, location and direct contacts open only after provider confirmation.',
+    contactsOpen: 'Contacts open',
+    address: 'Address',
+    phone: 'Phone',
+    email: 'Email',
+    paymentIcon: 'Payment method',
   },
   RU: {
     title: 'Мои клиенты',
@@ -174,44 +203,50 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     requests: 'Запросы',
     calendar: 'Календарь',
     history: 'История',
-    month: 'Месяц',
-    year: 'Год',
-    week: 'Неделя',
     day: 'День',
+    week: 'Неделя',
+    month: 'Месяц',
     list: 'Список',
     filters: 'Фильтры',
     freeWindows: 'Свободные окна',
     onlyRequests: 'Только запросы',
-    synced: 'Синхронизировано',
+    active: 'Активные',
+    total: 'Всего',
+    revenue: 'Доход',
+    done: 'Готово',
     confirmed: 'Подтверждено',
     waiting: 'Ожидает',
     completed: 'Готово',
     cancelled: 'Отменено',
     unavailable: 'Недоступно',
     available: 'Свободное окно',
-    selectedDay: 'Выбранный день',
     bookings: 'записей',
     noBookings: 'На эту дату записей нет',
     details: 'Детали',
     openChat: 'Чат',
     markDone: 'Готово',
+    confirm: 'Подтвердить',
+    decline: 'Отклонить',
     price: 'Цена',
     notes: 'Заметки',
     back: 'Назад',
     close: 'Закрыть',
-    active: 'Активные',
-    total: 'Всего',
-    revenue: 'Доход',
-    done: 'Готово',
     dateRange: 'Диапазон дат',
     from: 'От',
     to: 'До',
-    surname: 'Имя клиента',
+    clientName: 'Имя клиента',
     minPrice: 'Цена от',
     maxPrice: 'Цена до',
-    paidOnly: 'Только оплаченные',
-    unpaidOnly: 'Только неоплаченные',
+    payment: 'Оплата',
     allPayments: 'Все оплаты',
+    paidOnly: 'Оплачено',
+    unpaidOnly: 'Не оплачено',
+    paymentMethod: 'Способ',
+    allMethods: 'Все способы',
+    cash: 'Наличные',
+    card: 'Карта',
+    app: 'Через приложение',
+    transfer: 'Перевод',
     reset: 'Сбросить',
     apply: 'Применить',
     addBefore: '+ Добавить время до 05:00',
@@ -221,11 +256,19 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     status: 'Статус',
     repeatClient: 'Постоянный клиент',
     specialNote: 'Спец. заметка',
-    addCustomTime: 'Добавить своё время',
-    confirmRequest: 'Подтвердить',
-    declineRequest: 'Отклонить',
-    chatAllowed: 'Чат доступен',
-    protectedInfo: 'Контакты, адрес и геолокация скрыты до подтверждения',
+    addMinute: 'Добавить минуты',
+    chooseMinute: 'Выбрать минуты',
+    hourFixed: 'Час фиксирован',
+    newTime: 'Новое время',
+    clientCard: 'Карточка клиента',
+    contactLocked: 'Контакты закрыты',
+    contactLockedText:
+      'Чат и фото доступны сразу. Телефон, адрес, геолокация и прямые контакты открываются только после подтверждения мастером.',
+    contactsOpen: 'Контакты открыты',
+    address: 'Адрес',
+    phone: 'Телефон',
+    email: 'Email',
+    paymentIcon: 'Способ оплаты',
   },
   UA: {
     title: 'Мої клієнти',
@@ -235,44 +278,50 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     requests: 'Запити',
     calendar: 'Календар',
     history: 'Історія',
-    month: 'Місяць',
-    year: 'Рік',
-    week: 'Тиждень',
     day: 'День',
+    week: 'Тиждень',
+    month: 'Місяць',
     list: 'Список',
     filters: 'Фільтри',
     freeWindows: 'Вільні вікна',
     onlyRequests: 'Тільки запити',
-    synced: 'Синхронізовано',
+    active: 'Активні',
+    total: 'Усього',
+    revenue: 'Дохід',
+    done: 'Готово',
     confirmed: 'Підтверджено',
     waiting: 'Очікує',
     completed: 'Готово',
     cancelled: 'Скасовано',
     unavailable: 'Недоступно',
     available: 'Вільне вікно',
-    selectedDay: 'Обраний день',
     bookings: 'записів',
     noBookings: 'На цю дату записів немає',
     details: 'Деталі',
     openChat: 'Чат',
     markDone: 'Готово',
+    confirm: 'Підтвердити',
+    decline: 'Відхилити',
     price: 'Ціна',
     notes: 'Нотатки',
     back: 'Назад',
     close: 'Закрити',
-    active: 'Активні',
-    total: 'Усього',
-    revenue: 'Дохід',
-    done: 'Готово',
     dateRange: 'Діапазон дат',
     from: 'Від',
     to: 'До',
-    surname: 'Імʼя клієнта',
+    clientName: 'Імʼя клієнта',
     minPrice: 'Ціна від',
     maxPrice: 'Ціна до',
-    paidOnly: 'Тільки оплачені',
-    unpaidOnly: 'Тільки неоплачені',
+    payment: 'Оплата',
     allPayments: 'Усі оплати',
+    paidOnly: 'Оплачено',
+    unpaidOnly: 'Не оплачено',
+    paymentMethod: 'Спосіб',
+    allMethods: 'Усі способи',
+    cash: 'Готівка',
+    card: 'Картка',
+    app: 'Через додаток',
+    transfer: 'Переказ',
     reset: 'Скинути',
     apply: 'Застосувати',
     addBefore: '+ Додати час до 05:00',
@@ -282,11 +331,19 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     status: 'Статус',
     repeatClient: 'Постійний клієнт',
     specialNote: 'Спец. нотатка',
-    addCustomTime: 'Додати свій час',
-    confirmRequest: 'Підтвердити',
-    declineRequest: 'Відхилити',
-    chatAllowed: 'Чат доступний',
-    protectedInfo: 'Контакти, адреса й геолокація приховані до підтвердження',
+    addMinute: 'Додати хвилини',
+    chooseMinute: 'Обрати хвилини',
+    hourFixed: 'Година фіксована',
+    newTime: 'Новий час',
+    clientCard: 'Картка клієнта',
+    contactLocked: 'Контакти закриті',
+    contactLockedText:
+      'Чат і фото доступні одразу. Телефон, адреса, геолокація та прямі контакти відкриваються тільки після підтвердження майстром.',
+    contactsOpen: 'Контакти відкриті',
+    address: 'Адреса',
+    phone: 'Телефон',
+    email: 'Email',
+    paymentIcon: 'Спосіб оплати',
   },
 };
 
@@ -296,8 +353,21 @@ const clientRepeatCount: Record<string, number> = {
   'Klára Nováková': 1,
   'Lenka Bohatová': 5,
   'Barbora Bendová': 3,
+  'Sophie Williams': 1,
   'Emily Carter': 4,
 };
+
+const bookingPaymentMethods: Record<string, PaymentMethod> = {
+  'client-demo-1': 'cash',
+  'client-demo-2': 'card',
+  'client-demo-3': 'transfer',
+  'client-demo-4': 'app',
+  'client-demo-5': 'cash',
+  'client-demo-6': 'card',
+  'client-demo-7': 'app',
+};
+
+const minuteOptions = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
 function getText(language: AppLanguage) {
   return texts[language] || texts.EN!;
@@ -368,6 +438,7 @@ function getTimeLabel(booking: BookingItem) {
 }
 
 function getHourLabel(hour: number) {
+  if (hour === 24) return '00:00';
   return `${String(hour).padStart(2, '0')}:00`;
 }
 
@@ -389,20 +460,25 @@ function getFullDateTitle(date: Date, language: AppLanguage) {
   }).format(date);
 }
 
+function getMonthTitle(date: Date, language: AppLanguage) {
+  return new Intl.DateTimeFormat(getLocale(language), {
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
+
 function getShortMonthName(monthIndex: number, language: AppLanguage) {
   return new Intl.DateTimeFormat(getLocale(language), { month: 'long' }).format(
     new Date(2026, monthIndex, 1)
   );
 }
 
-function getWeekDays(language: AppLanguage) {
-  const monday = new Date(2026, 3, 20);
+function getWeekDates(date: Date) {
+  const base = startOfDay(date);
+  const day = (base.getDay() + 6) % 7;
+  const monday = addDays(base, -day);
 
-  return Array.from({ length: 7 }, (_, index) =>
-    new Intl.DateTimeFormat(getLocale(language), { weekday: 'short' }).format(
-      addDays(monday, index)
-    )
-  );
+  return Array.from({ length: 7 }, (_, index) => addDays(monday, index));
 }
 
 function getCalendarCells(year: number, month: number) {
@@ -420,20 +496,34 @@ function getCalendarCells(year: number, month: number) {
   });
 }
 
-function getWeekDates(date: Date) {
-  const base = startOfDay(date);
-  const day = (base.getDay() + 6) % 7;
-  const monday = addDays(base, -day);
-
-  return Array.from({ length: 7 }, (_, index) => addDays(monday, index));
-}
-
 function isPaid(booking: BookingItem) {
   return Boolean(booking.clientPaid || booking.paymentReceivedByPlatform || booking.unlockFeePaid);
 }
 
 function isUnlocked(booking: BookingItem) {
   return canShowExactAddress(booking) && canShowDirectContacts(booking);
+}
+
+function canChat(booking: BookingItem) {
+  return booking.status !== 'cancelled';
+}
+
+function getPaymentMethod(booking: BookingItem): PaymentMethod {
+  return bookingPaymentMethods[booking.id] || 'app';
+}
+
+function getPaymentIcon(method: PaymentMethod) {
+  if (method === 'cash') return '💵';
+  if (method === 'card') return '💳';
+  if (method === 'transfer') return '🏦';
+  return '📱';
+}
+
+function getPaymentLabel(method: PaymentMethod, text: PageText) {
+  if (method === 'cash') return text.cash;
+  if (method === 'card') return text.card;
+  if (method === 'transfer') return text.transfer;
+  return text.app;
 }
 
 function statusLabel(booking: BookingItem, text: PageText) {
@@ -643,19 +733,19 @@ export default function ProfileClientsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('today');
   const [calendarMode, setCalendarMode] = useState<CalendarMode>('day');
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
-  const [calendarDate, setCalendarDate] = useState<Date>(() => startOfDay(new Date()));
   const [showFreeWindows, setShowFreeWindows] = useState(true);
   const [showOnlyRequests, setShowOnlyRequests] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [nameFilter, setNameFilter] = useState('');
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
+  const [methodFilter, setMethodFilter] = useState<'all' | PaymentMethod>('all');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [rangeFrom, setRangeFrom] = useState(() => toInputDate(startOfDay(new Date())));
   const [rangeTo, setRangeTo] = useState(() => toInputDate(startOfDay(new Date())));
   const [noteBooking, setNoteBooking] = useState<BookingItem | null>(null);
-  const [timePickerOpen, setTimePickerOpen] = useState(false);
-  const [customHour, setCustomHour] = useState(4);
+  const [clientCardBooking, setClientCardBooking] = useState<BookingItem | null>(null);
+  const [minutePickerHour, setMinutePickerHour] = useState<number | null>(null);
   const [customMinute, setCustomMinute] = useState(25);
 
   const text = useMemo(() => getText(language), [language]);
@@ -722,11 +812,10 @@ export default function ProfileClientsPage() {
       if (calendarMode === 'month') {
         source = source.filter((booking) => {
           const date = getBookingDate(booking);
-          return (
-            date &&
-            date.getFullYear() === calendarDate.getFullYear() &&
-            date.getMonth() === calendarDate.getMonth()
-          );
+          return date
+            ? date.getFullYear() === selectedDate.getFullYear() &&
+                date.getMonth() === selectedDate.getMonth()
+            : false;
         });
       }
 
@@ -780,6 +869,10 @@ export default function ProfileClientsPage() {
       source = source.filter((booking) => !isPaid(booking));
     }
 
+    if (methodFilter !== 'all') {
+      source = source.filter((booking) => getPaymentMethod(booking) === methodFilter);
+    }
+
     if (minPrice.trim()) {
       source = source.filter((booking) => Number(booking.price || 0) >= Number(minPrice));
     }
@@ -795,10 +888,10 @@ export default function ProfileClientsPage() {
     });
   }, [
     bookings,
-    calendarDate,
     calendarMode,
     filtersOpen,
     maxPrice,
+    methodFilter,
     minPrice,
     nameFilter,
     paymentFilter,
@@ -814,23 +907,10 @@ export default function ProfileClientsPage() {
   const activeCount = bookings.filter(
     (booking) => booking.status === 'pending' || booking.status === 'upcoming'
   ).length;
-
   const completedCount = bookings.filter((booking) => booking.status === 'completed').length;
-
   const totalRevenue = bookings
     .filter((booking) => booking.status !== 'cancelled')
     .reduce((sum, booking) => sum + Number(booking.price || 0), 0);
-
-  const monthBookings = useMemo(() => {
-    return bookings.filter((booking) => {
-      const date = getBookingDate(booking);
-      return (
-        date &&
-        date.getMonth() === calendarDate.getMonth() &&
-        date.getFullYear() === calendarDate.getFullYear()
-      );
-    });
-  }, [bookings, calendarDate]);
 
   const years = useMemo(() => {
     const current = new Date().getFullYear();
@@ -843,7 +923,6 @@ export default function ProfileClientsPage() {
     if (mode === 'today') {
       const now = startOfDay(new Date());
       setSelectedDate(now);
-      setCalendarDate(now);
       setCalendarMode('day');
       setRangeFrom(toInputDate(now));
       setRangeTo(toInputDate(now));
@@ -852,7 +931,6 @@ export default function ProfileClientsPage() {
     if (mode === 'tomorrow') {
       const next = addDays(startOfDay(new Date()), 1);
       setSelectedDate(next);
-      setCalendarDate(next);
       setCalendarMode('day');
       setRangeFrom(toInputDate(next));
       setRangeTo(toInputDate(next));
@@ -867,6 +945,23 @@ export default function ProfileClientsPage() {
     }
   };
 
+  const openChat = (booking: BookingItem) => {
+    if (!canChat(booking)) return;
+
+    const thread = getOrCreateChatThread({
+      threadId: `client-booking-${booking.id}`,
+      providerName: booking.masterName || 'Client',
+      providerAvatar:
+        booking.masterAvatar ||
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+      category: booking.serviceName || 'Booking',
+      online: true,
+      lastSeenText: 'Online',
+    });
+
+    router.push(`/messages/${encodeURIComponent(thread.id)}`);
+  };
+
   const markDone = (booking: BookingItem) => {
     updateBookingStatus(booking.id, 'completed');
     setBookings((prev) =>
@@ -874,7 +969,7 @@ export default function ProfileClientsPage() {
     );
   };
 
-  const confirmRequest = (booking: BookingItem) => {
+  const confirmBooking = (booking: BookingItem) => {
     confirmBookingByMaster(booking.id);
     setBookings((prev) =>
       prev.map((item) =>
@@ -890,7 +985,7 @@ export default function ProfileClientsPage() {
     );
   };
 
-  const declineRequest = (booking: BookingItem) => {
+  const declineBooking = (booking: BookingItem) => {
     declineBookingByMaster(booking.id);
     setBookings((prev) =>
       prev.map((item) =>
@@ -909,10 +1004,20 @@ export default function ProfileClientsPage() {
   const resetFilters = () => {
     setNameFilter('');
     setPaymentFilter('all');
+    setMethodFilter('all');
     setMinPrice('');
     setMaxPrice('');
     setRangeFrom(toInputDate(activeDate));
     setRangeTo(toInputDate(activeDate));
+  };
+
+  const moveDay = (days: number) => {
+    const next = addDays(activeDate, days);
+    setSelectedDate(next);
+    setViewMode('calendar');
+    setCalendarMode('day');
+    setRangeFrom(toInputDate(next));
+    setRangeTo(toInputDate(next));
   };
 
   return (
@@ -926,20 +1031,8 @@ export default function ProfileClientsPage() {
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 176px' }}>
-        <header
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '48px 1fr 48px',
-            alignItems: 'center',
-            gap: 10,
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => router.back()}
-            aria-label={text.back}
-            style={circleButtonStyle}
-          >
+        <header style={headerStyle}>
+          <button type="button" onClick={() => router.back()} aria-label={text.back} style={circleButtonStyle}>
             ←
           </button>
 
@@ -989,53 +1082,27 @@ export default function ProfileClientsPage() {
           })}
         </section>
 
-        <section style={compactStatsWrapStyle}>
-          <StatMini title={text.active} value={String(activeCount)} bg={BRAND.softGreen} />
-          <StatMini title={text.total} value={String(bookings.length)} bg={BRAND.softBlue} />
-          <StatMini title={text.revenue} value={money(totalRevenue)} bg={BRAND.softOrange} />
-          <StatMini title={text.done} value={String(completedCount)} bg={BRAND.softViolet} />
+        <section style={statsRowStyle}>
+          <StatBox title={text.active} value={String(activeCount)} bg={BRAND.softGreen} />
+          <StatBox title={text.total} value={String(bookings.length)} bg={BRAND.softBlue} />
+          <StatBox title={text.revenue} value={money(totalRevenue)} bg={BRAND.softOrange} />
+          <StatBox title={text.done} value={String(completedCount)} bg={BRAND.softViolet} />
         </section>
 
         <section style={calendarPanelStyle}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '42px 1fr 42px',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                const next = addDays(calendarDate, -1);
-                setCalendarDate(next);
-                setSelectedDate(startOfDay(next));
-                setViewMode('calendar');
-              }}
-              style={smallCircleStyle}
-            >
+          <div style={dateHeaderStyle}>
+            <button type="button" onClick={() => moveDay(-1)} style={smallCircleStyle}>
               ‹
             </button>
 
-            <div style={{ textAlign: 'center' }}>
-              <div style={currentDateTitleStyle}>{getDateTitle(activeDate, language)}</div>
-              <div style={currentDateSubStyle}>
-                {filteredBookings.length} {text.bookings} · {getShortMonthName(calendarDate.getMonth(), language)}{' '}
-                {calendarDate.getFullYear()}
+            <div style={{ textAlign: 'center', minWidth: 0 }}>
+              <div style={dateTitleStyle}>{getDateTitle(activeDate, language)}</div>
+              <div style={dateSubtitleStyle}>
+                {filteredBookings.length} {text.bookings} · {getMonthTitle(activeDate, language)}
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                const next = addDays(calendarDate, 1);
-                setCalendarDate(next);
-                setSelectedDate(startOfDay(next));
-                setViewMode('calendar');
-              }}
-              style={smallCircleStyle}
-            >
+            <button type="button" onClick={() => moveDay(1)} style={smallCircleStyle}>
               ›
             </button>
           </div>
@@ -1053,11 +1120,7 @@ export default function ProfileClientsPage() {
               ☰ {text.filters}
             </button>
 
-            <button
-              type="button"
-              onClick={() => handleTopMode('today')}
-              style={filterChipStyle}
-            >
+            <button type="button" onClick={() => handleTopMode('today')} style={filterChipStyle}>
               📅 {text.today}
             </button>
 
@@ -1088,22 +1151,16 @@ export default function ProfileClientsPage() {
 
           {filtersOpen ? (
             <div style={filtersBoxStyle}>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1.3fr',
-                  gap: 9,
-                  marginBottom: 10,
-                }}
-              >
+              <div style={filtersGridStyle}>
                 <label style={fieldLabelStyle}>
-                  <span>{text.year}</span>
+                  <span>Year</span>
                   <select
-                    value={calendarDate.getFullYear()}
+                    value={activeDate.getFullYear()}
                     onChange={(event) => {
-                      const next = new Date(calendarDate);
+                      const next = new Date(activeDate);
                       next.setFullYear(Number(event.target.value));
-                      setCalendarDate(next);
+                      setSelectedDate(next);
+                      setViewMode('calendar');
                     }}
                     style={inputStyle}
                   >
@@ -1118,11 +1175,12 @@ export default function ProfileClientsPage() {
                 <label style={fieldLabelStyle}>
                   <span>{text.month}</span>
                   <select
-                    value={calendarDate.getMonth()}
+                    value={activeDate.getMonth()}
                     onChange={(event) => {
-                      const next = new Date(calendarDate);
+                      const next = new Date(activeDate);
                       next.setMonth(Number(event.target.value));
-                      setCalendarDate(next);
+                      setSelectedDate(next);
+                      setViewMode('calendar');
                     }}
                     style={inputStyle}
                   >
@@ -1167,12 +1225,11 @@ export default function ProfileClientsPage() {
               {calendarMode === 'month' ? (
                 <MonthGrid
                   language={language}
-                  calendarDate={calendarDate}
+                  calendarDate={activeDate}
                   selectedDate={selectedDate}
-                  bookings={monthBookings}
+                  bookings={bookings}
                   onSelect={(date) => {
                     setSelectedDate(startOfDay(date));
-                    setCalendarDate(startOfDay(date));
                     setViewMode('calendar');
                     setCalendarMode('day');
                   }}
@@ -1186,13 +1243,13 @@ export default function ProfileClientsPage() {
                   bookings={bookings}
                   onSelect={(date) => {
                     setSelectedDate(startOfDay(date));
-                    setCalendarDate(startOfDay(date));
                     setViewMode('calendar');
+                    setCalendarMode('day');
                   }}
                 />
               ) : null}
 
-              <div style={filtersGridStyle}>
+              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 <label style={fieldLabelStyle}>
                   <span>{text.from}</span>
                   <input
@@ -1214,7 +1271,7 @@ export default function ProfileClientsPage() {
                 </label>
 
                 <label style={fieldLabelStyle}>
-                  <span>{text.surname}</span>
+                  <span>{text.clientName}</span>
                   <input
                     value={nameFilter}
                     onChange={(event) => setNameFilter(event.target.value)}
@@ -1224,7 +1281,7 @@ export default function ProfileClientsPage() {
                 </label>
 
                 <label style={fieldLabelStyle}>
-                  <span>{text.allPayments}</span>
+                  <span>{text.payment}</span>
                   <select
                     value={paymentFilter}
                     onChange={(event) =>
@@ -1235,6 +1292,23 @@ export default function ProfileClientsPage() {
                     <option value="all">{text.allPayments}</option>
                     <option value="paid">{text.paidOnly}</option>
                     <option value="unpaid">{text.unpaidOnly}</option>
+                  </select>
+                </label>
+
+                <label style={fieldLabelStyle}>
+                  <span>{text.paymentMethod}</span>
+                  <select
+                    value={methodFilter}
+                    onChange={(event) =>
+                      setMethodFilter(event.target.value as 'all' | PaymentMethod)
+                    }
+                    style={inputStyle}
+                  >
+                    <option value="all">{text.allMethods}</option>
+                    <option value="cash">💵 {text.cash}</option>
+                    <option value="card">💳 {text.card}</option>
+                    <option value="app">📱 {text.app}</option>
+                    <option value="transfer">🏦 {text.transfer}</option>
                   </select>
                 </label>
 
@@ -1281,7 +1355,7 @@ export default function ProfileClientsPage() {
         <section style={{ marginTop: 20 }}>
           <button
             type="button"
-            onClick={() => setTimePickerOpen(true)}
+            onClick={() => setMinutePickerHour(4)}
             style={addTimeButtonStyle}
           >
             {text.addBefore}
@@ -1300,17 +1374,17 @@ export default function ProfileClientsPage() {
             activeDate={activeDate}
             showFreeWindows={showFreeWindows}
             onDone={markDone}
-            onConfirm={confirmRequest}
-            onDecline={declineRequest}
-            onChat={() => router.push('/messages')}
-            onDetails={() => router.push('/bookings')}
+            onConfirm={confirmBooking}
+            onDecline={declineBooking}
+            onChat={openChat}
+            onDetails={setClientCardBooking}
             onNote={setNoteBooking}
-            onTimePicker={() => setTimePickerOpen(true)}
+            onMinute={(hour) => setMinutePickerHour(hour)}
           />
 
           <button
             type="button"
-            onClick={() => setTimePickerOpen(true)}
+            onClick={() => setMinutePickerHour(0)}
             style={{ ...addTimeButtonStyle, marginTop: 12 }}
           >
             {text.addAfter}
@@ -1324,14 +1398,24 @@ export default function ProfileClientsPage() {
         <NoteModal booking={noteBooking} text={text} onClose={() => setNoteBooking(null)} />
       ) : null}
 
-      {timePickerOpen ? (
-        <TimePickerModal
+      {clientCardBooking ? (
+        <ClientCardModal
+          booking={clientCardBooking}
           text={text}
-          hour={customHour}
+          onClose={() => setClientCardBooking(null)}
+          onChat={() => openChat(clientCardBooking)}
+          onConfirm={() => confirmBooking(clientCardBooking)}
+          onDecline={() => declineBooking(clientCardBooking)}
+        />
+      ) : null}
+
+      {minutePickerHour !== null ? (
+        <MinutePickerModal
+          text={text}
+          hour={minutePickerHour}
           minute={customMinute}
-          onHour={setCustomHour}
           onMinute={setCustomMinute}
-          onClose={() => setTimePickerOpen(false)}
+          onClose={() => setMinutePickerHour(null)}
         />
       ) : null}
     </main>
@@ -1349,7 +1433,7 @@ function NotebookSchedule({
   onChat,
   onDetails,
   onNote,
-  onTimePicker,
+  onMinute,
 }: {
   text: PageText;
   bookings: BookingItem[];
@@ -1358,10 +1442,10 @@ function NotebookSchedule({
   onDone: (booking: BookingItem) => void;
   onConfirm: (booking: BookingItem) => void;
   onDecline: (booking: BookingItem) => void;
-  onChat: () => void;
-  onDetails: () => void;
+  onChat: (booking: BookingItem) => void;
+  onDetails: (booking: BookingItem) => void;
   onNote: (booking: BookingItem) => void;
-  onTimePicker: () => void;
+  onMinute: (hour: number) => void;
 }) {
   const hours = Array.from({ length: 20 }, (_, index) => index + 5);
 
@@ -1376,7 +1460,7 @@ function NotebookSchedule({
         if (hourBookings.length === 0 && !showFreeWindows) return null;
 
         if (hourBookings.length === 0) {
-          return <FreeSlotRow key={hour} hour={hour} text={text} onTimePicker={onTimePicker} />;
+          return <FreeSlotRow key={hour} hour={hour} text={text} onMinute={() => onMinute(hour)} />;
         }
 
         return hourBookings.map((booking) => (
@@ -1387,10 +1471,10 @@ function NotebookSchedule({
             onDone={() => onDone(booking)}
             onConfirm={() => onConfirm(booking)}
             onDecline={() => onDecline(booking)}
-            onChat={onChat}
-            onDetails={onDetails}
+            onChat={() => onChat(booking)}
+            onDetails={() => onDetails(booking)}
             onNote={() => onNote(booking)}
-            onTimePicker={onTimePicker}
+            onMinute={() => onMinute(getBookingDate(booking)?.getHours() || hour)}
           />
         ));
       })}
@@ -1407,7 +1491,7 @@ function NotebookBookingRow({
   onChat,
   onDetails,
   onNote,
-  onTimePicker,
+  onMinute,
 }: {
   booking: BookingItem;
   text: PageText;
@@ -1417,7 +1501,7 @@ function NotebookBookingRow({
   onChat: () => void;
   onDetails: () => void;
   onNote: () => void;
-  onTimePicker: () => void;
+  onMinute: () => void;
 }) {
   const done = booking.status === 'completed';
   const cancelled = booking.status === 'cancelled';
@@ -1425,19 +1509,19 @@ function NotebookBookingRow({
   const color = statusColor(booking);
   const bg = statusBg(booking);
   const repeat = clientRepeatCount[booking.masterName] || 1;
-  const location = isUnlocked(booking)
-    ? getVisibleBookingLocation(booking)
-    : getPublicBookingLocation(booking);
+  const unlocked = isUnlocked(booking);
+  const location = unlocked ? getVisibleBookingLocation(booking) : getPublicBookingLocation(booking);
+  const method = getPaymentMethod(booking);
 
   return (
     <article
       draggable
-      title="Long press / drag to move time"
+      onDoubleClick={onDetails}
       style={{
         position: 'relative',
-        minHeight: pending ? 178 : cancelled ? 98 : 156,
+        minHeight: cancelled ? 108 : pending ? 172 : 158,
         borderRadius: 24,
-        border: `2.5px solid ${cancelled ? '#f0afbf' : '#d8e2dc'}`,
+        border: `2.5px solid ${cancelled ? '#f4b4c4' : '#d7e4dd'}`,
         background: cancelled
           ? 'linear-gradient(135deg, #ffffff 0%, #ffffff 48%, #ffe3ea 49%, #ffe3ea 100%)'
           : bg,
@@ -1461,69 +1545,52 @@ function NotebookBookingRow({
         }}
       />
 
-      <div style={{ position: 'relative', minHeight: 92, display: 'grid', alignContent: 'center' }}>
-        {done ? (
-          <div
-            style={{
-              position: 'absolute',
-              top: 2,
-              left: 21,
-              width: 31,
-              height: 31,
-              borderRadius: 999,
-              background: BRAND.green,
-              color: '#ffffff',
-              border: `2px solid ${BRAND.green}`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 20,
-              fontWeight: 900,
-              zIndex: 2,
-            }}
-          >
-            ✓
-          </div>
-        ) : null}
-
+      <div style={{ display: 'grid', justifyItems: 'center', gap: 7, paddingLeft: 8 }}>
         <button
           type="button"
-          onClick={onTimePicker}
-          aria-label={text.addCustomTime}
-          style={{
-            width: 31,
-            height: 31,
-            borderRadius: 999,
-            border: `2.2px solid ${BRAND.border}`,
-            background: '#ffffff',
-            color: BRAND.navy,
-            fontSize: 22,
-            fontWeight: 900,
-            cursor: 'pointer',
-            marginLeft: 21,
-            marginBottom: 4,
-            lineHeight: 1,
-          }}
+          onClick={onMinute}
+          aria-label={text.addMinute}
+          style={minutePlusStyle}
         >
           +
         </button>
 
-        <div
+        {done ? (
+          <div style={doneCheckStyle}>✓</div>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={onMinute}
           style={{
+            background: 'transparent',
+            border: 'none',
             color: BRAND.navy,
-            fontSize: 25,
+            fontSize: 26,
             fontWeight: 900,
-            paddingLeft: 21,
+            cursor: 'pointer',
+            padding: 0,
           }}
         >
           {getTimeLabel(booking)}
-        </div>
+        </button>
       </div>
 
-      <div style={{ minWidth: 0 }}>
+      <button
+        type="button"
+        onClick={onDetails}
+        style={{
+          minWidth: 0,
+          background: 'transparent',
+          border: 'none',
+          textAlign: 'left',
+          cursor: 'pointer',
+          padding: 0,
+        }}
+      >
         <div
           style={{
-            fontSize: cancelled ? 20 : 21,
+            fontSize: cancelled ? 20 : 22,
             lineHeight: 1.05,
             fontWeight: 900,
             color: cancelled ? BRAND.red : BRAND.navy,
@@ -1575,101 +1642,77 @@ function NotebookBookingRow({
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
-                filter: pending || !isUnlocked(booking) ? 'blur(2.5px)' : 'none',
-                userSelect: pending || !isUnlocked(booking) ? 'none' : 'auto',
+                filter: unlocked ? 'none' : 'blur(2.8px)',
+                userSelect: unlocked ? 'auto' : 'none',
               }}
             >
               📍 {location || 'London'}
             </div>
-
-            {pending ? (
-              <div
-                style={{
-                  marginTop: 8,
-                  fontSize: 11,
-                  lineHeight: 1.25,
-                  fontWeight: 900,
-                  color: BRAND.muted,
-                }}
-              >
-                🔒 {text.protectedInfo}
-              </div>
-            ) : null}
-
-            <div
-              style={{
-                marginTop: 9,
-                display: 'grid',
-                gridTemplateColumns: pending ? '1fr 1fr' : '1fr 1fr',
-                gap: 8,
-              }}
-            >
-              {pending ? (
-                <>
-                  <button type="button" onClick={onConfirm} style={miniGreenButtonStyle}>
-                    ✓ {text.confirmRequest}
-                  </button>
-                  <button type="button" onClick={onDecline} style={miniRedButtonStyle}>
-                    × {text.declineRequest}
-                  </button>
-                  <button type="button" onClick={onChat} style={miniOutlineButtonStyle}>
-                    💬 {text.openChat}
-                  </button>
-                  <button type="button" onClick={onDetails} style={miniOutlineButtonStyle}>
-                    {text.details}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button type="button" onClick={onChat} style={miniOutlineButtonStyle}>
-                    💬 {text.openChat}
-                  </button>
-
-                  {done ? (
-                    <button type="button" onClick={onDetails} style={miniOutlineButtonStyle}>
-                      {text.details}
-                    </button>
-                  ) : (
-                    <button type="button" onClick={onDone} style={miniGreenButtonStyle}>
-                      ✓ {text.markDone}
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
           </>
         ) : null}
+      </button>
+
+      <div style={{ textAlign: 'right' }}>
+        <div
+          title={getPaymentLabel(method, text)}
+          style={{
+            fontSize: 18,
+            lineHeight: 1,
+            marginBottom: 6,
+          }}
+        >
+          {getPaymentIcon(method)}
+        </div>
+
+        <div
+          style={{
+            fontSize: 24,
+            fontWeight: 900,
+            color: cancelled ? BRAND.red : color === BRAND.yellow ? BRAND.orange : color,
+          }}
+        >
+          {money(Number(booking.price || 0))}
+        </div>
       </div>
 
-      <div
-        style={{
-          fontSize: 24,
-          fontWeight: 900,
-          color: cancelled ? BRAND.red : color === BRAND.yellow ? BRAND.orange : color,
-          textAlign: 'right',
-        }}
-      >
-        {money(Number(booking.price || 0))}
-      </div>
-
-      <button
-        type="button"
-        onClick={onNote}
-        aria-label={text.notes}
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: 12,
-          border: 'none',
-          background: 'transparent',
-          color: BRAND.muted,
-          fontSize: 24,
-          fontWeight: 900,
-          cursor: 'pointer',
-        }}
-      >
+      <button type="button" onClick={onNote} aria-label={text.notes} style={noteButtonStyle}>
         ☰
       </button>
+
+      {!cancelled ? (
+        <div
+          style={{
+            gridColumn: '2 / 5',
+            display: 'grid',
+            gridTemplateColumns: pending ? '1fr 1fr 1fr' : '1fr 1fr',
+            gap: 8,
+            paddingRight: 0,
+          }}
+        >
+          <button type="button" onClick={onChat} style={miniOutlineButtonStyle}>
+            💬 {text.openChat}
+          </button>
+
+          {pending ? (
+            <>
+              <button type="button" onClick={onConfirm} style={miniGreenButtonStyle}>
+                ✓ {text.confirm}
+              </button>
+              <button type="button" onClick={onDecline} style={miniRedButtonStyle}>
+                × {text.decline}
+              </button>
+            </>
+          ) : done ? (
+            <button type="button" onClick={onDetails} style={miniOutlineButtonStyle}>
+              {text.details}
+            </button>
+          ) : (
+            <button type="button" onClick={onDone} style={miniGreenButtonStyle}>
+              ✓ {text.markDone}
+            </button>
+          )}
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -1677,64 +1720,21 @@ function NotebookBookingRow({
 function FreeSlotRow({
   hour,
   text,
-  onTimePicker,
+  onMinute,
 }: {
   hour: number;
   text: PageText;
-  onTimePicker: () => void;
+  onMinute: () => void;
 }) {
   return (
-    <article
-      style={{
-        minHeight: 72,
-        borderRadius: 24,
-        border: '2px dashed #d7dce4',
-        background: '#ffffff',
-        display: 'grid',
-        gridTemplateColumns: '64px 94px minmax(0, 1fr)',
-        alignItems: 'center',
-        padding: '0 16px',
-      }}
-    >
-      <button
-        type="button"
-        onClick={onTimePicker}
-        aria-label={text.addCustomTime}
-        style={{
-          width: 31,
-          height: 31,
-          borderRadius: 999,
-          border: `2.2px solid ${BRAND.border}`,
-          background: '#ffffff',
-          color: BRAND.navy,
-          fontSize: 22,
-          fontWeight: 900,
-          cursor: 'pointer',
-          lineHeight: 1,
-        }}
-      >
+    <article style={freeSlotStyle}>
+      <button type="button" onClick={onMinute} aria-label={text.addMinute} style={minutePlusStyle}>
         +
       </button>
 
-      <div
-        style={{
-          fontSize: 27,
-          fontWeight: 900,
-          color: '#a1a8b4',
-        }}
-      >
-        {getHourLabel(hour)}
-      </div>
+      <div style={freeSlotTimeStyle}>{getHourLabel(hour)}</div>
 
-      <div
-        style={{
-          fontSize: 18,
-          fontWeight: 900,
-          color: BRAND.muted,
-        }}
-      >
-        {text.available}
-      </div>
+      <div style={freeSlotTextStyle}>{text.available}</div>
     </article>
   );
 }
@@ -1752,15 +1752,15 @@ function MonthGrid({
   bookings: BookingItem[];
   onSelect: (date: Date) => void;
 }) {
-  const weekDays = getWeekDays(language);
+  const weekDays = getWeekDates(calendarDate);
   const cells = getCalendarCells(calendarDate.getFullYear(), calendarDate.getMonth());
 
   return (
     <div style={monthGridWrapStyle}>
       <div style={weekHeaderStyle}>
-        {weekDays.map((day) => (
-          <div key={day} style={weekDayStyle}>
-            {day}
+        {weekDays.map((date) => (
+          <div key={date.toISOString()} style={weekDayStyle}>
+            {new Intl.DateTimeFormat(getLocale(language), { weekday: 'short' }).format(date)}
           </div>
         ))}
       </div>
@@ -1873,9 +1873,6 @@ function NoteModal({
   text: PageText;
   onClose: () => void;
 }) {
-  const pending = booking.status === 'pending';
-  const unlocked = isUnlocked(booking);
-
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
       <div style={modalCardStyle} onClick={(event) => event.stopPropagation()}>
@@ -1883,9 +1880,7 @@ function NoteModal({
           ×
         </button>
 
-        <h2 style={{ margin: 0, fontSize: 25, fontWeight: 900, color: BRAND.navy }}>
-          {text.specialNote}
-        </h2>
+        <h2 style={modalTitleStyle}>{text.specialNote}</h2>
 
         <div style={{ marginTop: 12, fontSize: 18, fontWeight: 900, color: BRAND.navy }}>
           {booking.masterName}
@@ -1895,56 +1890,7 @@ function NoteModal({
           {booking.serviceName}
         </div>
 
-        <div
-          style={{
-            marginTop: 14,
-            borderRadius: 18,
-            border: `2px solid ${BRAND.border}`,
-            background: BRAND.softYellow,
-            padding: 13,
-            fontSize: 15,
-            lineHeight: 1.4,
-            fontWeight: 800,
-            color: BRAND.navy,
-          }}
-        >
-          {booking.category || text.notes}
-        </div>
-
-        <div
-          style={{
-            marginTop: 12,
-            borderRadius: 18,
-            border: `2px solid ${BRAND.border}`,
-            background: '#ffffff',
-            padding: 13,
-            fontSize: 13,
-            lineHeight: 1.4,
-            fontWeight: 900,
-            color: BRAND.muted,
-            filter: pending || !unlocked ? 'blur(2.5px)' : 'none',
-          }}
-        >
-          📍 {getVisibleBookingLocation(booking)}
-          <br />
-          ☎ {booking.contactPhone || '+44 7700 123456'}
-          <br />
-          ✉ {booking.contactEmail || 'client@olamep.com'}
-        </div>
-
-        {pending || !unlocked ? (
-          <div
-            style={{
-              marginTop: 10,
-              fontSize: 12,
-              lineHeight: 1.35,
-              fontWeight: 900,
-              color: BRAND.red,
-            }}
-          >
-            🔒 {text.protectedInfo}
-          </div>
-        ) : null}
+        <div style={noteBoxStyle}>{booking.category || text.notes}</div>
 
         <button type="button" onClick={onClose} style={{ ...darkButtonStyle, marginTop: 14 }}>
           {text.close}
@@ -1954,18 +1900,122 @@ function NoteModal({
   );
 }
 
-function TimePickerModal({
+function ClientCardModal({
+  booking,
+  text,
+  onClose,
+  onChat,
+  onConfirm,
+  onDecline,
+}: {
+  booking: BookingItem;
+  text: PageText;
+  onClose: () => void;
+  onChat: () => void;
+  onConfirm: () => void;
+  onDecline: () => void;
+}) {
+  const unlocked = isUnlocked(booking);
+  const method = getPaymentMethod(booking);
+  const location = unlocked ? getVisibleBookingLocation(booking) : getPublicBookingLocation(booking);
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={modalCardStyle} onClick={(event) => event.stopPropagation()}>
+        <button type="button" onClick={onClose} style={modalCloseStyle}>
+          ×
+        </button>
+
+        <h2 style={modalTitleStyle}>{text.clientCard}</h2>
+
+        <div style={clientCardTopStyle}>
+          <div style={clientAvatarStyle}>
+            {booking.masterName
+              .split(' ')
+              .map((part) => part[0])
+              .join('')
+              .slice(0, 2)}
+          </div>
+
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
+              {booking.masterName}
+            </div>
+            <div style={{ marginTop: 4, fontSize: 14, fontWeight: 800, color: BRAND.muted }}>
+              {booking.serviceName}
+            </div>
+            <div style={{ marginTop: 7, fontSize: 25, fontWeight: 900, color: statusColor(booking) }}>
+              {money(Number(booking.price || 0))}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <MiniPill label={statusLabel(booking, text)} color={statusColor(booking)} bg={statusBg(booking)} />
+          <MiniPill
+            label={`${getPaymentIcon(method)} ${getPaymentLabel(method, text)}`}
+            color={BRAND.navy}
+            bg="#ffffff"
+          />
+          <MiniPill
+            label={unlocked ? text.contactsOpen : text.contactLocked}
+            color={unlocked ? '#008f3a' : '#b87500'}
+            bg={unlocked ? BRAND.softGreen : BRAND.softYellow}
+          />
+        </div>
+
+        {!unlocked ? (
+          <div style={lockedBoxStyle}>
+            <strong>🔒 {text.contactLocked}</strong>
+            <p style={{ margin: '7px 0 0', lineHeight: 1.4 }}>{text.contactLockedText}</p>
+          </div>
+        ) : null}
+
+        <div style={{ marginTop: 12, display: 'grid', gap: 9 }}>
+          <InfoLine label={text.address} value={location || 'London'} locked={!unlocked} />
+          <InfoLine label={text.phone} value={booking.contactPhone || '+44 7700 123456'} locked={!unlocked} />
+          <InfoLine label={text.email} value={booking.contactEmail || 'client@olamep.com'} locked={!unlocked} />
+          <InfoLine label={text.notes} value={booking.category || text.notes} locked={false} />
+        </div>
+
+        <div
+          style={{
+            marginTop: 14,
+            display: 'grid',
+            gridTemplateColumns: booking.status === 'pending' ? '1fr 1fr 1fr' : '1fr',
+            gap: 8,
+          }}
+        >
+          <button type="button" onClick={onChat} style={miniOutlineButtonStyle}>
+            💬 {text.openChat}
+          </button>
+
+          {booking.status === 'pending' ? (
+            <>
+              <button type="button" onClick={onConfirm} style={miniGreenButtonStyle}>
+                ✓ {text.confirm}
+              </button>
+              <button type="button" onClick={onDecline} style={miniRedButtonStyle}>
+                × {text.decline}
+              </button>
+            </>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MinutePickerModal({
   text,
   hour,
   minute,
-  onHour,
   onMinute,
   onClose,
 }: {
   text: PageText;
   hour: number;
   minute: number;
-  onHour: (value: number) => void;
   onMinute: (value: number) => void;
   onClose: () => void;
 }) {
@@ -1976,34 +2026,20 @@ function TimePickerModal({
           ×
         </button>
 
-        <h2 style={{ margin: 0, fontSize: 25, fontWeight: 900, color: BRAND.navy }}>
-          {text.addCustomTime}
-        </h2>
+        <h2 style={modalTitleStyle}>{text.chooseMinute}</h2>
 
-        <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <label style={fieldLabelStyle}>
-            <span>Hour</span>
-            <select
-              value={hour}
-              onChange={(event) => onHour(Number(event.target.value))}
-              style={inputStyle}
-            >
-              {Array.from({ length: 24 }, (_, index) => (
-                <option key={index} value={index}>
-                  {String(index).padStart(2, '0')}
-                </option>
-              ))}
-            </select>
-          </label>
+        <div style={minutePickerGridStyle}>
+          <div style={fixedHourBoxStyle}>
+            <div style={{ fontSize: 46, fontWeight: 900, color: BRAND.green }}>
+              {String(hour).padStart(2, '0')}
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 900, color: BRAND.muted }}>{text.hourFixed}</div>
+          </div>
 
           <label style={fieldLabelStyle}>
             <span>Minute</span>
-            <select
-              value={minute}
-              onChange={(event) => onMinute(Number(event.target.value))}
-              style={inputStyle}
-            >
-              {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map((item) => (
+            <select value={minute} onChange={(event) => onMinute(Number(event.target.value))} style={inputStyle}>
+              {minuteOptions.map((item) => (
                 <option key={item} value={item}>
                   {String(item).padStart(2, '0')}
                 </option>
@@ -2012,22 +2048,8 @@ function TimePickerModal({
           </label>
         </div>
 
-        <div
-          style={{
-            marginTop: 16,
-            borderRadius: 18,
-            border: `2px solid ${BRAND.border}`,
-            background: BRAND.softGreen,
-            color: '#008f3a',
-            minHeight: 54,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 20,
-            fontWeight: 900,
-          }}
-        >
-          {String(hour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
+        <div style={newTimeBoxStyle}>
+          🕘 {text.newTime}: {String(hour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
         </div>
 
         <button type="button" onClick={onClose} style={{ ...darkButtonStyle, marginTop: 14 }}>
@@ -2038,46 +2060,41 @@ function TimePickerModal({
   );
 }
 
-function StatMini({ title, value, bg }: { title: string; value: string; bg: string }) {
+function InfoLine({ label, value, locked }: { label: string; value: string; locked: boolean }) {
   return (
-    <div
-      style={{
-        minHeight: 58,
-        borderRadius: 15,
-        border: `2px solid ${BRAND.border}`,
-        background: bg,
-        padding: '7px 8px',
-        display: 'grid',
-        alignContent: 'space-between',
-        minWidth: 0,
-      }}
-    >
+    <div style={infoLineStyle}>
+      <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.muted }}>{label}</div>
       <div
         style={{
-          fontSize: 10.5,
-          lineHeight: 1,
-          fontWeight: 900,
-          color: BRAND.muted,
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        }}
-      >
-        {title}
-      </div>
-      <div
-        style={{
-          fontSize: 20,
-          lineHeight: 1,
+          marginTop: 4,
+          fontSize: 14,
           fontWeight: 900,
           color: BRAND.navy,
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
+          filter: locked ? 'blur(3px)' : 'none',
+          userSelect: locked ? 'none' : 'auto',
         }}
       >
         {value}
       </div>
+    </div>
+  );
+}
+
+function StatBox({ title, value, bg }: { title: string; value: string; bg: string }) {
+  return (
+    <div
+      style={{
+        minHeight: 64,
+        borderRadius: 16,
+        border: `2.2px solid ${BRAND.border}`,
+        background: bg,
+        padding: 10,
+        display: 'grid',
+        alignContent: 'space-between',
+      }}
+    >
+      <div style={{ fontSize: 11.5, fontWeight: 900, color: BRAND.muted }}>{title}</div>
+      <div style={{ fontSize: 24, fontWeight: 900, color: BRAND.navy }}>{value}</div>
     </div>
   );
 }
@@ -2106,22 +2123,19 @@ function MiniPill({ label, color, bg }: { label: string; color: string; bg: stri
 
 function LegendDot({ color, label }: { color: string; label: string }) {
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        fontSize: 12,
-        fontWeight: 900,
-        color: BRAND.navy,
-        whiteSpace: 'nowrap',
-      }}
-    >
+    <span style={legendItemStyle}>
       <span style={{ width: 11, height: 11, borderRadius: 999, background: color }} />
       {label}
     </span>
   );
 }
+
+const headerStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '48px 1fr 48px',
+  alignItems: 'center',
+  gap: 10,
+};
 
 const circleButtonStyle: CSSProperties = {
   width: 48,
@@ -2175,15 +2189,15 @@ const topTabStyle: CSSProperties = {
   textOverflow: 'ellipsis',
 };
 
-const compactStatsWrapStyle: CSSProperties = {
+const statsRowStyle: CSSProperties = {
   marginTop: 13,
-  borderRadius: 22,
+  borderRadius: 25,
   border: `2.5px solid ${BRAND.border}`,
   background: '#ffffff',
-  padding: 9,
+  padding: 10,
   display: 'grid',
-  gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-  gap: 7,
+  gridTemplateColumns: 'repeat(4, 1fr)',
+  gap: 8,
 };
 
 const calendarPanelStyle: CSSProperties = {
@@ -2193,6 +2207,30 @@ const calendarPanelStyle: CSSProperties = {
   background: '#ffffff',
   padding: 13,
   overflow: 'hidden',
+};
+
+const dateHeaderStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '42px 1fr 42px',
+  alignItems: 'center',
+  gap: 8,
+};
+
+const dateTitleStyle: CSSProperties = {
+  fontSize: 26,
+  fontWeight: 900,
+  color: BRAND.navy,
+  lineHeight: 1.05,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
+
+const dateSubtitleStyle: CSSProperties = {
+  marginTop: 5,
+  fontSize: 13,
+  fontWeight: 900,
+  color: BRAND.muted,
 };
 
 const smallCircleStyle: CSSProperties = {
@@ -2207,18 +2245,76 @@ const smallCircleStyle: CSSProperties = {
   cursor: 'pointer',
 };
 
-const currentDateTitleStyle: CSSProperties = {
-  fontSize: 22,
-  fontWeight: 900,
-  color: BRAND.navy,
-  lineHeight: 1.05,
+const filterActionsRowStyle: CSSProperties = {
+  marginTop: 12,
+  display: 'flex',
+  gap: 9,
+  overflowX: 'auto',
+  paddingBottom: 6,
 };
 
-const currentDateSubStyle: CSSProperties = {
-  marginTop: 5,
-  fontSize: 12,
+const filterChipStyle: CSSProperties = {
+  flexShrink: 0,
+  minHeight: 46,
+  borderRadius: 999,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  padding: '0 15px',
+  fontSize: 13,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const filtersBoxStyle: CSSProperties = {
+  marginTop: 10,
+  borderRadius: 20,
+  border: `2px solid ${BRAND.border}`,
+  background: '#fffdf8',
+  padding: 10,
+};
+
+const filtersGridStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: 9,
+};
+
+const modeRowStyle: CSSProperties = {
+  marginTop: 10,
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, 1fr)',
+  gap: 7,
+};
+
+const modeButtonStyle: CSSProperties = {
+  minHeight: 42,
+  borderRadius: 999,
+  border: `2px solid ${BRAND.border}`,
+  fontSize: 13,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const fieldLabelStyle: CSSProperties = {
+  display: 'grid',
+  gap: 5,
+  fontSize: 11,
   fontWeight: 900,
   color: BRAND.muted,
+};
+
+const inputStyle: CSSProperties = {
+  width: '100%',
+  minHeight: 42,
+  boxSizing: 'border-box',
+  borderRadius: 14,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 13,
+  fontWeight: 900,
+  padding: '0 10px',
 };
 
 const plainButtonStyle: CSSProperties = {
@@ -2243,78 +2339,6 @@ const darkButtonStyle: CSSProperties = {
   cursor: 'pointer',
 };
 
-const modeRowStyle: CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(4, 1fr)',
-  gap: 7,
-  marginBottom: 10,
-};
-
-const modeButtonStyle: CSSProperties = {
-  minHeight: 40,
-  borderRadius: 999,
-  border: `2px solid ${BRAND.border}`,
-  fontSize: 12,
-  fontWeight: 900,
-  cursor: 'pointer',
-};
-
-const filterActionsRowStyle: CSSProperties = {
-  marginTop: 12,
-  display: 'flex',
-  gap: 9,
-  overflowX: 'auto',
-  paddingBottom: 6,
-};
-
-const filterChipStyle: CSSProperties = {
-  flexShrink: 0,
-  minHeight: 46,
-  borderRadius: 999,
-  border: `2px solid ${BRAND.border}`,
-  padding: '0 15px',
-  background: '#ffffff',
-  color: BRAND.navy,
-  fontSize: 13,
-  fontWeight: 900,
-  cursor: 'pointer',
-};
-
-const filtersBoxStyle: CSSProperties = {
-  marginTop: 10,
-  borderRadius: 20,
-  border: `2px solid ${BRAND.border}`,
-  background: '#fffdf8',
-  padding: 10,
-};
-
-const filtersGridStyle: CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
-  gap: 9,
-};
-
-const fieldLabelStyle: CSSProperties = {
-  display: 'grid',
-  gap: 5,
-  fontSize: 11,
-  fontWeight: 900,
-  color: BRAND.muted,
-};
-
-const inputStyle: CSSProperties = {
-  width: '100%',
-  minHeight: 42,
-  boxSizing: 'border-box',
-  borderRadius: 14,
-  border: `2px solid ${BRAND.border}`,
-  background: '#ffffff',
-  color: BRAND.navy,
-  fontSize: 13,
-  fontWeight: 900,
-  padding: '0 10px',
-};
-
 const legendStyle: CSSProperties = {
   marginTop: 10,
   borderRadius: 18,
@@ -2326,6 +2350,16 @@ const legendStyle: CSSProperties = {
   gap: 14,
   overflowX: 'auto',
   padding: '0 12px',
+};
+
+const legendItemStyle: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 6,
+  fontSize: 12,
+  fontWeight: 900,
+  color: BRAND.navy,
+  whiteSpace: 'nowrap',
 };
 
 const addTimeButtonStyle: CSSProperties = {
@@ -2343,12 +2377,51 @@ const addTimeButtonStyle: CSSProperties = {
 const notebookHeaderStyle: CSSProperties = {
   marginTop: 12,
   display: 'grid',
-  gridTemplateColumns: '92px 1fr 76px 42px',
-  gap: 10,
+  gridTemplateColumns: '140px 1fr 76px 42px',
+  gap: 8,
   padding: '0 14px 8px',
   color: BRAND.muted,
   fontSize: 13,
   fontWeight: 900,
+};
+
+const minutePlusStyle: CSSProperties = {
+  width: 34,
+  height: 34,
+  borderRadius: 999,
+  border: `2.4px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 24,
+  lineHeight: 1,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const doneCheckStyle: CSSProperties = {
+  width: 32,
+  height: 32,
+  borderRadius: 999,
+  background: BRAND.green,
+  color: '#ffffff',
+  border: `2px solid ${BRAND.border}`,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: 18,
+  fontWeight: 900,
+};
+
+const noteButtonStyle: CSSProperties = {
+  width: 38,
+  height: 38,
+  borderRadius: 12,
+  border: 'none',
+  background: 'transparent',
+  color: BRAND.muted,
+  fontSize: 24,
+  fontWeight: 900,
+  cursor: 'pointer',
 };
 
 const miniOutlineButtonStyle: CSSProperties = {
@@ -2382,6 +2455,30 @@ const miniRedButtonStyle: CSSProperties = {
   fontSize: 13,
   fontWeight: 900,
   cursor: 'pointer',
+};
+
+const freeSlotStyle: CSSProperties = {
+  minHeight: 72,
+  borderRadius: 24,
+  border: '2px dashed #d7dce4',
+  background: '#ffffff',
+  display: 'grid',
+  gridTemplateColumns: '48px 118px minmax(0, 1fr)',
+  gap: 10,
+  alignItems: 'center',
+  padding: '0 18px',
+};
+
+const freeSlotTimeStyle: CSSProperties = {
+  fontSize: 27,
+  fontWeight: 900,
+  color: '#a1a8b4',
+};
+
+const freeSlotTextStyle: CSSProperties = {
+  fontSize: 18,
+  fontWeight: 900,
+  color: BRAND.muted,
 };
 
 const monthGridWrapStyle: CSSProperties = {
@@ -2423,6 +2520,8 @@ const modalOverlayStyle: CSSProperties = {
 const modalCardStyle: CSSProperties = {
   width: '100%',
   maxWidth: 430,
+  maxHeight: '86vh',
+  overflowY: 'auto',
   borderTopLeftRadius: 28,
   borderTopRightRadius: 28,
   border: `2.5px solid ${BRAND.border}`,
@@ -2443,4 +2542,95 @@ const modalCloseStyle: CSSProperties = {
   fontWeight: 900,
   cursor: 'pointer',
   marginBottom: 12,
+};
+
+const modalTitleStyle: CSSProperties = {
+  margin: 0,
+  fontSize: 25,
+  fontWeight: 900,
+  color: BRAND.navy,
+};
+
+const noteBoxStyle: CSSProperties = {
+  marginTop: 14,
+  borderRadius: 18,
+  border: `2px solid ${BRAND.border}`,
+  background: BRAND.softYellow,
+  padding: 13,
+  fontSize: 15,
+  lineHeight: 1.4,
+  fontWeight: 800,
+  color: BRAND.navy,
+};
+
+const clientCardTopStyle: CSSProperties = {
+  marginTop: 12,
+  display: 'grid',
+  gridTemplateColumns: '78px 1fr',
+  gap: 12,
+  alignItems: 'center',
+};
+
+const clientAvatarStyle: CSSProperties = {
+  width: 78,
+  height: 78,
+  borderRadius: 24,
+  border: `2px solid ${BRAND.border}`,
+  background: BRAND.softBlue,
+  color: BRAND.navy,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: 24,
+  fontWeight: 900,
+};
+
+const lockedBoxStyle: CSSProperties = {
+  marginTop: 12,
+  borderRadius: 18,
+  border: `2px solid ${BRAND.border}`,
+  background: BRAND.softYellow,
+  padding: 13,
+  fontSize: 13,
+  fontWeight: 800,
+  color: BRAND.navy,
+};
+
+const infoLineStyle: CSSProperties = {
+  borderRadius: 16,
+  border: '1.5px solid #d9dee8',
+  background: '#ffffff',
+  padding: 12,
+};
+
+const minutePickerGridStyle: CSSProperties = {
+  marginTop: 16,
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: 12,
+  alignItems: 'end',
+};
+
+const fixedHourBoxStyle: CSSProperties = {
+  minHeight: 86,
+  borderRadius: 18,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  display: 'grid',
+  alignContent: 'center',
+  justifyItems: 'center',
+};
+
+const newTimeBoxStyle: CSSProperties = {
+  marginTop: 16,
+  borderRadius: 18,
+  border: `2px solid ${BRAND.border}`,
+  background: BRAND.softGreen,
+  color: '#008f3a',
+  minHeight: 54,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: 18,
+  fontWeight: 900,
 };
