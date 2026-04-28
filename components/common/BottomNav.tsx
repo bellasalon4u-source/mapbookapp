@@ -556,13 +556,13 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
         style={{
           position: 'fixed',
           left: '50%',
-          bottom: 'calc(14px + env(safe-area-inset-bottom))',
+          bottom: 'calc(16px + env(safe-area-inset-bottom))',
           transform: shouldShowNav
             ? 'translateX(-50%) translateY(0)'
-            : 'translateX(-50%) translateY(120px)',
+            : 'translateX(-50%) translateY(118px)',
           opacity: shouldShowNav ? 1 : 0,
-          width: 'calc(100% - 58px)',
-          maxWidth: 358,
+          width: 'calc(100% - 54px)',
+          maxWidth: 360,
           zIndex: 1200,
           pointerEvents: shouldShowNav ? 'auto' : 'none',
           transition: 'transform 0.34s ease, opacity 0.22s ease',
@@ -571,42 +571,22 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
         <div
           style={{
             position: 'relative',
-            height: 72,
+            height: 76,
             overflow: 'visible',
           }}
         >
           <div
             style={{
               position: 'absolute',
-              left: '50%',
-              top: -25,
-              transform: 'translateX(-50%)',
-              width: 96,
-              height: 54,
-              borderTopLeftRadius: 999,
-              borderTopRightRadius: 999,
-              borderTop: `3px solid ${BRAND.border}`,
-              borderLeft: `3px solid ${BRAND.border}`,
-              borderRight: `3px solid ${BRAND.border}`,
-              background: BRAND.cream,
-              zIndex: 1,
-              pointerEvents: 'none',
-              boxSizing: 'border-box',
-            }}
-          />
-
-          <div
-            style={{
-              position: 'absolute',
               inset: 0,
               background: BRAND.cream,
               border: `3px solid ${BRAND.border}`,
-              borderRadius: 28,
-              boxShadow: '0 10px 24px rgba(15,23,42,0.08)',
+              borderRadius: 32,
+              boxShadow: '0 12px 26px rgba(17,17,17,0.10)',
               display: 'grid',
               gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
               alignItems: 'center',
-              padding: '8px 7px 5px',
+              padding: '9px 8px 6px',
               boxSizing: 'border-box',
               zIndex: 2,
               overflow: 'visible',
@@ -634,18 +614,48 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'flex-start',
-                      gap: 0,
                       position: 'relative',
-                      zIndex: 30,
-                      height: 72,
+                      zIndex: 20,
+                      height: 76,
                       minWidth: 0,
                       overflow: 'visible',
                     }}
                   >
                     <span
                       style={{
+                        position: 'absolute',
+                        top: -29,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: 76,
+                        height: 76,
+                        borderRadius: '50%',
+                        background: BRAND.cream,
+                        border: `3px solid ${BRAND.border}`,
+                        boxSizing: 'border-box',
+                        zIndex: 21,
+                        boxShadow: '0 8px 20px rgba(17,17,17,0.08)',
+                      }}
+                    />
+
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: 10,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: 92,
+                        height: 35,
+                        background: BRAND.cream,
+                        zIndex: 22,
+                        pointerEvents: 'none',
+                      }}
+                    />
+
+                    <span
+                      style={{
                         position: 'relative',
-                        zIndex: 40,
+                        zIndex: 30,
                         width: 62,
                         height: 62,
                         borderRadius: '50%',
@@ -657,8 +667,9 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                         fontSize: 40,
                         fontWeight: 900,
                         lineHeight: 1,
-                        boxShadow: '0 10px 24px rgba(85,199,95,0.34)',
-                        transform: 'translateY(-15px)',
+                        border: '3px solid #ffffff',
+                        boxShadow: '0 12px 24px rgba(85,199,95,0.34)',
+                        transform: 'translateY(-22px)',
                         flexShrink: 0,
                       }}
                     >
@@ -669,8 +680,8 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                       title={label}
                       style={{
                         position: 'relative',
-                        zIndex: 40,
-                        marginTop: -12,
+                        zIndex: 31,
+                        marginTop: -19,
                         width: '100%',
                         maxWidth: 72,
                         display: 'block',
@@ -700,7 +711,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     background: 'transparent',
                     padding: 0,
                     cursor: 'pointer',
-                    height: 58,
+                    height: 60,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
