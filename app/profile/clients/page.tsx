@@ -77,6 +77,9 @@ type PageText = {
   repeatClient: string;
   specialNote: string;
   addCustomTime: string;
+  hour: string;
+  minute: string;
+  newTime: string;
 };
 
 const BRAND = {
@@ -153,6 +156,9 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     repeatClient: 'Regular client',
     specialNote: 'Special note',
     addCustomTime: 'Add custom time',
+    hour: 'Hour',
+    minute: 'Minute',
+    newTime: 'New time',
   },
   RU: {
     title: 'Мои клиенты',
@@ -209,6 +215,9 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     repeatClient: 'Постоянный клиент',
     specialNote: 'Спец. заметка',
     addCustomTime: 'Добавить своё время',
+    hour: 'Час',
+    minute: 'Минуты',
+    newTime: 'Новое время',
   },
   UA: {
     title: 'Мої клієнти',
@@ -265,6 +274,9 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     repeatClient: 'Постійний клієнт',
     specialNote: 'Спец. нотатка',
     addCustomTime: 'Додати свій час',
+    hour: 'Година',
+    minute: 'Хвилини',
+    newTime: 'Новий час',
   },
 };
 
@@ -274,6 +286,8 @@ const clientRepeatCount: Record<string, number> = {
   'Klára Nováková': 1,
   'Lenka Bohatová': 5,
   'Barbora Bendová': 3,
+  'Sophie Williams': 3,
+  'Emily Carter': 4,
 };
 
 function getText(language: AppLanguage) {
@@ -307,12 +321,6 @@ function startOfDay(date: Date) {
 function addDays(date: Date, days: number) {
   const next = new Date(date);
   next.setDate(next.getDate() + days);
-  return next;
-}
-
-function addHours(date: Date, hours: number) {
-  const next = new Date(date);
-  next.setHours(next.getHours() + hours);
   return next;
 }
 
@@ -351,6 +359,7 @@ function getTimeLabel(booking: BookingItem) {
 }
 
 function getHourLabel(hour: number) {
+  if (hour === 24) return '00:00';
   return `${String(hour).padStart(2, '0')}:00`;
 }
 
@@ -359,6 +368,15 @@ function getDateTitle(date: Date, language: AppLanguage) {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
+
+function getCompactDateTitle(date: Date, language: AppLanguage) {
+  return new Intl.DateTimeFormat(getLocale(language), {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
     year: 'numeric',
   }).format(date);
 }
@@ -465,7 +483,7 @@ function makeBooking(
     price,
     status,
     dateTime: dateTime.toISOString(),
-    dateLabel: `${getHourLabel(hour).replace(':00', '')}:${String(minute).padStart(2, '0')}`,
+    dateLabel: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
     location: address,
     areaLabel: address.split(',')[0] || address,
     exactAddress: address,
@@ -792,23 +810,12 @@ export default function ProfileClientsPage() {
     viewMode,
   ]);
 
-  const selectedDayBookings = useMemo(() => {
-    return bookings
-      .filter((booking) => {
-        const date = getBookingDate(booking);
-        return date ? isSameDay(date, activeDate) : false;
-      })
-      .sort((a, b) => {
-        const left = getBookingDate(a)?.getTime() || 0;
-        const right = getBookingDate(b)?.getTime() || 0;
-        return left - right;
-      });
-  }, [activeDate, bookings]);
-
   const activeCount = bookings.filter(
     (booking) => booking.status === 'pending' || booking.status === 'upcoming'
   ).length;
+
   const completedCount = bookings.filter((booking) => booking.status === 'completed').length;
+
   const totalRevenue = bookings
     .filter((booking) => booking.status !== 'cancelled')
     .reduce((sum, booking) => sum + Number(booking.price || 0), 0);
@@ -828,6 +835,9 @@ export default function ProfileClientsPage() {
     const current = new Date().getFullYear();
     return Array.from({ length: 7 }, (_, index) => current - 2 + index);
   }, []);
+
+  const currentDateTitle = getDateTitle(activeDate, language);
+  const compactDateTitle = getCompactDateTitle(activeDate, language);
 
   const handleTopMode = (mode: ViewMode) => {
     setViewMode(mode);
@@ -875,6 +885,12 @@ export default function ProfileClientsPage() {
     setRangeTo(toInputDate(activeDate));
   };
 
+  const openTimePicker = (hour?: number, minute?: number) => {
+    if (typeof hour === 'number') setCustomHour(hour);
+    if (typeof minute === 'number') setCustomMinute(minute);
+    setTimePickerOpen(true);
+  };
+
   return (
     <main
       style={{
@@ -886,14 +902,7 @@ export default function ProfileClientsPage() {
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 176px' }}>
-        <header
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '48px 1fr 48px',
-            alignItems: 'center',
-            gap: 10,
-          }}
-        >
+        <header style={headerStyle}>
           <button
             type="button"
             onClick={() => router.back()}
@@ -949,53 +958,44 @@ export default function ProfileClientsPage() {
           })}
         </section>
 
-        <section style={statsWrapStyle}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <StatBox title={text.active} value={String(activeCount)} bg={BRAND.softGreen} />
-            <StatBox title={text.total} value={String(bookings.length)} bg={BRAND.softBlue} />
-            <StatBox title={text.revenue} value={money(totalRevenue)} bg={BRAND.softOrange} />
-            <StatBox title={text.done} value={String(completedCount)} bg={BRAND.softViolet} />
-          </div>
+        <section style={compactStatsWrapStyle}>
+          <CompactStat title={text.active} value={String(activeCount)} bg={BRAND.softGreen} />
+          <CompactStat title={text.total} value={String(bookings.length)} bg={BRAND.softBlue} />
+          <CompactStat title={text.revenue} value={money(totalRevenue)} bg={BRAND.softOrange} />
+          <CompactStat title={text.done} value={String(completedCount)} bg={BRAND.softViolet} />
         </section>
 
         <section style={calendarPanelStyle}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '42px 1fr 42px',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
+          <div style={dateHeaderStyle}>
             <button
               type="button"
               onClick={() => {
-                const next = addHours(new Date(calendarDate), -24 * 30);
+                const next = addDays(activeDate, -1);
+                setSelectedDate(next);
                 setCalendarDate(next);
+                setViewMode('calendar');
+                setCalendarMode('day');
               }}
               style={smallCircleStyle}
             >
               ‹
             </button>
 
-            <div
-              style={{
-                textAlign: 'center',
-                fontSize: 27,
-                fontWeight: 900,
-                color: BRAND.navy,
-                textTransform: 'capitalize',
-                lineHeight: 1,
-              }}
-            >
-              {getMonthTitle(calendarDate, language)}
+            <div style={{ minWidth: 0 }}>
+              <div style={dateTitleStyle}>{compactDateTitle}</div>
+              <div style={dateSubTitleStyle}>
+                {filteredBookings.length} {text.bookings} · {getMonthTitle(calendarDate, language)}
+              </div>
             </div>
 
             <button
               type="button"
               onClick={() => {
-                const next = addHours(new Date(calendarDate), 24 * 30);
+                const next = addDays(activeDate, 1);
+                setSelectedDate(next);
                 setCalendarDate(next);
+                setViewMode('calendar');
+                setCalendarMode('day');
               }}
               style={smallCircleStyle}
             >
@@ -1003,146 +1003,7 @@ export default function ProfileClientsPage() {
             </button>
           </div>
 
-          <div
-            style={{
-              marginTop: 14,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1.5fr 1fr',
-              gap: 8,
-            }}
-          >
-            <select
-              value={calendarDate.getFullYear()}
-              onChange={(event) => {
-                const next = new Date(calendarDate);
-                next.setFullYear(Number(event.target.value));
-                setCalendarDate(next);
-              }}
-              style={selectStyle}
-            >
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={calendarDate.getMonth()}
-              onChange={(event) => {
-                const next = new Date(calendarDate);
-                next.setMonth(Number(event.target.value));
-                setCalendarDate(next);
-              }}
-              style={selectStyle}
-            >
-              {Array.from({ length: 12 }, (_, index) => (
-                <option key={index} value={index}>
-                  {getShortMonthName(index, language)}
-                </option>
-              ))}
-            </select>
-
-            <button
-              type="button"
-              onClick={() => handleTopMode('today')}
-              style={plainButtonStyle}
-            >
-              {text.today}
-            </button>
-          </div>
-
-          <div
-            style={{
-              marginTop: 11,
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: 7,
-            }}
-          >
-            {([
-              ['month', text.month],
-              ['week', text.week],
-              ['day', text.day],
-              ['list', text.list],
-            ] as const).map(([mode, label]) => {
-              const active = calendarMode === mode;
-
-              return (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => {
-                    setCalendarMode(mode);
-                    setViewMode('calendar');
-                  }}
-                  style={{
-                    ...modeButtonStyle,
-                    background: active ? BRAND.navy : '#ffffff',
-                    color: active ? '#ffffff' : BRAND.navy,
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-
-          {calendarMode === 'month' ? (
-            <MonthGrid
-              language={language}
-              calendarDate={calendarDate}
-              selectedDate={selectedDate}
-              bookings={monthBookings}
-              onSelect={(date) => {
-                setSelectedDate(startOfDay(date));
-                setCalendarDate(startOfDay(date));
-                setViewMode('calendar');
-                setCalendarMode('day');
-              }}
-            />
-          ) : null}
-
-          {calendarMode === 'week' ? (
-            <WeekStrip
-              language={language}
-              selectedDate={selectedDate}
-              bookings={bookings}
-              onSelect={(date) => {
-                setSelectedDate(startOfDay(date));
-                setCalendarDate(startOfDay(date));
-                setViewMode('calendar');
-              }}
-            />
-          ) : null}
-
-          <div style={rangeCardStyle}>
-            <div>
-              <div style={{ fontSize: 26, fontWeight: 900, color: BRAND.navy }}>
-                {calendarMode === 'day'
-                  ? text.selectedDay
-                  : calendarMode === 'week'
-                  ? text.week
-                  : calendarMode === 'month'
-                  ? text.month
-                  : text.dateRange}
-              </div>
-              <div
-                style={{
-                  marginTop: 5,
-                  fontSize: 14,
-                  fontWeight: 900,
-                  color: BRAND.muted,
-                }}
-              >
-                {getDateTitle(activeDate, language)} · {filteredBookings.length} {text.bookings}
-              </div>
-            </div>
-
-            <div style={countBadgeStyle}>{filteredBookings.length}</div>
-          </div>
-
-          <div style={filterActionsRowStyle}>
+          <div style={quickControlsRowStyle}>
             <button
               type="button"
               onClick={() => setFiltersOpen((prev) => !prev)}
@@ -1153,6 +1014,14 @@ export default function ProfileClientsPage() {
               }}
             >
               ☰ {text.filters}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleTopMode('today')}
+              style={filterChipStyle}
+            >
+              📅 {text.today}
             </button>
 
             <button
@@ -1182,7 +1051,72 @@ export default function ProfileClientsPage() {
 
           {filtersOpen ? (
             <div style={filtersBoxStyle}>
+              <div style={modeSelectorStyle}>
+                {([
+                  ['month', text.month],
+                  ['week', text.week],
+                  ['day', text.day],
+                  ['list', text.list],
+                ] as const).map(([mode, label]) => {
+                  const active = calendarMode === mode;
+
+                  return (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => {
+                        setCalendarMode(mode);
+                        setViewMode('calendar');
+                      }}
+                      style={{
+                        ...modeButtonStyle,
+                        background: active ? BRAND.navy : '#ffffff',
+                        color: active ? '#ffffff' : BRAND.navy,
+                      }}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+
               <div style={filtersGridStyle}>
+                <select
+                  value={calendarDate.getFullYear()}
+                  onChange={(event) => {
+                    const next = new Date(calendarDate);
+                    next.setFullYear(Number(event.target.value));
+                    setCalendarDate(next);
+                    setSelectedDate(next);
+                    setViewMode('calendar');
+                  }}
+                  style={inputStyle}
+                >
+                  {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={calendarDate.getMonth()}
+                  onChange={(event) => {
+                    const next = new Date(calendarDate);
+                    next.setMonth(Number(event.target.value));
+                    setCalendarDate(next);
+                    setSelectedDate(next);
+                    setViewMode('calendar');
+                  }}
+                  style={inputStyle}
+                >
+                  {Array.from({ length: 12 }, (_, index) => (
+                    <option key={index} value={index}>
+                      {getShortMonthName(index, language)}
+                    </option>
+                  ))}
+                </select>
+
                 <label style={fieldLabelStyle}>
                   <span>{text.from}</span>
                   <input
@@ -1260,6 +1194,34 @@ export default function ProfileClientsPage() {
             </div>
           ) : null}
 
+          {calendarMode === 'month' && viewMode === 'calendar' ? (
+            <MonthGrid
+              language={language}
+              calendarDate={calendarDate}
+              selectedDate={selectedDate}
+              bookings={monthBookings}
+              onSelect={(date) => {
+                setSelectedDate(startOfDay(date));
+                setCalendarDate(startOfDay(date));
+                setViewMode('calendar');
+                setCalendarMode('day');
+              }}
+            />
+          ) : null}
+
+          {calendarMode === 'week' && viewMode === 'calendar' ? (
+            <WeekStrip
+              language={language}
+              selectedDate={selectedDate}
+              bookings={bookings}
+              onSelect={(date) => {
+                setSelectedDate(startOfDay(date));
+                setCalendarDate(startOfDay(date));
+                setViewMode('calendar');
+              }}
+            />
+          ) : null}
+
           <div style={legendStyle}>
             <LegendDot color={BRAND.blue} label={text.completed} />
             <LegendDot color={BRAND.green} label={text.confirmed} />
@@ -1268,10 +1230,10 @@ export default function ProfileClientsPage() {
           </div>
         </section>
 
-        <section style={{ marginTop: 20 }}>
+        <section style={{ marginTop: 16 }}>
           <button
             type="button"
-            onClick={() => setTimePickerOpen(true)}
+            onClick={() => openTimePicker(4, 25)}
             style={addTimeButtonStyle}
           >
             {text.addBefore}
@@ -1293,11 +1255,12 @@ export default function ProfileClientsPage() {
             onChat={() => router.push('/messages')}
             onDetails={() => router.push('/bookings')}
             onNote={setNoteBooking}
+            onTime={(hour, minute) => openTimePicker(hour, minute)}
           />
 
           <button
             type="button"
-            onClick={() => setTimePickerOpen(true)}
+            onClick={() => openTimePicker(0, 15)}
             style={{ ...addTimeButtonStyle, marginTop: 12 }}
           >
             {text.addAfter}
@@ -1334,6 +1297,7 @@ function NotebookSchedule({
   onChat,
   onDetails,
   onNote,
+  onTime,
 }: {
   text: PageText;
   bookings: BookingItem[];
@@ -1343,34 +1307,44 @@ function NotebookSchedule({
   onChat: () => void;
   onDetails: () => void;
   onNote: (booking: BookingItem) => void;
+  onTime: (hour: number, minute: number) => void;
 }) {
   const hours = Array.from({ length: 20 }, (_, index) => index + 5);
 
   return (
-    <div style={{ display: 'grid', gap: 9 }}>
+    <div style={{ display: 'grid', gap: 8 }}>
       {hours.map((hour) => {
+        const realHour = hour === 24 ? 0 : hour;
+
         const hourBookings = bookings.filter((booking) => {
           const date = getBookingDate(booking);
-          return date ? isSameDay(date, activeDate) && date.getHours() === hour : false;
+          return date ? isSameDay(date, activeDate) && date.getHours() === realHour : false;
         });
 
         if (hourBookings.length === 0 && !showFreeWindows) return null;
 
         if (hourBookings.length === 0) {
-          return <FreeSlotRow key={hour} hour={hour} text={text} />;
+          return <FreeSlotRow key={hour} hour={hour} text={text} onTime={() => onTime(realHour, 0)} />;
         }
 
-        return hourBookings.map((booking) => (
-          <NotebookBookingRow
-            key={booking.id}
-            booking={booking}
-            text={text}
-            onDone={() => onDone(booking)}
-            onChat={onChat}
-            onDetails={onDetails}
-            onNote={() => onNote(booking)}
-          />
-        ));
+        return hourBookings.map((booking) => {
+          const date = getBookingDate(booking);
+          const hourValue = date ? date.getHours() : realHour;
+          const minuteValue = date ? date.getMinutes() : 0;
+
+          return (
+            <NotebookBookingRow
+              key={booking.id}
+              booking={booking}
+              text={text}
+              onDone={() => onDone(booking)}
+              onChat={onChat}
+              onDetails={onDetails}
+              onNote={() => onNote(booking)}
+              onTime={() => onTime(hourValue, minuteValue)}
+            />
+          );
+        });
       })}
     </div>
   );
@@ -1383,6 +1357,7 @@ function NotebookBookingRow({
   onChat,
   onDetails,
   onNote,
+  onTime,
 }: {
   booking: BookingItem;
   text: PageText;
@@ -1390,6 +1365,7 @@ function NotebookBookingRow({
   onChat: () => void;
   onDetails: () => void;
   onNote: () => void;
+  onTime: () => void;
 }) {
   const done = booking.status === 'completed';
   const cancelled = booking.status === 'cancelled';
@@ -1407,78 +1383,79 @@ function NotebookBookingRow({
       title="Long press / drag to move time"
       style={{
         position: 'relative',
-        minHeight: cancelled ? 98 : 156,
-        borderRadius: 24,
-        border: `2.5px solid ${BRAND.border}`,
+        minHeight: cancelled ? 86 : 138,
+        borderRadius: 18,
+        border: `1.8px solid ${cancelled ? '#f1b9c4' : '#d8e2dd'}`,
         background: cancelled
           ? 'linear-gradient(135deg, #ffffff 0%, #ffffff 48%, #ffe3ea 49%, #ffe3ea 100%)'
           : bg,
         display: 'grid',
-        gridTemplateColumns: '92px minmax(0, 1fr) 76px 42px',
-        gap: 10,
+        gridTemplateColumns: '86px minmax(0, 1fr) 64px 34px',
+        gap: 8,
         alignItems: 'center',
-        padding: '12px 12px 12px 0',
+        padding: '10px 9px 10px 0',
         overflow: 'hidden',
-        boxShadow: '0 8px 20px rgba(7,27,70,0.05)',
+        boxShadow: '0 5px 14px rgba(7,27,70,0.05)',
       }}
     >
       <div
         style={{
           position: 'absolute',
           left: 0,
-          top: 0,
-          bottom: 0,
-          width: 7,
+          top: 8,
+          bottom: 8,
+          width: 4,
+          borderRadius: 999,
           background: color,
         }}
       />
 
-      {done ? (
-        <div
+      <div style={timeCellStyle}>
+        <button
+          type="button"
+          onClick={onTime}
+          aria-label={text.addCustomTime}
           style={{
-            position: 'absolute',
-            top: 8,
-            left: 7,
-            width: 28,
-            height: 28,
+            width: 27,
+            height: 27,
             borderRadius: 999,
-            background: BRAND.green,
-            color: '#ffffff',
-            border: `2px solid ${BRAND.border}`,
+            border: `1.8px solid ${done ? BRAND.green : BRAND.border}`,
+            background: done ? BRAND.green : '#ffffff',
+            color: done ? '#ffffff' : BRAND.navy,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 17,
+            fontSize: done ? 16 : 20,
+            lineHeight: 1,
             fontWeight: 900,
-            zIndex: 2,
+            cursor: 'pointer',
           }}
         >
-          ✓
-        </div>
-      ) : null}
+          {done ? '✓' : '+'}
+        </button>
 
-      <button
-        type="button"
-        onClick={onNote}
-        style={{
-          minHeight: 80,
-          background: 'transparent',
-          border: 'none',
-          color: BRAND.navy,
-          fontSize: 27,
-          fontWeight: 900,
-          cursor: 'pointer',
-          paddingLeft: 12,
-        }}
-      >
-        {getTimeLabel(booking)}
-        <div style={{ marginTop: 4, fontSize: 16, color: color }}>{pending ? '!' : '+'}</div>
-      </button>
+        <button
+          type="button"
+          onClick={onTime}
+          style={{
+            border: 'none',
+            background: 'transparent',
+            color: BRAND.navy,
+            fontSize: 20,
+            lineHeight: 1,
+            fontWeight: 900,
+            cursor: 'pointer',
+            padding: 0,
+          }}
+        >
+          {getTimeLabel(booking)}
+        </button>
+      </div>
 
       <div style={{ minWidth: 0 }}>
         <div
           style={{
-            fontSize: cancelled ? 20 : 21,
+            fontSize: cancelled ? 18 : 19,
             lineHeight: 1.05,
             fontWeight: 900,
             color: cancelled ? BRAND.red : BRAND.navy,
@@ -1498,8 +1475,8 @@ function NotebookBookingRow({
         <div
           style={{
             marginTop: 4,
-            fontSize: 14,
-            lineHeight: 1.2,
+            fontSize: 13,
+            lineHeight: 1.15,
             fontWeight: 800,
             color: BRAND.muted,
             overflow: 'hidden',
@@ -1512,24 +1489,19 @@ function NotebookBookingRow({
 
         {!cancelled ? (
           <>
-            <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            <div style={{ marginTop: 7, display: 'flex', flexWrap: 'wrap', gap: 5 }}>
               <MiniPill label={statusLabel(booking, text)} color={color} bg="#ffffff" />
               <MiniPill
                 label={isPaid(booking) ? 'Deposit paid' : 'Deposit waiting'}
                 color={isPaid(booking) ? '#008f3a' : '#b87500'}
                 bg={isPaid(booking) ? BRAND.softGreen : BRAND.softYellow}
               />
-              <MiniPill
-                label={isUnlocked(booking) ? 'Contacts open' : 'Contacts locked'}
-                color={isUnlocked(booking) ? '#008f3a' : BRAND.blue}
-                bg={isUnlocked(booking) ? BRAND.softGreen : BRAND.softBlue}
-              />
             </div>
 
             <div
               style={{
-                marginTop: 8,
-                fontSize: 12,
+                marginTop: 7,
+                fontSize: 11.5,
                 fontWeight: 900,
                 color: BRAND.muted,
                 overflow: 'hidden',
@@ -1542,10 +1514,10 @@ function NotebookBookingRow({
 
             <div
               style={{
-                marginTop: 9,
+                marginTop: 8,
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                gap: 8,
+                gap: 7,
               }}
             >
               <button type="button" onClick={onChat} style={miniOutlineButtonStyle}>
@@ -1568,9 +1540,9 @@ function NotebookBookingRow({
 
       <div
         style={{
-          fontSize: 24,
+          fontSize: 21,
           fontWeight: 900,
-          color: cancelled ? BRAND.red : color === BRAND.yellow ? BRAND.orange : color,
+          color: cancelled ? BRAND.red : pending ? BRAND.orange : color,
           textAlign: 'right',
         }}
       >
@@ -1582,13 +1554,13 @@ function NotebookBookingRow({
         onClick={onNote}
         aria-label={text.notes}
         style={{
-          width: 38,
-          height: 38,
-          borderRadius: 12,
+          width: 32,
+          height: 32,
+          borderRadius: 10,
           border: 'none',
           background: 'transparent',
           color: BRAND.muted,
-          fontSize: 24,
+          fontSize: 23,
           fontWeight: 900,
           cursor: 'pointer',
         }}
@@ -1599,33 +1571,46 @@ function NotebookBookingRow({
   );
 }
 
-function FreeSlotRow({ hour, text }: { hour: number; text: PageText }) {
+function FreeSlotRow({ hour, text, onTime }: { hour: number; text: PageText; onTime: () => void }) {
   return (
     <article
       style={{
-        minHeight: 72,
-        borderRadius: 24,
-        border: '2px dashed #d7dce4',
+        minHeight: 64,
+        borderRadius: 18,
+        border: '1.8px dashed #d7dce4',
         background: '#ffffff',
         display: 'grid',
-        gridTemplateColumns: '118px minmax(0, 1fr)',
+        gridTemplateColumns: '86px minmax(0, 1fr)',
         alignItems: 'center',
-        padding: '0 18px',
+        padding: '0 12px 0 0',
       }}
     >
-      <div
-        style={{
-          fontSize: 27,
-          fontWeight: 900,
-          color: '#a1a8b4',
-        }}
-      >
-        {getHourLabel(hour)}
+      <div style={timeCellStyle}>
+        <button type="button" onClick={onTime} style={timePlusButtonStyle}>
+          +
+        </button>
+
+        <button
+          type="button"
+          onClick={onTime}
+          style={{
+            border: 'none',
+            background: 'transparent',
+            color: '#9aa3b1',
+            fontSize: 20,
+            lineHeight: 1,
+            fontWeight: 900,
+            cursor: 'pointer',
+            padding: 0,
+          }}
+        >
+          {getHourLabel(hour)}
+        </button>
       </div>
 
       <div
         style={{
-          fontSize: 18,
+          fontSize: 17,
           fontWeight: 900,
           color: BRAND.muted,
         }}
@@ -1677,7 +1662,7 @@ function MonthGrid({
               type="button"
               onClick={() => onSelect(date)}
               style={{
-                minHeight: 52,
+                minHeight: 46,
                 border: 'none',
                 borderRight: '1px solid #eeeeee',
                 borderBottom: '1px solid #eeeeee',
@@ -1690,7 +1675,7 @@ function MonthGrid({
                 justifyItems: 'center',
               }}
             >
-              <span style={{ fontSize: 14, fontWeight: 900 }}>{date.getDate()}</span>
+              <span style={{ fontSize: 13, fontWeight: 900 }}>{date.getDate()}</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 {dayBookings.slice(0, 4).map((booking) => (
                   <span
@@ -1726,7 +1711,7 @@ function WeekStrip({
   const days = getWeekDates(selectedDate);
 
   return (
-    <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
+    <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 5 }}>
       {days.map((date) => {
         const selected = isSameDay(date, selectedDate);
         const count = bookings.filter((booking) => {
@@ -1740,8 +1725,8 @@ function WeekStrip({
             type="button"
             onClick={() => onSelect(date)}
             style={{
-              minHeight: 78,
-              borderRadius: 18,
+              minHeight: 68,
+              borderRadius: 15,
               border: `2px solid ${BRAND.border}`,
               background: selected ? BRAND.navy : '#ffffff',
               color: selected ? '#ffffff' : BRAND.navy,
@@ -1749,11 +1734,11 @@ function WeekStrip({
               fontWeight: 900,
             }}
           >
-            <div style={{ fontSize: 10, textTransform: 'capitalize' }}>
+            <div style={{ fontSize: 9.5, textTransform: 'capitalize' }}>
               {new Intl.DateTimeFormat(getLocale(language), { weekday: 'short' }).format(date)}
             </div>
-            <div style={{ marginTop: 4, fontSize: 23 }}>{date.getDate()}</div>
-            <div style={{ marginTop: 4, fontSize: 11 }}>{count}</div>
+            <div style={{ marginTop: 3, fontSize: 20 }}>{date.getDate()}</div>
+            <div style={{ marginTop: 3, fontSize: 10 }}>{count}</div>
           </button>
         );
       })}
@@ -1841,7 +1826,7 @@ function TimePickerModal({
 
         <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <label style={fieldLabelStyle}>
-            <span>Hour</span>
+            <span>{text.hour}</span>
             <select
               value={hour}
               onChange={(event) => onHour(Number(event.target.value))}
@@ -1856,7 +1841,7 @@ function TimePickerModal({
           </label>
 
           <label style={fieldLabelStyle}>
-            <span>Minute</span>
+            <span>{text.minute}</span>
             <select
               value={minute}
               onChange={(event) => onMinute(Number(event.target.value))}
@@ -1882,11 +1867,12 @@ function TimePickerModal({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            gap: 8,
             fontSize: 20,
             fontWeight: 900,
           }}
         >
-          {String(hour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
+          ⏱ {text.newTime}: {String(hour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
         </div>
 
         <button type="button" onClick={onClose} style={{ ...darkButtonStyle, marginTop: 14 }}>
@@ -1897,21 +1883,47 @@ function TimePickerModal({
   );
 }
 
-function StatBox({ title, value, bg }: { title: string; value: string; bg: string }) {
+function CompactStat({ title, value, bg }: { title: string; value: string; bg: string }) {
   return (
     <div
       style={{
-        minHeight: 92,
-        borderRadius: 20,
-        border: `2.5px solid ${BRAND.border}`,
+        minHeight: 58,
+        borderRadius: 17,
+        border: `2px solid ${BRAND.border}`,
         background: bg,
-        padding: 13,
+        padding: '8px 9px',
         display: 'grid',
         alignContent: 'space-between',
       }}
     >
-      <div style={{ fontSize: 13, fontWeight: 900, color: BRAND.muted }}>{title}</div>
-      <div style={{ fontSize: 30, fontWeight: 900, color: BRAND.navy }}>{value}</div>
+      <div
+        style={{
+          fontSize: 10.5,
+          lineHeight: 1.05,
+          fontWeight: 900,
+          color: BRAND.muted,
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {title}
+      </div>
+
+      <div
+        style={{
+          marginTop: 4,
+          fontSize: value.length > 4 ? 18 : 23,
+          lineHeight: 1,
+          fontWeight: 900,
+          color: BRAND.navy,
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {value}
+      </div>
     </div>
   );
 }
@@ -1920,15 +1932,15 @@ function MiniPill({ label, color, bg }: { label: string; color: string; bg: stri
   return (
     <span
       style={{
-        minHeight: 26,
-        padding: '0 8px',
+        minHeight: 23,
+        padding: '0 7px',
         borderRadius: 999,
-        border: `1.8px solid ${color}`,
+        border: `1.6px solid ${color}`,
         background: bg,
         color,
         display: 'inline-flex',
         alignItems: 'center',
-        fontSize: 10.5,
+        fontSize: 9.8,
         fontWeight: 900,
         whiteSpace: 'nowrap',
       }}
@@ -1945,17 +1957,24 @@ function LegendDot({ color, label }: { color: string; label: string }) {
         display: 'inline-flex',
         alignItems: 'center',
         gap: 6,
-        fontSize: 12,
+        fontSize: 11.5,
         fontWeight: 900,
         color: BRAND.navy,
         whiteSpace: 'nowrap',
       }}
     >
-      <span style={{ width: 11, height: 11, borderRadius: 999, background: color }} />
+      <span style={{ width: 10, height: 10, borderRadius: 999, background: color }} />
       {label}
     </span>
   );
 }
+
+const headerStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '48px 1fr 48px',
+  alignItems: 'center',
+  gap: 10,
+};
 
 const circleButtonStyle: CSSProperties = {
   width: 48,
@@ -2009,136 +2028,117 @@ const topTabStyle: CSSProperties = {
   textOverflow: 'ellipsis',
 };
 
-const statsWrapStyle: CSSProperties = {
-  marginTop: 13,
-  borderRadius: 25,
-  border: `2.5px solid ${BRAND.border}`,
-  background: '#ffffff',
-  padding: 12,
-};
-
-const calendarPanelStyle: CSSProperties = {
-  marginTop: 13,
-  borderRadius: 28,
-  border: `2.5px solid ${BRAND.border}`,
-  background: '#ffffff',
-  padding: 13,
-  overflow: 'hidden',
-};
-
-const smallCircleStyle: CSSProperties = {
-  width: 42,
-  height: 42,
-  borderRadius: 999,
-  border: `2.5px solid ${BRAND.border}`,
-  background: '#ffffff',
-  color: BRAND.navy,
-  fontSize: 25,
-  fontWeight: 900,
-  cursor: 'pointer',
-};
-
-const selectStyle: CSSProperties = {
-  minHeight: 54,
-  borderRadius: 17,
-  border: `2.5px solid ${BRAND.border}`,
-  background: '#ffffff',
-  color: BRAND.navy,
-  fontSize: 16,
-  fontWeight: 900,
-  padding: '0 12px',
-  width: '100%',
-};
-
-const plainButtonStyle: CSSProperties = {
-  minHeight: 54,
-  borderRadius: 17,
-  border: `2.5px solid ${BRAND.border}`,
-  background: '#ffffff',
-  color: BRAND.navy,
-  fontSize: 16,
-  fontWeight: 900,
-  cursor: 'pointer',
-};
-
-const darkButtonStyle: CSSProperties = {
-  minHeight: 54,
-  borderRadius: 17,
-  border: `2.5px solid ${BRAND.border}`,
-  background: BRAND.navy,
-  color: '#ffffff',
-  fontSize: 16,
-  fontWeight: 900,
-  cursor: 'pointer',
-};
-
-const modeButtonStyle: CSSProperties = {
-  minHeight: 44,
-  borderRadius: 999,
-  border: `2px solid ${BRAND.border}`,
-  fontSize: 13,
-  fontWeight: 900,
-  cursor: 'pointer',
-};
-
-const rangeCardStyle: CSSProperties = {
+const compactStatsWrapStyle: CSSProperties = {
   marginTop: 12,
-  minHeight: 78,
   borderRadius: 22,
   border: `2.5px solid ${BRAND.border}`,
   background: '#ffffff',
-  padding: '12px 13px',
+  padding: 8,
   display: 'grid',
-  gridTemplateColumns: '1fr 58px',
-  alignItems: 'center',
-  gap: 10,
+  gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+  gap: 7,
 };
 
-const countBadgeStyle: CSSProperties = {
-  width: 52,
-  height: 52,
-  borderRadius: 999,
-  border: `2.5px solid ${BRAND.border}`,
-  background: BRAND.softBlue,
-  color: BRAND.navy,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: 24,
-  fontWeight: 900,
-};
-
-const filterActionsRowStyle: CSSProperties = {
+const calendarPanelStyle: CSSProperties = {
   marginTop: 12,
+  borderRadius: 25,
+  border: `2.5px solid ${BRAND.border}`,
+  background: '#ffffff',
+  padding: 11,
+  overflow: 'hidden',
+};
+
+const dateHeaderStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '38px minmax(0, 1fr) 38px',
+  alignItems: 'center',
+  gap: 8,
+};
+
+const smallCircleStyle: CSSProperties = {
+  width: 38,
+  height: 38,
+  borderRadius: 999,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 22,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const dateTitleStyle: CSSProperties = {
+  textAlign: 'center',
+  fontSize: 20,
+  fontWeight: 900,
+  color: BRAND.navy,
+  textTransform: 'capitalize',
+  lineHeight: 1.08,
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  textOverflow: 'ellipsis',
+};
+
+const dateSubTitleStyle: CSSProperties = {
+  marginTop: 4,
+  textAlign: 'center',
+  fontSize: 11.5,
+  fontWeight: 900,
+  color: BRAND.muted,
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  textOverflow: 'ellipsis',
+};
+
+const quickControlsRowStyle: CSSProperties = {
+  marginTop: 10,
   display: 'flex',
-  gap: 9,
+  gap: 8,
   overflowX: 'auto',
-  paddingBottom: 6,
+  paddingBottom: 5,
 };
 
 const filterChipStyle: CSSProperties = {
   flexShrink: 0,
-  minHeight: 46,
+  minHeight: 39,
   borderRadius: 999,
   border: `2px solid ${BRAND.border}`,
-  padding: '0 15px',
-  fontSize: 13,
+  background: '#ffffff',
+  color: BRAND.navy,
+  padding: '0 12px',
+  fontSize: 12,
   fontWeight: 900,
   cursor: 'pointer',
 };
 
 const filtersBoxStyle: CSSProperties = {
-  marginTop: 10,
-  borderRadius: 20,
+  marginTop: 9,
+  borderRadius: 19,
   border: `2px solid ${BRAND.border}`,
   background: '#fffdf8',
-  padding: 10,
+  padding: 9,
+};
+
+const modeSelectorStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, 1fr)',
+  gap: 7,
+  marginBottom: 9,
+};
+
+const modeButtonStyle: CSSProperties = {
+  minHeight: 39,
+  borderRadius: 999,
+  border: `2px solid ${BRAND.border}`,
+  fontSize: 12,
+  fontWeight: 900,
+  cursor: 'pointer',
 };
 
 const filtersGridStyle: CSSProperties = {
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
-  gap: 9,
+  gap: 8,
 };
 
 const fieldLabelStyle: CSSProperties = {
@@ -2151,7 +2151,7 @@ const fieldLabelStyle: CSSProperties = {
 
 const inputStyle: CSSProperties = {
   width: '100%',
-  minHeight: 42,
+  minHeight: 41,
   boxSizing: 'border-box',
   borderRadius: 14,
   border: `2px solid ${BRAND.border}`,
@@ -2162,67 +2162,113 @@ const inputStyle: CSSProperties = {
   padding: '0 10px',
 };
 
-const legendStyle: CSSProperties = {
-  marginTop: 10,
-  borderRadius: 18,
+const plainButtonStyle: CSSProperties = {
+  minHeight: 48,
+  borderRadius: 16,
   border: `2px solid ${BRAND.border}`,
   background: '#ffffff',
-  minHeight: 44,
-  display: 'flex',
-  alignItems: 'center',
-  gap: 14,
-  overflowX: 'auto',
-  padding: '0 12px',
-};
-
-const addTimeButtonStyle: CSSProperties = {
-  width: '100%',
-  minHeight: 54,
-  borderRadius: 22,
-  border: '2px dashed #d7dce4',
-  background: '#ffffff',
-  color: BRAND.muted,
+  color: BRAND.navy,
   fontSize: 15,
   fontWeight: 900,
   cursor: 'pointer',
 };
 
-const notebookHeaderStyle: CSSProperties = {
-  marginTop: 12,
-  display: 'grid',
-  gridTemplateColumns: '92px 1fr 76px 42px',
-  gap: 10,
-  padding: '0 14px 8px',
+const darkButtonStyle: CSSProperties = {
+  minHeight: 48,
+  borderRadius: 16,
+  border: `2px solid ${BRAND.border}`,
+  background: BRAND.navy,
+  color: '#ffffff',
+  fontSize: 15,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const legendStyle: CSSProperties = {
+  marginTop: 9,
+  borderRadius: 17,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  minHeight: 39,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 13,
+  overflowX: 'auto',
+  padding: '0 10px',
+};
+
+const addTimeButtonStyle: CSSProperties = {
+  width: '100%',
+  minHeight: 50,
+  borderRadius: 20,
+  border: '2px dashed #d7dce4',
+  background: '#ffffff',
   color: BRAND.muted,
-  fontSize: 13,
+  fontSize: 14,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const notebookHeaderStyle: CSSProperties = {
+  marginTop: 10,
+  display: 'grid',
+  gridTemplateColumns: '86px 1fr 64px 34px',
+  gap: 8,
+  padding: '0 10px 7px',
+  color: BRAND.muted,
+  fontSize: 12.5,
   fontWeight: 900,
 };
 
+const timeCellStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '28px 1fr',
+  alignItems: 'center',
+  gap: 8,
+  paddingLeft: 11,
+};
+
+const timePlusButtonStyle: CSSProperties = {
+  width: 27,
+  height: 27,
+  borderRadius: 999,
+  border: `1.8px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: 20,
+  lineHeight: 1,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
 const miniOutlineButtonStyle: CSSProperties = {
-  minHeight: 42,
-  borderRadius: 15,
+  minHeight: 38,
+  borderRadius: 13,
   border: `2px solid ${BRAND.border}`,
   background: '#ffffff',
   color: BRAND.navy,
-  fontSize: 13,
+  fontSize: 12.5,
   fontWeight: 900,
   cursor: 'pointer',
 };
 
 const miniGreenButtonStyle: CSSProperties = {
-  minHeight: 42,
-  borderRadius: 15,
+  minHeight: 38,
+  borderRadius: 13,
   border: `2px solid ${BRAND.green}`,
   background: BRAND.green,
   color: '#ffffff',
-  fontSize: 13,
+  fontSize: 12.5,
   fontWeight: 900,
   cursor: 'pointer',
 };
 
 const monthGridWrapStyle: CSSProperties = {
-  marginTop: 12,
-  borderRadius: 20,
+  marginTop: 10,
+  borderRadius: 18,
   border: '1.5px solid #e3e3e3',
   overflow: 'hidden',
   background: '#ffffff',
@@ -2236,11 +2282,11 @@ const weekHeaderStyle: CSSProperties = {
 };
 
 const weekDayStyle: CSSProperties = {
-  height: 28,
+  height: 26,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontSize: 10,
+  fontSize: 9.5,
   fontWeight: 900,
   color: BRAND.muted,
   textTransform: 'capitalize',
