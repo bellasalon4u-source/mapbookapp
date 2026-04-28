@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
 import {
@@ -918,9 +918,7 @@ export default function ProfileClientsPage() {
             />
           ))}
 
-          {showFreeWindows ? (
-            <FreeWindowRow time="19:00" text={text} />
-          ) : null}
+          {showFreeWindows ? <FreeWindowRow time="19:00" text={text} /> : null}
         </section>
       </div>
 
@@ -1382,7 +1380,7 @@ function Dot({ color }: { color: string }) {
   );
 }
 
-const roundButtonStyle = {
+const roundButtonStyle: CSSProperties = {
   width: 38,
   height: 38,
   borderRadius: 999,
@@ -1394,7 +1392,7 @@ const roundButtonStyle = {
   cursor: 'pointer',
 };
 
-const outlineButtonStyle = {
+const outlineButtonStyle: CSSProperties = {
   minHeight: 42,
   borderRadius: 15,
   border: `2px solid ${BRAND.border}`,
@@ -1405,7 +1403,7 @@ const outlineButtonStyle = {
   cursor: 'pointer',
 };
 
-const greenButtonStyle = {
+const greenButtonStyle: CSSProperties = {
   minHeight: 42,
   borderRadius: 15,
   border: `2px solid ${BRAND.green}`,
