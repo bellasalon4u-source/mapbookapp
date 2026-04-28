@@ -54,6 +54,16 @@ type PageText = {
   notes: string;
   back: string;
   close: string;
+  active: string;
+  total: string;
+  revenue: string;
+  done: string;
+  year: string;
+  allStatuses: string;
+  statusLegendDone: string;
+  statusLegendConfirmed: string;
+  statusLegendUnavailable: string;
+  statusLegendAttention: string;
 };
 
 const BRAND = {
@@ -69,6 +79,7 @@ const BRAND = {
   softGreen: '#dcffe8',
   softYellow: '#fff4c7',
   softRed: '#ffe3ea',
+  softPurple: '#f3edff',
   cream: '#fffdf8',
 };
 
@@ -105,6 +116,16 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     notes: 'Notes',
     back: 'Back',
     close: 'Close',
+    active: 'Active',
+    total: 'Total',
+    revenue: 'Revenue',
+    done: 'Done',
+    year: 'Year',
+    allStatuses: 'All statuses',
+    statusLegendDone: 'Done',
+    statusLegendConfirmed: 'Confirmed',
+    statusLegendUnavailable: 'Unavailable',
+    statusLegendAttention: 'Needs attention',
   },
   RU: {
     title: 'Мои клиенты',
@@ -138,6 +159,16 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     notes: 'Заметки',
     back: 'Назад',
     close: 'Закрыть',
+    active: 'Активные',
+    total: 'Всего',
+    revenue: 'Доход',
+    done: 'Готово',
+    year: 'Год',
+    allStatuses: 'Все статусы',
+    statusLegendDone: 'Готово',
+    statusLegendConfirmed: 'Подтверждено',
+    statusLegendUnavailable: 'Недоступно',
+    statusLegendAttention: 'Требует внимания',
   },
   UA: {
     title: 'Мої клієнти',
@@ -171,6 +202,16 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     notes: 'Нотатки',
     back: 'Назад',
     close: 'Закрити',
+    active: 'Активні',
+    total: 'Усього',
+    revenue: 'Дохід',
+    done: 'Готово',
+    year: 'Рік',
+    allStatuses: 'Усі статуси',
+    statusLegendDone: 'Готово',
+    statusLegendConfirmed: 'Підтверджено',
+    statusLegendUnavailable: 'Недоступно',
+    statusLegendAttention: 'Потребує уваги',
   },
 };
 
@@ -192,6 +233,8 @@ const demoSchedule: BookingItem[] = [
     clientPaid: true,
     paymentReceivedByPlatform: true,
     unlockFeePaid: true,
+    bookingConfirmedByMaster: true,
+    promotionPaidByMaster: true,
   } as BookingItem,
   {
     id: 'client-demo-2',
@@ -210,6 +253,8 @@ const demoSchedule: BookingItem[] = [
     clientPaid: true,
     paymentReceivedByPlatform: true,
     unlockFeePaid: true,
+    bookingConfirmedByMaster: true,
+    promotionPaidByMaster: true,
   } as BookingItem,
   {
     id: 'client-demo-3',
@@ -228,6 +273,8 @@ const demoSchedule: BookingItem[] = [
     clientPaid: true,
     paymentReceivedByPlatform: true,
     unlockFeePaid: false,
+    bookingConfirmedByMaster: false,
+    promotionPaidByMaster: false,
   } as BookingItem,
   {
     id: 'client-demo-4',
@@ -245,6 +292,8 @@ const demoSchedule: BookingItem[] = [
     clientPaid: false,
     paymentReceivedByPlatform: false,
     unlockFeePaid: false,
+    bookingConfirmedByMaster: false,
+    promotionPaidByMaster: false,
   } as BookingItem,
 ];
 
@@ -313,6 +362,12 @@ function getMonthName(date: Date, language: AppLanguage) {
   }).format(date);
 }
 
+function getOnlyMonthName(monthIndex: number, language: AppLanguage) {
+  return new Intl.DateTimeFormat(getLocale(language), {
+    month: 'long',
+  }).format(new Date(2026, monthIndex, 1));
+}
+
 function getWeekDays(language: AppLanguage) {
   const monday = new Date(2026, 3, 20);
 
@@ -336,6 +391,12 @@ function getCalendarCells(year: number, month: number) {
       currentMonth: date.getMonth() === month,
     };
   });
+}
+
+function getWeekDates(selectedDate: Date) {
+  const weekDay = (selectedDate.getDay() + 6) % 7;
+  const monday = addDays(selectedDate, -weekDay);
+  return Array.from({ length: 7 }, (_, index) => addDays(monday, index));
 }
 
 function statusLabel(booking: BookingItem, text: PageText) {
@@ -365,6 +426,61 @@ function isPaid(booking: BookingItem) {
 
 function isUnlocked(booking: BookingItem) {
   return canShowExactAddress(booking) && canShowDirectContacts(booking);
+}
+
+function getPreferredDate(bookings: BookingItem[]) {
+  const today = startOfDay(new Date());
+
+  const todayBooking = bookings.find((booking) => {
+    const date = getBookingDate(booking);
+    return date ? isSameDay(date, today) : false;
+  });
+
+  if (todayBooking) {
+    const date = getBookingDate(todayBooking);
+    if (date) return startOfDay(date);
+  }
+
+  const futureBooking = [...bookings]
+    .filter((booking) => {
+      const date = getBookingDate(booking);
+      return date && startOfDay(date).getTime() >= today.getTime();
+    })
+    .sort((a, b) => {
+      const left = getBookingDate(a)?.getTime() || 0;
+      const right = getBookingDate(b)?.getTime() || 0;
+      return left - right;
+    })[0];
+
+  if (futureBooking) {
+    const date = getBookingDate(futureBooking);
+    if (date) return startOfDay(date);
+  }
+
+  const firstBooking = [...bookings].sort((a, b) => {
+    const left = getBookingDate(a)?.getTime() || 0;
+    const right = getBookingDate(b)?.getTime() || 0;
+    return left - right;
+  })[0];
+
+  const firstDate = getBookingDate(firstBooking);
+  return firstDate ? startOfDay(firstDate) : today;
+}
+
+function hasBookingsOnDate(bookings: BookingItem[], date: Date) {
+  return bookings.some((booking) => {
+    const bookingDate = getBookingDate(booking);
+    return bookingDate ? isSameDay(bookingDate, date) : false;
+  });
+}
+
+function getDateTitle(date: Date, language: AppLanguage) {
+  return new Intl.DateTimeFormat(getLocale(language), {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
 }
 
 function OlamepLogo() {
@@ -419,12 +535,22 @@ export default function ProfileClientsPage() {
   const [calendarDate, setCalendarDate] = useState<Date>(() => startOfDay(new Date()));
   const [showOnlyRequests, setShowOnlyRequests] = useState(false);
   const [showFreeWindows, setShowFreeWindows] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
     const syncBookings = () => {
       const saved = getBookings();
-      setBookings(saved.length > 0 ? saved : demoSchedule);
+      const nextBookings = saved.length > 0 ? saved : demoSchedule;
+      const preferredDate = getPreferredDate(nextBookings);
+
+      setBookings(nextBookings);
+      setSelectedDate((current) =>
+        hasBookingsOnDate(nextBookings, current) ? current : preferredDate
+      );
+      setCalendarDate((current) =>
+        hasBookingsOnDate(nextBookings, current) ? current : preferredDate
+      );
     };
 
     syncLanguage();
@@ -513,15 +639,20 @@ export default function ProfileClientsPage() {
   ).length;
   const completedCount = bookings.filter((booking) => booking.status === 'completed').length;
 
-  const selectedDateLabel = new Intl.DateTimeFormat(getLocale(language), {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(selectedDate);
+  const years = useMemo(() => {
+    const current = new Date().getFullYear();
+    return Array.from({ length: 7 }, (_, index) => current - 2 + index);
+  }, []);
 
   const markDone = (booking: BookingItem) => {
     updateBookingStatus(booking.id, 'completed');
+  };
+
+  const goToday = () => {
+    const now = startOfDay(new Date());
+    setSelectedDate(now);
+    setCalendarDate(now);
+    setViewMode('today');
   };
 
   return (
@@ -547,17 +678,7 @@ export default function ProfileClientsPage() {
             type="button"
             onClick={() => router.back()}
             aria-label={text.back}
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 999,
-              border: `2.5px solid ${BRAND.border}`,
-              background: '#ffffff',
-              color: BRAND.navy,
-              fontSize: 25,
-              fontWeight: 900,
-              cursor: 'pointer',
-            }}
+            style={headerCircleButtonStyle}
           >
             ←
           </button>
@@ -570,17 +691,7 @@ export default function ProfileClientsPage() {
             type="button"
             onClick={() => router.push('/profile')}
             aria-label={text.close}
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 999,
-              border: `2.5px solid ${BRAND.border}`,
-              background: '#ffffff',
-              color: BRAND.navy,
-              fontSize: 24,
-              fontWeight: 900,
-              cursor: 'pointer',
-            }}
+            style={headerCircleButtonStyle}
           >
             ×
           </button>
@@ -669,10 +780,10 @@ export default function ProfileClientsPage() {
           }}
         >
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <StatBox title="Active" value={String(activeCount)} bg={BRAND.softGreen} />
-            <StatBox title="Total" value={String(bookings.length)} bg={BRAND.softBlue} />
-            <StatBox title="Revenue" value={money(totalRevenue)} bg="#fff0da" />
-            <StatBox title="Done" value={String(completedCount)} bg="#f3edff" />
+            <StatBox title={text.active} value={String(activeCount)} bg={BRAND.softGreen} />
+            <StatBox title={text.total} value={String(bookings.length)} bg={BRAND.softBlue} />
+            <StatBox title={text.revenue} value={money(totalRevenue)} bg="#fff0da" />
+            <StatBox title={text.done} value={String(completedCount)} bg={BRAND.softPurple} />
           </div>
         </section>
 
@@ -734,6 +845,51 @@ export default function ProfileClientsPage() {
             style={{
               marginTop: 10,
               display: 'grid',
+              gridTemplateColumns: '1fr 1.5fr 1fr',
+              gap: 8,
+            }}
+          >
+            <select
+              value={calendarDate.getFullYear()}
+              onChange={(event) => {
+                const next = new Date(calendarDate);
+                next.setFullYear(Number(event.target.value));
+                setCalendarDate(next);
+              }}
+              style={selectStyle}
+            >
+              {years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={calendarDate.getMonth()}
+              onChange={(event) => {
+                const next = new Date(calendarDate);
+                next.setMonth(Number(event.target.value));
+                setCalendarDate(next);
+              }}
+              style={selectStyle}
+            >
+              {Array.from({ length: 12 }, (_, index) => (
+                <option key={index} value={index}>
+                  {getOnlyMonthName(index, language)}
+                </option>
+              ))}
+            </select>
+
+            <button type="button" onClick={goToday} style={smallOutlineButtonStyle}>
+              {text.today}
+            </button>
+          </div>
+
+          <div
+            style={{
+              marginTop: 10,
+              display: 'grid',
               gridTemplateColumns: 'repeat(4, 1fr)',
               gap: 7,
             }}
@@ -768,55 +924,116 @@ export default function ProfileClientsPage() {
             })}
           </div>
 
-          <CalendarGrid
-            language={language}
-            calendarDate={calendarDate}
-            selectedDate={selectedDate}
-            bookings={monthBookings}
-            onSelect={(date) => {
-              setSelectedDate(startOfDay(date));
-              setViewMode('calendar');
-            }}
-          />
+          {calendarMode === 'month' ? (
+            <CalendarGrid
+              language={language}
+              calendarDate={calendarDate}
+              selectedDate={selectedDate}
+              bookings={monthBookings}
+              onSelect={(date) => {
+                setSelectedDate(startOfDay(date));
+                setViewMode('calendar');
+              }}
+            />
+          ) : null}
+
+          {calendarMode === 'week' ? (
+            <WeekStrip
+              language={language}
+              selectedDate={selectedDate}
+              bookings={bookings}
+              onSelect={(date) => {
+                setSelectedDate(startOfDay(date));
+                setCalendarDate(startOfDay(date));
+                setViewMode('calendar');
+              }}
+            />
+          ) : null}
+
+          {calendarMode === 'day' ? (
+            <DayFocus
+              date={selectedDate}
+              language={language}
+              bookings={visibleBookings}
+              text={text}
+            />
+          ) : null}
+
+          {calendarMode === 'list' ? (
+            <MonthList
+              bookings={monthBookings}
+              language={language}
+              text={text}
+              onSelect={(date) => {
+                setSelectedDate(startOfDay(date));
+                setViewMode('calendar');
+              }}
+            />
+          ) : null}
 
           <div
             style={{
               marginTop: 12,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
+              display: 'flex',
               gap: 8,
+              overflowX: 'auto',
+              paddingBottom: 2,
             }}
           >
-            <ToggleButton
-              active={showOnlyRequests}
-              label={text.onlyRequests}
-              onClick={() => setShowOnlyRequests((prev) => !prev)}
+            <FilterButton
+              active={filtersOpen}
+              label={`☰ ${text.filters}`}
+              onClick={() => setFiltersOpen((prev) => !prev)}
             />
-            <ToggleButton
+            <FilterButton
               active={showFreeWindows}
-              label={text.freeWindows}
+              label={`◷ ${text.freeWindows}`}
               onClick={() => setShowFreeWindows((prev) => !prev)}
             />
+            <FilterButton
+              active={showOnlyRequests}
+              label={`♙ ${text.onlyRequests}`}
+              onClick={() => setShowOnlyRequests((prev) => !prev)}
+            />
+            <div
+              style={{
+                flexShrink: 0,
+                minHeight: 40,
+                borderRadius: 999,
+                border: `2px solid ${BRAND.border}`,
+                background: BRAND.softGreen,
+                color: '#008f3a',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0 13px',
+                gap: 7,
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              ☁ {text.synced}
+            </div>
           </div>
 
-          <div
-            style={{
-              marginTop: 10,
-              minHeight: 38,
-              borderRadius: 999,
-              border: `2px solid ${BRAND.border}`,
-              background: BRAND.softGreen,
-              color: '#008f3a',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 7,
-              fontSize: 12,
-              fontWeight: 900,
-            }}
-          >
-            ☁ {text.synced}
-          </div>
+          {filtersOpen ? (
+            <div
+              style={{
+                marginTop: 10,
+                borderRadius: 18,
+                border: `2px solid ${BRAND.border}`,
+                background: '#fbfbfb',
+                padding: 10,
+              }}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 7 }}>
+                <LegendDot color={BRAND.blue} label={text.statusLegendDone} />
+                <LegendDot color={BRAND.green} label={text.statusLegendConfirmed} />
+                <LegendDot color={BRAND.red} label={text.statusLegendUnavailable} />
+                <LegendDot color={BRAND.yellow} label={text.statusLegendAttention} />
+              </div>
+            </div>
+          ) : null}
         </section>
 
         <section
@@ -843,9 +1060,10 @@ export default function ProfileClientsPage() {
                   fontWeight: 900,
                   lineHeight: 1.05,
                   color: BRAND.navy,
+                  textTransform: 'capitalize',
                 }}
               >
-                {selectedDateLabel}
+                {getDateTitle(selectedDate, language)}
               </div>
 
               <div
@@ -860,27 +1078,7 @@ export default function ProfileClientsPage() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                const now = startOfDay(new Date());
-                setSelectedDate(now);
-                setCalendarDate(now);
-                setViewMode('today');
-              }}
-              style={{
-                minWidth: 72,
-                height: 46,
-                borderRadius: 17,
-                border: `2px solid ${BRAND.border}`,
-                background:
-                  'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
-                color: '#ffffff',
-                fontSize: 13,
-                fontWeight: 900,
-                cursor: 'pointer',
-              }}
-            >
+            <button type="button" onClick={goToday} style={todayGradientButtonStyle}>
               {text.today}
             </button>
           </div>
@@ -1004,7 +1202,7 @@ function CalendarGrid({
               type="button"
               onClick={() => onSelect(date)}
               style={{
-                minHeight: 58,
+                minHeight: 52,
                 border: 'none',
                 borderRight: '1px solid #eeeeee',
                 borderBottom: '1px solid #eeeeee',
@@ -1029,6 +1227,203 @@ function CalendarGrid({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function WeekStrip({
+  language,
+  selectedDate,
+  bookings,
+  onSelect,
+}: {
+  language: AppLanguage;
+  selectedDate: Date;
+  bookings: BookingItem[];
+  onSelect: (date: Date) => void;
+}) {
+  const weekDays = getWeekDays(language);
+  const dates = getWeekDates(selectedDate);
+
+  return (
+    <div
+      style={{
+        marginTop: 12,
+        display: 'grid',
+        gridTemplateColumns: 'repeat(7, 1fr)',
+        gap: 6,
+      }}
+    >
+      {dates.map((date, index) => {
+        const selected = isSameDay(date, selectedDate);
+        const count = bookings.filter((booking) => {
+          const bookingDate = getBookingDate(booking);
+          return bookingDate ? isSameDay(bookingDate, date) : false;
+        }).length;
+
+        return (
+          <button
+            key={date.toISOString()}
+            type="button"
+            onClick={() => onSelect(date)}
+            style={{
+              minHeight: 74,
+              borderRadius: 18,
+              border: `2px solid ${selected ? BRAND.border : '#e0e0e0'}`,
+              background: selected ? BRAND.blue : '#ffffff',
+              color: selected ? '#ffffff' : BRAND.navy,
+              cursor: 'pointer',
+              display: 'grid',
+              alignContent: 'center',
+              justifyItems: 'center',
+              gap: 5,
+            }}
+          >
+            <span style={{ fontSize: 10, fontWeight: 900, color: selected ? '#ffffff' : BRAND.muted }}>
+              {weekDays[index]}
+            </span>
+            <span style={{ fontSize: 18, fontWeight: 900 }}>{date.getDate()}</span>
+            {count > 0 ? <Dot color={selected ? '#ffffff' : BRAND.green} /> : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function DayFocus({
+  date,
+  language,
+  bookings,
+  text,
+}: {
+  date: Date;
+  language: AppLanguage;
+  bookings: BookingItem[];
+  text: PageText;
+}) {
+  return (
+    <div
+      style={{
+        marginTop: 12,
+        borderRadius: 22,
+        border: `2px solid ${BRAND.border}`,
+        background: BRAND.softBlue,
+        padding: 13,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 19,
+          fontWeight: 900,
+          color: BRAND.navy,
+          textTransform: 'capitalize',
+        }}
+      >
+        {getDateTitle(date, language)}
+      </div>
+      <div style={{ marginTop: 5, fontSize: 13, fontWeight: 900, color: BRAND.muted }}>
+        {bookings.length} {text.bookings}
+      </div>
+    </div>
+  );
+}
+
+function MonthList({
+  bookings,
+  language,
+  text,
+  onSelect,
+}: {
+  bookings: BookingItem[];
+  language: AppLanguage;
+  text: PageText;
+  onSelect: (date: Date) => void;
+}) {
+  const groupedDates = Array.from(
+    new Set(
+      bookings
+        .map((booking) => getBookingDate(booking))
+        .filter((date): date is Date => Boolean(date))
+        .map((date) => startOfDay(date).toISOString())
+    )
+  ).map((iso) => new Date(iso));
+
+  return (
+    <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
+      {groupedDates.length === 0 ? (
+        <div
+          style={{
+            minHeight: 70,
+            borderRadius: 18,
+            border: '1.5px dashed #d7dce4',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: BRAND.muted,
+            fontSize: 13,
+            fontWeight: 900,
+          }}
+        >
+          {text.noBookings}
+        </div>
+      ) : null}
+
+      {groupedDates.map((date) => {
+        const count = bookings.filter((booking) => {
+          const bookingDate = getBookingDate(booking);
+          return bookingDate ? isSameDay(bookingDate, date) : false;
+        }).length;
+
+        return (
+          <button
+            key={date.toISOString()}
+            type="button"
+            onClick={() => onSelect(date)}
+            style={{
+              minHeight: 54,
+              borderRadius: 18,
+              border: `2px solid ${BRAND.border}`,
+              background: '#ffffff',
+              color: BRAND.navy,
+              display: 'grid',
+              gridTemplateColumns: '1fr auto',
+              alignItems: 'center',
+              gap: 10,
+              padding: '0 12px',
+              cursor: 'pointer',
+              textAlign: 'left',
+            }}
+          >
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 900,
+                textTransform: 'capitalize',
+              }}
+            >
+              {getDateTitle(date, language)}
+            </span>
+            <span
+              style={{
+                minHeight: 28,
+                borderRadius: 999,
+                border: `2px solid ${BRAND.border}`,
+                background: BRAND.softBlue,
+                color: BRAND.blue,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0 10px',
+                fontSize: 12,
+                fontWeight: 900,
+              }}
+            >
+              {count}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -1105,12 +1500,13 @@ function ScheduleRow({
 
       <div
         style={{
-          fontSize: 25,
+          fontSize: 24,
           fontWeight: 900,
           color: BRAND.navy,
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
+          paddingTop: 12,
         }}
       >
         {getTimeLabel(booking)}
@@ -1274,7 +1670,7 @@ function FreeWindowRow({ time, text }: { time: string; text: PageText }) {
     >
       <div
         style={{
-          fontSize: 25,
+          fontSize: 24,
           fontWeight: 900,
           color: '#7b8490',
           display: 'flex',
@@ -1316,7 +1712,7 @@ function StatBox({ title, value, bg }: { title: string; value: string; bg: strin
   );
 }
 
-function ToggleButton({
+function FilterButton({
   active,
   label,
   onClick,
@@ -1330,11 +1726,13 @@ function ToggleButton({
       type="button"
       onClick={onClick}
       style={{
+        flexShrink: 0,
         minHeight: 40,
         borderRadius: 999,
         border: `2px solid ${BRAND.border}`,
         background: active ? BRAND.navy : '#ffffff',
         color: active ? '#ffffff' : BRAND.navy,
+        padding: '0 13px',
         fontSize: 12,
         fontWeight: 900,
         cursor: 'pointer',
@@ -1342,6 +1740,28 @@ function ToggleButton({
     >
       {label}
     </button>
+  );
+}
+
+function LegendDot({ color, label }: { color: string; label: string }) {
+  return (
+    <div
+      style={{
+        minWidth: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 5,
+        fontSize: 9,
+        fontWeight: 900,
+        color: BRAND.navy,
+      }}
+    >
+      <Dot color={color} />
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {label}
+      </span>
+    </div>
   );
 }
 
@@ -1380,6 +1800,18 @@ function Dot({ color }: { color: string }) {
   );
 }
 
+const headerCircleButtonStyle: CSSProperties = {
+  width: 48,
+  height: 48,
+  borderRadius: 999,
+  border: `2.5px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 25,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
 const roundButtonStyle: CSSProperties = {
   width: 38,
   height: 38,
@@ -1388,6 +1820,43 @@ const roundButtonStyle: CSSProperties = {
   background: '#ffffff',
   color: BRAND.navy,
   fontSize: 24,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const selectStyle: CSSProperties = {
+  minWidth: 0,
+  minHeight: 42,
+  borderRadius: 15,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 13,
+  fontWeight: 900,
+  padding: '0 8px',
+  outline: 'none',
+};
+
+const smallOutlineButtonStyle: CSSProperties = {
+  minHeight: 42,
+  borderRadius: 15,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 12,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const todayGradientButtonStyle: CSSProperties = {
+  minWidth: 72,
+  height: 46,
+  borderRadius: 17,
+  border: `2px solid ${BRAND.border}`,
+  background:
+    'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
+  color: '#ffffff',
+  fontSize: 13,
   fontWeight: 900,
   cursor: 'pointer',
 };
