@@ -21,7 +21,6 @@ import {
 
 type ViewMode = 'today' | 'tomorrow' | 'week' | 'calendar' | 'history';
 type CalendarMode = 'month' | 'week' | 'day' | 'list';
-type CalendarStage = 'year' | 'months' | 'month';
 type StatusFilter = 'all' | 'completed' | 'upcoming' | 'pending' | 'cancelled';
 type PaymentFilter = 'all' | 'paid' | 'unpaid';
 
@@ -33,12 +32,9 @@ type PageText = {
   week: string;
   calendar: string;
   history: string;
-  year: string;
   month: string;
   day: string;
   list: string;
-  chooseYear: string;
-  chooseMonth: string;
   management: string;
   freeWindows: string;
   onlyRequests: string;
@@ -118,12 +114,9 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     week: 'Week',
     calendar: 'Calendar',
     history: 'History',
-    year: 'Year',
     month: 'Month',
     day: 'Day',
     list: 'List',
-    chooseYear: 'Choose year',
-    chooseMonth: 'Choose month',
     management: 'Management',
     freeWindows: 'Free windows',
     onlyRequests: 'Only requests',
@@ -184,12 +177,9 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     week: 'Неделя',
     calendar: 'Календарь',
     history: 'История',
-    year: 'Год',
     month: 'Месяц',
     day: 'День',
     list: 'Список',
-    chooseYear: 'Выбери год',
-    chooseMonth: 'Выбери месяц',
     management: 'Управление',
     freeWindows: 'Свободные окна',
     onlyRequests: 'Только запросы',
@@ -250,12 +240,9 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     week: 'Тиждень',
     calendar: 'Календар',
     history: 'Історія',
-    year: 'Рік',
     month: 'Місяць',
     day: 'День',
     list: 'Список',
-    chooseYear: 'Обери рік',
-    chooseMonth: 'Обери місяць',
     management: 'Керування',
     freeWindows: 'Вільні вікна',
     onlyRequests: 'Тільки запити',
@@ -343,6 +330,54 @@ function getLocale(language: AppLanguage) {
   return 'en-GB';
 }
 
+function getYearLabel(language: AppLanguage) {
+  if (language === 'RU') return 'Год';
+  if (language === 'UA') return 'Рік';
+  if (language === 'CZ') return 'Rok';
+  if (language === 'ES') return 'Año';
+  if (language === 'DE') return 'Jahr';
+  if (language === 'FR') return 'Année';
+  if (language === 'IT') return 'Anno';
+  if (language === 'PL') return 'Rok';
+  return 'Year';
+}
+
+function getChooseMonthText(language: AppLanguage) {
+  if (language === 'RU') return 'Выбери месяц';
+  if (language === 'UA') return 'Обери місяць';
+  if (language === 'CZ') return 'Vyber měsíc';
+  if (language === 'ES') return 'Elige mes';
+  if (language === 'DE') return 'Monat wählen';
+  if (language === 'FR') return 'Choisir le mois';
+  if (language === 'IT') return 'Scegli mese';
+  if (language === 'PL') return 'Wybierz miesiąc';
+  return 'Choose month';
+}
+
+function getChoosePeriodText(language: AppLanguage) {
+  if (language === 'RU') return 'Выбор периода';
+  if (language === 'UA') return 'Вибір періоду';
+  if (language === 'CZ') return 'Výběr období';
+  if (language === 'ES') return 'Elegir periodo';
+  if (language === 'DE') return 'Zeitraum wählen';
+  if (language === 'FR') return 'Choisir la période';
+  if (language === 'IT') return 'Scegli periodo';
+  if (language === 'PL') return 'Wybierz okres';
+  return 'Choose period';
+}
+
+function getCancelText(language: AppLanguage) {
+  if (language === 'RU') return 'Отмена';
+  if (language === 'UA') return 'Скасувати';
+  if (language === 'CZ') return 'Zrušit';
+  if (language === 'ES') return 'Cancelar';
+  if (language === 'DE') return 'Abbrechen';
+  if (language === 'FR') return 'Annuler';
+  if (language === 'IT') return 'Annulla';
+  if (language === 'PL') return 'Anuluj';
+  return 'Cancel';
+}
+
 function money(value: number) {
   if (!value) return '—';
   return `£${Number(value || 0).toFixed(0)}`;
@@ -402,6 +437,15 @@ function getDateTitle(date: Date, language: AppLanguage) {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
+
+function getLongDateTitle(date: Date, language: AppLanguage) {
+  return new Intl.DateTimeFormat(getLocale(language), {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
     year: 'numeric',
   }).format(date);
 }
@@ -487,11 +531,6 @@ function getPaymentMethod(booking: BookingItem) {
   if (id.includes('2') || id.includes('card')) return 'card';
   if (id.includes('5') || id.includes('app')) return 'app';
   return 'cash';
-}
-
-function statusMatches(booking: BookingItem, statusFilter: StatusFilter) {
-  if (statusFilter === 'all') return true;
-  return booking.status === statusFilter;
 }
 
 function makeBooking(
@@ -692,12 +731,12 @@ export default function ProfileClientsPage() {
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('today');
   const [calendarMode, setCalendarMode] = useState<CalendarMode>('day');
-  const [calendarStage, setCalendarStage] = useState<CalendarStage>('month');
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
   const [calendarDate, setCalendarDate] = useState<Date>(() => startOfDay(new Date()));
   const [showFreeWindows, setShowFreeWindows] = useState(true);
   const [showOnlyRequests, setShowOnlyRequests] = useState(false);
   const [managementOpen, setManagementOpen] = useState(false);
+  const [calendarWheelOpen, setCalendarWheelOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [nameFilter, setNameFilter] = useState('');
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('all');
@@ -782,12 +821,7 @@ export default function ProfileClientsPage() {
     }
 
     if (viewMode === 'calendar') {
-      if (calendarStage === 'year' || calendarStage === 'months') {
-        source = source.filter((booking) => {
-          const date = getEffectiveDate(booking);
-          return date ? date.getFullYear() === calendarDate.getFullYear() : false;
-        });
-      } else if (calendarMode === 'month') {
+      if (calendarMode === 'month') {
         source = source.filter((booking) => {
           const date = getEffectiveDate(booking);
           return (
@@ -796,7 +830,17 @@ export default function ProfileClientsPage() {
             date.getMonth() === calendarDate.getMonth()
           );
         });
-      } else if (calendarMode === 'day' || calendarMode === 'list') {
+      }
+
+      if (calendarMode === 'week') {
+        const week = getWeekDates(selectedDate);
+        source = source.filter((booking) => {
+          const date = getEffectiveDate(booking);
+          return date ? week.some((item) => isSameDay(item, date)) : false;
+        });
+      }
+
+      if (calendarMode === 'day' || calendarMode === 'list') {
         source = source.filter((booking) => {
           const date = getEffectiveDate(booking);
           return date ? isSameDay(date, selectedDate) : false;
@@ -821,7 +865,6 @@ export default function ProfileClientsPage() {
     bookings,
     calendarDate,
     calendarMode,
-    calendarStage,
     rangeFrom,
     rangeTo,
     selectedDate,
@@ -899,15 +942,14 @@ export default function ProfileClientsPage() {
       return (
         date &&
         date.getMonth() === calendarDate.getMonth() &&
-        date.getFullYear() === calendarDate.getFullYear() &&
-        statusMatches(booking, statusFilter)
+        date.getFullYear() === calendarDate.getFullYear()
       );
     });
-  }, [bookings, calendarDate, statusFilter, timeOverrides]);
+  }, [bookings, calendarDate, timeOverrides]);
 
   const years = useMemo(() => {
     const current = new Date().getFullYear();
-    return Array.from({ length: 9 }, (_, index) => current - 3 + index);
+    return Array.from({ length: 11 }, (_, index) => current - 3 + index);
   }, []);
 
   const weekDates = useMemo(() => getWeekDates(selectedDate), [selectedDate]);
@@ -922,7 +964,6 @@ export default function ProfileClientsPage() {
       setSelectedDate(now);
       setCalendarDate(now);
       setCalendarMode('day');
-      setCalendarStage('month');
       setRangeFrom(toInputDate(now));
       setRangeTo(toInputDate(now));
     }
@@ -932,7 +973,6 @@ export default function ProfileClientsPage() {
       setSelectedDate(next);
       setCalendarDate(next);
       setCalendarMode('day');
-      setCalendarStage('month');
       setRangeFrom(toInputDate(next));
       setRangeTo(toInputDate(next));
     }
@@ -942,18 +982,15 @@ export default function ProfileClientsPage() {
       setSelectedDate(now);
       setCalendarDate(now);
       setCalendarMode('week');
-      setCalendarStage('month');
     }
 
     if (mode === 'calendar') {
       setCalendarMode('month');
-      setCalendarStage('year');
       setManagementOpen(false);
     }
 
     if (mode === 'history') {
       setCalendarMode('list');
-      setCalendarStage('month');
       setManagementOpen(true);
     }
   };
@@ -966,21 +1003,7 @@ export default function ProfileClientsPage() {
       return;
     }
 
-    if (viewMode === 'calendar' && calendarStage === 'year') {
-      const next = new Date(calendarDate);
-      next.setFullYear(next.getFullYear() + direction);
-      setCalendarDate(next);
-      return;
-    }
-
-    if (viewMode === 'calendar' && calendarStage === 'months') {
-      const next = new Date(calendarDate);
-      next.setFullYear(next.getFullYear() + direction);
-      setCalendarDate(next);
-      return;
-    }
-
-    if (viewMode === 'calendar' && calendarStage === 'month' && calendarMode === 'month') {
+    if (viewMode === 'calendar' && calendarMode === 'month') {
       const next = new Date(calendarDate);
       next.setMonth(next.getMonth() + direction);
       setCalendarDate(next);
@@ -994,7 +1017,6 @@ export default function ProfileClientsPage() {
     if (viewMode === 'today' || viewMode === 'tomorrow') {
       setViewMode('calendar');
       setCalendarMode('day');
-      setCalendarStage('month');
     }
   };
 
@@ -1054,14 +1076,10 @@ export default function ProfileClientsPage() {
   };
 
   const activeTitle =
-    viewMode === 'week'
+    viewMode === 'calendar' && calendarMode === 'month'
+      ? getChooseMonthText(language)
+      : viewMode === 'week'
       ? `${getDateTitle(weekDates[0], language)} — ${getDateTitle(weekDates[6], language)}`
-      : viewMode === 'calendar' && calendarStage === 'year'
-      ? text.chooseYear
-      : viewMode === 'calendar' && calendarStage === 'months'
-      ? `${text.chooseMonth} · ${calendarDate.getFullYear()}`
-      : viewMode === 'calendar' && calendarStage === 'month' && calendarMode === 'month'
-      ? getMonthTitle(calendarDate, language)
       : getDateTitle(activeDate, language);
 
   return (
@@ -1162,7 +1180,20 @@ export default function ProfileClientsPage() {
               ‹
             </button>
 
-            <div style={{ minWidth: 0, textAlign: 'center' }}>
+            <button
+              type="button"
+              onClick={() => {
+                if (viewMode === 'calendar') setCalendarWheelOpen(true);
+              }}
+              style={{
+                minWidth: 0,
+                textAlign: 'center',
+                border: 'none',
+                background: 'transparent',
+                padding: 0,
+                cursor: viewMode === 'calendar' ? 'pointer' : 'default',
+              }}
+            >
               <div
                 style={{
                   fontSize: 25,
@@ -1190,7 +1221,7 @@ export default function ProfileClientsPage() {
                 {filteredBookings.length} {text.bookings} · {money(periodRevenue)} ·{' '}
                 {getMonthTitle(calendarDate, language)}
               </div>
-            </div>
+            </button>
 
             <button type="button" onClick={() => moveDay(1)} style={smallCircleStyle}>
               ›
@@ -1257,53 +1288,19 @@ export default function ProfileClientsPage() {
             />
           ) : null}
 
-          {viewMode === 'calendar' && calendarStage === 'year' ? (
-            <YearPicker
-              years={years}
-              calendarDate={calendarDate}
-              bookings={bookings}
-              statusFilter={statusFilter}
-              timeOverrides={timeOverrides}
-              onSelect={(year) => {
-                const next = new Date(calendarDate);
-                next.setFullYear(year);
-                setCalendarDate(next);
-                setCalendarStage('months');
-                setCalendarMode('month');
-              }}
-            />
-          ) : null}
-
-          {viewMode === 'calendar' && calendarStage === 'months' ? (
-            <MonthPicker
-              language={language}
-              year={calendarDate.getFullYear()}
-              bookings={bookings}
-              statusFilter={statusFilter}
-              timeOverrides={timeOverrides}
-              onSelect={(month) => {
-                const next = new Date(calendarDate);
-                next.setMonth(month);
-                setCalendarDate(next);
-                setCalendarStage('month');
-                setCalendarMode('month');
-              }}
-            />
-          ) : null}
-
-          {viewMode === 'calendar' && calendarStage === 'month' && calendarMode === 'month' ? (
-            <MonthGrid
+          {viewMode === 'calendar' && calendarMode === 'month' ? (
+            <MonthChooserGrid
               language={language}
               calendarDate={calendarDate}
-              selectedDate={selectedDate}
-              bookings={monthBookings}
+              bookings={bookings}
               timeOverrides={timeOverrides}
-              onSelect={(date) => {
-                setSelectedDate(startOfDay(date));
-                setCalendarDate(startOfDay(date));
-                setViewMode('calendar');
-                setCalendarMode('day');
-                setCalendarStage('month');
+              onOpenWheel={() => setCalendarWheelOpen(true)}
+              onSelectMonth={(monthIndex) => {
+                const next = new Date(calendarDate);
+                next.setMonth(monthIndex);
+                next.setDate(1);
+                setCalendarDate(next);
+                setSelectedDate(startOfDay(next));
               }}
             />
           ) : null}
@@ -1311,43 +1308,27 @@ export default function ProfileClientsPage() {
           {managementOpen ? (
             <div style={managementBoxStyle}>
               <div style={managementGridStyle}>
-                <label style={fieldLabelStyle}>
-                  <span>{text.year}</span>
-                  <select
-                    value={calendarDate.getFullYear()}
-                    onChange={(event) => {
-                      const next = new Date(calendarDate);
-                      next.setFullYear(Number(event.target.value));
-                      setCalendarDate(next);
-                    }}
-                    style={inputStyle}
-                  >
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <button
+                  type="button"
+                  onClick={() => setCalendarWheelOpen(true)}
+                  style={pickerOpenButtonStyle}
+                >
+                  <span style={pickerOpenLabelStyle}>{getYearLabel(language)}</span>
+                  <strong>{calendarDate.getFullYear()}</strong>
+                  <span>⌄</span>
+                </button>
 
-                <label style={fieldLabelStyle}>
-                  <span>{text.month}</span>
-                  <select
-                    value={calendarDate.getMonth()}
-                    onChange={(event) => {
-                      const next = new Date(calendarDate);
-                      next.setMonth(Number(event.target.value));
-                      setCalendarDate(next);
-                    }}
-                    style={inputStyle}
-                  >
-                    {Array.from({ length: 12 }, (_, index) => (
-                      <option key={index} value={index}>
-                        {getShortMonthName(index, language)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <button
+                  type="button"
+                  onClick={() => setCalendarWheelOpen(true)}
+                  style={pickerOpenButtonStyle}
+                >
+                  <span style={pickerOpenLabelStyle}>{text.month}</span>
+                  <strong style={{ textTransform: 'capitalize' }}>
+                    {getShortMonthName(calendarDate.getMonth(), language)}
+                  </strong>
+                  <span>⌄</span>
+                </button>
               </div>
 
               <div style={calendarModeRowStyle}>
@@ -1365,7 +1346,6 @@ export default function ProfileClientsPage() {
                       type="button"
                       onClick={() => {
                         setCalendarMode(mode);
-                        setCalendarStage('month');
                         setViewMode(mode === 'week' ? 'week' : 'calendar');
                       }}
                       style={{
@@ -1379,6 +1359,22 @@ export default function ProfileClientsPage() {
                   );
                 })}
               </div>
+
+              {calendarMode === 'day' || calendarMode === 'list' ? (
+                <MonthGrid
+                  language={language}
+                  calendarDate={calendarDate}
+                  selectedDate={selectedDate}
+                  bookings={monthBookings}
+                  timeOverrides={timeOverrides}
+                  onSelect={(date) => {
+                    setSelectedDate(startOfDay(date));
+                    setCalendarDate(startOfDay(date));
+                    setViewMode('calendar');
+                    setCalendarMode('day');
+                  }}
+                />
+              ) : null}
 
               <div style={{ marginTop: 10, ...managementGridStyle }}>
                 <label style={fieldLabelStyle}>
@@ -1537,178 +1533,24 @@ export default function ProfileClientsPage() {
           onApply={saveCustomMinute}
         />
       ) : null}
+
+      {calendarWheelOpen ? (
+        <MonthYearWheelModal
+          language={language}
+          text={text}
+          value={calendarDate}
+          years={years}
+          onClose={() => setCalendarWheelOpen(false)}
+          onApply={(next) => {
+            setCalendarDate(next);
+            setSelectedDate(startOfDay(next));
+            setViewMode('calendar');
+            setCalendarMode('month');
+            setCalendarWheelOpen(false);
+          }}
+        />
+      ) : null}
     </main>
-  );
-}
-
-function YearPicker({
-  years,
-  calendarDate,
-  bookings,
-  statusFilter,
-  timeOverrides,
-  onSelect,
-}: {
-  years: number[];
-  calendarDate: Date;
-  bookings: BookingItem[];
-  statusFilter: StatusFilter;
-  timeOverrides: Record<string, string>;
-  onSelect: (year: number) => void;
-}) {
-  return (
-    <div style={yearGridStyle}>
-      {years.map((year) => {
-        const yearBookings = bookings.filter((booking) => {
-          const override = timeOverrides[booking.id];
-          const date = override ? safeDate(override) : getBookingDate(booking);
-
-          return date && date.getFullYear() === year && statusMatches(booking, statusFilter);
-        });
-
-        const selected = calendarDate.getFullYear() === year;
-
-        return (
-          <button
-            key={year}
-            type="button"
-            onClick={() => onSelect(year)}
-            style={{
-              minHeight: 82,
-              borderRadius: 22,
-              border: `2.5px solid ${BRAND.border}`,
-              background: selected ? BRAND.navy : '#ffffff',
-              color: selected ? '#ffffff' : BRAND.navy,
-              cursor: 'pointer',
-              display: 'grid',
-              alignContent: 'center',
-              justifyItems: 'center',
-              gap: 6,
-              fontWeight: 900,
-            }}
-          >
-            <span style={{ fontSize: 26 }}>{year}</span>
-            <span
-              style={{
-                minWidth: 30,
-                minHeight: 24,
-                borderRadius: 999,
-                background: selected ? '#ffffff' : BRAND.softBlue,
-                color: selected ? BRAND.navy : BRAND.blue,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 13,
-                fontWeight: 900,
-                padding: '0 8px',
-              }}
-            >
-              {yearBookings.length}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function MonthPicker({
-  language,
-  year,
-  bookings,
-  statusFilter,
-  timeOverrides,
-  onSelect,
-}: {
-  language: AppLanguage;
-  year: number;
-  bookings: BookingItem[];
-  statusFilter: StatusFilter;
-  timeOverrides: Record<string, string>;
-  onSelect: (month: number) => void;
-}) {
-  return (
-    <div style={monthCardsGridStyle}>
-      {Array.from({ length: 12 }, (_, month) => {
-        const monthBookings = bookings.filter((booking) => {
-          const override = timeOverrides[booking.id];
-          const date = override ? safeDate(override) : getBookingDate(booking);
-
-          return (
-            date &&
-            date.getFullYear() === year &&
-            date.getMonth() === month &&
-            statusMatches(booking, statusFilter)
-          );
-        });
-
-        return (
-          <button
-            key={month}
-            type="button"
-            onClick={() => onSelect(month)}
-            style={{
-              minHeight: 90,
-              borderRadius: 23,
-              border: `2.5px solid ${BRAND.border}`,
-              background: monthBookings.length > 0 ? BRAND.softGreen : '#ffffff',
-              color: BRAND.navy,
-              cursor: 'pointer',
-              display: 'grid',
-              alignContent: 'center',
-              justifyItems: 'center',
-              gap: 7,
-              fontWeight: 900,
-              padding: 8,
-            }}
-          >
-            <span
-              style={{
-                fontSize: 15,
-                lineHeight: 1.1,
-                textTransform: 'capitalize',
-                textAlign: 'center',
-              }}
-            >
-              {getShortMonthName(month, language)}
-            </span>
-
-            <span
-              style={{
-                minWidth: 34,
-                minHeight: 28,
-                borderRadius: 999,
-                border: `2px solid ${BRAND.border}`,
-                background: monthBookings.length > 0 ? BRAND.green : '#ffffff',
-                color: monthBookings.length > 0 ? '#ffffff' : BRAND.muted,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 14,
-                fontWeight: 900,
-                padding: '0 8px',
-              }}
-            >
-              {monthBookings.length}
-            </span>
-
-            <span style={{ display: 'flex', gap: 3 }}>
-              {monthBookings.slice(0, 4).map((booking) => (
-                <span
-                  key={booking.id}
-                  style={{
-                    width: 7,
-                    height: 7,
-                    borderRadius: 999,
-                    background: statusColor(booking.status),
-                  }}
-                />
-              ))}
-            </span>
-          </button>
-        );
-      })}
-    </div>
   );
 }
 
@@ -1800,6 +1642,226 @@ function StatusFilterBar({
   );
 }
 
+function MonthChooserGrid({
+  language,
+  calendarDate,
+  bookings,
+  timeOverrides,
+  onOpenWheel,
+  onSelectMonth,
+}: {
+  language: AppLanguage;
+  calendarDate: Date;
+  bookings: BookingItem[];
+  timeOverrides: Record<string, string>;
+  onOpenWheel: () => void;
+  onSelectMonth: (monthIndex: number) => void;
+}) {
+  return (
+    <div style={monthChooserWrapStyle}>
+      <button type="button" onClick={onOpenWheel} style={monthChooserTopButtonStyle}>
+        <span>{getYearLabel(language)}</span>
+        <strong>{calendarDate.getFullYear()}</strong>
+        <span>⌄</span>
+      </button>
+
+      <div style={monthCardsGridStyle}>
+        {Array.from({ length: 12 }, (_, monthIndex) => {
+          const active = calendarDate.getMonth() === monthIndex;
+          const monthBookings = bookings.filter((booking) => {
+            const override = timeOverrides[booking.id];
+            const bookingDate = override ? safeDate(override) : getBookingDate(booking);
+
+            return (
+              bookingDate &&
+              bookingDate.getFullYear() === calendarDate.getFullYear() &&
+              bookingDate.getMonth() === monthIndex
+            );
+          });
+
+          return (
+            <button
+              key={monthIndex}
+              type="button"
+              onClick={() => onSelectMonth(monthIndex)}
+              style={{
+                minHeight: 86,
+                borderRadius: 20,
+                border: `2.5px solid ${BRAND.border}`,
+                background: active ? BRAND.softGreen : '#ffffff',
+                color: BRAND.navy,
+                display: 'grid',
+                alignContent: 'center',
+                justifyItems: 'center',
+                gap: 7,
+                cursor: 'pointer',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 18,
+                  fontWeight: 900,
+                  textTransform: 'capitalize',
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {getShortMonthName(monthIndex, language)}
+              </span>
+
+              <span
+                style={{
+                  width: 38,
+                  height: 28,
+                  borderRadius: 999,
+                  border: `2px solid ${active ? BRAND.green : BRAND.border}`,
+                  background: active ? BRAND.green : '#ffffff',
+                  color: active ? '#ffffff' : BRAND.muted,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 16,
+                  fontWeight: 900,
+                }}
+              >
+                {monthBookings.length}
+              </span>
+
+              {monthBookings.length > 0 ? (
+                <span style={{ display: 'flex', gap: 3 }}>
+                  {monthBookings.slice(0, 5).map((booking) => (
+                    <span
+                      key={booking.id}
+                      style={{
+                        width: 7,
+                        height: 7,
+                        borderRadius: 999,
+                        background: statusColor(booking.status),
+                      }}
+                    />
+                  ))}
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function MonthYearWheelModal({
+  language,
+  text,
+  value,
+  years,
+  onClose,
+  onApply,
+}: {
+  language: AppLanguage;
+  text: PageText;
+  value: Date;
+  years: number[];
+  onClose: () => void;
+  onApply: (next: Date) => void;
+}) {
+  const [month, setMonth] = useState(value.getMonth());
+  const [year, setYear] = useState(value.getFullYear());
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={modalCardStyle} onClick={(event) => event.stopPropagation()}>
+        <button type="button" onClick={onClose} style={modalCloseStyle}>
+          ×
+        </button>
+
+        <h2 style={modalTitleStyle}>{getChoosePeriodText(language)}</h2>
+
+        <div style={wheelPreviewStyle}>
+          <span style={{ textTransform: 'capitalize' }}>{getShortMonthName(month, language)}</span>
+          <strong>{year}</strong>
+        </div>
+
+        <div style={wheelPickerGridStyle}>
+          <div>
+            <div style={wheelLabelStyle}>{text.month}</div>
+            <div style={wheelColumnStyle}>
+              {Array.from({ length: 12 }, (_, index) => {
+                const active = month === index;
+
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setMonth(index)}
+                    style={{
+                      ...wheelOptionStyle,
+                      background: active ? BRAND.softGreen : '#ffffff',
+                      borderColor: active ? BRAND.green : '#e4e4e4',
+                      color: active ? '#008f3a' : BRAND.navy,
+                      transform: active ? 'scale(1.03)' : 'scale(1)',
+                    }}
+                  >
+                    {getShortMonthName(index, language)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <div style={wheelLabelStyle}>{getYearLabel(language)}</div>
+            <div style={wheelColumnStyle}>
+              {years.map((item) => {
+                const active = year === item;
+
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setYear(item)}
+                    style={{
+                      ...wheelOptionStyle,
+                      background: active ? BRAND.softGreen : '#ffffff',
+                      borderColor: active ? BRAND.green : '#e4e4e4',
+                      color: active ? '#008f3a' : BRAND.navy,
+                      transform: active ? 'scale(1.03)' : 'scale(1)',
+                    }}
+                  >
+                    {item}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
+          <button type="button" onClick={onClose} style={plainButtonStyle}>
+            {getCancelText(language)}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const next = new Date(value);
+              next.setFullYear(year);
+              next.setMonth(month);
+              next.setDate(1);
+              onApply(startOfDay(next));
+            }}
+            style={darkButtonStyle}
+          >
+            {text.apply}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function NotebookSchedule({
   text,
   bookings,
@@ -1831,10 +1893,7 @@ function NotebookSchedule({
   onDetails: (booking: BookingItem) => void;
   onNote: (booking: BookingItem) => void;
 }) {
-  const baseHours = Array.from(
-    { length: 20 },
-    (_, index) => `${String(index + 5).padStart(2, '0')}:00`
-  );
+  const baseHours = Array.from({ length: 20 }, (_, index) => `${String(index + 5).padStart(2, '0')}:00`);
   const times = [...new Set([...baseHours, ...extraTimes])].sort();
 
   return (
@@ -1853,9 +1912,7 @@ function NotebookSchedule({
             ? timeBookings
             : bookings.filter((booking) => {
                 const date = getEffectiveDate(booking);
-                return date
-                  ? isSameDay(date, activeDate) && date.getHours() === hour && time.endsWith(':00')
-                  : false;
+                return date ? isSameDay(date, activeDate) && date.getHours() === hour && time.endsWith(':00') : false;
               });
 
         if (hourBookings.length === 0 && !showFreeWindows) return null;
@@ -2725,6 +2782,28 @@ const modeButtonStyle: CSSProperties = {
   cursor: 'pointer',
 };
 
+const pickerOpenButtonStyle: CSSProperties = {
+  minHeight: 58,
+  borderRadius: 17,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  padding: '7px 11px',
+  display: 'grid',
+  gridTemplateColumns: '1fr auto',
+  alignContent: 'center',
+  textAlign: 'left',
+  cursor: 'pointer',
+};
+
+const pickerOpenLabelStyle: CSSProperties = {
+  gridColumn: '1 / -1',
+  color: BRAND.muted,
+  fontSize: 11,
+  fontWeight: 900,
+  marginBottom: 3,
+};
+
 const fieldLabelStyle: CSSProperties = {
   display: 'grid',
   gap: 5,
@@ -2841,26 +2920,44 @@ const smallRedButtonStyle: CSSProperties = {
   cursor: 'pointer',
 };
 
-const yearGridStyle: CSSProperties = {
-  marginTop: 14,
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
-  gap: 9,
-};
-
-const monthCardsGridStyle: CSSProperties = {
-  marginTop: 14,
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
-  gap: 9,
-};
-
 const monthGridWrapStyle: CSSProperties = {
   marginTop: 12,
   borderRadius: 20,
   border: '1.5px solid #e3e3e3',
   overflow: 'hidden',
   background: '#ffffff',
+};
+
+const monthChooserWrapStyle: CSSProperties = {
+  marginTop: 12,
+  borderRadius: 22,
+  border: `2.5px solid ${BRAND.border}`,
+  background: BRAND.cream,
+  padding: 12,
+};
+
+const monthChooserTopButtonStyle: CSSProperties = {
+  width: '100%',
+  minHeight: 52,
+  borderRadius: 18,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  display: 'grid',
+  gridTemplateColumns: '1fr auto auto',
+  alignItems: 'center',
+  gap: 8,
+  padding: '0 14px',
+  fontSize: 15,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const monthCardsGridStyle: CSSProperties = {
+  marginTop: 12,
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
+  gap: 9,
 };
 
 const weekHeaderStyle: CSSProperties = {
@@ -2921,4 +3018,53 @@ const modalTitleStyle: CSSProperties = {
   fontSize: 25,
   fontWeight: 900,
   color: BRAND.navy,
+};
+
+const wheelPreviewStyle: CSSProperties = {
+  marginTop: 14,
+  minHeight: 58,
+  borderRadius: 20,
+  border: `2.5px solid ${BRAND.border}`,
+  background: BRAND.softGreen,
+  color: '#008f3a',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 10,
+  fontSize: 22,
+  fontWeight: 900,
+};
+
+const wheelPickerGridStyle: CSSProperties = {
+  marginTop: 14,
+  display: 'grid',
+  gridTemplateColumns: '1.3fr 1fr',
+  gap: 12,
+};
+
+const wheelLabelStyle: CSSProperties = {
+  marginBottom: 7,
+  color: BRAND.muted,
+  fontSize: 12,
+  fontWeight: 900,
+};
+
+const wheelColumnStyle: CSSProperties = {
+  maxHeight: 242,
+  overflowY: 'auto',
+  display: 'grid',
+  gap: 8,
+  padding: '2px 2px 8px',
+};
+
+const wheelOptionStyle: CSSProperties = {
+  minHeight: 48,
+  borderRadius: 17,
+  border: '2px solid #e4e4e4',
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 15,
+  fontWeight: 900,
+  cursor: 'pointer',
+  textTransform: 'capitalize',
 };
