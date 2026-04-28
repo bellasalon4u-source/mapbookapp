@@ -17,7 +17,7 @@ type BottomNavProps = {
   onAddClick?: () => void;
 };
 
-type NavKey = 'messages' | 'add' | 'bookings' | 'profile' | 'clients';
+type NavKey = 'home' | 'messages' | 'add' | 'bookings' | 'profile' | 'clients';
 
 type NavItem = {
   key: NavKey;
@@ -56,40 +56,40 @@ const addMenuTexts: Record<
   PL: { ad: 'Reklama', service: 'Usługa', deal: 'Zniżka', close: 'Zamknij' },
 };
 
-const navItems: NavItem[] = [
-  {
-    key: 'profile',
-    href: '/profile',
+const baseItems: Record<NavKey, NavItem> = {
+  home: {
+    key: 'home',
+    href: '/',
     label: {
-      EN: 'Profile',
-      ES: 'Perfil',
-      RU: 'Профиль',
-      UA: 'Профіль',
-      CZ: 'Profil',
-      DE: 'Profil',
-      IT: 'Profilo',
-      FR: 'Profil',
-      AR: 'حسابي',
-      PL: 'Profil',
+      EN: 'Home',
+      ES: 'Inicio',
+      RU: 'Главная',
+      UA: 'Головна',
+      CZ: 'Domů',
+      DE: 'Start',
+      IT: 'Home',
+      FR: 'Accueil',
+      AR: 'الرئيسية',
+      PL: 'Start',
     },
   },
-  {
-    key: 'clients',
-    href: '/profile/clients',
+  messages: {
+    key: 'messages',
+    href: '/messages',
     label: {
-      EN: 'My clients',
-      ES: 'Clientes',
-      RU: 'Мои клие...',
-      UA: 'Мої кліє...',
-      CZ: 'Klienti',
-      DE: 'Kunden',
-      IT: 'Clienti',
-      FR: 'Clients',
-      AR: 'عملائي',
-      PL: 'Klienci',
+      EN: 'Messages',
+      ES: 'Mensajes',
+      RU: 'Сообщения',
+      UA: 'Повідомл.',
+      CZ: 'Zprávy',
+      DE: 'Nachr.',
+      IT: 'Messaggi',
+      FR: 'Messages',
+      AR: 'رسائل',
+      PL: 'Wiadom.',
     },
   },
-  {
+  add: {
     key: 'add',
     href: '/add',
     accent: true,
@@ -106,11 +106,11 @@ const navItems: NavItem[] = [
       PL: 'Dodaj',
     },
   },
-  {
+  bookings: {
     key: 'bookings',
     href: '/bookings',
     label: {
-      EN: 'My bookings',
+      EN: 'Bookings',
       ES: 'Reservas',
       RU: 'Мои брони',
       UA: 'Мої броні',
@@ -122,23 +122,39 @@ const navItems: NavItem[] = [
       PL: 'Rezerw.',
     },
   },
-  {
-    key: 'messages',
-    href: '/messages',
+  profile: {
+    key: 'profile',
+    href: '/profile',
     label: {
-      EN: 'Messages',
-      ES: 'Mensajes',
-      RU: 'Сообщения',
-      UA: 'Повідомл.',
-      CZ: 'Zprávy',
-      DE: 'Nachr.',
-      IT: 'Messaggi',
-      FR: 'Messages',
-      AR: 'رسائل',
-      PL: 'Wiadom.',
+      EN: 'Profile',
+      ES: 'Perfil',
+      RU: 'Профиль',
+      UA: 'Профіль',
+      CZ: 'Profil',
+      DE: 'Profil',
+      IT: 'Profilo',
+      FR: 'Profil',
+      AR: 'حسابي',
+      PL: 'Profil',
     },
   },
-];
+  clients: {
+    key: 'clients',
+    href: '/profile/clients',
+    label: {
+      EN: 'My clients',
+      ES: 'Clientes',
+      RU: 'Мои клие...',
+      UA: 'Мої кліє...',
+      CZ: 'Klienti',
+      DE: 'Kunden',
+      IT: 'Clienti',
+      FR: 'Clients',
+      AR: 'عملائي',
+      PL: 'Klienci',
+    },
+  },
+};
 
 function getAddText(language: AppLanguage) {
   return addMenuTexts[language] || addMenuTexts.EN;
@@ -153,11 +169,27 @@ function getActiveColor(key: NavKey) {
   return BRAND.green;
 }
 
+function HomeIcon({ active }: { active: boolean }) {
+  const color = active ? BRAND.green : BRAND.black;
+
+  return (
+    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M4.8 10.6L12 4.5L19.2 10.6V19.5H6.3C5.5 19.5 4.8 18.8 4.8 18V10.6Z"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path d="M9.5 19.5V14.5H14.5V19.5" stroke={color} strokeWidth="2" />
+    </svg>
+  );
+}
+
 function CalendarIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.blue : BRAND.black;
 
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
       <rect x="4" y="6" width="16" height="14" rx="2.4" stroke={color} strokeWidth="2" />
       <path d="M8 3V8" stroke={color} strokeWidth="2" strokeLinecap="round" />
       <path d="M16 3V8" stroke={color} strokeWidth="2" strokeLinecap="round" />
@@ -170,7 +202,7 @@ function MessageIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
       <path
         d="M6 7H18C19.1046 7 20 7.89543 20 9V14C20 15.1046 19.1046 16 18 16H11L7 19V16H6C4.89543 16 4 15.1046 4 14V9C4 7.89543 4.89543 7 6 7Z"
         stroke={color}
@@ -185,7 +217,7 @@ function ProfileIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="8" r="3.2" stroke={color} strokeWidth="2" />
       <path
         d="M5.5 19C6.5 15.8 8.8 14.5 12 14.5C15.2 14.5 17.5 15.8 18.5 19"
@@ -201,7 +233,7 @@ function ClientsIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.green : BRAND.black;
 
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+    <svg width="29" height="29" viewBox="0 0 24 24" fill="none">
       <rect x="5" y="7" width="14" height="11" rx="2.4" stroke={color} strokeWidth="2" />
       <path
         d="M9 7V5.8C9 4.8 9.8 4 10.8 4H13.2C14.2 4 15 4.8 15 5.8V7"
@@ -214,6 +246,7 @@ function ClientsIcon({ active }: { active: boolean }) {
 }
 
 function NavIcon({ itemKey, active }: { itemKey: NavKey; active: boolean }) {
+  if (itemKey === 'home') return <HomeIcon active={active} />;
   if (itemKey === 'bookings') return <CalendarIcon active={active} />;
   if (itemKey === 'messages') return <MessageIcon active={active} />;
   if (itemKey === 'profile') return <ProfileIcon active={active} />;
@@ -232,12 +265,33 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
 
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const shouldAutoHide =
-    pathname === '/profile' ||
-    pathname?.startsWith('/profile/') ||
+  const isProfileArea = pathname === '/profile' || pathname?.startsWith('/profile/');
+  const isBookingsArea =
     pathname === '/bookings' ||
     pathname?.startsWith('/bookings/') ||
     pathname?.startsWith('/booking/');
+
+  const shouldAutoHide = isProfileArea || isBookingsArea;
+
+  const navItems = useMemo<NavItem[]>(() => {
+    if (isProfileArea) {
+      return [
+        baseItems.profile,
+        baseItems.clients,
+        baseItems.add,
+        baseItems.bookings,
+        baseItems.messages,
+      ];
+    }
+
+    return [
+      baseItems.home,
+      baseItems.messages,
+      baseItems.add,
+      baseItems.bookings,
+      baseItems.profile,
+    ];
+  }, [isProfileArea]);
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
@@ -330,7 +384,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
     } else if (shouldAutoHide) {
       showNavTemporarily();
     }
-  }, [addMenuOpen]);
+  }, [addMenuOpen, shouldAutoHide]);
 
   const addText = useMemo(() => getAddText(language), [language]);
 
@@ -340,13 +394,10 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
     if (addMenuOpen && key === 'add') return true;
 
     if (activeProp) {
-      if (activeProp === 'clients') return key === 'clients';
-      if (activeProp === 'bookings') return key === 'bookings';
-      if (activeProp === 'profile') return key === 'profile';
-      if (activeProp === 'messages') return key === 'messages';
-      if (activeProp === 'add') return key === 'add';
+      return activeProp === key;
     }
 
+    if (key === 'home') return pathname === '/';
     if (key === 'profile') return pathname === '/profile';
     if (key === 'clients') return pathname === '/profile/clients';
     if (key === 'messages') return pathname === '/messages' || pathname?.startsWith('/messages/');
@@ -410,7 +461,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
-            padding: '0 22px 124px',
+            padding: '0 22px 118px',
             boxSizing: 'border-box',
           }}
         >
@@ -505,27 +556,27 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
         style={{
           position: 'fixed',
           left: '50%',
-          bottom: 'calc(28px + env(safe-area-inset-bottom))',
+          bottom: 'calc(18px + env(safe-area-inset-bottom))',
           transform: shouldShowNav
             ? 'translateX(-50%) translateY(0)'
-            : 'translateX(-50%) translateY(135px)',
+            : 'translateX(-50%) translateY(130px)',
           opacity: shouldShowNav ? 1 : 0,
           width: 'calc(100% - 44px)',
-          maxWidth: 384,
+          maxWidth: 392,
           zIndex: 1200,
           pointerEvents: shouldShowNav ? 'auto' : 'none',
           transition: 'transform 0.34s ease, opacity 0.22s ease',
         }}
       >
-        <div style={{ position: 'relative', height: 86 }}>
+        <div style={{ position: 'relative', height: 82 }}>
           <div
             style={{
               position: 'absolute',
               left: '50%',
-              top: -4,
+              top: -1,
               transform: 'translateX(-50%)',
               width: 104,
-              height: 32,
+              height: 30,
               background: BRAND.cream,
               zIndex: 3,
               pointerEvents: 'none',
@@ -536,10 +587,10 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
             style={{
               position: 'absolute',
               left: '50%',
-              top: -34,
+              top: -31,
               transform: 'translateX(-50%)',
-              width: 112,
-              height: 68,
+              width: 108,
+              height: 64,
               borderTopLeftRadius: 999,
               borderTopRightRadius: 999,
               borderTop: `3px solid ${BRAND.border}`,
@@ -558,12 +609,12 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
               inset: 0,
               background: BRAND.cream,
               border: `3px solid ${BRAND.border}`,
-              borderRadius: 30,
+              borderRadius: 29,
               boxShadow: '0 10px 24px rgba(15,23,42,0.08)',
               display: 'grid',
               gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
               alignItems: 'center',
-              padding: '12px 8px 7px',
+              padding: '10px 8px 6px',
               boxSizing: 'border-box',
               zIndex: 2,
               overflow: 'visible',
@@ -594,7 +645,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                       gap: 0,
                       position: 'relative',
                       zIndex: 8,
-                      height: 86,
+                      height: 82,
                       minWidth: 0,
                       overflow: 'visible',
                     }}
@@ -613,7 +664,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                         fontWeight: 900,
                         lineHeight: 1,
                         boxShadow: '0 12px 28px rgba(85,199,95,0.34)',
-                        transform: 'translateY(-15px)',
+                        transform: 'translateY(-18px)',
                         flexShrink: 0,
                       }}
                     >
@@ -623,9 +674,9 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     <span
                       title={label}
                       style={{
-                        marginTop: -12,
+                        marginTop: -15,
                         width: '100%',
-                        maxWidth: 76,
+                        maxWidth: 78,
                         display: 'block',
                         textAlign: 'center',
                         fontSize: language === 'RU' || language === 'UA' ? 10.5 : 12,
@@ -653,12 +704,12 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     background: 'transparent',
                     padding: 0,
                     cursor: 'pointer',
-                    height: 66,
+                    height: 64,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 4,
+                    gap: 3,
                     position: 'relative',
                     minWidth: 0,
                     zIndex: 6,
@@ -666,7 +717,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                 >
                   <span
                     style={{
-                      height: 29,
+                      height: 30,
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -679,7 +730,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     <span
                       style={{
                         position: 'absolute',
-                        top: 2,
+                        top: 0,
                         right: '16%',
                         minWidth: 22,
                         height: 22,
@@ -704,7 +755,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                     title={label}
                     style={{
                       width: '100%',
-                      maxWidth: 72,
+                      maxWidth: 74,
                       display: 'block',
                       textAlign: 'center',
                       fontSize:
