@@ -17,10 +17,13 @@ import {
   canShowExactAddress,
   canShowDirectContacts,
   type BookingItem,
+  type BookingStatus,
 } from '../../../services/bookingsStore';
 
 type ViewMode = 'today' | 'tomorrow' | 'requests' | 'calendar' | 'history';
 type CalendarMode = 'month' | 'week' | 'day' | 'list';
+type StatusFilter = 'all' | BookingStatus;
+type PaymentFilter = 'all' | 'paid' | 'unpaid' | 'platform' | 'notPlatform';
 
 type PageText = {
   title: string;
@@ -64,6 +67,20 @@ type PageText = {
   statusLegendConfirmed: string;
   statusLegendUnavailable: string;
   statusLegendAttention: string;
+  searchClient: string;
+  fromDate: string;
+  toDate: string;
+  priceFrom: string;
+  priceTo: string;
+  payment: string;
+  allPayments: string;
+  paid: string;
+  unpaid: string;
+  platformPaid: string;
+  notPlatformPaid: string;
+  resetFilters: string;
+  dateRange: string;
+  period: string;
 };
 
 const BRAND = {
@@ -126,6 +143,20 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     statusLegendConfirmed: 'Confirmed',
     statusLegendUnavailable: 'Unavailable',
     statusLegendAttention: 'Needs attention',
+    searchClient: 'Client or service',
+    fromDate: 'From date',
+    toDate: 'To date',
+    priceFrom: 'Price from',
+    priceTo: 'Price to',
+    payment: 'Payment',
+    allPayments: 'All payments',
+    paid: 'Paid',
+    unpaid: 'Unpaid',
+    platformPaid: 'Paid through platform',
+    notPlatformPaid: 'Not platform',
+    resetFilters: 'Reset filters',
+    dateRange: 'Date range',
+    period: 'Period',
   },
   RU: {
     title: 'Мои клиенты',
@@ -169,6 +200,20 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     statusLegendConfirmed: 'Подтверждено',
     statusLegendUnavailable: 'Недоступно',
     statusLegendAttention: 'Требует внимания',
+    searchClient: 'Клиент или услуга',
+    fromDate: 'Дата от',
+    toDate: 'Дата до',
+    priceFrom: 'Цена от',
+    priceTo: 'Цена до',
+    payment: 'Оплата',
+    allPayments: 'Все оплаты',
+    paid: 'Оплачено',
+    unpaid: 'Не оплачено',
+    platformPaid: 'Оплачено через платформу',
+    notPlatformPaid: 'Не через платформу',
+    resetFilters: 'Сбросить фильтры',
+    dateRange: 'Диапазон дат',
+    period: 'Период',
   },
   UA: {
     title: 'Мої клієнти',
@@ -212,90 +257,22 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     statusLegendConfirmed: 'Підтверджено',
     statusLegendUnavailable: 'Недоступно',
     statusLegendAttention: 'Потребує уваги',
+    searchClient: 'Клієнт або послуга',
+    fromDate: 'Дата від',
+    toDate: 'Дата до',
+    priceFrom: 'Ціна від',
+    priceTo: 'Ціна до',
+    payment: 'Оплата',
+    allPayments: 'Усі оплати',
+    paid: 'Оплачено',
+    unpaid: 'Не оплачено',
+    platformPaid: 'Оплачено через платформу',
+    notPlatformPaid: 'Не через платформу',
+    resetFilters: 'Скинути фільтри',
+    dateRange: 'Діапазон дат',
+    period: 'Період',
   },
 };
-
-const demoSchedule: BookingItem[] = [
-  {
-    id: 'client-demo-1',
-    masterId: 'client-lenka',
-    masterName: 'Lenka Smith',
-    masterAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
-    serviceName: 'Визаж',
-    price: 50,
-    status: 'completed',
-    dateTime: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
-    dateLabel: 'Today at 10:00',
-    location: 'Camden, London',
-    areaLabel: 'Camden',
-    exactAddress: '21 Camden High Street, London',
-    clientPaid: true,
-    paymentReceivedByPlatform: true,
-    unlockFeePaid: true,
-    bookingConfirmedByMaster: true,
-    promotionPaidByMaster: true,
-  } as BookingItem,
-  {
-    id: 'client-demo-2',
-    masterId: 'client-klara',
-    masterName: 'Kliára Nováková',
-    masterAvatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
-    serviceName: 'Массаж',
-    price: 60,
-    status: 'upcoming',
-    dateTime: new Date(new Date().setHours(12, 30, 0, 0)).toISOString(),
-    dateLabel: 'Today at 12:30',
-    location: 'Soho, London',
-    areaLabel: 'Soho',
-    exactAddress: '18 Greek Street, Soho, London',
-    clientPaid: true,
-    paymentReceivedByPlatform: true,
-    unlockFeePaid: true,
-    bookingConfirmedByMaster: true,
-    promotionPaidByMaster: true,
-  } as BookingItem,
-  {
-    id: 'client-demo-3',
-    masterId: 'client-anna',
-    masterName: 'Anna Johnson',
-    masterAvatar:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
-    serviceName: 'Укладка',
-    price: 40,
-    status: 'pending',
-    dateTime: new Date(new Date().setHours(15, 0, 0, 0)).toISOString(),
-    dateLabel: 'Today at 15:00',
-    location: 'Chelsea, London',
-    areaLabel: 'Chelsea',
-    exactAddress: '11 King’s Road, Chelsea, London',
-    clientPaid: true,
-    paymentReceivedByPlatform: true,
-    unlockFeePaid: false,
-    bookingConfirmedByMaster: false,
-    promotionPaidByMaster: false,
-  } as BookingItem,
-  {
-    id: 'client-demo-4',
-    masterId: 'blocked-slot',
-    masterName: 'Недоступно',
-    masterAvatar: '',
-    serviceName: '',
-    price: 0,
-    status: 'cancelled',
-    dateTime: new Date(new Date().setHours(17, 30, 0, 0)).toISOString(),
-    dateLabel: 'Today at 17:30',
-    location: '',
-    areaLabel: '',
-    exactAddress: '',
-    clientPaid: false,
-    paymentReceivedByPlatform: false,
-    unlockFeePaid: false,
-    bookingConfirmedByMaster: false,
-    promotionPaidByMaster: false,
-  } as BookingItem,
-];
 
 function getText(language: AppLanguage) {
   return texts[language] || texts.EN!;
@@ -322,6 +299,12 @@ function money(value: number) {
 function startOfDay(date: Date) {
   const next = new Date(date);
   next.setHours(0, 0, 0, 0);
+  return next;
+}
+
+function endOfDay(date: Date) {
+  const next = new Date(date);
+  next.setHours(23, 59, 59, 999);
   return next;
 }
 
@@ -353,6 +336,20 @@ function getTimeLabel(booking: BookingItem) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date);
+}
+
+function inputDateValue(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function dateFromInput(value: string) {
+  if (!value) return null;
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  return date;
 }
 
 function getMonthName(date: Date, language: AppLanguage) {
@@ -399,6 +396,21 @@ function getWeekDates(selectedDate: Date) {
   return Array.from({ length: 7 }, (_, index) => addDays(monday, index));
 }
 
+function getWeekRange(selectedDate: Date) {
+  const dates = getWeekDates(selectedDate);
+  return {
+    from: startOfDay(dates[0]),
+    to: endOfDay(dates[6]),
+  };
+}
+
+function getMonthRange(date: Date) {
+  return {
+    from: startOfDay(new Date(date.getFullYear(), date.getMonth(), 1)),
+    to: endOfDay(new Date(date.getFullYear(), date.getMonth() + 1, 0)),
+  };
+}
+
 function statusLabel(booking: BookingItem, text: PageText) {
   if (booking.status === 'completed') return text.completed;
   if (booking.status === 'pending') return text.waiting;
@@ -424,54 +436,12 @@ function isPaid(booking: BookingItem) {
   return Boolean(booking.clientPaid || booking.paymentReceivedByPlatform || booking.unlockFeePaid);
 }
 
+function isPlatformPaid(booking: BookingItem) {
+  return Boolean(booking.paymentReceivedByPlatform);
+}
+
 function isUnlocked(booking: BookingItem) {
   return canShowExactAddress(booking) && canShowDirectContacts(booking);
-}
-
-function getPreferredDate(bookings: BookingItem[]) {
-  const today = startOfDay(new Date());
-
-  const todayBooking = bookings.find((booking) => {
-    const date = getBookingDate(booking);
-    return date ? isSameDay(date, today) : false;
-  });
-
-  if (todayBooking) {
-    const date = getBookingDate(todayBooking);
-    if (date) return startOfDay(date);
-  }
-
-  const futureBooking = [...bookings]
-    .filter((booking) => {
-      const date = getBookingDate(booking);
-      return date && startOfDay(date).getTime() >= today.getTime();
-    })
-    .sort((a, b) => {
-      const left = getBookingDate(a)?.getTime() || 0;
-      const right = getBookingDate(b)?.getTime() || 0;
-      return left - right;
-    })[0];
-
-  if (futureBooking) {
-    const date = getBookingDate(futureBooking);
-    if (date) return startOfDay(date);
-  }
-
-  const firstBooking = [...bookings].sort((a, b) => {
-    const left = getBookingDate(a)?.getTime() || 0;
-    const right = getBookingDate(b)?.getTime() || 0;
-    return left - right;
-  })[0];
-
-  const firstDate = getBookingDate(firstBooking);
-  return firstDate ? startOfDay(firstDate) : today;
-}
-
-function hasBookingsOnDate(bookings: BookingItem[], date: Date) {
-  return bookings.some((booking) => {
-    const bookingDate = getBookingDate(booking);
-    return bookingDate ? isSameDay(bookingDate, date) : false;
-  });
 }
 
 function getDateTitle(date: Date, language: AppLanguage) {
@@ -481,6 +451,12 @@ function getDateTitle(date: Date, language: AppLanguage) {
     month: 'long',
     year: 'numeric',
   }).format(date);
+}
+
+function isInsideRange(booking: BookingItem, from: Date, to: Date) {
+  const date = getBookingDate(booking);
+  if (!date) return false;
+  return date.getTime() >= from.getTime() && date.getTime() <= to.getTime();
 }
 
 function OlamepLogo() {
@@ -529,7 +505,7 @@ export default function ProfileClientsPage() {
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [bookings, setBookings] = useState<BookingItem[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>('calendar');
+  const [viewMode, setViewMode] = useState<ViewMode>('today');
   const [calendarMode, setCalendarMode] = useState<CalendarMode>('month');
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
   const [calendarDate, setCalendarDate] = useState<Date>(() => startOfDay(new Date()));
@@ -537,20 +513,18 @@ export default function ProfileClientsPage() {
   const [showFreeWindows, setShowFreeWindows] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('all');
+  const [priceFrom, setPriceFrom] = useState('');
+  const [priceTo, setPriceTo] = useState('');
+  const [rangeFrom, setRangeFrom] = useState('');
+  const [rangeTo, setRangeTo] = useState('');
+
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
     const syncBookings = () => {
-      const saved = getBookings();
-      const nextBookings = saved.length > 0 ? saved : demoSchedule;
-      const preferredDate = getPreferredDate(nextBookings);
-
-      setBookings(nextBookings);
-      setSelectedDate((current) =>
-        hasBookingsOnDate(nextBookings, current) ? current : preferredDate
-      );
-      setCalendarDate((current) =>
-        hasBookingsOnDate(nextBookings, current) ? current : preferredDate
-      );
+      setBookings(getBookings());
     };
 
     syncLanguage();
@@ -577,24 +551,57 @@ export default function ProfileClientsPage() {
   const today = useMemo(() => startOfDay(new Date()), []);
   const tomorrow = useMemo(() => addDays(today, 1), [today]);
 
-  const visibleBookings = useMemo(() => {
-    let source = [...bookings];
+  const selectedRange = useMemo(() => {
+    const customFrom = dateFromInput(rangeFrom);
+    const customTo = dateFromInput(rangeTo);
+
+    if (customFrom && customTo) {
+      return {
+        from: startOfDay(customFrom),
+        to: endOfDay(customTo),
+      };
+    }
 
     if (viewMode === 'today') {
-      source = source.filter((booking) => {
-        const date = getBookingDate(booking);
-        return date ? isSameDay(date, today) : false;
-      });
+      return {
+        from: startOfDay(today),
+        to: endOfDay(today),
+      };
     }
 
     if (viewMode === 'tomorrow') {
-      source = source.filter((booking) => {
-        const date = getBookingDate(booking);
-        return date ? isSameDay(date, tomorrow) : false;
-      });
+      return {
+        from: startOfDay(tomorrow),
+        to: endOfDay(tomorrow),
+      };
     }
 
-    if (viewMode === 'requests') {
+    if (viewMode === 'calendar') {
+      if (calendarMode === 'month' || calendarMode === 'list') {
+        return getMonthRange(calendarDate);
+      }
+
+      if (calendarMode === 'week') {
+        return getWeekRange(selectedDate);
+      }
+
+      return {
+        from: startOfDay(selectedDate),
+        to: endOfDay(selectedDate),
+      };
+    }
+
+    return null;
+  }, [calendarDate, calendarMode, rangeFrom, rangeTo, selectedDate, today, tomorrow, viewMode]);
+
+  const visibleBookings = useMemo(() => {
+    let source = [...bookings];
+
+    if (selectedRange) {
+      source = source.filter((booking) => isInsideRange(booking, selectedRange.from, selectedRange.to));
+    }
+
+    if (viewMode === 'requests' || showOnlyRequests) {
       source = source.filter((booking) => booking.status === 'pending');
     }
 
@@ -604,15 +611,48 @@ export default function ProfileClientsPage() {
       );
     }
 
-    if (viewMode === 'calendar') {
-      source = source.filter((booking) => {
-        const date = getBookingDate(booking);
-        return date ? isSameDay(date, selectedDate) : false;
-      });
+    if (statusFilter !== 'all') {
+      source = source.filter((booking) => booking.status === statusFilter);
     }
 
-    if (showOnlyRequests) {
-      source = source.filter((booking) => booking.status === 'pending');
+    if (paymentFilter === 'paid') {
+      source = source.filter((booking) => isPaid(booking));
+    }
+
+    if (paymentFilter === 'unpaid') {
+      source = source.filter((booking) => !isPaid(booking));
+    }
+
+    if (paymentFilter === 'platform') {
+      source = source.filter((booking) => isPlatformPaid(booking));
+    }
+
+    if (paymentFilter === 'notPlatform') {
+      source = source.filter((booking) => !isPlatformPaid(booking));
+    }
+
+    const minPrice = Number(priceFrom);
+    const maxPrice = Number(priceTo);
+
+    if (priceFrom.trim() && !Number.isNaN(minPrice)) {
+      source = source.filter((booking) => Number(booking.price || 0) >= minPrice);
+    }
+
+    if (priceTo.trim() && !Number.isNaN(maxPrice)) {
+      source = source.filter((booking) => Number(booking.price || 0) <= maxPrice);
+    }
+
+    const q = search.trim().toLowerCase();
+
+    if (q) {
+      source = source.filter((booking) => {
+        return (
+          booking.masterName.toLowerCase().includes(q) ||
+          booking.serviceName.toLowerCase().includes(q) ||
+          String(booking.location || '').toLowerCase().includes(q) ||
+          String(booking.areaLabel || '').toLowerCase().includes(q)
+        );
+      });
     }
 
     return source.sort((a, b) => {
@@ -620,7 +660,17 @@ export default function ProfileClientsPage() {
       const right = getBookingDate(b)?.getTime() || 0;
       return left - right;
     });
-  }, [bookings, selectedDate, showOnlyRequests, today, tomorrow, viewMode]);
+  }, [
+    bookings,
+    paymentFilter,
+    priceFrom,
+    priceTo,
+    search,
+    selectedRange,
+    showOnlyRequests,
+    statusFilter,
+    viewMode,
+  ]);
 
   const monthBookings = useMemo(() => {
     return bookings.filter((booking) => {
@@ -633,11 +683,11 @@ export default function ProfileClientsPage() {
     });
   }, [bookings, calendarDate]);
 
-  const totalRevenue = bookings.reduce((sum, booking) => sum + Number(booking.price || 0), 0);
-  const activeCount = bookings.filter(
+  const totalRevenue = visibleBookings.reduce((sum, booking) => sum + Number(booking.price || 0), 0);
+  const activeCount = visibleBookings.filter(
     (booking) => booking.status === 'pending' || booking.status === 'upcoming'
   ).length;
-  const completedCount = bookings.filter((booking) => booking.status === 'completed').length;
+  const completedCount = visibleBookings.filter((booking) => booking.status === 'completed').length;
 
   const years = useMemo(() => {
     const current = new Date().getFullYear();
@@ -648,12 +698,45 @@ export default function ProfileClientsPage() {
     updateBookingStatus(booking.id, 'completed');
   };
 
+  const resetFilters = () => {
+    setSearch('');
+    setStatusFilter('all');
+    setPaymentFilter('all');
+    setPriceFrom('');
+    setPriceTo('');
+    setRangeFrom('');
+    setRangeTo('');
+    setShowOnlyRequests(false);
+    setShowFreeWindows(false);
+  };
+
+  const setMode = (mode: ViewMode) => {
+    setViewMode(mode);
+    setRangeFrom('');
+    setRangeTo('');
+
+    if (mode === 'today') {
+      setSelectedDate(today);
+      setCalendarDate(today);
+    }
+
+    if (mode === 'tomorrow') {
+      setSelectedDate(tomorrow);
+      setCalendarDate(tomorrow);
+    }
+  };
+
   const goToday = () => {
-    const now = startOfDay(new Date());
-    setSelectedDate(now);
-    setCalendarDate(now);
+    setRangeFrom('');
+    setRangeTo('');
+    setSelectedDate(today);
+    setCalendarDate(today);
     setViewMode('today');
   };
+
+  const periodLabel = selectedRange
+    ? `${inputDateValue(selectedRange.from)} — ${inputDateValue(selectedRange.to)}`
+    : text.allStatuses;
 
   return (
     <main
@@ -749,7 +832,7 @@ export default function ProfileClientsPage() {
               <button
                 key={mode}
                 type="button"
-                onClick={() => setViewMode(mode)}
+                onClick={() => setMode(mode)}
                 style={{
                   minHeight: 42,
                   borderRadius: 15,
@@ -781,7 +864,7 @@ export default function ProfileClientsPage() {
         >
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <StatBox title={text.active} value={String(activeCount)} bg={BRAND.softGreen} />
-            <StatBox title={text.total} value={String(bookings.length)} bg={BRAND.softBlue} />
+            <StatBox title={text.total} value={String(visibleBookings.length)} bg={BRAND.softBlue} />
             <StatBox title={text.revenue} value={money(totalRevenue)} bg="#fff0da" />
             <StatBox title={text.done} value={String(completedCount)} bg={BRAND.softPurple} />
           </div>
@@ -810,6 +893,7 @@ export default function ProfileClientsPage() {
                 const next = new Date(calendarDate);
                 next.setMonth(next.getMonth() - 1);
                 setCalendarDate(next);
+                setViewMode('calendar');
               }}
               style={roundButtonStyle}
             >
@@ -834,6 +918,7 @@ export default function ProfileClientsPage() {
                 const next = new Date(calendarDate);
                 next.setMonth(next.getMonth() + 1);
                 setCalendarDate(next);
+                setViewMode('calendar');
               }}
               style={roundButtonStyle}
             >
@@ -855,6 +940,7 @@ export default function ProfileClientsPage() {
                 const next = new Date(calendarDate);
                 next.setFullYear(Number(event.target.value));
                 setCalendarDate(next);
+                setViewMode('calendar');
               }}
               style={selectStyle}
             >
@@ -871,6 +957,7 @@ export default function ProfileClientsPage() {
                 const next = new Date(calendarDate);
                 next.setMonth(Number(event.target.value));
                 setCalendarDate(next);
+                setViewMode('calendar');
               }}
               style={selectStyle}
             >
@@ -906,7 +993,12 @@ export default function ProfileClientsPage() {
                 <button
                   key={mode}
                   type="button"
-                  onClick={() => setCalendarMode(mode)}
+                  onClick={() => {
+                    setCalendarMode(mode);
+                    setViewMode('calendar');
+                    setRangeFrom('');
+                    setRangeTo('');
+                  }}
                   style={{
                     minHeight: 38,
                     borderRadius: 999,
@@ -932,7 +1024,11 @@ export default function ProfileClientsPage() {
               bookings={monthBookings}
               onSelect={(date) => {
                 setSelectedDate(startOfDay(date));
+                setCalendarDate(startOfDay(date));
                 setViewMode('calendar');
+                setCalendarMode('day');
+                setRangeFrom('');
+                setRangeTo('');
               }}
             />
           ) : null}
@@ -946,6 +1042,8 @@ export default function ProfileClientsPage() {
                 setSelectedDate(startOfDay(date));
                 setCalendarDate(startOfDay(date));
                 setViewMode('calendar');
+                setRangeFrom('');
+                setRangeTo('');
               }}
             />
           ) : null}
@@ -966,7 +1064,11 @@ export default function ProfileClientsPage() {
               text={text}
               onSelect={(date) => {
                 setSelectedDate(startOfDay(date));
+                setCalendarDate(startOfDay(date));
+                setCalendarMode('day');
                 setViewMode('calendar');
+                setRangeFrom('');
+                setRangeTo('');
               }}
             />
           ) : null}
@@ -1020,12 +1122,122 @@ export default function ProfileClientsPage() {
             <div
               style={{
                 marginTop: 10,
-                borderRadius: 18,
+                borderRadius: 20,
                 border: `2px solid ${BRAND.border}`,
                 background: '#fbfbfb',
                 padding: 10,
+                display: 'grid',
+                gap: 10,
               }}
             >
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 900,
+                  color: BRAND.navy,
+                }}
+              >
+                {text.dateRange}: {periodLabel}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <label style={filterLabelStyle}>
+                  <span>{text.fromDate}</span>
+                  <input
+                    type="date"
+                    value={rangeFrom}
+                    onChange={(event) => {
+                      setRangeFrom(event.target.value);
+                      setViewMode('calendar');
+                    }}
+                    style={filterInputStyle}
+                  />
+                </label>
+
+                <label style={filterLabelStyle}>
+                  <span>{text.toDate}</span>
+                  <input
+                    type="date"
+                    value={rangeTo}
+                    onChange={(event) => {
+                      setRangeTo(event.target.value);
+                      setViewMode('calendar');
+                    }}
+                    style={filterInputStyle}
+                  />
+                </label>
+              </div>
+
+              <label style={filterLabelStyle}>
+                <span>{text.searchClient}</span>
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={text.searchClient}
+                  style={filterInputStyle}
+                />
+              </label>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <label style={filterLabelStyle}>
+                  <span>{text.priceFrom}</span>
+                  <input
+                    value={priceFrom}
+                    onChange={(event) => setPriceFrom(event.target.value)}
+                    inputMode="numeric"
+                    placeholder="0"
+                    style={filterInputStyle}
+                  />
+                </label>
+
+                <label style={filterLabelStyle}>
+                  <span>{text.priceTo}</span>
+                  <input
+                    value={priceTo}
+                    onChange={(event) => setPriceTo(event.target.value)}
+                    inputMode="numeric"
+                    placeholder="999"
+                    style={filterInputStyle}
+                  />
+                </label>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <label style={filterLabelStyle}>
+                  <span>{text.allStatuses}</span>
+                  <select
+                    value={statusFilter}
+                    onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+                    style={filterInputStyle}
+                  >
+                    <option value="all">{text.allStatuses}</option>
+                    <option value="upcoming">{text.confirmed}</option>
+                    <option value="pending">{text.waiting}</option>
+                    <option value="completed">{text.completed}</option>
+                    <option value="cancelled">{text.cancelled}</option>
+                  </select>
+                </label>
+
+                <label style={filterLabelStyle}>
+                  <span>{text.payment}</span>
+                  <select
+                    value={paymentFilter}
+                    onChange={(event) => setPaymentFilter(event.target.value as PaymentFilter)}
+                    style={filterInputStyle}
+                  >
+                    <option value="all">{text.allPayments}</option>
+                    <option value="paid">{text.paid}</option>
+                    <option value="unpaid">{text.unpaid}</option>
+                    <option value="platform">{text.platformPaid}</option>
+                    <option value="notPlatform">{text.notPlatformPaid}</option>
+                  </select>
+                </label>
+              </div>
+
+              <button type="button" onClick={resetFilters} style={resetButtonStyle}>
+                {text.resetFilters}
+              </button>
+
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 7 }}>
                 <LegendDot color={BRAND.blue} label={text.statusLegendDone} />
                 <LegendDot color={BRAND.green} label={text.statusLegendConfirmed} />
@@ -1063,7 +1275,9 @@ export default function ProfileClientsPage() {
                   textTransform: 'capitalize',
                 }}
               >
-                {getDateTitle(selectedDate, language)}
+                {selectedRange
+                  ? `${inputDateValue(selectedRange.from)} — ${inputDateValue(selectedRange.to)}`
+                  : getDateTitle(selectedDate, language)}
               </div>
 
               <div
@@ -1178,12 +1392,7 @@ function CalendarGrid({
         ))}
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, 1fr)',
-        }}
-      >
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
         {cells.map(({ date, currentMonth }) => {
           const dayBookings = bookings.filter((booking) => {
             const bookingDate = getBookingDate(booking);
@@ -1218,10 +1427,10 @@ function CalendarGrid({
               <span style={{ fontSize: 14, fontWeight: 900 }}>{date.getDate()}</span>
 
               <span style={{ minHeight: 14, display: 'flex', alignItems: 'center', gap: 3 }}>
-                {hasConfirmed ? <Dot color={BRAND.green} /> : null}
-                {hasPending ? <Dot color={BRAND.yellow} /> : null}
                 {hasCompleted ? <Dot color={BRAND.blue} /> : null}
+                {hasConfirmed ? <Dot color={BRAND.green} /> : null}
                 {hasCancelled ? <Dot color={BRAND.red} /> : null}
+                {hasPending ? <Dot color={BRAND.yellow} /> : null}
               </span>
             </button>
           );
@@ -1279,7 +1488,13 @@ function WeekStrip({
               gap: 5,
             }}
           >
-            <span style={{ fontSize: 10, fontWeight: 900, color: selected ? '#ffffff' : BRAND.muted }}>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 900,
+                color: selected ? '#ffffff' : BRAND.muted,
+              }}
+            >
               {weekDays[index]}
             </span>
             <span style={{ fontSize: 18, fontWeight: 900 }}>{date.getDate()}</span>
@@ -1455,22 +1670,23 @@ function ScheduleRow({
         position: 'relative',
         borderRadius: 24,
         border: `2.5px solid ${BRAND.border}`,
-        background: '#ffffff',
+        background:
+          'repeating-linear-gradient(180deg, #ffffff 0px, #ffffff 31px, #edf1f6 32px, #ffffff 33px)',
         padding: 12,
         display: 'grid',
         gridTemplateColumns: '64px minmax(0, 1fr)',
         gap: 12,
         boxShadow: '0 8px 20px rgba(7,27,70,0.05)',
+        overflow: 'hidden',
       }}
     >
       <div
         style={{
           position: 'absolute',
           left: 0,
-          top: 18,
-          bottom: 18,
-          width: 5,
-          borderRadius: 999,
+          top: 0,
+          bottom: 0,
+          width: 7,
           background: color,
         }}
       />
@@ -1578,14 +1794,14 @@ function ScheduleRow({
             >
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 <Pill
-                  label={isPaid(booking) ? 'Deposit paid' : 'Deposit waiting'}
+                  label={isPaid(booking) ? text.paid : text.unpaid}
                   color={isPaid(booking) ? '#008f3a' : '#b87500'}
                   bg={isPaid(booking) ? BRAND.softGreen : BRAND.softYellow}
                 />
                 <Pill
-                  label={isUnlocked(booking) ? 'Contacts open' : 'Contacts locked'}
-                  color={isUnlocked(booking) ? '#008f3a' : BRAND.blue}
-                  bg={isUnlocked(booking) ? BRAND.softGreen : BRAND.softBlue}
+                  label={isPlatformPaid(booking) ? text.platformPaid : text.notPlatformPaid}
+                  color={isPlatformPaid(booking) ? BRAND.blue : BRAND.muted}
+                  bg={isPlatformPaid(booking) ? BRAND.softBlue : '#f3f4f6'}
                 />
               </div>
 
@@ -1661,7 +1877,8 @@ function FreeWindowRow({ time, text }: { time: string; text: PageText }) {
       style={{
         borderRadius: 22,
         border: `2px solid #d2d2d2`,
-        background: '#f8f8f8',
+        background:
+          'repeating-linear-gradient(180deg, #f8f8f8 0px, #f8f8f8 31px, #e1e1e1 32px, #f8f8f8 33px)',
         padding: 12,
         display: 'grid',
         gridTemplateColumns: '64px minmax(0, 1fr)',
@@ -1795,6 +2012,7 @@ function Dot({ color }: { color: string }) {
         borderRadius: 999,
         background: color,
         display: 'inline-block',
+        flexShrink: 0,
       }}
     />
   );
@@ -1877,6 +2095,41 @@ const greenButtonStyle: CSSProperties = {
   borderRadius: 15,
   border: `2px solid ${BRAND.green}`,
   background: BRAND.green,
+  color: '#ffffff',
+  fontSize: 13,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const filterLabelStyle: CSSProperties = {
+  minWidth: 0,
+  display: 'grid',
+  gap: 5,
+  fontSize: 10.5,
+  fontWeight: 900,
+  color: BRAND.muted,
+};
+
+const filterInputStyle: CSSProperties = {
+  width: '100%',
+  minWidth: 0,
+  height: 42,
+  borderRadius: 15,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 13,
+  fontWeight: 900,
+  padding: '0 10px',
+  outline: 'none',
+  boxSizing: 'border-box',
+};
+
+const resetButtonStyle: CSSProperties = {
+  minHeight: 42,
+  borderRadius: 15,
+  border: `2px solid ${BRAND.border}`,
+  background: BRAND.navy,
   color: '#ffffff',
   fontSize: 13,
   fontWeight: 900,
