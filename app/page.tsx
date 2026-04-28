@@ -605,14 +605,18 @@ function QuickActionsPanel({
         top: 14,
         right: open ? 8 : -82,
         width: 78,
-        zIndex: 850,
+        zIndex: 3000,
         transition: 'right 0.28s ease',
         pointerEvents: 'auto',
       }}
     >
       <button
         type="button"
-        onClick={onToggle}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          onToggle();
+        }}
         aria-label="Toggle quick actions"
         style={{
           position: 'absolute',
@@ -631,6 +635,9 @@ function QuickActionsPanel({
           justifyContent: 'center',
           cursor: 'pointer',
           padding: 0,
+          zIndex: 3002,
+          pointerEvents: 'auto',
+          touchAction: 'manipulation',
         }}
       >
         <span
@@ -658,13 +665,19 @@ function QuickActionsPanel({
           gap: 6,
           boxSizing: 'border-box',
           backdropFilter: 'blur(10px)',
+          zIndex: 3001,
+          pointerEvents: 'auto',
         }}
       >
         {items.map((item) => (
           <button
             key={item.key}
             type="button"
-            onClick={item.onClick}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              item.onClick();
+            }}
             style={{
               minHeight: 50,
               borderRadius: 17,
@@ -680,6 +693,8 @@ function QuickActionsPanel({
               justifyContent: 'center',
               gap: 4,
               position: 'relative',
+              pointerEvents: 'auto',
+              touchAction: 'manipulation',
             }}
           >
             <span
