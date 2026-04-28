@@ -8,56 +8,52 @@ import {
   subscribeToLanguageChange,
   type AppLanguage,
 } from '../../../services/i18n';
-import { getOrCreateChatThread } from '../../../services/chatStore';
 import {
   getBookings,
   subscribeToBookingsStore,
+  updateBookingStatus,
+  getPublicBookingLocation,
+  getVisibleBookingLocation,
+  canShowExactAddress,
+  canShowDirectContacts,
   type BookingItem,
 } from '../../../services/bookingsStore';
 
-type ClientStatus = 'active' | 'new' | 'returning' | 'completed';
-type ClientFilter = 'all' | 'active' | 'returning' | 'new' | 'completed';
+type ViewMode = 'today' | 'tomorrow' | 'requests' | 'calendar' | 'history';
+type CalendarMode = 'month' | 'week' | 'day' | 'list';
 
-type ClientItem = {
-  id: string;
-  name: string;
-  avatar: string;
-  service: string;
-  lastBooking: string;
-  totalSpent: number;
-  bookingsCount: number;
-  status: ClientStatus;
-  completed: boolean;
-  lastBookingId?: string;
-  masterId?: string;
-};
-
-type ClientsText = {
+type PageText = {
   title: string;
   subtitle: string;
-  search: string;
-  totalClients: string;
-  activeClients: string;
-  totalRevenue: string;
-  repeatClients: string;
-  allLabel: string;
-  newLabel: string;
-  activeLabel: string;
-  returningLabel: string;
-  completedLabel: string;
+  today: string;
+  tomorrow: string;
+  requests: string;
+  calendar: string;
+  history: string;
+  month: string;
+  week: string;
+  day: string;
+  list: string;
+  filters: string;
+  freeWindows: string;
+  onlyRequests: string;
+  synced: string;
+  confirmed: string;
+  waiting: string;
+  completed: string;
+  cancelled: string;
+  unavailable: string;
+  available: string;
+  selectedDay: string;
   bookings: string;
-  spent: string;
-  lastBooking: string;
-  message: string;
-  viewBookings: string;
-  noClients: string;
-  noClientsHint: string;
+  noBookings: string;
+  details: string;
+  openChat: string;
+  markDone: string;
+  price: string;
+  notes: string;
   back: string;
   close: string;
-  calendarLinked: string;
-  synced: string;
-  requests: string;
-  history: string;
 };
 
 const BRAND = {
@@ -66,415 +62,309 @@ const BRAND = {
   green: '#24c45a',
   red: '#ff2456',
   yellow: '#ffd629',
-  pink: '#ff4f9a',
-  cream: '#fff4dc',
-  softBlue: '#dcecff',
-  softGreen: '#dcffe8',
-  softPink: '#ffe9f2',
-  softViolet: '#f2edff',
-  softOrange: '#fff0da',
-  bg: '#ffffff',
+  orange: '#ffb020',
   border: '#050505',
   muted: '#657080',
+  softBlue: '#eaf4ff',
+  softGreen: '#dcffe8',
+  softYellow: '#fff4c7',
+  softRed: '#ffe3ea',
+  cream: '#fffdf8',
 };
 
-const clientsTexts: Record<AppLanguage, ClientsText> = {
+const texts: Partial<Record<AppLanguage, PageText>> = {
   EN: {
     title: 'My clients',
-    subtitle: 'Bookings, requests, calendar and quick client history',
-    search: 'Search clients, services...',
-    totalClients: 'Total clients',
-    activeClients: 'Active',
-    totalRevenue: 'Revenue',
-    repeatClients: 'Repeat clients',
-    allLabel: 'All',
-    newLabel: 'New',
-    activeLabel: 'Active',
-    returningLabel: 'Repeat',
-    completedLabel: 'Completed',
+    subtitle: 'Bookings, requests, calendar and quick calculations',
+    today: 'Today',
+    tomorrow: 'Tomorrow',
+    requests: 'Requests',
+    calendar: 'Calendar',
+    history: 'History',
+    month: 'Month',
+    week: 'Week',
+    day: 'Day',
+    list: 'List',
+    filters: 'Filters',
+    freeWindows: 'Free windows',
+    onlyRequests: 'Only requests',
+    synced: 'Synced',
+    confirmed: 'Confirmed',
+    waiting: 'Waiting',
+    completed: 'Done',
+    cancelled: 'Cancelled',
+    unavailable: 'Unavailable',
+    available: 'Free slot',
+    selectedDay: 'Selected day',
     bookings: 'bookings',
-    spent: 'spent',
-    lastBooking: 'Last booking',
-    message: 'Message',
-    viewBookings: 'Bookings',
-    noClients: 'No clients yet',
-    noClientsHint: 'When someone books your service, clients will appear here.',
+    noBookings: 'No bookings for this date',
+    details: 'Booking details',
+    openChat: 'Open chat',
+    markDone: 'Mark done',
+    price: 'Price',
+    notes: 'Notes',
     back: 'Back',
     close: 'Close',
-    calendarLinked: 'Calendar linked',
-    synced: 'Synchronized',
-    requests: 'Requests',
-    history: 'History',
   },
   RU: {
     title: 'Мои клиенты',
-    subtitle: 'Брони у меня, запросы, календарь и быстрая история клиентов',
-    search: 'Поиск клиентов, услуг...',
-    totalClients: 'Всего клиентов',
-    activeClients: 'Активные',
-    totalRevenue: 'Доход',
-    repeatClients: 'Повторные',
-    allLabel: 'Все',
-    newLabel: 'Новые',
-    activeLabel: 'Активные',
-    returningLabel: 'Повторные',
-    completedLabel: 'Готовые',
-    bookings: 'брони',
-    spent: 'потрачено',
-    lastBooking: 'Последняя бронь',
-    message: 'Сообщение',
-    viewBookings: 'Брони',
-    noClients: 'Клиентов пока нет',
-    noClientsHint: 'Когда кто-то забронирует вашу услугу, клиенты появятся здесь.',
+    subtitle: 'Брони у меня, запросы, календарь и быстрые расчёты',
+    today: 'Сегодня',
+    tomorrow: 'Завтра',
+    requests: 'Запросы',
+    calendar: 'Календарь',
+    history: 'История',
+    month: 'Месяц',
+    week: 'Неделя',
+    day: 'День',
+    list: 'Список',
+    filters: 'Фильтры',
+    freeWindows: 'Свободные окна',
+    onlyRequests: 'Только запросы',
+    synced: 'Синхронизировано',
+    confirmed: 'Подтверждено',
+    waiting: 'Ожидает подтверждения',
+    completed: 'Готово',
+    cancelled: 'Отменено',
+    unavailable: 'Недоступно',
+    available: 'Свободное окно',
+    selectedDay: 'Выбранный день',
+    bookings: 'записи',
+    noBookings: 'На эту дату записей нет',
+    details: 'Детали брони',
+    openChat: 'Открыть чат',
+    markDone: 'Отметить готово',
+    price: 'Цена',
+    notes: 'Заметки',
     back: 'Назад',
     close: 'Закрыть',
-    calendarLinked: 'Связано с календарём',
-    synced: 'Синхронизировано',
-    requests: 'Запросы',
-    history: 'История',
   },
   UA: {
     title: 'Мої клієнти',
-    subtitle: 'Бронювання у мене, запити, календар і швидка історія клієнтів',
-    search: 'Пошук клієнтів, послуг...',
-    totalClients: 'Усього клієнтів',
-    activeClients: 'Активні',
-    totalRevenue: 'Дохід',
-    repeatClients: 'Повторні',
-    allLabel: 'Усі',
-    newLabel: 'Нові',
-    activeLabel: 'Активні',
-    returningLabel: 'Повторні',
-    completedLabel: 'Готові',
-    bookings: 'броні',
-    spent: 'витрачено',
-    lastBooking: 'Остання бронь',
-    message: 'Повідомлення',
-    viewBookings: 'Броні',
-    noClients: 'Клієнтів поки немає',
-    noClientsHint: 'Коли хтось забронює вашу послугу, клієнти зʼявляться тут.',
+    subtitle: 'Бронювання у мене, запити, календар і швидкі розрахунки',
+    today: 'Сьогодні',
+    tomorrow: 'Завтра',
+    requests: 'Запити',
+    calendar: 'Календар',
+    history: 'Історія',
+    month: 'Місяць',
+    week: 'Тиждень',
+    day: 'День',
+    list: 'Список',
+    filters: 'Фільтри',
+    freeWindows: 'Вільні вікна',
+    onlyRequests: 'Тільки запити',
+    synced: 'Синхронізовано',
+    confirmed: 'Підтверджено',
+    waiting: 'Очікує підтвердження',
+    completed: 'Готово',
+    cancelled: 'Скасовано',
+    unavailable: 'Недоступно',
+    available: 'Вільне вікно',
+    selectedDay: 'Обраний день',
+    bookings: 'записи',
+    noBookings: 'На цю дату записів немає',
+    details: 'Деталі бронювання',
+    openChat: 'Відкрити чат',
+    markDone: 'Позначити готово',
+    price: 'Ціна',
+    notes: 'Нотатки',
     back: 'Назад',
     close: 'Закрити',
-    calendarLinked: 'Повʼязано з календарем',
-    synced: 'Синхронізовано',
-    requests: 'Запити',
-    history: 'Історія',
-  },
-  ES: {
-    title: 'Mis clientes',
-    subtitle: 'Reservas, solicitudes, calendario e historial rápido',
-    search: 'Buscar clientes, servicios...',
-    totalClients: 'Clientes',
-    activeClients: 'Activos',
-    totalRevenue: 'Ingresos',
-    repeatClients: 'Repetidos',
-    allLabel: 'Todo',
-    newLabel: 'Nuevo',
-    activeLabel: 'Activo',
-    returningLabel: 'Repite',
-    completedLabel: 'Completado',
-    bookings: 'reservas',
-    spent: 'gastado',
-    lastBooking: 'Última reserva',
-    message: 'Mensaje',
-    viewBookings: 'Reservas',
-    noClients: 'Aún no hay clientes',
-    noClientsHint: 'Cuando alguien reserve tu servicio, aparecerá aquí.',
-    back: 'Atrás',
-    close: 'Cerrar',
-    calendarLinked: 'Calendario conectado',
-    synced: 'Sincronizado',
-    requests: 'Solicitudes',
-    history: 'Historial',
-  },
-  CZ: {
-    title: 'Moji klienti',
-    subtitle: 'Rezervace, žádosti, kalendář a rychlá historie klientů',
-    search: 'Hledat klienty, služby...',
-    totalClients: 'Klienti',
-    activeClients: 'Aktivní',
-    totalRevenue: 'Příjem',
-    repeatClients: 'Opakovaní',
-    allLabel: 'Vše',
-    newLabel: 'Nový',
-    activeLabel: 'Aktivní',
-    returningLabel: 'Opakuje',
-    completedLabel: 'Dokončeno',
-    bookings: 'rezervací',
-    spent: 'utraceno',
-    lastBooking: 'Poslední rezervace',
-    message: 'Zpráva',
-    viewBookings: 'Rezervace',
-    noClients: 'Zatím žádní klienti',
-    noClientsHint: 'Jakmile si někdo rezervuje vaši službu, klienti se zobrazí zde.',
-    back: 'Zpět',
-    close: 'Zavřít',
-    calendarLinked: 'Propojeno s kalendářem',
-    synced: 'Synchronizováno',
-    requests: 'Žádosti',
-    history: 'Historie',
-  },
-  DE: {
-    title: 'Meine Kunden',
-    subtitle: 'Buchungen, Anfragen, Kalender und schnelle Kundenhistorie',
-    search: 'Kunden, Services suchen...',
-    totalClients: 'Kunden',
-    activeClients: 'Aktiv',
-    totalRevenue: 'Umsatz',
-    repeatClients: 'Wiederkehrend',
-    allLabel: 'Alle',
-    newLabel: 'Neu',
-    activeLabel: 'Aktiv',
-    returningLabel: 'Wiederkehrend',
-    completedLabel: 'Abgeschlossen',
-    bookings: 'Buchungen',
-    spent: 'ausgegeben',
-    lastBooking: 'Letzte Buchung',
-    message: 'Nachricht',
-    viewBookings: 'Buchungen',
-    noClients: 'Noch keine Kunden',
-    noClientsHint: 'Wenn jemand deinen Service bucht, erscheinen Kunden hier.',
-    back: 'Zurück',
-    close: 'Schließen',
-    calendarLinked: 'Kalender verbunden',
-    synced: 'Synchronisiert',
-    requests: 'Anfragen',
-    history: 'Historie',
-  },
-  IT: {
-    title: 'I miei clienti',
-    subtitle: 'Prenotazioni, richieste, calendario e cronologia clienti',
-    search: 'Cerca clienti, servizi...',
-    totalClients: 'Clienti',
-    activeClients: 'Attivi',
-    totalRevenue: 'Entrate',
-    repeatClients: 'Ricorrenti',
-    allLabel: 'Tutti',
-    newLabel: 'Nuovo',
-    activeLabel: 'Attivo',
-    returningLabel: 'Ricorrente',
-    completedLabel: 'Completato',
-    bookings: 'prenotazioni',
-    spent: 'speso',
-    lastBooking: 'Ultima prenotazione',
-    message: 'Messaggio',
-    viewBookings: 'Prenotazioni',
-    noClients: 'Ancora nessun cliente',
-    noClientsHint: 'Quando qualcuno prenota il tuo servizio, apparirà qui.',
-    back: 'Indietro',
-    close: 'Chiudi',
-    calendarLinked: 'Calendario collegato',
-    synced: 'Sincronizzato',
-    requests: 'Richieste',
-    history: 'Cronologia',
-  },
-  FR: {
-    title: 'Mes clients',
-    subtitle: 'Réservations, demandes, calendrier et historique rapide',
-    search: 'Rechercher clients, services...',
-    totalClients: 'Clients',
-    activeClients: 'Actifs',
-    totalRevenue: 'Revenus',
-    repeatClients: 'Fidèles',
-    allLabel: 'Tous',
-    newLabel: 'Nouveau',
-    activeLabel: 'Actif',
-    returningLabel: 'Fidèle',
-    completedLabel: 'Terminé',
-    bookings: 'réservations',
-    spent: 'dépensé',
-    lastBooking: 'Dernière réservation',
-    message: 'Message',
-    viewBookings: 'Réservations',
-    noClients: 'Aucun client pour le moment',
-    noClientsHint: 'Quand quelqu’un réservera votre service, il apparaîtra ici.',
-    back: 'Retour',
-    close: 'Fermer',
-    calendarLinked: 'Calendrier lié',
-    synced: 'Synchronisé',
-    requests: 'Demandes',
-    history: 'Historique',
-  },
-  PL: {
-    title: 'Moi klienci',
-    subtitle: 'Rezerwacje, zapytania, kalendarz i szybka historia klientów',
-    search: 'Szukaj klientów, usług...',
-    totalClients: 'Klienci',
-    activeClients: 'Aktywni',
-    totalRevenue: 'Przychód',
-    repeatClients: 'Powracający',
-    allLabel: 'Wszystko',
-    newLabel: 'Nowy',
-    activeLabel: 'Aktywny',
-    returningLabel: 'Powracający',
-    completedLabel: 'Zakończono',
-    bookings: 'rezerwacji',
-    spent: 'wydano',
-    lastBooking: 'Ostatnia rezerwacja',
-    message: 'Wiadomość',
-    viewBookings: 'Rezerwacje',
-    noClients: 'Brak klientów',
-    noClientsHint: 'Gdy ktoś zarezerwuje usługę, klienci pojawią się tutaj.',
-    back: 'Wstecz',
-    close: 'Zamknij',
-    calendarLinked: 'Połączono z kalendarzem',
-    synced: 'Zsynchronizowano',
-    requests: 'Zapytania',
-    history: 'Historia',
-  },
-  AR: {
-    title: 'عملائي',
-    subtitle: 'الحجوزات والطلبات والتقويم وسجل العملاء السريع',
-    search: 'ابحث عن العملاء أو الخدمات...',
-    totalClients: 'العملاء',
-    activeClients: 'نشطون',
-    totalRevenue: 'الإيراد',
-    repeatClients: 'متكررون',
-    allLabel: 'الكل',
-    newLabel: 'جديد',
-    activeLabel: 'نشط',
-    returningLabel: 'متكرر',
-    completedLabel: 'مكتمل',
-    bookings: 'حجوزات',
-    spent: 'مدفوع',
-    lastBooking: 'آخر حجز',
-    message: 'رسالة',
-    viewBookings: 'الحجوزات',
-    noClients: 'لا يوجد عملاء بعد',
-    noClientsHint: 'عندما يحجز شخص خدمتك، سيظهر العملاء هنا.',
-    back: 'رجوع',
-    close: 'إغلاق',
-    calendarLinked: 'مرتبط بالتقويم',
-    synced: 'متزامن',
-    requests: 'الطلبات',
-    history: 'السجل',
   },
 };
 
-const fallbackClients: ClientItem[] = [
+const demoSchedule: BookingItem[] = [
   {
-    id: 'client-1',
-    name: 'Sophie Williams',
-    avatar:
+    id: 'client-demo-1',
+    masterId: 'client-lenka',
+    masterName: 'Lenka Smith',
+    masterAvatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
-    service: 'Hair extensions',
-    lastBooking: 'Today, 14:30',
-    totalSpent: 180,
-    bookingsCount: 3,
-    status: 'active',
-    completed: false,
-  },
+    serviceName: 'Визаж',
+    price: 50,
+    status: 'completed',
+    dateTime: new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
+    dateLabel: 'Today at 10:00',
+    location: 'Camden, London',
+    areaLabel: 'Camden',
+    exactAddress: '21 Camden High Street, London',
+    clientPaid: true,
+    paymentReceivedByPlatform: true,
+    unlockFeePaid: true,
+  } as BookingItem,
   {
-    id: 'client-2',
-    name: 'Emily Carter',
-    avatar:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
-    service: 'Makeup',
-    lastBooking: 'Yesterday, 11:00',
-    totalSpent: 95,
-    bookingsCount: 2,
-    status: 'returning',
-    completed: false,
-  },
-  {
-    id: 'client-3',
-    name: 'Anna Novak',
-    avatar:
+    id: 'client-demo-2',
+    masterId: 'client-klara',
+    masterName: 'Kliára Nováková',
+    masterAvatar:
       'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
-    service: 'Manicure',
-    lastBooking: '22 Apr, 16:00',
-    totalSpent: 45,
-    bookingsCount: 1,
-    status: 'new',
-    completed: false,
-  },
+    serviceName: 'Массаж',
+    price: 60,
+    status: 'upcoming',
+    dateTime: new Date(new Date().setHours(12, 30, 0, 0)).toISOString(),
+    dateLabel: 'Today at 12:30',
+    location: 'Soho, London',
+    areaLabel: 'Soho',
+    exactAddress: '18 Greek Street, Soho, London',
+    clientPaid: true,
+    paymentReceivedByPlatform: true,
+    unlockFeePaid: true,
+  } as BookingItem,
+  {
+    id: 'client-demo-3',
+    masterId: 'client-anna',
+    masterName: 'Anna Johnson',
+    masterAvatar:
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=300&q=80',
+    serviceName: 'Укладка',
+    price: 40,
+    status: 'pending',
+    dateTime: new Date(new Date().setHours(15, 0, 0, 0)).toISOString(),
+    dateLabel: 'Today at 15:00',
+    location: 'Chelsea, London',
+    areaLabel: 'Chelsea',
+    exactAddress: '11 King’s Road, Chelsea, London',
+    clientPaid: true,
+    paymentReceivedByPlatform: true,
+    unlockFeePaid: false,
+  } as BookingItem,
+  {
+    id: 'client-demo-4',
+    masterId: 'blocked-slot',
+    masterName: 'Недоступно',
+    masterAvatar: '',
+    serviceName: '',
+    price: 0,
+    status: 'cancelled',
+    dateTime: new Date(new Date().setHours(17, 30, 0, 0)).toISOString(),
+    dateLabel: 'Today at 17:30',
+    location: '',
+    areaLabel: '',
+    exactAddress: '',
+    clientPaid: false,
+    paymentReceivedByPlatform: false,
+    unlockFeePaid: false,
+  } as BookingItem,
 ];
 
 function getText(language: AppLanguage) {
-  return clientsTexts[language] || clientsTexts.EN;
+  return texts[language] || texts.EN!;
 }
 
-function statusMeta(status: ClientStatus, text: ClientsText) {
-  if (status === 'new') {
-    return { label: text.newLabel, bg: BRAND.softPink, color: BRAND.pink };
-  }
-
-  if (status === 'returning') {
-    return { label: text.returningLabel, bg: BRAND.softBlue, color: BRAND.blue };
-  }
-
-  if (status === 'completed') {
-    return { label: text.completedLabel, bg: BRAND.softOrange, color: '#b87500' };
-  }
-
-  return { label: text.activeLabel, bg: BRAND.softGreen, color: '#008f3a' };
+function getLocale(language: AppLanguage) {
+  if (language === 'RU') return 'ru-RU';
+  if (language === 'UA') return 'uk-UA';
+  if (language === 'CZ') return 'cs-CZ';
+  if (language === 'ES') return 'es-ES';
+  if (language === 'DE') return 'de-DE';
+  if (language === 'FR') return 'fr-FR';
+  if (language === 'IT') return 'it-IT';
+  if (language === 'PL') return 'pl-PL';
+  if (language === 'AR') return 'ar';
+  return 'en-GB';
 }
 
 function money(value: number) {
-  return `£${Number(value || 0).toFixed(2)}`;
+  if (!value) return '—';
+  return `£${Number(value || 0).toFixed(0)}`;
 }
 
-function bookingDateValue(booking: BookingItem) {
-  const date = new Date(booking.dateTime || '');
-  return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+function startOfDay(date: Date) {
+  const next = new Date(date);
+  next.setHours(0, 0, 0, 0);
+  return next;
 }
 
-function buildClientsFromBookings(bookings: BookingItem[]): ClientItem[] {
-  if (!bookings.length) return fallbackClients;
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
 
-  const map = new Map<string, ClientItem & { latestTime: number }>();
+function isSameDay(a: Date, b: Date) {
+  return startOfDay(a).getTime() === startOfDay(b).getTime();
+}
 
-  bookings.forEach((booking) => {
-    const key = String(booking.masterId || booking.masterName || booking.id);
-    const latestTime = bookingDateValue(booking);
-    const previous = map.get(key);
-    const isCompleted = booking.status === 'completed';
-    const bookingPrice = Number(booking.price || 0);
+function safeDate(value?: string) {
+  const date = new Date(value || '');
+  if (Number.isNaN(date.getTime())) return null;
+  return date;
+}
 
-    if (!previous) {
-      map.set(key, {
-        id: key,
-        name: booking.masterName || 'Client',
-        avatar:
-          booking.masterAvatar ||
-          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
-        service: booking.serviceName || 'Service',
-        lastBooking: booking.dateLabel || '',
-        totalSpent: bookingPrice,
-        bookingsCount: 1,
-        status: isCompleted ? 'completed' : booking.status === 'pending' ? 'new' : 'active',
-        completed: isCompleted,
-        lastBookingId: booking.id,
-        masterId: booking.masterId,
-        latestTime,
-      });
-      return;
-    }
+function getBookingDate(booking: BookingItem) {
+  return safeDate(booking.dateTime);
+}
 
-    previous.totalSpent += bookingPrice;
-    previous.bookingsCount += 1;
+function getTimeLabel(booking: BookingItem) {
+  const date = getBookingDate(booking);
+  if (!date) return '—';
 
-    if (latestTime >= previous.latestTime) {
-      previous.latestTime = latestTime;
-      previous.service = booking.serviceName || previous.service;
-      previous.lastBooking = booking.dateLabel || previous.lastBooking;
-      previous.lastBookingId = booking.id;
-      previous.masterId = booking.masterId;
-      previous.completed = isCompleted;
-    }
+  return new Intl.DateTimeFormat('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
 
-    if (previous.bookingsCount > 1 && previous.status !== 'completed') {
-      previous.status = 'returning';
-    }
+function getMonthName(date: Date, language: AppLanguage) {
+  return new Intl.DateTimeFormat(getLocale(language), {
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
 
-    if (isCompleted) {
-      previous.status = 'completed';
-    }
+function getWeekDays(language: AppLanguage) {
+  const monday = new Date(2026, 3, 20);
+
+  return Array.from({ length: 7 }, (_, index) =>
+    new Intl.DateTimeFormat(getLocale(language), { weekday: 'short' }).format(
+      addDays(monday, index)
+    )
+  );
+}
+
+function getCalendarCells(year: number, month: number) {
+  const firstDay = new Date(year, month, 1);
+  const firstWeekDay = (firstDay.getDay() + 6) % 7;
+  const firstCell = addDays(firstDay, -firstWeekDay);
+
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = addDays(firstCell, index);
+
+    return {
+      date,
+      currentMonth: date.getMonth() === month,
+    };
   });
+}
 
-  return Array.from(map.values())
-    .sort((a, b) => b.latestTime - a.latestTime)
-    .map(({ latestTime, ...client }) => client);
+function statusLabel(booking: BookingItem, text: PageText) {
+  if (booking.status === 'completed') return text.completed;
+  if (booking.status === 'pending') return text.waiting;
+  if (booking.status === 'cancelled') return text.cancelled;
+  return text.confirmed;
+}
+
+function statusColor(booking: BookingItem) {
+  if (booking.status === 'completed') return BRAND.blue;
+  if (booking.status === 'pending') return BRAND.orange;
+  if (booking.status === 'cancelled') return BRAND.red;
+  return BRAND.green;
+}
+
+function statusBg(booking: BookingItem) {
+  if (booking.status === 'completed') return BRAND.softBlue;
+  if (booking.status === 'pending') return BRAND.softYellow;
+  if (booking.status === 'cancelled') return BRAND.softRed;
+  return BRAND.softGreen;
+}
+
+function isPaid(booking: BookingItem) {
+  return Boolean(booking.clientPaid || booking.paymentReceivedByPlatform || booking.unlockFeePaid);
+}
+
+function isUnlocked(booking: BookingItem) {
+  return canShowExactAddress(booking) && canShowDirectContacts(booking);
 }
 
 function OlamepLogo() {
@@ -522,35 +412,34 @@ export default function ProfileClientsPage() {
   const router = useRouter();
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
-  const [bookings, setBookings] = useState<BookingItem[]>(getBookings());
-  const [search, setSearch] = useState('');
-  const [activeFilter, setActiveFilter] = useState<ClientFilter>('all');
+  const [bookings, setBookings] = useState<BookingItem[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>('calendar');
+  const [calendarMode, setCalendarMode] = useState<CalendarMode>('month');
+  const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
+  const [calendarDate, setCalendarDate] = useState<Date>(() => startOfDay(new Date()));
+  const [showOnlyRequests, setShowOnlyRequests] = useState(false);
+  const [showFreeWindows, setShowFreeWindows] = useState(false);
 
   useEffect(() => {
-    const syncLanguage = () => {
-      setLanguage(getSavedLanguage());
-    };
-
+    const syncLanguage = () => setLanguage(getSavedLanguage());
     const syncBookings = () => {
-      setBookings(getBookings());
+      const saved = getBookings();
+      setBookings(saved.length > 0 ? saved : demoSchedule);
     };
 
     syncLanguage();
     syncBookings();
 
-    const unsubscribeLanguage = subscribeToLanguageChange((nextLanguage) => {
-      setLanguage(nextLanguage);
-    });
-
-    const unsubscribeBookings = subscribeToBookingsStore(syncBookings);
+    const unsubLang = subscribeToLanguageChange(setLanguage);
+    const unsubBookings = subscribeToBookingsStore(syncBookings);
 
     window.addEventListener('focus', syncLanguage);
     window.addEventListener('pageshow', syncBookings);
     window.addEventListener('storage', syncBookings);
 
     return () => {
-      unsubscribeLanguage();
-      unsubscribeBookings();
+      unsubLang();
+      unsubBookings();
       window.removeEventListener('focus', syncLanguage);
       window.removeEventListener('pageshow', syncBookings);
       window.removeEventListener('storage', syncBookings);
@@ -559,56 +448,93 @@ export default function ProfileClientsPage() {
 
   const text = useMemo(() => getText(language), [language]);
 
-  const clients = useMemo(() => buildClientsFromBookings(bookings), [bookings]);
+  const today = useMemo(() => startOfDay(new Date()), []);
+  const tomorrow = useMemo(() => addDays(today, 1), [today]);
 
-  const filteredClients = useMemo(() => {
-    const q = search.trim().toLowerCase();
+  const visibleBookings = useMemo(() => {
+    let source = [...bookings];
 
-    return clients.filter((client) => {
-      const matchesFilter =
-        activeFilter === 'all' ||
-        client.status === activeFilter ||
-        (activeFilter === 'returning' && client.bookingsCount > 1);
+    if (viewMode === 'today') {
+      source = source.filter((booking) => {
+        const date = getBookingDate(booking);
+        return date ? isSameDay(date, today) : false;
+      });
+    }
 
-      const matchesSearch =
-        !q ||
-        client.name.toLowerCase().includes(q) ||
-        client.service.toLowerCase().includes(q) ||
-        client.lastBooking.toLowerCase().includes(q);
+    if (viewMode === 'tomorrow') {
+      source = source.filter((booking) => {
+        const date = getBookingDate(booking);
+        return date ? isSameDay(date, tomorrow) : false;
+      });
+    }
 
-      return matchesFilter && matchesSearch;
+    if (viewMode === 'requests') {
+      source = source.filter((booking) => booking.status === 'pending');
+    }
+
+    if (viewMode === 'history') {
+      source = source.filter(
+        (booking) => booking.status === 'completed' || booking.status === 'cancelled'
+      );
+    }
+
+    if (viewMode === 'calendar') {
+      source = source.filter((booking) => {
+        const date = getBookingDate(booking);
+        return date ? isSameDay(date, selectedDate) : false;
+      });
+    }
+
+    if (showOnlyRequests) {
+      source = source.filter((booking) => booking.status === 'pending');
+    }
+
+    return source.sort((a, b) => {
+      const left = getBookingDate(a)?.getTime() || 0;
+      const right = getBookingDate(b)?.getTime() || 0;
+      return left - right;
     });
-  }, [clients, search, activeFilter]);
+  }, [bookings, selectedDate, showOnlyRequests, today, tomorrow, viewMode]);
 
-  const totalRevenue = clients.reduce((sum, client) => sum + client.totalSpent, 0);
-  const activeCount = clients.filter((client) => client.status === 'active').length;
-  const repeatCount = clients.filter((client) => client.bookingsCount > 1).length;
-
-  const openMessage = (client: ClientItem) => {
-    const thread = getOrCreateChatThread({
-      threadId: `client-${client.id}`,
-      providerName: client.name,
-      providerAvatar: client.avatar,
-      category: client.service,
-      online: true,
-      lastSeenText: 'Online',
+  const monthBookings = useMemo(() => {
+    return bookings.filter((booking) => {
+      const date = getBookingDate(booking);
+      return (
+        date &&
+        date.getMonth() === calendarDate.getMonth() &&
+        date.getFullYear() === calendarDate.getFullYear()
+      );
     });
+  }, [bookings, calendarDate]);
 
-    router.push(`/messages/${encodeURIComponent(thread.id)}`);
+  const totalRevenue = bookings.reduce((sum, booking) => sum + Number(booking.price || 0), 0);
+  const activeCount = bookings.filter(
+    (booking) => booking.status === 'pending' || booking.status === 'upcoming'
+  ).length;
+  const completedCount = bookings.filter((booking) => booking.status === 'completed').length;
+
+  const selectedDateLabel = new Intl.DateTimeFormat(getLocale(language), {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(selectedDate);
+
+  const markDone = (booking: BookingItem) => {
+    updateBookingStatus(booking.id, 'completed');
   };
 
   return (
     <main
       style={{
         minHeight: '100vh',
-        background: BRAND.bg,
+        background: '#ffffff',
         color: BRAND.navy,
-        paddingBottom: 210,
+        paddingBottom: 138,
         fontFamily: 'Arial, sans-serif',
-        overflowX: 'hidden',
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 210px' }}>
+      <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 145px' }}>
         <header
           style={{
             display: 'grid',
@@ -689,96 +615,42 @@ export default function ProfileClientsPage() {
 
         <section
           style={{
-            marginTop: 17,
-            borderRadius: 26,
-            border: `2.5px solid ${BRAND.border}`,
-            background: '#ffffff',
-            padding: 13,
-            boxShadow: '0 10px 26px rgba(7,27,70,0.06)',
-          }}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 10,
-            }}
-          >
-            <StatCard title={text.totalClients} value={String(clients.length)} bg={BRAND.softBlue} />
-            <StatCard title={text.activeClients} value={String(activeCount)} bg={BRAND.softGreen} />
-            <StatCard title={text.totalRevenue} value={money(totalRevenue)} bg={BRAND.softOrange} />
-            <StatCard title={text.repeatClients} value={String(repeatCount)} bg={BRAND.softPink} />
-          </div>
-
-          <div
-            style={{
-              marginTop: 12,
-              height: 54,
-              borderRadius: 18,
-              border: `2.5px solid ${BRAND.border}`,
-              background: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '0 14px',
-            }}
-          >
-            <span style={{ fontSize: 21 }}>🔎</span>
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder={text.search}
-              style={{
-                flex: 1,
-                border: 'none',
-                outline: 'none',
-                background: 'transparent',
-                fontSize: 14,
-                fontWeight: 800,
-                color: BRAND.navy,
-                minWidth: 0,
-              }}
-            />
-          </div>
-        </section>
-
-        <section
-          style={{
-            marginTop: 13,
+            marginTop: 15,
             borderRadius: 24,
             border: `2.5px solid ${BRAND.border}`,
             background: '#ffffff',
             padding: 7,
-            display: 'flex',
-            gap: 8,
-            overflowX: 'auto',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+            gap: 6,
           }}
         >
           {([
-            ['all', text.allLabel],
-            ['active', text.activeLabel],
-            ['returning', text.returningLabel],
-            ['new', text.newLabel],
-            ['completed', text.completedLabel],
-          ] as const).map(([filter, label]) => {
-            const active = activeFilter === filter;
+            ['today', text.today],
+            ['tomorrow', text.tomorrow],
+            ['requests', text.requests],
+            ['calendar', text.calendar],
+            ['history', text.history],
+          ] as const).map(([mode, label]) => {
+            const active = viewMode === mode;
 
             return (
               <button
-                key={filter}
+                key={mode}
                 type="button"
-                onClick={() => setActiveFilter(filter)}
+                onClick={() => setViewMode(mode)}
                 style={{
-                  flexShrink: 0,
                   minHeight: 42,
-                  borderRadius: 999,
+                  borderRadius: 15,
                   border: `2px solid ${BRAND.border}`,
                   background: active ? BRAND.navy : '#ffffff',
                   color: active ? '#ffffff' : BRAND.navy,
-                  padding: '0 16px',
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 900,
                   cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
                 {label}
@@ -790,59 +662,265 @@ export default function ProfileClientsPage() {
         <section
           style={{
             marginTop: 13,
+            borderRadius: 25,
+            border: `2.5px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 12,
+          }}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <StatBox title="Active" value={String(activeCount)} bg={BRAND.softGreen} />
+            <StatBox title="Total" value={String(bookings.length)} bg={BRAND.softBlue} />
+            <StatBox title="Revenue" value={money(totalRevenue)} bg="#fff0da" />
+            <StatBox title="Done" value={String(completedCount)} bg="#f3edff" />
+          </div>
+        </section>
+
+        <section
+          style={{
+            marginTop: 13,
+            borderRadius: 28,
+            border: `2.5px solid ${BRAND.border}`,
+            background: '#ffffff',
+            padding: 10,
+          }}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'auto 1fr auto',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                const next = new Date(calendarDate);
+                next.setMonth(next.getMonth() - 1);
+                setCalendarDate(next);
+              }}
+              style={roundButtonStyle}
+            >
+              ‹
+            </button>
+
+            <div
+              style={{
+                textAlign: 'center',
+                fontSize: 22,
+                fontWeight: 900,
+                color: BRAND.navy,
+                textTransform: 'capitalize',
+              }}
+            >
+              {getMonthName(calendarDate, language)}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                const next = new Date(calendarDate);
+                next.setMonth(next.getMonth() + 1);
+                setCalendarDate(next);
+              }}
+              style={roundButtonStyle}
+            >
+              ›
+            </button>
+          </div>
+
+          <div
+            style={{
+              marginTop: 10,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 7,
+            }}
+          >
+            {([
+              ['month', text.month],
+              ['week', text.week],
+              ['day', text.day],
+              ['list', text.list],
+            ] as const).map(([mode, label]) => {
+              const active = calendarMode === mode;
+
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setCalendarMode(mode)}
+                  style={{
+                    minHeight: 38,
+                    borderRadius: 999,
+                    border: `2px solid ${BRAND.border}`,
+                    background: active ? BRAND.navy : '#ffffff',
+                    color: active ? '#ffffff' : BRAND.navy,
+                    fontSize: 12,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          <CalendarGrid
+            language={language}
+            calendarDate={calendarDate}
+            selectedDate={selectedDate}
+            bookings={monthBookings}
+            onSelect={(date) => {
+              setSelectedDate(startOfDay(date));
+              setViewMode('calendar');
+            }}
+          />
+
+          <div
+            style={{
+              marginTop: 12,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 8,
+            }}
+          >
+            <ToggleButton
+              active={showOnlyRequests}
+              label={text.onlyRequests}
+              onClick={() => setShowOnlyRequests((prev) => !prev)}
+            />
+            <ToggleButton
+              active={showFreeWindows}
+              label={text.freeWindows}
+              onClick={() => setShowFreeWindows((prev) => !prev)}
+            />
+          </div>
+
+          <div
+            style={{
+              marginTop: 10,
+              minHeight: 38,
+              borderRadius: 999,
+              border: `2px solid ${BRAND.border}`,
+              background: BRAND.softGreen,
+              color: '#008f3a',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 7,
+              fontSize: 12,
+              fontWeight: 900,
+            }}
+          >
+            ☁ {text.synced}
+          </div>
+        </section>
+
+        <section
+          style={{
+            marginTop: 13,
             borderRadius: 24,
             border: `2.5px solid ${BRAND.border}`,
             background: '#f8fbff',
-            padding: 10,
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 8,
+            padding: 11,
           }}
         >
-          <MiniSyncBadge icon="📅" label={text.calendarLinked} />
-          <MiniSyncBadge icon="✅" label={text.synced} />
-          <MiniSyncBadge icon="📩" label={text.requests} />
-          <MiniSyncBadge icon="🕘" label={text.history} />
-        </section>
-
-        <section style={{ marginTop: 16, display: 'grid', gap: 12, paddingBottom: 90 }}>
-          {filteredClients.length === 0 ? (
-            <div
-              style={{
-                borderRadius: 26,
-                border: `2.5px solid ${BRAND.border}`,
-                background: '#ffffff',
-                padding: 22,
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ fontSize: 44, marginBottom: 8 }}>🤝</div>
-              <div style={{ fontSize: 21, fontWeight: 900, color: BRAND.navy }}>
-                {text.noClients}
-              </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr auto',
+              gap: 10,
+              alignItems: 'center',
+            }}
+          >
+            <div>
               <div
                 style={{
-                  marginTop: 8,
-                  fontSize: 14,
-                  lineHeight: 1.4,
-                  fontWeight: 800,
+                  fontSize: 20,
+                  fontWeight: 900,
+                  lineHeight: 1.05,
+                  color: BRAND.navy,
+                }}
+              >
+                {selectedDateLabel}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 12,
+                  fontWeight: 900,
                   color: BRAND.muted,
                 }}
               >
-                {text.noClientsHint}
+                {visibleBookings.length} {text.bookings}
               </div>
             </div>
-          ) : (
-            filteredClients.map((client) => (
-              <ClientCard
-                key={client.id}
-                client={client}
-                text={text}
-                onMessage={() => openMessage(client)}
-                onBookings={() => router.push('/bookings')}
-              />
-            ))
-          )}
+
+            <button
+              type="button"
+              onClick={() => {
+                const now = startOfDay(new Date());
+                setSelectedDate(now);
+                setCalendarDate(now);
+                setViewMode('today');
+              }}
+              style={{
+                minWidth: 72,
+                height: 46,
+                borderRadius: 17,
+                border: `2px solid ${BRAND.border}`,
+                background:
+                  'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
+                color: '#ffffff',
+                fontSize: 13,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              {text.today}
+            </button>
+          </div>
+        </section>
+
+        <section style={{ marginTop: 13, display: 'grid', gap: 10 }}>
+          {visibleBookings.length === 0 && !showFreeWindows ? (
+            <div
+              style={{
+                minHeight: 112,
+                borderRadius: 24,
+                border: `2px dashed #d7dce4`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                padding: 18,
+                color: BRAND.muted,
+                fontSize: 15,
+                fontWeight: 900,
+              }}
+            >
+              {text.noBookings}
+            </div>
+          ) : null}
+
+          {visibleBookings.map((booking) => (
+            <ScheduleRow
+              key={booking.id}
+              booking={booking}
+              text={text}
+              onDone={() => markDone(booking)}
+              onDetails={() => router.push('/bookings')}
+              onChat={() => router.push('/messages')}
+            />
+          ))}
+
+          {showFreeWindows ? (
+            <FreeWindowRow time="19:00" text={text} />
+          ) : null}
         </section>
       </div>
 
@@ -851,99 +929,167 @@ export default function ProfileClientsPage() {
   );
 }
 
-function StatCard({ title, value, bg }: { title: string; value: string; bg: string }) {
+function CalendarGrid({
+  language,
+  calendarDate,
+  selectedDate,
+  bookings,
+  onSelect,
+}: {
+  language: AppLanguage;
+  calendarDate: Date;
+  selectedDate: Date;
+  bookings: BookingItem[];
+  onSelect: (date: Date) => void;
+}) {
+  const weekDays = getWeekDays(language);
+  const cells = getCalendarCells(calendarDate.getFullYear(), calendarDate.getMonth());
+
   return (
     <div
       style={{
-        borderRadius: 20,
-        border: `2.5px solid ${BRAND.border}`,
-        background: bg,
-        padding: 12,
-        minHeight: 86,
-        display: 'grid',
-        alignContent: 'space-between',
+        marginTop: 12,
+        borderRadius: 22,
+        border: '1.5px solid #e3e3e3',
+        overflow: 'hidden',
+        background: '#ffffff',
       }}
     >
-      <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.muted }}>{title}</div>
       <div
         style={{
-          marginTop: 8,
-          fontSize: 25,
-          lineHeight: 1,
-          fontWeight: 900,
-          color: BRAND.navy,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+          borderBottom: '1.5px solid #e3e3e3',
+          background: '#fbfbfb',
         }}
       >
-        {value}
+        {weekDays.map((day) => (
+          <div
+            key={day}
+            style={{
+              height: 31,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 11,
+              fontWeight: 900,
+              color: BRAND.muted,
+              textTransform: 'capitalize',
+            }}
+          >
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, 1fr)',
+        }}
+      >
+        {cells.map(({ date, currentMonth }) => {
+          const dayBookings = bookings.filter((booking) => {
+            const bookingDate = getBookingDate(booking);
+            return bookingDate ? isSameDay(bookingDate, date) : false;
+          });
+
+          const selected = isSameDay(date, selectedDate);
+          const hasConfirmed = dayBookings.some((booking) => booking.status === 'upcoming');
+          const hasPending = dayBookings.some((booking) => booking.status === 'pending');
+          const hasCompleted = dayBookings.some((booking) => booking.status === 'completed');
+          const hasCancelled = dayBookings.some((booking) => booking.status === 'cancelled');
+
+          return (
+            <button
+              key={date.toISOString()}
+              type="button"
+              onClick={() => onSelect(date)}
+              style={{
+                minHeight: 58,
+                border: 'none',
+                borderRight: '1px solid #eeeeee',
+                borderBottom: '1px solid #eeeeee',
+                background: selected ? BRAND.blue : currentMonth ? '#ffffff' : '#f5f5f5',
+                color: selected ? '#ffffff' : currentMonth ? BRAND.navy : '#a8a8a8',
+                cursor: 'pointer',
+                padding: 5,
+                display: 'grid',
+                alignContent: 'space-between',
+                justifyItems: 'center',
+              }}
+            >
+              <span style={{ fontSize: 14, fontWeight: 900 }}>{date.getDate()}</span>
+
+              <span style={{ minHeight: 14, display: 'flex', alignItems: 'center', gap: 3 }}>
+                {hasConfirmed ? <Dot color={BRAND.green} /> : null}
+                {hasPending ? <Dot color={BRAND.yellow} /> : null}
+                {hasCompleted ? <Dot color={BRAND.blue} /> : null}
+                {hasCancelled ? <Dot color={BRAND.red} /> : null}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-function MiniSyncBadge({ icon, label }: { icon: string; label: string }) {
-  return (
-    <div
-      style={{
-        minHeight: 42,
-        borderRadius: 15,
-        border: `2px solid ${BRAND.border}`,
-        background: '#ffffff',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '0 10px',
-        fontSize: 11,
-        fontWeight: 900,
-        color: BRAND.navy,
-      }}
-    >
-      <span style={{ fontSize: 16 }}>{icon}</span>
-      <span
-        style={{
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function ClientCard({
-  client,
+function ScheduleRow({
+  booking,
   text,
-  onMessage,
-  onBookings,
+  onDone,
+  onDetails,
+  onChat,
 }: {
-  client: ClientItem;
-  text: ClientsText;
-  onMessage: () => void;
-  onBookings: () => void;
+  booking: BookingItem;
+  text: PageText;
+  onDone: () => void;
+  onDetails: () => void;
+  onChat: () => void;
 }) {
-  const meta = statusMeta(client.status, text);
+  const color = statusColor(booking);
+  const bg = statusBg(booking);
+  const done = booking.status === 'completed';
+  const cancelled = booking.status === 'cancelled';
+  const location = isUnlocked(booking)
+    ? getVisibleBookingLocation(booking)
+    : getPublicBookingLocation(booking);
 
   return (
-    <div
+    <article
       style={{
         position: 'relative',
-        borderRadius: 26,
+        borderRadius: 24,
         border: `2.5px solid ${BRAND.border}`,
         background: '#ffffff',
-        padding: 13,
+        padding: 12,
+        display: 'grid',
+        gridTemplateColumns: '64px minmax(0, 1fr)',
+        gap: 12,
         boxShadow: '0 8px 20px rgba(7,27,70,0.05)',
-        overflow: 'hidden',
       }}
     >
-      {client.completed ? (
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 18,
+          bottom: 18,
+          width: 5,
+          borderRadius: 999,
+          background: color,
+        }}
+      />
+
+      {done ? (
         <div
           style={{
             position: 'absolute',
-            top: 13,
-            right: 13,
-            width: 38,
-            height: 38,
+            right: 11,
+            top: 11,
+            width: 34,
+            height: 34,
             borderRadius: 999,
             border: `2px solid ${BRAND.border}`,
             background: BRAND.green,
@@ -951,10 +1097,8 @@ function ClientCard({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 24,
+            fontSize: 21,
             fontWeight: 900,
-            boxShadow: '4px 4px 0 rgba(0,0,0,0.14)',
-            zIndex: 2,
           }}
         >
           ✓
@@ -963,177 +1107,311 @@ function ClientCard({
 
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: '74px minmax(0, 1fr)',
-          gap: 12,
+          fontSize: 25,
+          fontWeight: 900,
+          color: BRAND.navy,
+          display: 'flex',
           alignItems: 'center',
-          paddingRight: client.completed ? 38 : 0,
+          justifyContent: 'center',
         }}
       >
-        <img
-          src={client.avatar}
-          alt={client.name}
-          style={{
-            width: 74,
-            height: 74,
-            borderRadius: 22,
-            objectFit: 'cover',
-            display: 'block',
-            border: `2.5px solid ${BRAND.border}`,
-          }}
-        />
+        {getTimeLabel(booking)}
+      </div>
 
-        <div style={{ minWidth: 0 }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              minWidth: 0,
-            }}
-          >
+      <div style={{ minWidth: 0, paddingRight: done ? 38 : 0 }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            minHeight: 28,
+            alignItems: 'center',
+            borderRadius: 999,
+            border: `2px solid ${color}`,
+            background: bg,
+            color,
+            padding: '0 9px',
+            fontSize: 11,
+            fontWeight: 900,
+            marginBottom: 7,
+          }}
+        >
+          {done ? '✓ ' : cancelled ? '× ' : ''}
+          {statusLabel(booking, text)}
+        </div>
+
+        <div
+          style={{
+            fontSize: 18,
+            lineHeight: 1.1,
+            fontWeight: 900,
+            color: cancelled ? BRAND.red : BRAND.navy,
+          }}
+        >
+          {cancelled ? text.unavailable : booking.masterName}
+        </div>
+
+        {!cancelled ? (
+          <>
             <div
               style={{
-                fontSize: 20,
-                lineHeight: 1.1,
-                fontWeight: 900,
-                color: BRAND.navy,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
+                marginTop: 4,
+                fontSize: 13,
+                fontWeight: 800,
+                color: BRAND.muted,
               }}
             >
-              {client.name}
+              {booking.serviceName || 'Service'}
             </div>
 
-            <span
+            <div
               style={{
-                minHeight: 28,
-                padding: '0 9px',
-                borderRadius: 999,
-                border: `2px solid ${BRAND.border}`,
-                background: meta.bg,
-                color: meta.color,
-                display: 'inline-flex',
-                alignItems: 'center',
-                fontSize: 11,
+                marginTop: 6,
+                fontSize: 13,
                 fontWeight: 900,
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
+                color: BRAND.blue,
               }}
             >
-              {meta.label}
-            </span>
-          </div>
+              📍 {location || 'London'}
+            </div>
 
+            <div
+              style={{
+                marginTop: 8,
+                display: 'grid',
+                gridTemplateColumns: '1fr auto',
+                gap: 8,
+                alignItems: 'center',
+              }}
+            >
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                <Pill
+                  label={isPaid(booking) ? 'Deposit paid' : 'Deposit waiting'}
+                  color={isPaid(booking) ? '#008f3a' : '#b87500'}
+                  bg={isPaid(booking) ? BRAND.softGreen : BRAND.softYellow}
+                />
+                <Pill
+                  label={isUnlocked(booking) ? 'Contacts open' : 'Contacts locked'}
+                  color={isUnlocked(booking) ? '#008f3a' : BRAND.blue}
+                  bg={isUnlocked(booking) ? BRAND.softGreen : BRAND.softBlue}
+                />
+              </div>
+
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: BRAND.red,
+                }}
+              >
+                {money(Number(booking.price || 0))}
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: 10,
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 8,
+              }}
+            >
+              <button type="button" onClick={onDetails} style={outlineButtonStyle}>
+                {text.details}
+              </button>
+
+              <button type="button" onClick={onChat} style={greenButtonStyle}>
+                💬 {text.openChat}
+              </button>
+            </div>
+
+            {booking.status !== 'completed' ? (
+              <button
+                type="button"
+                onClick={onDone}
+                style={{
+                  marginTop: 8,
+                  width: '100%',
+                  minHeight: 42,
+                  borderRadius: 15,
+                  border: `2px solid ${BRAND.border}`,
+                  background: BRAND.softBlue,
+                  color: BRAND.blue,
+                  fontSize: 13,
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                }}
+              >
+                ✓ {text.markDone}
+              </button>
+            ) : null}
+          </>
+        ) : (
           <div
             style={{
               marginTop: 5,
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: 800,
               color: BRAND.muted,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
             }}
           >
-            {client.service}
+            {text.available}
           </div>
-
-          <div
-            style={{
-              marginTop: 7,
-              fontSize: 12,
-              fontWeight: 900,
-              color: BRAND.blue,
-            }}
-          >
-            {text.lastBooking}: {client.lastBooking || '—'}
-          </div>
-        </div>
+        )}
       </div>
-
-      <div
-        style={{
-          marginTop: 13,
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 10,
-        }}
-      >
-        <SmallInfo label={text.bookings} value={String(client.bookingsCount)} />
-        <SmallInfo label={text.spent} value={money(client.totalSpent)} />
-      </div>
-
-      <div
-        style={{
-          marginTop: 12,
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 10,
-        }}
-      >
-        <button
-          type="button"
-          onClick={onMessage}
-          style={{
-            minHeight: 48,
-            borderRadius: 17,
-            border: `2.5px solid ${BRAND.border}`,
-            background: BRAND.softViolet,
-            color: BRAND.navy,
-            fontSize: 14,
-            fontWeight: 900,
-            cursor: 'pointer',
-          }}
-        >
-          💬 {text.message}
-        </button>
-
-        <button
-          type="button"
-          onClick={onBookings}
-          style={{
-            minHeight: 48,
-            borderRadius: 17,
-            border: `2.5px solid ${BRAND.border}`,
-            background: BRAND.blue,
-            color: '#ffffff',
-            fontSize: 14,
-            fontWeight: 900,
-            cursor: 'pointer',
-          }}
-        >
-          📅 {text.viewBookings}
-        </button>
-      </div>
-    </div>
+    </article>
   );
 }
 
-function SmallInfo({ label, value }: { label: string; value: string }) {
+function FreeWindowRow({ time, text }: { time: string; text: PageText }) {
+  return (
+    <article
+      style={{
+        borderRadius: 22,
+        border: `2px solid #d2d2d2`,
+        background: '#f8f8f8',
+        padding: 12,
+        display: 'grid',
+        gridTemplateColumns: '64px minmax(0, 1fr)',
+        gap: 12,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 25,
+          fontWeight: 900,
+          color: '#7b8490',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {time}
+      </div>
+
+      <div>
+        <div style={{ fontSize: 17, fontWeight: 900, color: BRAND.navy }}>
+          {text.available}
+        </div>
+        <div style={{ marginTop: 4, fontSize: 13, fontWeight: 800, color: BRAND.muted }}>
+          Available for booking
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function StatBox({ title, value, bg }: { title: string; value: string; bg: string }) {
   return (
     <div
       style={{
-        minHeight: 60,
-        borderRadius: 18,
-        border: `2px solid ${BRAND.border}`,
-        background: '#ffffff',
-        padding: '10px 12px',
+        minHeight: 78,
+        borderRadius: 20,
+        border: `2.5px solid ${BRAND.border}`,
+        background: bg,
+        padding: 11,
+        display: 'grid',
+        alignContent: 'space-between',
       }}
     >
-      <div style={{ fontSize: 11, fontWeight: 900, color: BRAND.muted }}>{label}</div>
-      <div
-        style={{
-          marginTop: 5,
-          fontSize: 20,
-          lineHeight: 1,
-          fontWeight: 900,
-          color: BRAND.navy,
-        }}
-      >
-        {value}
-      </div>
+      <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.muted }}>{title}</div>
+      <div style={{ fontSize: 25, fontWeight: 900, color: BRAND.navy }}>{value}</div>
     </div>
   );
 }
+
+function ToggleButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        minHeight: 40,
+        borderRadius: 999,
+        border: `2px solid ${BRAND.border}`,
+        background: active ? BRAND.navy : '#ffffff',
+        color: active ? '#ffffff' : BRAND.navy,
+        fontSize: 12,
+        fontWeight: 900,
+        cursor: 'pointer',
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function Pill({ label, color, bg }: { label: string; color: string; bg: string }) {
+  return (
+    <span
+      style={{
+        minHeight: 26,
+        padding: '0 8px',
+        borderRadius: 999,
+        border: `1.8px solid ${color}`,
+        background: bg,
+        color,
+        display: 'inline-flex',
+        alignItems: 'center',
+        fontSize: 10.5,
+        fontWeight: 900,
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+function Dot({ color }: { color: string }) {
+  return (
+    <span
+      style={{
+        width: 7,
+        height: 7,
+        borderRadius: 999,
+        background: color,
+        display: 'inline-block',
+      }}
+    />
+  );
+}
+
+const roundButtonStyle = {
+  width: 38,
+  height: 38,
+  borderRadius: 999,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 24,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const outlineButtonStyle = {
+  minHeight: 42,
+  borderRadius: 15,
+  border: `2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 13,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const greenButtonStyle = {
+  minHeight: 42,
+  borderRadius: 15,
+  border: `2px solid ${BRAND.green}`,
+  background: BRAND.green,
+  color: '#ffffff',
+  fontSize: 13,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
