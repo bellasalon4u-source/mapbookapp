@@ -603,7 +603,7 @@ function QuickActionsPanel({
       style={{
         position: 'absolute',
         top: 14,
-        right: open ? 8 : -66,
+        right: open ? 8 : -82,
         width: 78,
         zIndex: 850,
         transition: 'right 0.28s ease',
