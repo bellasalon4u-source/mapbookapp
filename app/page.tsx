@@ -602,9 +602,9 @@ function QuickActionsPanel({
     <div
       style={{
         position: 'absolute',
-        top: 18,
-        right: open ? 8 : -78,
-        width: 96,
+        top: 14,
+        right: open ? 8 : -66,
+        width: 78,
         zIndex: 850,
         transition: 'right 0.28s ease',
         pointerEvents: 'auto',
@@ -616,60 +616,46 @@ function QuickActionsPanel({
         aria-label="Toggle quick actions"
         style={{
           position: 'absolute',
-          left: -38,
-          top: 66,
-          width: 42,
-          height: 86,
-          borderTopLeftRadius: 22,
-          borderBottomLeftRadius: 22,
-          border: '2.4px solid #111111',
+          left: -32,
+          top: 68,
+          width: 36,
+          height: 76,
+          borderTopLeftRadius: 20,
+          borderBottomLeftRadius: 20,
+          border: '2px solid #111111',
           borderRight: 'none',
-          background: '#fffdf8',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.13)',
+          background: '#55c75f',
+          boxShadow: '0 8px 18px rgba(85,199,95,0.28)',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 5,
           cursor: 'pointer',
           padding: 0,
         }}
       >
-        <img
-          src="/ui/logo/logo.png"
-          alt="Olamep"
-          style={{
-            width: 28,
-            height: 28,
-            objectFit: 'contain',
-            display: 'block',
-          }}
-        />
         <span
           style={{
-            fontSize: 14,
+            fontSize: 20,
             fontWeight: 900,
-            color: '#111111',
+            color: '#ffffff',
             lineHeight: 1,
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.25s ease',
           }}
         >
-          ◂
+          {open ? '▸' : '◂'}
         </span>
       </button>
 
       <div
         style={{
-          width: 96,
-          borderRadius: 24,
-          border: '2.4px solid #111111',
+          width: 78,
+          borderRadius: 22,
+          border: '2px solid #111111',
           background: 'rgba(255,253,248,0.98)',
-          boxShadow: '0 14px 30px rgba(0,0,0,0.16)',
-          padding: '10px 7px',
+          boxShadow: '0 14px 28px rgba(0,0,0,0.15)',
+          padding: '8px 6px',
           display: 'flex',
           flexDirection: 'column',
-          gap: 7,
+          gap: 6,
           boxSizing: 'border-box',
           backdropFilter: 'blur(10px)',
         }}
@@ -680,7 +666,7 @@ function QuickActionsPanel({
             type="button"
             onClick={item.onClick}
             style={{
-              minHeight: 58,
+              minHeight: 50,
               borderRadius: 17,
               border: item.active ? '2px solid #111111' : '1.4px solid #ded7ce',
               background: item.active ? '#fff7d8' : '#ffffff',
@@ -698,15 +684,15 @@ function QuickActionsPanel({
           >
             <span
               style={{
-                minWidth: item.yellow ? 30 : 'auto',
-                height: item.yellow ? 30 : 'auto',
+                minWidth: item.yellow ? 28 : 'auto',
+                height: item.yellow ? 28 : 'auto',
                 borderRadius: item.yellow ? '50%' : 0,
                 background: item.yellow ? '#ffe44d' : 'transparent',
                 color: item.color,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: item.key === 'allFavourite' ? 15 : 22,
+                fontSize: item.key === 'allFavourite' ? 13 : 19,
                 fontWeight: 900,
                 lineHeight: 1,
               }}
@@ -716,8 +702,8 @@ function QuickActionsPanel({
 
             <span
               style={{
-                maxWidth: 78,
-                fontSize: 10.5,
+                maxWidth: 66,
+                fontSize: 9.2,
                 fontWeight: 900,
                 lineHeight: 1.05,
                 textAlign: 'center',
@@ -1551,7 +1537,7 @@ export default function HomePage() {
         await navigator.clipboard.writeText(shareUrl);
       }
     } catch {
-      // Safe fallback: do nothing, UI stays stable.
+      // Safe fallback.
     }
   };
 
