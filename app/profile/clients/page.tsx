@@ -7,7 +7,6 @@ import {
   useState,
   type CSSProperties,
   type ReactNode,
-  type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
@@ -26,6 +25,7 @@ import {
   canShowDirectContacts,
   type BookingItem,
 } from '../../../services/bookingsStore';
+import { getOrCreateChatThread } from '../../../services/chatStore';
 
 type ViewMode = 'today' | 'tomorrow' | 'week' | 'calendar' | 'history';
 type CalendarStage = 'year' | 'month' | 'day';
@@ -46,11 +46,6 @@ type SlotAction = {
   hour: number;
   minute: number;
   label: string;
-} | null;
-
-type DragState = {
-  bookingId: string;
-  sourceTime: string;
 } | null;
 
 type PageText = {
@@ -130,6 +125,9 @@ type PageText = {
   manualService: string;
   manualPrice: string;
   manualNote: string;
+  moveMode: string;
+  moveHint: string;
+  cancelMove: string;
 };
 
 const BRAND = {
@@ -227,6 +225,9 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     manualService: 'Service',
     manualPrice: 'Price',
     manualNote: 'Note',
+    moveMode: 'Move booking',
+    moveHint: 'Tap a free slot or another booking to move',
+    cancelMove: 'Cancel move',
   },
   RU: {
     title: 'Мои клиенты',
@@ -305,6 +306,9 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     manualService: 'Услуга',
     manualPrice: 'Цена',
     manualNote: 'Заметка',
+    moveMode: 'Перемещение записи',
+    moveHint: 'Нажми на свободное окно или другую запись',
+    cancelMove: 'Отменить перенос',
   },
   UA: {
     title: 'Мої клієнти',
@@ -383,6 +387,9 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     manualService: 'Послуга',
     manualPrice: 'Ціна',
     manualNote: 'Нотатка',
+    moveMode: 'Переміщення запису',
+    moveHint: 'Натисни на вільне вікно або інший запис',
+    cancelMove: 'Скасувати перенос',
   },
 };
 
@@ -471,15 +478,6 @@ function minutesOfDay(date: Date) {
 function timeStringToMinutes(value: string) {
   const [h, m] = value.split(':').map(Number);
   return Number(h || 0) * 60 + Number(m || 0);
-}
-
-function parseTimeLabel(value: string) {
-  const [hour, minute] = value.split(':').map(Number);
-
-  return {
-    hour: Number(hour || 0),
-    minute: Number(minute || 0),
-  };
 }
 
 function getTimeLabel(date: Date | null) {
@@ -590,6 +588,20 @@ function getPaymentMethod(booking: BookingItem) {
   if (id.includes('2') || id.includes('card')) return 'card';
   if (id.includes('5') || id.includes('app')) return 'app';
   return 'cash';
+}
+
+function getBookingAvatar(booking: BookingItem) {
+  const avatar = String((booking as any).clientAvatar || booking.masterAvatar || '').trim();
+
+  if (avatar) return avatar;
+
+  return `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(
+    booking.masterName || 'Client'
+  )}&backgroundColor=dcffe8,eaf4ff,f2edff,fff4c7`;
+}
+
+function getBookingThreadId(booking: BookingItem) {
+  return `booking-${String(booking.id || booking.masterName || 'client')}`;
 }
 
 function makeBooking(
@@ -775,16 +787,6 @@ function createDemoBookings(baseDate: Date): BookingItem[] {
   ];
 }
 
-function getDropTimeFromPoint(clientX: number, clientY: number) {
-  if (typeof document === 'undefined') return null;
-
-  const element = document.elementFromPoint(clientX, clientY);
-  const dropTarget = element?.closest('[data-drop-time]') as HTMLElement | null;
-  const value = dropTarget?.dataset.dropTime || '';
-
-  return value || null;
-}
-
 function OlamepLogo() {
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
@@ -839,6 +841,9 @@ export default function ProfileClientsPage() {
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [weekOverviewOpen, setWeekOverviewOpen] = useState(true);
 
+  const [movingBookingId, setMovingBookingId] = useState<string | null>(null);
+  const moveStartedAtRef = useRef(0);
+
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [filterSwitches, setFilterSwitches] = useState<FilterSwitches>({
     dateRange: false,
@@ -874,15 +879,7 @@ export default function ProfileClientsPage() {
   const [manualPrice, setManualPrice] = useState('');
   const [manualNote, setManualNote] = useState('');
 
-  const [dragState, setDragState] = useState<DragState>(null);
-  const [dragOverTime, setDragOverTime] = useState<string | null>(null);
-  const dragStateRef = useRef<DragState>(null);
-
   const text = useMemo(() => getText(language), [language]);
-
-  useEffect(() => {
-    dragStateRef.current = dragState;
-  }, [dragState]);
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -928,76 +925,10 @@ export default function ProfileClientsPage() {
 
   const weekDates = useMemo(() => getWeekDates(selectedDate), [selectedDate]);
 
-  const moveBookingToTime = (bookingId: string, targetTime: string | null) => {
-    if (!targetTime) return;
-
-    const draggedBooking = bookings.find((booking) => booking.id === bookingId);
-    if (!draggedBooking) return;
-
-    const sourceDate = getEffectiveDate(draggedBooking);
-    if (!sourceDate) return;
-
-    const sourceTime = getTimeLabel(sourceDate);
-    if (sourceTime === targetTime) return;
-
-    const { hour, minute } = parseTimeLabel(targetTime);
-    const nextDraggedDate = new Date(activeDate);
-    nextDraggedDate.setHours(hour, minute, 0, 0);
-
-    const targetBooking = bookings.find((booking) => {
-      if (booking.id === bookingId) return false;
-
-      const date = getEffectiveDate(booking);
-      return date ? isSameDay(date, activeDate) && getTimeLabel(date) === targetTime : false;
-    });
-
-    setTimeOverrides((prev) => {
-      const next: Record<string, string> = {
-        ...prev,
-        [bookingId]: nextDraggedDate.toISOString(),
-      };
-
-      if (targetBooking) {
-        next[targetBooking.id] = sourceDate.toISOString();
-      }
-
-      return next;
-    });
-  };
-
-  useEffect(() => {
-    if (!dragState) return;
-
-    const onPointerMove = (event: PointerEvent) => {
-      event.preventDefault();
-      const targetTime = getDropTimeFromPoint(event.clientX, event.clientY);
-      setDragOverTime(targetTime);
-    };
-
-    const onPointerUp = (event: PointerEvent) => {
-      event.preventDefault();
-
-      const currentDrag = dragStateRef.current;
-      const targetTime = getDropTimeFromPoint(event.clientX, event.clientY);
-
-      setDragState(null);
-      setDragOverTime(null);
-
-      if (currentDrag) {
-        moveBookingToTime(currentDrag.bookingId, targetTime);
-      }
-    };
-
-    window.addEventListener('pointermove', onPointerMove, { passive: false });
-    window.addEventListener('pointerup', onPointerUp, { passive: false });
-    window.addEventListener('pointercancel', onPointerUp, { passive: false });
-
-    return () => {
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-      window.removeEventListener('pointercancel', onPointerUp);
-    };
-  }, [dragState, activeDate, bookings, timeOverrides]);
+  const movingBooking = useMemo(() => {
+    if (!movingBookingId) return null;
+    return bookings.find((booking) => booking.id === movingBookingId) || null;
+  }, [bookings, movingBookingId]);
 
   const periodBookings = useMemo(() => {
     let source = [...bookings];
@@ -1170,7 +1101,70 @@ export default function ProfileClientsPage() {
 
   const years = useMemo(() => Array.from({ length: 10 }, (_, index) => 2026 + index), []);
 
+  const openBookingChat = (booking: BookingItem) => {
+    const thread = getOrCreateChatThread({
+      threadId: getBookingThreadId(booking),
+      providerName: booking.masterName || 'Client',
+      providerAvatar: getBookingAvatar(booking),
+      category: booking.serviceName || 'Booking',
+      online: true,
+      lastSeenText: 'Online',
+    });
+
+    router.push(`/messages/${encodeURIComponent(thread.id)}`);
+  };
+
+  const cancelMoveMode = () => {
+    setMovingBookingId(null);
+    moveStartedAtRef.current = 0;
+  };
+
+  const moveBookingToDate = (bookingId: string, targetDate: Date) => {
+    if (!bookingId) return;
+
+    const booking = bookings.find((item) => item.id === bookingId);
+    if (!booking || booking.status === 'completed') return;
+
+    setTimeOverrides((prev) => ({
+      ...prev,
+      [bookingId]: targetDate.toISOString(),
+    }));
+
+    cancelMoveMode();
+  };
+
+  const moveBookingToSlot = (time: string) => {
+    if (!movingBooking) return;
+    if (movingBooking.status === 'completed') return;
+
+    const [hour, minute] = time.split(':').map(Number);
+    const targetDate = new Date(activeDate);
+    targetDate.setHours(Number(hour || 0), Number(minute || 0), 0, 0);
+
+    moveBookingToDate(movingBooking.id, targetDate);
+  };
+
+  const swapBookingTimes = (targetBooking: BookingItem) => {
+    if (!movingBooking) return;
+    if (movingBooking.id === targetBooking.id) return;
+    if (movingBooking.status === 'completed' || targetBooking.status === 'completed') return;
+
+    const movingDate = getEffectiveDate(movingBooking);
+    const targetDate = getEffectiveDate(targetBooking);
+
+    if (!movingDate || !targetDate) return;
+
+    setTimeOverrides((prev) => ({
+      ...prev,
+      [movingBooking.id]: targetDate.toISOString(),
+      [targetBooking.id]: movingDate.toISOString(),
+    }));
+
+    cancelMoveMode();
+  };
+
   const handleTopMode = (mode: ViewMode) => {
+    cancelMoveMode();
     setViewMode(mode);
     setStatusFilter('all');
 
@@ -1218,6 +1212,8 @@ export default function ProfileClientsPage() {
   };
 
   const movePeriod = (direction: number) => {
+    cancelMoveMode();
+
     if (viewMode === 'week') {
       const next = addDays(selectedDate, direction * 7);
       setSelectedDate(next);
@@ -1255,6 +1251,10 @@ export default function ProfileClientsPage() {
     setBookings((prev) =>
       prev.map((item) => (item.id === booking.id ? { ...item, status: 'completed' } : item))
     );
+
+    if (movingBookingId === booking.id) {
+      cancelMoveMode();
+    }
   };
 
   const approveBooking = (booking: BookingItem) => {
@@ -1318,6 +1318,11 @@ export default function ProfileClientsPage() {
   };
 
   const openSlotAction = (time: string) => {
+    if (movingBookingId) {
+      moveBookingToSlot(time);
+      return;
+    }
+
     const [hour, minute] = time.split(':').map(Number);
     setSlotAction({
       hour: Number(hour || 0),
@@ -1378,22 +1383,6 @@ export default function ProfileClientsPage() {
     setSlotAction(null);
   };
 
-  const handleBookingDragStart = (booking: BookingItem, event: ReactPointerEvent<HTMLElement>) => {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-
-    const date = getEffectiveDate(booking);
-    if (!date) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    setDragState({
-      bookingId: booking.id,
-      sourceTime: getTimeLabel(date),
-    });
-    setDragOverTime(getTimeLabel(date));
-  };
-
   const titleForPanel = useMemo(() => {
     if (viewMode === 'calendar' && calendarStage === 'year') return text.chooseYear;
     if (viewMode === 'calendar' && calendarStage === 'month') return text.chooseMonth;
@@ -1428,6 +1417,8 @@ export default function ProfileClientsPage() {
         color: BRAND.navy,
         paddingBottom: 170,
         fontFamily: 'Arial, sans-serif',
+        userSelect: movingBookingId ? 'none' : 'auto',
+        WebkitUserSelect: movingBookingId ? 'none' : 'auto',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 176px' }}>
@@ -1439,7 +1430,12 @@ export default function ProfileClientsPage() {
             gap: 10,
           }}
         >
-          <button type="button" onClick={() => router.back()} aria-label={text.back} style={circleButtonStyle}>
+          <button
+            type="button"
+            onClick={() => router.back()}
+            aria-label={text.back}
+            style={circleButtonStyle}
+          >
             ←
           </button>
 
@@ -1447,7 +1443,12 @@ export default function ProfileClientsPage() {
             <OlamepLogo />
           </div>
 
-          <button type="button" onClick={() => router.push('/profile')} aria-label={text.close} style={circleButtonStyle}>
+          <button
+            type="button"
+            onClick={() => router.push('/profile')}
+            aria-label={text.close}
+            style={circleButtonStyle}
+          >
             ×
           </button>
         </header>
@@ -1488,7 +1489,10 @@ export default function ProfileClientsPage() {
           text={text}
           activeFilter={statusFilter}
           counts={statusCounts}
-          onSelect={setStatusFilter}
+          onSelect={(value) => {
+            cancelMoveMode();
+            setStatusFilter(value);
+          }}
           onClear={() => setStatusFilter('all')}
         />
 
@@ -1543,7 +1547,10 @@ export default function ProfileClientsPage() {
           <div style={quickControlsRowStyle}>
             <button
               type="button"
-              onClick={() => setFilterModalOpen(true)}
+              onClick={() => {
+                cancelMoveMode();
+                setFilterModalOpen(true);
+              }}
               style={{
                 ...quickChipStyle,
                 background: activeFilterCount > 0 ? BRAND.green : '#ffffff',
@@ -1578,6 +1585,7 @@ export default function ProfileClientsPage() {
               bookings={filteredBookings.length ? filteredBookings : periodBookings}
               timeOverrides={timeOverrides}
               onSelect={(date) => {
+                cancelMoveMode();
                 setSelectedDate(startOfDay(date));
                 setCalendarDate(startOfDay(date));
                 setViewMode('week');
@@ -1618,6 +1626,7 @@ export default function ProfileClientsPage() {
               bookings={filteredBookings.length ? filteredBookings : periodBookings}
               getEffectiveDate={getEffectiveDate}
               onSelect={(date) => {
+                cancelMoveMode();
                 setSelectedDate(startOfDay(date));
                 setCalendarDate(startOfDay(date));
                 setCalendarStage('day');
@@ -1628,13 +1637,42 @@ export default function ProfileClientsPage() {
           {viewMode === 'calendar' && calendarStage === 'day' ? (
             <button
               type="button"
-              onClick={() => setCalendarStage('month')}
+              onClick={() => {
+                cancelMoveMode();
+                setCalendarStage('month');
+              }}
               style={{ ...plainButtonStyle, width: '100%', marginTop: 12 }}
             >
               ← {text.chooseMonth}
             </button>
           ) : null}
         </section>
+
+        {movingBooking ? (
+          <section style={moveNoticeStyle}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 15, fontWeight: 900 }}>{text.moveMode}</div>
+              <div
+                style={{
+                  marginTop: 3,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  opacity: 0.9,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {movingBooking.masterName} · {text.moveHint}
+              </div>
+            </div>
+
+            <button type="button" onClick={cancelMoveMode} style={moveCancelButtonStyle}>
+              ×
+            </button>
+          </section>
+        ) : null}
 
         {viewMode === 'week' && weekOverviewOpen ? (
           <WeekAgenda
@@ -1644,6 +1682,7 @@ export default function ProfileClientsPage() {
             bookings={filteredBookings}
             getEffectiveDate={getEffectiveDate}
             onDay={(date) => {
+              cancelMoveMode();
               setSelectedDate(startOfDay(date));
               setCalendarDate(startOfDay(date));
               setWeekOverviewOpen(false);
@@ -1654,7 +1693,15 @@ export default function ProfileClientsPage() {
 
         {shouldShowDaySchedule ? (
           <section style={{ marginTop: 18 }}>
-            <button type="button" onClick={() => openSlotAction('04:00')} style={addTimeButtonStyle}>
+            <button
+              type="button"
+              onClick={() => openSlotAction('04:00')}
+              style={{
+                ...addTimeButtonStyle,
+                borderColor: movingBookingId ? BRAND.green : '#d7dce4',
+                color: movingBookingId ? BRAND.green : BRAND.muted,
+              }}
+            >
               {text.addBefore}
             </button>
 
@@ -1671,33 +1718,56 @@ export default function ProfileClientsPage() {
               activeDate={activeDate}
               showFreeWindows={showFreeWindows}
               extraTimes={extraTimes}
-              dragState={dragState}
-              dragOverTime={dragOverTime}
+              movingBookingId={movingBookingId}
               getEffectiveDate={getEffectiveDate}
               onOpenSlot={openSlotAction}
-              onStartDrag={handleBookingDragStart}
+              onStartMove={(booking) => {
+                if (booking.status === 'completed') return;
+                moveStartedAtRef.current = Date.now();
+                setMovingBookingId(booking.id);
+              }}
+              onSwapTarget={swapBookingTimes}
               onChangeBookingMinute={(booking, hour, minute) => {
+                cancelMoveMode();
                 setCustomMinute(minute);
                 setTimePicker({ hour, bookingId: booking.id });
               }}
               onDone={markDone}
               onApprove={approveBooking}
               onReject={rejectBooking}
-              onChat={(booking) => router.push(`/messages/${encodeURIComponent(booking.id)}`)}
-              onDetails={(booking) => setClientCardBooking(booking)}
+              onChat={openBookingChat}
+              onDetails={(booking) => {
+                if (movingBookingId) {
+                  swapBookingTimes(booking);
+                  return;
+                }
+
+                setClientCardBooking(booking);
+              }}
               onNote={setNoteBooking}
             />
 
             <button
               type="button"
               onClick={() => openSlotAction('24:00')}
-              style={{ ...addTimeButtonStyle, marginTop: 12 }}
+              style={{
+                ...addTimeButtonStyle,
+                marginTop: 12,
+                borderColor: movingBookingId ? BRAND.green : '#d7dce4',
+                color: movingBookingId ? BRAND.green : BRAND.muted,
+              }}
             >
               {text.addAfter}
             </button>
           </section>
         ) : null}
       </div>
+
+      {movingBooking ? (
+        <button type="button" onClick={cancelMoveMode} style={floatingMoveCancelStyle}>
+          ×
+        </button>
+      ) : null}
 
       <BottomNav active="clients" />
 
@@ -1764,7 +1834,7 @@ export default function ProfileClientsPage() {
           booking={clientCardBooking}
           text={text}
           onClose={() => setClientCardBooking(null)}
-          onChat={() => router.push(`/messages/${encodeURIComponent(clientCardBooking.id)}`)}
+          onChat={() => openBookingChat(clientCardBooking)}
         />
       ) : null}
 
@@ -1943,63 +2013,139 @@ function FilterModal({
         </div>
 
         <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
-          <FilterCard title={text.dateRange} active={switches.dateRange} onToggle={() => toggle('dateRange')}>
+          <FilterCard
+            title={text.dateRange}
+            active={switches.dateRange}
+            onToggle={() => toggle('dateRange')}
+          >
             <div style={twoColStyle}>
               <label style={fieldLabelStyle}>
                 <span>{text.from}</span>
-                <input type="date" value={rangeFrom} onChange={(event) => onRangeFrom(event.target.value)} style={inputStyle} />
+                <input
+                  type="date"
+                  value={rangeFrom}
+                  onChange={(event) => onRangeFrom(event.target.value)}
+                  style={inputStyle}
+                />
               </label>
               <label style={fieldLabelStyle}>
                 <span>{text.to}</span>
-                <input type="date" value={rangeTo} onChange={(event) => onRangeTo(event.target.value)} style={inputStyle} />
+                <input
+                  type="date"
+                  value={rangeTo}
+                  onChange={(event) => onRangeTo(event.target.value)}
+                  style={inputStyle}
+                />
               </label>
             </div>
           </FilterCard>
 
-          <FilterCard title={text.timeRange} active={switches.timeRange} onToggle={() => toggle('timeRange')}>
+          <FilterCard
+            title={text.timeRange}
+            active={switches.timeRange}
+            onToggle={() => toggle('timeRange')}
+          >
             <div style={twoColStyle}>
               <label style={fieldLabelStyle}>
                 <span>{text.from}</span>
-                <input type="time" value={timeFrom} onChange={(event) => onTimeFrom(event.target.value)} style={inputStyle} />
+                <input
+                  type="time"
+                  value={timeFrom}
+                  onChange={(event) => onTimeFrom(event.target.value)}
+                  style={inputStyle}
+                />
               </label>
               <label style={fieldLabelStyle}>
                 <span>{text.to}</span>
-                <input type="time" value={timeTo} onChange={(event) => onTimeTo(event.target.value)} style={inputStyle} />
+                <input
+                  type="time"
+                  value={timeTo}
+                  onChange={(event) => onTimeTo(event.target.value)}
+                  style={inputStyle}
+                />
               </label>
             </div>
           </FilterCard>
 
-          <FilterCard title={text.price} active={switches.price} onToggle={() => toggle('price')}>
+          <FilterCard
+            title={text.price}
+            active={switches.price}
+            onToggle={() => toggle('price')}
+          >
             <div style={twoColStyle}>
               <label style={fieldLabelStyle}>
                 <span>{text.minPrice}</span>
-                <input type="number" value={minPrice} onChange={(event) => onMinPrice(event.target.value)} style={inputStyle} />
+                <input
+                  type="number"
+                  value={minPrice}
+                  onChange={(event) => onMinPrice(event.target.value)}
+                  style={inputStyle}
+                />
               </label>
               <label style={fieldLabelStyle}>
                 <span>{text.maxPrice}</span>
-                <input type="number" value={maxPrice} onChange={(event) => onMaxPrice(event.target.value)} style={inputStyle} />
+                <input
+                  type="number"
+                  value={maxPrice}
+                  onChange={(event) => onMaxPrice(event.target.value)}
+                  style={inputStyle}
+                />
               </label>
             </div>
           </FilterCard>
 
-          <FilterCard title={text.clientName} active={switches.client} onToggle={() => toggle('client')}>
-            <input value={nameFilter} onChange={(event) => onName(event.target.value)} placeholder="Smith / Anna" style={inputStyle} />
+          <FilterCard
+            title={text.clientName}
+            active={switches.client}
+            onToggle={() => toggle('client')}
+          >
+            <input
+              value={nameFilter}
+              onChange={(event) => onName(event.target.value)}
+              placeholder="Smith / Anna"
+              style={inputStyle}
+            />
           </FilterCard>
 
-          <FilterCard title={text.service} active={switches.service} onToggle={() => toggle('service')}>
-            <input value={serviceFilter} onChange={(event) => onService(event.target.value)} placeholder="Hair / Massage" style={inputStyle} />
+          <FilterCard
+            title={text.service}
+            active={switches.service}
+            onToggle={() => toggle('service')}
+          >
+            <input
+              value={serviceFilter}
+              onChange={(event) => onService(event.target.value)}
+              placeholder="Hair / Massage"
+              style={inputStyle}
+            />
           </FilterCard>
 
-          <FilterCard title={text.allPayments} active={switches.payment} onToggle={() => toggle('payment')}>
-            <select value={paymentFilter} onChange={(event) => onPayment(event.target.value as PaymentFilter)} style={inputStyle}>
+          <FilterCard
+            title={text.allPayments}
+            active={switches.payment}
+            onToggle={() => toggle('payment')}
+          >
+            <select
+              value={paymentFilter}
+              onChange={(event) => onPayment(event.target.value as PaymentFilter)}
+              style={inputStyle}
+            >
               <option value="all">{text.allPayments}</option>
               <option value="paid">{text.paidOnly}</option>
               <option value="unpaid">{text.unpaidOnly}</option>
             </select>
           </FilterCard>
 
-          <FilterCard title={text.history} active={switches.status} onToggle={() => toggle('status')}>
-            <select value={statusFilter} onChange={(event) => onStatus(event.target.value as StatusFilter)} style={inputStyle}>
+          <FilterCard
+            title={text.history}
+            active={switches.status}
+            onToggle={() => toggle('status')}
+          >
+            <select
+              value={statusFilter}
+              onChange={(event) => onStatus(event.target.value as StatusFilter)}
+              style={inputStyle}
+            >
               <option value="all">{text.all}</option>
               <option value="completed">{text.completed}</option>
               <option value="upcoming">{text.confirmed}</option>
@@ -2141,7 +2287,11 @@ function SlotActionModal({
         </div>
 
         <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
-          <button type="button" onClick={() => setManualOpen((prev) => !prev)} style={slotActionButtonStyle}>
+          <button
+            type="button"
+            onClick={() => setManualOpen((prev) => !prev)}
+            style={slotActionButtonStyle}
+          >
             <span>👤</span>
             <strong>{text.manualClient}</strong>
             <span>{manualOpen ? '−' : '+'}</span>
@@ -2151,23 +2301,42 @@ function SlotActionModal({
             <div style={manualFormStyle}>
               <label style={fieldLabelStyle}>
                 <span>{text.manualClientName}</span>
-                <input value={manualName} onChange={(event) => onName(event.target.value)} placeholder="Anna Smith" style={inputStyle} />
+                <input
+                  value={manualName}
+                  onChange={(event) => onName(event.target.value)}
+                  placeholder="Anna Smith"
+                  style={inputStyle}
+                />
               </label>
 
               <label style={fieldLabelStyle}>
                 <span>{text.manualService}</span>
-                <input value={manualService} onChange={(event) => onService(event.target.value)} placeholder="Hair / Massage" style={inputStyle} />
+                <input
+                  value={manualService}
+                  onChange={(event) => onService(event.target.value)}
+                  placeholder="Hair / Massage"
+                  style={inputStyle}
+                />
               </label>
 
               <div style={twoColStyle}>
                 <label style={fieldLabelStyle}>
                   <span>{text.manualPrice}</span>
-                  <input type="number" value={manualPrice} onChange={(event) => onPrice(event.target.value)} style={inputStyle} />
+                  <input
+                    type="number"
+                    value={manualPrice}
+                    onChange={(event) => onPrice(event.target.value)}
+                    style={inputStyle}
+                  />
                 </label>
 
                 <label style={fieldLabelStyle}>
                   <span>{text.manualNote}</span>
-                  <input value={manualNote} onChange={(event) => onNote(event.target.value)} style={inputStyle} />
+                  <input
+                    value={manualNote}
+                    onChange={(event) => onNote(event.target.value)}
+                    style={inputStyle}
+                  />
                 </label>
               </div>
 
@@ -2482,7 +2651,12 @@ function WeekAgenda({
           });
 
           return (
-            <button key={date.toISOString()} type="button" onClick={() => onDay(date)} style={weekDayAgendaStyle}>
+            <button
+              key={date.toISOString()}
+              type="button"
+              onClick={() => onDay(date)}
+              style={weekDayAgendaStyle}
+            >
               <div style={{ minWidth: 0 }}>
                 <div
                   style={{
@@ -2525,7 +2699,9 @@ function WeekAgenda({
                             padding: '7px 8px',
                           }}
                         >
-                          <span style={{ fontSize: 13, fontWeight: 900 }}>{getTimeLabel(bookingDate)}</span>
+                          <span style={{ fontSize: 13, fontWeight: 900 }}>
+                            {getTimeLabel(bookingDate)}
+                          </span>
                           <span
                             style={{
                               fontSize: 13,
@@ -2537,7 +2713,9 @@ function WeekAgenda({
                           >
                             {booking.masterName}
                           </span>
-                          <span style={{ fontSize: 13, fontWeight: 900 }}>{money(Number(booking.price || 0))}</span>
+                          <span style={{ fontSize: 13, fontWeight: 900 }}>
+                            {money(Number(booking.price || 0))}
+                          </span>
                         </div>
                       );
                     })
@@ -2575,11 +2753,11 @@ function NotebookSchedule({
   activeDate,
   showFreeWindows,
   extraTimes,
-  dragState,
-  dragOverTime,
+  movingBookingId,
   getEffectiveDate,
   onOpenSlot,
-  onStartDrag,
+  onStartMove,
+  onSwapTarget,
   onChangeBookingMinute,
   onDone,
   onApprove,
@@ -2593,11 +2771,11 @@ function NotebookSchedule({
   activeDate: Date;
   showFreeWindows: boolean;
   extraTimes: string[];
-  dragState: DragState;
-  dragOverTime: string | null;
+  movingBookingId: string | null;
   getEffectiveDate: (booking: BookingItem) => Date | null;
   onOpenSlot: (time: string) => void;
-  onStartDrag: (booking: BookingItem, event: ReactPointerEvent<HTMLElement>) => void;
+  onStartMove: (booking: BookingItem) => void;
+  onSwapTarget: (booking: BookingItem) => void;
   onChangeBookingMinute: (booking: BookingItem, hour: number, minute: number) => void;
   onDone: (booking: BookingItem) => void;
   onApprove: (booking: BookingItem) => void;
@@ -2634,7 +2812,7 @@ function NotebookSchedule({
               key={time}
               time={time}
               text={text}
-              dropActive={dragOverTime === time}
+              movingActive={Boolean(movingBookingId)}
               onOpenSlot={() => onOpenSlot(time)}
             />
           );
@@ -2643,17 +2821,17 @@ function NotebookSchedule({
         return timeBookings.map((booking) => {
           const date = getEffectiveDate(booking);
           const minute = date?.getMinutes() || 0;
-          const timeLabel = getTimeLabel(date);
 
           return (
             <NotebookBookingRow
-              key={`${booking.id}-${timeLabel}`}
+              key={`${booking.id}-${getTimeLabel(date)}`}
               booking={booking}
               date={date}
               text={text}
-              isDragging={dragState?.bookingId === booking.id}
-              isDropTarget={dragOverTime === timeLabel && dragState?.bookingId !== booking.id}
-              onStartDrag={(event) => onStartDrag(booking, event)}
+              movingActive={Boolean(movingBookingId)}
+              selectedForMove={movingBookingId === booking.id}
+              onStartMove={() => onStartMove(booking)}
+              onSwapTarget={() => onSwapTarget(booking)}
               onMinute={() => onChangeBookingMinute(booking, date?.getHours() || 0, minute)}
               onDone={() => onDone(booking)}
               onApprove={() => onApprove(booking)}
@@ -2673,9 +2851,10 @@ function NotebookBookingRow({
   booking,
   date,
   text,
-  isDragging,
-  isDropTarget,
-  onStartDrag,
+  movingActive,
+  selectedForMove,
+  onStartMove,
+  onSwapTarget,
   onMinute,
   onDone,
   onApprove,
@@ -2687,9 +2866,10 @@ function NotebookBookingRow({
   booking: BookingItem;
   date: Date | null;
   text: PageText;
-  isDragging: boolean;
-  isDropTarget: boolean;
-  onStartDrag: (event: ReactPointerEvent<HTMLElement>) => void;
+  movingActive: boolean;
+  selectedForMove: boolean;
+  onStartMove: () => void;
+  onSwapTarget: () => void;
   onMinute: () => void;
   onDone: () => void;
   onApprove: () => void;
@@ -2698,6 +2878,9 @@ function NotebookBookingRow({
   onDetails: () => void;
   onNote: () => void;
 }) {
+  const pressTimerRef = useRef<number | null>(null);
+  const longPressTriggeredRef = useRef(false);
+
   const done = booking.status === 'completed';
   const cancelled = booking.status === 'cancelled';
   const pending = booking.status === 'pending';
@@ -2708,22 +2891,73 @@ function NotebookBookingRow({
   const location = isUnlocked(booking)
     ? getVisibleBookingLocation(booking)
     : getPublicBookingLocation(booking);
-  const timeLabel = getTimeLabel(date);
+
+  const clearPressTimer = () => {
+    if (pressTimerRef.current) {
+      window.clearTimeout(pressTimerRef.current);
+      pressTimerRef.current = null;
+    }
+  };
+
+  const startLongPress = () => {
+    if (done) return;
+    longPressTriggeredRef.current = false;
+    clearPressTimer();
+
+    pressTimerRef.current = window.setTimeout(() => {
+      longPressTriggeredRef.current = true;
+      onStartMove();
+    }, 520);
+  };
+
+  const finishPress = () => {
+    clearPressTimer();
+
+    window.setTimeout(() => {
+      longPressTriggeredRef.current = false;
+    }, 80);
+  };
 
   return (
     <article
-      data-drop-time={timeLabel}
-      onPointerDown={onStartDrag}
-      onClick={() => {
-        if (!isDragging) onDetails();
+      onPointerDown={(event) => {
+        if (event.pointerType === 'mouse' && event.button !== 0) return;
+        startLongPress();
+      }}
+      onPointerUp={finishPress}
+      onPointerCancel={finishPress}
+      onPointerLeave={finishPress}
+      onClick={(event) => {
+        if (longPressTriggeredRef.current) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+
+        if (movingActive && !selectedForMove) {
+          event.preventDefault();
+          event.stopPropagation();
+          onSwapTarget();
+          return;
+        }
+
+        if (movingActive && selectedForMove) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+
+        onDetails();
       }}
       style={{
         position: 'relative',
         minHeight: cancelled ? 82 : 116,
         borderRadius: 22,
-        border: `2.5px solid ${
-          isDropTarget ? BRAND.blue : cancelled ? '#f3a9bb' : '#d8e3dd'
-        }`,
+        border: selectedForMove
+          ? `4px solid ${BRAND.border}`
+          : movingActive && !done
+            ? `3px dashed ${BRAND.green}`
+            : `2px solid ${cancelled ? '#f3a9bb' : '#d8e3dd'}`,
         background: cancelled
           ? 'linear-gradient(135deg, #ffffff 0%, #ffffff 47%, #ffe3ea 48%, #ffe3ea 100%)'
           : bg,
@@ -2731,19 +2965,59 @@ function NotebookBookingRow({
         gridTemplateColumns: '104px minmax(0, 1fr) 64px 34px',
         gap: 7,
         alignItems: 'center',
-        padding: '10px 9px 10px 0',
+        padding: selectedForMove ? '8px 7px 8px 0' : '10px 9px 10px 0',
         overflow: 'hidden',
-        boxShadow: isDropTarget
-          ? '0 0 0 5px rgba(14,115,216,0.16), 0 12px 22px rgba(7,27,70,0.12)'
+        boxShadow: selectedForMove
+          ? '0 10px 26px rgba(0,0,0,0.22)'
           : '0 7px 18px rgba(7,27,70,0.05)',
-        cursor: 'grab',
-        touchAction: 'none',
-        opacity: isDragging ? 0.42 : 1,
-        transform: isDragging ? 'scale(0.985)' : 'scale(1)',
-        transition: 'opacity 120ms ease, transform 120ms ease, box-shadow 120ms ease',
-        zIndex: isDragging ? 40 : 1,
+        cursor: movingActive ? 'pointer' : 'grab',
+        touchAction: 'manipulation',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        WebkitTouchCallout: 'none',
+        outline: 'none',
       }}
     >
+      {selectedForMove ? (
+        <div
+          style={{
+            position: 'absolute',
+            right: 10,
+            top: 9,
+            zIndex: 2,
+            borderRadius: 999,
+            border: `2px solid ${BRAND.border}`,
+            background: BRAND.navy,
+            color: '#ffffff',
+            padding: '4px 8px',
+            fontSize: 10,
+            fontWeight: 900,
+          }}
+        >
+          {text.moveMode}
+        </div>
+      ) : null}
+
+      {done ? (
+        <div
+          style={{
+            position: 'absolute',
+            right: 10,
+            top: 9,
+            zIndex: 2,
+            borderRadius: 999,
+            border: `2px solid ${BRAND.blue}`,
+            background: '#ffffff',
+            color: BRAND.blue,
+            padding: '4px 8px',
+            fontSize: 10,
+            fontWeight: 900,
+          }}
+        >
+          🔒
+        </div>
+      ) : null}
+
       <div
         style={{
           position: 'absolute',
@@ -2756,7 +3030,6 @@ function NotebookBookingRow({
       />
 
       <div
-        onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
         style={{
           display: 'grid',
@@ -2766,7 +3039,15 @@ function NotebookBookingRow({
           paddingLeft: 14,
         }}
       >
-        <button type="button" onClick={onMinute} style={timePlusButtonStyle}>
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            if (movingActive) return;
+            onMinute();
+          }}
+          style={timePlusButtonStyle}
+        >
           {done ? '✓' : '+'}
         </button>
 
@@ -2778,7 +3059,7 @@ function NotebookBookingRow({
             whiteSpace: 'nowrap',
           }}
         >
-          {timeLabel}
+          {getTimeLabel(date)}
         </div>
       </div>
 
@@ -2843,7 +3124,6 @@ function NotebookBookingRow({
             </div>
 
             <div
-              onPointerDown={(event) => event.stopPropagation()}
               onClick={(event) => event.stopPropagation()}
               style={{
                 marginTop: 7,
@@ -2852,25 +3132,65 @@ function NotebookBookingRow({
                 alignItems: 'center',
               }}
             >
-              <button type="button" onClick={onChat} style={smallActionButtonStyle}>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (movingActive) return;
+                  onChat();
+                }}
+                style={smallActionButtonStyle}
+              >
                 💬 {text.openChat}
               </button>
 
               {pending ? (
                 <>
-                  <button type="button" onClick={onApprove} style={smallGreenButtonStyle}>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (movingActive) return;
+                      onApprove();
+                    }}
+                    style={smallGreenButtonStyle}
+                  >
                     ✓ {text.approve}
                   </button>
-                  <button type="button" onClick={onReject} style={smallRedButtonStyle}>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (movingActive) return;
+                      onReject();
+                    }}
+                    style={smallRedButtonStyle}
+                  >
                     ×
                   </button>
                 </>
               ) : done ? (
-                <button type="button" onClick={onDetails} style={smallActionButtonStyle}>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (movingActive) return;
+                    onDetails();
+                  }}
+                  style={smallActionButtonStyle}
+                >
                   {text.details}
                 </button>
               ) : (
-                <button type="button" onClick={onDone} style={smallGreenButtonStyle}>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (movingActive) return;
+                    onDone();
+                  }}
+                  style={smallGreenButtonStyle}
+                >
                   ✓ {text.markDone}
                 </button>
               )}
@@ -2899,9 +3219,9 @@ function NotebookBookingRow({
 
       <button
         type="button"
-        onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => {
           event.stopPropagation();
+          if (movingActive) return;
           onNote();
         }}
         aria-label={text.notes}
@@ -2926,40 +3246,50 @@ function NotebookBookingRow({
 function FreeSlotRow({
   time,
   text,
-  dropActive,
+  movingActive,
   onOpenSlot,
 }: {
   time: string;
   text: PageText;
-  dropActive: boolean;
+  movingActive: boolean;
   onOpenSlot: () => void;
 }) {
   return (
     <article
-      data-drop-time={time}
+      onClick={onOpenSlot}
       style={{
         minHeight: 68,
         borderRadius: 22,
-        border: `2.5px dashed ${dropActive ? BRAND.green : '#d7dce4'}`,
-        background: dropActive ? BRAND.softGreen : '#ffffff',
+        border: movingActive ? `3px dashed ${BRAND.green}` : '2px dashed #d7dce4',
+        background: movingActive ? BRAND.softGreen : '#ffffff',
         display: 'grid',
         gridTemplateColumns: '104px minmax(0, 1fr)',
         alignItems: 'center',
         padding: '0 18px 0 14px',
-        boxShadow: dropActive ? '0 0 0 5px rgba(36,196,90,0.14)' : 'none',
-        transition: 'background 120ms ease, border 120ms ease, box-shadow 120ms ease',
+        cursor: 'pointer',
       }}
     >
       <div style={{ display: 'grid', gridTemplateColumns: '38px 1fr', alignItems: 'center', gap: 4 }}>
-        <button type="button" onClick={onOpenSlot} style={timePlusButtonStyle}>
-          +
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenSlot();
+          }}
+          style={{
+            ...timePlusButtonStyle,
+            background: movingActive ? BRAND.green : '#ffffff',
+            color: movingActive ? '#ffffff' : BRAND.navy,
+          }}
+        >
+          {movingActive ? '↓' : '+'}
         </button>
 
         <div
           style={{
             fontSize: 25,
             fontWeight: 900,
-            color: dropActive ? BRAND.green : '#a1a8b4',
+            color: movingActive ? BRAND.green : '#a1a8b4',
             whiteSpace: 'nowrap',
           }}
         >
@@ -2971,11 +3301,11 @@ function FreeSlotRow({
         style={{
           fontSize: 18,
           fontWeight: 900,
-          color: dropActive ? BRAND.green : BRAND.muted,
+          color: movingActive ? BRAND.green : BRAND.muted,
           textAlign: 'left',
         }}
       >
-        {text.available}
+        {movingActive ? text.moveHint : text.available}
       </div>
     </article>
   );
@@ -3042,13 +3372,56 @@ function ClientCardModal({
   onClose: () => void;
   onChat: () => void;
 }) {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const dragRef = useRef({
+    active: false,
+    startX: 0,
+    startY: 0,
+    baseX: 0,
+    baseY: 0,
+  });
+
   const unlocked = isUnlocked(booking);
   const location = unlocked ? getVisibleBookingLocation(booking) : getPublicBookingLocation(booking);
   const paymentMethod = getPaymentMethod(booking);
+  const avatar = getBookingAvatar(booking);
 
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
-      <div style={modalCardStyle} onClick={(event) => event.stopPropagation()}>
+      <div
+        style={{
+          ...modalCardStyle,
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          touchAction: 'none',
+        }}
+        onClick={(event) => event.stopPropagation()}
+        onPointerDown={(event) => {
+          dragRef.current = {
+            active: true,
+            startX: event.clientX,
+            startY: event.clientY,
+            baseX: position.x,
+            baseY: position.y,
+          };
+        }}
+        onPointerMove={(event) => {
+          if (!dragRef.current.active) return;
+
+          const nextX = dragRef.current.baseX + event.clientX - dragRef.current.startX;
+          const nextY = dragRef.current.baseY + event.clientY - dragRef.current.startY;
+
+          setPosition({
+            x: Math.max(-40, Math.min(40, nextX)),
+            y: Math.max(-260, Math.min(80, nextY)),
+          });
+        }}
+        onPointerUp={() => {
+          dragRef.current.active = false;
+        }}
+        onPointerCancel={() => {
+          dragRef.current.active = false;
+        }}
+      >
         <button type="button" onClick={onClose} style={modalCloseStyle}>
           ×
         </button>
@@ -3058,18 +3431,61 @@ function ClientCardModal({
         <div
           style={{
             marginTop: 12,
-            borderRadius: 22,
+            borderRadius: 24,
             border: `2.5px solid ${BRAND.border}`,
             background: statusBg(booking.status),
             padding: 14,
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
-            {booking.masterName}
-          </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '74px 1fr',
+              gap: 12,
+              alignItems: 'center',
+            }}
+          >
+            <img
+              src={avatar}
+              alt={booking.masterName}
+              style={{
+                width: 74,
+                height: 74,
+                borderRadius: 22,
+                border: `2.5px solid ${BRAND.border}`,
+                objectFit: 'cover',
+                background: '#ffffff',
+              }}
+            />
 
-          <div style={{ marginTop: 5, fontSize: 15, fontWeight: 800, color: BRAND.muted }}>
-            {booking.serviceName}
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 23,
+                  fontWeight: 900,
+                  color: BRAND.navy,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {booking.masterName}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 5,
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: BRAND.muted,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {booking.serviceName}
+              </div>
+            </div>
           </div>
 
           <div
@@ -3081,51 +3497,116 @@ function ClientCardModal({
               alignItems: 'center',
             }}
           >
-            <MiniPill label={statusLabel(booking.status, text)} color={statusColor(booking.status)} bg="#ffffff" />
+            <MiniPill
+              label={statusLabel(booking.status, text)}
+              color={statusColor(booking.status)}
+              bg="#ffffff"
+            />
             <div style={{ fontSize: 28, fontWeight: 900, color: statusColor(booking.status) }}>
               {money(Number(booking.price || 0))}
             </div>
           </div>
 
-          <div style={{ marginTop: 10, fontSize: 15, fontWeight: 900, color: BRAND.navy }}>
-            {paymentIcons[paymentMethod]} {text.paymentMethod}
-          </div>
+          <InfoBox title={text.paymentMethod}>
+            {paymentIcons[paymentMethod]} {isPaid(booking) ? text.depositPaid : text.depositWaiting}
+          </InfoBox>
 
-          <div style={{ marginTop: 10, fontSize: 14, fontWeight: 900, color: BRAND.muted }}>
-            📍 {location || 'London'}
-          </div>
+          <InfoBox title="Location">📍 {location || 'London'}</InfoBox>
+
+          <InfoBox title={text.notes}>{booking.category || text.notes}</InfoBox>
 
           <div
             style={{
               marginTop: 12,
-              borderRadius: 18,
-              border: `2px solid ${BRAND.border}`,
+              borderRadius: 20,
+              border: `2.5px solid ${BRAND.border}`,
               background: '#ffffff',
               padding: 12,
-              color: BRAND.navy,
-              fontWeight: 800,
-              filter: unlocked ? 'none' : 'blur(3px)',
-              userSelect: unlocked ? 'auto' : 'none',
             }}
           >
-            +44 7700 123456 · client@olamep.com
-          </div>
+            <div
+              style={{
+                fontSize: 20,
+                fontWeight: 900,
+                color: BRAND.navy,
+                marginBottom: 10,
+              }}
+            >
+              {unlocked ? text.contactsOpen : text.contactsLocked}
+            </div>
 
-          {!unlocked ? (
-            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 900, color: BRAND.red }}>
-              🔒 {text.contactsLocked}
+            <div
+              style={{
+                display: 'grid',
+                gap: 8,
+                filter: unlocked ? 'none' : 'blur(3px)',
+                userSelect: unlocked ? 'auto' : 'none',
+              }}
+            >
+              <ContactRow icon="☎️" value={booking.contactPhone || '+44 7700 123456'} />
+              <ContactRow icon="✉️" value={booking.contactEmail || 'client@olamep.com'} />
+              <ContactRow icon="🟢" value={booking.contactWhatsapp || '+44 7700 123456'} />
+              <ContactRow icon="✈️" value={booking.contactTelegram || '@client'} />
+              <ContactRow icon="📸" value={booking.contactInstagram || '@client'} />
             </div>
-          ) : (
-            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 900, color: '#008f3a' }}>
-              ✅ {text.contactsOpen}
-            </div>
-          )}
+
+            {!unlocked ? (
+              <div style={{ marginTop: 8, fontSize: 12, fontWeight: 900, color: BRAND.red }}>
+                🔒 {text.contactsLocked}
+              </div>
+            ) : null}
+          </div>
         </div>
 
         <button type="button" onClick={onChat} style={{ ...darkButtonStyle, marginTop: 14 }}>
           💬 {text.openChat}
         </button>
       </div>
+    </div>
+  );
+}
+
+function InfoBox({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div
+      style={{
+        marginTop: 12,
+        borderRadius: 18,
+        border: `2px solid ${BRAND.border}`,
+        background: '#ffffff',
+        padding: 12,
+      }}
+    >
+      <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.muted, marginBottom: 6 }}>
+        {title}
+      </div>
+      <div style={{ fontSize: 16, fontWeight: 900, color: BRAND.navy }}>{children}</div>
+    </div>
+  );
+}
+
+function ContactRow({ icon, value }: { icon: string; value: string }) {
+  return (
+    <div
+      style={{
+        minHeight: 48,
+        borderRadius: 16,
+        border: '2px solid #d9dde5',
+        background: BRAND.cream,
+        display: 'grid',
+        gridTemplateColumns: '44px 1fr',
+        alignItems: 'center',
+        gap: 8,
+        padding: '0 10px',
+        fontSize: 15,
+        fontWeight: 900,
+        color: BRAND.navy,
+      }}
+    >
+      <span>{icon}</span>
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {value}
+      </span>
     </div>
   );
 }
@@ -3181,7 +3662,11 @@ function TimePickerModal({
 
           <label style={fieldLabelStyle}>
             <span>{text.minute}</span>
-            <select value={minute} onChange={(event) => onMinute(Number(event.target.value))} style={inputStyle}>
+            <select
+              value={minute}
+              onChange={(event) => onMinute(Number(event.target.value))}
+              style={inputStyle}
+            >
               {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map((item) => (
                 <option key={item} value={item}>
                   {String(item).padStart(2, '0')}
@@ -3352,6 +3837,51 @@ const quickChipStyle: CSSProperties = {
   padding: '0 15px',
   fontSize: 13,
   fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const moveNoticeStyle: CSSProperties = {
+  marginTop: 13,
+  borderRadius: 22,
+  border: `2.5px solid ${BRAND.border}`,
+  background: BRAND.navy,
+  color: '#ffffff',
+  padding: '10px 12px',
+  display: 'grid',
+  gridTemplateColumns: '1fr 44px',
+  alignItems: 'center',
+  gap: 10,
+  boxShadow: '0 10px 24px rgba(7,27,70,0.18)',
+};
+
+const moveCancelButtonStyle: CSSProperties = {
+  width: 44,
+  height: 44,
+  borderRadius: 999,
+  border: `2px solid ${BRAND.border}`,
+  background: BRAND.red,
+  color: '#ffffff',
+  fontSize: 28,
+  lineHeight: 1,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const floatingMoveCancelStyle: CSSProperties = {
+  position: 'fixed',
+  top: 18,
+  right: 18,
+  zIndex: 500,
+  width: 58,
+  height: 58,
+  borderRadius: 999,
+  border: `3px solid ${BRAND.border}`,
+  background: BRAND.red,
+  color: '#ffffff',
+  fontSize: 34,
+  lineHeight: 1,
+  fontWeight: 900,
+  boxShadow: '0 12px 30px rgba(0,0,0,0.22)',
   cursor: 'pointer',
 };
 
