@@ -1638,6 +1638,7 @@ export default function ProfileClientsPage() {
         <ClientCardModal
           booking={clientCardBooking}
           text={text}
+          language={language}
           onClose={() => setClientCardBooking(null)}
           onChat={() => router.push(`/messages?booking=${encodeURIComponent(clientCardBooking.id)}`)}
         />
@@ -2980,102 +2981,386 @@ function NoteModal({
 function ClientCardModal({
   booking,
   text,
+  language,
   onClose,
   onChat,
 }: {
   booking: BookingItem;
   text: PageText;
+  language: AppLanguage;
   onClose: () => void;
   onChat: () => void;
 }) {
   const unlocked = isUnlocked(booking);
   const location = unlocked ? getVisibleBookingLocation(booking) : getPublicBookingLocation(booking);
   const paymentMethod = getPaymentMethod(booking);
+  const bookingDate = getBookingDate(booking);
+  const avatarLetter = booking.masterName?.trim()?.charAt(0)?.toUpperCase() || 'C';
+
+  const contactData = booking as BookingItem & {
+    contactPhone?: string;
+    contactEmail?: string;
+    contactWhatsapp?: string;
+    contactTelegram?: string;
+    contactInstagram?: string;
+  };
+
+  const [dragY, setDragY] = useState(0);
+  const [dragStartY, setDragStartY] = useState<number | null>(null);
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    setDragStartY(event.clientY);
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (dragStartY === null) return;
+
+    const nextY = event.clientY - dragStartY;
+    setDragY(Math.max(0, nextY));
+  };
+
+  const handlePointerUp = () => {
+    if (dragY > 130) {
+      onClose();
+      return;
+    }
+
+    setDragY(0);
+    setDragStartY(null);
+  };
 
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
-      <div style={modalCardStyle} onClick={(event) => event.stopPropagation()}>
-        <button type="button" onClick={onClose} style={modalCloseStyle}>
-          ×
-        </button>
-
-        <h2 style={modalTitleStyle}>{text.clientCard}</h2>
+      <div
+        style={{
+          ...modalCardStyle,
+          maxHeight: '92vh',
+          transform: `translateY(${dragY}px)`,
+          transition: dragStartY === null ? 'transform 180ms ease' : 'none',
+          paddingBottom: 'calc(120px + env(safe-area-inset-bottom))',
+        }}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          style={{
+            width: '100%',
+            minHeight: 28,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            touchAction: 'none',
+            cursor: 'grab',
+          }}
+        >
+          <div
+            style={{
+              width: 62,
+              height: 6,
+              borderRadius: 999,
+              background: '#d7dce4',
+            }}
+          />
+        </div>
 
         <div
           style={{
-            marginTop: 12,
-            borderRadius: 22,
-            border: `2.5px solid ${BRAND.border}`,
-            background: statusBg(booking.status),
-            padding: 14,
+            display: 'grid',
+            gridTemplateColumns: '1fr 48px',
+            alignItems: 'center',
+            gap: 10,
+            marginTop: 4,
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
-            {booking.masterName}
-          </div>
+          <h2 style={modalTitleStyle}>{text.clientCard}</h2>
 
-          <div style={{ marginTop: 5, fontSize: 15, fontWeight: 800, color: BRAND.muted }}>
-            {booking.serviceName}
+          <button type="button" onClick={onClose} style={modalCloseStyle}>
+            ×
+          </button>
+        </div>
+
+        <div
+          style={{
+            marginTop: 14,
+            borderRadius: 26,
+            border: `2.8px solid ${BRAND.border}`,
+            background: statusBg(booking.status),
+            padding: 14,
+            boxShadow: '0 12px 30px rgba(7,27,70,0.12)',
+          }}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '78px 1fr',
+              gap: 13,
+              alignItems: 'center',
+            }}
+          >
+            {booking.masterAvatar ? (
+              <img
+                src={booking.masterAvatar}
+                alt={booking.masterName}
+                style={{
+                  width: 78,
+                  height: 78,
+                  borderRadius: 24,
+                  border: `2.5px solid ${BRAND.border}`,
+                  objectFit: 'cover',
+                  background: '#ffffff',
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: 78,
+                  height: 78,
+                  borderRadius: 24,
+                  border: `2.5px solid ${BRAND.border}`,
+                  background:
+                    'linear-gradient(135deg, #dcffe8 0%, #eaf4ff 45%, #fff4c7 100%)',
+                  color: BRAND.navy,
+                  display: 'grid',
+                  placeItems: 'center',
+                  fontSize: 34,
+                  fontWeight: 900,
+                }}
+              >
+                {avatarLetter}
+              </div>
+            )}
+
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 25,
+                  fontWeight: 900,
+                  color: BRAND.navy,
+                  lineHeight: 1.05,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {booking.masterName}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 5,
+                  fontSize: 16,
+                  fontWeight: 900,
+                  color: BRAND.muted,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {booking.serviceName || text.service}
+              </div>
+
+              <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                <MiniPill
+                  label={statusLabel(booking.status, text)}
+                  color={statusColor(booking.status)}
+                  bg="#ffffff"
+                />
+
+                <MiniPill
+                  label={isPaid(booking) ? text.depositPaid : text.depositWaiting}
+                  color={isPaid(booking) ? '#008f3a' : '#b87500'}
+                  bg={isPaid(booking) ? BRAND.softGreen : BRAND.softYellow}
+                />
+              </div>
+            </div>
           </div>
 
           <div
             style={{
-              marginTop: 13,
+              marginTop: 16,
               display: 'grid',
               gridTemplateColumns: '1fr auto',
               gap: 10,
               alignItems: 'center',
             }}
           >
-            <MiniPill
-              label={statusLabel(booking.status, text)}
-              color={statusColor(booking.status)}
-              bg="#ffffff"
-            />
-            <div style={{ fontSize: 28, fontWeight: 900, color: statusColor(booking.status) }}>
+            <div
+              style={{
+                borderRadius: 20,
+                border: `2px solid ${BRAND.border}`,
+                background: '#ffffff',
+                padding: 12,
+              }}
+            >
+              <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.muted }}>
+                {text.time}
+              </div>
+
+              <div style={{ marginTop: 4, fontSize: 18, fontWeight: 900, color: BRAND.navy }}>
+                {bookingDate ? getLongDateTitle(bookingDate, language) : '—'} ·{' '}
+                {getTimeLabel(bookingDate)}
+              </div>
+            </div>
+
+            <div
+              style={{
+                minWidth: 92,
+                minHeight: 74,
+                borderRadius: 20,
+                border: `2px solid ${BRAND.border}`,
+                background: '#ffffff',
+                display: 'grid',
+                placeItems: 'center',
+                color: statusColor(booking.status),
+                fontSize: 30,
+                fontWeight: 900,
+              }}
+            >
               {money(Number(booking.price || 0))}
             </div>
           </div>
 
-          <div style={{ marginTop: 10, fontSize: 15, fontWeight: 900, color: BRAND.navy }}>
-            {paymentIcons[paymentMethod]} {text.paymentMethod}
-          </div>
-
-          <div style={{ marginTop: 10, fontSize: 14, fontWeight: 900, color: BRAND.muted }}>
-            📍 {location || 'London'}
-          </div>
+          <InfoRow
+            label={text.paymentMethod}
+            value={`${paymentIcons[paymentMethod]} ${
+              paymentMethod === 'cash'
+                ? text.cash
+                : paymentMethod === 'card'
+                ? text.card
+                : text.app
+            }`}
+          />
+          <InfoRow label="Location" value={`📍 ${location || 'London'}`} />
+          <InfoRow label={text.notes} value={booking.category || text.notes} />
 
           <div
             style={{
-              marginTop: 12,
-              borderRadius: 18,
-              border: `2px solid ${BRAND.border}`,
+              marginTop: 14,
+              borderRadius: 22,
+              border: `2.5px solid ${BRAND.border}`,
               background: '#ffffff',
-              padding: 12,
-              color: BRAND.navy,
-              fontWeight: 800,
-              filter: unlocked ? 'none' : 'blur(3px)',
-              userSelect: unlocked ? 'auto' : 'none',
+              padding: 13,
             }}
           >
-            +44 7700 123456 · client@olamep.com
+            <div
+              style={{
+                fontSize: 17,
+                fontWeight: 900,
+                color: BRAND.navy,
+                marginBottom: 10,
+              }}
+            >
+              {unlocked ? text.contactsOpen : text.contactsLocked}
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gap: 8,
+                filter: unlocked ? 'none' : 'blur(4px)',
+                userSelect: unlocked ? 'auto' : 'none',
+                pointerEvents: unlocked ? 'auto' : 'none',
+              }}
+            >
+              <ContactLine icon="☎️" value={contactData.contactPhone || '+44 7700 123456'} />
+              <ContactLine icon="✉️" value={contactData.contactEmail || 'client@olamep.com'} />
+              <ContactLine icon="🟢" value={contactData.contactWhatsapp || '+44 7700 123456'} />
+              <ContactLine icon="📨" value={contactData.contactTelegram || '@client'} />
+              <ContactLine icon="📸" value={contactData.contactInstagram || '@client'} />
+            </div>
+
+            {!unlocked ? (
+              <div
+                style={{
+                  marginTop: 10,
+                  borderRadius: 16,
+                  background: BRAND.softRed,
+                  border: `2px solid ${BRAND.red}`,
+                  padding: 10,
+                  color: BRAND.red,
+                  fontSize: 12,
+                  fontWeight: 900,
+                  lineHeight: 1.35,
+                }}
+              >
+                🔒 Контакты, адреса и личная информация открываются только после подтверждения и оплаты.
+              </div>
+            ) : null}
           </div>
 
-          {!unlocked ? (
-            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 900, color: BRAND.red }}>
-              🔒 {text.contactsLocked}
-            </div>
-          ) : (
-            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 900, color: '#008f3a' }}>
-              ✅ {text.contactsOpen}
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={onChat}
+            style={{
+              ...darkButtonStyle,
+              marginTop: 14,
+              width: '100%',
+              minHeight: 56,
+              fontSize: 17,
+            }}
+          >
+            💬 {text.openChat}
+          </button>
         </div>
-
-        <button type="button" onClick={onChat} style={{ ...darkButtonStyle, marginTop: 14 }}>
-          💬 {text.openChat}
-        </button>
       </div>
+    </div>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      style={{
+        marginTop: 10,
+        borderRadius: 18,
+        border: `2px solid ${BRAND.border}`,
+        background: '#ffffff',
+        padding: 11,
+      }}
+    >
+      <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.muted }}>{label}</div>
+      <div
+        style={{
+          marginTop: 4,
+          fontSize: 15,
+          lineHeight: 1.3,
+          fontWeight: 900,
+          color: BRAND.navy,
+          wordBreak: 'break-word',
+        }}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function ContactLine({ icon, value }: { icon: string; value: string }) {
+  return (
+    <div
+      style={{
+        minHeight: 44,
+        borderRadius: 15,
+        border: '1.8px solid #d7dce4',
+        background: '#fffdf8',
+        display: 'grid',
+        gridTemplateColumns: '34px 1fr',
+        alignItems: 'center',
+        gap: 6,
+        padding: '0 10px',
+        color: BRAND.navy,
+        fontSize: 14,
+        fontWeight: 900,
+      }}
+    >
+      <span>{icon}</span>
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {value}
+      </span>
     </div>
   );
 }
