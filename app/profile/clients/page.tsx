@@ -20,9 +20,19 @@ import {
 } from '../../../services/bookingsStore';
 
 type ViewMode = 'today' | 'tomorrow' | 'week' | 'calendar' | 'history';
-type CalendarMode = 'month' | 'week' | 'day' | 'list';
+type CalendarStage = 'year' | 'month' | 'day';
 type StatusFilter = 'all' | 'completed' | 'upcoming' | 'pending' | 'cancelled';
 type PaymentFilter = 'all' | 'paid' | 'unpaid';
+
+type FilterSwitches = {
+  dateRange: boolean;
+  timeRange: boolean;
+  price: boolean;
+  client: boolean;
+  service: boolean;
+  payment: boolean;
+  status: boolean;
+};
 
 type PageText = {
   title: string;
@@ -36,8 +46,8 @@ type PageText = {
   day: string;
   list: string;
   management: string;
+  filters: string;
   freeWindows: string;
-  onlyRequests: string;
   confirmed: string;
   waiting: string;
   completed: string;
@@ -45,7 +55,6 @@ type PageText = {
   unavailable: string;
   available: string;
   all: string;
-  marked: string;
   bookings: string;
   noBookings: string;
   details: string;
@@ -57,10 +66,14 @@ type PageText = {
   notes: string;
   back: string;
   close: string;
-  dateRange: string;
+  chooseYear: string;
+  chooseMonth: string;
   from: string;
   to: string;
   clientName: string;
+  service: string;
+  timeRange: string;
+  dateRange: string;
   minPrice: string;
   maxPrice: string;
   paidOnly: string;
@@ -86,6 +99,8 @@ type PageText = {
   contactsOpen: string;
   depositPaid: string;
   depositWaiting: string;
+  wholeWeek: string;
+  tapDayHint: string;
 };
 
 const BRAND = {
@@ -118,8 +133,8 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     day: 'Day',
     list: 'List',
     management: 'Management',
+    filters: 'Filters',
     freeWindows: 'Free windows',
-    onlyRequests: 'Only requests',
     confirmed: 'Confirmed',
     waiting: 'Waiting',
     completed: 'Done',
@@ -127,7 +142,6 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     unavailable: 'Unavailable',
     available: 'Free slot',
     all: 'All',
-    marked: 'Marked',
     bookings: 'bookings',
     noBookings: 'No bookings for this date',
     details: 'Details',
@@ -139,10 +153,14 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     notes: 'Notes',
     back: 'Back',
     close: 'Close',
-    dateRange: 'Date range',
+    chooseYear: 'Choose year',
+    chooseMonth: 'Choose month',
     from: 'From',
     to: 'To',
     clientName: 'Client name',
+    service: 'Service',
+    timeRange: 'Time range',
+    dateRange: 'Date range',
     minPrice: 'Min price',
     maxPrice: 'Max price',
     paidOnly: 'Paid only',
@@ -168,6 +186,8 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     contactsOpen: 'Contacts open',
     depositPaid: 'Deposit paid',
     depositWaiting: 'Deposit waiting',
+    wholeWeek: 'Whole week',
+    tapDayHint: 'Tap a day or booking to open details',
   },
   RU: {
     title: 'Мои клиенты',
@@ -181,8 +201,8 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     day: 'День',
     list: 'Список',
     management: 'Управление',
+    filters: 'Фильтры',
     freeWindows: 'Свободные окна',
-    onlyRequests: 'Только запросы',
     confirmed: 'Подтверждено',
     waiting: 'Ожидает',
     completed: 'Готово',
@@ -190,7 +210,6 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     unavailable: 'Недоступно',
     available: 'Свободное окно',
     all: 'Все',
-    marked: 'Отмеченные',
     bookings: 'записей',
     noBookings: 'На эту дату записей нет',
     details: 'Детали',
@@ -202,10 +221,14 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     notes: 'Заметки',
     back: 'Назад',
     close: 'Закрыть',
-    dateRange: 'Диапазон дат',
+    chooseYear: 'Выбери год',
+    chooseMonth: 'Выбери месяц',
     from: 'От',
     to: 'До',
-    clientName: 'Имя клиента',
+    clientName: 'Имя или фамилия',
+    service: 'Услуга',
+    timeRange: 'Время',
+    dateRange: 'Диапазон дат',
     minPrice: 'Цена от',
     maxPrice: 'Цена до',
     paidOnly: 'Только оплаченные',
@@ -231,6 +254,8 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     contactsOpen: 'Контакты открыты',
     depositPaid: 'Оплачено',
     depositWaiting: 'Ждёт оплаты',
+    wholeWeek: 'Вся неделя',
+    tapDayHint: 'Нажми на день или запись, чтобы открыть детали',
   },
   UA: {
     title: 'Мої клієнти',
@@ -244,8 +269,8 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     day: 'День',
     list: 'Список',
     management: 'Керування',
+    filters: 'Фільтри',
     freeWindows: 'Вільні вікна',
-    onlyRequests: 'Тільки запити',
     confirmed: 'Підтверджено',
     waiting: 'Очікує',
     completed: 'Готово',
@@ -253,7 +278,6 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     unavailable: 'Недоступно',
     available: 'Вільне вікно',
     all: 'Усе',
-    marked: 'Позначені',
     bookings: 'записів',
     noBookings: 'На цю дату записів немає',
     details: 'Деталі',
@@ -265,10 +289,14 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     notes: 'Нотатки',
     back: 'Назад',
     close: 'Закрити',
-    dateRange: 'Діапазон дат',
+    chooseYear: 'Обери рік',
+    chooseMonth: 'Обери місяць',
     from: 'Від',
     to: 'До',
-    clientName: 'Імʼя клієнта',
+    clientName: 'Імʼя або прізвище',
+    service: 'Послуга',
+    timeRange: 'Час',
+    dateRange: 'Діапазон дат',
     minPrice: 'Ціна від',
     maxPrice: 'Ціна до',
     paidOnly: 'Тільки оплачені',
@@ -294,6 +322,8 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     contactsOpen: 'Контакти відкрито',
     depositPaid: 'Оплачено',
     depositWaiting: 'Очікує оплати',
+    wholeWeek: 'Увесь тиждень',
+    tapDayHint: 'Натисни на день або запис, щоб відкрити деталі',
   },
 };
 
@@ -375,6 +405,15 @@ function fromInputDate(value: string) {
   return date;
 }
 
+function minutesOfDay(date: Date) {
+  return date.getHours() * 60 + date.getMinutes();
+}
+
+function timeStringToMinutes(value: string) {
+  const [h, m] = value.split(':').map(Number);
+  return Number(h || 0) * 60 + Number(m || 0);
+}
+
 function getTimeLabel(date: Date | null) {
   if (!date) return '—';
 
@@ -382,10 +421,6 @@ function getTimeLabel(date: Date | null) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date);
-}
-
-function getHourLabel(hour: number) {
-  return `${String(hour).padStart(2, '0')}:00`;
 }
 
 function getDateTitle(date: Date, language: AppLanguage) {
@@ -686,19 +721,35 @@ export default function ProfileClientsPage() {
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('today');
-  const [calendarMode, setCalendarMode] = useState<CalendarMode>('day');
+  const [calendarStage, setCalendarStage] = useState<CalendarStage>('day');
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
   const [calendarDate, setCalendarDate] = useState<Date>(() => startOfDay(new Date()));
   const [showFreeWindows, setShowFreeWindows] = useState(true);
-  const [showOnlyRequests, setShowOnlyRequests] = useState(false);
-  const [managementOpen, setManagementOpen] = useState(false);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [weekOverviewOpen, setWeekOverviewOpen] = useState(true);
+
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [filterSwitches, setFilterSwitches] = useState<FilterSwitches>({
+    dateRange: false,
+    timeRange: false,
+    price: false,
+    client: false,
+    service: false,
+    payment: false,
+    status: false,
+  });
+
   const [nameFilter, setNameFilter] = useState('');
+  const [serviceFilter, setServiceFilter] = useState('');
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('all');
+  const [modalStatusFilter, setModalStatusFilter] = useState<StatusFilter>('all');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [rangeFrom, setRangeFrom] = useState(() => toInputDate(startOfDay(new Date())));
   const [rangeTo, setRangeTo] = useState(() => toInputDate(startOfDay(new Date())));
+  const [timeFrom, setTimeFrom] = useState('05:00');
+  const [timeTo, setTimeTo] = useState('23:59');
+
   const [noteBooking, setNoteBooking] = useState<BookingItem | null>(null);
   const [clientCardBooking, setClientCardBooking] = useState<BookingItem | null>(null);
   const [timePicker, setTimePicker] = useState<{ hour: number; bookingId?: string } | null>(null);
@@ -738,17 +789,19 @@ export default function ProfileClientsPage() {
   const today = useMemo(() => startOfDay(new Date()), []);
   const tomorrow = useMemo(() => addDays(today, 1), [today]);
 
+  const getEffectiveDate = (booking: BookingItem) => {
+    const override = timeOverrides[booking.id];
+    if (override) return safeDate(override);
+    return getBookingDate(booking);
+  };
+
   const activeDate = useMemo(() => {
     if (viewMode === 'today') return today;
     if (viewMode === 'tomorrow') return tomorrow;
     return selectedDate;
   }, [selectedDate, today, tomorrow, viewMode]);
 
-  const getEffectiveDate = (booking: BookingItem) => {
-    const override = timeOverrides[booking.id];
-    if (override) return safeDate(override);
-    return getBookingDate(booking);
-  };
+  const weekDates = useMemo(() => getWeekDates(selectedDate), [selectedDate]);
 
   const periodBookings = useMemo(() => {
     let source = [...bookings];
@@ -776,7 +829,14 @@ export default function ProfileClientsPage() {
     }
 
     if (viewMode === 'calendar') {
-      if (calendarMode === 'month') {
+      if (calendarStage === 'year') {
+        source = source.filter((booking) => {
+          const date = getEffectiveDate(booking);
+          return date ? date.getFullYear() === calendarDate.getFullYear() : false;
+        });
+      }
+
+      if (calendarStage === 'month') {
         source = source.filter((booking) => {
           const date = getEffectiveDate(booking);
           return (
@@ -787,15 +847,7 @@ export default function ProfileClientsPage() {
         });
       }
 
-      if (calendarMode === 'week') {
-        const week = getWeekDates(selectedDate);
-        source = source.filter((booking) => {
-          const date = getEffectiveDate(booking);
-          return date ? week.some((item) => isSameDay(item, date)) : false;
-        });
-      }
-
-      if (calendarMode === 'day' || calendarMode === 'list') {
+      if (calendarStage === 'day') {
         source = source.filter((booking) => {
           const date = getEffectiveDate(booking);
           return date ? isSameDay(date, selectedDate) : false;
@@ -804,24 +856,14 @@ export default function ProfileClientsPage() {
     }
 
     if (viewMode === 'history') {
-      const from = fromInputDate(rangeFrom);
-      const to = fromInputDate(rangeTo);
-      const toEnd = new Date(to);
-      toEnd.setHours(23, 59, 59, 999);
-
-      source = source.filter((booking) => {
-        const date = getEffectiveDate(booking);
-        return date ? date >= from && date <= toEnd : true;
-      });
+      source = [...bookings];
     }
 
     return source;
   }, [
     bookings,
     calendarDate,
-    calendarMode,
-    rangeFrom,
-    rangeTo,
+    calendarStage,
     selectedDate,
     timeOverrides,
     today,
@@ -832,32 +874,61 @@ export default function ProfileClientsPage() {
   const filteredBookings = useMemo(() => {
     let source = [...periodBookings];
 
-    if (showOnlyRequests) {
-      source = source.filter((booking) => booking.status === 'pending');
-    }
-
     if (statusFilter !== 'all') {
       source = source.filter((booking) => booking.status === statusFilter);
     }
 
-    if (nameFilter.trim()) {
+    if (filterSwitches.status && modalStatusFilter !== 'all') {
+      source = source.filter((booking) => booking.status === modalStatusFilter);
+    }
+
+    if (filterSwitches.dateRange) {
+      const from = fromInputDate(rangeFrom);
+      const to = fromInputDate(rangeTo);
+      const toEnd = new Date(to);
+      toEnd.setHours(23, 59, 59, 999);
+
+      source = source.filter((booking) => {
+        const date = getEffectiveDate(booking);
+        return date ? date >= from && date <= toEnd : false;
+      });
+    }
+
+    if (filterSwitches.timeRange) {
+      const from = timeStringToMinutes(timeFrom);
+      const to = timeStringToMinutes(timeTo);
+
+      source = source.filter((booking) => {
+        const date = getEffectiveDate(booking);
+        return date ? minutesOfDay(date) >= from && minutesOfDay(date) <= to : false;
+      });
+    }
+
+    if (filterSwitches.client && nameFilter.trim()) {
       const query = nameFilter.trim().toLowerCase();
       source = source.filter((booking) => booking.masterName.toLowerCase().includes(query));
     }
 
-    if (paymentFilter === 'paid') {
+    if (filterSwitches.service && serviceFilter.trim()) {
+      const query = serviceFilter.trim().toLowerCase();
+      source = source.filter((booking) =>
+        String(booking.serviceName || '').toLowerCase().includes(query)
+      );
+    }
+
+    if (filterSwitches.payment && paymentFilter === 'paid') {
       source = source.filter((booking) => isPaid(booking));
     }
 
-    if (paymentFilter === 'unpaid') {
+    if (filterSwitches.payment && paymentFilter === 'unpaid') {
       source = source.filter((booking) => !isPaid(booking));
     }
 
-    if (minPrice.trim()) {
+    if (filterSwitches.price && minPrice.trim()) {
       source = source.filter((booking) => Number(booking.price || 0) >= Number(minPrice));
     }
 
-    if (maxPrice.trim()) {
+    if (filterSwitches.price && maxPrice.trim()) {
       source = source.filter((booking) => Number(booking.price || 0) <= Number(maxPrice));
     }
 
@@ -867,15 +938,25 @@ export default function ProfileClientsPage() {
       return left - right;
     });
   }, [
+    filterSwitches,
     maxPrice,
     minPrice,
+    modalStatusFilter,
     nameFilter,
     paymentFilter,
     periodBookings,
-    showOnlyRequests,
+    rangeFrom,
+    rangeTo,
+    serviceFilter,
     statusFilter,
+    timeFrom,
     timeOverrides,
+    timeTo,
   ]);
+
+  const activeFilterCount = useMemo(() => {
+    return Object.values(filterSwitches).filter(Boolean).length;
+  }, [filterSwitches]);
 
   const statusCounts = useMemo(() => {
     return {
@@ -891,33 +972,18 @@ export default function ProfileClientsPage() {
     .filter((booking) => booking.status !== 'cancelled')
     .reduce((sum, booking) => sum + Number(booking.price || 0), 0);
 
-  const monthBookings = useMemo(() => {
-    return bookings.filter((booking) => {
-      const date = getEffectiveDate(booking);
-      return (
-        date &&
-        date.getMonth() === calendarDate.getMonth() &&
-        date.getFullYear() === calendarDate.getFullYear()
-      );
-    });
-  }, [bookings, calendarDate, timeOverrides]);
-
-  const years = useMemo(() => {
-    return Array.from({ length: 10 }, (_, index) => 2026 + index);
-  }, []);
-
-  const weekDates = useMemo(() => getWeekDates(selectedDate), [selectedDate]);
+  const years = useMemo(() => Array.from({ length: 10 }, (_, index) => 2026 + index), []);
 
   const handleTopMode = (mode: ViewMode) => {
     setViewMode(mode);
     setStatusFilter('all');
-    setShowOnlyRequests(false);
 
     if (mode === 'today') {
       const now = startOfDay(new Date());
       setSelectedDate(now);
       setCalendarDate(now);
-      setCalendarMode('day');
+      setCalendarStage('day');
+      setWeekOverviewOpen(false);
       setRangeFrom(toInputDate(now));
       setRangeTo(toInputDate(now));
     }
@@ -926,7 +992,8 @@ export default function ProfileClientsPage() {
       const next = addDays(startOfDay(new Date()), 1);
       setSelectedDate(next);
       setCalendarDate(next);
-      setCalendarMode('day');
+      setCalendarStage('day');
+      setWeekOverviewOpen(false);
       setRangeFrom(toInputDate(next));
       setRangeTo(toInputDate(next));
     }
@@ -935,29 +1002,42 @@ export default function ProfileClientsPage() {
       const now = startOfDay(new Date());
       setSelectedDate(now);
       setCalendarDate(now);
-      setCalendarMode('week');
+      setCalendarStage('day');
+      setWeekOverviewOpen(true);
     }
 
     if (mode === 'calendar') {
-      setCalendarMode('month');
-      setManagementOpen(true);
+      const base = calendarDate.getFullYear() < 2026 ? new Date(2026, 0, 1) : calendarDate;
+      setCalendarDate(base);
+      setSelectedDate(base);
+      setCalendarStage('year');
+      setWeekOverviewOpen(false);
     }
 
     if (mode === 'history') {
-      setCalendarMode('list');
-      setManagementOpen(true);
+      setCalendarStage('day');
+      setWeekOverviewOpen(false);
+      setFilterModalOpen(true);
     }
   };
 
-  const moveDay = (direction: number) => {
+  const movePeriod = (direction: number) => {
     if (viewMode === 'week') {
       const next = addDays(selectedDate, direction * 7);
       setSelectedDate(next);
       setCalendarDate(next);
+      setWeekOverviewOpen(true);
       return;
     }
 
-    if (viewMode === 'calendar' && calendarMode === 'month') {
+    if (viewMode === 'calendar' && calendarStage === 'year') {
+      const next = new Date(calendarDate);
+      next.setFullYear(Math.max(2026, next.getFullYear() + direction));
+      setCalendarDate(next);
+      return;
+    }
+
+    if (viewMode === 'calendar' && calendarStage === 'month') {
       const next = new Date(calendarDate);
       next.setMonth(next.getMonth() + direction);
       setCalendarDate(next);
@@ -970,7 +1050,7 @@ export default function ProfileClientsPage() {
 
     if (viewMode === 'today' || viewMode === 'tomorrow') {
       setViewMode('calendar');
-      setCalendarMode('day');
+      setCalendarStage('day');
     }
   };
 
@@ -996,12 +1076,24 @@ export default function ProfileClientsPage() {
   };
 
   const resetFilters = () => {
+    setFilterSwitches({
+      dateRange: false,
+      timeRange: false,
+      price: false,
+      client: false,
+      service: false,
+      payment: false,
+      status: false,
+    });
     setNameFilter('');
+    setServiceFilter('');
     setPaymentFilter('all');
+    setModalStatusFilter('all');
     setMinPrice('');
     setMaxPrice('');
+    setTimeFrom('05:00');
+    setTimeTo('23:59');
     setStatusFilter('all');
-    setShowOnlyRequests(false);
     setRangeFrom(toInputDate(activeDate));
     setRangeTo(toInputDate(activeDate));
   };
@@ -1029,10 +1121,22 @@ export default function ProfileClientsPage() {
     setTimePicker(null);
   };
 
-  const activeTitle =
-    viewMode === 'week'
-      ? `${getDateTitle(weekDates[0], language)} — ${getDateTitle(weekDates[6], language)}`
-      : getDateTitle(activeDate, language);
+  const titleForPanel = useMemo(() => {
+    if (viewMode === 'calendar' && calendarStage === 'year') return text.chooseYear;
+    if (viewMode === 'calendar' && calendarStage === 'month') return text.chooseMonth;
+    if (viewMode === 'week' && weekOverviewOpen) {
+      return `${getDateTitle(weekDates[0], language)} — ${getDateTitle(weekDates[6], language)}`;
+    }
+
+    return getDateTitle(activeDate, language);
+  }, [activeDate, calendarStage, language, text.chooseMonth, text.chooseYear, viewMode, weekDates, weekOverviewOpen]);
+
+  const shouldShowDaySchedule =
+    viewMode === 'today' ||
+    viewMode === 'tomorrow' ||
+    viewMode === 'history' ||
+    (viewMode === 'week' && !weekOverviewOpen) ||
+    (viewMode === 'calendar' && calendarStage === 'day');
 
   return (
     <main
@@ -1113,10 +1217,7 @@ export default function ProfileClientsPage() {
           activeFilter={statusFilter}
           counts={statusCounts}
           onSelect={setStatusFilter}
-          onClear={() => {
-            setStatusFilter('all');
-            setShowOnlyRequests(false);
-          }}
+          onClear={() => setStatusFilter('all')}
         />
 
         <section style={calendarPanelStyle}>
@@ -1128,7 +1229,7 @@ export default function ProfileClientsPage() {
               gap: 8,
             }}
           >
-            <button type="button" onClick={() => moveDay(-1)} style={smallCircleStyle}>
+            <button type="button" onClick={() => movePeriod(-1)} style={smallCircleStyle}>
               ‹
             </button>
 
@@ -1145,7 +1246,7 @@ export default function ProfileClientsPage() {
                   textTransform: 'capitalize',
                 }}
               >
-                {activeTitle}
+                {titleForPanel}
               </div>
 
               <div
@@ -1162,7 +1263,7 @@ export default function ProfileClientsPage() {
               </div>
             </div>
 
-            <button type="button" onClick={() => moveDay(1)} style={smallCircleStyle}>
+            <button type="button" onClick={() => movePeriod(1)} style={smallCircleStyle}>
               ›
             </button>
           </div>
@@ -1170,14 +1271,15 @@ export default function ProfileClientsPage() {
           <div style={quickControlsRowStyle}>
             <button
               type="button"
-              onClick={() => setManagementOpen((prev) => !prev)}
+              onClick={() => setFilterModalOpen(true)}
               style={{
                 ...quickChipStyle,
-                background: managementOpen ? BRAND.navy : '#ffffff',
-                color: managementOpen ? '#ffffff' : BRAND.navy,
+                background: activeFilterCount > 0 ? BRAND.green : '#ffffff',
+                color: activeFilterCount > 0 ? '#ffffff' : BRAND.navy,
               }}
             >
-              ☰ {text.management}
+              ☰ {text.filters}
+              {activeFilterCount > 0 ? ` ${activeFilterCount}` : ''}
             </button>
 
             <button type="button" onClick={() => handleTopMode('today')} style={quickChipStyle}>
@@ -1195,258 +1297,177 @@ export default function ProfileClientsPage() {
             >
               ◷ {text.freeWindows}
             </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowOnlyRequests((prev) => !prev);
-                setStatusFilter('all');
-              }}
-              style={{
-                ...quickChipStyle,
-                background: showOnlyRequests ? BRAND.navy : '#ffffff',
-                color: showOnlyRequests ? '#ffffff' : BRAND.navy,
-              }}
-            >
-              ⚠ {text.onlyRequests}
-            </button>
           </div>
 
-          {viewMode === 'week' || calendarMode === 'week' ? (
+          {viewMode === 'week' ? (
             <WeekStrip
               language={language}
               selectedDate={selectedDate}
-              bookings={bookings}
+              bookings={filteredBookings.length ? filteredBookings : periodBookings}
               timeOverrides={timeOverrides}
               onSelect={(date) => {
                 setSelectedDate(startOfDay(date));
                 setCalendarDate(startOfDay(date));
                 setViewMode('week');
-                setCalendarMode('week');
+                setWeekOverviewOpen(false);
               }}
             />
           ) : null}
 
-          {managementOpen ? (
-            <div style={managementBoxStyle}>
-              <div style={managementGridStyle}>
-                <label style={fieldLabelStyle}>
-                  <span>Year</span>
-                  <select
-                    value={calendarDate.getFullYear()}
-                    onChange={(event) => {
-                      const next = new Date(calendarDate);
-                      next.setFullYear(Number(event.target.value));
-                      setCalendarDate(next);
-                    }}
-                    style={inputStyle}
-                  >
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+          {viewMode === 'calendar' && calendarStage === 'year' ? (
+            <YearOverview
+              language={language}
+              year={calendarDate.getFullYear()}
+              years={years}
+              bookings={filteredBookings.length ? filteredBookings : periodBookings}
+              getEffectiveDate={getEffectiveDate}
+              onYear={(year) => {
+                const next = new Date(calendarDate);
+                next.setFullYear(year);
+                next.setMonth(0);
+                setCalendarDate(next);
+              }}
+              onMonth={(monthIndex) => {
+                const next = new Date(calendarDate);
+                next.setMonth(monthIndex);
+                next.setDate(1);
+                setCalendarDate(next);
+                setSelectedDate(next);
+                setCalendarStage('month');
+              }}
+            />
+          ) : null}
 
-                <label style={fieldLabelStyle}>
-                  <span>Month</span>
-                  <select
-                    value={calendarDate.getMonth()}
-                    onChange={(event) => {
-                      const next = new Date(calendarDate);
-                      next.setMonth(Number(event.target.value));
-                      setCalendarDate(next);
-                    }}
-                    style={inputStyle}
-                  >
-                    {Array.from({ length: 12 }, (_, index) => (
-                      <option key={index} value={index}>
-                        {getShortMonthName(index, language)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
+          {viewMode === 'calendar' && calendarStage === 'month' ? (
+            <MonthLargeCalendar
+              language={language}
+              calendarDate={calendarDate}
+              selectedDate={selectedDate}
+              bookings={filteredBookings.length ? filteredBookings : periodBookings}
+              getEffectiveDate={getEffectiveDate}
+              onSelect={(date) => {
+                setSelectedDate(startOfDay(date));
+                setCalendarDate(startOfDay(date));
+                setCalendarStage('day');
+              }}
+            />
+          ) : null}
 
-              <div style={calendarModeRowStyle}>
-                {([
-                  ['month', text.month],
-                  ['week', text.week],
-                  ['day', text.day],
-                  ['list', text.list],
-                ] as const).map(([mode, label]) => {
-                  const active = calendarMode === mode;
-
-                  return (
-                    <button
-                      key={mode}
-                      type="button"
-                      onClick={() => {
-                        setCalendarMode(mode);
-                        setViewMode(mode === 'week' ? 'week' : 'calendar');
-                      }}
-                      style={{
-                        ...modeButtonStyle,
-                        background: active ? BRAND.navy : '#ffffff',
-                        color: active ? '#ffffff' : BRAND.navy,
-                      }}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {calendarMode === 'month' ? (
-                <MonthGrid
-                  language={language}
-                  calendarDate={calendarDate}
-                  selectedDate={selectedDate}
-                  bookings={monthBookings}
-                  timeOverrides={timeOverrides}
-                  onSelect={(date) => {
-                    setSelectedDate(startOfDay(date));
-                    setCalendarDate(startOfDay(date));
-                    setViewMode('calendar');
-                    setCalendarMode('day');
-                  }}
-                />
-              ) : null}
-
-              <div style={{ marginTop: 10, ...managementGridStyle }}>
-                <label style={fieldLabelStyle}>
-                  <span>{text.from}</span>
-                  <input
-                    type="date"
-                    value={rangeFrom}
-                    onChange={(event) => setRangeFrom(event.target.value)}
-                    style={inputStyle}
-                  />
-                </label>
-
-                <label style={fieldLabelStyle}>
-                  <span>{text.to}</span>
-                  <input
-                    type="date"
-                    value={rangeTo}
-                    onChange={(event) => setRangeTo(event.target.value)}
-                    style={inputStyle}
-                  />
-                </label>
-
-                <label style={fieldLabelStyle}>
-                  <span>{text.clientName}</span>
-                  <input
-                    value={nameFilter}
-                    onChange={(event) => setNameFilter(event.target.value)}
-                    placeholder="Smith"
-                    style={inputStyle}
-                  />
-                </label>
-
-                <label style={fieldLabelStyle}>
-                  <span>{text.allPayments}</span>
-                  <select
-                    value={paymentFilter}
-                    onChange={(event) => setPaymentFilter(event.target.value as PaymentFilter)}
-                    style={inputStyle}
-                  >
-                    <option value="all">{text.allPayments}</option>
-                    <option value="paid">{text.paidOnly}</option>
-                    <option value="unpaid">{text.unpaidOnly}</option>
-                  </select>
-                </label>
-
-                <label style={fieldLabelStyle}>
-                  <span>{text.minPrice}</span>
-                  <input
-                    type="number"
-                    value={minPrice}
-                    onChange={(event) => setMinPrice(event.target.value)}
-                    style={inputStyle}
-                  />
-                </label>
-
-                <label style={fieldLabelStyle}>
-                  <span>{text.maxPrice}</span>
-                  <input
-                    type="number"
-                    value={maxPrice}
-                    onChange={(event) => setMaxPrice(event.target.value)}
-                    style={inputStyle}
-                  />
-                </label>
-              </div>
-
-              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <button type="button" onClick={resetFilters} style={plainButtonStyle}>
-                  {text.reset}
-                </button>
-                <button type="button" onClick={() => setManagementOpen(false)} style={darkButtonStyle}>
-                  {text.apply}
-                </button>
-              </div>
-            </div>
+          {viewMode === 'calendar' && calendarStage === 'day' ? (
+            <button
+              type="button"
+              onClick={() => setCalendarStage('month')}
+              style={{ ...plainButtonStyle, width: '100%', marginTop: 12 }}
+            >
+              ← {text.chooseMonth}
+            </button>
           ) : null}
         </section>
 
-        <section style={{ marginTop: 18 }}>
-          <button
-            type="button"
-            onClick={() => {
-              setCustomMinute(25);
-              setTimePicker({ hour: 4 });
-            }}
-            style={addTimeButtonStyle}
-          >
-            {text.addBefore}
-          </button>
-
-          <div style={notebookHeaderStyle}>
-            <span>{text.time}</span>
-            <span>{text.clientProcedure}</span>
-            <span>{text.price}</span>
-            <span>{text.notes}</span>
-          </div>
-
-          <NotebookSchedule
+        {viewMode === 'week' && weekOverviewOpen ? (
+          <WeekAgenda
             text={text}
+            language={language}
+            weekDates={weekDates}
             bookings={filteredBookings}
-            activeDate={activeDate}
-            showFreeWindows={showFreeWindows}
-            extraTimes={extraTimes}
             getEffectiveDate={getEffectiveDate}
-            onAddMinute={(hour) => {
-              setCustomMinute(25);
-              setTimePicker({ hour });
+            onDay={(date) => {
+              setSelectedDate(startOfDay(date));
+              setCalendarDate(startOfDay(date));
+              setWeekOverviewOpen(false);
             }}
-            onChangeBookingMinute={(booking, hour, minute) => {
-              setCustomMinute(minute);
-              setTimePicker({ hour, bookingId: booking.id });
-            }}
-            onDone={markDone}
-            onApprove={approveBooking}
-            onReject={rejectBooking}
-            onChat={(booking) => router.push(`/messages?booking=${encodeURIComponent(booking.id)}`)}
-            onDetails={(booking) => setClientCardBooking(booking)}
-            onNote={setNoteBooking}
+            onBooking={setClientCardBooking}
           />
+        ) : null}
 
-          <button
-            type="button"
-            onClick={() => {
-              setCustomMinute(25);
-              setTimePicker({ hour: 24 });
-            }}
-            style={{ ...addTimeButtonStyle, marginTop: 12 }}
-          >
-            {text.addAfter}
-          </button>
-        </section>
+        {shouldShowDaySchedule ? (
+          <section style={{ marginTop: 18 }}>
+            <button
+              type="button"
+              onClick={() => {
+                setCustomMinute(25);
+                setTimePicker({ hour: 4 });
+              }}
+              style={addTimeButtonStyle}
+            >
+              {text.addBefore}
+            </button>
+
+            <div style={notebookHeaderStyle}>
+              <span>{text.time}</span>
+              <span>{text.clientProcedure}</span>
+              <span>{text.price}</span>
+              <span>{text.notes}</span>
+            </div>
+
+            <NotebookSchedule
+              text={text}
+              bookings={filteredBookings}
+              activeDate={activeDate}
+              showFreeWindows={showFreeWindows}
+              extraTimes={extraTimes}
+              getEffectiveDate={getEffectiveDate}
+              onAddMinute={(hour) => {
+                setCustomMinute(25);
+                setTimePicker({ hour });
+              }}
+              onChangeBookingMinute={(booking, hour, minute) => {
+                setCustomMinute(minute);
+                setTimePicker({ hour, bookingId: booking.id });
+              }}
+              onDone={markDone}
+              onApprove={approveBooking}
+              onReject={rejectBooking}
+              onChat={(booking) => router.push(`/messages?booking=${encodeURIComponent(booking.id)}`)}
+              onDetails={(booking) => setClientCardBooking(booking)}
+              onNote={setNoteBooking}
+            />
+
+            <button
+              type="button"
+              onClick={() => {
+                setCustomMinute(25);
+                setTimePicker({ hour: 24 });
+              }}
+              style={{ ...addTimeButtonStyle, marginTop: 12 }}
+            >
+              {text.addAfter}
+            </button>
+          </section>
+        ) : null}
       </div>
 
       <BottomNav active="clients" />
+
+      {filterModalOpen ? (
+        <FilterModal
+          text={text}
+          switches={filterSwitches}
+          onSwitches={setFilterSwitches}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          timeFrom={timeFrom}
+          timeTo={timeTo}
+          nameFilter={nameFilter}
+          serviceFilter={serviceFilter}
+          paymentFilter={paymentFilter}
+          statusFilter={modalStatusFilter}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          onRangeFrom={setRangeFrom}
+          onRangeTo={setRangeTo}
+          onTimeFrom={setTimeFrom}
+          onTimeTo={setTimeTo}
+          onName={setNameFilter}
+          onService={setServiceFilter}
+          onPayment={setPaymentFilter}
+          onStatus={setModalStatusFilter}
+          onMinPrice={setMinPrice}
+          onMaxPrice={setMaxPrice}
+          onReset={resetFilters}
+          onClose={() => setFilterModalOpen(false)}
+        />
+      ) : null}
 
       {noteBooking ? (
         <NoteModal booking={noteBooking} text={text} onClose={() => setNoteBooking(null)} />
@@ -1488,11 +1509,7 @@ function StatusFilterBar({
   onSelect: (value: StatusFilter) => void;
   onClear: () => void;
 }) {
-  const items: Array<{
-    key: StatusFilter;
-    label: string;
-    color: string;
-  }> = [
+  const items: Array<{ key: StatusFilter; label: string; color: string }> = [
     { key: 'all', label: text.all, color: BRAND.navy },
     { key: 'completed', label: text.completed, color: BRAND.blue },
     { key: 'upcoming', label: text.confirmed, color: BRAND.green },
@@ -1519,29 +1536,31 @@ function StatusFilterBar({
               onClick={() => onSelect(item.key)}
               style={{
                 flexShrink: 0,
-                minWidth: 108,
+                minWidth: 112,
                 minHeight: 54,
                 borderRadius: 18,
                 border: `2.3px solid ${BRAND.border}`,
                 background: active ? BRAND.navy : '#ffffff',
                 color: active ? '#ffffff' : BRAND.navy,
                 display: 'grid',
-                gridTemplateColumns: 'auto 1fr auto',
+                gridTemplateColumns: item.key === 'all' ? '1fr auto' : 'auto 1fr auto',
                 alignItems: 'center',
                 gap: 7,
                 padding: '0 10px',
                 cursor: 'pointer',
               }}
             >
-              <span
-                style={{
-                  width: 13,
-                  height: 13,
-                  borderRadius: 999,
-                  background: item.color,
-                  display: 'inline-block',
-                }}
-              />
+              {item.key !== 'all' ? (
+                <span
+                  style={{
+                    width: 13,
+                    height: 13,
+                    borderRadius: 999,
+                    background: item.color,
+                    display: 'inline-block',
+                  }}
+                />
+              ) : null}
               <span
                 style={{
                   fontSize: 12,
@@ -1555,6 +1574,679 @@ function StatusFilterBar({
                 {item.label}
               </span>
               <span style={{ fontSize: 20, fontWeight: 900 }}>{counts[item.key]}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function FilterModal({
+  text,
+  switches,
+  onSwitches,
+  rangeFrom,
+  rangeTo,
+  timeFrom,
+  timeTo,
+  nameFilter,
+  serviceFilter,
+  paymentFilter,
+  statusFilter,
+  minPrice,
+  maxPrice,
+  onRangeFrom,
+  onRangeTo,
+  onTimeFrom,
+  onTimeTo,
+  onName,
+  onService,
+  onPayment,
+  onStatus,
+  onMinPrice,
+  onMaxPrice,
+  onReset,
+  onClose,
+}: {
+  text: PageText;
+  switches: FilterSwitches;
+  onSwitches: (value: FilterSwitches) => void;
+  rangeFrom: string;
+  rangeTo: string;
+  timeFrom: string;
+  timeTo: string;
+  nameFilter: string;
+  serviceFilter: string;
+  paymentFilter: PaymentFilter;
+  statusFilter: StatusFilter;
+  minPrice: string;
+  maxPrice: string;
+  onRangeFrom: (value: string) => void;
+  onRangeTo: (value: string) => void;
+  onTimeFrom: (value: string) => void;
+  onTimeTo: (value: string) => void;
+  onName: (value: string) => void;
+  onService: (value: string) => void;
+  onPayment: (value: PaymentFilter) => void;
+  onStatus: (value: StatusFilter) => void;
+  onMinPrice: (value: string) => void;
+  onMaxPrice: (value: string) => void;
+  onReset: () => void;
+  onClose: () => void;
+}) {
+  const toggle = (key: keyof FilterSwitches) => {
+    onSwitches({ ...switches, [key]: !switches[key] });
+  };
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={modalCardStyle} onClick={(event) => event.stopPropagation()}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 44px',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          <h2 style={modalTitleStyle}>{text.filters}</h2>
+          <button type="button" onClick={onClose} style={modalCloseStyle}>
+            ×
+          </button>
+        </div>
+
+        <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
+          <FilterCard
+            title={text.dateRange}
+            active={switches.dateRange}
+            onToggle={() => toggle('dateRange')}
+          >
+            <div style={twoColStyle}>
+              <label style={fieldLabelStyle}>
+                <span>{text.from}</span>
+                <input
+                  type="date"
+                  value={rangeFrom}
+                  onChange={(event) => onRangeFrom(event.target.value)}
+                  style={inputStyle}
+                />
+              </label>
+              <label style={fieldLabelStyle}>
+                <span>{text.to}</span>
+                <input
+                  type="date"
+                  value={rangeTo}
+                  onChange={(event) => onRangeTo(event.target.value)}
+                  style={inputStyle}
+                />
+              </label>
+            </div>
+          </FilterCard>
+
+          <FilterCard
+            title={text.timeRange}
+            active={switches.timeRange}
+            onToggle={() => toggle('timeRange')}
+          >
+            <div style={twoColStyle}>
+              <label style={fieldLabelStyle}>
+                <span>{text.from}</span>
+                <input
+                  type="time"
+                  value={timeFrom}
+                  onChange={(event) => onTimeFrom(event.target.value)}
+                  style={inputStyle}
+                />
+              </label>
+              <label style={fieldLabelStyle}>
+                <span>{text.to}</span>
+                <input
+                  type="time"
+                  value={timeTo}
+                  onChange={(event) => onTimeTo(event.target.value)}
+                  style={inputStyle}
+                />
+              </label>
+            </div>
+          </FilterCard>
+
+          <FilterCard
+            title={text.price}
+            active={switches.price}
+            onToggle={() => toggle('price')}
+          >
+            <div style={twoColStyle}>
+              <label style={fieldLabelStyle}>
+                <span>{text.minPrice}</span>
+                <input
+                  type="number"
+                  value={minPrice}
+                  onChange={(event) => onMinPrice(event.target.value)}
+                  style={inputStyle}
+                />
+              </label>
+              <label style={fieldLabelStyle}>
+                <span>{text.maxPrice}</span>
+                <input
+                  type="number"
+                  value={maxPrice}
+                  onChange={(event) => onMaxPrice(event.target.value)}
+                  style={inputStyle}
+                />
+              </label>
+            </div>
+          </FilterCard>
+
+          <FilterCard
+            title={text.clientName}
+            active={switches.client}
+            onToggle={() => toggle('client')}
+          >
+            <input
+              value={nameFilter}
+              onChange={(event) => onName(event.target.value)}
+              placeholder="Smith / Anna"
+              style={inputStyle}
+            />
+          </FilterCard>
+
+          <FilterCard
+            title={text.service}
+            active={switches.service}
+            onToggle={() => toggle('service')}
+          >
+            <input
+              value={serviceFilter}
+              onChange={(event) => onService(event.target.value)}
+              placeholder="Hair / Massage"
+              style={inputStyle}
+            />
+          </FilterCard>
+
+          <FilterCard
+            title={text.allPayments}
+            active={switches.payment}
+            onToggle={() => toggle('payment')}
+          >
+            <select
+              value={paymentFilter}
+              onChange={(event) => onPayment(event.target.value as PaymentFilter)}
+              style={inputStyle}
+            >
+              <option value="all">{text.allPayments}</option>
+              <option value="paid">{text.paidOnly}</option>
+              <option value="unpaid">{text.unpaidOnly}</option>
+            </select>
+          </FilterCard>
+
+          <FilterCard
+            title={text.history}
+            active={switches.status}
+            onToggle={() => toggle('status')}
+          >
+            <select
+              value={statusFilter}
+              onChange={(event) => onStatus(event.target.value as StatusFilter)}
+              style={inputStyle}
+            >
+              <option value="all">{text.all}</option>
+              <option value="completed">{text.completed}</option>
+              <option value="upcoming">{text.confirmed}</option>
+              <option value="pending">{text.waiting}</option>
+              <option value="cancelled">{text.cancelled}</option>
+            </select>
+          </FilterCard>
+        </div>
+
+        <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <button type="button" onClick={onReset} style={plainButtonStyle}>
+            {text.reset}
+          </button>
+          <button type="button" onClick={onClose} style={darkButtonStyle}>
+            {text.apply}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FilterCard({
+  title,
+  active,
+  onToggle,
+  children,
+}: {
+  title: string;
+  active: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        borderRadius: 20,
+        border: `2.4px solid ${active ? BRAND.green : BRAND.border}`,
+        background: active ? BRAND.softGreen : '#ffffff',
+        padding: 10,
+      }}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        style={{
+          width: '100%',
+          minHeight: 42,
+          border: 'none',
+          background: 'transparent',
+          color: BRAND.navy,
+          display: 'grid',
+          gridTemplateColumns: '1fr 34px',
+          alignItems: 'center',
+          gap: 8,
+          cursor: 'pointer',
+          padding: 0,
+        }}
+      >
+        <span style={{ fontSize: 15, fontWeight: 900, textAlign: 'left' }}>{title}</span>
+        <span
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: 999,
+            border: `2px solid ${active ? BRAND.green : BRAND.border}`,
+            background: active ? BRAND.green : '#ffffff',
+            color: active ? '#ffffff' : BRAND.navy,
+            display: 'grid',
+            placeItems: 'center',
+            fontSize: 18,
+            fontWeight: 900,
+          }}
+        >
+          {active ? '✓' : '+'}
+        </span>
+      </button>
+
+      {active ? <div style={{ marginTop: 8 }}>{children}</div> : null}
+    </div>
+  );
+}
+
+function YearOverview({
+  language,
+  year,
+  years,
+  bookings,
+  getEffectiveDate,
+  onYear,
+  onMonth,
+}: {
+  language: AppLanguage;
+  year: number;
+  years: number[];
+  bookings: BookingItem[];
+  getEffectiveDate: (booking: BookingItem) => Date | null;
+  onYear: (year: number) => void;
+  onMonth: (monthIndex: number) => void;
+}) {
+  return (
+    <div style={{ marginTop: 14 }}>
+      <div style={yearWheelStyle}>
+        {years.map((item) => {
+          const active = item === year;
+
+          return (
+            <button
+              key={item}
+              type="button"
+              onClick={() => onYear(item)}
+              style={{
+                ...yearWheelButtonStyle,
+                background: active ? BRAND.navy : '#ffffff',
+                color: active ? '#ffffff' : BRAND.navy,
+              }}
+            >
+              {item}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={monthsGridStyle}>
+        {Array.from({ length: 12 }, (_, monthIndex) => {
+          const monthBookings = bookings.filter((booking) => {
+            const date = getEffectiveDate(booking);
+            return (
+              date &&
+              date.getFullYear() === year &&
+              date.getMonth() === monthIndex
+            );
+          });
+
+          return (
+            <button
+              key={monthIndex}
+              type="button"
+              onClick={() => onMonth(monthIndex)}
+              style={{
+                minHeight: 92,
+                borderRadius: 22,
+                border: `2.5px solid ${BRAND.border}`,
+                background: monthBookings.length ? BRAND.softGreen : '#ffffff',
+                color: BRAND.navy,
+                cursor: 'pointer',
+                padding: 10,
+              }}
+            >
+              <div style={{ fontSize: 17, fontWeight: 900, textTransform: 'capitalize' }}>
+                {getShortMonthName(monthIndex, language)}
+              </div>
+
+              <div
+                style={{
+                  margin: '10px auto 0',
+                  width: 42,
+                  height: 30,
+                  borderRadius: 999,
+                  border: `2px solid ${BRAND.border}`,
+                  background: monthBookings.length ? BRAND.green : '#ffffff',
+                  color: monthBookings.length ? '#ffffff' : BRAND.muted,
+                  display: 'grid',
+                  placeItems: 'center',
+                  fontSize: 18,
+                  fontWeight: 900,
+                }}
+              >
+                {monthBookings.length}
+              </div>
+
+              <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 3 }}>
+                {monthBookings.slice(0, 5).map((booking) => (
+                  <span
+                    key={booking.id}
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: 999,
+                      background: statusColor(booking.status),
+                    }}
+                  />
+                ))}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function MonthLargeCalendar({
+  language,
+  calendarDate,
+  selectedDate,
+  bookings,
+  getEffectiveDate,
+  onSelect,
+}: {
+  language: AppLanguage;
+  calendarDate: Date;
+  selectedDate: Date;
+  bookings: BookingItem[];
+  getEffectiveDate: (booking: BookingItem) => Date | null;
+  onSelect: (date: Date) => void;
+}) {
+  const weekDays = getWeekDays(language);
+  const cells = getCalendarCells(calendarDate.getFullYear(), calendarDate.getMonth());
+
+  return (
+    <div style={monthGridWrapStyle}>
+      <div style={weekHeaderStyle}>
+        {weekDays.map((day) => (
+          <div key={day} style={weekDayStyle}>
+            {day}
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+        {cells.map(({ date, currentMonth }) => {
+          const dayBookings = bookings.filter((booking) => {
+            const bookingDate = getEffectiveDate(booking);
+            return bookingDate ? isSameDay(bookingDate, date) : false;
+          });
+
+          const selected = isSameDay(date, selectedDate);
+
+          return (
+            <button
+              key={date.toISOString()}
+              type="button"
+              onClick={() => onSelect(date)}
+              style={{
+                minHeight: 58,
+                border: 'none',
+                borderRight: '1px solid #eeeeee',
+                borderBottom: '1px solid #eeeeee',
+                background: selected ? BRAND.navy : currentMonth ? '#ffffff' : '#f5f5f5',
+                color: selected ? '#ffffff' : currentMonth ? BRAND.navy : '#a8a8a8',
+                cursor: 'pointer',
+                padding: 4,
+                display: 'grid',
+                alignContent: 'space-between',
+                justifyItems: 'center',
+              }}
+            >
+              <span style={{ fontSize: 16, fontWeight: 900 }}>{date.getDate()}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {dayBookings.slice(0, 5).map((booking) => (
+                  <span
+                    key={booking.id}
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: 999,
+                      background: statusColor(booking.status),
+                    }}
+                  />
+                ))}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function WeekStrip({
+  language,
+  selectedDate,
+  bookings,
+  timeOverrides,
+  onSelect,
+}: {
+  language: AppLanguage;
+  selectedDate: Date;
+  bookings: BookingItem[];
+  timeOverrides: Record<string, string>;
+  onSelect: (date: Date) => void;
+}) {
+  const days = getWeekDates(selectedDate);
+
+  return (
+    <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
+      {days.map((date) => {
+        const selected = isSameDay(date, selectedDate);
+        const dayBookings = bookings.filter((booking) => {
+          const override = timeOverrides[booking.id];
+          const bookingDate = override ? safeDate(override) : getBookingDate(booking);
+          return bookingDate ? isSameDay(bookingDate, date) : false;
+        });
+
+        return (
+          <button
+            key={date.toISOString()}
+            type="button"
+            onClick={() => onSelect(date)}
+            style={{
+              minHeight: 78,
+              borderRadius: 18,
+              border: `2px solid ${BRAND.border}`,
+              background: selected ? BRAND.navy : '#ffffff',
+              color: selected ? '#ffffff' : BRAND.navy,
+              cursor: 'pointer',
+              fontWeight: 900,
+            }}
+          >
+            <div style={{ fontSize: 10, textTransform: 'capitalize' }}>
+              {new Intl.DateTimeFormat(getLocale(language), { weekday: 'short' }).format(date)}
+            </div>
+            <div style={{ marginTop: 4, fontSize: 23 }}>{date.getDate()}</div>
+            <div style={{ marginTop: 4, display: 'flex', justifyContent: 'center', gap: 2 }}>
+              {dayBookings.slice(0, 4).map((booking) => (
+                <span
+                  key={booking.id}
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: 999,
+                    background: statusColor(booking.status),
+                  }}
+                />
+              ))}
+            </div>
+            <div style={{ marginTop: 2, fontSize: 11 }}>{dayBookings.length}</div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function WeekAgenda({
+  text,
+  language,
+  weekDates,
+  bookings,
+  getEffectiveDate,
+  onDay,
+  onBooking,
+}: {
+  text: PageText;
+  language: AppLanguage;
+  weekDates: Date[];
+  bookings: BookingItem[];
+  getEffectiveDate: (booking: BookingItem) => Date | null;
+  onDay: (date: Date) => void;
+  onBooking: (booking: BookingItem) => void;
+}) {
+  return (
+    <section style={weekAgendaStyle}>
+      <h2 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
+        {text.wholeWeek}
+      </h2>
+      <p style={{ margin: '5px 0 12px', fontSize: 12, fontWeight: 900, color: BRAND.muted }}>
+        {text.tapDayHint}
+      </p>
+
+      <div style={{ display: 'grid', gap: 10 }}>
+        {weekDates.map((date) => {
+          const dayBookings = bookings.filter((booking) => {
+            const bookingDate = getEffectiveDate(booking);
+            return bookingDate ? isSameDay(bookingDate, date) : false;
+          });
+
+          return (
+            <button
+              key={date.toISOString()}
+              type="button"
+              onClick={() => onDay(date)}
+              style={weekDayAgendaStyle}
+            >
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 900,
+                    color: BRAND.navy,
+                    textTransform: 'capitalize',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {getLongDateTitle(date, language)}
+                </div>
+
+                <div style={{ marginTop: 7, display: 'grid', gap: 6 }}>
+                  {dayBookings.length === 0 ? (
+                    <div style={{ fontSize: 14, fontWeight: 900, color: BRAND.muted }}>
+                      {text.available}
+                    </div>
+                  ) : (
+                    dayBookings.slice(0, 4).map((booking) => {
+                      const bookingDate = getEffectiveDate(booking);
+
+                      return (
+                        <div
+                          key={booking.id}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onBooking(booking);
+                          }}
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: '52px 1fr auto',
+                            gap: 8,
+                            alignItems: 'center',
+                            borderRadius: 14,
+                            border: `1.8px solid ${statusColor(booking.status)}`,
+                            background: statusBg(booking.status),
+                            padding: '7px 8px',
+                          }}
+                        >
+                          <span style={{ fontSize: 13, fontWeight: 900 }}>
+                            {getTimeLabel(bookingDate)}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 900,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {booking.masterName}
+                          </span>
+                          <span style={{ fontSize: 13, fontWeight: 900 }}>
+                            {money(Number(booking.price || 0))}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 999,
+                  border: `2px solid ${BRAND.border}`,
+                  background: dayBookings.length ? BRAND.softBlue : '#ffffff',
+                  display: 'grid',
+                  placeItems: 'center',
+                  fontSize: 20,
+                  fontWeight: 900,
+                  color: BRAND.navy,
+                }}
+              >
+                {dayBookings.length}
+              </div>
             </button>
           );
         })}
@@ -1594,8 +2286,17 @@ function NotebookSchedule({
   onDetails: (booking: BookingItem) => void;
   onNote: (booking: BookingItem) => void;
 }) {
-  const baseHours = Array.from({ length: 20 }, (_, index) => `${String(index + 5).padStart(2, '0')}:00`);
-  const times = [...new Set([...baseHours, ...extraTimes])].sort();
+  const baseHours = Array.from(
+    { length: 20 },
+    (_, index) => `${String(index + 5).padStart(2, '0')}:00`
+  );
+  const bookingTimes = bookings
+    .map((booking) => getEffectiveDate(booking))
+    .filter((date): date is Date => Boolean(date))
+    .filter((date) => isSameDay(date, activeDate))
+    .map((date) => getTimeLabel(date));
+
+  const times = [...new Set([...baseHours, ...extraTimes, ...bookingTimes])].sort();
 
   return (
     <div style={{ display: 'grid', gap: 8 }}>
@@ -1608,17 +2309,9 @@ function NotebookSchedule({
           return date ? isSameDay(date, activeDate) && getTimeLabel(date) === time : false;
         });
 
-        const hourBookings =
-          timeBookings.length > 0
-            ? timeBookings
-            : bookings.filter((booking) => {
-                const date = getEffectiveDate(booking);
-                return date ? isSameDay(date, activeDate) && date.getHours() === hour && time.endsWith(':00') : false;
-              });
+        if (timeBookings.length === 0 && !showFreeWindows) return null;
 
-        if (hourBookings.length === 0 && !showFreeWindows) return null;
-
-        if (hourBookings.length === 0) {
+        if (timeBookings.length === 0) {
           return (
             <FreeSlotRow
               key={time}
@@ -1629,7 +2322,7 @@ function NotebookSchedule({
           );
         }
 
-        return hourBookings.map((booking) => {
+        return timeBookings.map((booking) => {
           const date = getEffectiveDate(booking);
           const minute = date?.getMinutes() || 0;
 
@@ -1937,137 +2630,6 @@ function FreeSlotRow({
         {text.available}
       </div>
     </article>
-  );
-}
-
-function MonthGrid({
-  language,
-  calendarDate,
-  selectedDate,
-  bookings,
-  timeOverrides,
-  onSelect,
-}: {
-  language: AppLanguage;
-  calendarDate: Date;
-  selectedDate: Date;
-  bookings: BookingItem[];
-  timeOverrides: Record<string, string>;
-  onSelect: (date: Date) => void;
-}) {
-  const weekDays = getWeekDays(language);
-  const cells = getCalendarCells(calendarDate.getFullYear(), calendarDate.getMonth());
-
-  return (
-    <div style={monthGridWrapStyle}>
-      <div style={weekHeaderStyle}>
-        {weekDays.map((day) => (
-          <div key={day} style={weekDayStyle}>
-            {day}
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
-        {cells.map(({ date, currentMonth }) => {
-          const dayBookings = bookings.filter((booking) => {
-            const override = timeOverrides[booking.id];
-            const bookingDate = override ? safeDate(override) : getBookingDate(booking);
-            return bookingDate ? isSameDay(bookingDate, date) : false;
-          });
-
-          const selected = isSameDay(date, selectedDate);
-
-          return (
-            <button
-              key={date.toISOString()}
-              type="button"
-              onClick={() => onSelect(date)}
-              style={{
-                minHeight: 50,
-                border: 'none',
-                borderRight: '1px solid #eeeeee',
-                borderBottom: '1px solid #eeeeee',
-                background: selected ? BRAND.navy : currentMonth ? '#ffffff' : '#f5f5f5',
-                color: selected ? '#ffffff' : currentMonth ? BRAND.navy : '#a8a8a8',
-                cursor: 'pointer',
-                padding: 4,
-                display: 'grid',
-                alignContent: 'space-between',
-                justifyItems: 'center',
-              }}
-            >
-              <span style={{ fontSize: 14, fontWeight: 900 }}>{date.getDate()}</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                {dayBookings.slice(0, 4).map((booking) => (
-                  <span
-                    key={booking.id}
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: 999,
-                      background: statusColor(booking.status),
-                    }}
-                  />
-                ))}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function WeekStrip({
-  language,
-  selectedDate,
-  bookings,
-  timeOverrides,
-  onSelect,
-}: {
-  language: AppLanguage;
-  selectedDate: Date;
-  bookings: BookingItem[];
-  timeOverrides: Record<string, string>;
-  onSelect: (date: Date) => void;
-}) {
-  const days = getWeekDates(selectedDate);
-
-  return (
-    <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
-      {days.map((date) => {
-        const selected = isSameDay(date, selectedDate);
-        const count = bookings.filter((booking) => {
-          const override = timeOverrides[booking.id];
-          const bookingDate = override ? safeDate(override) : getBookingDate(booking);
-          return bookingDate ? isSameDay(bookingDate, date) : false;
-        }).length;
-
-        return (
-          <button
-            key={date.toISOString()}
-            type="button"
-            onClick={() => onSelect(date)}
-            style={{
-              minHeight: 78,
-              borderRadius: 18,
-              border: `2px solid ${BRAND.border}`,
-              background: selected ? BRAND.navy : '#ffffff',
-              color: selected ? '#ffffff' : BRAND.navy,
-              cursor: 'pointer',
-              fontWeight: 900,
-            }}
-          >
-            <div style={{ fontSize: 10, textTransform: 'capitalize' }}>
-              {new Intl.DateTimeFormat(getLocale(language), { weekday: 'short' }).format(date)}
-            </div>
-            <div style={{ marginTop: 4, fontSize: 23 }}>{date.getDate()}</div>
-            <div style={{ marginTop: 4, fontSize: 11 }}>{count}</div>
-          </button>
-        );
-      })}
-    </div>
   );
 }
 
@@ -2453,34 +3015,35 @@ const quickChipStyle: CSSProperties = {
   cursor: 'pointer',
 };
 
-const managementBoxStyle: CSSProperties = {
-  marginTop: 12,
-  borderRadius: 22,
-  border: `2.5px solid ${BRAND.border}`,
-  background: BRAND.cream,
-  padding: 12,
+const yearWheelStyle: CSSProperties = {
+  display: 'flex',
+  gap: 8,
+  overflowX: 'auto',
+  padding: '2px 0 10px',
 };
 
-const managementGridStyle: CSSProperties = {
+const yearWheelButtonStyle: CSSProperties = {
+  flexShrink: 0,
+  minWidth: 92,
+  minHeight: 52,
+  borderRadius: 18,
+  border: `2.5px solid ${BRAND.border}`,
+  fontSize: 20,
+  fontWeight: 900,
+  cursor: 'pointer',
+};
+
+const monthsGridStyle: CSSProperties = {
+  marginTop: 8,
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
+  gap: 10,
+};
+
+const twoColStyle: CSSProperties = {
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
   gap: 9,
-};
-
-const calendarModeRowStyle: CSSProperties = {
-  marginTop: 11,
-  display: 'grid',
-  gridTemplateColumns: 'repeat(4, 1fr)',
-  gap: 7,
-};
-
-const modeButtonStyle: CSSProperties = {
-  minHeight: 42,
-  borderRadius: 999,
-  border: `2px solid ${BRAND.border}`,
-  fontSize: 13,
-  fontWeight: 900,
-  cursor: 'pointer',
 };
 
 const fieldLabelStyle: CSSProperties = {
@@ -2625,6 +3188,29 @@ const weekDayStyle: CSSProperties = {
   textTransform: 'capitalize',
 };
 
+const weekAgendaStyle: CSSProperties = {
+  marginTop: 18,
+  borderRadius: 28,
+  border: `2.5px solid ${BRAND.border}`,
+  background: '#ffffff',
+  padding: 13,
+};
+
+const weekDayAgendaStyle: CSSProperties = {
+  width: '100%',
+  minHeight: 92,
+  borderRadius: 22,
+  border: `2.2px solid ${BRAND.border}`,
+  background: '#ffffff',
+  padding: 12,
+  display: 'grid',
+  gridTemplateColumns: '1fr 48px',
+  gap: 10,
+  alignItems: 'center',
+  cursor: 'pointer',
+  textAlign: 'left',
+};
+
 const modalOverlayStyle: CSSProperties = {
   position: 'fixed',
   inset: 0,
@@ -2638,6 +3224,8 @@ const modalOverlayStyle: CSSProperties = {
 const modalCardStyle: CSSProperties = {
   width: '100%',
   maxWidth: 430,
+  maxHeight: '88vh',
+  overflowY: 'auto',
   borderTopLeftRadius: 28,
   borderTopRightRadius: 28,
   border: `2.5px solid ${BRAND.border}`,
@@ -2657,7 +3245,6 @@ const modalCloseStyle: CSSProperties = {
   fontSize: 24,
   fontWeight: 900,
   cursor: 'pointer',
-  marginBottom: 12,
 };
 
 const modalTitleStyle: CSSProperties = {
