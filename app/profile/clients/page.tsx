@@ -1,6 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
 import {
@@ -38,6 +46,11 @@ type SlotAction = {
   hour: number;
   minute: number;
   label: string;
+} | null;
+
+type DragState = {
+  bookingId: string;
+  sourceTime: string;
 } | null;
 
 type PageText = {
@@ -460,6 +473,15 @@ function timeStringToMinutes(value: string) {
   return Number(h || 0) * 60 + Number(m || 0);
 }
 
+function parseTimeLabel(value: string) {
+  const [hour, minute] = value.split(':').map(Number);
+
+  return {
+    hour: Number(hour || 0),
+    minute: Number(minute || 0),
+  };
+}
+
 function getTimeLabel(date: Date | null) {
   if (!date) return '—';
 
@@ -753,6 +775,16 @@ function createDemoBookings(baseDate: Date): BookingItem[] {
   ];
 }
 
+function getDropTimeFromPoint(clientX: number, clientY: number) {
+  if (typeof document === 'undefined') return null;
+
+  const element = document.elementFromPoint(clientX, clientY);
+  const dropTarget = element?.closest('[data-drop-time]') as HTMLElement | null;
+  const value = dropTarget?.dataset.dropTime || '';
+
+  return value || null;
+}
+
 function OlamepLogo() {
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
@@ -842,7 +874,15 @@ export default function ProfileClientsPage() {
   const [manualPrice, setManualPrice] = useState('');
   const [manualNote, setManualNote] = useState('');
 
+  const [dragState, setDragState] = useState<DragState>(null);
+  const [dragOverTime, setDragOverTime] = useState<string | null>(null);
+  const dragStateRef = useRef<DragState>(null);
+
   const text = useMemo(() => getText(language), [language]);
+
+  useEffect(() => {
+    dragStateRef.current = dragState;
+  }, [dragState]);
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -887,6 +927,77 @@ export default function ProfileClientsPage() {
   }, [selectedDate, today, tomorrow, viewMode]);
 
   const weekDates = useMemo(() => getWeekDates(selectedDate), [selectedDate]);
+
+  const moveBookingToTime = (bookingId: string, targetTime: string | null) => {
+    if (!targetTime) return;
+
+    const draggedBooking = bookings.find((booking) => booking.id === bookingId);
+    if (!draggedBooking) return;
+
+    const sourceDate = getEffectiveDate(draggedBooking);
+    if (!sourceDate) return;
+
+    const sourceTime = getTimeLabel(sourceDate);
+    if (sourceTime === targetTime) return;
+
+    const { hour, minute } = parseTimeLabel(targetTime);
+    const nextDraggedDate = new Date(activeDate);
+    nextDraggedDate.setHours(hour, minute, 0, 0);
+
+    const targetBooking = bookings.find((booking) => {
+      if (booking.id === bookingId) return false;
+
+      const date = getEffectiveDate(booking);
+      return date ? isSameDay(date, activeDate) && getTimeLabel(date) === targetTime : false;
+    });
+
+    setTimeOverrides((prev) => {
+      const next: Record<string, string> = {
+        ...prev,
+        [bookingId]: nextDraggedDate.toISOString(),
+      };
+
+      if (targetBooking) {
+        next[targetBooking.id] = sourceDate.toISOString();
+      }
+
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (!dragState) return;
+
+    const onPointerMove = (event: PointerEvent) => {
+      event.preventDefault();
+      const targetTime = getDropTimeFromPoint(event.clientX, event.clientY);
+      setDragOverTime(targetTime);
+    };
+
+    const onPointerUp = (event: PointerEvent) => {
+      event.preventDefault();
+
+      const currentDrag = dragStateRef.current;
+      const targetTime = getDropTimeFromPoint(event.clientX, event.clientY);
+
+      setDragState(null);
+      setDragOverTime(null);
+
+      if (currentDrag) {
+        moveBookingToTime(currentDrag.bookingId, targetTime);
+      }
+    };
+
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp, { passive: false });
+    window.addEventListener('pointercancel', onPointerUp, { passive: false });
+
+    return () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+    };
+  }, [dragState, activeDate, bookings, timeOverrides]);
 
   const periodBookings = useMemo(() => {
     let source = [...bookings];
@@ -1267,6 +1378,22 @@ export default function ProfileClientsPage() {
     setSlotAction(null);
   };
 
+  const handleBookingDragStart = (booking: BookingItem, event: ReactPointerEvent<HTMLElement>) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+    const date = getEffectiveDate(booking);
+    if (!date) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    setDragState({
+      bookingId: booking.id,
+      sourceTime: getTimeLabel(date),
+    });
+    setDragOverTime(getTimeLabel(date));
+  };
+
   const titleForPanel = useMemo(() => {
     if (viewMode === 'calendar' && calendarStage === 'year') return text.chooseYear;
     if (viewMode === 'calendar' && calendarStage === 'month') return text.chooseMonth;
@@ -1275,7 +1402,16 @@ export default function ProfileClientsPage() {
     }
 
     return getDateTitle(activeDate, language);
-  }, [activeDate, calendarStage, language, text.chooseMonth, text.chooseYear, viewMode, weekDates, weekOverviewOpen]);
+  }, [
+    activeDate,
+    calendarStage,
+    language,
+    text.chooseMonth,
+    text.chooseYear,
+    viewMode,
+    weekDates,
+    weekOverviewOpen,
+  ]);
 
   const shouldShowDaySchedule =
     viewMode === 'today' ||
@@ -1303,12 +1439,7 @@ export default function ProfileClientsPage() {
             gap: 10,
           }}
         >
-          <button
-            type="button"
-            onClick={() => router.back()}
-            aria-label={text.back}
-            style={circleButtonStyle}
-          >
+          <button type="button" onClick={() => router.back()} aria-label={text.back} style={circleButtonStyle}>
             ←
           </button>
 
@@ -1316,12 +1447,7 @@ export default function ProfileClientsPage() {
             <OlamepLogo />
           </div>
 
-          <button
-            type="button"
-            onClick={() => router.push('/profile')}
-            aria-label={text.close}
-            style={circleButtonStyle}
-          >
+          <button type="button" onClick={() => router.push('/profile')} aria-label={text.close} style={circleButtonStyle}>
             ×
           </button>
         </header>
@@ -1528,11 +1654,7 @@ export default function ProfileClientsPage() {
 
         {shouldShowDaySchedule ? (
           <section style={{ marginTop: 18 }}>
-            <button
-              type="button"
-              onClick={() => openSlotAction('04:00')}
-              style={addTimeButtonStyle}
-            >
+            <button type="button" onClick={() => openSlotAction('04:00')} style={addTimeButtonStyle}>
               {text.addBefore}
             </button>
 
@@ -1549,8 +1671,11 @@ export default function ProfileClientsPage() {
               activeDate={activeDate}
               showFreeWindows={showFreeWindows}
               extraTimes={extraTimes}
+              dragState={dragState}
+              dragOverTime={dragOverTime}
               getEffectiveDate={getEffectiveDate}
               onOpenSlot={openSlotAction}
+              onStartDrag={handleBookingDragStart}
               onChangeBookingMinute={(booking, hour, minute) => {
                 setCustomMinute(minute);
                 setTimePicker({ hour, bookingId: booking.id });
@@ -1558,7 +1683,7 @@ export default function ProfileClientsPage() {
               onDone={markDone}
               onApprove={approveBooking}
               onReject={rejectBooking}
-              onChat={(booking) => router.push(`/messages?booking=${encodeURIComponent(booking.id)}`)}
+              onChat={(booking) => router.push(`/messages/${encodeURIComponent(booking.id)}`)}
               onDetails={(booking) => setClientCardBooking(booking)}
               onNote={setNoteBooking}
             />
@@ -1638,9 +1763,8 @@ export default function ProfileClientsPage() {
         <ClientCardModal
           booking={clientCardBooking}
           text={text}
-          language={language}
           onClose={() => setClientCardBooking(null)}
-          onChat={() => router.push(`/messages?booking=${encodeURIComponent(clientCardBooking.id)}`)}
+          onChat={() => router.push(`/messages/${encodeURIComponent(clientCardBooking.id)}`)}
         />
       ) : null}
 
@@ -1819,139 +1943,63 @@ function FilterModal({
         </div>
 
         <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
-          <FilterCard
-            title={text.dateRange}
-            active={switches.dateRange}
-            onToggle={() => toggle('dateRange')}
-          >
+          <FilterCard title={text.dateRange} active={switches.dateRange} onToggle={() => toggle('dateRange')}>
             <div style={twoColStyle}>
               <label style={fieldLabelStyle}>
                 <span>{text.from}</span>
-                <input
-                  type="date"
-                  value={rangeFrom}
-                  onChange={(event) => onRangeFrom(event.target.value)}
-                  style={inputStyle}
-                />
+                <input type="date" value={rangeFrom} onChange={(event) => onRangeFrom(event.target.value)} style={inputStyle} />
               </label>
               <label style={fieldLabelStyle}>
                 <span>{text.to}</span>
-                <input
-                  type="date"
-                  value={rangeTo}
-                  onChange={(event) => onRangeTo(event.target.value)}
-                  style={inputStyle}
-                />
+                <input type="date" value={rangeTo} onChange={(event) => onRangeTo(event.target.value)} style={inputStyle} />
               </label>
             </div>
           </FilterCard>
 
-          <FilterCard
-            title={text.timeRange}
-            active={switches.timeRange}
-            onToggle={() => toggle('timeRange')}
-          >
+          <FilterCard title={text.timeRange} active={switches.timeRange} onToggle={() => toggle('timeRange')}>
             <div style={twoColStyle}>
               <label style={fieldLabelStyle}>
                 <span>{text.from}</span>
-                <input
-                  type="time"
-                  value={timeFrom}
-                  onChange={(event) => onTimeFrom(event.target.value)}
-                  style={inputStyle}
-                />
+                <input type="time" value={timeFrom} onChange={(event) => onTimeFrom(event.target.value)} style={inputStyle} />
               </label>
               <label style={fieldLabelStyle}>
                 <span>{text.to}</span>
-                <input
-                  type="time"
-                  value={timeTo}
-                  onChange={(event) => onTimeTo(event.target.value)}
-                  style={inputStyle}
-                />
+                <input type="time" value={timeTo} onChange={(event) => onTimeTo(event.target.value)} style={inputStyle} />
               </label>
             </div>
           </FilterCard>
 
-          <FilterCard
-            title={text.price}
-            active={switches.price}
-            onToggle={() => toggle('price')}
-          >
+          <FilterCard title={text.price} active={switches.price} onToggle={() => toggle('price')}>
             <div style={twoColStyle}>
               <label style={fieldLabelStyle}>
                 <span>{text.minPrice}</span>
-                <input
-                  type="number"
-                  value={minPrice}
-                  onChange={(event) => onMinPrice(event.target.value)}
-                  style={inputStyle}
-                />
+                <input type="number" value={minPrice} onChange={(event) => onMinPrice(event.target.value)} style={inputStyle} />
               </label>
               <label style={fieldLabelStyle}>
                 <span>{text.maxPrice}</span>
-                <input
-                  type="number"
-                  value={maxPrice}
-                  onChange={(event) => onMaxPrice(event.target.value)}
-                  style={inputStyle}
-                />
+                <input type="number" value={maxPrice} onChange={(event) => onMaxPrice(event.target.value)} style={inputStyle} />
               </label>
             </div>
           </FilterCard>
 
-          <FilterCard
-            title={text.clientName}
-            active={switches.client}
-            onToggle={() => toggle('client')}
-          >
-            <input
-              value={nameFilter}
-              onChange={(event) => onName(event.target.value)}
-              placeholder="Smith / Anna"
-              style={inputStyle}
-            />
+          <FilterCard title={text.clientName} active={switches.client} onToggle={() => toggle('client')}>
+            <input value={nameFilter} onChange={(event) => onName(event.target.value)} placeholder="Smith / Anna" style={inputStyle} />
           </FilterCard>
 
-          <FilterCard
-            title={text.service}
-            active={switches.service}
-            onToggle={() => toggle('service')}
-          >
-            <input
-              value={serviceFilter}
-              onChange={(event) => onService(event.target.value)}
-              placeholder="Hair / Massage"
-              style={inputStyle}
-            />
+          <FilterCard title={text.service} active={switches.service} onToggle={() => toggle('service')}>
+            <input value={serviceFilter} onChange={(event) => onService(event.target.value)} placeholder="Hair / Massage" style={inputStyle} />
           </FilterCard>
 
-          <FilterCard
-            title={text.allPayments}
-            active={switches.payment}
-            onToggle={() => toggle('payment')}
-          >
-            <select
-              value={paymentFilter}
-              onChange={(event) => onPayment(event.target.value as PaymentFilter)}
-              style={inputStyle}
-            >
+          <FilterCard title={text.allPayments} active={switches.payment} onToggle={() => toggle('payment')}>
+            <select value={paymentFilter} onChange={(event) => onPayment(event.target.value as PaymentFilter)} style={inputStyle}>
               <option value="all">{text.allPayments}</option>
               <option value="paid">{text.paidOnly}</option>
               <option value="unpaid">{text.unpaidOnly}</option>
             </select>
           </FilterCard>
 
-          <FilterCard
-            title={text.history}
-            active={switches.status}
-            onToggle={() => toggle('status')}
-          >
-            <select
-              value={statusFilter}
-              onChange={(event) => onStatus(event.target.value as StatusFilter)}
-              style={inputStyle}
-            >
+          <FilterCard title={text.history} active={switches.status} onToggle={() => toggle('status')}>
+            <select value={statusFilter} onChange={(event) => onStatus(event.target.value as StatusFilter)} style={inputStyle}>
               <option value="all">{text.all}</option>
               <option value="completed">{text.completed}</option>
               <option value="upcoming">{text.confirmed}</option>
@@ -2093,11 +2141,7 @@ function SlotActionModal({
         </div>
 
         <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
-          <button
-            type="button"
-            onClick={() => setManualOpen((prev) => !prev)}
-            style={slotActionButtonStyle}
-          >
+          <button type="button" onClick={() => setManualOpen((prev) => !prev)} style={slotActionButtonStyle}>
             <span>👤</span>
             <strong>{text.manualClient}</strong>
             <span>{manualOpen ? '−' : '+'}</span>
@@ -2107,42 +2151,23 @@ function SlotActionModal({
             <div style={manualFormStyle}>
               <label style={fieldLabelStyle}>
                 <span>{text.manualClientName}</span>
-                <input
-                  value={manualName}
-                  onChange={(event) => onName(event.target.value)}
-                  placeholder="Anna Smith"
-                  style={inputStyle}
-                />
+                <input value={manualName} onChange={(event) => onName(event.target.value)} placeholder="Anna Smith" style={inputStyle} />
               </label>
 
               <label style={fieldLabelStyle}>
                 <span>{text.manualService}</span>
-                <input
-                  value={manualService}
-                  onChange={(event) => onService(event.target.value)}
-                  placeholder="Hair / Massage"
-                  style={inputStyle}
-                />
+                <input value={manualService} onChange={(event) => onService(event.target.value)} placeholder="Hair / Massage" style={inputStyle} />
               </label>
 
               <div style={twoColStyle}>
                 <label style={fieldLabelStyle}>
                   <span>{text.manualPrice}</span>
-                  <input
-                    type="number"
-                    value={manualPrice}
-                    onChange={(event) => onPrice(event.target.value)}
-                    style={inputStyle}
-                  />
+                  <input type="number" value={manualPrice} onChange={(event) => onPrice(event.target.value)} style={inputStyle} />
                 </label>
 
                 <label style={fieldLabelStyle}>
                   <span>{text.manualNote}</span>
-                  <input
-                    value={manualNote}
-                    onChange={(event) => onNote(event.target.value)}
-                    style={inputStyle}
-                  />
+                  <input value={manualNote} onChange={(event) => onNote(event.target.value)} style={inputStyle} />
                 </label>
               </div>
 
@@ -2457,12 +2482,7 @@ function WeekAgenda({
           });
 
           return (
-            <button
-              key={date.toISOString()}
-              type="button"
-              onClick={() => onDay(date)}
-              style={weekDayAgendaStyle}
-            >
+            <button key={date.toISOString()} type="button" onClick={() => onDay(date)} style={weekDayAgendaStyle}>
               <div style={{ minWidth: 0 }}>
                 <div
                   style={{
@@ -2505,9 +2525,7 @@ function WeekAgenda({
                             padding: '7px 8px',
                           }}
                         >
-                          <span style={{ fontSize: 13, fontWeight: 900 }}>
-                            {getTimeLabel(bookingDate)}
-                          </span>
+                          <span style={{ fontSize: 13, fontWeight: 900 }}>{getTimeLabel(bookingDate)}</span>
                           <span
                             style={{
                               fontSize: 13,
@@ -2519,9 +2537,7 @@ function WeekAgenda({
                           >
                             {booking.masterName}
                           </span>
-                          <span style={{ fontSize: 13, fontWeight: 900 }}>
-                            {money(Number(booking.price || 0))}
-                          </span>
+                          <span style={{ fontSize: 13, fontWeight: 900 }}>{money(Number(booking.price || 0))}</span>
                         </div>
                       );
                     })
@@ -2559,8 +2575,11 @@ function NotebookSchedule({
   activeDate,
   showFreeWindows,
   extraTimes,
+  dragState,
+  dragOverTime,
   getEffectiveDate,
   onOpenSlot,
+  onStartDrag,
   onChangeBookingMinute,
   onDone,
   onApprove,
@@ -2574,8 +2593,11 @@ function NotebookSchedule({
   activeDate: Date;
   showFreeWindows: boolean;
   extraTimes: string[];
+  dragState: DragState;
+  dragOverTime: string | null;
   getEffectiveDate: (booking: BookingItem) => Date | null;
   onOpenSlot: (time: string) => void;
+  onStartDrag: (booking: BookingItem, event: ReactPointerEvent<HTMLElement>) => void;
   onChangeBookingMinute: (booking: BookingItem, hour: number, minute: number) => void;
   onDone: (booking: BookingItem) => void;
   onApprove: (booking: BookingItem) => void;
@@ -2612,6 +2634,7 @@ function NotebookSchedule({
               key={time}
               time={time}
               text={text}
+              dropActive={dragOverTime === time}
               onOpenSlot={() => onOpenSlot(time)}
             />
           );
@@ -2620,13 +2643,17 @@ function NotebookSchedule({
         return timeBookings.map((booking) => {
           const date = getEffectiveDate(booking);
           const minute = date?.getMinutes() || 0;
+          const timeLabel = getTimeLabel(date);
 
           return (
             <NotebookBookingRow
-              key={`${booking.id}-${getTimeLabel(date)}`}
+              key={`${booking.id}-${timeLabel}`}
               booking={booking}
               date={date}
               text={text}
+              isDragging={dragState?.bookingId === booking.id}
+              isDropTarget={dragOverTime === timeLabel && dragState?.bookingId !== booking.id}
+              onStartDrag={(event) => onStartDrag(booking, event)}
               onMinute={() => onChangeBookingMinute(booking, date?.getHours() || 0, minute)}
               onDone={() => onDone(booking)}
               onApprove={() => onApprove(booking)}
@@ -2646,6 +2673,9 @@ function NotebookBookingRow({
   booking,
   date,
   text,
+  isDragging,
+  isDropTarget,
+  onStartDrag,
   onMinute,
   onDone,
   onApprove,
@@ -2657,6 +2687,9 @@ function NotebookBookingRow({
   booking: BookingItem;
   date: Date | null;
   text: PageText;
+  isDragging: boolean;
+  isDropTarget: boolean;
+  onStartDrag: (event: ReactPointerEvent<HTMLElement>) => void;
   onMinute: () => void;
   onDone: () => void;
   onApprove: () => void;
@@ -2675,17 +2708,22 @@ function NotebookBookingRow({
   const location = isUnlocked(booking)
     ? getVisibleBookingLocation(booking)
     : getPublicBookingLocation(booking);
+  const timeLabel = getTimeLabel(date);
 
   return (
     <article
-      draggable
-      title="Long press / drag to move time"
-      onClick={onDetails}
+      data-drop-time={timeLabel}
+      onPointerDown={onStartDrag}
+      onClick={() => {
+        if (!isDragging) onDetails();
+      }}
       style={{
         position: 'relative',
         minHeight: cancelled ? 82 : 116,
         borderRadius: 22,
-        border: `2px solid ${cancelled ? '#f3a9bb' : '#d8e3dd'}`,
+        border: `2.5px solid ${
+          isDropTarget ? BRAND.blue : cancelled ? '#f3a9bb' : '#d8e3dd'
+        }`,
         background: cancelled
           ? 'linear-gradient(135deg, #ffffff 0%, #ffffff 47%, #ffe3ea 48%, #ffe3ea 100%)'
           : bg,
@@ -2695,8 +2733,15 @@ function NotebookBookingRow({
         alignItems: 'center',
         padding: '10px 9px 10px 0',
         overflow: 'hidden',
-        boxShadow: '0 7px 18px rgba(7,27,70,0.05)',
-        cursor: 'pointer',
+        boxShadow: isDropTarget
+          ? '0 0 0 5px rgba(14,115,216,0.16), 0 12px 22px rgba(7,27,70,0.12)'
+          : '0 7px 18px rgba(7,27,70,0.05)',
+        cursor: 'grab',
+        touchAction: 'none',
+        opacity: isDragging ? 0.42 : 1,
+        transform: isDragging ? 'scale(0.985)' : 'scale(1)',
+        transition: 'opacity 120ms ease, transform 120ms ease, box-shadow 120ms ease',
+        zIndex: isDragging ? 40 : 1,
       }}
     >
       <div
@@ -2711,6 +2756,7 @@ function NotebookBookingRow({
       />
 
       <div
+        onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => event.stopPropagation()}
         style={{
           display: 'grid',
@@ -2732,7 +2778,7 @@ function NotebookBookingRow({
             whiteSpace: 'nowrap',
           }}
         >
-          {getTimeLabel(date)}
+          {timeLabel}
         </div>
       </div>
 
@@ -2797,6 +2843,7 @@ function NotebookBookingRow({
             </div>
 
             <div
+              onPointerDown={(event) => event.stopPropagation()}
               onClick={(event) => event.stopPropagation()}
               style={{
                 marginTop: 7,
@@ -2852,6 +2899,7 @@ function NotebookBookingRow({
 
       <button
         type="button"
+        onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => {
           event.stopPropagation();
           onNote();
@@ -2878,23 +2926,28 @@ function NotebookBookingRow({
 function FreeSlotRow({
   time,
   text,
+  dropActive,
   onOpenSlot,
 }: {
   time: string;
   text: PageText;
+  dropActive: boolean;
   onOpenSlot: () => void;
 }) {
   return (
     <article
+      data-drop-time={time}
       style={{
         minHeight: 68,
         borderRadius: 22,
-        border: '2px dashed #d7dce4',
-        background: '#ffffff',
+        border: `2.5px dashed ${dropActive ? BRAND.green : '#d7dce4'}`,
+        background: dropActive ? BRAND.softGreen : '#ffffff',
         display: 'grid',
         gridTemplateColumns: '104px minmax(0, 1fr)',
         alignItems: 'center',
         padding: '0 18px 0 14px',
+        boxShadow: dropActive ? '0 0 0 5px rgba(36,196,90,0.14)' : 'none',
+        transition: 'background 120ms ease, border 120ms ease, box-shadow 120ms ease',
       }}
     >
       <div style={{ display: 'grid', gridTemplateColumns: '38px 1fr', alignItems: 'center', gap: 4 }}>
@@ -2906,7 +2959,7 @@ function FreeSlotRow({
           style={{
             fontSize: 25,
             fontWeight: 900,
-            color: '#a1a8b4',
+            color: dropActive ? BRAND.green : '#a1a8b4',
             whiteSpace: 'nowrap',
           }}
         >
@@ -2918,7 +2971,7 @@ function FreeSlotRow({
         style={{
           fontSize: 18,
           fontWeight: 900,
-          color: BRAND.muted,
+          color: dropActive ? BRAND.green : BRAND.muted,
           textAlign: 'left',
         }}
       >
@@ -2981,386 +3034,98 @@ function NoteModal({
 function ClientCardModal({
   booking,
   text,
-  language,
   onClose,
   onChat,
 }: {
   booking: BookingItem;
   text: PageText;
-  language: AppLanguage;
   onClose: () => void;
   onChat: () => void;
 }) {
   const unlocked = isUnlocked(booking);
   const location = unlocked ? getVisibleBookingLocation(booking) : getPublicBookingLocation(booking);
   const paymentMethod = getPaymentMethod(booking);
-  const bookingDate = getBookingDate(booking);
-  const avatarLetter = booking.masterName?.trim()?.charAt(0)?.toUpperCase() || 'C';
-
-  const contactData = booking as BookingItem & {
-    contactPhone?: string;
-    contactEmail?: string;
-    contactWhatsapp?: string;
-    contactTelegram?: string;
-    contactInstagram?: string;
-  };
-
-  const [dragY, setDragY] = useState(0);
-  const [dragStartY, setDragStartY] = useState<number | null>(null);
-
-  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    setDragStartY(event.clientY);
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-  };
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (dragStartY === null) return;
-
-    const nextY = event.clientY - dragStartY;
-    setDragY(Math.max(0, nextY));
-  };
-
-  const handlePointerUp = () => {
-    if (dragY > 130) {
-      onClose();
-      return;
-    }
-
-    setDragY(0);
-    setDragStartY(null);
-  };
 
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
-      <div
-        style={{
-          ...modalCardStyle,
-          maxHeight: '92vh',
-          transform: `translateY(${dragY}px)`,
-          transition: dragStartY === null ? 'transform 180ms ease' : 'none',
-          paddingBottom: 'calc(120px + env(safe-area-inset-bottom))',
-        }}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          style={{
-            width: '100%',
-            minHeight: 28,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            touchAction: 'none',
-            cursor: 'grab',
-          }}
-        >
-          <div
-            style={{
-              width: 62,
-              height: 6,
-              borderRadius: 999,
-              background: '#d7dce4',
-            }}
-          />
-        </div>
+      <div style={modalCardStyle} onClick={(event) => event.stopPropagation()}>
+        <button type="button" onClick={onClose} style={modalCloseStyle}>
+          ×
+        </button>
+
+        <h2 style={modalTitleStyle}>{text.clientCard}</h2>
 
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 48px',
-            alignItems: 'center',
-            gap: 10,
-            marginTop: 4,
-          }}
-        >
-          <h2 style={modalTitleStyle}>{text.clientCard}</h2>
-
-          <button type="button" onClick={onClose} style={modalCloseStyle}>
-            ×
-          </button>
-        </div>
-
-        <div
-          style={{
-            marginTop: 14,
-            borderRadius: 26,
-            border: `2.8px solid ${BRAND.border}`,
+            marginTop: 12,
+            borderRadius: 22,
+            border: `2.5px solid ${BRAND.border}`,
             background: statusBg(booking.status),
             padding: 14,
-            boxShadow: '0 12px 30px rgba(7,27,70,0.12)',
           }}
         >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '78px 1fr',
-              gap: 13,
-              alignItems: 'center',
-            }}
-          >
-            {booking.masterAvatar ? (
-              <img
-                src={booking.masterAvatar}
-                alt={booking.masterName}
-                style={{
-                  width: 78,
-                  height: 78,
-                  borderRadius: 24,
-                  border: `2.5px solid ${BRAND.border}`,
-                  objectFit: 'cover',
-                  background: '#ffffff',
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: 78,
-                  height: 78,
-                  borderRadius: 24,
-                  border: `2.5px solid ${BRAND.border}`,
-                  background:
-                    'linear-gradient(135deg, #dcffe8 0%, #eaf4ff 45%, #fff4c7 100%)',
-                  color: BRAND.navy,
-                  display: 'grid',
-                  placeItems: 'center',
-                  fontSize: 34,
-                  fontWeight: 900,
-                }}
-              >
-                {avatarLetter}
-              </div>
-            )}
+          <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
+            {booking.masterName}
+          </div>
 
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 25,
-                  fontWeight: 900,
-                  color: BRAND.navy,
-                  lineHeight: 1.05,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {booking.masterName}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 5,
-                  fontSize: 16,
-                  fontWeight: 900,
-                  color: BRAND.muted,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {booking.serviceName || text.service}
-              </div>
-
-              <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                <MiniPill
-                  label={statusLabel(booking.status, text)}
-                  color={statusColor(booking.status)}
-                  bg="#ffffff"
-                />
-
-                <MiniPill
-                  label={isPaid(booking) ? text.depositPaid : text.depositWaiting}
-                  color={isPaid(booking) ? '#008f3a' : '#b87500'}
-                  bg={isPaid(booking) ? BRAND.softGreen : BRAND.softYellow}
-                />
-              </div>
-            </div>
+          <div style={{ marginTop: 5, fontSize: 15, fontWeight: 800, color: BRAND.muted }}>
+            {booking.serviceName}
           </div>
 
           <div
             style={{
-              marginTop: 16,
+              marginTop: 13,
               display: 'grid',
               gridTemplateColumns: '1fr auto',
               gap: 10,
               alignItems: 'center',
             }}
           >
-            <div
-              style={{
-                borderRadius: 20,
-                border: `2px solid ${BRAND.border}`,
-                background: '#ffffff',
-                padding: 12,
-              }}
-            >
-              <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.muted }}>
-                {text.time}
-              </div>
-
-              <div style={{ marginTop: 4, fontSize: 18, fontWeight: 900, color: BRAND.navy }}>
-                {bookingDate ? getLongDateTitle(bookingDate, language) : '—'} ·{' '}
-                {getTimeLabel(bookingDate)}
-              </div>
-            </div>
-
-            <div
-              style={{
-                minWidth: 92,
-                minHeight: 74,
-                borderRadius: 20,
-                border: `2px solid ${BRAND.border}`,
-                background: '#ffffff',
-                display: 'grid',
-                placeItems: 'center',
-                color: statusColor(booking.status),
-                fontSize: 30,
-                fontWeight: 900,
-              }}
-            >
+            <MiniPill label={statusLabel(booking.status, text)} color={statusColor(booking.status)} bg="#ffffff" />
+            <div style={{ fontSize: 28, fontWeight: 900, color: statusColor(booking.status) }}>
               {money(Number(booking.price || 0))}
             </div>
           </div>
 
-          <InfoRow
-            label={text.paymentMethod}
-            value={`${paymentIcons[paymentMethod]} ${
-              paymentMethod === 'cash'
-                ? text.cash
-                : paymentMethod === 'card'
-                ? text.card
-                : text.app
-            }`}
-          />
-          <InfoRow label="Location" value={`📍 ${location || 'London'}`} />
-          <InfoRow label={text.notes} value={booking.category || text.notes} />
+          <div style={{ marginTop: 10, fontSize: 15, fontWeight: 900, color: BRAND.navy }}>
+            {paymentIcons[paymentMethod]} {text.paymentMethod}
+          </div>
+
+          <div style={{ marginTop: 10, fontSize: 14, fontWeight: 900, color: BRAND.muted }}>
+            📍 {location || 'London'}
+          </div>
 
           <div
             style={{
-              marginTop: 14,
-              borderRadius: 22,
-              border: `2.5px solid ${BRAND.border}`,
+              marginTop: 12,
+              borderRadius: 18,
+              border: `2px solid ${BRAND.border}`,
               background: '#ffffff',
-              padding: 13,
+              padding: 12,
+              color: BRAND.navy,
+              fontWeight: 800,
+              filter: unlocked ? 'none' : 'blur(3px)',
+              userSelect: unlocked ? 'auto' : 'none',
             }}
           >
-            <div
-              style={{
-                fontSize: 17,
-                fontWeight: 900,
-                color: BRAND.navy,
-                marginBottom: 10,
-              }}
-            >
-              {unlocked ? text.contactsOpen : text.contactsLocked}
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gap: 8,
-                filter: unlocked ? 'none' : 'blur(4px)',
-                userSelect: unlocked ? 'auto' : 'none',
-                pointerEvents: unlocked ? 'auto' : 'none',
-              }}
-            >
-              <ContactLine icon="☎️" value={contactData.contactPhone || '+44 7700 123456'} />
-              <ContactLine icon="✉️" value={contactData.contactEmail || 'client@olamep.com'} />
-              <ContactLine icon="🟢" value={contactData.contactWhatsapp || '+44 7700 123456'} />
-              <ContactLine icon="📨" value={contactData.contactTelegram || '@client'} />
-              <ContactLine icon="📸" value={contactData.contactInstagram || '@client'} />
-            </div>
-
-            {!unlocked ? (
-              <div
-                style={{
-                  marginTop: 10,
-                  borderRadius: 16,
-                  background: BRAND.softRed,
-                  border: `2px solid ${BRAND.red}`,
-                  padding: 10,
-                  color: BRAND.red,
-                  fontSize: 12,
-                  fontWeight: 900,
-                  lineHeight: 1.35,
-                }}
-              >
-                🔒 Контакты, адреса и личная информация открываются только после подтверждения и оплаты.
-              </div>
-            ) : null}
+            +44 7700 123456 · client@olamep.com
           </div>
 
-          <button
-            type="button"
-            onClick={onChat}
-            style={{
-              ...darkButtonStyle,
-              marginTop: 14,
-              width: '100%',
-              minHeight: 56,
-              fontSize: 17,
-            }}
-          >
-            💬 {text.openChat}
-          </button>
+          {!unlocked ? (
+            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 900, color: BRAND.red }}>
+              🔒 {text.contactsLocked}
+            </div>
+          ) : (
+            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 900, color: '#008f3a' }}>
+              ✅ {text.contactsOpen}
+            </div>
+          )}
         </div>
-      </div>
-    </div>
-  );
-}
 
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div
-      style={{
-        marginTop: 10,
-        borderRadius: 18,
-        border: `2px solid ${BRAND.border}`,
-        background: '#ffffff',
-        padding: 11,
-      }}
-    >
-      <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.muted }}>{label}</div>
-      <div
-        style={{
-          marginTop: 4,
-          fontSize: 15,
-          lineHeight: 1.3,
-          fontWeight: 900,
-          color: BRAND.navy,
-          wordBreak: 'break-word',
-        }}
-      >
-        {value}
+        <button type="button" onClick={onChat} style={{ ...darkButtonStyle, marginTop: 14 }}>
+          💬 {text.openChat}
+        </button>
       </div>
-    </div>
-  );
-}
-
-function ContactLine({ icon, value }: { icon: string; value: string }) {
-  return (
-    <div
-      style={{
-        minHeight: 44,
-        borderRadius: 15,
-        border: '1.8px solid #d7dce4',
-        background: '#fffdf8',
-        display: 'grid',
-        gridTemplateColumns: '34px 1fr',
-        alignItems: 'center',
-        gap: 6,
-        padding: '0 10px',
-        color: BRAND.navy,
-        fontSize: 14,
-        fontWeight: 900,
-      }}
-    >
-      <span>{icon}</span>
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {value}
-      </span>
     </div>
   );
 }
@@ -3416,11 +3181,7 @@ function TimePickerModal({
 
           <label style={fieldLabelStyle}>
             <span>{text.minute}</span>
-            <select
-              value={minute}
-              onChange={(event) => onMinute(Number(event.target.value))}
-              style={inputStyle}
-            >
+            <select value={minute} onChange={(event) => onMinute(Number(event.target.value))} style={inputStyle}>
               {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map((item) => (
                 <option key={item} value={item}>
                   {String(item).padStart(2, '0')}
