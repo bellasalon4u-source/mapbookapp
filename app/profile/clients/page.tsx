@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
@@ -47,6 +48,26 @@ type SlotAction = {
   minute: number;
   label: string;
 } | null;
+
+type MoveBookingState = {
+  booking: BookingItem;
+  x: number;
+  y: number;
+  offsetX: number;
+  offsetY: number;
+  width: number;
+  height: number;
+};
+
+type PendingLongPress = {
+  booking: BookingItem;
+  startX: number;
+  startY: number;
+  offsetX: number;
+  offsetY: number;
+  width: number;
+  height: number;
+};
 
 type PageText = {
   title: string;
@@ -125,9 +146,8 @@ type PageText = {
   manualService: string;
   manualPrice: string;
   manualNote: string;
-  moveMode: string;
+  moveBooking: string;
   moveHint: string;
-  cancelMove: string;
 };
 
 const BRAND = {
@@ -225,9 +245,8 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     manualService: 'Service',
     manualPrice: 'Price',
     manualNote: 'Note',
-    moveMode: 'Move booking',
-    moveHint: 'Tap a free slot or another booking to move',
-    cancelMove: 'Cancel move',
+    moveBooking: 'Move booking',
+    moveHint: 'Hold and drag to a free slot or another booking',
   },
   RU: {
     title: 'Мои клиенты',
@@ -306,9 +325,8 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     manualService: 'Услуга',
     manualPrice: 'Цена',
     manualNote: 'Заметка',
-    moveMode: 'Перемещение записи',
-    moveHint: 'Нажми на свободное окно или другую запись',
-    cancelMove: 'Отменить перенос',
+    moveBooking: 'Перенести запись',
+    moveHint: 'Удержи и перетащи на свободное время или другую запись',
   },
   UA: {
     title: 'Мої клієнти',
@@ -387,9 +405,8 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     manualService: 'Послуга',
     manualPrice: 'Ціна',
     manualNote: 'Нотатка',
-    moveMode: 'Переміщення запису',
-    moveHint: 'Натисни на вільне вікно або інший запис',
-    cancelMove: 'Скасувати перенос',
+    moveBooking: 'Перенести запис',
+    moveHint: 'Утримай і перетягни на вільний час або інший запис',
   },
 };
 
@@ -487,6 +504,13 @@ function getTimeLabel(date: Date | null) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date);
+}
+
+function timeToDate(baseDate: Date, time: string) {
+  const [hourText, minuteText] = time.split(':');
+  const next = new Date(baseDate);
+  next.setHours(Number(hourText || 0), Number(minuteText || 0), 0, 0);
+  return next;
 }
 
 function getDateTitle(date: Date, language: AppLanguage) {
@@ -588,20 +612,6 @@ function getPaymentMethod(booking: BookingItem) {
   if (id.includes('2') || id.includes('card')) return 'card';
   if (id.includes('5') || id.includes('app')) return 'app';
   return 'cash';
-}
-
-function getBookingAvatar(booking: BookingItem) {
-  const avatar = String((booking as any).clientAvatar || booking.masterAvatar || '').trim();
-
-  if (avatar) return avatar;
-
-  return `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(
-    booking.masterName || 'Client'
-  )}&backgroundColor=dcffe8,eaf4ff,f2edff,fff4c7`;
-}
-
-function getBookingThreadId(booking: BookingItem) {
-  return `booking-${String(booking.id || booking.masterName || 'client')}`;
 }
 
 function makeBooking(
@@ -831,6 +841,11 @@ function OlamepLogo() {
 export default function ProfileClientsPage() {
   const router = useRouter();
 
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingLongPressRef = useRef<PendingLongPress | null>(null);
+  const movingBookingRef = useRef<MoveBookingState | null>(null);
+  const suppressClickRef = useRef(false);
+
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('today');
@@ -840,9 +855,7 @@ export default function ProfileClientsPage() {
   const [showFreeWindows, setShowFreeWindows] = useState(true);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [weekOverviewOpen, setWeekOverviewOpen] = useState(true);
-
-  const [movingBookingId, setMovingBookingId] = useState<string | null>(null);
-  const moveStartedAtRef = useRef(0);
+  const [movingBooking, setMovingBooking] = useState<MoveBookingState | null>(null);
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [filterSwitches, setFilterSwitches] = useState<FilterSwitches>({
@@ -880,6 +893,10 @@ export default function ProfileClientsPage() {
   const [manualNote, setManualNote] = useState('');
 
   const text = useMemo(() => getText(language), [language]);
+
+  useEffect(() => {
+    movingBookingRef.current = movingBooking;
+  }, [movingBooking]);
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -924,11 +941,6 @@ export default function ProfileClientsPage() {
   }, [selectedDate, today, tomorrow, viewMode]);
 
   const weekDates = useMemo(() => getWeekDates(selectedDate), [selectedDate]);
-
-  const movingBooking = useMemo(() => {
-    if (!movingBookingId) return null;
-    return bookings.find((booking) => booking.id === movingBookingId) || null;
-  }, [bookings, movingBookingId]);
 
   const periodBookings = useMemo(() => {
     let source = [...bookings];
@@ -1101,11 +1113,197 @@ export default function ProfileClientsPage() {
 
   const years = useMemo(() => Array.from({ length: 10 }, (_, index) => 2026 + index), []);
 
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+
+    pendingLongPressRef.current = null;
+  };
+
+  const cancelMovingBooking = () => {
+    clearLongPressTimer();
+    setMovingBooking(null);
+    movingBookingRef.current = null;
+  };
+
+  const moveBookingToTime = (bookingId: string, time: string) => {
+    const booking = bookings.find((item) => item.id === bookingId);
+    if (!booking || booking.status === 'completed') return;
+
+    const next = timeToDate(activeDate, time);
+
+    setTimeOverrides((prev) => ({
+      ...prev,
+      [bookingId]: next.toISOString(),
+    }));
+  };
+
+  const swapBookingTimes = (sourceId: string, targetId: string) => {
+    if (sourceId === targetId) return;
+
+    const source = bookings.find((item) => item.id === sourceId);
+    const target = bookings.find((item) => item.id === targetId);
+
+    if (!source || !target) return;
+    if (source.status === 'completed' || target.status === 'completed') return;
+
+    const sourceDate = getEffectiveDate(source);
+    const targetDate = getEffectiveDate(target);
+
+    if (!sourceDate || !targetDate) return;
+
+    setTimeOverrides((prev) => ({
+      ...prev,
+      [sourceId]: targetDate.toISOString(),
+      [targetId]: sourceDate.toISOString(),
+    }));
+  };
+
+  const finishMovingBooking = (clientX: number, clientY: number) => {
+    const moving = movingBookingRef.current;
+
+    if (!moving) return;
+
+    const element = document.elementFromPoint(clientX, clientY) as HTMLElement | null;
+    const bookingTarget = element?.closest('[data-drop-booking]') as HTMLElement | null;
+    const slotTarget = element?.closest('[data-drop-slot]') as HTMLElement | null;
+
+    if (bookingTarget) {
+      const targetId = bookingTarget.getAttribute('data-drop-booking');
+      if (targetId) {
+        swapBookingTimes(moving.booking.id, targetId);
+      }
+    } else if (slotTarget) {
+      const targetTime = slotTarget.getAttribute('data-drop-slot');
+      if (targetTime) {
+        moveBookingToTime(moving.booking.id, targetTime);
+      }
+    }
+
+    suppressClickRef.current = true;
+    setMovingBooking(null);
+    movingBookingRef.current = null;
+
+    window.setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 450);
+  };
+
+  useEffect(() => {
+    if (!movingBooking) return;
+
+    const previousUserSelect = document.body.style.userSelect;
+    const previousTouchAction = document.body.style.touchAction;
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.userSelect = 'none';
+    document.body.style.touchAction = 'none';
+    document.body.style.overflow = 'hidden';
+
+    const handlePointerMove = (event: PointerEvent) => {
+      event.preventDefault();
+
+      setMovingBooking((prev) =>
+        prev
+          ? {
+              ...prev,
+              x: event.clientX,
+              y: event.clientY,
+            }
+          : prev
+      );
+    };
+
+    const handlePointerUp = (event: PointerEvent) => {
+      event.preventDefault();
+      finishMovingBooking(event.clientX, event.clientY);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: false });
+    window.addEventListener('pointerup', handlePointerUp, { passive: false });
+    window.addEventListener('pointercancel', handlePointerUp, { passive: false });
+
+    return () => {
+      document.body.style.userSelect = previousUserSelect;
+      document.body.style.touchAction = previousTouchAction;
+      document.body.style.overflow = previousOverflow;
+
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+    };
+  }, [movingBooking?.booking.id, activeDate, bookings, timeOverrides]);
+
+  const startBookingLongPress = (
+    booking: BookingItem,
+    event: ReactPointerEvent<HTMLElement>
+  ) => {
+    if (booking.status === 'completed') return;
+    if (movingBookingRef.current) return;
+
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+
+    clearLongPressTimer();
+
+    pendingLongPressRef.current = {
+      booking,
+      startX: event.clientX,
+      startY: event.clientY,
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
+      width: rect.width,
+      height: rect.height,
+    };
+
+    longPressTimerRef.current = window.setTimeout(() => {
+      const pending = pendingLongPressRef.current;
+      if (!pending) return;
+
+      suppressClickRef.current = true;
+
+      setMovingBooking({
+        booking: pending.booking,
+        x: pending.startX,
+        y: pending.startY,
+        offsetX: pending.offsetX,
+        offsetY: pending.offsetY,
+        width: pending.width,
+        height: pending.height,
+      });
+
+      pendingLongPressRef.current = null;
+      longPressTimerRef.current = null;
+    }, 330);
+  };
+
+  const trackLongPressMove = (event: ReactPointerEvent<HTMLElement>) => {
+    const pending = pendingLongPressRef.current;
+    if (!pending || movingBookingRef.current) return;
+
+    const dx = Math.abs(event.clientX - pending.startX);
+    const dy = Math.abs(event.clientY - pending.startY);
+
+    if (dx > 12 || dy > 12) {
+      clearLongPressTimer();
+    }
+  };
+
+  const stopLongPressBeforeStart = () => {
+    if (!movingBookingRef.current) {
+      clearLongPressTimer();
+    }
+  };
+
   const openBookingChat = (booking: BookingItem) => {
     const thread = getOrCreateChatThread({
-      threadId: getBookingThreadId(booking),
+      threadId: `booking-${booking.id}`,
       providerName: booking.masterName || 'Client',
-      providerAvatar: getBookingAvatar(booking),
+      providerAvatar:
+        booking.masterAvatar ||
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
       category: booking.serviceName || 'Booking',
       online: true,
       lastSeenText: 'Online',
@@ -1114,57 +1312,13 @@ export default function ProfileClientsPage() {
     router.push(`/messages/${encodeURIComponent(thread.id)}`);
   };
 
-  const cancelMoveMode = () => {
-    setMovingBookingId(null);
-    moveStartedAtRef.current = 0;
-  };
-
-  const moveBookingToDate = (bookingId: string, targetDate: Date) => {
-    if (!bookingId) return;
-
-    const booking = bookings.find((item) => item.id === bookingId);
-    if (!booking || booking.status === 'completed') return;
-
-    setTimeOverrides((prev) => ({
-      ...prev,
-      [bookingId]: targetDate.toISOString(),
-    }));
-
-    cancelMoveMode();
-  };
-
-  const moveBookingToSlot = (time: string) => {
-    if (!movingBooking) return;
-    if (movingBooking.status === 'completed') return;
-
-    const [hour, minute] = time.split(':').map(Number);
-    const targetDate = new Date(activeDate);
-    targetDate.setHours(Number(hour || 0), Number(minute || 0), 0, 0);
-
-    moveBookingToDate(movingBooking.id, targetDate);
-  };
-
-  const swapBookingTimes = (targetBooking: BookingItem) => {
-    if (!movingBooking) return;
-    if (movingBooking.id === targetBooking.id) return;
-    if (movingBooking.status === 'completed' || targetBooking.status === 'completed') return;
-
-    const movingDate = getEffectiveDate(movingBooking);
-    const targetDate = getEffectiveDate(targetBooking);
-
-    if (!movingDate || !targetDate) return;
-
-    setTimeOverrides((prev) => ({
-      ...prev,
-      [movingBooking.id]: targetDate.toISOString(),
-      [targetBooking.id]: movingDate.toISOString(),
-    }));
-
-    cancelMoveMode();
+  const openClientDetails = (booking: BookingItem) => {
+    if (suppressClickRef.current) return;
+    setClientCardBooking(booking);
   };
 
   const handleTopMode = (mode: ViewMode) => {
-    cancelMoveMode();
+    cancelMovingBooking();
     setViewMode(mode);
     setStatusFilter('all');
 
@@ -1212,7 +1366,7 @@ export default function ProfileClientsPage() {
   };
 
   const movePeriod = (direction: number) => {
-    cancelMoveMode();
+    cancelMovingBooking();
 
     if (viewMode === 'week') {
       const next = addDays(selectedDate, direction * 7);
@@ -1251,10 +1405,6 @@ export default function ProfileClientsPage() {
     setBookings((prev) =>
       prev.map((item) => (item.id === booking.id ? { ...item, status: 'completed' } : item))
     );
-
-    if (movingBookingId === booking.id) {
-      cancelMoveMode();
-    }
   };
 
   const approveBooking = (booking: BookingItem) => {
@@ -1318,11 +1468,6 @@ export default function ProfileClientsPage() {
   };
 
   const openSlotAction = (time: string) => {
-    if (movingBookingId) {
-      moveBookingToSlot(time);
-      return;
-    }
-
     const [hour, minute] = time.split(':').map(Number);
     setSlotAction({
       hour: Number(hour || 0),
@@ -1417,8 +1562,6 @@ export default function ProfileClientsPage() {
         color: BRAND.navy,
         paddingBottom: 170,
         fontFamily: 'Arial, sans-serif',
-        userSelect: movingBookingId ? 'none' : 'auto',
-        WebkitUserSelect: movingBookingId ? 'none' : 'auto',
       }}
     >
       <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px 14px 176px' }}>
@@ -1489,10 +1632,7 @@ export default function ProfileClientsPage() {
           text={text}
           activeFilter={statusFilter}
           counts={statusCounts}
-          onSelect={(value) => {
-            cancelMoveMode();
-            setStatusFilter(value);
-          }}
+          onSelect={setStatusFilter}
           onClear={() => setStatusFilter('all')}
         />
 
@@ -1547,10 +1687,7 @@ export default function ProfileClientsPage() {
           <div style={quickControlsRowStyle}>
             <button
               type="button"
-              onClick={() => {
-                cancelMoveMode();
-                setFilterModalOpen(true);
-              }}
+              onClick={() => setFilterModalOpen(true)}
               style={{
                 ...quickChipStyle,
                 background: activeFilterCount > 0 ? BRAND.green : '#ffffff',
@@ -1585,7 +1722,7 @@ export default function ProfileClientsPage() {
               bookings={filteredBookings.length ? filteredBookings : periodBookings}
               timeOverrides={timeOverrides}
               onSelect={(date) => {
-                cancelMoveMode();
+                cancelMovingBooking();
                 setSelectedDate(startOfDay(date));
                 setCalendarDate(startOfDay(date));
                 setViewMode('week');
@@ -1626,7 +1763,6 @@ export default function ProfileClientsPage() {
               bookings={filteredBookings.length ? filteredBookings : periodBookings}
               getEffectiveDate={getEffectiveDate}
               onSelect={(date) => {
-                cancelMoveMode();
                 setSelectedDate(startOfDay(date));
                 setCalendarDate(startOfDay(date));
                 setCalendarStage('day');
@@ -1637,42 +1773,13 @@ export default function ProfileClientsPage() {
           {viewMode === 'calendar' && calendarStage === 'day' ? (
             <button
               type="button"
-              onClick={() => {
-                cancelMoveMode();
-                setCalendarStage('month');
-              }}
+              onClick={() => setCalendarStage('month')}
               style={{ ...plainButtonStyle, width: '100%', marginTop: 12 }}
             >
               ← {text.chooseMonth}
             </button>
           ) : null}
         </section>
-
-        {movingBooking ? (
-          <section style={moveNoticeStyle}>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 900 }}>{text.moveMode}</div>
-              <div
-                style={{
-                  marginTop: 3,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  color: '#ffffff',
-                  opacity: 0.9,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {movingBooking.masterName} · {text.moveHint}
-              </div>
-            </div>
-
-            <button type="button" onClick={cancelMoveMode} style={moveCancelButtonStyle}>
-              ×
-            </button>
-          </section>
-        ) : null}
 
         {viewMode === 'week' && weekOverviewOpen ? (
           <WeekAgenda
@@ -1682,12 +1789,11 @@ export default function ProfileClientsPage() {
             bookings={filteredBookings}
             getEffectiveDate={getEffectiveDate}
             onDay={(date) => {
-              cancelMoveMode();
               setSelectedDate(startOfDay(date));
               setCalendarDate(startOfDay(date));
               setWeekOverviewOpen(false);
             }}
-            onBooking={setClientCardBooking}
+            onBooking={openClientDetails}
           />
         ) : null}
 
@@ -1696,11 +1802,8 @@ export default function ProfileClientsPage() {
             <button
               type="button"
               onClick={() => openSlotAction('04:00')}
-              style={{
-                ...addTimeButtonStyle,
-                borderColor: movingBookingId ? BRAND.green : '#d7dce4',
-                color: movingBookingId ? BRAND.green : BRAND.muted,
-              }}
+              style={addTimeButtonStyle}
+              data-drop-slot="04:00"
             >
               {text.addBefore}
             </button>
@@ -1718,17 +1821,13 @@ export default function ProfileClientsPage() {
               activeDate={activeDate}
               showFreeWindows={showFreeWindows}
               extraTimes={extraTimes}
-              movingBookingId={movingBookingId}
               getEffectiveDate={getEffectiveDate}
+              movingBookingId={movingBooking?.booking.id}
               onOpenSlot={openSlotAction}
-              onStartMove={(booking) => {
-                if (booking.status === 'completed') return;
-                moveStartedAtRef.current = Date.now();
-                setMovingBookingId(booking.id);
-              }}
-              onSwapTarget={swapBookingTimes}
+              onMovePointerDown={startBookingLongPress}
+              onMovePointerMove={trackLongPressMove}
+              onMovePointerUp={stopLongPressBeforeStart}
               onChangeBookingMinute={(booking, hour, minute) => {
-                cancelMoveMode();
                 setCustomMinute(minute);
                 setTimePicker({ hour, bookingId: booking.id });
               }}
@@ -1736,26 +1835,15 @@ export default function ProfileClientsPage() {
               onApprove={approveBooking}
               onReject={rejectBooking}
               onChat={openBookingChat}
-              onDetails={(booking) => {
-                if (movingBookingId) {
-                  swapBookingTimes(booking);
-                  return;
-                }
-
-                setClientCardBooking(booking);
-              }}
+              onDetails={openClientDetails}
               onNote={setNoteBooking}
             />
 
             <button
               type="button"
               onClick={() => openSlotAction('24:00')}
-              style={{
-                ...addTimeButtonStyle,
-                marginTop: 12,
-                borderColor: movingBookingId ? BRAND.green : '#d7dce4',
-                color: movingBookingId ? BRAND.green : BRAND.muted,
-              }}
+              style={{ ...addTimeButtonStyle, marginTop: 12 }}
+              data-drop-slot="24:00"
             >
               {text.addAfter}
             </button>
@@ -1763,13 +1851,22 @@ export default function ProfileClientsPage() {
         ) : null}
       </div>
 
-      {movingBooking ? (
-        <button type="button" onClick={cancelMoveMode} style={floatingMoveCancelStyle}>
-          ×
-        </button>
-      ) : null}
-
       <BottomNav active="clients" />
+
+      {movingBooking ? (
+        <>
+          <button
+            type="button"
+            onClick={cancelMovingBooking}
+            style={moveCancelButtonStyle}
+            aria-label={text.close}
+          >
+            ×
+          </button>
+
+          <MoveGhost booking={movingBooking} text={text} />
+        </>
+      ) : null}
 
       {filterModalOpen ? (
         <FilterModal
@@ -1849,6 +1946,76 @@ export default function ProfileClientsPage() {
         />
       ) : null}
     </main>
+  );
+}
+
+function MoveGhost({ booking, text }: { booking: MoveBookingState; text: PageText }) {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        left: booking.x - booking.offsetX,
+        top: booking.y - booking.offsetY,
+        width: booking.width,
+        minHeight: Math.min(booking.height, 132),
+        zIndex: 500,
+        pointerEvents: 'none',
+        borderRadius: 24,
+        border: `4px solid ${BRAND.border}`,
+        background: statusBg(booking.booking.status),
+        boxShadow: '0 18px 36px rgba(0,0,0,0.24)',
+        padding: '12px 14px',
+        boxSizing: 'border-box',
+        display: 'grid',
+        gridTemplateColumns: '82px minmax(0,1fr) auto',
+        gap: 10,
+        alignItems: 'center',
+        opacity: 0.96,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 26,
+          fontWeight: 900,
+          color: BRAND.navy,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {getTimeLabel(getBookingDate(booking.booking))}
+      </div>
+
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 18,
+            fontWeight: 900,
+            color: BRAND.navy,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {booking.booking.masterName}
+        </div>
+        <div
+          style={{
+            marginTop: 4,
+            fontSize: 13,
+            fontWeight: 900,
+            color: BRAND.muted,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {text.moveBooking}
+        </div>
+      </div>
+
+      <div style={{ fontSize: 22, fontWeight: 900, color: statusColor(booking.booking.status) }}>
+        {money(Number(booking.booking.price || 0))}
+      </div>
+    </div>
   );
 }
 
@@ -2753,11 +2920,12 @@ function NotebookSchedule({
   activeDate,
   showFreeWindows,
   extraTimes,
-  movingBookingId,
   getEffectiveDate,
+  movingBookingId,
   onOpenSlot,
-  onStartMove,
-  onSwapTarget,
+  onMovePointerDown,
+  onMovePointerMove,
+  onMovePointerUp,
   onChangeBookingMinute,
   onDone,
   onApprove,
@@ -2771,11 +2939,12 @@ function NotebookSchedule({
   activeDate: Date;
   showFreeWindows: boolean;
   extraTimes: string[];
-  movingBookingId: string | null;
   getEffectiveDate: (booking: BookingItem) => Date | null;
+  movingBookingId?: string;
   onOpenSlot: (time: string) => void;
-  onStartMove: (booking: BookingItem) => void;
-  onSwapTarget: (booking: BookingItem) => void;
+  onMovePointerDown: (booking: BookingItem, event: ReactPointerEvent<HTMLElement>) => void;
+  onMovePointerMove: (event: ReactPointerEvent<HTMLElement>) => void;
+  onMovePointerUp: () => void;
   onChangeBookingMinute: (booking: BookingItem, hour: number, minute: number) => void;
   onDone: (booking: BookingItem) => void;
   onApprove: (booking: BookingItem) => void;
@@ -2812,7 +2981,6 @@ function NotebookSchedule({
               key={time}
               time={time}
               text={text}
-              movingActive={Boolean(movingBookingId)}
               onOpenSlot={() => onOpenSlot(time)}
             />
           );
@@ -2828,10 +2996,10 @@ function NotebookSchedule({
               booking={booking}
               date={date}
               text={text}
-              movingActive={Boolean(movingBookingId)}
-              selectedForMove={movingBookingId === booking.id}
-              onStartMove={() => onStartMove(booking)}
-              onSwapTarget={() => onSwapTarget(booking)}
+              isMovingSource={movingBookingId === booking.id}
+              onMovePointerDown={(event) => onMovePointerDown(booking, event)}
+              onMovePointerMove={onMovePointerMove}
+              onMovePointerUp={onMovePointerUp}
               onMinute={() => onChangeBookingMinute(booking, date?.getHours() || 0, minute)}
               onDone={() => onDone(booking)}
               onApprove={() => onApprove(booking)}
@@ -2851,10 +3019,10 @@ function NotebookBookingRow({
   booking,
   date,
   text,
-  movingActive,
-  selectedForMove,
-  onStartMove,
-  onSwapTarget,
+  isMovingSource,
+  onMovePointerDown,
+  onMovePointerMove,
+  onMovePointerUp,
   onMinute,
   onDone,
   onApprove,
@@ -2866,10 +3034,10 @@ function NotebookBookingRow({
   booking: BookingItem;
   date: Date | null;
   text: PageText;
-  movingActive: boolean;
-  selectedForMove: boolean;
-  onStartMove: () => void;
-  onSwapTarget: () => void;
+  isMovingSource: boolean;
+  onMovePointerDown: (event: ReactPointerEvent<HTMLElement>) => void;
+  onMovePointerMove: (event: ReactPointerEvent<HTMLElement>) => void;
+  onMovePointerUp: () => void;
   onMinute: () => void;
   onDone: () => void;
   onApprove: () => void;
@@ -2878,9 +3046,6 @@ function NotebookBookingRow({
   onDetails: () => void;
   onNote: () => void;
 }) {
-  const pressTimerRef = useRef<number | null>(null);
-  const longPressTriggeredRef = useRef(false);
-
   const done = booking.status === 'completed';
   const cancelled = booking.status === 'cancelled';
   const pending = booking.status === 'pending';
@@ -2892,72 +3057,23 @@ function NotebookBookingRow({
     ? getVisibleBookingLocation(booking)
     : getPublicBookingLocation(booking);
 
-  const clearPressTimer = () => {
-    if (pressTimerRef.current) {
-      window.clearTimeout(pressTimerRef.current);
-      pressTimerRef.current = null;
-    }
-  };
-
-  const startLongPress = () => {
-    if (done) return;
-    longPressTriggeredRef.current = false;
-    clearPressTimer();
-
-    pressTimerRef.current = window.setTimeout(() => {
-      longPressTriggeredRef.current = true;
-      onStartMove();
-    }, 520);
-  };
-
-  const finishPress = () => {
-    clearPressTimer();
-
-    window.setTimeout(() => {
-      longPressTriggeredRef.current = false;
-    }, 80);
-  };
-
   return (
     <article
-      onPointerDown={(event) => {
-        if (event.pointerType === 'mouse' && event.button !== 0) return;
-        startLongPress();
-      }}
-      onPointerUp={finishPress}
-      onPointerCancel={finishPress}
-      onPointerLeave={finishPress}
-      onClick={(event) => {
-        if (longPressTriggeredRef.current) {
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        }
-
-        if (movingActive && !selectedForMove) {
-          event.preventDefault();
-          event.stopPropagation();
-          onSwapTarget();
-          return;
-        }
-
-        if (movingActive && selectedForMove) {
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        }
-
-        onDetails();
-      }}
+      data-drop-booking={booking.id}
+      title={done ? text.completed : text.moveHint}
+      onPointerDown={onMovePointerDown}
+      onPointerMove={onMovePointerMove}
+      onPointerUp={onMovePointerUp}
+      onPointerCancel={onMovePointerUp}
+      onContextMenu={(event) => event.preventDefault()}
+      onClick={onDetails}
       style={{
         position: 'relative',
         minHeight: cancelled ? 82 : 116,
         borderRadius: 22,
-        border: selectedForMove
+        border: isMovingSource
           ? `4px solid ${BRAND.border}`
-          : movingActive && !done
-            ? `3px dashed ${BRAND.green}`
-            : `2px solid ${cancelled ? '#f3a9bb' : '#d8e3dd'}`,
+          : `2px solid ${cancelled ? '#f3a9bb' : '#d8e3dd'}`,
         background: cancelled
           ? 'linear-gradient(135deg, #ffffff 0%, #ffffff 47%, #ffe3ea 48%, #ffe3ea 100%)'
           : bg,
@@ -2965,59 +3081,19 @@ function NotebookBookingRow({
         gridTemplateColumns: '104px minmax(0, 1fr) 64px 34px',
         gap: 7,
         alignItems: 'center',
-        padding: selectedForMove ? '8px 7px 8px 0' : '10px 9px 10px 0',
+        padding: isMovingSource ? '8px 7px 8px 0' : '10px 9px 10px 0',
         overflow: 'hidden',
-        boxShadow: selectedForMove
-          ? '0 10px 26px rgba(0,0,0,0.22)'
+        boxShadow: isMovingSource
+          ? '0 14px 32px rgba(0,0,0,0.18)'
           : '0 7px 18px rgba(7,27,70,0.05)',
-        cursor: movingActive ? 'pointer' : 'grab',
-        touchAction: 'manipulation',
+        cursor: done ? 'default' : 'grab',
+        opacity: isMovingSource ? 0.72 : 1,
         userSelect: 'none',
         WebkitUserSelect: 'none',
         WebkitTouchCallout: 'none',
-        outline: 'none',
+        touchAction: done ? 'auto' : 'pan-y',
       }}
     >
-      {selectedForMove ? (
-        <div
-          style={{
-            position: 'absolute',
-            right: 10,
-            top: 9,
-            zIndex: 2,
-            borderRadius: 999,
-            border: `2px solid ${BRAND.border}`,
-            background: BRAND.navy,
-            color: '#ffffff',
-            padding: '4px 8px',
-            fontSize: 10,
-            fontWeight: 900,
-          }}
-        >
-          {text.moveMode}
-        </div>
-      ) : null}
-
-      {done ? (
-        <div
-          style={{
-            position: 'absolute',
-            right: 10,
-            top: 9,
-            zIndex: 2,
-            borderRadius: 999,
-            border: `2px solid ${BRAND.blue}`,
-            background: '#ffffff',
-            color: BRAND.blue,
-            padding: '4px 8px',
-            fontSize: 10,
-            fontWeight: 900,
-          }}
-        >
-          🔒
-        </div>
-      ) : null}
-
       <div
         style={{
           position: 'absolute',
@@ -3030,7 +3106,6 @@ function NotebookBookingRow({
       />
 
       <div
-        onClick={(event) => event.stopPropagation()}
         style={{
           display: 'grid',
           gridTemplateColumns: '38px 1fr',
@@ -3041,9 +3116,9 @@ function NotebookBookingRow({
       >
         <button
           type="button"
+          onPointerDown={(event) => event.stopPropagation()}
           onClick={(event) => {
             event.stopPropagation();
-            if (movingActive) return;
             onMinute();
           }}
           style={timePlusButtonStyle}
@@ -3124,6 +3199,7 @@ function NotebookBookingRow({
             </div>
 
             <div
+              onPointerDown={(event) => event.stopPropagation()}
               onClick={(event) => event.stopPropagation()}
               style={{
                 marginTop: 7,
@@ -3132,65 +3208,25 @@ function NotebookBookingRow({
                 alignItems: 'center',
               }}
             >
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (movingActive) return;
-                  onChat();
-                }}
-                style={smallActionButtonStyle}
-              >
+              <button type="button" onClick={onChat} style={smallActionButtonStyle}>
                 💬 {text.openChat}
               </button>
 
               {pending ? (
                 <>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      if (movingActive) return;
-                      onApprove();
-                    }}
-                    style={smallGreenButtonStyle}
-                  >
+                  <button type="button" onClick={onApprove} style={smallGreenButtonStyle}>
                     ✓ {text.approve}
                   </button>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      if (movingActive) return;
-                      onReject();
-                    }}
-                    style={smallRedButtonStyle}
-                  >
+                  <button type="button" onClick={onReject} style={smallRedButtonStyle}>
                     ×
                   </button>
                 </>
               ) : done ? (
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    if (movingActive) return;
-                    onDetails();
-                  }}
-                  style={smallActionButtonStyle}
-                >
+                <button type="button" onClick={onDetails} style={smallActionButtonStyle}>
                   {text.details}
                 </button>
               ) : (
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    if (movingActive) return;
-                    onDone();
-                  }}
-                  style={smallGreenButtonStyle}
-                >
+                <button type="button" onClick={onDone} style={smallGreenButtonStyle}>
                   ✓ {text.markDone}
                 </button>
               )}
@@ -3219,9 +3255,9 @@ function NotebookBookingRow({
 
       <button
         type="button"
+        onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => {
           event.stopPropagation();
-          if (movingActive) return;
           onNote();
         }}
         aria-label={text.notes}
@@ -3246,50 +3282,36 @@ function NotebookBookingRow({
 function FreeSlotRow({
   time,
   text,
-  movingActive,
   onOpenSlot,
 }: {
   time: string;
   text: PageText;
-  movingActive: boolean;
   onOpenSlot: () => void;
 }) {
   return (
     <article
-      onClick={onOpenSlot}
+      data-drop-slot={time}
       style={{
         minHeight: 68,
         borderRadius: 22,
-        border: movingActive ? `3px dashed ${BRAND.green}` : '2px dashed #d7dce4',
-        background: movingActive ? BRAND.softGreen : '#ffffff',
+        border: '2px dashed #d7dce4',
+        background: '#ffffff',
         display: 'grid',
         gridTemplateColumns: '104px minmax(0, 1fr)',
         alignItems: 'center',
         padding: '0 18px 0 14px',
-        cursor: 'pointer',
       }}
     >
       <div style={{ display: 'grid', gridTemplateColumns: '38px 1fr', alignItems: 'center', gap: 4 }}>
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            onOpenSlot();
-          }}
-          style={{
-            ...timePlusButtonStyle,
-            background: movingActive ? BRAND.green : '#ffffff',
-            color: movingActive ? '#ffffff' : BRAND.navy,
-          }}
-        >
-          {movingActive ? '↓' : '+'}
+        <button type="button" onClick={onOpenSlot} style={timePlusButtonStyle}>
+          +
         </button>
 
         <div
           style={{
             fontSize: 25,
             fontWeight: 900,
-            color: movingActive ? BRAND.green : '#a1a8b4',
+            color: '#a1a8b4',
             whiteSpace: 'nowrap',
           }}
         >
@@ -3301,11 +3323,11 @@ function FreeSlotRow({
         style={{
           fontSize: 18,
           fontWeight: 900,
-          color: movingActive ? BRAND.green : BRAND.muted,
+          color: BRAND.muted,
           textAlign: 'left',
         }}
       >
-        {movingActive ? text.moveHint : text.available}
+        {text.available}
       </div>
     </article>
   );
@@ -3372,56 +3394,13 @@ function ClientCardModal({
   onClose: () => void;
   onChat: () => void;
 }) {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const dragRef = useRef({
-    active: false,
-    startX: 0,
-    startY: 0,
-    baseX: 0,
-    baseY: 0,
-  });
-
   const unlocked = isUnlocked(booking);
   const location = unlocked ? getVisibleBookingLocation(booking) : getPublicBookingLocation(booking);
   const paymentMethod = getPaymentMethod(booking);
-  const avatar = getBookingAvatar(booking);
 
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
-      <div
-        style={{
-          ...modalCardStyle,
-          transform: `translate(${position.x}px, ${position.y}px)`,
-          touchAction: 'none',
-        }}
-        onClick={(event) => event.stopPropagation()}
-        onPointerDown={(event) => {
-          dragRef.current = {
-            active: true,
-            startX: event.clientX,
-            startY: event.clientY,
-            baseX: position.x,
-            baseY: position.y,
-          };
-        }}
-        onPointerMove={(event) => {
-          if (!dragRef.current.active) return;
-
-          const nextX = dragRef.current.baseX + event.clientX - dragRef.current.startX;
-          const nextY = dragRef.current.baseY + event.clientY - dragRef.current.startY;
-
-          setPosition({
-            x: Math.max(-40, Math.min(40, nextX)),
-            y: Math.max(-260, Math.min(80, nextY)),
-          });
-        }}
-        onPointerUp={() => {
-          dragRef.current.active = false;
-        }}
-        onPointerCancel={() => {
-          dragRef.current.active = false;
-        }}
-      >
+      <div style={modalCardStyle} onClick={(event) => event.stopPropagation()}>
         <button type="button" onClick={onClose} style={modalCloseStyle}>
           ×
         </button>
@@ -3431,61 +3410,18 @@ function ClientCardModal({
         <div
           style={{
             marginTop: 12,
-            borderRadius: 24,
+            borderRadius: 22,
             border: `2.5px solid ${BRAND.border}`,
             background: statusBg(booking.status),
             padding: 14,
           }}
         >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '74px 1fr',
-              gap: 12,
-              alignItems: 'center',
-            }}
-          >
-            <img
-              src={avatar}
-              alt={booking.masterName}
-              style={{
-                width: 74,
-                height: 74,
-                borderRadius: 22,
-                border: `2.5px solid ${BRAND.border}`,
-                objectFit: 'cover',
-                background: '#ffffff',
-              }}
-            />
+          <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
+            {booking.masterName}
+          </div>
 
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 23,
-                  fontWeight: 900,
-                  color: BRAND.navy,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {booking.masterName}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 5,
-                  fontSize: 15,
-                  fontWeight: 800,
-                  color: BRAND.muted,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {booking.serviceName}
-              </div>
-            </div>
+          <div style={{ marginTop: 5, fontSize: 15, fontWeight: 800, color: BRAND.muted }}>
+            {booking.serviceName}
           </div>
 
           <div
@@ -3507,106 +3443,45 @@ function ClientCardModal({
             </div>
           </div>
 
-          <InfoBox title={text.paymentMethod}>
-            {paymentIcons[paymentMethod]} {isPaid(booking) ? text.depositPaid : text.depositWaiting}
-          </InfoBox>
+          <div style={{ marginTop: 10, fontSize: 15, fontWeight: 900, color: BRAND.navy }}>
+            {paymentIcons[paymentMethod]} {text.paymentMethod}
+          </div>
 
-          <InfoBox title="Location">📍 {location || 'London'}</InfoBox>
-
-          <InfoBox title={text.notes}>{booking.category || text.notes}</InfoBox>
+          <div style={{ marginTop: 10, fontSize: 14, fontWeight: 900, color: BRAND.muted }}>
+            📍 {location || 'London'}
+          </div>
 
           <div
             style={{
               marginTop: 12,
-              borderRadius: 20,
-              border: `2.5px solid ${BRAND.border}`,
+              borderRadius: 18,
+              border: `2px solid ${BRAND.border}`,
               background: '#ffffff',
               padding: 12,
+              color: BRAND.navy,
+              fontWeight: 800,
+              filter: unlocked ? 'none' : 'blur(3px)',
+              userSelect: unlocked ? 'auto' : 'none',
             }}
           >
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: 900,
-                color: BRAND.navy,
-                marginBottom: 10,
-              }}
-            >
-              {unlocked ? text.contactsOpen : text.contactsLocked}
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gap: 8,
-                filter: unlocked ? 'none' : 'blur(3px)',
-                userSelect: unlocked ? 'auto' : 'none',
-              }}
-            >
-              <ContactRow icon="☎️" value={booking.contactPhone || '+44 7700 123456'} />
-              <ContactRow icon="✉️" value={booking.contactEmail || 'client@olamep.com'} />
-              <ContactRow icon="🟢" value={booking.contactWhatsapp || '+44 7700 123456'} />
-              <ContactRow icon="✈️" value={booking.contactTelegram || '@client'} />
-              <ContactRow icon="📸" value={booking.contactInstagram || '@client'} />
-            </div>
-
-            {!unlocked ? (
-              <div style={{ marginTop: 8, fontSize: 12, fontWeight: 900, color: BRAND.red }}>
-                🔒 {text.contactsLocked}
-              </div>
-            ) : null}
+            +44 7700 123456 · client@olamep.com
           </div>
+
+          {!unlocked ? (
+            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 900, color: BRAND.red }}>
+              🔒 {text.contactsLocked}
+            </div>
+          ) : (
+            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 900, color: '#008f3a' }}>
+              ✅ {text.contactsOpen}
+            </div>
+          )}
         </div>
 
         <button type="button" onClick={onChat} style={{ ...darkButtonStyle, marginTop: 14 }}>
           💬 {text.openChat}
         </button>
       </div>
-    </div>
-  );
-}
-
-function InfoBox({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div
-      style={{
-        marginTop: 12,
-        borderRadius: 18,
-        border: `2px solid ${BRAND.border}`,
-        background: '#ffffff',
-        padding: 12,
-      }}
-    >
-      <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.muted, marginBottom: 6 }}>
-        {title}
-      </div>
-      <div style={{ fontSize: 16, fontWeight: 900, color: BRAND.navy }}>{children}</div>
-    </div>
-  );
-}
-
-function ContactRow({ icon, value }: { icon: string; value: string }) {
-  return (
-    <div
-      style={{
-        minHeight: 48,
-        borderRadius: 16,
-        border: '2px solid #d9dde5',
-        background: BRAND.cream,
-        display: 'grid',
-        gridTemplateColumns: '44px 1fr',
-        alignItems: 'center',
-        gap: 8,
-        padding: '0 10px',
-        fontSize: 15,
-        fontWeight: 900,
-        color: BRAND.navy,
-      }}
-    >
-      <span>{icon}</span>
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {value}
-      </span>
     </div>
   );
 }
@@ -3837,51 +3712,6 @@ const quickChipStyle: CSSProperties = {
   padding: '0 15px',
   fontSize: 13,
   fontWeight: 900,
-  cursor: 'pointer',
-};
-
-const moveNoticeStyle: CSSProperties = {
-  marginTop: 13,
-  borderRadius: 22,
-  border: `2.5px solid ${BRAND.border}`,
-  background: BRAND.navy,
-  color: '#ffffff',
-  padding: '10px 12px',
-  display: 'grid',
-  gridTemplateColumns: '1fr 44px',
-  alignItems: 'center',
-  gap: 10,
-  boxShadow: '0 10px 24px rgba(7,27,70,0.18)',
-};
-
-const moveCancelButtonStyle: CSSProperties = {
-  width: 44,
-  height: 44,
-  borderRadius: 999,
-  border: `2px solid ${BRAND.border}`,
-  background: BRAND.red,
-  color: '#ffffff',
-  fontSize: 28,
-  lineHeight: 1,
-  fontWeight: 900,
-  cursor: 'pointer',
-};
-
-const floatingMoveCancelStyle: CSSProperties = {
-  position: 'fixed',
-  top: 18,
-  right: 18,
-  zIndex: 500,
-  width: 58,
-  height: 58,
-  borderRadius: 999,
-  border: `3px solid ${BRAND.border}`,
-  background: BRAND.red,
-  color: '#ffffff',
-  fontSize: 34,
-  lineHeight: 1,
-  fontWeight: 900,
-  boxShadow: '0 12px 30px rgba(0,0,0,0.22)',
   cursor: 'pointer',
 };
 
@@ -4160,4 +3990,22 @@ const modalTitleStyle: CSSProperties = {
   fontSize: 25,
   fontWeight: 900,
   color: BRAND.navy,
+};
+
+const moveCancelButtonStyle: CSSProperties = {
+  position: 'fixed',
+  top: 86,
+  right: 18,
+  zIndex: 600,
+  width: 70,
+  height: 70,
+  borderRadius: 999,
+  border: `4px solid ${BRAND.border}`,
+  background: BRAND.red,
+  color: '#ffffff',
+  fontSize: 39,
+  lineHeight: 1,
+  fontWeight: 900,
+  cursor: 'pointer',
+  boxShadow: '0 14px 28px rgba(0,0,0,0.24)',
 };
