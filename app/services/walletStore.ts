@@ -6,7 +6,8 @@ export type WalletTransactionType =
   | 'refund'
   | 'top_up'
   | 'withdrawal'
-  | 'client_payment';
+  | 'client_payment'
+  | 'qr_receive_payment';
 
 export type WalletTransactionStatus =
   | 'completed'
@@ -241,6 +242,31 @@ export function topUpWallet(amount: number) {
   };
 
   emitChange();
+}
+
+export function receiveQrPayment(amount: number, subtitle = 'QR payment received') {
+  const cleanAmount = Number(amount);
+
+  if (!Number.isFinite(cleanAmount) || cleanAmount <= 0) return false;
+
+  const transaction: WalletTransaction = {
+    id: `tx_qr_receive_${Date.now()}`,
+    type: 'qr_receive_payment',
+    title: 'QR payment received',
+    subtitle,
+    amount: cleanAmount,
+    status: 'credited',
+    createdAt: new Date().toISOString(),
+  };
+
+  walletState = {
+    ...walletState,
+    availableBalance: walletState.availableBalance + cleanAmount,
+    transactions: [transaction, ...walletState.transactions],
+  };
+
+  emitChange();
+  return true;
 }
 
 export function withdrawFromWallet(amount: number) {
