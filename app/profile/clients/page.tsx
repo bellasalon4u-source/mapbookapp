@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '../../../components/common/BottomNav';
 import {
@@ -33,6 +33,12 @@ type FilterSwitches = {
   payment: boolean;
   status: boolean;
 };
+
+type SlotAction = {
+  hour: number;
+  minute: number;
+  label: string;
+} | null;
 
 type PageText = {
   title: string;
@@ -81,6 +87,7 @@ type PageText = {
   allPayments: string;
   reset: string;
   apply: string;
+  save: string;
   addBefore: string;
   addAfter: string;
   time: string;
@@ -101,6 +108,15 @@ type PageText = {
   depositWaiting: string;
   wholeWeek: string;
   tapDayHint: string;
+  whatAdd: string;
+  manualClient: string;
+  unavailableTime: string;
+  breakTime: string;
+  preciseMinute: string;
+  manualClientName: string;
+  manualService: string;
+  manualPrice: string;
+  manualNote: string;
 };
 
 const BRAND = {
@@ -168,6 +184,7 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     allPayments: 'All payments',
     reset: 'Reset',
     apply: 'Apply',
+    save: 'Save',
     addBefore: '+ Add time before 05:00',
     addAfter: '+ Add time after 00:00',
     time: 'Time',
@@ -188,6 +205,15 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     depositWaiting: 'Deposit waiting',
     wholeWeek: 'Whole week',
     tapDayHint: 'Tap a day or booking to open details',
+    whatAdd: 'What to add?',
+    manualClient: 'Add manual client',
+    unavailableTime: 'Make time unavailable',
+    breakTime: 'Add break',
+    preciseMinute: 'Change minutes',
+    manualClientName: 'Client name',
+    manualService: 'Service',
+    manualPrice: 'Price',
+    manualNote: 'Note',
   },
   RU: {
     title: 'Мои клиенты',
@@ -236,6 +262,7 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     allPayments: 'Все оплаты',
     reset: 'Сбросить',
     apply: 'Применить',
+    save: 'Сохранить',
     addBefore: '+ Добавить время до 05:00',
     addAfter: '+ Добавить время после 00:00',
     time: 'Время',
@@ -256,6 +283,15 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     depositWaiting: 'Ждёт оплаты',
     wholeWeek: 'Вся неделя',
     tapDayHint: 'Нажми на день или запись, чтобы открыть детали',
+    whatAdd: 'Что добавить?',
+    manualClient: 'Добавить клиента вручную',
+    unavailableTime: 'Сделать время недоступным',
+    breakTime: 'Добавить перерыв',
+    preciseMinute: 'Уточнить минуты',
+    manualClientName: 'Имя клиента',
+    manualService: 'Услуга',
+    manualPrice: 'Цена',
+    manualNote: 'Заметка',
   },
   UA: {
     title: 'Мої клієнти',
@@ -304,6 +340,7 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     allPayments: 'Усі оплати',
     reset: 'Скинути',
     apply: 'Застосувати',
+    save: 'Зберегти',
     addBefore: '+ Додати час до 05:00',
     addAfter: '+ Додати час після 00:00',
     time: 'Час',
@@ -324,6 +361,15 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     depositWaiting: 'Очікує оплати',
     wholeWeek: 'Увесь тиждень',
     tapDayHint: 'Натисни на день або запис, щоб відкрити деталі',
+    whatAdd: 'Що додати?',
+    manualClient: 'Додати клієнта вручну',
+    unavailableTime: 'Зробити час недоступним',
+    breakTime: 'Додати перерву',
+    preciseMinute: 'Уточнити хвилини',
+    manualClientName: 'Імʼя клієнта',
+    manualService: 'Послуга',
+    manualPrice: 'Ціна',
+    manualNote: 'Нотатка',
   },
 };
 
@@ -569,6 +615,39 @@ function makeBooking(
   } as BookingItem;
 }
 
+function makeManualBooking(
+  date: Date,
+  name: string,
+  serviceName: string,
+  price: number,
+  status: BookingItem['status'],
+  note: string
+): BookingItem {
+  const id = `manual-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const paid = status !== 'cancelled';
+
+  return {
+    id,
+    masterId: id,
+    masterName: name,
+    masterAvatar: '',
+    serviceName,
+    price,
+    status,
+    dateTime: date.toISOString(),
+    dateLabel: getTimeLabel(date),
+    location: '',
+    areaLabel: '',
+    exactAddress: '',
+    clientPaid: paid,
+    paymentReceivedByPlatform: paid,
+    unlockFeePaid: paid,
+    bookingConfirmedByMaster: status !== 'pending',
+    promotionPaidByMaster: status !== 'pending',
+    category: note,
+  } as BookingItem;
+}
+
 function createDemoBookings(baseDate: Date): BookingItem[] {
   const today = startOfDay(baseDate);
   const tomorrow = addDays(today, 1);
@@ -753,9 +832,15 @@ export default function ProfileClientsPage() {
   const [noteBooking, setNoteBooking] = useState<BookingItem | null>(null);
   const [clientCardBooking, setClientCardBooking] = useState<BookingItem | null>(null);
   const [timePicker, setTimePicker] = useState<{ hour: number; bookingId?: string } | null>(null);
+  const [slotAction, setSlotAction] = useState<SlotAction>(null);
   const [customMinute, setCustomMinute] = useState(25);
   const [extraTimes, setExtraTimes] = useState<string[]>([]);
   const [timeOverrides, setTimeOverrides] = useState<Record<string, string>>({});
+
+  const [manualName, setManualName] = useState('');
+  const [manualService, setManualService] = useState('');
+  const [manualPrice, setManualPrice] = useState('');
+  const [manualNote, setManualNote] = useState('');
 
   const text = useMemo(() => getText(language), [language]);
 
@@ -1121,6 +1206,67 @@ export default function ProfileClientsPage() {
     setTimePicker(null);
   };
 
+  const openSlotAction = (time: string) => {
+    const [hour, minute] = time.split(':').map(Number);
+    setSlotAction({
+      hour: Number(hour || 0),
+      minute: Number(minute || 0),
+      label: time,
+    });
+    setManualName('');
+    setManualService('');
+    setManualPrice('');
+    setManualNote('');
+  };
+
+  const createManualSlot = (kind: 'client' | 'unavailable' | 'break') => {
+    if (!slotAction) return;
+
+    const date = new Date(activeDate);
+    date.setHours(slotAction.hour, slotAction.minute, 0, 0);
+
+    if (kind === 'client') {
+      const booking = makeManualBooking(
+        date,
+        manualName.trim() || text.manualClient,
+        manualService.trim() || text.service,
+        Number(manualPrice || 0),
+        'upcoming',
+        manualNote.trim() || text.manualClient
+      );
+
+      setBookings((prev) => [...prev, booking]);
+    }
+
+    if (kind === 'unavailable') {
+      const booking = makeManualBooking(
+        date,
+        text.unavailableTime,
+        text.unavailable,
+        0,
+        'cancelled',
+        manualNote.trim() || text.unavailableTime
+      );
+
+      setBookings((prev) => [...prev, booking]);
+    }
+
+    if (kind === 'break') {
+      const booking = makeManualBooking(
+        date,
+        text.breakTime,
+        text.breakTime,
+        0,
+        'cancelled',
+        manualNote.trim() || text.breakTime
+      );
+
+      setBookings((prev) => [...prev, booking]);
+    }
+
+    setSlotAction(null);
+  };
+
   const titleForPanel = useMemo(() => {
     if (viewMode === 'calendar' && calendarStage === 'year') return text.chooseYear;
     if (viewMode === 'calendar' && calendarStage === 'month') return text.chooseMonth;
@@ -1384,10 +1530,7 @@ export default function ProfileClientsPage() {
           <section style={{ marginTop: 18 }}>
             <button
               type="button"
-              onClick={() => {
-                setCustomMinute(25);
-                setTimePicker({ hour: 4 });
-              }}
+              onClick={() => openSlotAction('04:00')}
               style={addTimeButtonStyle}
             >
               {text.addBefore}
@@ -1407,10 +1550,7 @@ export default function ProfileClientsPage() {
               showFreeWindows={showFreeWindows}
               extraTimes={extraTimes}
               getEffectiveDate={getEffectiveDate}
-              onAddMinute={(hour) => {
-                setCustomMinute(25);
-                setTimePicker({ hour });
-              }}
+              onOpenSlot={openSlotAction}
               onChangeBookingMinute={(booking, hour, minute) => {
                 setCustomMinute(minute);
                 setTimePicker({ hour, bookingId: booking.id });
@@ -1425,10 +1565,7 @@ export default function ProfileClientsPage() {
 
             <button
               type="button"
-              onClick={() => {
-                setCustomMinute(25);
-                setTimePicker({ hour: 24 });
-              }}
+              onClick={() => openSlotAction('24:00')}
               style={{ ...addTimeButtonStyle, marginTop: 12 }}
             >
               {text.addAfter}
@@ -1466,6 +1603,30 @@ export default function ProfileClientsPage() {
           onMaxPrice={setMaxPrice}
           onReset={resetFilters}
           onClose={() => setFilterModalOpen(false)}
+        />
+      ) : null}
+
+      {slotAction ? (
+        <SlotActionModal
+          text={text}
+          slot={slotAction}
+          manualName={manualName}
+          manualService={manualService}
+          manualPrice={manualPrice}
+          manualNote={manualNote}
+          onName={setManualName}
+          onService={setManualService}
+          onPrice={setManualPrice}
+          onNote={setManualNote}
+          onManualClient={() => createManualSlot('client')}
+          onUnavailable={() => createManualSlot('unavailable')}
+          onBreak={() => createManualSlot('break')}
+          onPreciseMinute={() => {
+            setCustomMinute(slotAction.minute || 25);
+            setTimePicker({ hour: slotAction.hour });
+            setSlotAction(null);
+          }}
+          onClose={() => setSlotAction(null)}
         />
       ) : null}
 
@@ -1821,7 +1982,7 @@ function FilterCard({
   title: string;
   active: boolean;
   onToggle: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div
@@ -1873,6 +2034,146 @@ function FilterCard({
   );
 }
 
+function SlotActionModal({
+  text,
+  slot,
+  manualName,
+  manualService,
+  manualPrice,
+  manualNote,
+  onName,
+  onService,
+  onPrice,
+  onNote,
+  onManualClient,
+  onUnavailable,
+  onBreak,
+  onPreciseMinute,
+  onClose,
+}: {
+  text: PageText;
+  slot: NonNullable<SlotAction>;
+  manualName: string;
+  manualService: string;
+  manualPrice: string;
+  manualNote: string;
+  onName: (value: string) => void;
+  onService: (value: string) => void;
+  onPrice: (value: string) => void;
+  onNote: (value: string) => void;
+  onManualClient: () => void;
+  onUnavailable: () => void;
+  onBreak: () => void;
+  onPreciseMinute: () => void;
+  onClose: () => void;
+}) {
+  const [manualOpen, setManualOpen] = useState(false);
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={modalCardStyle} onClick={(event) => event.stopPropagation()}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 44px',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          <div>
+            <h2 style={modalTitleStyle}>{text.whatAdd}</h2>
+            <div style={{ marginTop: 4, fontSize: 15, fontWeight: 900, color: BRAND.green }}>
+              {slot.label}
+            </div>
+          </div>
+          <button type="button" onClick={onClose} style={modalCloseStyle}>
+            ×
+          </button>
+        </div>
+
+        <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
+          <button
+            type="button"
+            onClick={() => setManualOpen((prev) => !prev)}
+            style={slotActionButtonStyle}
+          >
+            <span>👤</span>
+            <strong>{text.manualClient}</strong>
+            <span>{manualOpen ? '−' : '+'}</span>
+          </button>
+
+          {manualOpen ? (
+            <div style={manualFormStyle}>
+              <label style={fieldLabelStyle}>
+                <span>{text.manualClientName}</span>
+                <input
+                  value={manualName}
+                  onChange={(event) => onName(event.target.value)}
+                  placeholder="Anna Smith"
+                  style={inputStyle}
+                />
+              </label>
+
+              <label style={fieldLabelStyle}>
+                <span>{text.manualService}</span>
+                <input
+                  value={manualService}
+                  onChange={(event) => onService(event.target.value)}
+                  placeholder="Hair / Massage"
+                  style={inputStyle}
+                />
+              </label>
+
+              <div style={twoColStyle}>
+                <label style={fieldLabelStyle}>
+                  <span>{text.manualPrice}</span>
+                  <input
+                    type="number"
+                    value={manualPrice}
+                    onChange={(event) => onPrice(event.target.value)}
+                    style={inputStyle}
+                  />
+                </label>
+
+                <label style={fieldLabelStyle}>
+                  <span>{text.manualNote}</span>
+                  <input
+                    value={manualNote}
+                    onChange={(event) => onNote(event.target.value)}
+                    style={inputStyle}
+                  />
+                </label>
+              </div>
+
+              <button type="button" onClick={onManualClient} style={darkButtonStyle}>
+                {text.save}
+              </button>
+            </div>
+          ) : null}
+
+          <button type="button" onClick={onUnavailable} style={slotUnavailableButtonStyle}>
+            <span>⛔</span>
+            <strong>{text.unavailableTime}</strong>
+            <span>›</span>
+          </button>
+
+          <button type="button" onClick={onBreak} style={slotBreakButtonStyle}>
+            <span>☕</span>
+            <strong>{text.breakTime}</strong>
+            <span>›</span>
+          </button>
+
+          <button type="button" onClick={onPreciseMinute} style={slotActionButtonStyle}>
+            <span>⏱</span>
+            <strong>{text.preciseMinute}</strong>
+            <span>›</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function YearOverview({
   language,
   year,
@@ -1917,11 +2218,7 @@ function YearOverview({
         {Array.from({ length: 12 }, (_, monthIndex) => {
           const monthBookings = bookings.filter((booking) => {
             const date = getEffectiveDate(booking);
-            return (
-              date &&
-              date.getFullYear() === year &&
-              date.getMonth() === monthIndex
-            );
+            return date && date.getFullYear() === year && date.getMonth() === monthIndex;
           });
 
           return (
@@ -2262,7 +2559,7 @@ function NotebookSchedule({
   showFreeWindows,
   extraTimes,
   getEffectiveDate,
-  onAddMinute,
+  onOpenSlot,
   onChangeBookingMinute,
   onDone,
   onApprove,
@@ -2277,7 +2574,7 @@ function NotebookSchedule({
   showFreeWindows: boolean;
   extraTimes: string[];
   getEffectiveDate: (booking: BookingItem) => Date | null;
-  onAddMinute: (hour: number) => void;
+  onOpenSlot: (time: string) => void;
   onChangeBookingMinute: (booking: BookingItem, hour: number, minute: number) => void;
   onDone: (booking: BookingItem) => void;
   onApprove: (booking: BookingItem) => void;
@@ -2301,9 +2598,6 @@ function NotebookSchedule({
   return (
     <div style={{ display: 'grid', gap: 8 }}>
       {times.map((time) => {
-        const [hourText] = time.split(':');
-        const hour = Number(hourText);
-
         const timeBookings = bookings.filter((booking) => {
           const date = getEffectiveDate(booking);
           return date ? isSameDay(date, activeDate) && getTimeLabel(date) === time : false;
@@ -2317,7 +2611,7 @@ function NotebookSchedule({
               key={time}
               time={time}
               text={text}
-              onAddMinute={() => onAddMinute(hour)}
+              onOpenSlot={() => onOpenSlot(time)}
             />
           );
         }
@@ -2332,7 +2626,7 @@ function NotebookSchedule({
               booking={booking}
               date={date}
               text={text}
-              onMinute={() => onChangeBookingMinute(booking, date?.getHours() || hour, minute)}
+              onMinute={() => onChangeBookingMinute(booking, date?.getHours() || 0, minute)}
               onDone={() => onDone(booking)}
               onApprove={() => onApprove(booking)}
               onReject={() => onReject(booking)}
@@ -2453,7 +2747,7 @@ function NotebookBookingRow({
             whiteSpace: 'nowrap',
           }}
         >
-          {cancelled ? text.unavailable : booking.masterName}
+          {cancelled ? booking.masterName || text.unavailable : booking.masterName}
           {repeat >= 3 ? (
             <span title={text.repeatClient} style={{ marginLeft: 5, color: BRAND.orange }}>
               ★
@@ -2473,7 +2767,7 @@ function NotebookBookingRow({
             whiteSpace: 'nowrap',
           }}
         >
-          {cancelled ? text.available : booking.serviceName || 'Service'}
+          {booking.serviceName || text.service}
         </div>
 
         {!cancelled ? (
@@ -2583,11 +2877,11 @@ function NotebookBookingRow({
 function FreeSlotRow({
   time,
   text,
-  onAddMinute,
+  onOpenSlot,
 }: {
   time: string;
   text: PageText;
-  onAddMinute: () => void;
+  onOpenSlot: () => void;
 }) {
   return (
     <article
@@ -2603,7 +2897,7 @@ function FreeSlotRow({
       }}
     >
       <div style={{ display: 'grid', gridTemplateColumns: '38px 1fr', alignItems: 'center', gap: 4 }}>
-        <button type="button" onClick={onAddMinute} style={timePlusButtonStyle}>
+        <button type="button" onClick={onOpenSlot} style={timePlusButtonStyle}>
           +
         </button>
 
@@ -3065,6 +3359,44 @@ const inputStyle: CSSProperties = {
   fontSize: 13,
   fontWeight: 900,
   padding: '0 10px',
+};
+
+const manualFormStyle: CSSProperties = {
+  borderRadius: 20,
+  border: `2px solid ${BRAND.green}`,
+  background: BRAND.softGreen,
+  padding: 12,
+  display: 'grid',
+  gap: 10,
+};
+
+const slotActionButtonStyle: CSSProperties = {
+  width: '100%',
+  minHeight: 58,
+  borderRadius: 18,
+  border: `2.5px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  display: 'grid',
+  gridTemplateColumns: '34px 1fr 28px',
+  gap: 8,
+  alignItems: 'center',
+  padding: '0 12px',
+  textAlign: 'left',
+  cursor: 'pointer',
+  fontSize: 15,
+};
+
+const slotUnavailableButtonStyle: CSSProperties = {
+  ...slotActionButtonStyle,
+  border: `2.5px solid ${BRAND.red}`,
+  background: BRAND.softRed,
+};
+
+const slotBreakButtonStyle: CSSProperties = {
+  ...slotActionButtonStyle,
+  border: `2.5px solid ${BRAND.orange}`,
+  background: '#fff0da',
 };
 
 const plainButtonStyle: CSSProperties = {
