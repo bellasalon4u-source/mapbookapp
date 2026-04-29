@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import BottomNav from '../../components/common/BottomNav';
 import {
   getSavedLanguage,
@@ -288,8 +288,41 @@ function getLastMessageTime(lastMessage: any) {
   return lastMessage.time || '';
 }
 
+function findThreadByBooking(threads: ChatThread[], bookingId: string) {
+  return threads.find((thread) => {
+    const extendedThread = thread as ChatThread & {
+      bookingId?: string;
+      booking_id?: string;
+      sourceBookingId?: string;
+      source_booking_id?: string;
+      booking?: {
+        id?: string;
+        bookingId?: string;
+      };
+      metadata?: {
+        bookingId?: string;
+        booking_id?: string;
+      };
+    };
+
+    return (
+      thread.id === bookingId ||
+      extendedThread.bookingId === bookingId ||
+      extendedThread.booking_id === bookingId ||
+      extendedThread.sourceBookingId === bookingId ||
+      extendedThread.source_booking_id === bookingId ||
+      extendedThread.booking?.id === bookingId ||
+      extendedThread.booking?.bookingId === bookingId ||
+      extendedThread.metadata?.bookingId === bookingId ||
+      extendedThread.metadata?.booking_id === bookingId
+    );
+  });
+}
+
 function MessagesPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const bookingParam = searchParams.get('booking');
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [threads, setThreads] = useState<ChatThread[]>([]);
@@ -307,6 +340,14 @@ function MessagesPageContent() {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (!bookingParam || threads.length === 0) return;
+
+    const targetThread = findThreadByBooking(threads, bookingParam);
+
+    router.replace(`/messages/${targetThread?.id || bookingParam}`);
+  }, [bookingParam, router, threads]);
 
   useEffect(() => {
     const syncLanguage = () => {
