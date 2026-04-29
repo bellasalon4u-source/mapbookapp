@@ -4078,6 +4078,10 @@ const modalOverlayStyle: CSSProperties = {
   display: 'flex',
   alignItems: 'flex-end',
   justifyContent: 'center',
+  overflowY: 'auto',
+  overscrollBehavior: 'contain',
+  WebkitOverflowScrolling: 'touch',
+  touchAction: 'pan-y',
 };
 
 const modalCardStyle: CSSProperties = {
@@ -4085,12 +4089,15 @@ const modalCardStyle: CSSProperties = {
   maxWidth: 430,
   maxHeight: '88vh',
   overflowY: 'auto',
+  overscrollBehavior: 'contain',
+  WebkitOverflowScrolling: 'touch',
+  touchAction: 'pan-y',
   borderTopLeftRadius: 28,
   borderTopRightRadius: 28,
   border: `2.5px solid ${BRAND.border}`,
   borderBottom: 'none',
   background: '#ffffff',
-  padding: '18px 16px calc(22px + env(safe-area-inset-bottom))',
+  padding: '18px 16px calc(90px + env(safe-area-inset-bottom))',
   boxSizing: 'border-box',
 };
 
