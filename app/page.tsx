@@ -27,6 +27,11 @@ import {
   subscribeToAppRegionSettings,
 } from '../services/appRegionStore';
 import { refreshLiveCurrencyRates } from '../services/currencyDisplay';
+import {
+  getWalletState,
+  setWalletState,
+  type WalletTransaction,
+} from '../services/walletStore';
 import BottomNav from '../components/common/BottomNav';
 import TopCategoriesBar from '../components/TopCategoriesBar';
 
@@ -503,7 +508,7 @@ function QuickActionsPanel({
   open,
   onToggle,
   onShare,
-  onQrTopUp,
+  onQrReceive,
   onInvite,
   onFavourite,
   onAllFavourite,
@@ -521,7 +526,7 @@ function QuickActionsPanel({
   open: boolean;
   onToggle: () => void;
   onShare: () => void;
-  onQrTopUp: () => void;
+  onQrReceive: () => void;
   onInvite: () => void;
   onFavourite: () => void;
   onAllFavourite: () => void;
@@ -546,10 +551,10 @@ function QuickActionsPanel({
     },
     {
       key: 'qr',
-      label: 'QR top-up',
+      label: 'QR receive',
       icon: '▦',
       color: '#2378ff',
-      onClick: onQrTopUp,
+      onClick: onQrReceive,
     },
     {
       key: 'invite',
@@ -1158,6 +1163,419 @@ function MasterMiniCard({
   );
 }
 
+function QrReceiveModal({
+  language,
+  currencySymbol,
+  amount,
+  note,
+  generated,
+  credited,
+  onAmount,
+  onNote,
+  onGenerate,
+  onCredit,
+  onClose,
+}: {
+  language: AppLanguage;
+  currencySymbol: string;
+  amount: string;
+  note: string;
+  generated: boolean;
+  credited: boolean;
+  onAmount: (value: string) => void;
+  onNote: (value: string) => void;
+  onGenerate: () => void;
+  onCredit: () => void;
+  onClose: () => void;
+}) {
+  const value = Number(amount || 0);
+  const safeAmount = Number.isFinite(value) && value > 0 ? value : 0;
+  const requestId = useMemo(() => `olamep-pay-${Date.now()}`, []);
+  const paymentPayload = `https://olamep.com/pay?to=site-wallet&amount=${encodeURIComponent(
+    String(safeAmount)
+  )}&currency=${encodeURIComponent(currencySymbol)}&note=${encodeURIComponent(
+    note || 'Olamep QR payment'
+  )}&request=${encodeURIComponent(requestId)}`;
+
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=12&data=${encodeURIComponent(
+    paymentPayload
+  )}`;
+
+  const labels = {
+    title:
+      language === 'RU'
+        ? 'QR приём платежа'
+        : language === 'UA'
+        ? 'QR прийом платежу'
+        : 'QR payment receive',
+    subtitle:
+      language === 'RU'
+        ? 'Задай сумму, создай QR и получи деньги на баланс сайта.'
+        : language === 'UA'
+        ? 'Вкажи суму, створи QR і отримай гроші на баланс сайту.'
+        : 'Set an amount, generate a QR and receive money into the site balance.',
+    amount:
+      language === 'RU'
+        ? 'Сумма'
+        : language === 'UA'
+        ? 'Сума'
+        : 'Amount',
+    note:
+      language === 'RU'
+        ? 'Назначение платежа'
+        : language === 'UA'
+        ? 'Призначення платежу'
+        : 'Payment note',
+    generate:
+      language === 'RU'
+        ? 'Создать QR'
+        : language === 'UA'
+        ? 'Створити QR'
+        : 'Generate QR',
+    received:
+      language === 'RU'
+        ? 'Платёж получен'
+        : language === 'UA'
+        ? 'Платіж отримано'
+        : 'Payment received',
+    credit:
+      language === 'RU'
+        ? 'Зачислить на баланс'
+        : language === 'UA'
+        ? 'Зарахувати на баланс'
+        : 'Credit to balance',
+    hint:
+      language === 'RU'
+        ? 'Сейчас это рабочий прототип: после нажатия деньги зачисляются в кошелёк сайта и появляются в истории.'
+        : language === 'UA'
+        ? 'Зараз це робочий прототип: після натискання гроші зараховуються в гаманець сайту та зʼявляються в історії.'
+        : 'This is a working prototype: after pressing the button, money is credited to the site wallet and appears in history.',
+    close:
+      language === 'RU'
+        ? 'Закрыть'
+        : language === 'UA'
+        ? 'Закрити'
+        : 'Close',
+  };
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 8000,
+        background: 'rgba(0,0,0,0.34)',
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={(event) => event.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: 430,
+          maxHeight: '88vh',
+          overflowY: 'auto',
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          border: '3px solid #111111',
+          borderBottom: 'none',
+          background: '#ffffff',
+          padding: '18px 18px calc(22px + env(safe-area-inset-bottom))',
+          boxSizing: 'border-box',
+          boxShadow: '0 -12px 34px rgba(0,0,0,0.2)',
+        }}
+      >
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 48px',
+            gap: 10,
+            alignItems: 'start',
+          }}
+        >
+          <div>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 28,
+                lineHeight: 1,
+                fontWeight: 900,
+                color: '#071b46',
+                letterSpacing: '-0.8px',
+              }}
+            >
+              {labels.title}
+            </h2>
+            <p
+              style={{
+                margin: '8px 0 0',
+                fontSize: 13,
+                lineHeight: 1.35,
+                fontWeight: 800,
+                color: '#657080',
+              }}
+            >
+              {labels.subtitle}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 999,
+              border: '2.5px solid #111111',
+              background: '#ffffff',
+              color: '#071b46',
+              fontSize: 24,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        <div
+          style={{
+            marginTop: 16,
+            borderRadius: 24,
+            border: '2.5px solid #111111',
+            background: 'linear-gradient(135deg, #f0fff4 0%, #ffffff 50%, #eef4ff 100%)',
+            padding: 14,
+          }}
+        >
+          <label
+            style={{
+              display: 'grid',
+              gap: 6,
+              fontSize: 12,
+              fontWeight: 900,
+              color: '#657080',
+            }}
+          >
+            <span>{labels.amount}</span>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '52px 1fr',
+                borderRadius: 18,
+                border: '2.5px solid #111111',
+                overflow: 'hidden',
+                background: '#ffffff',
+              }}
+            >
+              <div
+                style={{
+                  minHeight: 54,
+                  display: 'grid',
+                  placeItems: 'center',
+                  borderRight: '2.5px solid #111111',
+                  fontSize: 24,
+                  fontWeight: 900,
+                  color: '#071b46',
+                }}
+              >
+                {currencySymbol}
+              </div>
+              <input
+                type="number"
+                inputMode="decimal"
+                min="1"
+                value={amount}
+                onChange={(event) => onAmount(event.target.value)}
+                placeholder="25"
+                style={{
+                  border: 'none',
+                  outline: 'none',
+                  minHeight: 54,
+                  padding: '0 14px',
+                  fontSize: 24,
+                  fontWeight: 900,
+                  color: '#071b46',
+                  background: 'transparent',
+                }}
+              />
+            </div>
+          </label>
+
+          <label
+            style={{
+              marginTop: 12,
+              display: 'grid',
+              gap: 6,
+              fontSize: 12,
+              fontWeight: 900,
+              color: '#657080',
+            }}
+          >
+            <span>{labels.note}</span>
+            <input
+              value={note}
+              onChange={(event) => onNote(event.target.value)}
+              placeholder="Massage / booking / service"
+              style={{
+                width: '100%',
+                minHeight: 48,
+                boxSizing: 'border-box',
+                borderRadius: 16,
+                border: '2.5px solid #111111',
+                background: '#ffffff',
+                color: '#071b46',
+                fontSize: 14,
+                fontWeight: 900,
+                padding: '0 12px',
+              }}
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={onGenerate}
+            disabled={safeAmount <= 0}
+            style={{
+              marginTop: 14,
+              width: '100%',
+              minHeight: 52,
+              borderRadius: 18,
+              border: '2.5px solid #111111',
+              background: safeAmount > 0 ? '#55c75f' : '#d8dce2',
+              color: '#ffffff',
+              fontSize: 16,
+              fontWeight: 900,
+              cursor: safeAmount > 0 ? 'pointer' : 'not-allowed',
+              boxShadow: safeAmount > 0 ? '0 8px 18px rgba(85,199,95,0.28)' : 'none',
+            }}
+          >
+            {labels.generate}
+          </button>
+        </div>
+
+        {generated ? (
+          <div
+            style={{
+              marginTop: 14,
+              borderRadius: 26,
+              border: '2.5px solid #111111',
+              background: '#ffffff',
+              padding: 14,
+              textAlign: 'center',
+            }}
+          >
+            <div
+              style={{
+                margin: '0 auto',
+                width: 244,
+                height: 244,
+                borderRadius: 22,
+                border: '2.5px solid #111111',
+                background: '#ffffff',
+                display: 'grid',
+                placeItems: 'center',
+                overflow: 'hidden',
+              }}
+            >
+              <img
+                src={qrUrl}
+                alt="QR payment"
+                style={{
+                  width: 232,
+                  height: 232,
+                  display: 'block',
+                }}
+              />
+            </div>
+
+            <div
+              style={{
+                marginTop: 12,
+                fontSize: 32,
+                fontWeight: 900,
+                color: '#071b46',
+              }}
+            >
+              {currencySymbol}
+              {safeAmount.toFixed(2)}
+            </div>
+
+            <div
+              style={{
+                marginTop: 4,
+                fontSize: 13,
+                fontWeight: 800,
+                color: '#657080',
+              }}
+            >
+              {note || 'Olamep QR payment'}
+            </div>
+
+            <div
+              style={{
+                marginTop: 12,
+                borderRadius: 18,
+                border: '2px solid #111111',
+                background: '#fff4c7',
+                padding: 10,
+                fontSize: 12,
+                lineHeight: 1.35,
+                fontWeight: 800,
+                color: '#071b46',
+                textAlign: 'left',
+              }}
+            >
+              {labels.hint}
+            </div>
+
+            <button
+              type="button"
+              onClick={onCredit}
+              disabled={credited}
+              style={{
+                marginTop: 12,
+                width: '100%',
+                minHeight: 54,
+                borderRadius: 18,
+                border: '2.5px solid #111111',
+                background: credited ? '#dcffe8' : '#071b46',
+                color: credited ? '#008f3a' : '#ffffff',
+                fontSize: 16,
+                fontWeight: 900,
+                cursor: credited ? 'default' : 'pointer',
+              }}
+            >
+              {credited ? `✓ ${labels.received}` : labels.credit}
+            </button>
+          </div>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            marginTop: 14,
+            width: '100%',
+            minHeight: 50,
+            borderRadius: 18,
+            border: '2.5px solid #111111',
+            background: '#ffffff',
+            color: '#071b46',
+            fontSize: 15,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          {labels.close}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
   const baseMasters = getAllMasters();
@@ -1185,6 +1603,12 @@ export default function HomePage() {
   const [regionVersion, setRegionVersion] = useState(0);
   const [currencyVersion, setCurrencyVersion] = useState(0);
   const [quickPanelOpen, setQuickPanelOpen] = useState(false);
+
+  const [qrReceiveOpen, setQrReceiveOpen] = useState(false);
+  const [qrAmount, setQrAmount] = useState('');
+  const [qrNote, setQrNote] = useState('');
+  const [qrGenerated, setQrGenerated] = useState(false);
+  const [qrCredited, setQrCredited] = useState(false);
 
   const tr = t(language);
   const pageBackground = getAppBackground(language);
@@ -1540,6 +1964,46 @@ export default function HomePage() {
   const closeSelectedMasterCard = () => {
     setSelectedMaster(null);
     setMapResetKey((prev) => prev + 1);
+  };
+
+  const openQrReceive = () => {
+    setQuickPanelOpen(false);
+    setQrReceiveOpen(true);
+    setQrGenerated(false);
+    setQrCredited(false);
+    if (!qrAmount) setQrAmount('25');
+    if (!qrNote) setQrNote('Olamep payment');
+  };
+
+  const creditQrPaymentToWallet = () => {
+    const amount = Number(qrAmount || 0);
+
+    if (!Number.isFinite(amount) || amount <= 0 || qrCredited) return;
+
+    const current = getWalletState();
+
+    const transaction: WalletTransaction = {
+      id: `tx_qr_receive_${Date.now()}`,
+      type: 'client_payment',
+      title:
+        language === 'RU'
+          ? 'QR платёж от клиента'
+          : language === 'UA'
+          ? 'QR платіж від клієнта'
+          : 'QR client payment',
+      subtitle: qrNote.trim() || 'Olamep QR payment',
+      amount,
+      status: 'credited',
+      createdAt: new Date().toISOString(),
+    };
+
+    setWalletState({
+      ...current,
+      availableBalance: current.availableBalance + amount,
+      transactions: [transaction, ...current.transactions],
+    });
+
+    setQrCredited(true);
   };
 
   const shareApp = async () => {
@@ -2140,10 +2604,7 @@ export default function HomePage() {
                 onShare={() => {
                   void shareApp();
                 }}
-                onQrTopUp={() => {
-                  setQuickPanelOpen(false);
-                  router.push('/profile');
-                }}
+                onQrReceive={openQrReceive}
                 onInvite={() => {
                   void shareApp();
                 }}
@@ -2280,6 +2741,33 @@ export default function HomePage() {
           </section>
         )}
       </div>
+
+      {qrReceiveOpen ? (
+        <QrReceiveModal
+          language={language}
+          currencySymbol={currencySymbol}
+          amount={qrAmount}
+          note={qrNote}
+          generated={qrGenerated}
+          credited={qrCredited}
+          onAmount={(value) => {
+            setQrAmount(value);
+            setQrGenerated(false);
+            setQrCredited(false);
+          }}
+          onNote={(value) => {
+            setQrNote(value);
+            setQrGenerated(false);
+            setQrCredited(false);
+          }}
+          onGenerate={() => {
+            setQrGenerated(true);
+            setQrCredited(false);
+          }}
+          onCredit={creditQrPaymentToWallet}
+          onClose={() => setQrReceiveOpen(false)}
+        />
+      ) : null}
 
       <BottomNav />
     </main>
