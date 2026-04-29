@@ -49,24 +49,14 @@ type SlotAction = {
   label: string;
 } | null;
 
-type MoveBookingState = {
-  booking: BookingItem;
-  x: number;
-  y: number;
-  offsetX: number;
-  offsetY: number;
-  width: number;
-  height: number;
-};
-
-type PendingLongPress = {
-  booking: BookingItem;
+type DragMoveState = {
+  bookingId: string;
+  pointerId: number;
+  active: boolean;
   startX: number;
   startY: number;
-  offsetX: number;
-  offsetY: number;
-  width: number;
-  height: number;
+  x: number;
+  y: number;
 };
 
 type PageText = {
@@ -146,8 +136,7 @@ type PageText = {
   manualService: string;
   manualPrice: string;
   manualNote: string;
-  moveBooking: string;
-  moveHint: string;
+  moveCancel: string;
 };
 
 const BRAND = {
@@ -245,8 +234,7 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     manualService: 'Service',
     manualPrice: 'Price',
     manualNote: 'Note',
-    moveBooking: 'Move booking',
-    moveHint: 'Hold and drag to a free slot or another booking',
+    moveCancel: 'Cancel move',
   },
   RU: {
     title: 'Мои клиенты',
@@ -325,8 +313,7 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     manualService: 'Услуга',
     manualPrice: 'Цена',
     manualNote: 'Заметка',
-    moveBooking: 'Перенести запись',
-    moveHint: 'Удержи и перетащи на свободное время или другую запись',
+    moveCancel: 'Отменить перенос',
   },
   UA: {
     title: 'Мої клієнти',
@@ -405,8 +392,7 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     manualService: 'Послуга',
     manualPrice: 'Ціна',
     manualNote: 'Нотатка',
-    moveBooking: 'Перенести запис',
-    moveHint: 'Утримай і перетягни на вільний час або інший запис',
+    moveCancel: 'Скасувати перенос',
   },
 };
 
@@ -504,13 +490,6 @@ function getTimeLabel(date: Date | null) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date);
-}
-
-function timeToDate(baseDate: Date, time: string) {
-  const [hourText, minuteText] = time.split(':');
-  const next = new Date(baseDate);
-  next.setHours(Number(hourText || 0), Number(minuteText || 0), 0, 0);
-  return next;
 }
 
 function getDateTitle(date: Date, language: AppLanguage) {
@@ -841,11 +820,6 @@ function OlamepLogo() {
 export default function ProfileClientsPage() {
   const router = useRouter();
 
-  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingLongPressRef = useRef<PendingLongPress | null>(null);
-  const movingBookingRef = useRef<MoveBookingState | null>(null);
-  const suppressClickRef = useRef(false);
-
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [bookings, setBookings] = useState<BookingItem[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('today');
@@ -855,7 +829,6 @@ export default function ProfileClientsPage() {
   const [showFreeWindows, setShowFreeWindows] = useState(true);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [weekOverviewOpen, setWeekOverviewOpen] = useState(true);
-  const [movingBooking, setMovingBooking] = useState<MoveBookingState | null>(null);
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [filterSwitches, setFilterSwitches] = useState<FilterSwitches>({
@@ -892,11 +865,12 @@ export default function ProfileClientsPage() {
   const [manualPrice, setManualPrice] = useState('');
   const [manualNote, setManualNote] = useState('');
 
-  const text = useMemo(() => getText(language), [language]);
+  const [dragMove, setDragMove] = useState<DragMoveState | null>(null);
+  const dragTimerRef = useRef<number | null>(null);
+  const dragClickBlockRef = useRef(false);
+  const pendingDragRef = useRef<{ bookingId: string; startX: number; startY: number } | null>(null);
 
-  useEffect(() => {
-    movingBookingRef.current = movingBooking;
-  }, [movingBooking]);
+  const text = useMemo(() => getText(language), [language]);
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
@@ -922,6 +896,14 @@ export default function ProfileClientsPage() {
       window.removeEventListener('focus', syncLanguage);
       window.removeEventListener('pageshow', syncBookings);
       window.removeEventListener('storage', syncBookings);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (dragTimerRef.current) {
+        window.clearTimeout(dragTimerRef.current);
+      }
     };
   }, []);
 
@@ -1113,26 +1095,33 @@ export default function ProfileClientsPage() {
 
   const years = useMemo(() => Array.from({ length: 10 }, (_, index) => 2026 + index), []);
 
-  const clearLongPressTimer = () => {
-    if (longPressTimerRef.current) {
-      window.clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
+  const clearDragTimer = () => {
+    if (dragTimerRef.current) {
+      window.clearTimeout(dragTimerRef.current);
+      dragTimerRef.current = null;
     }
-
-    pendingLongPressRef.current = null;
   };
 
-  const cancelMovingBooking = () => {
-    clearLongPressTimer();
-    setMovingBooking(null);
-    movingBookingRef.current = null;
+  const stopDragMove = () => {
+    clearDragTimer();
+    pendingDragRef.current = null;
+    setDragMove(null);
   };
 
-  const moveBookingToTime = (bookingId: string, time: string) => {
+  const moveBookingToSlot = (bookingId: string, slotTime: string) => {
     const booking = bookings.find((item) => item.id === bookingId);
     if (!booking || booking.status === 'completed') return;
 
-    const next = timeToDate(activeDate, time);
+    const [hourRaw, minuteRaw] = slotTime.split(':').map(Number);
+    const next = new Date(activeDate);
+    const hour = Number.isFinite(hourRaw) ? hourRaw : 0;
+    const minute = Number.isFinite(minuteRaw) ? minuteRaw : 0;
+
+    if (hour >= 24) {
+      next.setHours(23, 59, 0, 0);
+    } else {
+      next.setHours(hour, minute, 0, 0);
+    }
 
     setTimeOverrides((prev) => ({
       ...prev,
@@ -1140,170 +1129,139 @@ export default function ProfileClientsPage() {
     }));
   };
 
-  const swapBookingTimes = (sourceId: string, targetId: string) => {
-    if (sourceId === targetId) return;
+  const swapBookings = (fromBookingId: string, toBookingId: string) => {
+    if (fromBookingId === toBookingId) return;
 
-    const source = bookings.find((item) => item.id === sourceId);
-    const target = bookings.find((item) => item.id === targetId);
+    const fromBooking = bookings.find((item) => item.id === fromBookingId);
+    const toBooking = bookings.find((item) => item.id === toBookingId);
 
-    if (!source || !target) return;
-    if (source.status === 'completed' || target.status === 'completed') return;
+    if (!fromBooking || !toBooking) return;
+    if (fromBooking.status === 'completed' || toBooking.status === 'completed') return;
 
-    const sourceDate = getEffectiveDate(source);
-    const targetDate = getEffectiveDate(target);
+    const fromDate = getEffectiveDate(fromBooking);
+    const toDate = getEffectiveDate(toBooking);
 
-    if (!sourceDate || !targetDate) return;
+    if (!fromDate || !toDate) return;
 
     setTimeOverrides((prev) => ({
       ...prev,
-      [sourceId]: targetDate.toISOString(),
-      [targetId]: sourceDate.toISOString(),
+      [fromBookingId]: toDate.toISOString(),
+      [toBookingId]: fromDate.toISOString(),
     }));
   };
 
-  const finishMovingBooking = (clientX: number, clientY: number) => {
-    const moving = movingBookingRef.current;
+  const finishDragDrop = (clientX: number, clientY: number) => {
+    if (!dragMove?.active) return;
 
-    if (!moving) return;
-
+    const draggedBookingId = dragMove.bookingId;
     const element = document.elementFromPoint(clientX, clientY) as HTMLElement | null;
-    const bookingTarget = element?.closest('[data-drop-booking]') as HTMLElement | null;
-    const slotTarget = element?.closest('[data-drop-slot]') as HTMLElement | null;
 
-    if (bookingTarget) {
-      const targetId = bookingTarget.getAttribute('data-drop-booking');
-      if (targetId) {
-        swapBookingTimes(moving.booking.id, targetId);
-      }
-    } else if (slotTarget) {
-      const targetTime = slotTarget.getAttribute('data-drop-slot');
-      if (targetTime) {
-        moveBookingToTime(moving.booking.id, targetTime);
-      }
+    const slotElement = element?.closest('[data-drop-slot]') as HTMLElement | null;
+    const bookingElement = element?.closest('[data-booking-drop-id]') as HTMLElement | null;
+
+    if (slotElement?.dataset.dropSlot) {
+      moveBookingToSlot(draggedBookingId, slotElement.dataset.dropSlot);
+    } else if (bookingElement?.dataset.bookingDropId) {
+      swapBookings(draggedBookingId, bookingElement.dataset.bookingDropId);
     }
 
-    suppressClickRef.current = true;
-    setMovingBooking(null);
-    movingBookingRef.current = null;
-
+    dragClickBlockRef.current = true;
     window.setTimeout(() => {
-      suppressClickRef.current = false;
-    }, 450);
+      dragClickBlockRef.current = false;
+    }, 250);
+
+    stopDragMove();
   };
 
-  useEffect(() => {
-    if (!movingBooking) return;
-
-    const previousUserSelect = document.body.style.userSelect;
-    const previousTouchAction = document.body.style.touchAction;
-    const previousOverflow = document.body.style.overflow;
-
-    document.body.style.userSelect = 'none';
-    document.body.style.touchAction = 'none';
-    document.body.style.overflow = 'hidden';
-
-    const handlePointerMove = (event: PointerEvent) => {
-      event.preventDefault();
-
-      setMovingBooking((prev) =>
-        prev
-          ? {
-              ...prev,
-              x: event.clientX,
-              y: event.clientY,
-            }
-          : prev
-      );
-    };
-
-    const handlePointerUp = (event: PointerEvent) => {
-      event.preventDefault();
-      finishMovingBooking(event.clientX, event.clientY);
-    };
-
-    window.addEventListener('pointermove', handlePointerMove, { passive: false });
-    window.addEventListener('pointerup', handlePointerUp, { passive: false });
-    window.addEventListener('pointercancel', handlePointerUp, { passive: false });
-
-    return () => {
-      document.body.style.userSelect = previousUserSelect;
-      document.body.style.touchAction = previousTouchAction;
-      document.body.style.overflow = previousOverflow;
-
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('pointercancel', handlePointerUp);
-    };
-  }, [movingBooking?.booking.id, activeDate, bookings, timeOverrides]);
-
-  const startBookingLongPress = (
+  const handleBookingPointerDown = (
     booking: BookingItem,
     event: ReactPointerEvent<HTMLElement>
   ) => {
     if (booking.status === 'completed') return;
-    if (movingBookingRef.current) return;
 
-    const target = event.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('[data-no-drag="true"]')) return;
 
-    clearLongPressTimer();
+    clearDragTimer();
 
-    pendingLongPressRef.current = {
-      booking,
+    pendingDragRef.current = {
+      bookingId: booking.id,
       startX: event.clientX,
       startY: event.clientY,
-      offsetX: event.clientX - rect.left,
-      offsetY: event.clientY - rect.top,
-      width: rect.width,
-      height: rect.height,
     };
 
-    longPressTimerRef.current = window.setTimeout(() => {
-      const pending = pendingLongPressRef.current;
-      if (!pending) return;
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // ignore pointer capture errors on older browsers
+    }
 
-      suppressClickRef.current = true;
-
-      setMovingBooking({
-        booking: pending.booking,
-        x: pending.startX,
-        y: pending.startY,
-        offsetX: pending.offsetX,
-        offsetY: pending.offsetY,
-        width: pending.width,
-        height: pending.height,
+    dragTimerRef.current = window.setTimeout(() => {
+      pendingDragRef.current = null;
+      setDragMove({
+        bookingId: booking.id,
+        pointerId: event.pointerId,
+        active: true,
+        startX: event.clientX,
+        startY: event.clientY,
+        x: event.clientX,
+        y: event.clientY,
       });
-
-      pendingLongPressRef.current = null;
-      longPressTimerRef.current = null;
-    }, 330);
+    }, 420);
   };
 
-  const trackLongPressMove = (event: ReactPointerEvent<HTMLElement>) => {
-    const pending = pendingLongPressRef.current;
-    if (!pending || movingBookingRef.current) return;
+  const handleBookingPointerMove = (event: ReactPointerEvent<HTMLElement>) => {
+    const pending = pendingDragRef.current;
 
-    const dx = Math.abs(event.clientX - pending.startX);
-    const dy = Math.abs(event.clientY - pending.startY);
+    if (pending && !dragMove?.active) {
+      const dx = Math.abs(event.clientX - pending.startX);
+      const dy = Math.abs(event.clientY - pending.startY);
 
-    if (dx > 12 || dy > 12) {
-      clearLongPressTimer();
+      if (dx > 12 || dy > 12) {
+        clearDragTimer();
+        pendingDragRef.current = null;
+      }
+    }
+
+    if (!dragMove?.active) return;
+
+    event.preventDefault();
+
+    setDragMove((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        x: event.clientX,
+        y: event.clientY,
+      };
+    });
+  };
+
+  const handleBookingPointerUp = (event: ReactPointerEvent<HTMLElement>) => {
+    clearDragTimer();
+    pendingDragRef.current = null;
+
+    if (!dragMove?.active) return;
+
+    event.preventDefault();
+    finishDragDrop(event.clientX, event.clientY);
+  };
+
+  const handleBookingPointerCancel = () => {
+    clearDragTimer();
+    pendingDragRef.current = null;
+
+    if (dragMove?.active) {
+      stopDragMove();
     }
   };
 
-  const stopLongPressBeforeStart = () => {
-    if (!movingBookingRef.current) {
-      clearLongPressTimer();
-    }
-  };
-
-  const openBookingChat = (booking: BookingItem) => {
+  const handleOpenBookingChat = (booking: BookingItem) => {
     const thread = getOrCreateChatThread({
-      threadId: `booking-${booking.id}`,
+      threadId: booking.id,
       providerName: booking.masterName || 'Client',
-      providerAvatar:
-        booking.masterAvatar ||
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+      providerAvatar: booking.masterAvatar || '',
       category: booking.serviceName || 'Booking',
       online: true,
       lastSeenText: 'Online',
@@ -1312,15 +1270,10 @@ export default function ProfileClientsPage() {
     router.push(`/messages/${encodeURIComponent(thread.id)}`);
   };
 
-  const openClientDetails = (booking: BookingItem) => {
-    if (suppressClickRef.current) return;
-    setClientCardBooking(booking);
-  };
-
   const handleTopMode = (mode: ViewMode) => {
-    cancelMovingBooking();
     setViewMode(mode);
     setStatusFilter('all');
+    stopDragMove();
 
     if (mode === 'today') {
       const now = startOfDay(new Date());
@@ -1366,7 +1319,7 @@ export default function ProfileClientsPage() {
   };
 
   const movePeriod = (direction: number) => {
-    cancelMovingBooking();
+    stopDragMove();
 
     if (viewMode === 'week') {
       const next = addDays(selectedDate, direction * 7);
@@ -1401,6 +1354,7 @@ export default function ProfileClientsPage() {
   };
 
   const markDone = (booking: BookingItem) => {
+    stopDragMove();
     updateBookingStatus(booking.id, 'completed');
     setBookings((prev) =>
       prev.map((item) => (item.id === booking.id ? { ...item, status: 'completed' } : item))
@@ -1468,6 +1422,8 @@ export default function ProfileClientsPage() {
   };
 
   const openSlotAction = (time: string) => {
+    stopDragMove();
+
     const [hour, minute] = time.split(':').map(Number);
     setSlotAction({
       hour: Number(hour || 0),
@@ -1553,6 +1509,10 @@ export default function ProfileClientsPage() {
     viewMode === 'history' ||
     (viewMode === 'week' && !weekOverviewOpen) ||
     (viewMode === 'calendar' && calendarStage === 'day');
+
+  const draggedBooking = dragMove
+    ? bookings.find((booking) => booking.id === dragMove.bookingId) || null
+    : null;
 
   return (
     <main
@@ -1722,7 +1682,7 @@ export default function ProfileClientsPage() {
               bookings={filteredBookings.length ? filteredBookings : periodBookings}
               timeOverrides={timeOverrides}
               onSelect={(date) => {
-                cancelMovingBooking();
+                stopDragMove();
                 setSelectedDate(startOfDay(date));
                 setCalendarDate(startOfDay(date));
                 setViewMode('week');
@@ -1793,7 +1753,7 @@ export default function ProfileClientsPage() {
               setCalendarDate(startOfDay(date));
               setWeekOverviewOpen(false);
             }}
-            onBooking={openClientDetails}
+            onBooking={setClientCardBooking}
           />
         ) : null}
 
@@ -1822,11 +1782,13 @@ export default function ProfileClientsPage() {
               showFreeWindows={showFreeWindows}
               extraTimes={extraTimes}
               getEffectiveDate={getEffectiveDate}
-              movingBookingId={movingBooking?.booking.id}
+              dragMove={dragMove}
+              isDragClickBlocked={() => dragClickBlockRef.current}
               onOpenSlot={openSlotAction}
-              onMovePointerDown={startBookingLongPress}
-              onMovePointerMove={trackLongPressMove}
-              onMovePointerUp={stopLongPressBeforeStart}
+              onBookingPointerDown={handleBookingPointerDown}
+              onBookingPointerMove={handleBookingPointerMove}
+              onBookingPointerUp={handleBookingPointerUp}
+              onBookingPointerCancel={handleBookingPointerCancel}
               onChangeBookingMinute={(booking, hour, minute) => {
                 setCustomMinute(minute);
                 setTimePicker({ hour, bookingId: booking.id });
@@ -1834,8 +1796,8 @@ export default function ProfileClientsPage() {
               onDone={markDone}
               onApprove={approveBooking}
               onReject={rejectBooking}
-              onChat={openBookingChat}
-              onDetails={openClientDetails}
+              onChat={handleOpenBookingChat}
+              onDetails={(booking) => setClientCardBooking(booking)}
               onNote={setNoteBooking}
             />
 
@@ -1853,18 +1815,20 @@ export default function ProfileClientsPage() {
 
       <BottomNav active="clients" />
 
-      {movingBooking ? (
+      {dragMove?.active ? (
         <>
           <button
             type="button"
-            onClick={cancelMovingBooking}
-            style={moveCancelButtonStyle}
-            aria-label={text.close}
+            onClick={stopDragMove}
+            aria-label={text.moveCancel}
+            style={dragCancelButtonStyle}
           >
             ×
           </button>
 
-          <MoveGhost booking={movingBooking} text={text} />
+          {draggedBooking ? (
+            <DragGhost booking={draggedBooking} text={text} x={dragMove.x} y={dragMove.y} />
+          ) : null}
         </>
       ) : null}
 
@@ -1931,7 +1895,7 @@ export default function ProfileClientsPage() {
           booking={clientCardBooking}
           text={text}
           onClose={() => setClientCardBooking(null)}
-          onChat={() => openBookingChat(clientCardBooking)}
+          onChat={() => handleOpenBookingChat(clientCardBooking)}
         />
       ) : null}
 
@@ -1946,76 +1910,6 @@ export default function ProfileClientsPage() {
         />
       ) : null}
     </main>
-  );
-}
-
-function MoveGhost({ booking, text }: { booking: MoveBookingState; text: PageText }) {
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        left: booking.x - booking.offsetX,
-        top: booking.y - booking.offsetY,
-        width: booking.width,
-        minHeight: Math.min(booking.height, 132),
-        zIndex: 500,
-        pointerEvents: 'none',
-        borderRadius: 24,
-        border: `4px solid ${BRAND.border}`,
-        background: statusBg(booking.booking.status),
-        boxShadow: '0 18px 36px rgba(0,0,0,0.24)',
-        padding: '12px 14px',
-        boxSizing: 'border-box',
-        display: 'grid',
-        gridTemplateColumns: '82px minmax(0,1fr) auto',
-        gap: 10,
-        alignItems: 'center',
-        opacity: 0.96,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 26,
-          fontWeight: 900,
-          color: BRAND.navy,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {getTimeLabel(getBookingDate(booking.booking))}
-      </div>
-
-      <div style={{ minWidth: 0 }}>
-        <div
-          style={{
-            fontSize: 18,
-            fontWeight: 900,
-            color: BRAND.navy,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {booking.booking.masterName}
-        </div>
-        <div
-          style={{
-            marginTop: 4,
-            fontSize: 13,
-            fontWeight: 900,
-            color: BRAND.muted,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {text.moveBooking}
-        </div>
-      </div>
-
-      <div style={{ fontSize: 22, fontWeight: 900, color: statusColor(booking.booking.status) }}>
-        {money(Number(booking.booking.price || 0))}
-      </div>
-    </div>
   );
 }
 
@@ -2921,11 +2815,13 @@ function NotebookSchedule({
   showFreeWindows,
   extraTimes,
   getEffectiveDate,
-  movingBookingId,
+  dragMove,
+  isDragClickBlocked,
   onOpenSlot,
-  onMovePointerDown,
-  onMovePointerMove,
-  onMovePointerUp,
+  onBookingPointerDown,
+  onBookingPointerMove,
+  onBookingPointerUp,
+  onBookingPointerCancel,
   onChangeBookingMinute,
   onDone,
   onApprove,
@@ -2940,11 +2836,13 @@ function NotebookSchedule({
   showFreeWindows: boolean;
   extraTimes: string[];
   getEffectiveDate: (booking: BookingItem) => Date | null;
-  movingBookingId?: string;
+  dragMove: DragMoveState | null;
+  isDragClickBlocked: () => boolean;
   onOpenSlot: (time: string) => void;
-  onMovePointerDown: (booking: BookingItem, event: ReactPointerEvent<HTMLElement>) => void;
-  onMovePointerMove: (event: ReactPointerEvent<HTMLElement>) => void;
-  onMovePointerUp: () => void;
+  onBookingPointerDown: (booking: BookingItem, event: ReactPointerEvent<HTMLElement>) => void;
+  onBookingPointerMove: (event: ReactPointerEvent<HTMLElement>) => void;
+  onBookingPointerUp: (event: ReactPointerEvent<HTMLElement>) => void;
+  onBookingPointerCancel: () => void;
   onChangeBookingMinute: (booking: BookingItem, hour: number, minute: number) => void;
   onDone: (booking: BookingItem) => void;
   onApprove: (booking: BookingItem) => void;
@@ -2996,10 +2894,13 @@ function NotebookSchedule({
               booking={booking}
               date={date}
               text={text}
-              isMovingSource={movingBookingId === booking.id}
-              onMovePointerDown={(event) => onMovePointerDown(booking, event)}
-              onMovePointerMove={onMovePointerMove}
-              onMovePointerUp={onMovePointerUp}
+              isMoving={dragMove?.active && dragMove.bookingId === booking.id}
+              isMoveMode={Boolean(dragMove?.active)}
+              isDragClickBlocked={isDragClickBlocked}
+              onPointerDown={(event) => onBookingPointerDown(booking, event)}
+              onPointerMove={onBookingPointerMove}
+              onPointerUp={onBookingPointerUp}
+              onPointerCancel={onBookingPointerCancel}
               onMinute={() => onChangeBookingMinute(booking, date?.getHours() || 0, minute)}
               onDone={() => onDone(booking)}
               onApprove={() => onApprove(booking)}
@@ -3019,10 +2920,13 @@ function NotebookBookingRow({
   booking,
   date,
   text,
-  isMovingSource,
-  onMovePointerDown,
-  onMovePointerMove,
-  onMovePointerUp,
+  isMoving,
+  isMoveMode,
+  isDragClickBlocked,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  onPointerCancel,
   onMinute,
   onDone,
   onApprove,
@@ -3034,10 +2938,13 @@ function NotebookBookingRow({
   booking: BookingItem;
   date: Date | null;
   text: PageText;
-  isMovingSource: boolean;
-  onMovePointerDown: (event: ReactPointerEvent<HTMLElement>) => void;
-  onMovePointerMove: (event: ReactPointerEvent<HTMLElement>) => void;
-  onMovePointerUp: () => void;
+  isMoving: boolean;
+  isMoveMode: boolean;
+  isDragClickBlocked: () => boolean;
+  onPointerDown: (event: ReactPointerEvent<HTMLElement>) => void;
+  onPointerMove: (event: ReactPointerEvent<HTMLElement>) => void;
+  onPointerUp: (event: ReactPointerEvent<HTMLElement>) => void;
+  onPointerCancel: () => void;
   onMinute: () => void;
   onDone: () => void;
   onApprove: () => void;
@@ -3059,21 +2966,23 @@ function NotebookBookingRow({
 
   return (
     <article
-      data-drop-booking={booking.id}
-      title={done ? text.completed : text.moveHint}
-      onPointerDown={onMovePointerDown}
-      onPointerMove={onMovePointerMove}
-      onPointerUp={onMovePointerUp}
-      onPointerCancel={onMovePointerUp}
-      onContextMenu={(event) => event.preventDefault()}
-      onClick={onDetails}
+      data-booking-drop-id={!done ? booking.id : undefined}
+      onPointerDown={!done ? onPointerDown : undefined}
+      onPointerMove={!done ? onPointerMove : undefined}
+      onPointerUp={!done ? onPointerUp : undefined}
+      onPointerCancel={!done ? onPointerCancel : undefined}
+      onClick={() => {
+        if (isMoveMode || isDragClickBlocked()) return;
+        onDetails();
+      }}
       style={{
         position: 'relative',
         minHeight: cancelled ? 82 : 116,
         borderRadius: 22,
-        border: isMovingSource
+        border: isMoving
           ? `4px solid ${BRAND.border}`
           : `2px solid ${cancelled ? '#f3a9bb' : '#d8e3dd'}`,
+        outline: isMoving ? `2px solid #ffffff` : 'none',
         background: cancelled
           ? 'linear-gradient(135deg, #ffffff 0%, #ffffff 47%, #ffe3ea 48%, #ffe3ea 100%)'
           : bg,
@@ -3081,17 +2990,17 @@ function NotebookBookingRow({
         gridTemplateColumns: '104px minmax(0, 1fr) 64px 34px',
         gap: 7,
         alignItems: 'center',
-        padding: isMovingSource ? '8px 7px 8px 0' : '10px 9px 10px 0',
+        padding: '10px 9px 10px 0',
         overflow: 'hidden',
-        boxShadow: isMovingSource
-          ? '0 14px 32px rgba(0,0,0,0.18)'
+        boxShadow: isMoving
+          ? '0 16px 34px rgba(0,0,0,0.18)'
           : '0 7px 18px rgba(7,27,70,0.05)',
-        cursor: done ? 'default' : 'grab',
-        opacity: isMovingSource ? 0.72 : 1,
+        cursor: done ? 'pointer' : 'grab',
         userSelect: 'none',
         WebkitUserSelect: 'none',
-        WebkitTouchCallout: 'none',
-        touchAction: done ? 'auto' : 'pan-y',
+        touchAction: isMoving ? 'none' : 'manipulation',
+        opacity: isMoving ? 0.82 : 1,
+        transform: isMoving ? 'scale(1.01)' : 'none',
       }}
     >
       <div
@@ -3106,6 +3015,8 @@ function NotebookBookingRow({
       />
 
       <div
+        data-no-drag="true"
+        onClick={(event) => event.stopPropagation()}
         style={{
           display: 'grid',
           gridTemplateColumns: '38px 1fr',
@@ -3114,15 +3025,7 @@ function NotebookBookingRow({
           paddingLeft: 14,
         }}
       >
-        <button
-          type="button"
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={(event) => {
-            event.stopPropagation();
-            onMinute();
-          }}
-          style={timePlusButtonStyle}
-        >
+        <button type="button" onClick={onMinute} style={timePlusButtonStyle}>
           {done ? '✓' : '+'}
         </button>
 
@@ -3199,7 +3102,7 @@ function NotebookBookingRow({
             </div>
 
             <div
-              onPointerDown={(event) => event.stopPropagation()}
+              data-no-drag="true"
               onClick={(event) => event.stopPropagation()}
               style={{
                 marginTop: 7,
@@ -3255,7 +3158,7 @@ function NotebookBookingRow({
 
       <button
         type="button"
-        onPointerDown={(event) => event.stopPropagation()}
+        data-no-drag="true"
         onClick={(event) => {
           event.stopPropagation();
           onNote();
@@ -3330,6 +3233,75 @@ function FreeSlotRow({
         {text.available}
       </div>
     </article>
+  );
+}
+
+function DragGhost({
+  booking,
+  text,
+  x,
+  y,
+}: {
+  booking: BookingItem;
+  text: PageText;
+  x: number;
+  y: number;
+}) {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        left: x,
+        top: y,
+        transform: 'translate(-50%, -50%)',
+        zIndex: 500,
+        width: 245,
+        minHeight: 78,
+        borderRadius: 22,
+        border: `4px solid ${BRAND.border}`,
+        background: statusBg(booking.status),
+        boxShadow: '0 18px 40px rgba(0,0,0,0.28)',
+        pointerEvents: 'none',
+        padding: 12,
+        boxSizing: 'border-box',
+        display: 'grid',
+        gridTemplateColumns: '1fr auto',
+        gap: 8,
+        alignItems: 'center',
+      }}
+    >
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 18,
+            fontWeight: 900,
+            color: BRAND.navy,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {booking.masterName}
+        </div>
+        <div
+          style={{
+            marginTop: 4,
+            fontSize: 13,
+            fontWeight: 900,
+            color: BRAND.muted,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {booking.serviceName || text.service}
+        </div>
+      </div>
+
+      <div style={{ fontSize: 22, fontWeight: 900, color: statusColor(booking.status) }}>
+        {money(Number(booking.price || 0))}
+      </div>
+    </div>
   );
 }
 
@@ -3949,6 +3921,23 @@ const weekDayAgendaStyle: CSSProperties = {
   textAlign: 'left',
 };
 
+const dragCancelButtonStyle: CSSProperties = {
+  position: 'fixed',
+  right: 18,
+  top: 'calc(18px + env(safe-area-inset-top))',
+  zIndex: 520,
+  width: 64,
+  height: 64,
+  borderRadius: 999,
+  border: `4px solid ${BRAND.border}`,
+  background: BRAND.red,
+  color: '#ffffff',
+  fontSize: 36,
+  fontWeight: 900,
+  cursor: 'pointer',
+  boxShadow: '0 12px 28px rgba(0,0,0,0.22)',
+};
+
 const modalOverlayStyle: CSSProperties = {
   position: 'fixed',
   inset: 0,
@@ -3990,22 +3979,4 @@ const modalTitleStyle: CSSProperties = {
   fontSize: 25,
   fontWeight: 900,
   color: BRAND.navy,
-};
-
-const moveCancelButtonStyle: CSSProperties = {
-  position: 'fixed',
-  top: 86,
-  right: 18,
-  zIndex: 600,
-  width: 70,
-  height: 70,
-  borderRadius: 999,
-  border: `4px solid ${BRAND.border}`,
-  background: BRAND.red,
-  color: '#ffffff',
-  fontSize: 39,
-  lineHeight: 1,
-  fontWeight: 900,
-  cursor: 'pointer',
-  boxShadow: '0 14px 28px rgba(0,0,0,0.24)',
 };
