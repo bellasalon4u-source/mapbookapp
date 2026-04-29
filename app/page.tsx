@@ -1173,6 +1173,7 @@ export default function HomePage() {
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [mapMode] = useState<'map' | 'satellite'>('map');
   const [selectedMaster, setSelectedMaster] = useState<any | null>(null);
+  const [mapResetKey, setMapResetKey] = useState(0);
   const [likedMasterIds, setLikedMasterIds] = useState<string[]>([]);
   const [likedFilterMode, setLikedFilterMode] = useState<'none' | 'category' | 'all'>('none');
   const [dealFilterMode, setDealFilterMode] = useState<DealFilterMode>('none');
@@ -1508,6 +1509,7 @@ export default function HomePage() {
 
   useEffect(() => {
     setSelectedMaster(null);
+    setMapResetKey((prev) => prev + 1);
   }, [activeCategory, activeSubcategory, search, likedFilterMode, dealFilterMode]);
 
   const likedInCategoryCount = allMasters.filter(
@@ -1534,6 +1536,11 @@ export default function HomePage() {
   const selectedMasterDiscountBadge = selectedMaster?.discountBadge
     ? String(selectedMaster.discountBadge)
     : promotionBadgeTextByMasterId[String(selectedMaster?.id || '')];
+
+  const closeSelectedMasterCard = () => {
+    setSelectedMaster(null);
+    setMapResetKey((prev) => prev + 1);
+  };
 
   const shareApp = async () => {
     const shareUrl = 'https://olamep.com';
@@ -2065,7 +2072,7 @@ export default function HomePage() {
               setSearchOpen(false);
               setLikedFilterMode('none');
               setDealFilterMode('none');
-              setSelectedMaster(null);
+              closeSelectedMasterCard();
             }}
             onSelectSubcategory={(subcategory) => {
               setActiveSubcategory(subcategory);
@@ -2073,11 +2080,11 @@ export default function HomePage() {
               setSearchOpen(false);
               setLikedFilterMode('none');
               setDealFilterMode('none');
-              setSelectedMaster(null);
+              closeSelectedMasterCard();
             }}
             onClearSubcategory={() => {
               setActiveSubcategory('');
-              setSelectedMaster(null);
+              closeSelectedMasterCard();
             }}
           />
         </section>
@@ -2103,6 +2110,7 @@ export default function HomePage() {
               }}
             >
               <RealMap
+                key={`real-map-${mapResetKey}`}
                 masters={mapMasters}
                 mapMode={mapMode}
                 activeCategory={activeCategory}
@@ -2114,9 +2122,7 @@ export default function HomePage() {
                 onMasterSelect={(master) => {
                   setSelectedMaster(master);
                 }}
-                onMapBackgroundClick={() => {
-                  setSelectedMaster(null);
-                }}
+                onMapBackgroundClick={closeSelectedMasterCard}
                 onToggleLike={(master) => {
                   toggleLikedMaster(String(master.id));
                 }}
@@ -2143,22 +2149,22 @@ export default function HomePage() {
                 }}
                 onFavourite={() => {
                   setDealFilterMode('none');
-                  setSelectedMaster(null);
+                  closeSelectedMasterCard();
                   setLikedFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
                 }}
                 onAllFavourite={() => {
                   setDealFilterMode('none');
-                  setSelectedMaster(null);
+                  closeSelectedMasterCard();
                   setLikedFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
                 }}
                 onHotOffers={() => {
                   setLikedFilterMode('none');
-                  setSelectedMaster(null);
+                  closeSelectedMasterCard();
                   setDealFilterMode((prev) => (prev === 'category' ? 'none' : 'category'));
                 }}
                 onAllHotOffers={() => {
                   setLikedFilterMode('none');
-                  setSelectedMaster(null);
+                  closeSelectedMasterCard();
                   setDealFilterMode((prev) => (prev === 'all' ? 'none' : 'all'));
                 }}
                 favouriteCount={displayLikedInCategoryCount}
@@ -2177,7 +2183,7 @@ export default function HomePage() {
                   language={language}
                   liked={likedMasterIds.includes(String(selectedMaster.id))}
                   discountBadge={selectedMasterDiscountBadge}
-                  onClose={() => setSelectedMaster(null)}
+                  onClose={closeSelectedMasterCard}
                   onLike={() => toggleLikedMaster(String(selectedMaster.id))}
                   onOpen={() => router.push(`/master/${selectedMaster.id}`)}
                   onRoute={() => openRouteToMaster(selectedMaster)}
