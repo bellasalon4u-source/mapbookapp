@@ -904,6 +904,12 @@ export default function ProfileClientsPage() {
       if (dragTimerRef.current) {
         window.clearTimeout(dragTimerRef.current);
       }
+
+      if (typeof document !== 'undefined') {
+        document.body.style.userSelect = '';
+        document.body.style.webkitUserSelect = '';
+        document.body.style.touchAction = '';
+      }
     };
   }, []);
 
@@ -1106,6 +1112,12 @@ export default function ProfileClientsPage() {
     clearDragTimer();
     pendingDragRef.current = null;
     setDragMove(null);
+
+    if (typeof document !== 'undefined') {
+      document.body.style.userSelect = '';
+      document.body.style.webkitUserSelect = '';
+      document.body.style.touchAction = '';
+    }
   };
 
   const moveBookingToSlot = (bookingId: string, slotTime: string) => {
@@ -1150,19 +1162,66 @@ export default function ProfileClientsPage() {
     }));
   };
 
+  const getDropTargetFromPoint = (clientX: number, clientY: number, draggedBookingId: string) => {
+    const slotElements = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-drop-slot]')
+    );
+
+    for (const element of slotElements) {
+      const rect = element.getBoundingClientRect();
+
+      if (
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom
+      ) {
+        return {
+          type: 'slot' as const,
+          value: element.dataset.dropSlot || '',
+        };
+      }
+    }
+
+    const bookingElements = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-booking-drop-id]')
+    );
+
+    for (const element of bookingElements) {
+      const bookingId = element.dataset.bookingDropId || '';
+
+      if (!bookingId || bookingId === draggedBookingId) continue;
+
+      const rect = element.getBoundingClientRect();
+
+      if (
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom
+      ) {
+        return {
+          type: 'booking' as const,
+          value: bookingId,
+        };
+      }
+    }
+
+    return null;
+  };
+
   const finishDragDrop = (clientX: number, clientY: number) => {
     if (!dragMove?.active) return;
 
     const draggedBookingId = dragMove.bookingId;
-    const element = document.elementFromPoint(clientX, clientY) as HTMLElement | null;
+    const target = getDropTargetFromPoint(clientX, clientY, draggedBookingId);
 
-    const slotElement = element?.closest('[data-drop-slot]') as HTMLElement | null;
-    const bookingElement = element?.closest('[data-booking-drop-id]') as HTMLElement | null;
+    if (target?.type === 'slot' && target.value) {
+      moveBookingToSlot(draggedBookingId, target.value);
+    }
 
-    if (slotElement?.dataset.dropSlot) {
-      moveBookingToSlot(draggedBookingId, slotElement.dataset.dropSlot);
-    } else if (bookingElement?.dataset.bookingDropId) {
-      swapBookings(draggedBookingId, bookingElement.dataset.bookingDropId);
+    if (target?.type === 'booking' && target.value) {
+      swapBookings(draggedBookingId, target.value);
     }
 
     dragClickBlockRef.current = true;
@@ -1182,6 +1241,8 @@ export default function ProfileClientsPage() {
     const target = event.target as HTMLElement | null;
     if (target?.closest('[data-no-drag="true"]')) return;
 
+    event.preventDefault();
+
     clearDragTimer();
 
     pendingDragRef.current = {
@@ -1198,6 +1259,7 @@ export default function ProfileClientsPage() {
 
     dragTimerRef.current = window.setTimeout(() => {
       pendingDragRef.current = null;
+
       setDragMove({
         bookingId: booking.id,
         pointerId: event.pointerId,
@@ -1207,7 +1269,11 @@ export default function ProfileClientsPage() {
         x: event.clientX,
         y: event.clientY,
       });
-    }, 420);
+
+      document.body.style.userSelect = 'none';
+      document.body.style.webkitUserSelect = 'none';
+      document.body.style.touchAction = 'none';
+    }, 360);
   };
 
   const handleBookingPointerMove = (event: ReactPointerEvent<HTMLElement>) => {
@@ -2971,6 +3037,9 @@ function NotebookBookingRow({
       onPointerMove={!done ? onPointerMove : undefined}
       onPointerUp={!done ? onPointerUp : undefined}
       onPointerCancel={!done ? onPointerCancel : undefined}
+      onContextMenu={(event) => {
+        if (!done) event.preventDefault();
+      }}
       onClick={() => {
         if (isMoveMode || isDragClickBlocked()) return;
         onDetails();
@@ -2998,7 +3067,7 @@ function NotebookBookingRow({
         cursor: done ? 'pointer' : 'grab',
         userSelect: 'none',
         WebkitUserSelect: 'none',
-        touchAction: isMoving ? 'none' : 'manipulation',
+        touchAction: done ? 'manipulation' : 'none',
         opacity: isMoving ? 0.82 : 1,
         transform: isMoving ? 'scale(1.01)' : 'none',
       }}
