@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getAllMasters } from '../services/masters';
@@ -507,7 +507,6 @@ function BrightTicker({ language }: { language: AppLanguage }) {
 function QuickActionsPanel({
   open,
   onToggle,
-  onShare,
   onQrReceive,
   onInvite,
   onFavourite,
@@ -525,7 +524,6 @@ function QuickActionsPanel({
 }: {
   open: boolean;
   onToggle: () => void;
-  onShare: () => void;
   onQrReceive: () => void;
   onInvite: () => void;
   onFavourite: () => void;
@@ -543,22 +541,15 @@ function QuickActionsPanel({
 }) {
   const items = [
     {
-      key: 'share',
-      label: 'Share app',
-      icon: '⤴',
-      color: '#ff3b58',
-      onClick: onShare,
-    },
-    {
       key: 'qr',
-      label: 'QR receive',
+      label: 'QR payment',
       icon: '▦',
       color: '#2378ff',
       onClick: onQrReceive,
     },
     {
       key: 'invite',
-      label: 'Invite',
+      label: 'Invite friends',
       icon: '👥',
       color: '#2378ff',
       onClick: onInvite,
@@ -1576,6 +1567,302 @@ function QrReceiveModal({
   );
 }
 
+function InviteFriendsModal({
+  language,
+  inviteCode,
+  inviteLink,
+  copied,
+  onCopy,
+  onShare,
+  onClose,
+}: {
+  language: AppLanguage;
+  inviteCode: string;
+  inviteLink: string;
+  copied: boolean;
+  onCopy: () => void;
+  onShare: () => void;
+  onClose: () => void;
+}) {
+  const labels = {
+    title:
+      language === 'RU'
+        ? 'Пригласи друзей'
+        : language === 'UA'
+        ? 'Запроси друзів'
+        : 'Invite friends',
+    subtitle:
+      language === 'RU'
+        ? 'Дай другу свой код или ссылку. Когда он присоединится, бонус появится на твоём балансе.'
+        : language === 'UA'
+        ? 'Дай другу свій код або посилання. Коли він приєднається, бонус зʼявиться на твоєму балансі.'
+        : 'Share your code or link. When your friend joins, your bonus will appear in your balance.',
+    code:
+      language === 'RU'
+        ? 'Твой invite code'
+        : language === 'UA'
+        ? 'Твій invite code'
+        : 'Your invite code',
+    copy:
+      language === 'RU'
+        ? 'Скопировать код'
+        : language === 'UA'
+        ? 'Скопіювати код'
+        : 'Copy code',
+    copied:
+      language === 'RU'
+        ? 'Скопировано'
+        : language === 'UA'
+        ? 'Скопійовано'
+        : 'Copied',
+    share:
+      language === 'RU'
+        ? 'Поделиться ссылкой'
+        : language === 'UA'
+        ? 'Поділитися посиланням'
+        : 'Share invite link',
+    bonus:
+      language === 'RU'
+        ? 'Бонус за приглашение'
+        : language === 'UA'
+        ? 'Бонус за запрошення'
+        : 'Referral bonus',
+    bonusText:
+      language === 'RU'
+        ? 'Друг получает приглашение, ты получаешь бонус после регистрации или первой активности.'
+        : language === 'UA'
+        ? 'Друг отримує запрошення, ти отримуєш бонус після реєстрації або першої активності.'
+        : 'Your friend gets an invite, and you get a bonus after they join or complete their first action.',
+    close:
+      language === 'RU'
+        ? 'Закрыть'
+        : language === 'UA'
+        ? 'Закрити'
+        : 'Close',
+  };
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 8000,
+        background: 'rgba(0,0,0,0.34)',
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={(event) => event.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: 430,
+          maxHeight: '88vh',
+          overflowY: 'auto',
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          border: '3px solid #111111',
+          borderBottom: 'none',
+          background: '#ffffff',
+          padding: '18px 18px calc(22px + env(safe-area-inset-bottom))',
+          boxSizing: 'border-box',
+          boxShadow: '0 -12px 34px rgba(0,0,0,0.2)',
+        }}
+      >
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 48px',
+            gap: 10,
+            alignItems: 'start',
+          }}
+        >
+          <div>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 28,
+                lineHeight: 1,
+                fontWeight: 900,
+                color: '#071b46',
+                letterSpacing: '-0.8px',
+              }}
+            >
+              {labels.title}
+            </h2>
+            <p
+              style={{
+                margin: '8px 0 0',
+                fontSize: 13,
+                lineHeight: 1.35,
+                fontWeight: 800,
+                color: '#657080',
+              }}
+            >
+              {labels.subtitle}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 999,
+              border: '2.5px solid #111111',
+              background: '#ffffff',
+              color: '#071b46',
+              fontSize: 24,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        <div
+          style={{
+            marginTop: 16,
+            borderRadius: 26,
+            border: '2.5px solid #111111',
+            background: 'linear-gradient(135deg, #eef4ff 0%, #ffffff 45%, #dcffe8 100%)',
+            padding: 14,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 900,
+              color: '#657080',
+            }}
+          >
+            {labels.code}
+          </div>
+
+          <div
+            style={{
+              marginTop: 8,
+              minHeight: 64,
+              borderRadius: 20,
+              border: '2.5px solid #111111',
+              background: '#ffffff',
+              color: '#071b46',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 26,
+              fontWeight: 900,
+              letterSpacing: '1px',
+            }}
+          >
+            {inviteCode}
+          </div>
+
+          <div
+            style={{
+              marginTop: 10,
+              borderRadius: 18,
+              border: '2px solid #111111',
+              background: '#fff4c7',
+              padding: 10,
+              fontSize: 12,
+              lineHeight: 1.35,
+              fontWeight: 800,
+              color: '#071b46',
+            }}
+          >
+            <strong>{labels.bonus}:</strong> {labels.bonusText}
+          </div>
+
+          <div
+            style={{
+              marginTop: 12,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 9,
+            }}
+          >
+            <button
+              type="button"
+              onClick={onCopy}
+              style={{
+                minHeight: 52,
+                borderRadius: 18,
+                border: '2.5px solid #111111',
+                background: copied ? '#dcffe8' : '#ffffff',
+                color: copied ? '#008f3a' : '#071b46',
+                fontSize: 14,
+                fontWeight: 900,
+                cursor: 'pointer',
+              }}
+            >
+              {copied ? `✓ ${labels.copied}` : labels.copy}
+            </button>
+
+            <button
+              type="button"
+              onClick={onShare}
+              style={{
+                minHeight: 52,
+                borderRadius: 18,
+                border: '2.5px solid #111111',
+                background: '#55c75f',
+                color: '#ffffff',
+                fontSize: 14,
+                fontWeight: 900,
+                cursor: 'pointer',
+                boxShadow: '0 8px 18px rgba(85,199,95,0.28)',
+              }}
+            >
+              {labels.share}
+            </button>
+          </div>
+
+          <div
+            style={{
+              marginTop: 12,
+              borderRadius: 18,
+              border: '2px solid #111111',
+              background: '#ffffff',
+              padding: 11,
+              fontSize: 12,
+              lineHeight: 1.35,
+              fontWeight: 800,
+              color: '#657080',
+              wordBreak: 'break-all',
+            }}
+          >
+            {inviteLink}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            marginTop: 14,
+            width: '100%',
+            minHeight: 50,
+            borderRadius: 18,
+            border: '2.5px solid #111111',
+            background: '#ffffff',
+            color: '#071b46',
+            fontSize: 15,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          {labels.close}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
   const baseMasters = getAllMasters();
@@ -1610,8 +1897,14 @@ export default function HomePage() {
   const [qrGenerated, setQrGenerated] = useState(false);
   const [qrCredited, setQrCredited] = useState(false);
 
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteCopied, setInviteCopied] = useState(false);
+
   const tr = t(language);
   const pageBackground = getAppBackground(language);
+
+  const inviteCode = 'OLAMEP25';
+  const inviteLink = `https://olamep.com/invite/${inviteCode}`;
 
   useEffect(() => {
     setRecentSearches(readRecentSearches());
@@ -1975,6 +2268,60 @@ export default function HomePage() {
     if (!qrNote) setQrNote('Olamep payment');
   };
 
+  const openInviteFriends = () => {
+    setQuickPanelOpen(false);
+    setInviteOpen(true);
+    setInviteCopied(false);
+  };
+
+  const copyInviteCode = async () => {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(inviteCode);
+      }
+    } catch {
+      // Safe fallback.
+    }
+
+    setInviteCopied(true);
+
+    window.setTimeout(() => {
+      setInviteCopied(false);
+    }, 1600);
+  };
+
+  const shareInviteLink = async () => {
+    const shareText =
+      language === 'RU'
+        ? `Присоединяйся к Olamep. Мой invite code: ${inviteCode}`
+        : language === 'UA'
+        ? `Приєднуйся до Olamep. Мій invite code: ${inviteCode}`
+        : `Join Olamep. My invite code: ${inviteCode}`;
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({
+          title: 'Olamep',
+          text: shareText,
+          url: inviteLink,
+        });
+        return;
+      }
+
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(`${shareText} ${inviteLink}`);
+      }
+
+      setInviteCopied(true);
+
+      window.setTimeout(() => {
+        setInviteCopied(false);
+      }, 1600);
+    } catch {
+      // Safe fallback.
+    }
+  };
+
   const creditQrPaymentToWallet = () => {
     const amount = Number(qrAmount || 0);
 
@@ -2004,27 +2351,6 @@ export default function HomePage() {
     });
 
     setQrCredited(true);
-  };
-
-  const shareApp = async () => {
-    const shareUrl = 'https://olamep.com';
-
-    try {
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        await navigator.share({
-          title: 'Olamep',
-          text: 'Olamep',
-          url: shareUrl,
-        });
-        return;
-      }
-
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(shareUrl);
-      }
-    } catch {
-      // Safe fallback.
-    }
   };
 
   const selectSearchResult = (result: SearchResult) => {
@@ -2601,13 +2927,8 @@ export default function HomePage() {
               <QuickActionsPanel
                 open={quickPanelOpen}
                 onToggle={() => setQuickPanelOpen((prev) => !prev)}
-                onShare={() => {
-                  void shareApp();
-                }}
                 onQrReceive={openQrReceive}
-                onInvite={() => {
-                  void shareApp();
-                }}
+                onInvite={openInviteFriends}
                 onFavourite={() => {
                   setDealFilterMode('none');
                   closeSelectedMasterCard();
@@ -2766,6 +3087,18 @@ export default function HomePage() {
           }}
           onCredit={creditQrPaymentToWallet}
           onClose={() => setQrReceiveOpen(false)}
+        />
+      ) : null}
+
+      {inviteOpen ? (
+        <InviteFriendsModal
+          language={language}
+          inviteCode={inviteCode}
+          inviteLink={inviteLink}
+          copied={inviteCopied}
+          onCopy={copyInviteCode}
+          onShare={shareInviteLink}
+          onClose={() => setInviteOpen(false)}
         />
       ) : null}
 
