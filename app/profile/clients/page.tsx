@@ -87,6 +87,8 @@ type PageText = {
   markDone: string;
   approve: string;
   reject: string;
+  clearSlot: string;
+  clearedFromSchedule: string;
   price: string;
   notes: string;
   back: string;
@@ -185,6 +187,8 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     markDone: 'Mark done',
     approve: 'Approve',
     reject: 'Reject',
+    clearSlot: 'Clear',
+    clearedFromSchedule: 'Cleared from schedule',
     price: 'Price',
     notes: 'Notes',
     back: 'Back',
@@ -264,6 +268,8 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     markDone: 'Готово',
     approve: 'Подтвердить',
     reject: 'Отклонить',
+    clearSlot: 'Очистить',
+    clearedFromSchedule: 'Очищено из расписания',
     price: 'Цена',
     notes: 'Заметки',
     back: 'Назад',
@@ -343,6 +349,8 @@ const texts: Partial<Record<AppLanguage, PageText>> = {
     markDone: 'Готово',
     approve: 'Підтвердити',
     reject: 'Відхилити',
+    clearSlot: 'Очистити',
+    clearedFromSchedule: 'Очищено з розкладу',
     price: 'Ціна',
     notes: 'Нотатки',
     back: 'Назад',
@@ -822,6 +830,7 @@ export default function ProfileClientsPage() {
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [bookings, setBookings] = useState<BookingItem[]>([]);
+  const [clearedBookingIds, setClearedBookingIds] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('today');
   const [calendarStage, setCalendarStage] = useState<CalendarStage>('day');
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
@@ -986,11 +995,16 @@ export default function ProfileClientsPage() {
       source = [...bookings];
     }
 
+    if (viewMode !== 'history') {
+      source = source.filter((booking) => !clearedBookingIds.includes(booking.id));
+    }
+
     return source;
   }, [
     bookings,
     calendarDate,
     calendarStage,
+    clearedBookingIds,
     selectedDate,
     timeOverrides,
     today,
@@ -1160,6 +1174,20 @@ export default function ProfileClientsPage() {
       [fromBookingId]: toDate.toISOString(),
       [toBookingId]: fromDate.toISOString(),
     }));
+  };
+
+  const clearCancelledFromSchedule = (booking: BookingItem) => {
+    if (booking.status !== 'cancelled') return;
+
+    stopDragMove();
+
+    setClearedBookingIds((prev) => (prev.includes(booking.id) ? prev : [...prev, booking.id]));
+
+    setTimeOverrides((prev) => {
+      const next = { ...prev };
+      delete next[booking.id];
+      return next;
+    });
   };
 
   const getDropTargetFromPoint = (clientX: number, clientY: number, draggedBookingId: string) => {
@@ -1429,6 +1457,7 @@ export default function ProfileClientsPage() {
 
   const approveBooking = (booking: BookingItem) => {
     updateBookingStatus(booking.id, 'upcoming');
+    setClearedBookingIds((prev) => prev.filter((id) => id !== booking.id));
     setBookings((prev) =>
       prev.map((item) => (item.id === booking.id ? { ...item, status: 'upcoming' } : item))
     );
@@ -1848,6 +1877,7 @@ export default function ProfileClientsPage() {
               showFreeWindows={showFreeWindows}
               extraTimes={extraTimes}
               getEffectiveDate={getEffectiveDate}
+              clearedBookingIds={clearedBookingIds}
               dragMove={dragMove}
               isDragClickBlocked={() => dragClickBlockRef.current}
               onOpenSlot={openSlotAction}
@@ -1862,6 +1892,7 @@ export default function ProfileClientsPage() {
               onDone={markDone}
               onApprove={approveBooking}
               onReject={rejectBooking}
+              onClearCancelled={clearCancelledFromSchedule}
               onChat={handleOpenBookingChat}
               onDetails={(booking) => setClientCardBooking(booking)}
               onNote={setNoteBooking}
@@ -2881,6 +2912,7 @@ function NotebookSchedule({
   showFreeWindows,
   extraTimes,
   getEffectiveDate,
+  clearedBookingIds,
   dragMove,
   isDragClickBlocked,
   onOpenSlot,
@@ -2892,6 +2924,7 @@ function NotebookSchedule({
   onDone,
   onApprove,
   onReject,
+  onClearCancelled,
   onChat,
   onDetails,
   onNote,
@@ -2902,6 +2935,7 @@ function NotebookSchedule({
   showFreeWindows: boolean;
   extraTimes: string[];
   getEffectiveDate: (booking: BookingItem) => Date | null;
+  clearedBookingIds: string[];
   dragMove: DragMoveState | null;
   isDragClickBlocked: () => boolean;
   onOpenSlot: (time: string) => void;
@@ -2913,6 +2947,7 @@ function NotebookSchedule({
   onDone: (booking: BookingItem) => void;
   onApprove: (booking: BookingItem) => void;
   onReject: (booking: BookingItem) => void;
+  onClearCancelled: (booking: BookingItem) => void;
   onChat: (booking: BookingItem) => void;
   onDetails: (booking: BookingItem) => void;
   onNote: (booking: BookingItem) => void;
@@ -2960,6 +2995,7 @@ function NotebookSchedule({
               booking={booking}
               date={date}
               text={text}
+              cleared={clearedBookingIds.includes(booking.id)}
               isMoving={dragMove?.active && dragMove.bookingId === booking.id}
               isMoveMode={Boolean(dragMove?.active)}
               isDragClickBlocked={isDragClickBlocked}
@@ -2971,6 +3007,7 @@ function NotebookSchedule({
               onDone={() => onDone(booking)}
               onApprove={() => onApprove(booking)}
               onReject={() => onReject(booking)}
+              onClearCancelled={() => onClearCancelled(booking)}
               onChat={() => onChat(booking)}
               onDetails={() => onDetails(booking)}
               onNote={() => onNote(booking)}
@@ -2986,6 +3023,7 @@ function NotebookBookingRow({
   booking,
   date,
   text,
+  cleared,
   isMoving,
   isMoveMode,
   isDragClickBlocked,
@@ -2997,6 +3035,7 @@ function NotebookBookingRow({
   onDone,
   onApprove,
   onReject,
+  onClearCancelled,
   onChat,
   onDetails,
   onNote,
@@ -3004,6 +3043,7 @@ function NotebookBookingRow({
   booking: BookingItem;
   date: Date | null;
   text: PageText;
+  cleared: boolean;
   isMoving: boolean;
   isMoveMode: boolean;
   isDragClickBlocked: () => boolean;
@@ -3015,6 +3055,7 @@ function NotebookBookingRow({
   onDone: () => void;
   onApprove: () => void;
   onReject: () => void;
+  onClearCancelled: () => void;
   onChat: () => void;
   onDetails: () => void;
   onNote: () => void;
@@ -3032,13 +3073,13 @@ function NotebookBookingRow({
 
   return (
     <article
-      data-booking-drop-id={!done ? booking.id : undefined}
-      onPointerDown={!done ? onPointerDown : undefined}
-      onPointerMove={!done ? onPointerMove : undefined}
-      onPointerUp={!done ? onPointerUp : undefined}
-      onPointerCancel={!done ? onPointerCancel : undefined}
+      data-booking-drop-id={!done && !cancelled ? booking.id : undefined}
+      onPointerDown={!done && !cancelled ? onPointerDown : undefined}
+      onPointerMove={!done && !cancelled ? onPointerMove : undefined}
+      onPointerUp={!done && !cancelled ? onPointerUp : undefined}
+      onPointerCancel={!done && !cancelled ? onPointerCancel : undefined}
       onContextMenu={(event) => {
-        if (!done) event.preventDefault();
+        if (!done && !cancelled) event.preventDefault();
       }}
       onClick={() => {
         if (isMoveMode || isDragClickBlocked()) return;
@@ -3046,7 +3087,7 @@ function NotebookBookingRow({
       }}
       style={{
         position: 'relative',
-        minHeight: cancelled ? 82 : 116,
+        minHeight: cancelled ? 96 : 116,
         borderRadius: 22,
         border: isMoving
           ? `4px solid ${BRAND.border}`
@@ -3064,10 +3105,10 @@ function NotebookBookingRow({
         boxShadow: isMoving
           ? '0 16px 34px rgba(0,0,0,0.18)'
           : '0 7px 18px rgba(7,27,70,0.05)',
-        cursor: done ? 'pointer' : 'grab',
+        cursor: done || cancelled ? 'pointer' : 'grab',
         userSelect: 'none',
         WebkitUserSelect: 'none',
-        touchAction: done ? 'manipulation' : 'none',
+        touchAction: done || cancelled ? 'manipulation' : 'none',
         opacity: isMoving ? 0.82 : 1,
         transform: isMoving ? 'scale(1.01)' : 'none',
       }}
@@ -3145,7 +3186,29 @@ function NotebookBookingRow({
           {booking.serviceName || text.service}
         </div>
 
-        {!cancelled ? (
+        {cancelled ? (
+          <div
+            data-no-drag="true"
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              marginTop: 7,
+              display: 'flex',
+              gap: 7,
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
+            <MiniPill label={text.cancelled} color={BRAND.red} bg="#ffffff" />
+
+            {cleared ? (
+              <MiniPill label={text.clearedFromSchedule} color={BRAND.muted} bg="#ffffff" />
+            ) : (
+              <button type="button" onClick={onClearCancelled} style={smallRedButtonStyle}>
+                × {text.clearSlot}
+              </button>
+            )}
+          </div>
+        ) : (
           <>
             <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: 5 }}>
               <MiniPill label={statusLabel(booking.status, text)} color={color} bg="#ffffff" />
@@ -3204,7 +3267,7 @@ function NotebookBookingRow({
               )}
             </div>
           </>
-        ) : null}
+        )}
       </div>
 
       <div style={{ textAlign: 'right' }}>
