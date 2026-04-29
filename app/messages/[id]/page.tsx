@@ -8,9 +8,14 @@ import {
   type AppLanguage,
 } from '../../../services/i18n';
 import {
+  getBookings,
+  type BookingItem,
+} from '../../../services/bookingsStore';
+import {
   formatChatDayLabel,
   formatChatTime,
   getChatThreadById,
+  getOrCreateChatThread,
   markThreadAsRead,
   sendChatMessage,
   subscribeToChatStore,
@@ -112,6 +117,64 @@ const chatTexts: Record<AppLanguage, ChatText> = {
   },
 };
 
+const demoBookingThreadMeta: Record<
+  string,
+  {
+    providerName: string;
+    providerAvatar: string;
+    category: string;
+  }
+> = {
+  'client-demo-1-cash': {
+    providerName: 'Lucie Hlavová',
+    providerAvatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    category: 'Стрижка волос',
+  },
+  'client-demo-2-card': {
+    providerName: 'Janička Andělová',
+    providerAvatar:
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+    category: 'Маникюр',
+  },
+  'client-demo-3-cash': {
+    providerName: 'Klára Nováková',
+    providerAvatar:
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80',
+    category: 'Массаж',
+  },
+  'client-demo-4-app': {
+    providerName: 'Lenka Bohatová',
+    providerAvatar:
+      'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=300&q=80',
+    category: 'Окрашивание',
+  },
+  'client-demo-5-app': {
+    providerName: 'Barbora Bendová',
+    providerAvatar:
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=300&q=80',
+    category: 'Наращивание волос',
+  },
+  'client-demo-6-card': {
+    providerName: 'Sophie Williams',
+    providerAvatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+    category: 'Hair extensions',
+  },
+  'client-demo-7-app': {
+    providerName: 'Emily Carter',
+    providerAvatar:
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+    category: 'Makeup',
+  },
+  'client-demo-8-cash': {
+    providerName: 'Mia Brown',
+    providerAvatar:
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80',
+    category: 'Massage',
+  },
+};
+
 function isOlamepInternalChat(chat: ChatThread) {
   const name = chat.providerName.toLowerCase();
   const category = chat.category.toLowerCase();
@@ -169,6 +232,44 @@ function groupMessagesByDay(messages: ChatMessage[]) {
   });
 
   return groups;
+}
+
+function findBookingById(id: string): BookingItem | null {
+  try {
+    const bookings = getBookings();
+    return bookings.find((booking) => String(booking.id) === id) || null;
+  } catch {
+    return null;
+  }
+}
+
+function createThreadFromBookingId(threadId: string): ChatThread {
+  const booking = findBookingById(threadId);
+  const demoMeta = demoBookingThreadMeta[threadId];
+
+  const providerName =
+    booking?.masterName ||
+    demoMeta?.providerName ||
+    'Client';
+
+  const providerAvatar =
+    booking?.masterAvatar ||
+    demoMeta?.providerAvatar ||
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80';
+
+  const category =
+    booking?.serviceName ||
+    demoMeta?.category ||
+    'Booking';
+
+  return getOrCreateChatThread({
+    threadId,
+    providerName,
+    providerAvatar,
+    category,
+    online: true,
+    lastSeenText: 'Online',
+  });
 }
 
 function OlamepLogo() {
@@ -345,7 +446,20 @@ export default function ChatPage() {
 
   useEffect(() => {
     const loadChat = () => {
-      setChat(getChatThreadById(threadId));
+      if (!threadId) {
+        setChat(null);
+        return;
+      }
+
+      const existingThread = getChatThreadById(threadId);
+
+      if (existingThread) {
+        setChat(existingThread);
+        return;
+      }
+
+      const createdThread = createThreadFromBookingId(threadId);
+      setChat(createdThread);
     };
 
     loadChat();
