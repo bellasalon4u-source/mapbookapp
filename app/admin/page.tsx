@@ -664,10 +664,10 @@ export default function AdminPage() {
           >
             <AdminButton
               title="Открыть кошелёк"
-              hint="Баланс и история операций"
+              hint="Баланс и история операций владельца"
               icon="💰"
               bg={BRAND.softBlue}
-              onClick={() => router.push('/profile/wallet')}
+              onClick={() => router.push('/admin/wallet')}
             />
 
             <AdminButton
