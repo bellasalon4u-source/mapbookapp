@@ -926,6 +926,37 @@ function normalizeWebsite(value: string) {
   return `https://${trimmed}`;
 }
 
+function isUserRegistered() {
+  if (typeof window === 'undefined') return false;
+
+  const possibleKeys = [
+    'olamepUserRegistered',
+    'mapbookUserRegistered',
+    'olamep_registered',
+    'mapbook_registered',
+    'olamep_auth_user',
+    'mapbook_auth_user',
+    'currentUser',
+    'user',
+  ];
+
+  return possibleKeys.some((key) => {
+    const value = window.localStorage.getItem(key);
+    if (!value) return false;
+
+    const normalized = value.toLowerCase().trim();
+
+    return (
+      normalized === 'yes' ||
+      normalized === 'true' ||
+      normalized === '1' ||
+      normalized.includes('email') ||
+      normalized.includes('phone') ||
+      normalized.includes('name')
+    );
+  });
+}
+
 function inputBaseStyle(): CSSProperties {
   return {
     width: '100%',
@@ -1410,6 +1441,12 @@ export default function AddServicePage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  useEffect(() => {
+    if (!isUserRegistered()) {
+      router.replace(`/auth?next=${encodeURIComponent('/add')}`);
+    }
+  }, [router]);
+
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -1537,6 +1574,11 @@ export default function AddServicePage() {
   };
 
   const handlePublish = () => {
+    if (!isUserRegistered()) {
+      router.replace(`/auth?next=${encodeURIComponent('/add')}`);
+      return;
+    }
+
     if (!title.trim()) {
       alert(text.enterServiceTitle);
       return;
