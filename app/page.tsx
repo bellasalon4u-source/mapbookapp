@@ -337,6 +337,54 @@ function isPromotionInCategory(promo: PromotionItem, categoryId: string) {
     .trim() === String(categoryId || '').toLowerCase().trim();
 }
 
+function isUserRegistered() {
+  if (typeof window === 'undefined') return false;
+
+  const possibleKeys = [
+    'olamepUserRegistered',
+    'mapbookUserRegistered',
+    'olamep_registered',
+    'mapbook_registered',
+    'olamep_auth_user',
+    'mapbook_auth_user',
+    'currentUser',
+    'user',
+  ];
+
+  return possibleKeys.some((key) => {
+    const value = window.localStorage.getItem(key);
+    if (!value) return false;
+
+    const normalized = value.toLowerCase().trim();
+
+    return (
+      normalized === 'yes' ||
+      normalized === 'true' ||
+      normalized === '1' ||
+      normalized.includes('email') ||
+      normalized.includes('phone') ||
+      normalized.includes('name')
+    );
+  });
+}
+
+function savePendingGuestBooking(master: any) {
+  if (typeof window === 'undefined') return;
+
+  window.localStorage.setItem(
+    'olamep_pending_guest_booking',
+    JSON.stringify({
+      masterId: master?.id || '',
+      masterName: master?.name || master?.title || 'Professional',
+      category: master?.category || 'beauty',
+      subcategory: master?.subcategory || '',
+      price: master?.price || master?.priceFrom || master?.startingPrice || '45',
+      avatar: master?.avatar || master?.cover || '',
+      createdAt: new Date().toISOString(),
+    })
+  );
+}
+
 function extractPromotionDiscountBadge(promo: PromotionItem) {
   const anyPromo = promo as any;
 
@@ -2533,6 +2581,34 @@ export default function HomePage() {
     router.push(`/promotion/${promo.id}`);
   };
 
+  const handleBookMaster = (master: any) => {
+    if (isUserRegistered()) {
+      router.push(`/booking/${master.id}`);
+      return;
+    }
+
+    savePendingGuestBooking(master);
+    router.push(`/booking/guest?masterId=${encodeURIComponent(String(master.id || ''))}`);
+  };
+
+  const handleBookPromotion = (promo: PromotionItem) => {
+    const matchedMaster = findPromotionMaster(promo, allMasters);
+    const anyPromo = promo as any;
+
+    const bookingMaster =
+      matchedMaster || {
+        id: anyPromo.masterId || anyPromo.listingId || promo.id,
+        name: anyPromo.title || 'Promotion booking',
+        title: anyPromo.title || 'Promotion booking',
+        category: anyPromo.categoryId || activeCategory || 'beauty',
+        subcategory: anyPromo.subtitle || '',
+        price: anyPromo.price || anyPromo.priceFrom || '45',
+        avatar: anyPromo.image || '',
+      };
+
+    handleBookMaster(bookingMaster);
+  };
+
   const openRouteToMaster = (master: any) => {
     const query = encodeURIComponent(
       String(master.city || master.location || master.address || 'London')
@@ -3040,7 +3116,7 @@ export default function HomePage() {
                   router.push(`/master/${master.id}`);
                 }}
                 onBookMaster={(master) => {
-                  router.push(`/booking/${master.id}`);
+                  handleBookMaster(master);
                 }}
               />
 
@@ -3089,7 +3165,7 @@ export default function HomePage() {
                   onLike={() => toggleLikedMaster(String(selectedMaster.id))}
                   onOpen={() => router.push(`/master/${selectedMaster.id}`)}
                   onRoute={() => openRouteToMaster(selectedMaster)}
-                  onBook={() => router.push(`/booking/${selectedMaster.id}`)}
+                  onBook={() => handleBookMaster(selectedMaster)}
                 />
               ) : null}
             </div>
@@ -3173,7 +3249,7 @@ export default function HomePage() {
                       promo={promo}
                       language={language}
                       onOpen={() => openPromotionView(promo)}
-                      onBook={() => router.push(`/booking/${promo.masterId}`)}
+                      onBook={() => handleBookPromotion(promo)}
                     />
                   </div>
                 ))}
