@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 type GuestBooking = {
   id: string;
@@ -19,20 +19,22 @@ type GuestBooking = {
   createdAt: string;
 };
 
-function readPendingBooking() {
+type PendingBooking = {
+  masterId?: string;
+  masterName?: string;
+  category?: string;
+  subcategory?: string;
+  price?: string;
+  avatar?: string;
+};
+
+function readPendingBooking(): PendingBooking | null {
   if (typeof window === 'undefined') return null;
 
   try {
     const raw = window.localStorage.getItem('olamep_pending_guest_booking');
     if (!raw) return null;
-    return JSON.parse(raw) as {
-      masterId?: string;
-      masterName?: string;
-      category?: string;
-      subcategory?: string;
-      price?: string;
-      avatar?: string;
-    };
+    return JSON.parse(raw) as PendingBooking;
   } catch {
     return null;
   }
@@ -53,16 +55,13 @@ function saveGuestBooking(booking: GuestBooking) {
 
 export default function GuestBookingPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const [pending, setPending] = useState<ReturnType<typeof readPendingBooking>>(null);
+  const [pending, setPending] = useState<PendingBooking | null>(null);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [accepted, setAccepted] = useState(false);
   const [success, setSuccess] = useState(false);
-
-  const masterIdFromUrl = searchParams.get('masterId') || '';
 
   useEffect(() => {
     const saved = readPendingBooking();
@@ -73,14 +72,14 @@ export default function GuestBookingPage() {
     }
 
     setPending({
-      masterId: masterIdFromUrl,
+      masterId: 'guest',
       masterName: 'Professional',
       category: 'Service',
       subcategory: '',
       price: '45',
       avatar: '',
     });
-  }, [masterIdFromUrl]);
+  }, []);
 
   const canPay = useMemo(() => {
     return (
@@ -101,7 +100,7 @@ export default function GuestBookingPage() {
 
     const booking: GuestBooking = {
       id: `guest_booking_${Date.now()}`,
-      masterId: pending?.masterId || masterIdFromUrl || 'unknown',
+      masterId: pending?.masterId || 'guest',
       masterName,
       category,
       subcategory,
