@@ -2,11 +2,27 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 
+const SPLASH_STORAGE_KEY = 'olamep_splash_seen';
+
 export default function Template({ children }: { children: ReactNode }) {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
+    const alreadySeen =
+      typeof window !== 'undefined'
+        ? window.sessionStorage.getItem(SPLASH_STORAGE_KEY)
+        : 'true';
+
+    if (alreadySeen === 'true') {
+      setShowSplash(false);
+      return;
+    }
+
+    window.sessionStorage.setItem(SPLASH_STORAGE_KEY, 'true');
+    setShowSplash(true);
+    setFadeOut(false);
+
     const fadeTimer = window.setTimeout(() => {
       setFadeOut(true);
     }, 2100);
