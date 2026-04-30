@@ -479,4 +479,4 @@ const linkButtonStyle: CSSProperties = {
   fontSize: 12,
   fontWeight: 900,
   padding: 0,
-  textDecoration: 'underline
+  textDecoration: 'underline',
