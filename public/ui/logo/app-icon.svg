@@ -1,0 +1,67 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="32" y="32" width="960" height="960" rx="220" fill="#FFFFFF"/>
+  <rect x="32" y="32" width="960" height="960" rx="220" stroke="#050505" stroke-width="28"/>
+
+  <g opacity="0.55">
+    <path d="M120 305C250 360 320 455 355 590C390 720 470 800 620 875" stroke="#E8EBF0" stroke-width="24" stroke-linecap="round"/>
+    <path d="M910 180C770 300 705 430 680 565C650 730 565 830 420 910" stroke="#ECEFF3" stroke-width="22" stroke-linecap="round"/>
+    <path d="M90 660C235 610 390 615 525 675C665 738 790 750 930 710" stroke="#EEF1F5" stroke-width="20" stroke-linecap="round"/>
+    <path d="M180 450L290 505L370 610L470 690" stroke="#F2F4F7" stroke-width="10" stroke-linecap="round"/>
+    <path d="M640 330L590 470L575 610L630 735" stroke="#F2F4F7" stroke-width="10" stroke-linecap="round"/>
+    <path d="M250 805L355 750L480 765L600 835" stroke="#F2F4F7" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <path d="M512 160C379.45 160 272 267.45 272 400C272 576 512 832 512 832C512 832 752 576 752 400C752 267.45 644.55 160 512 160Z" fill="white"/>
+    <g clip-path="url(#clip0)">
+      <rect x="252" y="140" width="520" height="720" fill="url(#warm)"/>
+      <path d="M245 520C330 330 425 220 595 145C455 120 335 175 285 285C248 365 255 455 245 520Z" fill="url(#blue)"/>
+      <path d="M430 842C488 670 590 540 770 390V860H430Z" fill="url(#green)"/>
+      <path d="M245 735C340 600 465 550 600 615C690 658 735 745 765 860H245V735Z" fill="url(#pink)"/>
+      <path d="M480 180C585 170 675 225 720 320C665 235 585 190 480 180Z" fill="white" opacity="0.26"/>
+      <path d="M365 505C455 390 565 330 725 310C590 360 490 445 410 555C385 590 355 580 330 555C338 538 350 520 365 505Z" fill="white" opacity="0.22"/>
+    </g>
+
+    <circle cx="512" cy="398" r="94" fill="white"/>
+    <path d="M512 160C379.45 160 272 267.45 272 400C272 576 512 832 512 832C512 832 752 576 752 400C752 267.45 644.55 160 512 160Z" stroke="white" stroke-width="16"/>
+  </g>
+
+  <text x="512" y="910" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="92" font-weight="900" fill="#071B46" letter-spacing="-4">
+    Olamep
+  </text>
+
+  <defs>
+    <filter id="shadow" x="220" y="110" width="584" height="780" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#071B46" flood-opacity="0.20"/>
+    </filter>
+
+    <linearGradient id="blue" x1="250" y1="560" x2="560" y2="170" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1668FF"/>
+      <stop offset="0.55" stop-color="#00B8FF"/>
+      <stop offset="1" stop-color="#28D0C8"/>
+    </linearGradient>
+
+    <linearGradient id="green" x1="450" y1="850" x2="760" y2="390" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#005D9E"/>
+      <stop offset="0.48" stop-color="#24C45A"/>
+      <stop offset="1" stop-color="#B9EA32"/>
+    </linearGradient>
+
+    <linearGradient id="warm" x1="430" y1="150" x2="790" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF2F8A"/>
+      <stop offset="0.36" stop-color="#FF5B3D"/>
+      <stop offset="0.68" stop-color="#FFD629"/>
+      <stop offset="1" stop-color="#FF8A2F"/>
+    </linearGradient>
+
+    <linearGradient id="pink" x1="250" y1="560" x2="760" y2="860" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7A3CFF"/>
+      <stop offset="0.58" stop-color="#FF2F8A"/>
+      <stop offset="1" stop-color="#FF5B3D"/>
+    </linearGradient>
+
+    <clipPath id="clip0">
+      <path d="M512 160C379.45 160 272 267.45 272 400C272 576 512 832 512 832C512 832 752 576 752 400C752 267.45 644.55 160 512 160Z"/>
+    </clipPath>
+  </defs>
+</svg>
