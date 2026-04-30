@@ -4,7 +4,17 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { addBooking } from '../../../services/bookingsStore';
 
+type BookingStep = 'procedure' | 'date' | 'time' | 'details';
 type BookingMode = 'quick' | 'full';
+
+type ProcedureOption = {
+  id: string;
+  title: string;
+  subtitle: string;
+  duration: number;
+  price: number;
+  badge: string;
+};
 
 type GuestBooking = {
   id: string;
@@ -12,6 +22,8 @@ type GuestBooking = {
   masterName: string;
   category: string;
   subcategory: string;
+  procedureId: string;
+  procedureTitle: string;
   price: string;
   firstName: string;
   lastName: string;
@@ -46,46 +58,15 @@ type PaymentMethod = {
 };
 
 const PAYMENT_METHODS: PaymentMethod[] = [
-  {
-    id: 'card',
-    title: 'Bank card',
-    subtitle: 'Visa / Mastercard',
-    icon: '💳',
-  },
-  {
-    id: 'google-pay',
-    title: 'Google Pay',
-    subtitle: 'Fast mobile payment',
-    icon: 'G',
-  },
-  {
-    id: 'apple-pay',
-    title: 'Apple Pay',
-    subtitle: 'Fast wallet payment',
-    icon: '',
-  },
-  {
-    id: 'paypal',
-    title: 'PayPal',
-    subtitle: 'Pay with PayPal account',
-    icon: '🅿️',
-  },
-  {
-    id: 'crypto',
-    title: 'Crypto wallet',
-    subtitle: 'USDT / USDC',
-    icon: '₿',
-  },
-  {
-    id: 'swift',
-    title: 'SWIFT / bank transfer',
-    subtitle: 'Manual bank transfer',
-    icon: '🏦',
-  },
+  { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
+  { id: 'google-pay', title: 'Google Pay', subtitle: 'Fast mobile payment', icon: 'G' },
+  { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Fast wallet payment', icon: '' },
+  { id: 'paypal', title: 'PayPal', subtitle: 'Pay with PayPal account', icon: '🅿️' },
+  { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
+  { id: 'swift', title: 'SWIFT / bank transfer', subtitle: 'Manual bank transfer', icon: '🏦' },
 ];
 
 const BUSY_TIMES = ['11:00', '13:30', '16:00'];
-
 const MORNING_TIMES = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30'];
 const DAY_TIMES = ['12:00', '12:30', '13:00', '13:30', '14:00', '14:30'];
 const EVENING_TIMES = ['15:00', '15:30', '16:00', '16:30', '17:00', '17:30'];
@@ -125,6 +106,54 @@ function saveGuestBooking(booking: GuestBooking) {
   );
 }
 
+function cleanPrice(value: string) {
+  const parsed = Number(String(value || '').replace(/[^\d.]/g, ''));
+
+  if (!Number.isFinite(parsed) || parsed <= 0) return 45;
+
+  return parsed;
+}
+
+function buildProcedureOptions(pending: PendingBooking | null): ProcedureOption[] {
+  const basePrice = cleanPrice(pending?.price || '45');
+  const baseTitle = pending?.subcategory || pending?.category || 'Service';
+
+  return [
+    {
+      id: 'main',
+      title: baseTitle,
+      subtitle: 'Standard appointment',
+      duration: 45,
+      price: basePrice,
+      badge: 'Popular',
+    },
+    {
+      id: 'express',
+      title: `Express ${baseTitle}`,
+      subtitle: 'Short version / quick visit',
+      duration: 30,
+      price: Math.max(10, Math.round(basePrice * 0.75)),
+      badge: 'Fast',
+    },
+    {
+      id: 'premium',
+      title: `Premium ${baseTitle}`,
+      subtitle: 'Extended appointment with extra time',
+      duration: 60,
+      price: Math.round(basePrice * 1.25),
+      badge: 'Premium',
+    },
+    {
+      id: 'consultation',
+      title: 'Consultation',
+      subtitle: 'Discuss details before full booking',
+      duration: 20,
+      price: Math.max(10, Math.round(basePrice * 0.35)),
+      badge: 'Intro',
+    },
+  ];
+}
+
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
 }
@@ -135,7 +164,6 @@ function getCalendarDays(year: number, month: number) {
   const daysInMonth = getDaysInMonth(year, month);
 
   const cells: Array<{ day: number; currentMonth: boolean; date: Date }> = [];
-
   const prevMonthDays = getDaysInMonth(year, month - 1);
 
   for (let i = firstWeekDay - 1; i >= 0; i -= 1) {
@@ -213,14 +241,6 @@ function createBookingDateTime(date: Date, time: string) {
   return next;
 }
 
-function cleanPrice(value: string) {
-  const parsed = Number(String(value || '').replace(/[^\d.]/g, ''));
-
-  if (!Number.isFinite(parsed) || parsed <= 0) return 45;
-
-  return parsed;
-}
-
 function inputStyle(): CSSProperties {
   return {
     width: '100%',
@@ -264,9 +284,10 @@ export default function GuestBookingPage() {
   const [calendarMonth, setCalendarMonth] = useState(today.getMonth());
   const [calendarYear, setCalendarYear] = useState(today.getFullYear());
 
+  const [selectedProcedureId, setSelectedProcedureId] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState('');
-  const [step, setStep] = useState<'date' | 'time' | 'details'>('date');
+  const [step, setStep] = useState<BookingStep>('procedure');
 
   const [bookingMode, setBookingMode] = useState<BookingMode>('quick');
   const [firstName, setFirstName] = useState('');
@@ -299,15 +320,22 @@ export default function GuestBookingPage() {
     });
   }, []);
 
+  const procedureOptions = useMemo(() => buildProcedureOptions(pending), [pending]);
+
+  const selectedProcedure = useMemo(() => {
+    return procedureOptions.find((item) => item.id === selectedProcedureId) || null;
+  }, [procedureOptions, selectedProcedureId]);
+
   const masterName = pending?.masterName || 'Professional';
   const category = pending?.category || 'Service';
   const subcategory = pending?.subcategory || '';
-  const price = pending?.price || '45';
   const avatar =
     pending?.avatar ||
     'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80';
 
-  const numericPrice = cleanPrice(price);
+  const currentPrice = selectedProcedure?.price || cleanPrice(pending?.price || '45');
+  const currentDuration = selectedProcedure?.duration || 45;
+  const currentServiceTitle = selectedProcedure?.title || subcategory || category || 'Service';
 
   const selectedPaymentMethod =
     PAYMENT_METHODS.find((method) => method.id === selectedPayment) || PAYMENT_METHODS[0];
@@ -317,6 +345,8 @@ export default function GuestBookingPage() {
     [calendarYear, calendarMonth]
   );
 
+  const canContinueToDate = Boolean(selectedProcedure);
+  const canContinueToTime = Boolean(selectedDate);
   const canContinueToDetails = Boolean(selectedDate && selectedTime);
 
   const canOpenPayment = useMemo(() => {
@@ -333,6 +363,25 @@ export default function GuestBookingPage() {
     if (!selectedDate || !selectedTime) return null;
     return createBookingDateTime(selectedDate, selectedTime);
   }, [selectedDate, selectedTime]);
+
+  const handleBack = () => {
+    if (step === 'details') {
+      setStep('time');
+      return;
+    }
+
+    if (step === 'time') {
+      setStep('date');
+      return;
+    }
+
+    if (step === 'date') {
+      setStep('procedure');
+      return;
+    }
+
+    router.back();
+  };
 
   const handlePrevMonth = () => {
     const next = new Date(calendarYear, calendarMonth - 1, 1);
@@ -354,23 +403,13 @@ export default function GuestBookingPage() {
     setStep('date');
   };
 
-  const handleChooseTime = () => {
-    if (!selectedDate) return;
-    setStep('time');
-  };
-
-  const handleContinueToDetails = () => {
-    if (!canContinueToDetails) return;
-    setStep('details');
-  };
-
   const handleOpenPayment = () => {
     if (!canOpenPayment) return;
     setPaymentSheetOpen(true);
   };
 
   const handleConfirmPayment = () => {
-    if (!selectedDateTime) return;
+    if (!selectedDateTime || !selectedProcedure) return;
 
     const bookingId = `guest_booking_${Date.now()}`;
 
@@ -380,7 +419,9 @@ export default function GuestBookingPage() {
       masterName,
       category,
       subcategory,
-      price,
+      procedureId: selectedProcedure.id,
+      procedureTitle: selectedProcedure.title,
+      price: String(selectedProcedure.price),
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       phone: phone.trim(),
@@ -402,14 +443,14 @@ export default function GuestBookingPage() {
       masterId: pending?.masterId || 'guest',
       masterName,
       masterAvatar: avatar,
-      serviceName: subcategory || category || 'Service',
+      serviceName: selectedProcedure.title,
       category,
       location: pending?.location || pending?.areaLabel || 'London',
       areaLabel: pending?.areaLabel || pending?.location || 'London',
       exactAddress: '',
       dateLabel: `${formatDate(selectedDate)} ${selectedTime}`,
       dateTime: selectedDateTime.toISOString(),
-      price: numericPrice,
+      price: selectedProcedure.price,
       status: 'pending',
       unlockFeePaid: true,
       bookingConfirmedByMaster: false,
@@ -453,19 +494,7 @@ export default function GuestBookingPage() {
           >
             <button
               type="button"
-              onClick={() => {
-                if (step === 'details') {
-                  setStep('time');
-                  return;
-                }
-
-                if (step === 'time') {
-                  setStep('date');
-                  return;
-                }
-
-                router.back();
-              }}
+              onClick={handleBack}
               style={{
                 width: 54,
                 height: 54,
@@ -559,7 +588,9 @@ export default function GuestBookingPage() {
                 color: BRAND.navy,
               }}
             >
-              {step === 'date'
+              {step === 'procedure'
+                ? 'Choose service'
+                : step === 'date'
                 ? 'Choose date'
                 : step === 'time'
                 ? 'Choose time'
@@ -575,7 +606,9 @@ export default function GuestBookingPage() {
                 color: BRAND.muted,
               }}
             >
-              {step === 'date'
+              {step === 'procedure'
+                ? 'Select the procedure before choosing date and time'
+                : step === 'date'
                 ? 'Select the best date for your appointment'
                 : step === 'time'
                 ? 'Select available time for your appointment'
@@ -587,11 +620,169 @@ export default function GuestBookingPage() {
             avatar={avatar}
             masterName={masterName}
             category={category}
-            subcategory={subcategory}
-            price={numericPrice}
+            serviceTitle={currentServiceTitle}
+            price={currentPrice}
+            duration={currentDuration}
             selectedDate={selectedDate}
             selectedTime={selectedTime}
           />
+
+          {step === 'procedure' ? (
+            <section
+              style={{
+                marginTop: 18,
+                borderRadius: 30,
+                border: `3px solid ${BRAND.border}`,
+                background: '#ffffff',
+                padding: 16,
+                boxShadow: '0 14px 28px rgba(7,27,70,0.06)',
+              }}
+            >
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 34,
+                  lineHeight: 1,
+                  fontWeight: 900,
+                  color: BRAND.navy,
+                }}
+              >
+                Procedures
+              </h2>
+
+              <p
+                style={{
+                  margin: '10px 0 0',
+                  fontSize: 15,
+                  lineHeight: 1.4,
+                  fontWeight: 800,
+                  color: BRAND.muted,
+                }}
+              >
+                Choose what exactly you want to book. The provider will confirm the
+                final appointment after your £1 hold.
+              </p>
+
+              <div style={{ marginTop: 18, display: 'grid', gap: 12 }}>
+                {procedureOptions.map((procedure) => {
+                  const active = selectedProcedureId === procedure.id;
+
+                  return (
+                    <button
+                      key={procedure.id}
+                      type="button"
+                      onClick={() => setSelectedProcedureId(procedure.id)}
+                      style={{
+                        width: '100%',
+                        minHeight: 108,
+                        borderRadius: 24,
+                        border: `3px solid ${active ? BRAND.green : BRAND.border}`,
+                        background: active ? '#dcffe8' : '#ffffff',
+                        padding: 14,
+                        display: 'grid',
+                        gridTemplateColumns: '1fr auto',
+                        gap: 12,
+                        alignItems: 'center',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        boxShadow: active ? '0 10px 20px rgba(36,196,90,0.14)' : 'none',
+                      }}
+                    >
+                      <span>
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            borderRadius: 999,
+                            border: `2px solid ${BRAND.border}`,
+                            background: active ? BRAND.green : '#fff7d8',
+                            color: active ? '#ffffff' : BRAND.navy,
+                            padding: '7px 12px',
+                            fontSize: 12,
+                            fontWeight: 900,
+                            marginBottom: 10,
+                          }}
+                        >
+                          {procedure.badge}
+                        </span>
+
+                        <span
+                          style={{
+                            display: 'block',
+                            fontSize: 22,
+                            lineHeight: 1.08,
+                            fontWeight: 900,
+                            color: BRAND.navy,
+                          }}
+                        >
+                          {procedure.title}
+                        </span>
+
+                        <span
+                          style={{
+                            marginTop: 5,
+                            display: 'block',
+                            fontSize: 14,
+                            lineHeight: 1.35,
+                            fontWeight: 800,
+                            color: BRAND.muted,
+                          }}
+                        >
+                          {procedure.subtitle}
+                        </span>
+
+                        <span
+                          style={{
+                            marginTop: 8,
+                            display: 'block',
+                            fontSize: 14,
+                            fontWeight: 900,
+                            color: BRAND.blue,
+                          }}
+                        >
+                          ⏱ {procedure.duration}m
+                        </span>
+                      </span>
+
+                      <span
+                        style={{
+                          display: 'grid',
+                          justifyItems: 'end',
+                          gap: 12,
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 28,
+                            fontWeight: 900,
+                            color: BRAND.navy,
+                          }}
+                        >
+                          £{procedure.price}
+                        </span>
+
+                        <span
+                          style={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: 999,
+                            border: `3px solid ${active ? BRAND.green : '#d8dde8'}`,
+                            background: active ? BRAND.green : '#ffffff',
+                            color: '#ffffff',
+                            display: 'grid',
+                            placeItems: 'center',
+                            fontSize: 20,
+                            fontWeight: 900,
+                          }}
+                        >
+                          {active ? '✓' : ''}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
 
           {step === 'date' ? (
             <section
@@ -613,11 +804,7 @@ export default function GuestBookingPage() {
                   marginBottom: 16,
                 }}
               >
-                <button
-                  type="button"
-                  onClick={handlePrevMonth}
-                  style={roundButtonStyle}
-                >
+                <button type="button" onClick={handlePrevMonth} style={roundButtonStyle}>
                   ‹
                 </button>
 
@@ -636,11 +823,7 @@ export default function GuestBookingPage() {
                   {formatMonthTitle(calendarYear, calendarMonth)}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleNextMonth}
-                  style={roundButtonStyle}
-                >
+                <button type="button" onClick={handleNextMonth} style={roundButtonStyle}>
                   ›
                 </button>
               </div>
@@ -681,19 +864,9 @@ export default function GuestBookingPage() {
                       style={{
                         minHeight: 62,
                         borderRadius: 18,
-                        border: selected
-                          ? `3px solid ${BRAND.blue}`
-                          : '2px solid #e5e7eb',
-                        background: selected
-                          ? '#eef6ff'
-                          : disabled
-                          ? '#f4f4f5'
-                          : '#ffffff',
-                        color: selected
-                          ? BRAND.blue
-                          : disabled
-                          ? '#c8cdd5'
-                          : BRAND.navy,
+                        border: selected ? `3px solid ${BRAND.blue}` : '2px solid #e5e7eb',
+                        background: selected ? '#eef6ff' : disabled ? '#f4f4f5' : '#ffffff',
+                        color: selected ? BRAND.blue : disabled ? '#c8cdd5' : BRAND.navy,
                         fontSize: 22,
                         fontWeight: 900,
                         cursor: disabled ? 'not-allowed' : 'pointer',
@@ -755,26 +928,9 @@ export default function GuestBookingPage() {
                 </div>
               </div>
 
-              <TimeGroup
-                title="Morning"
-                times={MORNING_TIMES}
-                selectedTime={selectedTime}
-                onSelect={setSelectedTime}
-              />
-
-              <TimeGroup
-                title="Day"
-                times={DAY_TIMES}
-                selectedTime={selectedTime}
-                onSelect={setSelectedTime}
-              />
-
-              <TimeGroup
-                title="Evening"
-                times={EVENING_TIMES}
-                selectedTime={selectedTime}
-                onSelect={setSelectedTime}
-              />
+              <TimeGroup title="Morning" times={MORNING_TIMES} selectedTime={selectedTime} onSelect={setSelectedTime} />
+              <TimeGroup title="Day" times={DAY_TIMES} selectedTime={selectedTime} onSelect={setSelectedTime} />
+              <TimeGroup title="Evening" times={EVENING_TIMES} selectedTime={selectedTime} onSelect={setSelectedTime} />
             </section>
           ) : null}
 
@@ -1082,7 +1238,9 @@ export default function GuestBookingPage() {
                   color: BRAND.muted,
                 }}
               >
-                {step === 'date'
+                {step === 'procedure'
+                  ? 'Selected service'
+                  : step === 'date'
                   ? 'Selected date'
                   : step === 'time'
                   ? 'Selected time'
@@ -1095,13 +1253,15 @@ export default function GuestBookingPage() {
                   fontSize: 23,
                   fontWeight: 900,
                   color:
-                    step === 'details' || selectedDate || selectedTime
+                    selectedProcedure || selectedDate || selectedTime || step === 'details'
                       ? BRAND.navy
                       : '#a7adb8',
                   lineHeight: 1.05,
                 }}
               >
-                {step === 'date'
+                {step === 'procedure'
+                  ? selectedProcedure?.title || 'Not selected'
+                  : step === 'date'
                   ? formatDate(selectedDate)
                   : step === 'time'
                   ? selectedTime || 'Not selected'
@@ -1113,20 +1273,27 @@ export default function GuestBookingPage() {
           <button
             type="button"
             disabled={
-              step === 'date'
-                ? !selectedDate
+              step === 'procedure'
+                ? !canContinueToDate
+                : step === 'date'
+                ? !canContinueToTime
                 : step === 'time'
                 ? !selectedTime
                 : !canOpenPayment
             }
             onClick={() => {
+              if (step === 'procedure') {
+                setStep('date');
+                return;
+              }
+
               if (step === 'date') {
-                handleChooseTime();
+                setStep('time');
                 return;
               }
 
               if (step === 'time') {
-                handleContinueToDetails();
+                setStep('details');
                 return;
               }
 
@@ -1136,7 +1303,8 @@ export default function GuestBookingPage() {
               border: 'none',
               borderLeft: '2px solid #d8dde8',
               background:
-                (step === 'date' && selectedDate) ||
+                (step === 'procedure' && canContinueToDate) ||
+                (step === 'date' && canContinueToTime) ||
                 (step === 'time' && selectedTime) ||
                 (step === 'details' && canOpenPayment)
                   ? BRAND.green
@@ -1145,14 +1313,17 @@ export default function GuestBookingPage() {
               fontSize: 22,
               fontWeight: 900,
               cursor:
-                (step === 'date' && selectedDate) ||
+                (step === 'procedure' && canContinueToDate) ||
+                (step === 'date' && canContinueToTime) ||
                 (step === 'time' && selectedTime) ||
                 (step === 'details' && canOpenPayment)
                   ? 'pointer'
                   : 'not-allowed',
             }}
           >
-            {step === 'date'
+            {step === 'procedure'
+              ? 'Choose date →'
+              : step === 'date'
               ? 'Choose time →'
               : step === 'time'
               ? 'Continue →'
@@ -1441,16 +1612,18 @@ function ServiceSummaryCard({
   avatar,
   masterName,
   category,
-  subcategory,
+  serviceTitle,
   price,
+  duration,
   selectedDate,
   selectedTime,
 }: {
   avatar: string;
   masterName: string;
   category: string;
-  subcategory: string;
+  serviceTitle: string;
   price: number;
+  duration: number;
   selectedDate: Date | null;
   selectedTime: string;
 }) {
@@ -1501,7 +1674,7 @@ function ServiceSummaryCard({
             color: '#505b6d',
           }}
         >
-          {subcategory || category}
+          {serviceTitle || category}
         </div>
 
         <div
@@ -1517,7 +1690,7 @@ function ServiceSummaryCard({
         >
           <span>📅 {formatDate(selectedDate)}</span>
           {selectedTime ? <span>🕒 {selectedTime}</span> : null}
-          <span>⏱ 45m</span>
+          <span>⏱ {duration}m</span>
         </div>
       </div>
 
@@ -1602,9 +1775,7 @@ function TimeGroup({
               style={{
                 minHeight: 92,
                 borderRadius: 20,
-                border: selected
-                  ? `3px solid ${BRAND.green}`
-                  : '2px solid #d8dde8',
+                border: selected ? `3px solid ${BRAND.green}` : '2px solid #d8dde8',
                 background: busy ? '#f0f1f3' : selected ? '#dcffe8' : '#ffffff',
                 color: busy ? '#b9bec8' : selected ? '#008f3a' : BRAND.navy,
                 cursor: busy ? 'not-allowed' : 'pointer',
