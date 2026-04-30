@@ -699,7 +699,7 @@ export default function AdminPage() {
               hint="Клиенты, мастера и аккаунты"
               icon="👥"
               bg={BRAND.softViolet}
-              onClick={() => router.push('/profile/clients')}
+              onClick={() => router.push('/admin/users')}
             />
 
             <AdminButton
