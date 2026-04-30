@@ -32,7 +32,7 @@ export default function Template({ children }: { children: ReactNode }) {
             inset: 0,
             zIndex: 99999,
             background:
-              'radial-gradient(circle at 50% 42%, #ffffff 0%, #fbfcfd 46%, #f4f6f9 100%)',
+              'radial-gradient(circle at 50% 38%, #ffffff 0%, #fbfcfd 48%, #f4f6f9 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -44,22 +44,22 @@ export default function Template({ children }: { children: ReactNode }) {
           }}
         >
           <style jsx>{`
-            @keyframes olamepMapMove {
+            @keyframes olamepMapDrift {
               0% {
-                transform: translate3d(-8px, -7px, 0) scale(1.03);
+                transform: translate3d(-7px, -6px, 0) scale(1.03);
               }
               100% {
-                transform: translate3d(8px, 7px, 0) scale(1.03);
+                transform: translate3d(7px, 6px, 0) scale(1.03);
               }
             }
 
-            @keyframes olamepLogoReveal {
+            @keyframes olamepLogoIn {
               0% {
                 transform: translateY(18px) scale(0.82);
                 opacity: 0;
-                filter: blur(6px);
+                filter: blur(5px);
               }
-              38% {
+              42% {
                 transform: translateY(0) scale(1.04);
                 opacity: 1;
                 filter: blur(0);
@@ -76,20 +76,20 @@ export default function Template({ children }: { children: ReactNode }) {
                 transform: translateY(0) scale(1);
               }
               50% {
-                transform: translateY(-6px) scale(1.025);
+                transform: translateY(-5px) scale(1.02);
               }
               100% {
                 transform: translateY(0) scale(1);
               }
             }
 
-            @keyframes olamepTitleReveal {
+            @keyframes olamepTextIn {
               0% {
-                transform: translateY(16px);
+                transform: translateY(15px);
                 opacity: 0;
               }
               45% {
-                transform: translateY(16px);
+                transform: translateY(15px);
                 opacity: 0;
               }
               100% {
@@ -101,44 +101,44 @@ export default function Template({ children }: { children: ReactNode }) {
             @keyframes olamepPinFloat {
               0% {
                 transform: translateY(0);
-                opacity: 0.42;
+                opacity: 0.38;
               }
               50% {
                 transform: translateY(-6px);
-                opacity: 0.72;
+                opacity: 0.68;
               }
               100% {
                 transform: translateY(0);
-                opacity: 0.42;
+                opacity: 0.38;
               }
             }
 
             @keyframes olamepDotPulse {
               0% {
                 transform: translateY(0) scale(0.78);
-                opacity: 0.42;
+                opacity: 0.4;
               }
               45% {
-                transform: translateY(-5px) scale(1.16);
+                transform: translateY(-5px) scale(1.15);
                 opacity: 1;
               }
               100% {
                 transform: translateY(0) scale(0.78);
-                opacity: 0.42;
+                opacity: 0.4;
               }
             }
 
-            @keyframes olamepGlowPulse {
+            @keyframes olamepSoftGlow {
               0% {
-                transform: scale(0.82);
-                opacity: 0.24;
+                transform: scale(0.9);
+                opacity: 0.28;
               }
               50% {
-                transform: scale(1.08);
+                transform: scale(1.07);
                 opacity: 0.52;
               }
               100% {
-                transform: scale(0.96);
+                transform: scale(0.98);
                 opacity: 0.34;
               }
             }
@@ -147,8 +147,8 @@ export default function Template({ children }: { children: ReactNode }) {
           <div
             style={{
               position: 'absolute',
-              inset: -60,
-              animation: 'olamepMapMove 3s ease-in-out infinite alternate',
+              inset: -70,
+              animation: 'olamepMapDrift 3s ease-in-out infinite alternate',
               opacity: 1,
             }}
           >
@@ -165,176 +165,94 @@ export default function Template({ children }: { children: ReactNode }) {
 
               <path
                 d="M80 170 C210 250 250 420 310 620 C360 790 430 930 565 1085 C705 1245 790 1390 940 1610"
-                stroke="#d7d9de"
-                strokeWidth="30"
-                fill="none"
-                strokeLinecap="round"
-                opacity="0.86"
-              />
-
-              <path
-                d="M930 100 C760 225 675 350 620 535 C575 690 545 850 430 995 C310 1145 185 1320 90 1585"
-                stroke="#dfe1e6"
-                strokeWidth="24"
-                fill="none"
-                strokeLinecap="round"
-                opacity="0.86"
-              />
-
-              <path
-                d="M-20 760 C150 715 300 710 430 780 C570 855 720 930 1020 870"
-                stroke="#dde0e5"
-                strokeWidth="26"
+                stroke="#e1e4e9"
+                strokeWidth="28"
                 fill="none"
                 strokeLinecap="round"
                 opacity="0.78"
               />
 
               <path
-                d="M120 330 L270 420 L360 560 L440 710 L560 790"
-                stroke="#e4e6eb"
-                strokeWidth="11"
+                d="M930 100 C760 225 675 350 620 535 C575 690 545 850 430 995 C310 1145 185 1320 90 1585"
+                stroke="#e5e7ec"
+                strokeWidth="24"
                 fill="none"
                 strokeLinecap="round"
+                opacity="0.8"
               />
 
               <path
-                d="M660 260 L600 380 L560 520 L530 670 L580 820 L710 950"
-                stroke="#e4e6eb"
-                strokeWidth="11"
+                d="M-20 760 C150 715 300 710 430 780 C570 855 720 930 1020 870"
+                stroke="#e2e5ea"
+                strokeWidth="24"
                 fill="none"
                 strokeLinecap="round"
+                opacity="0.7"
               />
 
-              <path
-                d="M180 1220 L320 1150 L430 1160 L580 1210 L700 1330"
-                stroke="#e4e6eb"
-                strokeWidth="11"
-                fill="none"
-                strokeLinecap="round"
-              />
+              {[
+                'M120 330 L270 420 L360 560 L440 710 L560 790',
+                'M660 260 L600 380 L560 520 L530 670 L580 820 L710 950',
+                'M180 1220 L320 1150 L430 1160 L580 1210 L700 1330',
+                'M280 220 L420 260 L540 340 L620 420',
+                'M700 640 L780 720 L860 840',
+                'M180 720 L280 780 L350 860 L420 930',
+                'M610 1180 L700 1230 L770 1320 L850 1450',
+                'M250 1450 L350 1370 L470 1350 L560 1380',
+              ].map((path) => (
+                <path
+                  key={path}
+                  d={path}
+                  stroke="#edf0f4"
+                  strokeWidth="8"
+                  fill="none"
+                  strokeLinecap="round"
+                  opacity="0.95"
+                />
+              ))}
 
-              <path
-                d="M280 220 L420 260 L540 340 L620 420"
-                stroke="#ebedf1"
-                strokeWidth="8"
-                fill="none"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M700 640 L780 720 L860 840"
-                stroke="#ebedf1"
-                strokeWidth="8"
-                fill="none"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M180 720 L280 780 L350 860 L420 930"
-                stroke="#ebedf1"
-                strokeWidth="8"
-                fill="none"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M610 1180 L700 1230 L770 1320 L850 1450"
-                stroke="#ebedf1"
-                strokeWidth="8"
-                fill="none"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M250 1450 L350 1370 L470 1350 L560 1380"
-                stroke="#ebedf1"
-                strokeWidth="8"
-                fill="none"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M110 520 L190 560 L250 640 L330 700"
-                stroke="#f0f1f4"
-                strokeWidth="5"
-                fill="none"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M690 430 L760 500 L820 590"
-                stroke="#f0f1f4"
-                strokeWidth="5"
-                fill="none"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M310 980 L370 1040 L440 1100"
-                stroke="#f0f1f4"
-                strokeWidth="5"
-                fill="none"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M690 980 L760 1050 L820 1110"
-                stroke="#f0f1f4"
-                strokeWidth="5"
-                fill="none"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M170 1320 L240 1280 L300 1290"
-                stroke="#f0f1f4"
-                strokeWidth="5"
-                fill="none"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M430 250 L470 360 L520 410 L595 430"
-                stroke="#f1f2f5"
-                strokeWidth="4"
-                fill="none"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M760 1180 L810 1230 L855 1290 L900 1355"
-                stroke="#f1f2f5"
-                strokeWidth="4"
-                fill="none"
-                strokeLinecap="round"
-              />
-
-              <path
-                d="M120 1050 L205 990 L270 1000 L335 1060"
-                stroke="#f1f2f5"
-                strokeWidth="4"
-                fill="none"
-                strokeLinecap="round"
-              />
+              {[
+                'M110 520 L190 560 L250 640 L330 700',
+                'M690 430 L760 500 L820 590',
+                'M310 980 L370 1040 L440 1100',
+                'M690 980 L760 1050 L820 1110',
+                'M170 1320 L240 1280 L300 1290',
+                'M430 250 L470 360 L520 410 L595 430',
+                'M760 1180 L810 1230 L855 1290 L900 1355',
+                'M120 1050 L205 990 L270 1000 L335 1060',
+                'M520 1190 L465 1260 L390 1320 L300 1390',
+                'M740 310 L815 390 L890 455',
+                'M90 1420 L180 1480 L245 1570',
+                'M570 620 L655 705 L760 775',
+              ].map((path) => (
+                <path
+                  key={path}
+                  d={path}
+                  stroke="#f2f4f7"
+                  strokeWidth="4"
+                  fill="none"
+                  strokeLinecap="round"
+                  opacity="0.98"
+                />
+              ))}
             </svg>
           </div>
 
-          <MapPin left="20%" top="19%" size={24} delay="0s" opacity={0.42} />
-          <MapPin right="20%" top="31%" size={22} delay="0.25s" opacity={0.46} />
-          <MapPin left="15%" top="54%" size={22} delay="0.45s" opacity={0.4} />
-          <MapPin right="16%" top="62%" size={25} delay="0.15s" opacity={0.5} />
-          <MapPin left="54%" bottom="12%" size={24} delay="0.35s" opacity={0.38} />
+          <MapPin left="20%" top="18%" size={22} delay="0s" opacity={0.36} />
+          <MapPin right="20%" top="31%" size={21} delay="0.25s" opacity={0.4} />
+          <MapPin left="16%" top="55%" size={21} delay="0.45s" opacity={0.34} />
+          <MapPin right="17%" top="63%" size={23} delay="0.15s" opacity={0.42} />
+          <MapPin left="55%" bottom="12%" size={22} delay="0.35s" opacity={0.34} />
 
           <div
             style={{
               position: 'absolute',
-              width: 420,
-              height: 420,
+              width: 430,
+              height: 430,
               borderRadius: 999,
               background:
-                'radial-gradient(circle, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.76) 42%, rgba(255,255,255,0.04) 72%, transparent 100%)',
-              animation: 'olamepGlowPulse 3s ease-in-out infinite',
+                'radial-gradient(circle, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.82) 44%, rgba(255,255,255,0.08) 74%, transparent 100%)',
+              animation: 'olamepSoftGlow 3s ease-in-out infinite',
             }}
           />
 
@@ -344,7 +262,7 @@ export default function Template({ children }: { children: ReactNode }) {
               position: 'relative',
               width: '100%',
               maxWidth: 430,
-              minHeight: 420,
+              minHeight: 460,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -355,11 +273,11 @@ export default function Template({ children }: { children: ReactNode }) {
           >
             <div
               style={{
-                width: 152,
-                height: 180,
+                width: 130,
+                height: 155,
                 position: 'relative',
                 animation:
-                  'olamepLogoReveal 0.95s cubic-bezier(0.2, 0.9, 0.2, 1) both, olamepLogoFloat 2.1s ease-in-out 0.95s infinite',
+                  'olamepLogoIn 0.9s cubic-bezier(0.2, 0.9, 0.2, 1) both, olamepLogoFloat 2.1s ease-in-out 0.9s infinite',
               }}
             >
               <div
@@ -370,36 +288,36 @@ export default function Template({ children }: { children: ReactNode }) {
                   background:
                     'conic-gradient(from 218deg, #0e73d8 0deg, #00a6ff 52deg, #24c45a 112deg, #ffd629 172deg, #ff2456 246deg, #7c3cff 310deg, #0e73d8 360deg)',
                   transform: 'rotate(45deg)',
-                  border: '3px solid rgba(255,255,255,0.86)',
+                  border: '3px solid rgba(255,255,255,0.88)',
                   boxShadow:
-                    '0 24px 44px rgba(7,27,70,0.18), inset 0 0 28px rgba(255,255,255,0.36)',
+                    '0 22px 40px rgba(7,27,70,0.16), inset 0 0 28px rgba(255,255,255,0.38)',
                 }}
               />
 
               <div
                 style={{
                   position: 'absolute',
-                  left: 43,
-                  top: 41,
-                  width: 66,
-                  height: 66,
+                  left: 37,
+                  top: 36,
+                  width: 56,
+                  height: 56,
                   borderRadius: 999,
                   background: '#ffffff',
                   boxShadow:
-                    'inset 0 0 0 1px rgba(7,27,70,0.04), 0 8px 18px rgba(7,27,70,0.11)',
+                    'inset 0 0 0 1px rgba(7,27,70,0.04), 0 8px 18px rgba(7,27,70,0.1)',
                 }}
               />
 
               <div
                 style={{
                   position: 'absolute',
-                  left: 27,
-                  top: 85,
-                  width: 98,
-                  height: 58,
-                  borderRadius: '999px 999px 24px 24px',
+                  left: 24,
+                  top: 74,
+                  width: 82,
+                  height: 50,
+                  borderRadius: '999px 999px 22px 22px',
                   background:
-                    'linear-gradient(135deg, rgba(255,255,255,0.26), rgba(255,255,255,0.02))',
+                    'linear-gradient(135deg, rgba(255,255,255,0.28), rgba(255,255,255,0.02))',
                   transform: 'rotate(45deg)',
                 }}
               />
@@ -408,14 +326,14 @@ export default function Template({ children }: { children: ReactNode }) {
             <div
               style={{
                 marginTop: 18,
-                fontSize: 58,
+                fontSize: 60,
                 lineHeight: 1,
                 fontWeight: 900,
                 letterSpacing: '-2.4px',
                 color: '#071b46',
                 textAlign: 'center',
                 textShadow: '0 8px 20px rgba(7,27,70,0.08)',
-                animation: 'olamepTitleReveal 1.15s ease-out both',
+                animation: 'olamepTextIn 1.15s ease-out both',
               }}
             >
               Olamep
@@ -423,7 +341,7 @@ export default function Template({ children }: { children: ReactNode }) {
 
             <div
               style={{
-                marginTop: 28,
+                marginTop: 30,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -435,13 +353,13 @@ export default function Template({ children }: { children: ReactNode }) {
                 { color: '#00b8c9', delay: '0.12s' },
                 { color: '#24c45a', delay: '0.24s' },
                 { color: '#ff9f1a', delay: '0.36s' },
-                { color: '#ff2456', delay: '0.48s' },
+                { color: '#ff5b8a', delay: '0.48s' },
               ].map((dot) => (
                 <span
                   key={dot.color}
                   style={{
-                    width: 15,
-                    height: 15,
+                    width: 14,
+                    height: 14,
                     borderRadius: 999,
                     background: dot.color,
                     boxShadow: `0 6px 14px ${dot.color}55`,
@@ -493,7 +411,7 @@ function MapPin({
           position: 'absolute',
           inset: -9,
           borderRadius: '50%',
-          background: 'rgba(7,27,70,0.07)',
+          background: 'rgba(7,27,70,0.06)',
         }}
       />
 
@@ -502,10 +420,10 @@ function MapPin({
           width: size,
           height: size,
           borderRadius: '50% 50% 50% 0',
-          background: '#7e8793',
+          background: '#8a929d',
           transform: 'rotate(-45deg)',
           position: 'relative',
-          boxShadow: '0 8px 18px rgba(7,27,70,0.14)',
+          boxShadow: '0 8px 18px rgba(7,27,70,0.12)',
         }}
       >
         <div
