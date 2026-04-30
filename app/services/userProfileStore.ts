@@ -22,17 +22,19 @@ export type UserProfile = {
   notificationSettings: NotificationSettings;
 };
 
+export const OWNER_ADMIN_EMAIL = 'olamepcom@gmail.com';
+
 const STORAGE_KEY = 'mapbook_user_profile';
 
 const defaultUserProfile: UserProfile = {
-  id: 'user_1',
-  fullName: 'Alex Carter',
-  email: 'alex@email.com',
+  id: 'owner_olamep_1',
+  fullName: 'Olamep Owner',
+  email: OWNER_ADMIN_EMAIL,
   phone: '+44 7700 123456',
   avatar:
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
   city: 'London, UK',
-  bio: 'Люблю удобные сервисы, красоту и быстрые бронирования.',
+  bio: 'Owner account for Olamep platform management.',
   language: 'Русский',
   region: 'United Kingdom',
   isVerified: true,
@@ -51,6 +53,10 @@ const listeners = new Set<() => void>();
 
 function isBrowser() {
   return typeof window !== 'undefined';
+}
+
+export function isOwnerAdminEmail(email?: string | null) {
+  return String(email || '').trim().toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase();
 }
 
 function normalizeNotificationSettings(
@@ -192,6 +198,15 @@ export function getUserProfile(): UserProfile {
   }
 
   return userProfileState;
+}
+
+export function getOwnerAdminEmail() {
+  return OWNER_ADMIN_EMAIL;
+}
+
+export function isCurrentUserOwnerAdmin() {
+  const profile = getUserProfile();
+  return isOwnerAdminEmail(profile.email);
 }
 
 export function subscribeToUserProfile(listener: () => void) {
