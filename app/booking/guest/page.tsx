@@ -1,12 +1,7 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  addBooking,
-  getBookings,
-  type BookingItem,
-} from '../../../services/bookingsStore';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type GuestBooking = {
   id: string;
@@ -41,24 +36,50 @@ type PaymentMethod = {
   icon: string;
 };
 
-const PENDING_BOOKING_KEY = 'olamep_pending_guest_booking';
-const GUEST_BOOKINGS_KEY = 'olamep_guest_bookings';
-const LAST_CREATED_BOOKING_KEY = 'olamep_last_created_guest_booking_key';
-
 const PAYMENT_METHODS: PaymentMethod[] = [
-  { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
-  { id: 'google-pay', title: 'Google Pay', subtitle: 'Fast mobile payment', icon: 'G' },
-  { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Fast wallet payment', icon: '' },
-  { id: 'paypal', title: 'PayPal', subtitle: 'Pay with PayPal account', icon: '🅿️' },
-  { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
-  { id: 'swift', title: 'SWIFT / bank transfer', subtitle: 'Manual bank transfer', icon: '🏦' },
+  {
+    id: 'card',
+    title: 'Bank card',
+    subtitle: 'Visa / Mastercard',
+    icon: '💳',
+  },
+  {
+    id: 'google-pay',
+    title: 'Google Pay',
+    subtitle: 'Fast mobile payment',
+    icon: 'G',
+  },
+  {
+    id: 'apple-pay',
+    title: 'Apple Pay',
+    subtitle: 'Fast wallet payment',
+    icon: '',
+  },
+  {
+    id: 'paypal',
+    title: 'PayPal',
+    subtitle: 'Pay with PayPal account',
+    icon: '🅿️',
+  },
+  {
+    id: 'crypto',
+    title: 'Crypto wallet',
+    subtitle: 'USDT / USDC',
+    icon: '₿',
+  },
+  {
+    id: 'swift',
+    title: 'SWIFT / bank transfer',
+    subtitle: 'Manual bank transfer',
+    icon: '🏦',
+  },
 ];
 
 function readPendingBooking(): PendingBooking | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    const raw = window.localStorage.getItem(PENDING_BOOKING_KEY);
+    const raw = window.localStorage.getItem('olamep_pending_guest_booking');
     if (!raw) return null;
     return JSON.parse(raw) as PendingBooking;
   } catch {
@@ -66,125 +87,25 @@ function readPendingBooking(): PendingBooking | null {
   }
 }
 
-function readGuestBookings(): GuestBooking[] {
-  if (typeof window === 'undefined') return [];
-
-  try {
-    const raw = window.localStorage.getItem(GUEST_BOOKINGS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as GuestBooking[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function makeStableBookingKey(params: {
-  masterId: string;
-  masterName: string;
-  phone: string;
-}) {
-  return [
-    String(params.masterId || 'guest').trim().toLowerCase(),
-    String(params.masterName || 'professional').trim().toLowerCase(),
-    String(params.phone || '').replace(/\s+/g, '').toLowerCase(),
-  ].join('__');
-}
-
-function saveGuestBookingOnce(booking: GuestBooking, stableKey: string) {
+function saveGuestBooking(booking: GuestBooking) {
   if (typeof window === 'undefined') return;
 
-  const current = readGuestBookings();
+  try {
+    const current = JSON.parse(
+      window.localStorage.getItem('olamep_guest_bookings') || '[]'
+    ) as GuestBooking[];
 
-  const alreadyExists = current.some((item) => {
-    const itemKey = makeStableBookingKey({
-      masterId: item.masterId,
-      masterName: item.masterName,
-      phone: item.phone,
-    });
-
-    return itemKey === stableKey;
-  });
-
-  if (!alreadyExists) {
-    window.localStorage.setItem(GUEST_BOOKINGS_KEY, JSON.stringify([booking, ...current]));
-  }
-
-  window.localStorage.setItem(LAST_CREATED_BOOKING_KEY, stableKey);
-  window.localStorage.removeItem(PENDING_BOOKING_KEY);
-}
-
-function addBookingToMainBookingsOnce(params: {
-  stableKey: string;
-  masterId: string;
-  masterName: string;
-  category: string;
-  subcategory: string;
-  priceNumber: number;
-  avatar?: string;
-  phone: string;
-}) {
-  const existing = getBookings();
-
-  const alreadyExists = existing.some((booking) => {
-    const bookingAny = booking as BookingItem & { guestStableKey?: string };
-
-    if (bookingAny.guestStableKey === params.stableKey) return true;
-
-    return (
-      String(booking.masterId || '').trim().toLowerCase() ===
-        String(params.masterId || '').trim().toLowerCase() &&
-      String(booking.masterName || '').trim().toLowerCase() ===
-        String(params.masterName || '').trim().toLowerCase() &&
-      Number(booking.price || 0) === params.priceNumber &&
-      booking.status === 'pending'
+    window.localStorage.setItem(
+      'olamep_guest_bookings',
+      JSON.stringify([booking, ...current])
     );
-  });
-
-  if (alreadyExists) return;
-
-  const now = new Date();
-
-  const booking: BookingItem & { guestStableKey?: string } = {
-    id: `guest_main_booking_${Date.now()}`,
-    masterId: params.masterId || 'guest',
-    masterName: params.masterName || 'Professional',
-    masterAvatar:
-      params.avatar ||
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-    serviceName: params.subcategory || params.category || 'Service',
-    category: params.category || 'Service',
-    location: 'London',
-    areaLabel: 'London',
-    exactAddress: 'Address will open after provider confirmation',
-    dateLabel: `30 Apr, ${now.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-    })}`,
-    dateTime: now.toISOString(),
-    price: params.priceNumber,
-    status: 'pending',
-    unlockFeePaid: true,
-    usedWelcomeBonus: false,
-    usedReferralCredit: false,
-    bookingConfirmedByMaster: false,
-    clientPaid: true,
-    paymentReceivedByPlatform: true,
-    promotionPaidByMaster: false,
-    contactPhone: params.phone,
-    contactEmail: '',
-    contactWhatsapp: params.phone,
-    contactTelegram: '',
-    contactInstagram: '',
-    guestStableKey: params.stableKey,
-  };
-
-  addBooking(booking);
+  } catch {
+    window.localStorage.setItem('olamep_guest_bookings', JSON.stringify([booking]));
+  }
 }
 
-function GuestBookingContent() {
+export default function GuestBookingPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [pending, setPending] = useState<PendingBooking | null>(null);
   const [firstName, setFirstName] = useState('');
@@ -194,11 +115,9 @@ function GuestBookingContent() {
   const [selectedPayment, setSelectedPayment] = useState('card');
   const [paymentSheetOpen, setPaymentSheetOpen] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [alreadyReserved, setAlreadyReserved] = useState(false);
 
   useEffect(() => {
     const saved = readPendingBooking();
-    const masterIdFromUrl = searchParams.get('masterId') || '';
 
     if (saved) {
       setPending(saved);
@@ -206,30 +125,28 @@ function GuestBookingContent() {
     }
 
     setPending({
-      masterId: masterIdFromUrl || 'guest',
+      masterId: 'guest',
       masterName: 'Professional',
       category: 'Service',
       subcategory: '',
       price: '45',
       avatar: '',
     });
-  }, [searchParams]);
+  }, []);
 
   const canContinueToPayment = useMemo(() => {
     return (
       firstName.trim().length >= 2 &&
       lastName.trim().length >= 2 &&
       phone.trim().length >= 6 &&
-      accepted &&
-      !alreadyReserved
+      accepted
     );
-  }, [firstName, lastName, phone, accepted, alreadyReserved]);
+  }, [firstName, lastName, phone, accepted]);
 
   const masterName = pending?.masterName || 'Professional';
   const category = pending?.category || 'Service';
   const subcategory = pending?.subcategory || '';
   const price = pending?.price || '45';
-  const cleanPrice = String(price).replace(/[^\d.]/g, '') || '45';
 
   const selectedPaymentMethod =
     PAYMENT_METHODS.find((method) => method.id === selectedPayment) || PAYMENT_METHODS[0];
@@ -240,36 +157,13 @@ function GuestBookingContent() {
   };
 
   const handleConfirmPayment = () => {
-    const stableKey = makeStableBookingKey({
-      masterId: pending?.masterId || 'guest',
-      masterName,
-      phone: phone.trim(),
-    });
-
-    const lastCreatedKey =
-      typeof window !== 'undefined'
-        ? window.localStorage.getItem(LAST_CREATED_BOOKING_KEY)
-        : null;
-
-    if (lastCreatedKey === stableKey) {
-      setPaymentSheetOpen(false);
-      setAlreadyReserved(true);
-      setSuccess(true);
-
-      window.setTimeout(() => {
-        router.push('/bookings');
-      }, 900);
-
-      return;
-    }
-
-    const guestBooking: GuestBooking = {
+    const booking: GuestBooking = {
       id: `guest_booking_${Date.now()}`,
       masterId: pending?.masterId || 'guest',
       masterName,
       category,
       subcategory,
-      price: cleanPrice,
+      price,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       phone: phone.trim(),
@@ -280,26 +174,13 @@ function GuestBookingContent() {
       createdAt: new Date().toISOString(),
     };
 
-    saveGuestBookingOnce(guestBooking, stableKey);
-
-    addBookingToMainBookingsOnce({
-      stableKey,
-      masterId: pending?.masterId || 'guest',
-      masterName,
-      category,
-      subcategory,
-      priceNumber: 1,
-      avatar: pending?.avatar,
-      phone: phone.trim(),
-    });
-
+    saveGuestBooking(booking);
     setPaymentSheetOpen(false);
     setSuccess(true);
-    setAlreadyReserved(true);
 
     window.setTimeout(() => {
       router.push('/bookings');
-    }, 1000);
+    }, 1400);
   };
 
   return (
@@ -342,7 +223,13 @@ function GuestBookingContent() {
             </button>
 
             <div>
-              <div style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.05 }}>
+              <div
+                style={{
+                  fontSize: 30,
+                  fontWeight: 900,
+                  lineHeight: 1.05,
+                }}
+              >
                 Reserve booking
               </div>
               <div
@@ -411,7 +298,14 @@ function GuestBookingContent() {
                 {subcategory ? ` · ${subcategory}` : ''}
               </div>
 
-              <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  marginTop: 10,
+                  display: 'flex',
+                  gap: 8,
+                  flexWrap: 'wrap',
+                }}
+              >
                 <span
                   style={{
                     borderRadius: 999,
@@ -422,7 +316,7 @@ function GuestBookingContent() {
                     fontWeight: 900,
                   }}
                 >
-                  From £{cleanPrice}
+                  From £{String(price).replace(/[^\d.]/g, '') || '45'}
                 </span>
 
                 <span
@@ -565,7 +459,7 @@ function GuestBookingContent() {
                   : 'none',
               }}
             >
-              {alreadyReserved ? 'Booking already reserved' : 'Pay £1 & reserve'}
+              Pay £1 & reserve
             </button>
 
             {success ? (
@@ -671,7 +565,13 @@ function GuestBookingContent() {
               </button>
             </div>
 
-            <div style={{ marginTop: 16, display: 'grid', gap: 10 }}>
+            <div
+              style={{
+                marginTop: 16,
+                display: 'grid',
+                gap: 10,
+              }}
+            >
               {PAYMENT_METHODS.map((method) => {
                 const active = selectedPayment === method.id;
 
@@ -771,7 +671,13 @@ function GuestBookingContent() {
               }}
             >
               <div>
-                <div style={{ fontSize: 12, fontWeight: 900, color: '#657080' }}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 900,
+                    color: '#657080',
+                  }}
+                >
                   Selected method
                 </div>
                 <div
@@ -786,7 +692,15 @@ function GuestBookingContent() {
                 </div>
               </div>
 
-              <div style={{ fontSize: 26, fontWeight: 900, color: '#071b46' }}>£1</div>
+              <div
+                style={{
+                  fontSize: 26,
+                  fontWeight: 900,
+                  color: '#071b46',
+                }}
+              >
+                £1
+              </div>
             </div>
 
             <button
@@ -833,29 +747,16 @@ function GuestBookingContent() {
   );
 }
 
-export default function GuestBookingPage() {
-  return (
-    <Suspense
-      fallback={
-        <main
-          style={{
-            minHeight: '100vh',
-            background: 'linear-gradient(180deg, #eef4ff 0%, #ffffff 45%, #fff1f4 100%)',
-            fontFamily: 'Arial, sans-serif',
-            color: '#071b46',
-            padding: 24,
-          }}
-        >
-          Loading booking...
-        </main>
-      }
-    >
-      <GuestBookingContent />
-    </Suspense>
-  );
-}
-
 const inputStyle = {
   width: '100%',
   height: 58,
-  border
+  borderRadius: 20,
+  border: '2px solid #111111',
+  background: '#ffffff',
+  color: '#071b46',
+  fontSize: 16,
+  fontWeight: 800,
+  padding: '0 14px',
+  outline: 'none',
+  boxSizing: 'border-box',
+} as const;
