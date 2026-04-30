@@ -1,8 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { addBooking, getBookings, type BookingItem } from '../../services/bookingsStore';
+import {
+  addBooking,
+  getBookings,
+  type BookingItem,
+} from '../../../services/bookingsStore';
 
 type GuestBooking = {
   id: string;
@@ -42,42 +46,12 @@ const GUEST_BOOKINGS_KEY = 'olamep_guest_bookings';
 const LAST_CREATED_BOOKING_KEY = 'olamep_last_created_guest_booking_key';
 
 const PAYMENT_METHODS: PaymentMethod[] = [
-  {
-    id: 'card',
-    title: 'Bank card',
-    subtitle: 'Visa / Mastercard',
-    icon: '💳',
-  },
-  {
-    id: 'google-pay',
-    title: 'Google Pay',
-    subtitle: 'Fast mobile payment',
-    icon: 'G',
-  },
-  {
-    id: 'apple-pay',
-    title: 'Apple Pay',
-    subtitle: 'Fast wallet payment',
-    icon: '',
-  },
-  {
-    id: 'paypal',
-    title: 'PayPal',
-    subtitle: 'Pay with PayPal account',
-    icon: '🅿️',
-  },
-  {
-    id: 'crypto',
-    title: 'Crypto wallet',
-    subtitle: 'USDT / USDC',
-    icon: '₿',
-  },
-  {
-    id: 'swift',
-    title: 'SWIFT / bank transfer',
-    subtitle: 'Manual bank transfer',
-    icon: '🏦',
-  },
+  { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
+  { id: 'google-pay', title: 'Google Pay', subtitle: 'Fast mobile payment', icon: 'G' },
+  { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Fast wallet payment', icon: '' },
+  { id: 'paypal', title: 'PayPal', subtitle: 'Pay with PayPal account', icon: '🅿️' },
+  { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
+  { id: 'swift', title: 'SWIFT / bank transfer', subtitle: 'Manual bank transfer', icon: '🏦' },
 ];
 
 function readPendingBooking(): PendingBooking | null {
@@ -208,7 +182,7 @@ function addBookingToMainBookingsOnce(params: {
   addBooking(booking);
 }
 
-export default function GuestBookingPage() {
+function GuestBookingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -256,7 +230,6 @@ export default function GuestBookingPage() {
   const subcategory = pending?.subcategory || '';
   const price = pending?.price || '45';
   const cleanPrice = String(price).replace(/[^\d.]/g, '') || '45';
-  const priceNumber = Number(cleanPrice) || 45;
 
   const selectedPaymentMethod =
     PAYMENT_METHODS.find((method) => method.id === selectedPayment) || PAYMENT_METHODS[0];
@@ -369,13 +342,7 @@ export default function GuestBookingPage() {
             </button>
 
             <div>
-              <div
-                style={{
-                  fontSize: 30,
-                  fontWeight: 900,
-                  lineHeight: 1.05,
-                }}
-              >
+              <div style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.05 }}>
                 Reserve booking
               </div>
               <div
@@ -444,14 +411,7 @@ export default function GuestBookingPage() {
                 {subcategory ? ` · ${subcategory}` : ''}
               </div>
 
-              <div
-                style={{
-                  marginTop: 10,
-                  display: 'flex',
-                  gap: 8,
-                  flexWrap: 'wrap',
-                }}
-              >
+              <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <span
                   style={{
                     borderRadius: 999,
@@ -711,13 +671,7 @@ export default function GuestBookingPage() {
               </button>
             </div>
 
-            <div
-              style={{
-                marginTop: 16,
-                display: 'grid',
-                gap: 10,
-              }}
-            >
+            <div style={{ marginTop: 16, display: 'grid', gap: 10 }}>
               {PAYMENT_METHODS.map((method) => {
                 const active = selectedPayment === method.id;
 
@@ -817,13 +771,7 @@ export default function GuestBookingPage() {
               }}
             >
               <div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 900,
-                    color: '#657080',
-                  }}
-                >
+                <div style={{ fontSize: 12, fontWeight: 900, color: '#657080' }}>
                   Selected method
                 </div>
                 <div
@@ -838,15 +786,7 @@ export default function GuestBookingPage() {
                 </div>
               </div>
 
-              <div
-                style={{
-                  fontSize: 26,
-                  fontWeight: 900,
-                  color: '#071b46',
-                }}
-              >
-                £1
-              </div>
+              <div style={{ fontSize: 26, fontWeight: 900, color: '#071b46' }}>£1</div>
             </div>
 
             <button
@@ -893,16 +833,29 @@ export default function GuestBookingPage() {
   );
 }
 
+export default function GuestBookingPage() {
+  return (
+    <Suspense
+      fallback={
+        <main
+          style={{
+            minHeight: '100vh',
+            background: 'linear-gradient(180deg, #eef4ff 0%, #ffffff 45%, #fff1f4 100%)',
+            fontFamily: 'Arial, sans-serif',
+            color: '#071b46',
+            padding: 24,
+          }}
+        >
+          Loading booking...
+        </main>
+      }
+    >
+      <GuestBookingContent />
+    </Suspense>
+  );
+}
+
 const inputStyle = {
   width: '100%',
   height: 58,
-  borderRadius: 20,
-  border: '2px solid #111111',
-  background: '#ffffff',
-  color: '#071b46',
-  fontSize: 16,
-  fontWeight: 800,
-  padding: '0 14px',
-  outline: 'none',
-  boxSizing: 'border-box',
-} as const;
+  border
