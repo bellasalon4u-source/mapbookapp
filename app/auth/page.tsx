@@ -1,27 +1,18 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  createAccount,
-  loginWithEmail,
-} from '../../services/authStore';
+import { createAccount, loginWithEmail } from '../../services/authStore';
 
 const BRAND = {
   navy: '#071b46',
   green: '#24c45a',
   blue: '#0e73d8',
-  yellow: '#ffd629',
   red: '#ff2456',
-  pink: '#ff4f9a',
   border: '#050505',
   muted: '#6c7686',
-  bg: '#ffffff',
-  softGreen: '#dcffe8',
-  softBlue: '#dcecff',
   softOrange: '#fff0da',
   softPink: '#ffe9f2',
-  softGrey: '#f3f5f8',
 };
 
 type AuthMode = 'create' | 'login';
@@ -56,7 +47,7 @@ function OlamepLogo() {
   );
 }
 
-export default function AuthPage() {
+function AuthPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -94,6 +85,23 @@ export default function AuthPage() {
     }
 
     setError('');
+    router.push(returnTo);
+  };
+
+  const continueWithGoogle = () => {
+    const result = createAccount({
+      email: 'google-user@olamep.com',
+      password: 'google123',
+      fullName: 'Google user',
+      acceptedTerms: true,
+      marketingConsent: false,
+    });
+
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+
     router.push(returnTo);
   };
 
@@ -227,23 +235,7 @@ export default function AuthPage() {
 
           <button
             type="button"
-            onClick={() => {
-              setEmail('google-user@olamep.com');
-              setPassword('google123');
-              setAcceptedTerms(true);
-
-              const result = createAccount({
-                email: 'google-user@olamep.com',
-                password: 'google123',
-                fullName: 'Google user',
-                acceptedTerms: true,
-                marketingConsent: false,
-              });
-
-              if (result.ok) {
-                router.push(returnTo);
-              }
-            }}
+            onClick={continueWithGoogle}
             style={{
               width: '100%',
               minHeight: 54,
@@ -283,15 +275,7 @@ export default function AuthPage() {
           </div>
 
           {isCreateMode ? (
-            <label
-              style={{
-                display: 'grid',
-                gap: 7,
-                fontSize: 12,
-                fontWeight: 900,
-                color: BRAND.muted,
-              }}
-            >
+            <label style={labelStyle}>
               Имя
               <input
                 value={fullName}
@@ -302,16 +286,7 @@ export default function AuthPage() {
             </label>
           ) : null}
 
-          <label
-            style={{
-              marginTop: isCreateMode ? 12 : 0,
-              display: 'grid',
-              gap: 7,
-              fontSize: 12,
-              fontWeight: 900,
-              color: BRAND.muted,
-            }}
-          >
+          <label style={{ ...labelStyle, marginTop: isCreateMode ? 12 : 0 }}>
             Email
             <input
               value={email}
@@ -323,16 +298,7 @@ export default function AuthPage() {
             />
           </label>
 
-          <label
-            style={{
-              marginTop: 12,
-              display: 'grid',
-              gap: 7,
-              fontSize: 12,
-              fontWeight: 900,
-              color: BRAND.muted,
-            }}
-          >
+          <label style={{ ...labelStyle, marginTop: 12 }}>
             Пароль
             <input
               value={password}
@@ -345,18 +311,7 @@ export default function AuthPage() {
 
           {isCreateMode ? (
             <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
-              <label
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '24px 1fr',
-                  gap: 9,
-                  alignItems: 'start',
-                  fontSize: 12,
-                  lineHeight: 1.35,
-                  fontWeight: 800,
-                  color: BRAND.navy,
-                }}
-              >
+              <label style={checkboxStyle}>
                 <input
                   type="checkbox"
                   checked={acceptedTerms}
@@ -384,18 +339,7 @@ export default function AuthPage() {
                 </span>
               </label>
 
-              <label
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '24px 1fr',
-                  gap: 9,
-                  alignItems: 'start',
-                  fontSize: 12,
-                  lineHeight: 1.35,
-                  fontWeight: 800,
-                  color: BRAND.muted,
-                }}
-              >
+              <label style={{ ...checkboxStyle, color: BRAND.muted }}>
                 <input
                   type="checkbox"
                   checked={marketingConsent}
@@ -427,6 +371,7 @@ export default function AuthPage() {
           <button
             type="button"
             onClick={submit}
+            disabled={isCreateMode && !acceptedTerms}
             style={{
               marginTop: 15,
               width: '100%',
@@ -443,7 +388,6 @@ export default function AuthPage() {
                   ? 'none'
                   : '0 6px 0 rgba(0,0,0,0.12)',
             }}
-            disabled={isCreateMode && !acceptedTerms}
           >
             {isCreateMode ? 'Создать аккаунт' : 'Войти'}
           </button>
@@ -470,7 +414,53 @@ export default function AuthPage() {
   );
 }
 
-const inputStyle: React.CSSProperties = {
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<AuthLoading />}>
+      <AuthPageContent />
+    </Suspense>
+  );
+}
+
+function AuthLoading() {
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        background: '#ffffff',
+        display: 'grid',
+        placeItems: 'center',
+        fontFamily: 'Arial, sans-serif',
+        color: BRAND.navy,
+        fontSize: 22,
+        fontWeight: 900,
+      }}
+    >
+      Olamep
+    </main>
+  );
+}
+
+const labelStyle: CSSProperties = {
+  display: 'grid',
+  gap: 7,
+  fontSize: 12,
+  fontWeight: 900,
+  color: BRAND.muted,
+};
+
+const checkboxStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '24px 1fr',
+  gap: 9,
+  alignItems: 'start',
+  fontSize: 12,
+  lineHeight: 1.35,
+  fontWeight: 800,
+  color: BRAND.navy,
+};
+
+const inputStyle: CSSProperties = {
   minHeight: 54,
   borderRadius: 18,
   border: `2.5px solid ${BRAND.border}`,
@@ -482,13 +472,11 @@ const inputStyle: React.CSSProperties = {
   background: '#ffffff',
 };
 
-const linkButtonStyle: React.CSSProperties = {
+const linkButtonStyle: CSSProperties = {
   border: 'none',
   background: 'transparent',
   color: BRAND.blue,
   fontSize: 12,
   fontWeight: 900,
   padding: 0,
-  textDecoration: 'underline',
-  cursor: 'pointer',
-};
+  textDecoration: 'underline
