@@ -371,6 +371,8 @@ function isUserRegistered() {
 function savePendingGuestBooking(master: any) {
   if (typeof window === 'undefined') return;
 
+  const registered = isUserRegistered();
+
   window.localStorage.setItem(
     'olamep_pending_guest_booking',
     JSON.stringify({
@@ -381,6 +383,8 @@ function savePendingGuestBooking(master: any) {
       price: master?.price || master?.priceFrom || master?.startingPrice || '45',
       avatar: master?.avatar || master?.cover || '',
       createdAt: new Date().toISOString(),
+      registered,
+      internalWalletAllowed: registered,
     })
   );
 }
@@ -2582,13 +2586,15 @@ export default function HomePage() {
   };
 
   const handleBookMaster = (master: any) => {
-    if (isUserRegistered()) {
-      router.push(`/booking/${master.id}`);
-      return;
-    }
+    const registered = isUserRegistered();
 
     savePendingGuestBooking(master);
-    router.push(`/booking/guest?masterId=${encodeURIComponent(String(master.id || ''))}`);
+
+    router.push(
+      `/booking/guest?masterId=${encodeURIComponent(
+        String(master?.id || '')
+      )}&registered=${registered ? '1' : '0'}`
+    );
   };
 
   const handleBookPromotion = (promo: PromotionItem) => {
