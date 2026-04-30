@@ -914,8 +914,85 @@ function MasterMiniCard({
   const price = master.price || master.priceFrom || master.startingPrice || '45';
   const categoryLabel = getCategoryLabel(master.category, language);
 
+  const [cardOffset, setCardOffset] = useState({ x: 0, y: 0 });
+  const dragRef = useRef({
+    active: false,
+    startX: 0,
+    startY: 0,
+    originX: 0,
+    originY: 0,
+    moved: false,
+  });
+
+  const clamp = (value: number, min: number, max: number) => {
+    return Math.max(min, Math.min(max, value));
+  };
+
+  const startDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+
+    if (target.closest('button')) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    dragRef.current = {
+      active: true,
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: cardOffset.x,
+      originY: cardOffset.y,
+      moved: false,
+    };
+
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // Safe fallback.
+    }
+  };
+
+  const moveDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current.active) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const diffX = event.clientX - dragRef.current.startX;
+    const diffY = event.clientY - dragRef.current.startY;
+
+    if (Math.abs(diffX) > 4 || Math.abs(diffY) > 4) {
+      dragRef.current.moved = true;
+    }
+
+    setCardOffset({
+      x: clamp(dragRef.current.originX + diffX, -72, 72),
+      y: clamp(dragRef.current.originY + diffY, -360, 26),
+    });
+  };
+
+  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current.active) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    dragRef.current.active = false;
+
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      // Safe fallback.
+    }
+  };
+
   return (
     <div
+      onPointerDown={startDrag}
+      onPointerMove={moveDrag}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onClick={(event) => event.stopPropagation()}
       style={{
         position: 'absolute',
         left: 10,
@@ -925,13 +1002,38 @@ function MasterMiniCard({
         borderRadius: 22,
         border: '2px solid #111111',
         background: '#ffffff',
-        boxShadow: '0 12px 28px rgba(0,0,0,0.18)',
-        padding: 10,
+        boxShadow: dragRef.current.active
+          ? '0 18px 34px rgba(0,0,0,0.24)'
+          : '0 12px 28px rgba(0,0,0,0.18)',
+        padding: '18px 10px 10px',
+        transform: `translate3d(${cardOffset.x}px, ${cardOffset.y}px, 0)`,
+        transition: dragRef.current.active ? 'none' : 'box-shadow 0.18s ease',
+        touchAction: 'none',
+        cursor: dragRef.current.active ? 'grabbing' : 'grab',
+        userSelect: 'none',
       }}
     >
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: 7,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 46,
+          height: 5,
+          borderRadius: 999,
+          background: '#d6dbe2',
+          border: '1px solid rgba(17,17,17,0.12)',
+        }}
+      />
+
       <button
         type="button"
-        onClick={onClose}
+        onClick={(event) => {
+          event.stopPropagation();
+          onClose();
+        }}
         style={{
           position: 'absolute',
           right: 9,
@@ -946,6 +1048,7 @@ function MasterMiniCard({
           fontWeight: 900,
           cursor: 'pointer',
           zIndex: 2,
+          touchAction: 'manipulation',
         }}
       >
         ×
@@ -974,12 +1077,16 @@ function MasterMiniCard({
               objectFit: 'cover',
               display: 'block',
               border: '1.5px solid #111111',
+              pointerEvents: 'none',
             }}
           />
 
           <button
             type="button"
-            onClick={onLike}
+            onClick={(event) => {
+              event.stopPropagation();
+              onLike();
+            }}
             style={{
               position: 'absolute',
               right: -7,
@@ -994,6 +1101,7 @@ function MasterMiniCard({
               fontWeight: 900,
               cursor: 'pointer',
               boxShadow: '0 3px 8px rgba(0,0,0,0.12)',
+              touchAction: 'manipulation',
             }}
           >
             {liked ? '♥' : '♡'}
@@ -1101,7 +1209,10 @@ function MasterMiniCard({
       >
         <button
           type="button"
-          onClick={onOpen}
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpen();
+          }}
           style={{
             height: 40,
             borderRadius: 14,
@@ -1111,6 +1222,7 @@ function MasterMiniCard({
             fontSize: 12,
             fontWeight: 900,
             cursor: 'pointer',
+            touchAction: 'manipulation',
           }}
         >
           {tr.view}
@@ -1118,7 +1230,10 @@ function MasterMiniCard({
 
         <button
           type="button"
-          onClick={onRoute}
+          onClick={(event) => {
+            event.stopPropagation();
+            onRoute();
+          }}
           style={{
             height: 40,
             borderRadius: 14,
@@ -1128,6 +1243,7 @@ function MasterMiniCard({
             fontSize: 12,
             fontWeight: 900,
             cursor: 'pointer',
+            touchAction: 'manipulation',
           }}
         >
           {tr.route}
@@ -1135,7 +1251,10 @@ function MasterMiniCard({
 
         <button
           type="button"
-          onClick={onBook}
+          onClick={(event) => {
+            event.stopPropagation();
+            onBook();
+          }}
           style={{
             height: 40,
             borderRadius: 14,
@@ -1145,6 +1264,7 @@ function MasterMiniCard({
             fontSize: 12,
             fontWeight: 900,
             cursor: 'pointer',
+            touchAction: 'manipulation',
           }}
         >
           {tr.bookNow}
