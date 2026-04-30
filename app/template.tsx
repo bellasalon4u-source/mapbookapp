@@ -31,8 +31,7 @@ export default function Template({ children }: { children: ReactNode }) {
             position: 'fixed',
             inset: 0,
             zIndex: 99999,
-            background:
-              'radial-gradient(circle at 50% 38%, #ffffff 0%, #fbfcfd 48%, #f4f6f9 100%)',
+            background: '#ffffff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -44,23 +43,23 @@ export default function Template({ children }: { children: ReactNode }) {
           }}
         >
           <style jsx>{`
-            @keyframes olamepMapDrift {
+            @keyframes mapDrift {
               0% {
-                transform: translate3d(-7px, -6px, 0) scale(1.03);
+                transform: translate3d(-10px, -8px, 0) scale(1.04);
               }
               100% {
-                transform: translate3d(7px, 6px, 0) scale(1.03);
+                transform: translate3d(10px, 8px, 0) scale(1.04);
               }
             }
 
-            @keyframes olamepLogoIn {
+            @keyframes logoEnter {
               0% {
-                transform: translateY(18px) scale(0.82);
+                transform: translateY(22px) scale(0.78);
                 opacity: 0;
-                filter: blur(5px);
+                filter: blur(7px);
               }
-              42% {
-                transform: translateY(0) scale(1.04);
+              45% {
+                transform: translateY(0) scale(1.05);
                 opacity: 1;
                 filter: blur(0);
               }
@@ -71,25 +70,25 @@ export default function Template({ children }: { children: ReactNode }) {
               }
             }
 
-            @keyframes olamepLogoFloat {
+            @keyframes logoFloat {
               0% {
                 transform: translateY(0) scale(1);
               }
               50% {
-                transform: translateY(-5px) scale(1.02);
+                transform: translateY(-6px) scale(1.015);
               }
               100% {
                 transform: translateY(0) scale(1);
               }
             }
 
-            @keyframes olamepTextIn {
+            @keyframes textEnter {
               0% {
-                transform: translateY(15px);
+                transform: translateY(18px);
                 opacity: 0;
               }
-              45% {
-                transform: translateY(15px);
+              48% {
+                transform: translateY(18px);
                 opacity: 0;
               }
               100% {
@@ -98,48 +97,48 @@ export default function Template({ children }: { children: ReactNode }) {
               }
             }
 
-            @keyframes olamepPinFloat {
+            @keyframes dotWave {
               0% {
-                transform: translateY(0);
-                opacity: 0.38;
-              }
-              50% {
-                transform: translateY(-6px);
-                opacity: 0.68;
-              }
-              100% {
-                transform: translateY(0);
-                opacity: 0.38;
-              }
-            }
-
-            @keyframes olamepDotPulse {
-              0% {
-                transform: translateY(0) scale(0.78);
-                opacity: 0.4;
+                transform: translateY(0) scale(0.72);
+                opacity: 0.45;
               }
               45% {
-                transform: translateY(-5px) scale(1.15);
+                transform: translateY(-7px) scale(1.18);
                 opacity: 1;
               }
               100% {
-                transform: translateY(0) scale(0.78);
-                opacity: 0.4;
+                transform: translateY(0) scale(0.72);
+                opacity: 0.45;
               }
             }
 
-            @keyframes olamepSoftGlow {
+            @keyframes smallPinFloat {
               0% {
-                transform: scale(0.9);
+                transform: translateY(0);
                 opacity: 0.28;
               }
               50% {
-                transform: scale(1.07);
+                transform: translateY(-5px);
                 opacity: 0.52;
               }
               100% {
-                transform: scale(0.98);
-                opacity: 0.34;
+                transform: translateY(0);
+                opacity: 0.28;
+              }
+            }
+
+            @keyframes glowPulse {
+              0% {
+                transform: scale(0.92);
+                opacity: 0.42;
+              }
+              50% {
+                transform: scale(1.08);
+                opacity: 0.72;
+              }
+              100% {
+                transform: scale(1);
+                opacity: 0.5;
               }
             }
           `}</style>
@@ -147,8 +146,8 @@ export default function Template({ children }: { children: ReactNode }) {
           <div
             style={{
               position: 'absolute',
-              inset: -70,
-              animation: 'olamepMapDrift 3s ease-in-out infinite alternate',
+              inset: -80,
+              animation: 'mapDrift 3s ease-in-out infinite alternate',
               opacity: 1,
             }}
           >
@@ -161,69 +160,125 @@ export default function Template({ children }: { children: ReactNode }) {
                 display: 'block',
               }}
             >
-              <rect width="1000" height="1800" fill="transparent" />
+              <rect width="1000" height="1800" fill="#ffffff" />
 
               <path
-                d="M80 170 C210 250 250 420 310 620 C360 790 430 930 565 1085 C705 1245 790 1390 940 1610"
-                stroke="#e1e4e9"
+                d="M-80 250 C120 350 190 520 250 730 C305 930 410 1070 570 1240 C710 1390 820 1510 1070 1700"
+                stroke="#e0e4ea"
+                strokeWidth="34"
+                fill="none"
+                strokeLinecap="round"
+                opacity="0.72"
+              />
+
+              <path
+                d="M1090 90 C850 230 740 390 680 610 C620 830 575 990 420 1160 C270 1325 155 1480 40 1750"
+                stroke="#e5e8ee"
+                strokeWidth="30"
+                fill="none"
+                strokeLinecap="round"
+                opacity="0.76"
+              />
+
+              <path
+                d="M-70 840 C120 780 300 780 470 850 C650 925 780 1000 1070 930"
+                stroke="#e2e6ec"
                 strokeWidth="28"
                 fill="none"
                 strokeLinecap="round"
-                opacity="0.78"
+                opacity="0.64"
               />
 
               <path
-                d="M930 100 C760 225 675 350 620 535 C575 690 545 850 430 995 C310 1145 185 1320 90 1585"
-                stroke="#e5e7ec"
-                strokeWidth="24"
+                d="M170 120 C280 240 380 315 520 370 C650 420 770 520 900 710"
+                stroke="#edf0f4"
+                strokeWidth="12"
                 fill="none"
                 strokeLinecap="round"
-                opacity="0.8"
+                opacity="0.95"
               />
 
               <path
-                d="M-20 760 C150 715 300 710 430 780 C570 855 720 930 1020 870"
-                stroke="#e2e5ea"
-                strokeWidth="24"
+                d="M105 440 L235 510 L330 645 L455 760 L590 820"
+                stroke="#e9edf2"
+                strokeWidth="10"
                 fill="none"
                 strokeLinecap="round"
-                opacity="0.7"
+              />
+
+              <path
+                d="M720 230 L650 365 L610 525 L585 690 L640 835 L780 980"
+                stroke="#e9edf2"
+                strokeWidth="10"
+                fill="none"
+                strokeLinecap="round"
+              />
+
+              <path
+                d="M130 1260 L290 1190 L430 1200 L585 1260 L735 1395"
+                stroke="#e9edf2"
+                strokeWidth="10"
+                fill="none"
+                strokeLinecap="round"
+              />
+
+              <path
+                d="M260 260 L410 295 L545 385 L650 470"
+                stroke="#eef1f5"
+                strokeWidth="7"
+                fill="none"
+                strokeLinecap="round"
+              />
+
+              <path
+                d="M720 665 L810 750 L910 880"
+                stroke="#eef1f5"
+                strokeWidth="7"
+                fill="none"
+                strokeLinecap="round"
+              />
+
+              <path
+                d="M160 755 L275 820 L360 910 L455 980"
+                stroke="#eef1f5"
+                strokeWidth="7"
+                fill="none"
+                strokeLinecap="round"
+              />
+
+              <path
+                d="M620 1210 L720 1275 L800 1380 L900 1535"
+                stroke="#eef1f5"
+                strokeWidth="7"
+                fill="none"
+                strokeLinecap="round"
+              />
+
+              <path
+                d="M245 1510 L370 1430 L500 1410 L610 1460"
+                stroke="#eef1f5"
+                strokeWidth="7"
+                fill="none"
+                strokeLinecap="round"
               />
 
               {[
-                'M120 330 L270 420 L360 560 L440 710 L560 790',
-                'M660 260 L600 380 L560 520 L530 670 L580 820 L710 950',
-                'M180 1220 L320 1150 L430 1160 L580 1210 L700 1330',
-                'M280 220 L420 260 L540 340 L620 420',
-                'M700 640 L780 720 L860 840',
-                'M180 720 L280 780 L350 860 L420 930',
-                'M610 1180 L700 1230 L770 1320 L850 1450',
-                'M250 1450 L350 1370 L470 1350 L560 1380',
-              ].map((path) => (
-                <path
-                  key={path}
-                  d={path}
-                  stroke="#edf0f4"
-                  strokeWidth="8"
-                  fill="none"
-                  strokeLinecap="round"
-                  opacity="0.95"
-                />
-              ))}
-
-              {[
-                'M110 520 L190 560 L250 640 L330 700',
-                'M690 430 L760 500 L820 590',
-                'M310 980 L370 1040 L440 1100',
-                'M690 980 L760 1050 L820 1110',
-                'M170 1320 L240 1280 L300 1290',
-                'M430 250 L470 360 L520 410 L595 430',
-                'M760 1180 L810 1230 L855 1290 L900 1355',
-                'M120 1050 L205 990 L270 1000 L335 1060',
-                'M520 1190 L465 1260 L390 1320 L300 1390',
-                'M740 310 L815 390 L890 455',
-                'M90 1420 L180 1480 L245 1570',
-                'M570 620 L655 705 L760 775',
+                'M120 570 L205 610 L275 700 L365 760',
+                'M725 455 L805 535 L890 640',
+                'M330 1015 L395 1080 L470 1145',
+                'M710 1010 L795 1090 L885 1175',
+                'M165 1360 L260 1310 L340 1325',
+                'M455 220 L505 355 L570 420 L660 450',
+                'M780 1210 L845 1270 L900 1340 L960 1425',
+                'M100 1110 L205 1040 L290 1060 L370 1130',
+                'M540 1240 L480 1320 L390 1390 L285 1465',
+                'M770 330 L850 420 L940 500',
+                'M70 1490 L165 1555 L245 1660',
+                'M585 650 L690 750 L820 830',
+                'M240 970 L330 945 L420 970 L510 1045',
+                'M590 210 L640 300 L720 375',
+                'M95 350 L180 395 L255 465',
+                'M805 1540 L880 1605 L950 1695',
               ].map((path) => (
                 <path
                   key={path}
@@ -232,27 +287,28 @@ export default function Template({ children }: { children: ReactNode }) {
                   strokeWidth="4"
                   fill="none"
                   strokeLinecap="round"
-                  opacity="0.98"
+                  opacity="1"
                 />
               ))}
             </svg>
           </div>
 
-          <MapPin left="20%" top="18%" size={22} delay="0s" opacity={0.36} />
-          <MapPin right="20%" top="31%" size={21} delay="0.25s" opacity={0.4} />
-          <MapPin left="16%" top="55%" size={21} delay="0.45s" opacity={0.34} />
-          <MapPin right="17%" top="63%" size={23} delay="0.15s" opacity={0.42} />
-          <MapPin left="55%" bottom="12%" size={22} delay="0.35s" opacity={0.34} />
+          <SmallPin left="18%" top="18%" size={23} delay="0s" />
+          <SmallPin right="18%" top="31%" size={22} delay="0.2s" />
+          <SmallPin left="14%" top="56%" size={22} delay="0.4s" />
+          <SmallPin right="15%" top="61%" size={24} delay="0.1s" />
+          <SmallPin left="56%" bottom="10%" size={23} delay="0.3s" />
+          <SmallPin left="13%" bottom="22%" size={18} delay="0.5s" />
 
           <div
             style={{
               position: 'absolute',
-              width: 430,
-              height: 430,
+              width: 520,
+              height: 520,
               borderRadius: 999,
               background:
-                'radial-gradient(circle, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.82) 44%, rgba(255,255,255,0.08) 74%, transparent 100%)',
-              animation: 'olamepSoftGlow 3s ease-in-out infinite',
+                'radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.88) 40%, rgba(255,255,255,0.12) 74%, transparent 100%)',
+              animation: 'glowPulse 3s ease-in-out infinite',
             }}
           />
 
@@ -262,78 +318,129 @@ export default function Template({ children }: { children: ReactNode }) {
               position: 'relative',
               width: '100%',
               maxWidth: 430,
-              minHeight: 460,
+              minHeight: 500,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               padding: '0 24px',
               boxSizing: 'border-box',
+              marginTop: -18,
             }}
           >
             <div
               style={{
-                width: 130,
-                height: 155,
+                width: 132,
+                height: 160,
                 position: 'relative',
                 animation:
-                  'olamepLogoIn 0.9s cubic-bezier(0.2, 0.9, 0.2, 1) both, olamepLogoFloat 2.1s ease-in-out 0.9s infinite',
+                  'logoEnter 0.9s cubic-bezier(0.2, 0.9, 0.2, 1) both, logoFloat 2.1s ease-in-out 0.9s infinite',
               }}
             >
-              <div
+              <svg
+                viewBox="0 0 132 160"
                 style={{
-                  position: 'absolute',
-                  inset: 0,
-                  borderRadius: '50% 50% 58% 58%',
-                  background:
-                    'conic-gradient(from 218deg, #0e73d8 0deg, #00a6ff 52deg, #24c45a 112deg, #ffd629 172deg, #ff2456 246deg, #7c3cff 310deg, #0e73d8 360deg)',
-                  transform: 'rotate(45deg)',
-                  border: '3px solid rgba(255,255,255,0.88)',
-                  boxShadow:
-                    '0 22px 40px rgba(7,27,70,0.16), inset 0 0 28px rgba(255,255,255,0.38)',
+                  width: '100%',
+                  height: '100%',
+                  display: 'block',
+                  filter: 'drop-shadow(0 24px 28px rgba(7,27,70,0.18))',
                 }}
-              />
+              >
+                <defs>
+                  <linearGradient id="pinBlue" x1="0%" y1="80%" x2="55%" y2="15%">
+                    <stop offset="0%" stopColor="#1668ff" />
+                    <stop offset="55%" stopColor="#00b8ff" />
+                    <stop offset="100%" stopColor="#28d0c8" />
+                  </linearGradient>
 
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 37,
-                  top: 36,
-                  width: 56,
-                  height: 56,
-                  borderRadius: 999,
-                  background: '#ffffff',
-                  boxShadow:
-                    'inset 0 0 0 1px rgba(7,27,70,0.04), 0 8px 18px rgba(7,27,70,0.1)',
-                }}
-              />
+                  <linearGradient id="pinGreen" x1="35%" y1="100%" x2="100%" y2="30%">
+                    <stop offset="0%" stopColor="#006c9c" />
+                    <stop offset="45%" stopColor="#20c35a" />
+                    <stop offset="100%" stopColor="#b7e82f" />
+                  </linearGradient>
 
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 24,
-                  top: 74,
-                  width: 82,
-                  height: 50,
-                  borderRadius: '999px 999px 22px 22px',
-                  background:
-                    'linear-gradient(135deg, rgba(255,255,255,0.28), rgba(255,255,255,0.02))',
-                  transform: 'rotate(45deg)',
-                }}
-              />
+                  <linearGradient id="pinWarm" x1="45%" y1="0%" x2="100%" y2="95%">
+                    <stop offset="0%" stopColor="#ff2f8a" />
+                    <stop offset="35%" stopColor="#ff5b3d" />
+                    <stop offset="68%" stopColor="#ffd42a" />
+                    <stop offset="100%" stopColor="#ff7a2f" />
+                  </linearGradient>
+
+                  <linearGradient id="pinPink" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#7a3cff" />
+                    <stop offset="55%" stopColor="#ff2f8a" />
+                    <stop offset="100%" stopColor="#ff5b3d" />
+                  </linearGradient>
+
+                  <clipPath id="pinShapeClip">
+                    <path d="M66 4C31.8 4 4 31.8 4 66c0 45.5 62 90 62 90s62-44.5 62-90C128 31.8 100.2 4 66 4Z" />
+                  </clipPath>
+                </defs>
+
+                <path
+                  d="M66 4C31.8 4 4 31.8 4 66c0 45.5 62 90 62 90s62-44.5 62-90C128 31.8 100.2 4 66 4Z"
+                  fill="#ffffff"
+                  opacity="0.95"
+                />
+
+                <g clipPath="url(#pinShapeClip)">
+                  <rect x="0" y="0" width="132" height="160" fill="url(#pinWarm)" />
+
+                  <path
+                    d="M-8 91C19 47 47 24 83 6C53 3 25 16 10 43C-4 67 -2 82 -8 91Z"
+                    fill="url(#pinBlue)"
+                  />
+
+                  <path
+                    d="M38 160C54 120 78 88 130 54V160H38Z"
+                    fill="url(#pinGreen)"
+                  />
+
+                  <path
+                    d="M-8 132C18 100 48 88 84 104C104 113 117 132 128 160H-8V132Z"
+                    fill="url(#pinPink)"
+                    opacity="0.92"
+                  />
+
+                  <path
+                    d="M63 19C87 20 107 34 119 55C111 38 93 15 63 8C35 2 14 16 6 39C20 26 38 18 63 19Z"
+                    fill="rgba(255,255,255,0.22)"
+                  />
+
+                  <path
+                    d="M29 84C52 58 82 43 123 39C93 49 68 67 49 92C40 104 29 104 20 98C22 93 25 88 29 84Z"
+                    fill="rgba(255,255,255,0.2)"
+                  />
+                </g>
+
+                <circle
+                  cx="66"
+                  cy="65"
+                  r="30"
+                  fill="#ffffff"
+                  filter="drop-shadow(0 7px 12px rgba(7,27,70,0.12))"
+                />
+
+                <path
+                  d="M66 4C31.8 4 4 31.8 4 66c0 45.5 62 90 62 90s62-44.5 62-90C128 31.8 100.2 4 66 4Z"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.9)"
+                  strokeWidth="3"
+                />
+              </svg>
             </div>
 
             <div
               style={{
                 marginTop: 18,
-                fontSize: 60,
+                fontSize: 62,
                 lineHeight: 1,
                 fontWeight: 900,
-                letterSpacing: '-2.4px',
+                letterSpacing: '-2.6px',
                 color: '#071b46',
                 textAlign: 'center',
                 textShadow: '0 8px 20px rgba(7,27,70,0.08)',
-                animation: 'olamepTextIn 1.15s ease-out both',
+                animation: 'textEnter 1.15s ease-out both',
               }}
             >
               Olamep
@@ -341,11 +448,11 @@ export default function Template({ children }: { children: ReactNode }) {
 
             <div
               style={{
-                marginTop: 30,
+                marginTop: 28,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 14,
+                gap: 16,
               }}
             >
               {[
@@ -353,17 +460,17 @@ export default function Template({ children }: { children: ReactNode }) {
                 { color: '#00b8c9', delay: '0.12s' },
                 { color: '#24c45a', delay: '0.24s' },
                 { color: '#ff9f1a', delay: '0.36s' },
-                { color: '#ff5b8a', delay: '0.48s' },
+                { color: '#ff4f8b', delay: '0.48s' },
               ].map((dot) => (
                 <span
                   key={dot.color}
                   style={{
-                    width: 14,
-                    height: 14,
+                    width: 15,
+                    height: 15,
                     borderRadius: 999,
                     background: dot.color,
-                    boxShadow: `0 6px 14px ${dot.color}55`,
-                    animation: `olamepDotPulse 0.9s ease-in-out ${dot.delay} infinite`,
+                    boxShadow: `0 6px 16px ${dot.color}66`,
+                    animation: `dotWave 0.9s ease-in-out ${dot.delay} infinite`,
                   }}
                 />
               ))}
@@ -375,14 +482,13 @@ export default function Template({ children }: { children: ReactNode }) {
   );
 }
 
-function MapPin({
+function SmallPin({
   left,
   right,
   top,
   bottom,
   size,
   delay,
-  opacity,
 }: {
   left?: string;
   right?: string;
@@ -390,7 +496,6 @@ function MapPin({
   bottom?: string;
   size: number;
   delay: string;
-  opacity: number;
 }) {
   return (
     <div
@@ -401,43 +506,37 @@ function MapPin({
         top,
         bottom,
         width: size,
-        height: size,
-        animation: `olamepPinFloat 2.25s ease-in-out ${delay} infinite`,
-        opacity,
+        height: size + 8,
+        animation: `smallPinFloat 2.4s ease-in-out ${delay} infinite`,
       }}
     >
       <div
         style={{
           position: 'absolute',
-          inset: -9,
-          borderRadius: '50%',
-          background: 'rgba(7,27,70,0.06)',
+          left: -9,
+          top: -5,
+          width: size + 18,
+          height: size + 18,
+          borderRadius: 999,
+          background: 'rgba(7,27,70,0.045)',
         }}
       />
 
-      <div
+      <svg
+        viewBox="0 0 40 48"
         style={{
           width: size,
-          height: size,
-          borderRadius: '50% 50% 50% 0',
-          background: '#8a929d',
-          transform: 'rotate(-45deg)',
-          position: 'relative',
-          boxShadow: '0 8px 18px rgba(7,27,70,0.12)',
+          height: size + 8,
+          display: 'block',
+          filter: 'drop-shadow(0 8px 12px rgba(7,27,70,0.1))',
         }}
       >
-        <div
-          style={{
-            position: 'absolute',
-            width: Math.max(6, size * 0.34),
-            height: Math.max(6, size * 0.34),
-            borderRadius: '50%',
-            background: '#ffffff',
-            left: size * 0.33,
-            top: size * 0.33,
-          }}
+        <path
+          d="M20 2C10.1 2 2 10.1 2 20c0 13.2 18 26 18 26s18-12.8 18-26C38 10.1 29.9 2 20 2Z"
+          fill="#9aa2ad"
         />
-      </div>
+        <circle cx="20" cy="20" r="7" fill="#ffffff" />
+      </svg>
     </div>
   );
 }
