@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
+import { getBookings, setBookings, type BookingItem } from '../../../services/bookingsStore';
 
 type GuestBooking = {
   id: string;
+  guestBookingKey: string;
   masterId: string;
   masterName: string;
   category: string;
@@ -87,6 +89,13 @@ function readPendingBooking(): PendingBooking | null {
   }
 }
 
+function makeGuestBookingKey(masterId: string, phone: string) {
+  return `guest:${String(masterId || 'guest').trim().toLowerCase()}:${String(phone || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '')}`;
+}
+
 function saveGuestBooking(booking: GuestBooking) {
   if (typeof window === 'undefined') return;
 
@@ -95,13 +104,75 @@ function saveGuestBooking(booking: GuestBooking) {
       window.localStorage.getItem('olamep_guest_bookings') || '[]'
     ) as GuestBooking[];
 
+    const withoutDuplicate = current.filter(
+      (item) => item.guestBookingKey !== booking.guestBookingKey
+    );
+
     window.localStorage.setItem(
       'olamep_guest_bookings',
-      JSON.stringify([booking, ...current])
+      JSON.stringify([booking, ...withoutDuplicate])
     );
   } catch {
     window.localStorage.setItem('olamep_guest_bookings', JSON.stringify([booking]));
   }
+}
+
+function addOrReplaceBookingInMainStore({
+  guestBooking,
+  pending,
+}: {
+  guestBooking: GuestBooking;
+  pending: PendingBooking | null;
+}) {
+  const currentBookings = getBookings();
+
+  const withoutDuplicate = currentBookings.filter((booking) => {
+    const anyBooking = booking as BookingItem & {
+      guestBookingKey?: string;
+    };
+
+    return anyBooking.guestBookingKey !== guestBooking.guestBookingKey;
+  });
+
+  const now = new Date();
+
+  const visibleBooking = {
+    id: guestBooking.id,
+    guestBookingKey: guestBooking.guestBookingKey,
+    masterId: guestBooking.masterId,
+    masterName: guestBooking.masterName,
+    masterAvatar:
+      pending?.avatar ||
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
+    serviceName: guestBooking.subcategory || guestBooking.category || 'Booking',
+    category: guestBooking.category || 'Service',
+    location: 'Waiting for provider confirmation',
+    areaLabel: 'Area will be shown after confirmation',
+    exactAddress: '',
+    dateLabel: now.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    dateTime: now.toISOString(),
+    price: 1,
+    status: 'pending',
+    unlockFeePaid: true,
+    clientPaid: true,
+    paymentReceivedByPlatform: true,
+    bookingConfirmedByMaster: false,
+    promotionPaidByMaster: false,
+    contactPhone: '',
+    contactEmail: '',
+    contactWhatsapp: '',
+    contactTelegram: '',
+    contactInstagram: '',
+  } as BookingItem & {
+    guestBookingKey: string;
+  };
+
+  setBookings([visibleBooking, ...withoutDuplicate]);
 }
 
 export default function GuestBookingPage() {
@@ -115,6 +186,7 @@ export default function GuestBookingPage() {
   const [selectedPayment, setSelectedPayment] = useState('card');
   const [paymentSheetOpen, setPaymentSheetOpen] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const saved = readPendingBooking();
@@ -139,11 +211,13 @@ export default function GuestBookingPage() {
       firstName.trim().length >= 2 &&
       lastName.trim().length >= 2 &&
       phone.trim().length >= 6 &&
-      accepted
+      accepted &&
+      !isProcessing
     );
-  }, [firstName, lastName, phone, accepted]);
+  }, [firstName, lastName, phone, accepted, isProcessing]);
 
   const masterName = pending?.masterName || 'Professional';
+  const masterId = pending?.masterId || 'guest';
   const category = pending?.category || 'Service';
   const subcategory = pending?.subcategory || '';
   const price = pending?.price || '45';
@@ -157,9 +231,16 @@ export default function GuestBookingPage() {
   };
 
   const handleConfirmPayment = () => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+
+    const guestBookingKey = makeGuestBookingKey(masterId, phone);
+
     const booking: GuestBooking = {
-      id: `guest_booking_${Date.now()}`,
-      masterId: pending?.masterId || 'guest',
+      id: `guest_booking_${guestBookingKey.replace(/[^a-zA-Z0-9]/g, '_')}`,
+      guestBookingKey,
+      masterId,
       masterName,
       category,
       subcategory,
@@ -175,12 +256,21 @@ export default function GuestBookingPage() {
     };
 
     saveGuestBooking(booking);
+    addOrReplaceBookingInMainStore({
+      guestBooking: booking,
+      pending,
+    });
+
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem('olamep_pending_guest_booking');
+    }
+
     setPaymentSheetOpen(false);
     setSuccess(true);
 
     window.setTimeout(() => {
       router.push('/bookings');
-    }, 1400);
+    }, 900);
   };
 
   return (
@@ -459,7 +549,7 @@ export default function GuestBookingPage() {
                   : 'none',
               }}
             >
-              Pay £1 & reserve
+              {isProcessing ? 'Processing...' : 'Pay £1 & reserve'}
             </button>
 
             {success ? (
@@ -549,6 +639,7 @@ export default function GuestBookingPage() {
               <button
                 type="button"
                 onClick={() => setPaymentSheetOpen(false)}
+                disabled={isProcessing}
                 style={{
                   width: 46,
                   height: 46,
@@ -558,7 +649,8 @@ export default function GuestBookingPage() {
                   color: '#071b46',
                   fontSize: 23,
                   fontWeight: 900,
-                  cursor: 'pointer',
+                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  opacity: isProcessing ? 0.5 : 1,
                 }}
               >
                 ×
@@ -579,6 +671,7 @@ export default function GuestBookingPage() {
                   <button
                     key={method.id}
                     type="button"
+                    disabled={isProcessing}
                     onClick={() => setSelectedPayment(method.id)}
                     style={{
                       width: '100%',
@@ -592,7 +685,8 @@ export default function GuestBookingPage() {
                       gap: 12,
                       alignItems: 'center',
                       textAlign: 'left',
-                      cursor: 'pointer',
+                      cursor: isProcessing ? 'not-allowed' : 'pointer',
+                      opacity: isProcessing ? 0.7 : 1,
                     }}
                   >
                     <span
@@ -706,25 +800,27 @@ export default function GuestBookingPage() {
             <button
               type="button"
               onClick={handleConfirmPayment}
+              disabled={isProcessing}
               style={{
                 marginTop: 14,
                 width: '100%',
                 minHeight: 58,
                 borderRadius: 22,
                 border: '2.5px solid #111111',
-                background: '#071b46',
+                background: isProcessing ? '#d8dce2' : '#071b46',
                 color: '#ffffff',
                 fontSize: 18,
                 fontWeight: 900,
-                cursor: 'pointer',
+                cursor: isProcessing ? 'not-allowed' : 'pointer',
               }}
             >
-              Confirm payment · £1
+              {isProcessing ? 'Processing...' : 'Confirm payment · £1'}
             </button>
 
             <button
               type="button"
               onClick={() => setPaymentSheetOpen(false)}
+              disabled={isProcessing}
               style={{
                 marginTop: 10,
                 width: '100%',
@@ -735,7 +831,8 @@ export default function GuestBookingPage() {
                 color: '#071b46',
                 fontSize: 16,
                 fontWeight: 900,
-                cursor: 'pointer',
+                cursor: isProcessing ? 'not-allowed' : 'pointer',
+                opacity: isProcessing ? 0.5 : 1,
               }}
             >
               Cancel
@@ -747,7 +844,7 @@ export default function GuestBookingPage() {
   );
 }
 
-const inputStyle = {
+const inputStyle: CSSProperties = {
   width: '100%',
   height: 58,
   borderRadius: 20,
@@ -759,4 +856,4 @@ const inputStyle = {
   padding: '0 14px',
   outline: 'none',
   boxSizing: 'border-box',
-} as const;
+};
