@@ -20,6 +20,8 @@ const BRAND = {
   softBlue: '#dcecff',
   softOrange: '#fff0da',
   softPink: '#ffe9f2',
+  softViolet: '#f2edff',
+  softGrey: '#f3f5f8',
 };
 
 function readNumberFromStorage(key: string, field: string, fallback: number) {
@@ -38,31 +40,12 @@ function readNumberFromStorage(key: string, field: string, fallback: number) {
   }
 }
 
-function getStoredProfileEmail() {
-  if (typeof window === 'undefined') return OWNER_EMAIL;
-
-  try {
-    const raw = window.localStorage.getItem('mapbook_user_profile');
-    if (!raw) return OWNER_EMAIL;
-
-    const parsed = JSON.parse(raw);
-    return typeof parsed?.email === 'string' && parsed.email.trim()
-      ? parsed.email.trim()
-      : OWNER_EMAIL;
-  } catch {
-    return OWNER_EMAIL;
-  }
-}
-
 function formatMoney(value: number) {
-  const safeValue = Number.isFinite(value) ? value : 0;
-
   return new Intl.NumberFormat('en-GB', {
     style: 'currency',
     currency: 'GBP',
-    minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(safeValue);
+  }).format(value);
 }
 
 function AdminLogo() {
@@ -72,7 +55,6 @@ function AdminLogo() {
         display: 'inline-flex',
         alignItems: 'center',
         gap: 10,
-        minWidth: 0,
       }}
     >
       <div
@@ -107,7 +89,6 @@ function AdminLogo() {
           color: BRAND.navy,
           letterSpacing: '-1px',
           lineHeight: 1,
-          whiteSpace: 'nowrap',
         }}
       >
         Olamep
@@ -132,13 +113,12 @@ function MetricCard({
   return (
     <div
       style={{
-        borderRadius: 22,
+        borderRadius: 24,
         border: `2.5px solid ${BRAND.border}`,
         background: bg,
-        padding: 12,
-        minHeight: 126,
+        padding: 13,
+        minHeight: 128,
         boxShadow: '0 8px 18px rgba(7,27,70,0.06)',
-        minWidth: 0,
         overflow: 'hidden',
       }}
     >
@@ -147,14 +127,12 @@ function MetricCard({
           display: 'flex',
           alignItems: 'center',
           gap: 7,
-          fontSize: 12,
-          lineHeight: 1.1,
+          fontSize: 13,
           fontWeight: 900,
           color: BRAND.muted,
-          minWidth: 0,
         }}
       >
-        <span style={{ fontSize: 22, flexShrink: 0 }}>{icon}</span>
+        <span style={{ fontSize: 23, lineHeight: 1 }}>{icon}</span>
         <span
           style={{
             minWidth: 0,
@@ -170,15 +148,13 @@ function MetricCard({
       <div
         style={{
           marginTop: 12,
-          fontSize: 'clamp(21px, 6.2vw, 29px)',
-          lineHeight: 1,
+          fontSize: 24,
+          lineHeight: 1.08,
           fontWeight: 900,
           color: BRAND.navy,
-          letterSpacing: '-0.9px',
-          maxWidth: '100%',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+          letterSpacing: '-0.8px',
+          wordBreak: 'break-word',
+          overflowWrap: 'anywhere',
         }}
       >
         {value}
@@ -187,8 +163,8 @@ function MetricCard({
       <div
         style={{
           marginTop: 9,
-          fontSize: 11.5,
-          lineHeight: 1.28,
+          fontSize: 12,
+          lineHeight: 1.3,
           fontWeight: 800,
           color: BRAND.muted,
         }}
@@ -203,11 +179,13 @@ function AdminButton({
   title,
   hint,
   icon,
+  bg,
   onClick,
 }: {
   title: string;
   hint: string;
   icon: string;
+  bg: string;
   onClick: () => void;
 }) {
   return (
@@ -236,7 +214,7 @@ function AdminButton({
           height: 50,
           borderRadius: 16,
           border: `2px solid ${BRAND.border}`,
-          background: BRAND.softBlue,
+          background: bg,
           display: 'grid',
           placeItems: 'center',
           fontSize: 25,
@@ -304,18 +282,21 @@ export default function AdminPage() {
       'availableBalance',
       24
     );
+
     const pendingBalance = readNumberFromStorage(
       'mapbook_wallet_state',
       'pendingBalance',
       10
     );
 
+    const totalGross = availableBalance + pendingBalance;
+    const platformRevenue = Math.max(0, totalGross * 0.12);
+
     return {
-      ownerEmail: getStoredProfileEmail(),
       availableBalance,
       pendingBalance,
-      platformRevenue: Math.max(0, availableBalance * 0.12),
-      totalGross: availableBalance + pendingBalance,
+      platformRevenue,
+      totalGross,
     };
   }, [isUnlocked]);
 
@@ -383,7 +364,7 @@ export default function AdminPage() {
                 letterSpacing: '-1.4px',
               }}
             >
-              Админ владельца
+              Вход владельца
             </h1>
 
             <p
@@ -395,9 +376,8 @@ export default function AdminPage() {
                 color: BRAND.muted,
               }}
             >
-              Приватный доступ для владельца Olamep. Здесь можно управлять
-              деньгами платформы, пользователями, услугами и системными
-              настройками.
+              Приватный доступ владельца Olamep. Управление деньгами платформы,
+              пользователями, услугами, рекламой и настройками.
             </p>
           </section>
 
@@ -519,10 +499,9 @@ export default function AdminPage() {
               color: BRAND.navy,
             }}
           >
-            Важно: сейчас это front-end прототип для владельца. Для реальных
-            денег и реальных пользователей нужно подключить защищённую
-            авторизацию, роли в базе данных, backend-проверки и права доступа
-            Stripe/Supabase.
+            Важно: сейчас это front-end прототип. Для настоящих денег и
+            пользователей нужно подключить защищённую авторизацию, роли в базе,
+            серверные проверки и Stripe/Supabase permissions.
           </section>
         </div>
       </main>
@@ -537,10 +516,9 @@ export default function AdminPage() {
         color: BRAND.navy,
         fontFamily: 'Arial, sans-serif',
         padding: '18px 14px 120px',
-        overflowX: 'hidden',
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto', overflowX: 'hidden' }}>
+      <div style={{ maxWidth: 430, margin: '0 auto' }}>
         <header
           style={{
             display: 'grid',
@@ -622,8 +600,6 @@ export default function AdminPage() {
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
             gap: 10,
-            width: '100%',
-            boxSizing: 'border-box',
           }}
         >
           <MetricCard
@@ -690,34 +666,71 @@ export default function AdminPage() {
               title="Открыть кошелёк"
               hint="Баланс и история операций"
               icon="💰"
+              bg={BRAND.softBlue}
               onClick={() => router.push('/profile/wallet')}
+            />
+
+            <AdminButton
+              title="Платежи"
+              hint="QR-платежи, карты и способы оплаты"
+              icon="💳"
+              bg={BRAND.softOrange}
+              onClick={() => router.push('/profile/payments')}
             />
 
             <AdminButton
               title="Управлять услугами"
               hint="Все объявления и предложения"
               icon="💼"
+              bg={BRAND.softGreen}
               onClick={() => router.push('/profile/listings')}
             />
 
             <AdminButton
-              title="Промо и реклама"
-              hint="Реклама, скидки и платная видимость"
+              title="Реклама и промо"
+              hint="Платная видимость, скидки и акции"
               icon="📣"
+              bg={BRAND.softPink}
               onClick={() => router.push('/profile/promotions')}
             />
 
             <AdminButton
-              title="Платежи"
-              hint="Карты, QR-платежи и способы оплаты"
-              icon="💳"
-              onClick={() => router.push('/profile/payments')}
+              title="Пользователи"
+              hint="Клиенты, мастера и аккаунты"
+              icon="👥"
+              bg={BRAND.softViolet}
+              onClick={() => router.push('/profile/clients')}
+            />
+
+            <AdminButton
+              title="Модерация"
+              hint="Проверка услуг, фото и профилей"
+              icon="🛡️"
+              bg={BRAND.softBlue}
+              onClick={() => router.push('/profile/listings')}
+            />
+
+            <AdminButton
+              title="Жалобы"
+              hint="Споры, обращения и поддержка"
+              icon="🚨"
+              bg={BRAND.softPink}
+              onClick={() => router.push('/profile/help')}
+            />
+
+            <AdminButton
+              title="Настройки системы"
+              hint="Язык, регион, юридические разделы"
+              icon="⚙️"
+              bg={BRAND.softGrey}
+              onClick={() => router.push('/profile/settings')}
             />
 
             <AdminButton
               title="Вернуться в приложение"
-              hint="Открыть главный экран Olamep"
+              hint="Открыть публичную главную страницу"
               icon="🏠"
+              bg={BRAND.softGreen}
               onClick={() => router.push('/')}
             />
           </div>
@@ -736,9 +749,9 @@ export default function AdminPage() {
             color: BRAND.navy,
           }}
         >
-          Следующий шаг безопасности: спрятать доступ владельца за настоящей
-          авторизацией, ролью admin, backend-проверками и server-side правами
-          для платежей.
+          Следующий шаг безопасности: закрыть эту страницу настоящей
+          авторизацией, ролью admin/owner, серверной проверкой и правами доступа
+          к платежам только на backend.
         </section>
       </div>
     </main>
