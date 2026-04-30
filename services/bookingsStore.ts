@@ -34,7 +34,25 @@ export type BookingItem = {
   contactInstagram?: string;
 };
 
+type GuestBookingRaw = {
+  id: string;
+  masterId?: string;
+  masterName?: string;
+  category?: string;
+  subcategory?: string;
+  price?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  depositAmount?: number;
+  depositStatus?: 'frozen';
+  paymentMethod?: string;
+  status?: 'reserved' | 'pending' | 'upcoming' | 'completed' | 'cancelled';
+  createdAt?: string;
+};
+
 const STORAGE_KEY = 'mapbook_bookings_state_v2';
+const GUEST_BOOKINGS_KEY = 'olamep_guest_bookings';
 
 const defaultBookings: BookingItem[] = [
   {
@@ -205,6 +223,99 @@ function loadBookings(): BookingItem[] {
   }
 }
 
+function loadGuestBookings(): GuestBookingRaw[] {
+  if (!isBrowser()) return [];
+
+  try {
+    const raw = window.localStorage.getItem(GUEST_BOOKINGS_KEY);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw) as GuestBookingRaw[];
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.filter((item) => item && typeof item.id === 'string');
+  } catch {
+    return [];
+  }
+}
+
+function saveGuestBookings(nextGuests: GuestBookingRaw[]) {
+  if (!isBrowser()) return;
+  window.localStorage.setItem(GUEST_BOOKINGS_KEY, JSON.stringify(nextGuests));
+}
+
+function formatGuestDateLabel(createdAt?: string) {
+  const date = new Date(createdAt || Date.now());
+
+  if (Number.isNaN(date.getTime())) {
+    return 'Reserved now';
+  }
+
+  const day = date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+  });
+
+  const time = date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  return `${day}, ${time}`;
+}
+
+function mapGuestStatus(status?: GuestBookingRaw['status']): BookingStatus {
+  if (status === 'upcoming') return 'upcoming';
+  if (status === 'completed') return 'completed';
+  if (status === 'cancelled') return 'cancelled';
+  return 'pending';
+}
+
+function guestToBooking(guest: GuestBookingRaw): BookingItem {
+  const createdAt = guest.createdAt || new Date().toISOString();
+  const serviceName = guest.subcategory || guest.category || 'Reserved service';
+  const paymentMethod = guest.paymentMethod ? ` · ${guest.paymentMethod}` : '';
+
+  return normalizeBooking({
+    id: guest.id,
+    masterId: guest.masterId || 'guest-master',
+    masterName: guest.masterName || 'Professional',
+    masterAvatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
+    serviceName,
+    category: guest.category || 'Service',
+    location: 'Area hidden until provider confirms',
+    areaLabel: 'Area hidden until provider confirms',
+    exactAddress: '',
+    dateLabel: formatGuestDateLabel(createdAt),
+    dateTime: createdAt,
+    price: Number(guest.depositAmount || 1),
+    status: mapGuestStatus(guest.status),
+    unlockFeePaid: true,
+    bookingConfirmedByMaster: false,
+    clientPaid: true,
+    paymentReceivedByPlatform: true,
+    promotionPaidByMaster: false,
+    contactPhone: guest.phone || '',
+    contactEmail: '',
+    contactWhatsapp: guest.phone || '',
+    contactTelegram: '',
+    contactInstagram: paymentMethod ? `Guest payment${paymentMethod}` : 'Guest payment',
+  });
+}
+
+function getMergedBookings() {
+  const normalBookings = bookingsState.map(normalizeBooking);
+  const guestBookings = loadGuestBookings().map(guestToBooking);
+
+  const existingIds = new Set(normalBookings.map((booking) => booking.id));
+
+  return [
+    ...guestBookings.filter((booking) => !existingIds.has(booking.id)),
+    ...normalBookings,
+  ];
+}
+
 let bookingsState: BookingItem[] = defaultBookings.map(normalizeBooking);
 
 if (isBrowser()) {
@@ -221,12 +332,64 @@ function emitChange() {
   listeners.forEach((listener) => listener());
 }
 
+function emitGuestChange() {
+  listeners.forEach((listener) => listener());
+}
+
+function updateGuestStatus(bookingId: string, status: BookingStatus) {
+  const guests = loadGuestBookings();
+  const exists = guests.some((guest) => guest.id === bookingId);
+
+  if (!exists) return false;
+
+  const nextGuests = guests.map((guest) =>
+    guest.id === bookingId
+      ? {
+          ...guest,
+          status,
+        }
+      : guest
+  );
+
+  saveGuestBookings(nextGuests);
+  emitGuestChange();
+
+  return true;
+}
+
+function patchGuestBooking(bookingId: string, patch: Partial<BookingItem>) {
+  const guests = loadGuestBookings();
+  const exists = guests.some((guest) => guest.id === bookingId);
+
+  if (!exists) return false;
+
+  const nextGuests = guests.map((guest) => {
+    if (guest.id !== bookingId) return guest;
+
+    return {
+      ...guest,
+      masterId: patch.masterId ?? guest.masterId,
+      masterName: patch.masterName ?? guest.masterName,
+      category: patch.category ?? guest.category,
+      subcategory: patch.serviceName ?? guest.subcategory,
+      price: typeof patch.price === 'number' ? String(patch.price) : guest.price,
+      phone: patch.contactPhone ?? guest.phone,
+      status: patch.status ?? guest.status,
+    };
+  });
+
+  saveGuestBookings(nextGuests);
+  emitGuestChange();
+
+  return true;
+}
+
 export function getBookings(): BookingItem[] {
-  return bookingsState;
+  return getMergedBookings();
 }
 
 export function getBookingById(bookingId: string) {
-  return bookingsState.find((booking) => booking.id === bookingId) ?? null;
+  return getMergedBookings().find((booking) => booking.id === bookingId) ?? null;
 }
 
 export function subscribeToBookingsStore(listener: () => void) {
@@ -250,6 +413,9 @@ export function addBooking(booking: BookingItem) {
 }
 
 export function updateBookingStatus(bookingId: string, status: BookingStatus) {
+  const guestUpdated = updateGuestStatus(bookingId, status);
+  if (guestUpdated) return;
+
   bookingsState = bookingsState.map((booking) =>
     booking.id === bookingId ? normalizeBooking({ ...booking, status }) : booking
   );
@@ -257,6 +423,9 @@ export function updateBookingStatus(bookingId: string, status: BookingStatus) {
 }
 
 export function patchBooking(bookingId: string, patch: Partial<BookingItem>) {
+  const guestPatched = patchGuestBooking(bookingId, patch);
+  if (guestPatched) return;
+
   bookingsState = bookingsState.map((booking) =>
     booking.id === bookingId ? normalizeBooking({ ...booking, ...patch }) : booking
   );
@@ -349,19 +518,19 @@ export function getProtectedBookingContact(booking: BookingItem) {
 }
 
 export function getUpcomingBookings() {
-  return bookingsState.filter(
+  return getMergedBookings().filter(
     (booking) => booking.status === 'upcoming' || booking.status === 'pending'
   );
 }
 
 export function getCompletedBookings() {
-  return bookingsState.filter((booking) => booking.status === 'completed');
+  return getMergedBookings().filter((booking) => booking.status === 'completed');
 }
 
 export function getCancelledBookings() {
-  return bookingsState.filter((booking) => booking.status === 'cancelled');
+  return getMergedBookings().filter((booking) => booking.status === 'cancelled');
 }
 
 export function getLatestBooking() {
-  return bookingsState[0] ?? null;
+  return getMergedBookings()[0] ?? null;
 }
