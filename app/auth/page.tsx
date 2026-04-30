@@ -480,3 +480,5 @@ const linkButtonStyle: CSSProperties = {
   fontWeight: 900,
   padding: 0,
   textDecoration: 'underline',
+  cursor: 'pointer',
+};
