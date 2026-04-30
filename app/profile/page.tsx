@@ -77,6 +77,8 @@ type ListAction = {
   bg: string;
 };
 
+const OWNER_EMAIL = 'olamepcom@gmail.com';
+
 const BRAND = {
   navy: '#071b46',
   blue: '#0e73d8',
@@ -492,6 +494,34 @@ function getText(language: AppLanguage) {
   return profileTexts[language] || profileTexts.EN;
 }
 
+function getOwnerText(language: AppLanguage) {
+  if (language === 'RU') {
+    return {
+      title: 'Панель владельца',
+      admin: 'Owner Admin Panel',
+      adminHint: 'Доход, QR-платежи, пользователи, реклама и управление платформой',
+    };
+  }
+
+  if (language === 'UA') {
+    return {
+      title: 'Панель власника',
+      admin: 'Owner Admin Panel',
+      adminHint: 'Дохід, QR-платежі, користувачі, реклама та керування платформою',
+    };
+  }
+
+  return {
+    title: 'Owner area',
+    admin: 'Owner Admin Panel',
+    adminHint: 'Revenue, QR payments, users, promotions and platform control',
+  };
+}
+
+function isOwnerProfile(profile: UserProfile) {
+  return String(profile.email || '').trim().toLowerCase() === OWNER_EMAIL;
+}
+
 function OlamepLogo() {
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
@@ -649,6 +679,8 @@ export default function ProfilePage() {
   }, []);
 
   const text = useMemo(() => getText(language), [language]);
+  const ownerText = useMemo(() => getOwnerText(language), [language]);
+  const isOwner = useMemo(() => isOwnerProfile(profile), [profile]);
 
   const mainActions: MainAction[] = [
     {
@@ -682,6 +714,17 @@ export default function ProfilePage() {
       route: '/profile/clients',
       icon: '🤝',
       bg: BRAND.softPink,
+    },
+  ];
+
+  const ownerActions: ListAction[] = [
+    {
+      id: 'ownerAdmin',
+      title: ownerText.admin,
+      hint: ownerText.adminHint,
+      route: '/admin',
+      icon: '👑',
+      bg: BRAND.softOrange,
     },
   ];
 
@@ -1171,6 +1214,13 @@ export default function ProfilePage() {
             </button>
           </div>
         </section>
+
+        {isOwner ? (
+          <>
+            <SectionTitle title={ownerText.title} />
+            <ListSection items={ownerActions} openText={text.open} router={router} />
+          </>
+        ) : null}
 
         <SectionTitle title={text.workHub} />
 
