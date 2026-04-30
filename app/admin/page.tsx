@@ -54,6 +54,17 @@ function getStoredProfileEmail() {
   }
 }
 
+function formatMoney(value: number) {
+  const safeValue = Number.isFinite(value) ? value : 0;
+
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(safeValue);
+}
+
 function AdminLogo() {
   return (
     <div
@@ -61,6 +72,7 @@ function AdminLogo() {
         display: 'inline-flex',
         alignItems: 'center',
         gap: 10,
+        minWidth: 0,
       }}
     >
       <div
@@ -95,6 +107,7 @@ function AdminLogo() {
           color: BRAND.navy,
           letterSpacing: '-1px',
           lineHeight: 1,
+          whiteSpace: 'nowrap',
         }}
       >
         Olamep
@@ -119,36 +132,53 @@ function MetricCard({
   return (
     <div
       style={{
-        borderRadius: 24,
+        borderRadius: 22,
         border: `2.5px solid ${BRAND.border}`,
         background: bg,
-        padding: 15,
-        minHeight: 128,
+        padding: 12,
+        minHeight: 126,
         boxShadow: '0 8px 18px rgba(7,27,70,0.06)',
+        minWidth: 0,
+        overflow: 'hidden',
       }}
     >
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
-          fontSize: 13,
+          gap: 7,
+          fontSize: 12,
+          lineHeight: 1.1,
           fontWeight: 900,
           color: BRAND.muted,
+          minWidth: 0,
         }}
       >
-        <span style={{ fontSize: 24 }}>{icon}</span>
-        {title}
+        <span style={{ fontSize: 22, flexShrink: 0 }}>{icon}</span>
+        <span
+          style={{
+            minWidth: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {title}
+        </span>
       </div>
 
       <div
         style={{
           marginTop: 12,
-          fontSize: 30,
+          fontSize: 'clamp(21px, 6.2vw, 29px)',
           lineHeight: 1,
           fontWeight: 900,
           color: BRAND.navy,
-          letterSpacing: '-0.8px',
+          letterSpacing: '-0.9px',
+          maxWidth: '100%',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
         }}
       >
         {value}
@@ -157,8 +187,8 @@ function MetricCard({
       <div
         style={{
           marginTop: 9,
-          fontSize: 12,
-          lineHeight: 1.35,
+          fontSize: 11.5,
+          lineHeight: 1.28,
           fontWeight: 800,
           color: BRAND.muted,
         }}
@@ -294,7 +324,7 @@ export default function AdminPage() {
     const normalizedCode = code.trim();
 
     if (normalizedEmail !== OWNER_EMAIL || normalizedCode !== OWNER_CODE) {
-      setError('Wrong owner email or access code.');
+      setError('Неверная почта владельца или код доступа.');
       return;
     }
 
@@ -353,7 +383,7 @@ export default function AdminPage() {
                 letterSpacing: '-1.4px',
               }}
             >
-              Owner Admin
+              Админ владельца
             </h1>
 
             <p
@@ -365,8 +395,9 @@ export default function AdminPage() {
                 color: BRAND.muted,
               }}
             >
-              Private access for Olamep owner. Manage platform money, users,
-              services and system settings.
+              Приватный доступ для владельца Olamep. Здесь можно управлять
+              деньгами платформы, пользователями, услугами и системными
+              настройками.
             </p>
           </section>
 
@@ -389,7 +420,7 @@ export default function AdminPage() {
                 color: BRAND.muted,
               }}
             >
-              Owner email
+              Почта владельца
               <input
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
@@ -418,7 +449,7 @@ export default function AdminPage() {
                 color: BRAND.muted,
               }}
             >
-              Access code
+              Код доступа
               <input
                 value={code}
                 onChange={(event) => setCode(event.target.value)}
@@ -471,7 +502,7 @@ export default function AdminPage() {
                 boxShadow: '0 6px 0 rgba(0,0,0,0.12)',
               }}
             >
-              Open admin panel
+              Открыть админ-панель
             </button>
           </section>
 
@@ -488,9 +519,10 @@ export default function AdminPage() {
               color: BRAND.navy,
             }}
           >
-            Important: this is a front-end owner prototype. For real money and
-            real users we must connect secure backend auth, database roles and
-            Stripe/Supabase permissions.
+            Важно: сейчас это front-end прототип для владельца. Для реальных
+            денег и реальных пользователей нужно подключить защищённую
+            авторизацию, роли в базе данных, backend-проверки и права доступа
+            Stripe/Supabase.
           </section>
         </div>
       </main>
@@ -505,9 +537,10 @@ export default function AdminPage() {
         color: BRAND.navy,
         fontFamily: 'Arial, sans-serif',
         padding: '18px 14px 120px',
+        overflowX: 'hidden',
       }}
     >
-      <div style={{ maxWidth: 430, margin: '0 auto' }}>
+      <div style={{ maxWidth: 430, margin: '0 auto', overflowX: 'hidden' }}>
         <header
           style={{
             display: 'grid',
@@ -567,7 +600,7 @@ export default function AdminPage() {
               letterSpacing: '-1.4px',
             }}
           >
-            Admin panel
+            Админ-панель
           </h1>
 
           <p
@@ -579,7 +612,7 @@ export default function AdminPage() {
               color: BRAND.muted,
             }}
           >
-            Owner access: {OWNER_EMAIL}
+            Доступ владельца: {OWNER_EMAIL}
           </p>
         </section>
 
@@ -589,36 +622,38 @@ export default function AdminPage() {
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
             gap: 10,
+            width: '100%',
+            boxSizing: 'border-box',
           }}
         >
           <MetricCard
-            title="Available"
-            value={`£${stats.availableBalance.toFixed(2)}`}
-            hint="Money visible in site wallet"
+            title="Доступно"
+            value={formatMoney(stats.availableBalance)}
+            hint="Деньги на балансе сайта"
             icon="💼"
             bg={BRAND.softOrange}
           />
 
           <MetricCard
-            title="Pending"
-            value={`£${stats.pendingBalance.toFixed(2)}`}
-            hint="Payments waiting to clear"
+            title="В ожидании"
+            value={formatMoney(stats.pendingBalance)}
+            hint="Платежи ожидают подтверждения"
             icon="⏳"
             bg={BRAND.softBlue}
           />
 
           <MetricCard
-            title="Gross"
-            value={`£${stats.totalGross.toFixed(2)}`}
-            hint="Available + pending"
+            title="Оборот"
+            value={formatMoney(stats.totalGross)}
+            hint="Доступно + в ожидании"
             icon="📊"
             bg={BRAND.softGreen}
           />
 
           <MetricCard
-            title="Platform"
-            value={`£${stats.platformRevenue.toFixed(2)}`}
-            hint="Estimated platform revenue"
+            title="Платформа"
+            value={formatMoney(stats.platformRevenue)}
+            hint="Примерный доход платформы"
             icon="👑"
             bg={BRAND.softPink}
           />
@@ -641,7 +676,7 @@ export default function AdminPage() {
               fontWeight: 900,
             }}
           >
-            Owner tools
+            Инструменты владельца
           </h2>
 
           <div
@@ -652,36 +687,36 @@ export default function AdminPage() {
             }}
           >
             <AdminButton
-              title="Open wallet"
-              hint="Check balance and transaction history"
+              title="Открыть кошелёк"
+              hint="Баланс и история операций"
               icon="💰"
               onClick={() => router.push('/profile/wallet')}
             />
 
             <AdminButton
-              title="Manage services"
-              hint="Open all listings and service offers"
+              title="Управлять услугами"
+              hint="Все объявления и предложения"
               icon="💼"
               onClick={() => router.push('/profile/listings')}
             />
 
             <AdminButton
-              title="Promotions"
-              hint="Ads, offers and paid visibility"
+              title="Промо и реклама"
+              hint="Реклама, скидки и платная видимость"
               icon="📣"
               onClick={() => router.push('/profile/promotions')}
             />
 
             <AdminButton
-              title="Payments"
-              hint="Cards, QR payments and methods"
+              title="Платежи"
+              hint="Карты, QR-платежи и способы оплаты"
               icon="💳"
               onClick={() => router.push('/profile/payments')}
             />
 
             <AdminButton
-              title="Return to app"
-              hint="Go back to public home page"
+              title="Вернуться в приложение"
+              hint="Открыть главный экран Olamep"
               icon="🏠"
               onClick={() => router.push('/')}
             />
@@ -701,8 +736,9 @@ export default function AdminPage() {
             color: BRAND.navy,
           }}
         >
-          Next security step: hide owner access behind real authentication, admin
-          role, backend checks and server-side payment permissions.
+          Следующий шаг безопасности: спрятать доступ владельца за настоящей
+          авторизацией, ролью admin, backend-проверками и server-side правами
+          для платежей.
         </section>
       </div>
     </main>
