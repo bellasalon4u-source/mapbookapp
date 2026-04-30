@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getWalletState } from '../../services/walletStore';
+import { getWalletState } from '../services/walletStore';
 
 const OWNER_EMAIL = 'olamepcom@gmail.com';
 const OWNER_CODE = 'OLAMEP-OWNER-2026';
