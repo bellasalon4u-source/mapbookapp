@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getWalletState } from '../../services/walletStore';
 
 const OWNER_EMAIL = 'olamepcom@gmail.com';
 const OWNER_CODE = 'OLAMEP-OWNER-2026';
@@ -23,22 +24,6 @@ const BRAND = {
   softViolet: '#f2edff',
   softGrey: '#f3f5f8',
 };
-
-function readNumberFromStorage(key: string, field: string, fallback: number) {
-  if (typeof window === 'undefined') return fallback;
-
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return fallback;
-
-    const parsed = JSON.parse(raw);
-    const value = parsed?.[field];
-
-    return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
-  } catch {
-    return fallback;
-  }
-}
 
 function formatMoney(value: number) {
   return new Intl.NumberFormat('en-GB', {
@@ -277,18 +262,10 @@ export default function AdminPage() {
   const [error, setError] = useState('');
 
   const stats = useMemo(() => {
-    const availableBalance = readNumberFromStorage(
-      'mapbook_wallet_state',
-      'availableBalance',
-      24
-    );
+    const wallet = getWalletState();
 
-    const pendingBalance = readNumberFromStorage(
-      'mapbook_wallet_state',
-      'pendingBalance',
-      10
-    );
-
+    const availableBalance = wallet.availableBalance;
+    const pendingBalance = wallet.pendingBalance;
     const totalGross = availableBalance + pendingBalance;
     const platformRevenue = Math.max(0, totalGross * 0.12);
 
@@ -667,7 +644,7 @@ export default function AdminPage() {
               hint="Баланс и история операций владельца"
               icon="💰"
               bg={BRAND.softBlue}
-              onClick={() => router.push('/admin/wallet')}
+              onClick={() => router.push('/profile/wallet')}
             />
 
             <AdminButton
