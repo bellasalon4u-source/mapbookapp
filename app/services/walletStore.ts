@@ -33,11 +33,7 @@ export type WalletState = {
   transactions: WalletTransaction[];
 };
 
-/**
- * Новый ключ специально, чтобы старые тестовые миллионы больше не подтягивались.
- * Старый ключ был: mapbook_wallet_state
- */
-const STORAGE_KEY = 'olamep_wallet_state_v2';
+const STORAGE_KEY = 'olamep_wallet_state_clean_v3';
 
 const defaultWalletState: WalletState = {
   availableBalance: 0,
