@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { addBooking, getBookings, type BookingItem } from '../../services/bookingsStore';
 
 type GuestBooking = {
   id: string;
@@ -35,6 +36,10 @@ type PaymentMethod = {
   subtitle: string;
   icon: string;
 };
+
+const PENDING_BOOKING_KEY = 'olamep_pending_guest_booking';
+const GUEST_BOOKINGS_KEY = 'olamep_guest_bookings';
+const LAST_CREATED_BOOKING_KEY = 'olamep_last_created_guest_booking_key';
 
 const PAYMENT_METHODS: PaymentMethod[] = [
   {
@@ -79,7 +84,7 @@ function readPendingBooking(): PendingBooking | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    const raw = window.localStorage.getItem('olamep_pending_guest_booking');
+    const raw = window.localStorage.getItem(PENDING_BOOKING_KEY);
     if (!raw) return null;
     return JSON.parse(raw) as PendingBooking;
   } catch {
@@ -87,21 +92,125 @@ function readPendingBooking(): PendingBooking | null {
   }
 }
 
-function saveGuestBooking(booking: GuestBooking) {
+function readGuestBookings(): GuestBooking[] {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const raw = window.localStorage.getItem(GUEST_BOOKINGS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as GuestBooking[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function makeStableBookingKey(params: {
+  masterId: string;
+  masterName: string;
+  phone: string;
+}) {
+  return [
+    String(params.masterId || 'guest').trim().toLowerCase(),
+    String(params.masterName || 'professional').trim().toLowerCase(),
+    String(params.phone || '').replace(/\s+/g, '').toLowerCase(),
+  ].join('__');
+}
+
+function saveGuestBookingOnce(booking: GuestBooking, stableKey: string) {
   if (typeof window === 'undefined') return;
 
-  const current = JSON.parse(
-    window.localStorage.getItem('olamep_guest_bookings') || '[]'
-  ) as GuestBooking[];
+  const current = readGuestBookings();
 
-  window.localStorage.setItem(
-    'olamep_guest_bookings',
-    JSON.stringify([booking, ...current])
-  );
+  const alreadyExists = current.some((item) => {
+    const itemKey = makeStableBookingKey({
+      masterId: item.masterId,
+      masterName: item.masterName,
+      phone: item.phone,
+    });
+
+    return itemKey === stableKey;
+  });
+
+  if (!alreadyExists) {
+    window.localStorage.setItem(GUEST_BOOKINGS_KEY, JSON.stringify([booking, ...current]));
+  }
+
+  window.localStorage.setItem(LAST_CREATED_BOOKING_KEY, stableKey);
+  window.localStorage.removeItem(PENDING_BOOKING_KEY);
+}
+
+function addBookingToMainBookingsOnce(params: {
+  stableKey: string;
+  masterId: string;
+  masterName: string;
+  category: string;
+  subcategory: string;
+  priceNumber: number;
+  avatar?: string;
+  phone: string;
+}) {
+  const existing = getBookings();
+
+  const alreadyExists = existing.some((booking) => {
+    const bookingAny = booking as BookingItem & { guestStableKey?: string };
+
+    if (bookingAny.guestStableKey === params.stableKey) return true;
+
+    return (
+      String(booking.masterId || '').trim().toLowerCase() ===
+        String(params.masterId || '').trim().toLowerCase() &&
+      String(booking.masterName || '').trim().toLowerCase() ===
+        String(params.masterName || '').trim().toLowerCase() &&
+      Number(booking.price || 0) === params.priceNumber &&
+      booking.status === 'pending'
+    );
+  });
+
+  if (alreadyExists) return;
+
+  const now = new Date();
+
+  const booking: BookingItem & { guestStableKey?: string } = {
+    id: `guest_main_booking_${Date.now()}`,
+    masterId: params.masterId || 'guest',
+    masterName: params.masterName || 'Professional',
+    masterAvatar:
+      params.avatar ||
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
+    serviceName: params.subcategory || params.category || 'Service',
+    category: params.category || 'Service',
+    location: 'London',
+    areaLabel: 'London',
+    exactAddress: 'Address will open after provider confirmation',
+    dateLabel: `30 Apr, ${now.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })}`,
+    dateTime: now.toISOString(),
+    price: params.priceNumber,
+    status: 'pending',
+    unlockFeePaid: true,
+    usedWelcomeBonus: false,
+    usedReferralCredit: false,
+    bookingConfirmedByMaster: false,
+    clientPaid: true,
+    paymentReceivedByPlatform: true,
+    promotionPaidByMaster: false,
+    contactPhone: params.phone,
+    contactEmail: '',
+    contactWhatsapp: params.phone,
+    contactTelegram: '',
+    contactInstagram: '',
+    guestStableKey: params.stableKey,
+  };
+
+  addBooking(booking);
 }
 
 export default function GuestBookingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [pending, setPending] = useState<PendingBooking | null>(null);
   const [firstName, setFirstName] = useState('');
@@ -111,9 +220,11 @@ export default function GuestBookingPage() {
   const [selectedPayment, setSelectedPayment] = useState('card');
   const [paymentSheetOpen, setPaymentSheetOpen] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [alreadyReserved, setAlreadyReserved] = useState(false);
 
   useEffect(() => {
     const saved = readPendingBooking();
+    const masterIdFromUrl = searchParams.get('masterId') || '';
 
     if (saved) {
       setPending(saved);
@@ -121,28 +232,31 @@ export default function GuestBookingPage() {
     }
 
     setPending({
-      masterId: 'guest',
+      masterId: masterIdFromUrl || 'guest',
       masterName: 'Professional',
       category: 'Service',
       subcategory: '',
       price: '45',
       avatar: '',
     });
-  }, []);
+  }, [searchParams]);
 
   const canContinueToPayment = useMemo(() => {
     return (
       firstName.trim().length >= 2 &&
       lastName.trim().length >= 2 &&
       phone.trim().length >= 6 &&
-      accepted
+      accepted &&
+      !alreadyReserved
     );
-  }, [firstName, lastName, phone, accepted]);
+  }, [firstName, lastName, phone, accepted, alreadyReserved]);
 
   const masterName = pending?.masterName || 'Professional';
   const category = pending?.category || 'Service';
   const subcategory = pending?.subcategory || '';
   const price = pending?.price || '45';
+  const cleanPrice = String(price).replace(/[^\d.]/g, '') || '45';
+  const priceNumber = Number(cleanPrice) || 45;
 
   const selectedPaymentMethod =
     PAYMENT_METHODS.find((method) => method.id === selectedPayment) || PAYMENT_METHODS[0];
@@ -153,13 +267,36 @@ export default function GuestBookingPage() {
   };
 
   const handleConfirmPayment = () => {
-    const booking: GuestBooking = {
+    const stableKey = makeStableBookingKey({
+      masterId: pending?.masterId || 'guest',
+      masterName,
+      phone: phone.trim(),
+    });
+
+    const lastCreatedKey =
+      typeof window !== 'undefined'
+        ? window.localStorage.getItem(LAST_CREATED_BOOKING_KEY)
+        : null;
+
+    if (lastCreatedKey === stableKey) {
+      setPaymentSheetOpen(false);
+      setAlreadyReserved(true);
+      setSuccess(true);
+
+      window.setTimeout(() => {
+        router.push('/bookings');
+      }, 900);
+
+      return;
+    }
+
+    const guestBooking: GuestBooking = {
       id: `guest_booking_${Date.now()}`,
       masterId: pending?.masterId || 'guest',
       masterName,
       category,
       subcategory,
-      price,
+      price: cleanPrice,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       phone: phone.trim(),
@@ -170,13 +307,26 @@ export default function GuestBookingPage() {
       createdAt: new Date().toISOString(),
     };
 
-    saveGuestBooking(booking);
+    saveGuestBookingOnce(guestBooking, stableKey);
+
+    addBookingToMainBookingsOnce({
+      stableKey,
+      masterId: pending?.masterId || 'guest',
+      masterName,
+      category,
+      subcategory,
+      priceNumber: 1,
+      avatar: pending?.avatar,
+      phone: phone.trim(),
+    });
+
     setPaymentSheetOpen(false);
     setSuccess(true);
+    setAlreadyReserved(true);
 
     window.setTimeout(() => {
       router.push('/bookings');
-    }, 1400);
+    }, 1000);
   };
 
   return (
@@ -312,7 +462,7 @@ export default function GuestBookingPage() {
                     fontWeight: 900,
                   }}
                 >
-                  From £{String(price).replace(/[^\d.]/g, '') || '45'}
+                  From £{cleanPrice}
                 </span>
 
                 <span
@@ -455,7 +605,7 @@ export default function GuestBookingPage() {
                   : 'none',
               }}
             >
-              Pay £1 & reserve
+              {alreadyReserved ? 'Booking already reserved' : 'Pay £1 & reserve'}
             </button>
 
             {success ? (
