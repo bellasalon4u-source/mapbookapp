@@ -40,50 +40,618 @@ const RealMap = dynamic(() => import('../components/RealMap'), {
 });
 
 const popularSearches = [
-  'Dog hotel',
+  'Dog grooming',
   'Carpet cleaning',
   'Phone repair',
   'Hair extensions',
   'Massage',
+  'Nails',
+  'Manicure',
+  'Cleaning',
+  'Private chef',
   'Moving help',
 ];
 
 const searchAliases = [
   {
+    label: 'Pets',
+    categoryId: 'pets',
+    subcategory: '',
+    keywords: [
+      'pets',
+      'pet',
+      'dog',
+      'dogs',
+      'cat',
+      'cats',
+      'puppy',
+      'puppies',
+      'animal',
+      'animals',
+      'собака',
+      'собаки',
+      'собак',
+      'пес',
+      'пёс',
+      'питомец',
+      'питомцы',
+      'животные',
+      'тварини',
+      'собака',
+      'собаки',
+      'кіт',
+      'коти',
+      'perro',
+      'perros',
+      'gato',
+      'gatos',
+      'mascota',
+      'mascotas',
+      'chien',
+      'chiens',
+      'chat',
+      'chats',
+      'hund',
+      'hunde',
+      'katze',
+      'katzen',
+      'pies',
+      'psy',
+      'kot',
+      'koty',
+      'zvíře',
+      'zvířata',
+      'pes',
+      'kočka',
+    ],
+  },
+  {
+    label: 'Dog grooming',
+    categoryId: 'pets',
+    subcategory: 'Grooming',
+    keywords: [
+      'grooming',
+      'dog grooming',
+      'pet grooming',
+      'groomer',
+      'dog groomer',
+      'pet haircut',
+      'dog haircut',
+      'dog washing',
+      'dog wash',
+      'грумер',
+      'груминг',
+      'грумінг',
+      'стрижка собак',
+      'стрижка собаки',
+      'мойка собак',
+      'мытье собак',
+      'мытьё собак',
+      'уход за собакой',
+      'уход за животными',
+      'дог грумер',
+      'собачий грумер',
+      'перукар для собак',
+      'стрижка собак',
+      'grooming perro',
+      'peluquería canina',
+      'peluqueria canina',
+      'corte de pelo perro',
+      'lavado perro',
+      'toilettage chien',
+      'hundefriseur',
+      'hundepflege',
+      'psi fryzjer',
+      'groomer psów',
+      'stříhání psů',
+    ],
+  },
+  {
+    label: 'Dog walking',
+    categoryId: 'pets',
+    subcategory: 'Dog Walking',
+    keywords: [
+      'dog walking',
+      'dog walker',
+      'walk dog',
+      'walk my dog',
+      'выгул собак',
+      'выгул собаки',
+      'погулять с собакой',
+      'гулять собаку',
+      'вигул собак',
+      'paseador de perros',
+      'paseo de perros',
+      'promeneur chien',
+      'hund ausführen',
+      'wyprowadzanie psów',
+      'venčení psů',
+    ],
+  },
+  {
     label: 'Dog hotel',
     categoryId: 'pets',
     subcategory: 'Pet Sitting',
-    keywords: ['dog hotel', 'hotel for dogs', 'pet hotel', 'dog boarding'],
+    keywords: [
+      'dog hotel',
+      'hotel for dogs',
+      'pet hotel',
+      'dog boarding',
+      'pet sitting',
+      'pet sitter',
+      'dog sitter',
+      'cat sitter',
+      'передержка собак',
+      'передержка животных',
+      'отель для собак',
+      'няня для собаки',
+      'догситтер',
+      'петситтер',
+      'дог ситтер',
+      'догсіттер',
+      'готель для собак',
+      'hotel para perros',
+      'cuidador de perros',
+      'canguro perros',
+      'garde chien',
+      'hundepension',
+      'opieka nad psem',
+      'hlídání psů',
+    ],
   },
   {
     label: 'Carpet cleaning',
     categoryId: 'home',
     subcategory: 'Deep Cleaning',
-    keywords: ['carpet cleaning', 'clean carpet', 'wash carpet'],
+    keywords: [
+      'carpet cleaning',
+      'clean carpet',
+      'wash carpet',
+      'rug cleaning',
+      'deep carpet cleaning',
+      'stain removal carpet',
+      'мойка ковров',
+      'чистка ковров',
+      'чистка ковра',
+      'ковры',
+      'ковер',
+      'ковёр',
+      'ковров',
+      'химчистка ковров',
+      'почистить ковер',
+      'почистить ковёр',
+      'помыть ковер',
+      'помыть ковёр',
+      'прання килимів',
+      'чистка килимів',
+      'килим',
+      'килими',
+      'limpieza de alfombras',
+      'limpieza alfombras',
+      'limpieza',
+      'limpiesa',
+      'limpeza',
+      'lopeza',
+      'alfombra',
+      'alfombras',
+      'lavado alfombra',
+      'lavado de alfombras',
+      'nettoyage tapis',
+      'tapis',
+      'teppichreinigung',
+      'teppich',
+      'pranie dywanów',
+      'dywan',
+      'dywany',
+      'čištění koberců',
+      'koberec',
+    ],
+  },
+  {
+    label: 'Cleaning',
+    categoryId: 'home',
+    subcategory: 'Cleaning',
+    keywords: [
+      'cleaning',
+      'cleaner',
+      'home cleaning',
+      'house cleaning',
+      'deep cleaning',
+      'maid',
+      'уборка',
+      'уборщица',
+      'убрать дом',
+      'уборка дома',
+      'генеральная уборка',
+      'клининг',
+      'прибирання',
+      'прибиральниця',
+      'limpieza',
+      'limpieza casa',
+      'limpieza hogar',
+      'limpiesa',
+      'limpeza',
+      'ménage',
+      'nettoyage',
+      'reinigung',
+      'putzfrau',
+      'sprzątanie',
+      'úklid',
+    ],
   },
   {
     label: 'Phone repair',
     categoryId: 'tech',
     subcategory: 'Phone Repair',
-    keywords: ['phone repair', 'fix phone'],
+    keywords: [
+      'phone repair',
+      'fix phone',
+      'screen repair',
+      'iphone repair',
+      'samsung repair',
+      'mobile repair',
+      'ремонт телефона',
+      'ремонт телефонов',
+      'починить телефон',
+      'разбит экран',
+      'замена экрана',
+      'айфон ремонт',
+      'ремонт айфона',
+      'ремонт телефону',
+      'reparación teléfono',
+      'reparacion telefono',
+      'arreglar móvil',
+      'arreglar movil',
+      'réparation téléphone',
+      'handy reparatur',
+      'naprawa telefonu',
+      'oprava telefonu',
+    ],
   },
   {
     label: 'Hair extensions',
     categoryId: 'beauty',
     subcategory: 'Hair',
-    keywords: ['hair extensions', 'hairextensions'],
+    keywords: [
+      'hair extensions',
+      'hairextensions',
+      'hair extension',
+      'hair',
+      'hairstyle',
+      'hair stylist',
+      'наращивание волос',
+      'волосы',
+      'прическа',
+      'парикмахер',
+      'укладка',
+      'нарощування волосся',
+      'cabello',
+      'extensiones de cabello',
+      'peluquería',
+      'peluqueria',
+      'cheveux',
+      'coiffure',
+      'haarverlängerung',
+      'friseur',
+      'przedłużanie włosów',
+      'fryzjer',
+      'kadeřník',
+      'prodloužení vlasů',
+    ],
+  },
+  {
+    label: 'Nails',
+    categoryId: 'beauty',
+    subcategory: 'Nails',
+    keywords: [
+      'nails',
+      'nail',
+      'manicure',
+      'pedicure',
+      'gel nails',
+      'ногти',
+      'ноготь',
+      'маникюр',
+      'педикюр',
+      'гель лак',
+      'шеллак',
+      'манікюр',
+      'педикюр',
+      'uñas',
+      'unas',
+      'manicura',
+      'pedicura',
+      'ongles',
+      'manucure',
+      'nägel',
+      'maniküre',
+      'paznokcie',
+      'manicure',
+      'nehty',
+      'manikúra',
+    ],
+  },
+  {
+    label: 'Brows & lashes',
+    categoryId: 'beauty',
+    subcategory: 'Brows & Lashes',
+    keywords: [
+      'brows',
+      'eyebrows',
+      'lashes',
+      'eyelashes',
+      'brow lamination',
+      'lash extensions',
+      'брови',
+      'ресницы',
+      'ламинирование бровей',
+      'наращивание ресниц',
+      'бровист',
+      'вії',
+      'брови',
+      'cejas',
+      'pestañas',
+      'cil',
+      'cils',
+      'wimpern',
+      'brwi',
+      'rzęsy',
+      'obočí',
+      'řasy',
+    ],
+  },
+  {
+    label: 'Makeup',
+    categoryId: 'beauty',
+    subcategory: 'Makeup',
+    keywords: [
+      'makeup',
+      'make up',
+      'mua',
+      'макияж',
+      'визажист',
+      'мейкап',
+      'макіяж',
+      'maquillaje',
+      'maquillador',
+      'maquillage',
+      'schminken',
+      'make-up',
+      'makijaż',
+      'líčení',
+    ],
   },
   {
     label: 'Massage',
     categoryId: 'wellness',
     subcategory: 'Massage',
-    keywords: ['massage'],
+    keywords: [
+      'massage',
+      'body massage',
+      'deep tissue',
+      'relax massage',
+      'массаж',
+      'масаж',
+      'массажист',
+      'масажист',
+      'masaje',
+      'masajista',
+      'massage relaxant',
+      'massagetherapie',
+      'masaż',
+      'masér',
+      'masáž',
+    ],
   },
   {
-    label: 'Moving',
+    label: 'Spa',
+    categoryId: 'wellness',
+    subcategory: 'Spa',
+    keywords: [
+      'spa',
+      'sauna',
+      'hammam',
+      'wellness',
+      'спа',
+      'сауна',
+      'хамам',
+      'баня',
+      'спа салон',
+      'balneario',
+      'sauna',
+      'spa',
+      'sauna',
+      'sauna',
+      'wellness',
+    ],
+  },
+  {
+    label: 'Barber',
+    categoryId: 'barber',
+    subcategory: 'Haircut',
+    keywords: [
+      'barber',
+      'haircut men',
+      'mens haircut',
+      'fade',
+      'beard',
+      'beard trim',
+      'барбер',
+      'мужская стрижка',
+      'стрижка мужская',
+      'борода',
+      'фейд',
+      'барбершоп',
+      'чоловіча стрижка',
+      'barbero',
+      'corte hombre',
+      'barbier',
+      'coiffeur homme',
+      'friseur herren',
+      'barber',
+      'fryzjer męski',
+      'holič',
+    ],
+  },
+  {
+    label: 'Private chef',
+    categoryId: 'food',
+    subcategory: 'Chef at Home',
+    keywords: [
+      'private chef',
+      'chef at home',
+      'home chef',
+      'personal chef',
+      'chef',
+      'повар на дом',
+      'шеф повар',
+      'шеф-повар',
+      'личный повар',
+      'кухар додому',
+      'chef a domicilio',
+      'chef privado',
+      'cocinero privado',
+      'chef à domicile',
+      'privatkoch',
+      'kucharz prywatny',
+      'soukromý kuchař',
+    ],
+  },
+  {
+    label: 'Restaurant table',
+    categoryId: 'food',
+    subcategory: 'Restaurant Table Booking',
+    keywords: [
+      'restaurant',
+      'restaurant table',
+      'table booking',
+      'book table',
+      'bar table',
+      'reservation',
+      'ресторан',
+      'забронировать столик',
+      'бронь столика',
+      'столик в ресторане',
+      'бар',
+      'ресторан бронь',
+      'резервація столика',
+      'reservar mesa',
+      'mesa restaurante',
+      'reserva restaurante',
+      'réserver table',
+      'restaurant reservierung',
+      'rezerwacja stolika',
+      'rezervace stolu',
+    ],
+  },
+  {
+    label: 'Moving help',
     categoryId: 'moving',
     subcategory: 'Small Moves',
-    keywords: ['moving', 'move house'],
+    keywords: [
+      'moving',
+      'move house',
+      'small moves',
+      'van help',
+      'delivery',
+      'courier',
+      'переезд',
+      'перевозка',
+      'грузчик',
+      'доставка',
+      'курьер',
+      'ван',
+      'переїзд',
+      'вантажник',
+      'mudanza',
+      'transporte',
+      'furgoneta',
+      'livraison',
+      'déménagement',
+      'umzug',
+      'transport',
+      'przeprowadzka',
+      'dostawa',
+      'stěhování',
+    ],
+  },
+  {
+    label: 'Car wash',
+    categoryId: 'auto',
+    subcategory: 'Car Wash',
+    keywords: [
+      'car wash',
+      'wash car',
+      'detailing',
+      'auto detailing',
+      'мойка авто',
+      'мойка машины',
+      'автомойка',
+      'детейлинг',
+      'мийка авто',
+      'lavado coche',
+      'lavado auto',
+      'lavage voiture',
+      'autowäsche',
+      'myjnia',
+      'mycie auta',
+      'mytí auta',
+    ],
+  },
+  {
+    label: 'Tattoo',
+    categoryId: 'beauty',
+    subcategory: 'Tattoo',
+    keywords: [
+      'tattoo',
+      'tattoo artist',
+      'тату',
+      'татуировка',
+      'тату мастер',
+      'татуаж',
+      'tatuaje',
+      'tatoueur',
+      'tätowierung',
+      'tatuaż',
+      'tetování',
+    ],
+  },
+  {
+    label: 'Piercing',
+    categoryId: 'beauty',
+    subcategory: 'Piercing',
+    keywords: [
+      'piercing',
+      'пирсинг',
+      'пірсинг',
+      'perforación',
+      'perforacion',
+      'piercing oreja',
+      'piercing nez',
+      'piercing',
+      'kolczykowanie',
+      'piercing',
+    ],
+  },
+  {
+    label: 'Tattoo removal',
+    categoryId: 'beauty',
+    subcategory: 'Tattoo Removal',
+    keywords: [
+      'tattoo removal',
+      'remove tattoo',
+      'laser tattoo removal',
+      'удаление тату',
+      'удалить тату',
+      'лазерное удаление тату',
+      'видалення тату',
+      'eliminar tatuaje',
+      'borrar tatuaje',
+      'détatouage',
+      'tattoo entfernung',
+      'usuwanie tatuażu',
+      'odstranění tetování',
+    ],
   },
 ];
 
@@ -239,7 +807,65 @@ function listingToMaster(listing: ListingItem, index: number) {
 }
 
 function normalizeText(value: string) {
-  return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ё/g, 'е')
+    .replace(/ї/g, 'і')
+    .replace(/[\u2019']/g, '')
+    .replace(/[^a-zа-яіїєґ0-9\s-]/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getSearchTokens(value: string) {
+  return normalizeText(value)
+    .split(' ')
+    .map((item) => item.trim())
+    .filter((item) => item.length >= 2);
+}
+
+function levenshteinDistance(a: string, b: string) {
+  const first = normalizeText(a);
+  const second = normalizeText(b);
+
+  if (first === second) return 0;
+  if (!first) return second.length;
+  if (!second) return first.length;
+
+  const previous = Array.from({ length: second.length + 1 }, (_, index) => index);
+
+  for (let i = 0; i < first.length; i += 1) {
+    const current = [i + 1];
+
+    for (let j = 0; j < second.length; j += 1) {
+      const insert = current[j] + 1;
+      const remove = previous[j + 1] + 1;
+      const replace = previous[j] + (first[i] === second[j] ? 0 : 1);
+
+      current.push(Math.min(insert, remove, replace));
+    }
+
+    previous.splice(0, previous.length, ...current);
+  }
+
+  return previous[second.length];
+}
+
+function fuzzyTokenScore(queryToken: string, targetToken: string) {
+  if (!queryToken || !targetToken) return 0;
+  if (queryToken === targetToken) return 58;
+  if (targetToken.startsWith(queryToken) || queryToken.startsWith(targetToken)) return 46;
+  if (targetToken.includes(queryToken) || queryToken.includes(targetToken)) return 38;
+
+  const maxLength = Math.max(queryToken.length, targetToken.length);
+  const distance = levenshteinDistance(queryToken, targetToken);
+
+  if (maxLength >= 7 && distance <= 2) return 34;
+  if (maxLength >= 4 && distance <= 1) return 28;
+
+  return 0;
 }
 
 function scoreTextMatch(query: string, target: string) {
@@ -247,11 +873,35 @@ function scoreTextMatch(query: string, target: string) {
   const tValue = normalizeText(target);
 
   if (!q || !tValue) return 0;
-  if (tValue === q) return 120;
-  if (tValue.startsWith(q)) return 90;
-  if (tValue.includes(q)) return 70;
+  if (tValue === q) return 140;
+  if (tValue.startsWith(q)) return 112;
+  if (tValue.includes(q)) return 92;
+  if (q.includes(tValue) && tValue.length >= 4) return 82;
 
-  return 0;
+  const queryTokens = getSearchTokens(q);
+  const targetTokens = getSearchTokens(tValue);
+
+  if (queryTokens.length === 0 || targetTokens.length === 0) return 0;
+
+  let score = 0;
+
+  queryTokens.forEach((queryToken) => {
+    const bestTokenScore = Math.max(
+      ...targetTokens.map((targetToken) => fuzzyTokenScore(queryToken, targetToken))
+    );
+
+    score += bestTokenScore;
+  });
+
+  const allQueryTokensMatched = queryTokens.every((queryToken) =>
+    targetTokens.some((targetToken) => fuzzyTokenScore(queryToken, targetToken) >= 28)
+  );
+
+  if (allQueryTokensMatched) {
+    score += 35;
+  }
+
+  return score;
 }
 
 function saveRecentSearch(value: string) {
@@ -311,6 +961,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
     beauty: { EN: 'Beauty', ES: 'Belleza', RU: 'Красота', CZ: 'Krása', DE: 'Beauty', PL: 'Uroda', UA: 'Краса' },
     barber: { EN: 'Barber', ES: 'Barbero', RU: 'Барбер', CZ: 'Barber', DE: 'Barber', PL: 'Barber', UA: 'Барбер' },
     wellness: { EN: 'Wellness', ES: 'Bienestar', RU: 'Велнес', CZ: 'Wellness', DE: 'Wellness', PL: 'Wellness', UA: 'Велнес' },
+    food: { EN: 'Food', ES: 'Comida', RU: 'Еда', CZ: 'Jídlo', DE: 'Essen', PL: 'Jedzenie', UA: 'Їжа' },
     home: { EN: 'Home', ES: 'Hogar', RU: 'Дом', CZ: 'Domov', DE: 'Zuhause', PL: 'Dom', UA: 'Дім' },
     repairs: { EN: 'Repairs', ES: 'Reparaciones', RU: 'Ремонт', CZ: 'Opravy', DE: 'Reparaturen', PL: 'Naprawy', UA: 'Ремонт' },
     tech: { EN: 'Tech', ES: 'Tecnología', RU: 'Техника', CZ: 'Technika', DE: 'Technik', PL: 'Technika', UA: 'Техніка' },
@@ -2263,21 +2914,36 @@ export default function HomePage() {
     if (!q) return [] as SmartSearchResult[];
 
     return searchAliases
-      .map((item) => ({
-        item,
-        score: Math.max(...item.keywords.map((keyword) => scoreTextMatch(q, keyword))),
-      }))
-      .filter((item) => item.score > 0)
+      .map((item) => {
+        const keywordScore = Math.max(
+          ...item.keywords.map((keyword) => scoreTextMatch(q, keyword))
+        );
+        const labelScore = scoreTextMatch(q, item.label);
+        const categoryScore = scoreTextMatch(q, item.categoryId);
+        const subcategoryScore = scoreTextMatch(q, item.subcategory);
+
+        return {
+          item,
+          score: Math.max(keywordScore, labelScore, categoryScore, subcategoryScore),
+        };
+      })
+      .filter((item) => item.score >= 34)
       .sort((a, b) => b.score - a.score)
-      .slice(0, 8)
+      .slice(0, 10)
       .map(({ item }) => ({
         type: 'smart' as const,
-        id: `smart-${item.categoryId}-${item.subcategory}-${item.label}`,
+        id: `smart-${item.categoryId}-${item.subcategory || 'all'}-${item.label}`,
         label: item.label,
         categoryId: item.categoryId,
         subcategory: item.subcategory,
       }));
   }, [search]);
+
+  const activeSearchIntent = useMemo(() => {
+    const q = search.trim();
+    if (!q) return null;
+    return smartResults[0] || null;
+  }, [search, smartResults]);
 
   const categoryResults = useMemo(() => {
     const q = search.trim();
@@ -2289,10 +2955,11 @@ export default function HomePage() {
         score: Math.max(
           scoreTextMatch(q, item.label),
           scoreTextMatch(q, item.shortLabel || ''),
-          scoreTextMatch(q, item.id)
+          scoreTextMatch(q, item.id),
+          ...item.subcategories.map((sub) => scoreTextMatch(q, sub))
         ),
       }))
-      .filter((item) => item.score > 0)
+      .filter((item) => item.score >= 34)
       .sort((a, b) => b.score - a.score)
       .slice(0, 6)
       .map(({ item }) => ({
@@ -2315,7 +2982,7 @@ export default function HomePage() {
           score: scoreTextMatch(q, sub),
         }))
       )
-      .filter((item) => item.score > 0)
+      .filter((item) => item.score >= 34)
       .sort((a, b) => b.score - a.score)
       .slice(0, 8)
       .map((item) => ({
@@ -2341,7 +3008,7 @@ export default function HomePage() {
 
         return { master, score };
       })
-      .filter((item) => item.score > 0)
+      .filter((item) => item.score >= 34)
       .sort((a, b) => b.score - a.score)
       .slice(0, 6)
       .map(({ master }) => ({
@@ -2354,36 +3021,58 @@ export default function HomePage() {
   }, [search, allMasters]);
 
   const searchedMasters = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const q = search.trim();
 
     if (!q) return allMasters;
 
+    if (activeSearchIntent) {
+      return allMasters.filter((master: any) => {
+        const masterCategory = String(master.category || '').toLowerCase().trim();
+        const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
+        const intentCategory = String(activeSearchIntent.categoryId || '').toLowerCase().trim();
+        const intentSubcategory = String(activeSearchIntent.subcategory || '').toLowerCase().trim();
+
+        if (masterCategory !== intentCategory) return false;
+        if (!intentSubcategory) return true;
+
+        return masterSubcategory === intentSubcategory;
+      });
+    }
+
     return allMasters.filter((master: any) => {
-      return (
-        String(master.name || '').toLowerCase().includes(q) ||
-        String(master.title || '').toLowerCase().includes(q) ||
-        String(master.city || '').toLowerCase().includes(q) ||
-        String(master.subcategory || '').toLowerCase().includes(q) ||
-        String(master.description || '').toLowerCase().includes(q) ||
-        String(master.category || '').toLowerCase().includes(q)
-      );
+      const haystack = [
+        master.name || '',
+        master.title || '',
+        master.city || '',
+        master.subcategory || '',
+        master.description || '',
+        master.category || '',
+      ].join(' ');
+
+      return scoreTextMatch(q, haystack) >= 34;
     });
-  }, [allMasters, search]);
+  }, [allMasters, search, activeSearchIntent]);
 
   const categoryFilteredMasters = useMemo(() => {
+    const effectiveCategory = activeSearchIntent?.categoryId || activeCategory;
+    const effectiveSubcategory =
+      activeSearchIntent?.subcategory !== undefined && activeSearchIntent?.subcategory !== null
+        ? activeSearchIntent.subcategory
+        : activeSubcategory;
+
     return searchedMasters.filter((master: any) => {
       const masterCategory = String(master.category || '').toLowerCase().trim();
       const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
 
-      const categoryOk = masterCategory === String(activeCategory || '').toLowerCase().trim();
+      const categoryOk = masterCategory === String(effectiveCategory || '').toLowerCase().trim();
 
       if (!categoryOk) return false;
 
-      if (!activeSubcategory) return true;
+      if (!effectiveSubcategory) return true;
 
-      return masterSubcategory === String(activeSubcategory || '').toLowerCase().trim();
+      return masterSubcategory === String(effectiveSubcategory || '').toLowerCase().trim();
     });
-  }, [searchedMasters, activeCategory, activeSubcategory]);
+  }, [searchedMasters, activeCategory, activeSubcategory, activeSearchIntent]);
 
   const categoryDealsCount = useMemo(() => {
     return promotions.filter((promo) => isPromotionInCategory(promo, activeCategory)).length;
@@ -2478,7 +3167,8 @@ export default function HomePage() {
     smartResults.length > 0 ||
     categoryResults.length > 0 ||
     subcategoryResults.length > 0 ||
-    proResults.length > 0;
+    proResults.length > 0 ||
+    mapMasters.length > 0;
 
   const currencySymbol = getCurrencySymbolForLocation(locationLabel);
 
@@ -3001,7 +3691,8 @@ export default function HomePage() {
                                 {item.label}
                               </span>
                               <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {getCategoryLabel(item.categoryId, language)} • {item.subcategory}
+                                {getCategoryLabel(item.categoryId, language)}
+                                {item.subcategory ? ` • ${item.subcategory}` : ''}
                               </span>
                             </button>
                           ))}
@@ -3120,8 +3811,8 @@ export default function HomePage() {
         <section style={{ padding: '5px 0 0' }}>
           <TopCategoriesBar
             language={language}
-            activeCategory={activeCategory}
-            activeSubcategory={activeSubcategory}
+            activeCategory={activeSearchIntent?.categoryId || activeCategory}
+            activeSubcategory={activeSearchIntent?.subcategory || activeSubcategory}
             onSelectCategory={(category) => {
               setActiveCategory(category);
               setActiveSubcategory('');
@@ -3170,7 +3861,7 @@ export default function HomePage() {
                 key={`real-map-${mapResetKey}`}
                 masters={mapMasters}
                 mapMode={mapMode}
-                activeCategory={activeCategory}
+                activeCategory={activeSearchIntent?.categoryId || activeCategory}
                 selectedMasterId={selectedMaster?.id ?? null}
                 likedMasterIds={likedMasterIds}
                 recenterToUserTrigger={recenterToUserTrigger}
