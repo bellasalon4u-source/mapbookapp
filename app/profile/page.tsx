@@ -8,16 +8,6 @@ import {
   subscribeToLanguageChange,
   type AppLanguage,
 } from '../../services/i18n';
-import {
-  getUserProfile,
-  subscribeToUserProfile,
-  type UserProfile,
-} from '../../services/userProfileStore';
-import {
-  getWalletState,
-  subscribeToWalletStore,
-  type WalletState,
-} from '../../services/walletStore';
 
 type ProfileTextShape = {
   title: string;
@@ -75,6 +65,16 @@ type SectionItem = {
   bg: string;
 };
 
+type SafeProfile = {
+  fullName: string;
+  email: string;
+  avatar: string;
+};
+
+type SafeWallet = {
+  availableBalance: number;
+};
+
 const OWNER_EMAIL = 'olamepcom@gmail.com';
 
 const BRAND = {
@@ -89,6 +89,17 @@ const BRAND = {
   muted: '#667080',
   bg: '#ffffff',
 };
+
+const fallbackAvatar =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+      <rect width="160" height="160" rx="34" fill="#dcecff"/>
+      <circle cx="80" cy="61" r="31" fill="#0e73d8"/>
+      <path d="M31 142c7-35 31-53 49-53s42 18 49 53" fill="#19c65a"/>
+      <text x="80" y="151" font-size="18" text-anchor="middle" font-family="Arial" font-weight="900" fill="#071b46">Olamep</text>
+    </svg>
+  `);
 
 const profileTexts: Partial<Record<AppLanguage, ProfileTextShape>> = {
   EN: {
@@ -229,13 +240,133 @@ const profileTexts: Partial<Record<AppLanguage, ProfileTextShape>> = {
     help: 'Центр допомоги',
     helpHint: 'FAQ, інструкція та підтримка',
   },
+  CZ: {
+    title: 'Profil',
+    subtitle: 'Váš účet, peněženka, služby a nastavení',
+    edit: 'Upravit',
+    rating: 'hodnocení',
+    olamepBalance: 'Olamep zůstatek',
+    topUp: 'Dobít',
+    olamepBonuses: 'Olamep bonusy',
+    bonusHint: 'Cashback • Doporučení • Odměny',
+    workHub: 'Moje pracovní zóna',
+    buyerHub: 'Zóna zákazníka',
+    rewardsHub: 'Bonusy a kontakt',
+    accountHub: 'Nastavení účtu',
+    helpHub: 'Pomoc a informace',
+    admin: 'admin',
+    myServices: 'Moje služby',
+    myServicesHint: 'Správa nabídek, fotek a popisů',
+    priceList: 'Ceník',
+    priceListHint: 'Ceny, balíčky a speciální nabídky',
+    clients: 'Moji klienti',
+    clientsHint: 'Klienti, požadavky a historie rezervací',
+    platformOffers: 'Nabídky platformy',
+    platformOffersHint: 'Novinky, možnosti a užitečné nástroje',
+    myBookings: 'Moje rezervace',
+    myBookingsHint: 'Všechny rezervace a jejich stav',
+    savedMasters: 'Uložení specialisté',
+    savedMastersHint: 'Vaši oblíbení specialisté',
+    savedPlaces: 'Uložená místa',
+    savedPlacesHint: 'Oblíbené lokace a adresy',
+    promotions: 'Akce',
+    promotionsHint: 'Slevy, kupóny a bonusové nabídky',
+    invite: 'Pozvat přátele',
+    inviteHint: 'Referral bonusy a pozvánky',
+    notifications: 'Oznámení',
+    notificationsHint: 'Zprávy, rezervace a aktualizace',
+    payments: 'Platební metody',
+    paymentsHint: 'Karty, peněženky a výplaty',
+    languageRegion: 'Jazyk a region',
+    languageRegionHint: 'Země, jazyk a měna',
+    accountSettings: 'Nastavení účtu',
+    accountSettingsHint: 'Profil, soukromí a přihlášení',
+    legal: 'Právní informace',
+    legalHint: 'Podmínky, soukromí a pravidla',
+    help: 'Centrum pomoci',
+    helpHint: 'FAQ, průvodce a podpora',
+  },
 };
 
 function getText(language: AppLanguage) {
   return profileTexts[language] || profileTexts.EN!;
 }
 
-function isOwnerProfile(profile: UserProfile) {
+function readSafeProfile(): SafeProfile {
+  if (typeof window === 'undefined') {
+    return {
+      fullName: 'Olamep user',
+      email: 'user@olamep.com',
+      avatar: fallbackAvatar,
+    };
+  }
+
+  try {
+    const raw =
+      window.localStorage.getItem('olamep_user_profile') ||
+      window.localStorage.getItem('mapbook_user_profile') ||
+      window.localStorage.getItem('userProfile');
+
+    if (!raw) {
+      return {
+        fullName: 'Olamep user',
+        email: 'user@olamep.com',
+        avatar: fallbackAvatar,
+      };
+    }
+
+    const parsed = JSON.parse(raw) as Partial<SafeProfile>;
+
+    return {
+      fullName:
+        typeof parsed.fullName === 'string' && parsed.fullName.trim()
+          ? parsed.fullName
+          : 'Olamep user',
+      email:
+        typeof parsed.email === 'string' && parsed.email.trim()
+          ? parsed.email
+          : 'user@olamep.com',
+      avatar:
+        typeof parsed.avatar === 'string' && parsed.avatar.trim()
+          ? parsed.avatar
+          : fallbackAvatar,
+    };
+  } catch {
+    return {
+      fullName: 'Olamep user',
+      email: 'user@olamep.com',
+      avatar: fallbackAvatar,
+    };
+  }
+}
+
+function readSafeWallet(): SafeWallet {
+  if (typeof window === 'undefined') {
+    return { availableBalance: 0 };
+  }
+
+  try {
+    const raw =
+      window.localStorage.getItem('olamep_wallet_state') ||
+      window.localStorage.getItem('mapbook_wallet_state') ||
+      window.localStorage.getItem('walletState');
+
+    if (!raw) {
+      return { availableBalance: 0 };
+    }
+
+    const parsed = JSON.parse(raw) as Partial<SafeWallet>;
+    const balance = Number(parsed.availableBalance);
+
+    return {
+      availableBalance: Number.isFinite(balance) ? balance : 0,
+    };
+  } catch {
+    return { availableBalance: 0 };
+  }
+}
+
+function isOwnerProfile(profile: SafeProfile) {
   return String(profile.email || '').trim().toLowerCase() === OWNER_EMAIL;
 }
 
@@ -307,24 +438,27 @@ function SectionIcon({ icon, bg }: { icon: string; bg: string }) {
 export default function ProfilePage() {
   const router = useRouter();
 
-  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
-  const [profile, setProfile] = useState<UserProfile>(getUserProfile());
-  const [wallet, setWallet] = useState<WalletState>(getWalletState());
+  const [language, setLanguage] = useState<AppLanguage>('EN' as AppLanguage);
+  const [profile, setProfile] = useState<SafeProfile>({
+    fullName: 'Olamep user',
+    email: 'user@olamep.com',
+    avatar: fallbackAvatar,
+  });
+  const [wallet, setWallet] = useState<SafeWallet>({ availableBalance: 0 });
 
   useEffect(() => {
     const syncLanguage = () => setLanguage(getSavedLanguage());
-    const syncProfile = () => setProfile(getUserProfile());
-    const syncWallet = () => setWallet(getWalletState());
+    const syncProfile = () => setProfile(readSafeProfile());
+    const syncWallet = () => setWallet(readSafeWallet());
 
     syncLanguage();
     syncProfile();
     syncWallet();
 
     const unsubLanguage = subscribeToLanguageChange(setLanguage);
-    const unsubProfile = subscribeToUserProfile(syncProfile);
-    const unsubWallet = subscribeToWalletStore(syncWallet);
 
     window.addEventListener('focus', syncLanguage);
+    window.addEventListener('pageshow', syncLanguage);
     window.addEventListener('pageshow', syncProfile);
     window.addEventListener('pageshow', syncWallet);
     window.addEventListener('storage', syncProfile);
@@ -332,9 +466,8 @@ export default function ProfilePage() {
 
     return () => {
       unsubLanguage();
-      unsubProfile();
-      unsubWallet();
       window.removeEventListener('focus', syncLanguage);
+      window.removeEventListener('pageshow', syncLanguage);
       window.removeEventListener('pageshow', syncProfile);
       window.removeEventListener('pageshow', syncWallet);
       window.removeEventListener('storage', syncProfile);
@@ -374,7 +507,7 @@ export default function ProfilePage() {
       id: 'offers',
       title: text.platformOffers,
       hint: text.platformOffersHint,
-      route: '/profile/platform-offers',
+      route: '/profile/promotions',
       icon: '📣',
       bg: '#fff0c9',
     },
@@ -578,6 +711,7 @@ export default function ProfilePage() {
                   objectFit: 'cover',
                   border: `2.5px solid ${BRAND.border}`,
                   display: 'block',
+                  background: '#dcecff',
                 }}
               />
 
