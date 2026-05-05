@@ -13,7 +13,7 @@ import {
 } from '../../services/chatStore';
 
 type BottomNavProps = {
-  active?: 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
+  active?: 'home' | 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
   onAddClick?: () => void;
 };
 
@@ -363,12 +363,19 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
       return (
         pathname === '/add' ||
         pathname?.startsWith('/add/') ||
+        pathname?.startsWith('/promotions/new') ||
         pathname?.startsWith('/profile/promotions/new') ||
+        pathname?.startsWith('/deals/new') ||
         pathname?.startsWith('/profile/deals/new')
       );
     }
 
     return pathname?.startsWith(href);
+  };
+
+  const pushAddRoute = (nextPath: string) => {
+    setAddMenuOpen(false);
+    router.push(nextPath);
   };
 
   const handleAddClick = () => {
@@ -381,18 +388,15 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   };
 
   const handleCreateAd = () => {
-    setAddMenuOpen(false);
-    router.push('/profile/promotions/new');
+    pushAddRoute('/promotions/new');
   };
 
   const handleCreateService = () => {
-    setAddMenuOpen(false);
-    router.push('/add');
+    pushAddRoute('/add');
   };
 
   const handleCreateDeal = () => {
-    setAddMenuOpen(false);
-    router.push('/profile/deals/new');
+    pushAddRoute('/deals/new');
   };
 
   return (
