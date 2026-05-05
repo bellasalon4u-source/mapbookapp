@@ -1,6 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getAllMasters } from '../services/masters';
@@ -32,12 +38,7 @@ import {
   setWalletState,
   type WalletTransaction,
 } from '../services/walletStore';
-import {
-  findSmartSearchIntents,
-  normalizeSearchText,
-  scoreSmartTextMatch,
-  scoreMasterBySearch,
-} from '../services/searchIntelligence';
+import { smartSearchAliases } from '../services/smartSearchDictionary';
 import BottomNav from '../components/common/BottomNav';
 import TopCategoriesBar from '../components/TopCategoriesBar';
 
@@ -50,13 +51,15 @@ const popularSearches = [
   'Carpet cleaning',
   'Phone repair',
   'Hair extensions',
-  'Laser hair removal',
   'Massage',
   'Nails',
+  'Manicure',
   'Cleaning',
   'Private chef',
   'Moving help',
 ];
+
+const searchAliases = smartSearchAliases;
 
 const tickerMessages: Record<AppLanguage, string[]> = {
   EN: ['Hot offers near you', 'New masters added today', 'Verified specialists', 'Instant booking'],
@@ -78,21 +81,18 @@ type SearchResult =
       label: string;
       categoryId: string;
       subcategory: string;
-      score: number;
     }
   | {
       type: 'category';
       id: string;
       label: string;
       categoryId: string;
-      score: number;
     }
   | {
       type: 'subcategory';
       id: string;
       label: string;
       categoryId: string;
-      score: number;
     }
   | {
       type: 'master';
@@ -100,7 +100,6 @@ type SearchResult =
       label: string;
       categoryId: string;
       master: any;
-      score: number;
     };
 
 type SmartSearchResult = Extract<SearchResult, { type: 'smart' }>;
@@ -118,13 +117,13 @@ type RadiusSearchConfig = {
 };
 
 function mapCategoryToId(category: string) {
-  const normalized = normalizeSearchText(category);
+  const normalized = String(category || '').toLowerCase().trim();
 
   const found = categories.find(
     (item) =>
-      normalizeSearchText(item.id) === normalized ||
-      normalizeSearchText(item.label) === normalized ||
-      normalizeSearchText(item.shortLabel || '') === normalized
+      item.id.toLowerCase() === normalized ||
+      item.label.toLowerCase() === normalized ||
+      String(item.shortLabel || '').toLowerCase() === normalized
   );
 
   return found?.id || normalized || 'beauty';
@@ -213,6 +212,104 @@ function listingToMaster(listing: ListingItem, index: number) {
   };
 }
 
+function normalizeText(value: string) {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ё/g, 'е')
+    .replace(/ї/g, 'і')
+    .replace(/[\u2019']/g, '')
+    .replace(/[^a-zа-яіїєґ0-9\s-]/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getSearchTokens(value: string) {
+  return normalizeText(value)
+    .split(' ')
+    .map((item) => item.trim())
+    .filter((item) => item.length >= 2);
+}
+
+function levenshteinDistance(a: string, b: string) {
+  const first = normalizeText(a);
+  const second = normalizeText(b);
+
+  if (first === second) return 0;
+  if (!first) return second.length;
+  if (!second) return first.length;
+
+  const previous = Array.from({ length: second.length + 1 }, (_, index) => index);
+
+  for (let i = 0; i < first.length; i += 1) {
+    const current = [i + 1];
+
+    for (let j = 0; j < second.length; j += 1) {
+      const insert = current[j] + 1;
+      const remove = previous[j + 1] + 1;
+      const replace = previous[j] + (first[i] === second[j] ? 0 : 1);
+
+      current.push(Math.min(insert, remove, replace));
+    }
+
+    previous.splice(0, previous.length, ...current);
+  }
+
+  return previous[second.length];
+}
+
+function fuzzyTokenScore(queryToken: string, targetToken: string) {
+  if (!queryToken || !targetToken) return 0;
+  if (queryToken === targetToken) return 58;
+  if (targetToken.startsWith(queryToken) || queryToken.startsWith(targetToken)) return 46;
+  if (targetToken.includes(queryToken) || queryToken.includes(targetToken)) return 38;
+
+  const maxLength = Math.max(queryToken.length, targetToken.length);
+  const distance = levenshteinDistance(queryToken, targetToken);
+
+  if (maxLength >= 7 && distance <= 2) return 34;
+  if (maxLength >= 4 && distance <= 1) return 28;
+
+  return 0;
+}
+
+function scoreTextMatch(query: string, target: string) {
+  const q = normalizeText(query);
+  const tValue = normalizeText(target);
+
+  if (!q || !tValue) return 0;
+  if (tValue === q) return 140;
+  if (tValue.startsWith(q)) return 112;
+  if (tValue.includes(q)) return 92;
+  if (q.includes(tValue) && tValue.length >= 4) return 82;
+
+  const queryTokens = getSearchTokens(q);
+  const targetTokens = getSearchTokens(tValue);
+
+  if (queryTokens.length === 0 || targetTokens.length === 0) return 0;
+
+  let score = 0;
+
+  queryTokens.forEach((queryToken) => {
+    const bestTokenScore = Math.max(
+      ...targetTokens.map((targetToken) => fuzzyTokenScore(queryToken, targetToken))
+    );
+
+    score += bestTokenScore;
+  });
+
+  const allQueryTokensMatched = queryTokens.every((queryToken) =>
+    targetTokens.some((targetToken) => fuzzyTokenScore(queryToken, targetToken) >= 28)
+  );
+
+  if (allQueryTokensMatched) {
+    score += 35;
+  }
+
+  return score;
+}
+
 function saveRecentSearch(value: string) {
   if (typeof window === 'undefined') return;
 
@@ -231,7 +328,12 @@ function saveRecentSearch(value: string) {
 
 function readRecentSearches() {
   if (typeof window === 'undefined') return [] as string[];
-  return JSON.parse(window.localStorage.getItem('mapbook_recent_searches') || '[]') as string[];
+
+  try {
+    return JSON.parse(window.localStorage.getItem('mapbook_recent_searches') || '[]') as string[];
+  } catch {
+    return [];
+  }
 }
 
 function languageFlag(language: AppLanguage) {
@@ -290,9 +392,9 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
 
 function findPromotionMaster(promo: PromotionItem, masters: any[]) {
   const anyPromo = promo as any;
-  const normalizedCategory = normalizeSearchText(anyPromo.categoryId || '');
-  const normalizedTitle = normalizeSearchText(anyPromo.title || '');
-  const normalizedSubtitle = normalizeSearchText(anyPromo.subtitle || '');
+  const normalizedCategory = String(anyPromo.categoryId || '').toLowerCase().trim();
+  const normalizedTitle = normalizeText(anyPromo.title);
+  const normalizedSubtitle = normalizeText(anyPromo.subtitle || '');
   const words = `${normalizedTitle} ${normalizedSubtitle}`
     .split(' ')
     .filter((word) => word.length > 2);
@@ -306,7 +408,7 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
   if (exactByMasterId) return exactByMasterId;
 
   const scoreMaster = (master: any) => {
-    const haystack = normalizeSearchText(
+    const haystack = normalizeText(
       [
         master.name || '',
         master.title || '',
@@ -328,7 +430,7 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
 
     if (
       normalizedCategory &&
-      normalizeSearchText(master.category || '') === normalizedCategory
+      String(master.category || '').toLowerCase().trim() === normalizedCategory
     ) {
       score += 35;
     }
@@ -346,7 +448,9 @@ function findPromotionMaster(promo: PromotionItem, masters: any[]) {
 }
 
 function isPromotionInCategory(promo: PromotionItem, categoryId: string) {
-  return normalizeSearchText((promo as any).categoryId || '') === normalizeSearchText(categoryId || '');
+  return String((promo as any).categoryId || '')
+    .toLowerCase()
+    .trim() === String(categoryId || '').toLowerCase().trim();
 }
 
 function isUserRegistered() {
@@ -448,9 +552,7 @@ function extractPromotionDiscountBadge(promo: PromotionItem) {
   const combined = `${title} ${subtitle}`;
   const match = combined.match(/(\d{1,2})\s?%/);
 
-  if (match) {
-    return `-${match[1]}%`;
-  }
+  if (match) return `-${match[1]}%`;
 
   return 'SALE';
 }
@@ -604,58 +706,12 @@ function QuickActionsPanel({
   allHotOffersActive: boolean;
 }) {
   const items = [
-    {
-      key: 'qr',
-      label: 'QR payment',
-      icon: '▦',
-      color: '#2378ff',
-      onClick: onQrReceive,
-    },
-    {
-      key: 'invite',
-      label: 'Invite friends',
-      icon: '👥',
-      color: '#2378ff',
-      onClick: onInvite,
-    },
-    {
-      key: 'favourite',
-      label: 'Favourite',
-      icon: '♥',
-      color: '#ff3b58',
-      count: favouriteCount,
-      active: favouriteActive,
-      onClick: onFavourite,
-    },
-    {
-      key: 'allFavourite',
-      label: 'All favourite',
-      icon: '♥♥♥',
-      color: '#ff3b58',
-      count: allFavouriteCount,
-      active: allFavouriteActive,
-      onClick: onAllFavourite,
-    },
-    {
-      key: 'hotOffers',
-      label: 'Hot offers',
-      icon: '%',
-      color: '#171717',
-      count: hotOffersCount,
-      active: hotOffersActive,
-      onClick: onHotOffers,
-      yellow: true,
-    },
-    {
-      key: 'allHotOffers',
-      label: 'All hot offers',
-      icon: '%',
-      color: '#171717',
-      count: allHotOffersCount,
-      active: allHotOffersActive,
-      onClick: onAllHotOffers,
-      yellow: true,
-    },
+    { key: 'qr', label: 'QR payment', icon: '▦', color: '#2378ff', onClick: onQrReceive },
+    { key: 'invite', label: 'Invite friends', icon: '👥', color: '#2378ff', onClick: onInvite },
+    { key: 'favourite', label: 'Favourite', icon: '♥', color: '#ff3b58', count: favouriteCount, active: favouriteActive, onClick: onFavourite },
+    { key: 'allFavourite', label: 'All favourite', icon: '♥♥♥', color: '#ff3b58', count: allFavouriteCount, active: allFavouriteActive, onClick: onAllFavourite },
+    { key: 'hotOffers', label: 'Hot offers', icon: '%', color: '#171717', count: hotOffersCount, active: hotOffersActive, onClick: onHotOffers, yellow: true },
+    { key: 'allHotOffers', label: 'All hot offers', icon: '%', color: '#171717', count: allHotOffersCount, active: allHotOffersActive, onClick: onAllHotOffers, yellow: true },
   ];
 
   return (
@@ -702,14 +758,7 @@ function QuickActionsPanel({
           touchAction: 'manipulation',
         }}
       >
-        <span
-          style={{
-            fontSize: 20,
-            fontWeight: 900,
-            color: '#ffffff',
-            lineHeight: 1,
-          }}
-        >
+        <span style={{ fontSize: 20, fontWeight: 900, color: '#ffffff', lineHeight: 1 }}>
           {open ? '▸' : '◂'}
         </span>
       </button>
@@ -847,6 +896,7 @@ function PromoCard({
 
   return (
     <button
+      type="button"
       onClick={onOpen}
       style={{
         minWidth: 150,
@@ -987,16 +1037,14 @@ function MasterMiniCard({
     startY: 0,
     originX: 0,
     originY: 0,
-    moved: false,
   });
 
   const clamp = (value: number, min: number, max: number) => {
     return Math.max(min, Math.min(max, value));
   };
 
-  const startDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+  const startDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
-
     if (target.closest('button')) return;
 
     event.preventDefault();
@@ -1008,7 +1056,6 @@ function MasterMiniCard({
       startY: event.clientY,
       originX: cardOffset.x,
       originY: cardOffset.y,
-      moved: false,
     };
 
     try {
@@ -1018,7 +1065,7 @@ function MasterMiniCard({
     }
   };
 
-  const moveDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+  const moveDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!dragRef.current.active) return;
 
     event.preventDefault();
@@ -1027,17 +1074,13 @@ function MasterMiniCard({
     const diffX = event.clientX - dragRef.current.startX;
     const diffY = event.clientY - dragRef.current.startY;
 
-    if (Math.abs(diffX) > 4 || Math.abs(diffY) > 4) {
-      dragRef.current.moved = true;
-    }
-
     setCardOffset({
       x: clamp(dragRef.current.originX + diffX, -72, 72),
       y: clamp(dragRef.current.originY + diffY, -360, 26),
     });
   };
 
-  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+  const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!dragRef.current.active) return;
 
     event.preventDefault();
@@ -1391,12 +1434,7 @@ function QrReceiveModal({
         : language === 'UA'
         ? 'Вкажи суму, створи QR і отримай гроші на баланс сайту.'
         : 'Set an amount, generate a QR and receive money into the site balance.',
-    amount:
-      language === 'RU'
-        ? 'Сумма'
-        : language === 'UA'
-        ? 'Сума'
-        : 'Amount',
+    amount: language === 'RU' ? 'Сумма' : language === 'UA' ? 'Сума' : 'Amount',
     note:
       language === 'RU'
         ? 'Назначение платежа'
@@ -1427,12 +1465,7 @@ function QrReceiveModal({
         : language === 'UA'
         ? 'Зараз це робочий прототип: після натискання гроші зараховуються в гаманець сайту та зʼявляються в історії.'
         : 'This is a working prototype: after pressing the button, money is credited to the site wallet and appears in history.',
-    close:
-      language === 'RU'
-        ? 'Закрыть'
-        : language === 'UA'
-        ? 'Закрити'
-        : 'Close',
+    close: language === 'RU' ? 'Закрыть' : language === 'UA' ? 'Закрити' : 'Close',
   };
 
   return (
@@ -1465,14 +1498,7 @@ function QrReceiveModal({
           boxShadow: '0 -12px 34px rgba(0,0,0,0.2)',
         }}
       >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 48px',
-            gap: 10,
-            alignItems: 'start',
-          }}
-        >
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 48px', gap: 10 }}>
           <div>
             <h2
               style={{
@@ -1527,15 +1553,7 @@ function QrReceiveModal({
             padding: 14,
           }}
         >
-          <label
-            style={{
-              display: 'grid',
-              gap: 6,
-              fontSize: 12,
-              fontWeight: 900,
-              color: '#657080',
-            }}
-          >
+          <label style={{ display: 'grid', gap: 6, fontSize: 12, fontWeight: 900, color: '#657080' }}>
             <span>{labels.amount}</span>
             <div
               style={{
@@ -1657,37 +1675,15 @@ function QrReceiveModal({
                 overflow: 'hidden',
               }}
             >
-              <img
-                src={qrUrl}
-                alt="QR payment"
-                style={{
-                  width: 232,
-                  height: 232,
-                  display: 'block',
-                }}
-              />
+              <img src={qrUrl} alt="QR payment" style={{ width: 232, height: 232, display: 'block' }} />
             </div>
 
-            <div
-              style={{
-                marginTop: 12,
-                fontSize: 32,
-                fontWeight: 900,
-                color: '#071b46',
-              }}
-            >
+            <div style={{ marginTop: 12, fontSize: 32, fontWeight: 900, color: '#071b46' }}>
               {currencySymbol}
               {safeAmount.toFixed(2)}
             </div>
 
-            <div
-              style={{
-                marginTop: 4,
-                fontSize: 13,
-                fontWeight: 800,
-                color: '#657080',
-              }}
-            >
+            <div style={{ marginTop: 4, fontSize: 13, fontWeight: 800, color: '#657080' }}>
               {note || 'Olamep QR payment'}
             </div>
 
@@ -1771,60 +1767,25 @@ function InviteFriendsModal({
   onClose: () => void;
 }) {
   const labels = {
-    title:
-      language === 'RU'
-        ? 'Пригласи друзей'
-        : language === 'UA'
-        ? 'Запроси друзів'
-        : 'Invite friends',
+    title: language === 'RU' ? 'Пригласи друзей' : language === 'UA' ? 'Запроси друзів' : 'Invite friends',
     subtitle:
       language === 'RU'
         ? 'Дай другу свой код или ссылку. Когда он присоединится, бонус появится на твоём балансе.'
         : language === 'UA'
         ? 'Дай другу свій код або посилання. Коли він приєднається, бонус зʼявиться на твоєму балансі.'
         : 'Share your code or link. When your friend joins, your bonus will appear in your balance.',
-    code:
-      language === 'RU'
-        ? 'Твой invite code'
-        : language === 'UA'
-        ? 'Твій invite code'
-        : 'Your invite code',
-    copy:
-      language === 'RU'
-        ? 'Скопировать код'
-        : language === 'UA'
-        ? 'Скопіювати код'
-        : 'Copy code',
-    copied:
-      language === 'RU'
-        ? 'Скопировано'
-        : language === 'UA'
-        ? 'Скопійовано'
-        : 'Copied',
-    share:
-      language === 'RU'
-        ? 'Поделиться ссылкой'
-        : language === 'UA'
-        ? 'Поділитися посиланням'
-        : 'Share invite link',
-    bonus:
-      language === 'RU'
-        ? 'Бонус за приглашение'
-        : language === 'UA'
-        ? 'Бонус за запрошення'
-        : 'Referral bonus',
+    code: language === 'RU' ? 'Твой invite code' : language === 'UA' ? 'Твій invite code' : 'Your invite code',
+    copy: language === 'RU' ? 'Скопировать код' : language === 'UA' ? 'Скопіювати код' : 'Copy code',
+    copied: language === 'RU' ? 'Скопировано' : language === 'UA' ? 'Скопійовано' : 'Copied',
+    share: language === 'RU' ? 'Поделиться ссылкой' : language === 'UA' ? 'Поділитися посиланням' : 'Share invite link',
+    bonus: language === 'RU' ? 'Бонус за приглашение' : language === 'UA' ? 'Бонус за запрошення' : 'Referral bonus',
     bonusText:
       language === 'RU'
         ? 'Друг получает приглашение, ты получаешь бонус после регистрации или первой активности.'
         : language === 'UA'
         ? 'Друг отримує запрошення, ти отримуєш бонус після реєстрації або першої активності.'
         : 'Your friend gets an invite, and you get a bonus after they join or complete their first action.',
-    close:
-      language === 'RU'
-        ? 'Закрыть'
-        : language === 'UA'
-        ? 'Закрити'
-        : 'Close',
+    close: language === 'RU' ? 'Закрыть' : language === 'UA' ? 'Закрити' : 'Close',
   };
 
   return (
@@ -1857,14 +1818,7 @@ function InviteFriendsModal({
           boxShadow: '0 -12px 34px rgba(0,0,0,0.2)',
         }}
       >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 48px',
-            gap: 10,
-            alignItems: 'start',
-          }}
-        >
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 48px', gap: 10 }}>
           <div>
             <h2
               style={{
@@ -1878,15 +1832,7 @@ function InviteFriendsModal({
             >
               {labels.title}
             </h2>
-            <p
-              style={{
-                margin: '8px 0 0',
-                fontSize: 13,
-                lineHeight: 1.35,
-                fontWeight: 800,
-                color: '#657080',
-              }}
-            >
+            <p style={{ margin: '8px 0 0', fontSize: 13, lineHeight: 1.35, fontWeight: 800, color: '#657080' }}>
               {labels.subtitle}
             </p>
           </div>
@@ -1919,15 +1865,7 @@ function InviteFriendsModal({
             padding: 14,
           }}
         >
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 900,
-              color: '#657080',
-            }}
-          >
-            {labels.code}
-          </div>
+          <div style={{ fontSize: 12, fontWeight: 900, color: '#657080' }}>{labels.code}</div>
 
           <div
             style={{
@@ -1964,14 +1902,7 @@ function InviteFriendsModal({
             <strong>{labels.bonus}:</strong> {labels.bonusText}
           </div>
 
-          <div
-            style={{
-              marginTop: 12,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 9,
-            }}
-          >
+          <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
             <button
               type="button"
               onClick={onCopy}
@@ -2220,27 +2151,36 @@ export default function HomePage() {
     const q = search.trim();
     if (!q) return [] as SmartSearchResult[];
 
-    return findSmartSearchIntents(q)
+    return searchAliases
+      .map((item) => {
+        const keywordScore = Math.max(
+          ...item.keywords.map((keyword) => scoreTextMatch(q, keyword))
+        );
+        const labelScore = scoreTextMatch(q, item.label);
+        const categoryScore = scoreTextMatch(q, item.categoryId);
+        const subcategoryScore = scoreTextMatch(q, item.subcategory);
+
+        return {
+          item,
+          score: Math.max(keywordScore, labelScore, categoryScore, subcategoryScore),
+        };
+      })
+      .filter((item) => item.score >= 34)
+      .sort((a, b) => b.score - a.score)
       .slice(0, 10)
-      .map((item) => ({
+      .map(({ item }) => ({
         type: 'smart' as const,
         id: `smart-${item.categoryId}-${item.subcategory || 'all'}-${item.label}`,
         label: item.label,
         categoryId: item.categoryId,
         subcategory: item.subcategory,
-        score: item.score,
       }));
   }, [search]);
 
   const activeSearchIntent = useMemo(() => {
     const q = search.trim();
     if (!q) return null;
-
-    const best = smartResults[0];
-
-    if (!best || best.score < 60) return null;
-
-    return best;
+    return smartResults[0] || null;
   }, [search, smartResults]);
 
   const categoryResults = useMemo(() => {
@@ -2251,21 +2191,20 @@ export default function HomePage() {
       .map((item) => ({
         item,
         score: Math.max(
-          scoreSmartTextMatch(q, item.label),
-          scoreSmartTextMatch(q, item.shortLabel || ''),
-          scoreSmartTextMatch(q, item.id),
-          ...item.subcategories.map((sub) => scoreSmartTextMatch(q, sub))
+          scoreTextMatch(q, item.label),
+          scoreTextMatch(q, item.shortLabel || ''),
+          scoreTextMatch(q, item.id),
+          ...item.subcategories.map((sub) => scoreTextMatch(q, sub))
         ),
       }))
-      .filter((item) => item.score >= 60)
+      .filter((item) => item.score >= 34)
       .sort((a, b) => b.score - a.score)
       .slice(0, 6)
-      .map(({ item, score }) => ({
+      .map(({ item }) => ({
         type: 'category' as const,
         id: `category-${item.id}`,
         label: getCategoryLabel(item.id, language),
         categoryId: item.id,
-        score,
       }));
   }, [search, language]);
 
@@ -2278,10 +2217,10 @@ export default function HomePage() {
         item.subcategories.map((sub) => ({
           sub,
           categoryId: item.id,
-          score: scoreSmartTextMatch(q, sub),
+          score: scoreTextMatch(q, sub),
         }))
       )
-      .filter((item) => item.score >= 60)
+      .filter((item) => item.score >= 34)
       .sort((a, b) => b.score - a.score)
       .slice(0, 8)
       .map((item) => ({
@@ -2289,7 +2228,6 @@ export default function HomePage() {
         id: `subcategory-${item.categoryId}-${item.sub}`,
         label: item.sub,
         categoryId: item.categoryId,
-        score: item.score,
       }));
   }, [search]);
 
@@ -2299,32 +2237,33 @@ export default function HomePage() {
 
     return allMasters
       .map((master: any) => {
-        const directScore = scoreMasterBySearch(q, master);
-        const smartBoost =
-          activeSearchIntent &&
-          normalizeSearchText(master.category || '') === normalizeSearchText(activeSearchIntent.categoryId || '') &&
-          (!activeSearchIntent.subcategory ||
-            normalizeSearchText(master.subcategory || '') === normalizeSearchText(activeSearchIntent.subcategory || ''))
-            ? 80
-            : 0;
+        const haystack = [
+          master.name || '',
+          master.title || '',
+          master.subcategory || '',
+          master.description || '',
+          master.city || '',
+          master.category || '',
+          ...(master.services || []).map((service: any) =>
+            [service.title || '', service.description || '', service.slug || ''].join(' ')
+          ),
+        ].join(' ');
 
-        return {
-          master,
-          score: directScore + smartBoost,
-        };
+        const score = scoreTextMatch(q, haystack);
+
+        return { master, score };
       })
-      .filter((item) => item.score >= 60)
+      .filter((item) => item.score >= 34)
       .sort((a, b) => b.score - a.score)
       .slice(0, 8)
-      .map(({ master, score }) => ({
+      .map(({ master }) => ({
         type: 'master' as const,
         id: `master-${master.id}`,
         label: master.name || master.title || 'Pro',
         categoryId: String(master.category || 'beauty'),
         master,
-        score,
       }));
-  }, [search, allMasters, activeSearchIntent]);
+  }, [search, allMasters]);
 
   const searchedMasters = useMemo(() => {
     const q = search.trim();
@@ -2333,19 +2272,33 @@ export default function HomePage() {
 
     if (activeSearchIntent) {
       return allMasters.filter((master: any) => {
-        const masterCategory = normalizeSearchText(master.category || '');
-        const masterSubcategory = normalizeSearchText(master.subcategory || '');
-        const intentCategory = normalizeSearchText(activeSearchIntent.categoryId || '');
-        const intentSubcategory = normalizeSearchText(activeSearchIntent.subcategory || '');
+        const masterCategory = String(master.category || '').toLowerCase().trim();
+        const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
+        const intentCategory = String(activeSearchIntent.categoryId || '').toLowerCase().trim();
+        const intentSubcategory = String(activeSearchIntent.subcategory || '').toLowerCase().trim();
 
         if (masterCategory !== intentCategory) return false;
         if (!intentSubcategory) return true;
 
-        return masterSubcategory === intentSubcategory || scoreMasterBySearch(q, master) >= 60;
+        return masterSubcategory === intentSubcategory;
       });
     }
 
-    return allMasters.filter((master: any) => scoreMasterBySearch(q, master) >= 60);
+    return allMasters.filter((master: any) => {
+      const haystack = [
+        master.name || '',
+        master.title || '',
+        master.city || '',
+        master.subcategory || '',
+        master.description || '',
+        master.category || '',
+        ...(master.services || []).map((service: any) =>
+          [service.title || '', service.description || '', service.slug || ''].join(' ')
+        ),
+      ].join(' ');
+
+      return scoreTextMatch(q, haystack) >= 34;
+    });
   }, [allMasters, search, activeSearchIntent]);
 
   const categoryFilteredMasters = useMemo(() => {
@@ -2356,16 +2309,15 @@ export default function HomePage() {
         : activeSubcategory;
 
     return searchedMasters.filter((master: any) => {
-      const masterCategory = normalizeSearchText(master.category || '');
-      const masterSubcategory = normalizeSearchText(master.subcategory || '');
+      const masterCategory = String(master.category || '').toLowerCase().trim();
+      const masterSubcategory = String(master.subcategory || '').toLowerCase().trim();
 
-      const categoryOk = masterCategory === normalizeSearchText(effectiveCategory || '');
+      const categoryOk = masterCategory === String(effectiveCategory || '').toLowerCase().trim();
 
       if (!categoryOk) return false;
-
       if (!effectiveSubcategory) return true;
 
-      return masterSubcategory === normalizeSearchText(effectiveSubcategory || '');
+      return masterSubcategory === String(effectiveSubcategory || '').toLowerCase().trim();
     });
   }, [searchedMasters, activeCategory, activeSubcategory, activeSearchIntent]);
 
@@ -2448,11 +2400,11 @@ export default function HomePage() {
   useEffect(() => {
     setSelectedMaster(null);
     setMapResetKey((prev) => prev + 1);
-  }, [activeCategory, activeSubcategory, search, likedFilterMode, dealFilterMode, radiusSearch]);
+  }, [activeCategory, activeSubcategory, search, likedFilterMode, dealFilterMode]);
 
   const likedInCategoryCount = allMasters.filter(
     (master: any) =>
-      normalizeSearchText(master.category || '') === normalizeSearchText(activeCategory) &&
+      String(master.category || '').toLowerCase().trim() === activeCategory &&
       likedMasterIds.includes(String(master.id))
   ).length;
 
@@ -2738,9 +2690,9 @@ export default function HomePage() {
                     if (e.key === 'Enter') {
                       const first =
                         smartResults[0] ||
-                        proResults[0] ||
                         subcategoryResults[0] ||
-                        categoryResults[0];
+                        categoryResults[0] ||
+                        proResults[0];
 
                       if (first) {
                         selectSearchResult(first);
@@ -2766,6 +2718,7 @@ export default function HomePage() {
 
                 {search ? (
                   <button
+                    type="button"
                     onClick={() => {
                       setSearch('');
                       setSearchOpen(false);
@@ -2785,6 +2738,7 @@ export default function HomePage() {
               </div>
 
               <button
+                type="button"
                 onClick={() => router.push('/profile/language')}
                 style={{
                   width: 42,
@@ -2810,6 +2764,7 @@ export default function HomePage() {
               </button>
 
               <button
+                type="button"
                 onClick={() => router.push('/profile/currency')}
                 style={{
                   width: 42,
@@ -2832,6 +2787,7 @@ export default function HomePage() {
               </button>
 
               <button
+                type="button"
                 onClick={() => router.push('/profile/location')}
                 style={{
                   width: 42,
@@ -2878,14 +2834,7 @@ export default function HomePage() {
                   <>
                     {recentSearches.length > 0 ? (
                       <div style={{ marginBottom: 14 }}>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 900,
-                            color: '#6c7480',
-                            marginBottom: 8,
-                          }}
-                        >
+                        <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
                           {tr.recentSearches}
                         </div>
 
@@ -2893,6 +2842,7 @@ export default function HomePage() {
                           {recentSearches.map((item) => (
                             <button
                               key={item}
+                              type="button"
                               onClick={() => runQuickSearch(item)}
                               style={{
                                 border: '1.4px solid #111111',
@@ -2913,14 +2863,7 @@ export default function HomePage() {
                     ) : null}
 
                     <div>
-                      <div
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 900,
-                          color: '#6c7480',
-                          marginBottom: 8,
-                        }}
-                      >
+                      <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
                         {tr.popularSearches}
                       </div>
 
@@ -2928,6 +2871,7 @@ export default function HomePage() {
                         {popularSearches.map((item) => (
                           <button
                             key={item}
+                            type="button"
                             onClick={() => runQuickSearch(item)}
                             style={{
                               border: '1.4px solid #111111',
@@ -2947,14 +2891,7 @@ export default function HomePage() {
                     </div>
                   </>
                 ) : !hasAnyResults ? (
-                  <div
-                    style={{
-                      padding: '12px 6px',
-                      fontSize: 14,
-                      fontWeight: 800,
-                      color: '#74808c',
-                    }}
-                  >
+                  <div style={{ padding: '12px 6px', fontSize: 14, fontWeight: 800, color: '#74808c' }}>
                     {tr.noResultsFound}
                   </div>
                 ) : (
@@ -2969,6 +2906,7 @@ export default function HomePage() {
                           {smartResults.map((item) => (
                             <button
                               key={item.id}
+                              type="button"
                               onClick={() => selectSearchResult(item)}
                               style={{
                                 border: '1.4px solid #111111',
@@ -2995,16 +2933,17 @@ export default function HomePage() {
                       </div>
                     )}
 
-                    {proResults.length > 0 && (
+                    {categoryResults.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
                         <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
-                          {tr.pros}
+                          {tr.categories}
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          {proResults.map((item) => (
+                          {categoryResults.map((item) => (
                             <button
                               key={item.id}
+                              type="button"
                               onClick={() => selectSearchResult(item)}
                               style={{
                                 border: '1.4px solid #111111',
@@ -3020,9 +2959,6 @@ export default function HomePage() {
                             >
                               <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
                                 {item.label}
-                              </span>
-                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
-                                {getCategoryLabel(item.categoryId, language)}
                               </span>
                             </button>
                           ))}
@@ -3040,6 +2976,7 @@ export default function HomePage() {
                           {subcategoryResults.map((item) => (
                             <button
                               key={item.id}
+                              type="button"
                               onClick={() => selectSearchResult(item)}
                               style={{
                                 border: '1.4px solid #111111',
@@ -3065,16 +3002,17 @@ export default function HomePage() {
                       </div>
                     )}
 
-                    {categoryResults.length > 0 && (
+                    {proResults.length > 0 && (
                       <div>
                         <div style={{ fontSize: 12, fontWeight: 900, color: '#6c7480', marginBottom: 8 }}>
-                          {tr.categories}
+                          {tr.pros}
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          {categoryResults.map((item) => (
+                          {proResults.map((item) => (
                             <button
                               key={item.id}
+                              type="button"
                               onClick={() => selectSearchResult(item)}
                               style={{
                                 border: '1.4px solid #111111',
@@ -3090,6 +3028,9 @@ export default function HomePage() {
                             >
                               <span style={{ fontSize: 14, fontWeight: 900, color: '#263545' }}>
                                 {item.label}
+                              </span>
+                              <span style={{ fontSize: 12, color: '#7d8691', fontWeight: 700 }}>
+                                {getCategoryLabel(item.categoryId, language)}
                               </span>
                             </button>
                           ))}
@@ -3250,14 +3191,7 @@ export default function HomePage() {
                   gap: 10,
                 }}
               >
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: 16,
-                    fontWeight: 900,
-                    color: '#111111',
-                  }}
-                >
+                <h2 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: '#111111' }}>
                   {language === 'RU'
                     ? 'Горячие предложения рядом'
                     : language === 'UA'
@@ -3268,6 +3202,7 @@ export default function HomePage() {
                 </h2>
 
                 <button
+                  type="button"
                   onClick={() => router.push('/explore')}
                   style={{
                     border: 'none',
