@@ -371,11 +371,6 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
     return pathname?.startsWith(href);
   };
 
-  const openAddRoute = (nextPath: string) => {
-    setAddMenuOpen(false);
-    router.push(nextPath);
-  };
-
   const handleAddClick = () => {
     if (onAddClick) {
       onAddClick();
@@ -386,15 +381,18 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   };
 
   const handleCreateAd = () => {
-    openAddRoute('/profile/promotions/new');
+    setAddMenuOpen(false);
+    router.push('/profile/promotions/new');
   };
 
   const handleCreateService = () => {
-    openAddRoute('/add');
+    setAddMenuOpen(false);
+    router.push('/add');
   };
 
   const handleCreateDeal = () => {
-    openAddRoute('/profile/deals/new');
+    setAddMenuOpen(false);
+    router.push('/profile/deals/new');
   };
 
   return (
