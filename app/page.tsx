@@ -704,10 +704,11 @@ function QuickActionsPanel({
     <div
       style={{
         position: 'absolute',
-        top: 14,
+        top: '50%',
         right: open ? 8 : -82,
         width: 78,
         zIndex: 3000,
+        transform: 'translateY(-50%)',
         transition: 'right 0.28s ease',
         pointerEvents: 'auto',
       }}
@@ -722,8 +723,9 @@ function QuickActionsPanel({
         aria-label="Toggle quick actions"
         style={{
           position: 'absolute',
-          left: -32,
-          top: 68,
+          left: -34,
+          top: '50%',
+          transform: 'translateY(-50%)',
           width: 36,
           height: 76,
           borderTopLeftRadius: 20,
