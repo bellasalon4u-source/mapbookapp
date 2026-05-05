@@ -23,17 +23,19 @@ type ProfileTextShape = {
   title: string;
   subtitle: string;
   edit: string;
+  verified: string;
   rating: string;
-  balanceTitle: string;
+  olamepBalance: string;
   topUp: string;
-  bonusTitle: string;
+  olamepBonuses: string;
   bonusHint: string;
-  admin: string;
   workHub: string;
   buyerHub: string;
-  rewardsHub: string;
-  accountHub: string;
-  helpHub: string;
+  bonusesAndContact: string;
+  accountSettings: string;
+  helpInfo: string;
+  admin: string;
+  adminHint: string;
   myServices: string;
   myServicesHint: string;
   priceList: string;
@@ -58,8 +60,8 @@ type ProfileTextShape = {
   paymentsHint: string;
   languageRegion: string;
   languageRegionHint: string;
-  accountSettings: string;
-  accountSettingsHint: string;
+  profileSettings: string;
+  profileSettingsHint: string;
   legal: string;
   legalHint: string;
   help: string;
@@ -68,13 +70,7 @@ type ProfileTextShape = {
   faqHint: string;
 };
 
-type ProfileSection = {
-  id: string;
-  title: string;
-  items: ProfileItem[];
-};
-
-type ProfileItem = {
+type ListAction = {
   id: string;
   title: string;
   hint: string;
@@ -89,197 +85,187 @@ const BRAND = {
   navy: '#071b46',
   blue: '#0e73d8',
   green: '#24c45a',
-  red: '#f10016',
+  red: '#ff0000',
   yellow: '#ffd629',
-  black: '#050505',
+  orange: '#ff8a00',
+  pink: '#ff2456',
+  cream: '#fff7ee',
   white: '#ffffff',
-  muted: '#697482',
-  softBlue: '#dcecff',
-  softGreen: '#dcffe8',
-  softYellow: '#fff0b8',
-  softPink: '#ffe5ef',
-  softViolet: '#eee8ff',
-  softOrange: '#fff0da',
+  border: '#050505',
+  muted: '#657080',
 };
 
-const profileTexts: Partial<Record<AppLanguage, ProfileTextShape>> = {
+const texts: Partial<Record<AppLanguage, ProfileTextShape>> = {
   EN: {
     title: 'Profile',
     subtitle: 'Your account, wallet, services and settings',
     edit: 'Edit',
+    verified: 'Verified',
     rating: 'rating',
-    balanceTitle: 'Olamep Balance',
+    olamepBalance: 'Olamep Balance',
     topUp: 'Top up',
-    bonusTitle: 'Olamep Bonuses',
+    olamepBonuses: 'Olamep Bonuses',
     bonusHint: 'Cashback • Referrals • Rewards',
-    admin: 'admin',
     workHub: 'My work hub',
-    buyerHub: 'Buyer space',
-    rewardsHub: 'Bonuses and connection',
-    accountHub: 'Account settings',
-    helpHub: 'Help and information',
+    buyerHub: 'Buyer area',
+    bonusesAndContact: 'Bonuses & contact',
+    accountSettings: 'Account settings',
+    helpInfo: 'Help & information',
+    admin: 'admin',
+    adminHint: 'Owner Admin Panel',
     myServices: 'My services',
     myServicesHint: 'Manage services, descriptions and photos',
     priceList: 'Price list',
     priceListHint: 'Prices, packages and special offers',
     clients: 'My clients',
-    clientsHint: 'Client base, requests and notes',
+    clientsHint: 'Client base, history and notes',
     platformOffers: 'Platform offers',
-    platformOffersHint: 'News, tools and business opportunities',
+    platformOffersHint: 'News, opportunities and recommendations',
     bookings: 'My bookings',
-    bookingsHint: 'All your appointments and requests',
+    bookingsHint: 'Your appointments and booking history',
     savedMasters: 'Saved masters',
-    savedMastersHint: 'Your favourite specialists',
+    savedMastersHint: 'Specialists you liked',
     savedPlaces: 'Saved places',
-    savedPlacesHint: 'Favourite locations and addresses',
+    savedPlacesHint: 'Favourite locations',
     promotions: 'Promotions',
-    promotionsHint: 'Discounts, gifts and bonus offers',
+    promotionsHint: 'Discounts, bonuses and special deals',
     invite: 'Invite friends',
-    inviteHint: 'Share Olamep and get bonuses',
+    inviteHint: 'Get rewards for referrals',
     notifications: 'Notifications',
-    notificationsHint: 'Messages, bookings and system alerts',
+    notificationsHint: 'Booking, chat and account alerts',
     payments: 'Payment methods',
-    paymentsHint: 'Cards, wallets, bank transfer and crypto',
+    paymentsHint: 'Cards, wallets and payout methods',
     languageRegion: 'Language & region',
     languageRegionHint: 'Country, language and currency',
-    accountSettings: 'Account settings',
-    accountSettingsHint: 'Profile, security and login details',
+    profileSettings: 'Profile settings',
+    profileSettingsHint: 'Account details and security',
     legal: 'Legal information',
     legalHint: 'Terms, privacy and platform rules',
     help: 'Help Centre',
-    helpHint: 'Support, instructions and contact',
-    faq: 'FAQ and guide',
-    faqHint: 'How Olamep works step by step',
+    helpHint: 'Support and instructions',
+    faq: 'FAQ & guide',
+    faqHint: 'How to use Olamep',
   },
   RU: {
     title: 'Профиль',
     subtitle: 'Ваш аккаунт, счёт, услуги и настройки',
     edit: 'Изменить',
+    verified: 'Проверено',
     rating: 'рейтинг',
-    balanceTitle: 'Баланс Olamep',
+    olamepBalance: 'Баланс Olamep',
     topUp: 'Пополнить',
-    bonusTitle: 'Бонусы Olamep',
+    olamepBonuses: 'Бонусы Olamep',
     bonusHint: 'Кэшбэк • Рефералы • Бонусы',
-    admin: 'админ',
     workHub: 'Мой рабочий блок',
     buyerHub: 'Покупатель',
-    rewardsHub: 'Бонусы и связь',
-    accountHub: 'Настройки аккаунта',
-    helpHub: 'Помощь и информация',
+    bonusesAndContact: 'Бонусы и связь',
+    accountSettings: 'Настройки аккаунта',
+    helpInfo: 'Помощь и информация',
+    admin: 'админ',
+    adminHint: 'Owner Admin Panel',
     myServices: 'Мои услуги',
     myServicesHint: 'Управляйте услугами, описаниями и фото',
     priceList: 'Прайс-лист',
     priceListHint: 'Цены, пакеты и специальные предложения',
     clients: 'Мои клиенты',
-    clientsHint: 'База клиентов, заявки и заметки',
+    clientsHint: 'База клиентов, история и заметки',
     platformOffers: 'Предложения платформы',
-    platformOffersHint: 'Новости, инструменты и возможности для бизнеса',
+    platformOffersHint: 'Новости, возможности и рекомендации',
     bookings: 'Мои бронирования',
-    bookingsHint: 'Все ваши записи и заявки',
+    bookingsHint: 'Ваши записи и история броней',
     savedMasters: 'Сохранённые мастера',
-    savedMastersHint: 'Ваши любимые специалисты',
+    savedMastersHint: 'Специалисты, которые вам понравились',
     savedPlaces: 'Сохранённые места',
-    savedPlacesHint: 'Любимые локации и адреса',
+    savedPlacesHint: 'Любимые локации',
     promotions: 'Промоакции',
-    promotionsHint: 'Скидки, подарки и бонусные предложения',
+    promotionsHint: 'Скидки, бонусы и спецпредложения',
     invite: 'Пригласить друзей',
-    inviteHint: 'Делитесь Olamep и получайте бонусы',
+    inviteHint: 'Получайте бонусы за рекомендации',
     notifications: 'Уведомления',
-    notificationsHint: 'Сообщения, брони и системные оповещения',
+    notificationsHint: 'Брони, чат и аккаунт',
     payments: 'Способы оплаты',
-    paymentsHint: 'Карты, кошельки, банк, SWIFT и крипта',
+    paymentsHint: 'Карты, кошельки и выплаты',
     languageRegion: 'Язык и регион',
     languageRegionHint: 'Страна, язык и валюта',
-    accountSettings: 'Настройки аккаунта',
-    accountSettingsHint: 'Профиль, безопасность и вход',
+    profileSettings: 'Настройки профиля',
+    profileSettingsHint: 'Данные аккаунта и безопасность',
     legal: 'Юридическая информация',
-    legalHint: 'Правила, privacy и условия платформы',
+    legalHint: 'Правила, приватность и условия',
     help: 'Центр помощи',
-    helpHint: 'Поддержка, инструкции и связь',
+    helpHint: 'Поддержка и инструкции',
     faq: 'FAQ и инструкция',
-    faqHint: 'Как пользоваться Olamep шаг за шагом',
+    faqHint: 'Как пользоваться Olamep',
   },
   UA: {
     title: 'Профіль',
     subtitle: 'Ваш акаунт, рахунок, послуги та налаштування',
     edit: 'Змінити',
+    verified: 'Перевірено',
     rating: 'рейтинг',
-    balanceTitle: 'Баланс Olamep',
+    olamepBalance: 'Баланс Olamep',
     topUp: 'Поповнити',
-    bonusTitle: 'Бонуси Olamep',
+    olamepBonuses: 'Бонуси Olamep',
     bonusHint: 'Кешбек • Реферали • Бонуси',
-    admin: 'адмін',
     workHub: 'Мій робочий блок',
     buyerHub: 'Покупець',
-    rewardsHub: 'Бонуси і зв’язок',
-    accountHub: 'Налаштування акаунта',
-    helpHub: 'Допомога та інформація',
+    bonusesAndContact: 'Бонуси і звʼязок',
+    accountSettings: 'Налаштування акаунта',
+    helpInfo: 'Допомога та інформація',
+    admin: 'адмін',
+    adminHint: 'Owner Admin Panel',
     myServices: 'Мої послуги',
     myServicesHint: 'Керуйте послугами, описами та фото',
     priceList: 'Прайс-лист',
-    priceListHint: 'Ціни, пакети і спеціальні пропозиції',
+    priceListHint: 'Ціни, пакети та спеціальні пропозиції',
     clients: 'Мої клієнти',
-    clientsHint: 'База клієнтів, заявки і нотатки',
+    clientsHint: 'База клієнтів, історія і нотатки',
     platformOffers: 'Пропозиції платформи',
-    platformOffersHint: 'Новини, інструменти і можливості для бізнесу',
+    platformOffersHint: 'Новини, можливості та рекомендації',
     bookings: 'Мої бронювання',
-    bookingsHint: 'Усі ваші записи і заявки',
+    bookingsHint: 'Ваші записи та історія бронювань',
     savedMasters: 'Збережені майстри',
-    savedMastersHint: 'Ваші улюблені спеціалісти',
+    savedMastersHint: 'Спеціалісти, які вам сподобались',
     savedPlaces: 'Збережені місця',
-    savedPlacesHint: 'Улюблені локації та адреси',
+    savedPlacesHint: 'Улюблені локації',
     promotions: 'Промоакції',
-    promotionsHint: 'Знижки, подарунки і бонусні пропозиції',
+    promotionsHint: 'Знижки, бонуси та спецпропозиції',
     invite: 'Запросити друзів',
-    inviteHint: 'Діліться Olamep і отримуйте бонуси',
+    inviteHint: 'Отримуйте бонуси за рекомендації',
     notifications: 'Сповіщення',
-    notificationsHint: 'Повідомлення, броні та системні сповіщення',
+    notificationsHint: 'Бронювання, чат і акаунт',
     payments: 'Способи оплати',
-    paymentsHint: 'Картки, гаманці, банк, SWIFT і крипта',
-    languageRegion: 'Мова і регіон',
+    paymentsHint: 'Картки, гаманці та виплати',
+    languageRegion: 'Мова та регіон',
     languageRegionHint: 'Країна, мова і валюта',
-    accountSettings: 'Налаштування акаунта',
-    accountSettingsHint: 'Профіль, безпека і вхід',
+    profileSettings: 'Налаштування профілю',
+    profileSettingsHint: 'Дані акаунта і безпека',
     legal: 'Юридична інформація',
-    legalHint: 'Правила, privacy і умови платформи',
+    legalHint: 'Правила, приватність та умови',
     help: 'Центр допомоги',
-    helpHint: 'Підтримка, інструкції і зв’язок',
+    helpHint: 'Підтримка та інструкції',
     faq: 'FAQ та інструкція',
-    faqHint: 'Як користуватися Olamep крок за кроком',
+    faqHint: 'Як користуватись Olamep',
   },
 };
 
 function getText(language: AppLanguage) {
-  return profileTexts[language] || profileTexts.EN!;
+  return texts[language] || texts.EN!;
 }
 
 function isOwnerProfile(profile: UserProfile) {
   return String(profile.email || '').trim().toLowerCase() === OWNER_EMAIL;
 }
 
-function shortName(name: string) {
-  const clean = String(name || 'Olamep User').trim();
-  if (clean.length <= 15) return clean;
-  return `${clean.slice(0, 12)}...`;
-}
-
 function OlamepLogo() {
   return (
-    <div
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 9,
-      }}
-    >
+    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
       <div
         style={{
           width: 34,
           height: 42,
           borderRadius: '50% 50% 58% 58%',
           background:
-            'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
+            'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff2456 230deg, #0e73d8 360deg)',
           position: 'relative',
           boxShadow: '0 8px 18px rgba(14,115,216,0.2)',
           flexShrink: 0,
@@ -293,7 +279,7 @@ function OlamepLogo() {
             width: 17,
             height: 17,
             borderRadius: 999,
-            background: BRAND.white,
+            background: '#ffffff',
           }}
         />
       </div>
@@ -317,12 +303,12 @@ function VerifiedBadge() {
   return (
     <span
       style={{
-        width: 28,
-        height: 28,
+        width: 27,
+        height: 27,
         borderRadius: 999,
         background: BRAND.blue,
-        color: BRAND.white,
-        border: `2.5px solid ${BRAND.black}`,
+        color: '#ffffff',
+        border: `2.5px solid ${BRAND.border}`,
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -336,158 +322,25 @@ function VerifiedBadge() {
   );
 }
 
-function MiniIcon({ icon, bg }: { icon: string; bg: string }) {
+function IconBox({ icon, bg }: { icon: string; bg: string }) {
   return (
     <div
       style={{
-        width: 52,
-        height: 52,
-        borderRadius: 16,
-        border: `2.5px solid ${BRAND.black}`,
+        width: 56,
+        height: 56,
+        borderRadius: 18,
+        border: `2.5px solid ${BRAND.border}`,
         background: bg,
-        display: 'grid',
-        placeItems: 'center',
-        fontSize: 26,
-        boxShadow: '0 5px 0 rgba(0,0,0,0.07)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 28,
+        boxShadow: '0 5px 0 rgba(0,0,0,0.06)',
         flexShrink: 0,
       }}
     >
       {icon}
     </div>
-  );
-}
-
-function SectionCard({
-  title,
-  items,
-  onOpen,
-}: {
-  title: string;
-  items: ProfileItem[];
-  onOpen: (route: string) => void;
-}) {
-  return (
-    <section style={{ marginTop: 15 }}>
-      <button
-        type="button"
-        onClick={() => {
-          if (items[0]) onOpen(items[0].route);
-        }}
-        style={{
-          width: '100%',
-          borderRadius: 23,
-          border: `2.8px solid ${BRAND.black}`,
-          background: BRAND.white,
-          padding: 0,
-          overflow: 'hidden',
-          textAlign: 'left',
-          cursor: 'pointer',
-          boxShadow: '0 8px 18px rgba(7,27,70,0.04)',
-        }}
-      >
-        <div
-          style={{
-            padding: '15px 15px 13px',
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            alignItems: 'center',
-            gap: 10,
-            borderBottom: items.length > 0 ? `2.4px solid ${BRAND.black}` : 'none',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 23,
-              lineHeight: 1.05,
-              fontWeight: 900,
-              color: BRAND.navy,
-              letterSpacing: '-0.5px',
-            }}
-          >
-            {title}
-          </div>
-
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 999,
-              border: `2.3px solid ${BRAND.black}`,
-              background: BRAND.white,
-              display: 'grid',
-              placeItems: 'center',
-              fontSize: 25,
-              fontWeight: 900,
-              color: BRAND.black,
-            }}
-          >
-            ›
-          </div>
-        </div>
-
-        <div>
-          {items.map((item, index) => (
-            <div
-              key={item.id}
-              style={{
-                minHeight: 76,
-                display: 'grid',
-                gridTemplateColumns: '52px minmax(0, 1fr) auto',
-                gap: 12,
-                alignItems: 'center',
-                padding: '12px 15px',
-                borderTop: index === 0 ? 'none' : `2px solid ${BRAND.black}`,
-                background: BRAND.white,
-              }}
-            >
-              <MiniIcon icon={item.icon} bg={item.bg} />
-
-              <div style={{ minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: 17,
-                    lineHeight: 1.1,
-                    fontWeight: 900,
-                    color: BRAND.navy,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {item.title}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 5,
-                    fontSize: 12.5,
-                    lineHeight: 1.2,
-                    fontWeight: 800,
-                    color: BRAND.muted,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {item.hint}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  fontSize: 27,
-                  lineHeight: 1,
-                  fontWeight: 900,
-                  color: BRAND.black,
-                }}
-              >
-                ›
-              </div>
-            </div>
-          ))}
-        </div>
-      </button>
-    </section>
   );
 }
 
@@ -532,164 +385,146 @@ export default function ProfilePage() {
   const text = useMemo(() => getText(language), [language]);
   const isOwner = useMemo(() => isOwnerProfile(profile), [profile]);
 
-  const sections: ProfileSection[] = [
+  const workActions: ListAction[] = [
     {
-      id: 'work',
-      title: text.workHub,
-      items: [
-        {
-          id: 'services',
-          title: text.myServices,
-          hint: text.myServicesHint,
-          route: '/profile/listings',
-          icon: '💼',
-          bg: BRAND.softViolet,
-        },
-        {
-          id: 'priceList',
-          title: text.priceList,
-          hint: text.priceListHint,
-          route: '/profile/price-list',
-          icon: '🏷️',
-          bg: BRAND.softGreen,
-        },
-        {
-          id: 'clients',
-          title: text.clients,
-          hint: text.clientsHint,
-          route: '/profile/clients',
-          icon: '👥',
-          bg: BRAND.softBlue,
-        },
-        {
-          id: 'platformOffers',
-          title: text.platformOffers,
-          hint: text.platformOffersHint,
-          route: '/profile/platform-offers',
-          icon: '📣',
-          bg: BRAND.softYellow,
-        },
-      ],
+      id: 'services',
+      title: text.myServices,
+      hint: text.myServicesHint,
+      route: '/profile/listings',
+      icon: '💼',
+      bg: '#d8ffdf',
     },
     {
-      id: 'buyer',
-      title: text.buyerHub,
-      items: [
-        {
-          id: 'bookings',
-          title: text.bookings,
-          hint: text.bookingsHint,
-          route: '/bookings',
-          icon: '📅',
-          bg: BRAND.softBlue,
-        },
-        {
-          id: 'savedMasters',
-          title: text.savedMasters,
-          hint: text.savedMastersHint,
-          route: '/profile/saved-masters',
-          icon: '❤️',
-          bg: BRAND.softPink,
-        },
-        {
-          id: 'savedPlaces',
-          title: text.savedPlaces,
-          hint: text.savedPlacesHint,
-          route: '/profile/saved-places',
-          icon: '📍',
-          bg: BRAND.softGreen,
-        },
-      ],
+      id: 'price',
+      title: text.priceList,
+      hint: text.priceListHint,
+      route: '/profile/price-list',
+      icon: '🏷️',
+      bg: '#fff0b8',
     },
     {
-      id: 'rewards',
-      title: text.rewardsHub,
-      items: [
-        {
-          id: 'promotions',
-          title: text.promotions,
-          hint: text.promotionsHint,
-          route: '/profile/promotions',
-          icon: '🎁',
-          bg: BRAND.softPink,
-        },
-        {
-          id: 'invite',
-          title: text.invite,
-          hint: text.inviteHint,
-          route: '/profile/invite',
-          icon: '🎉',
-          bg: BRAND.softViolet,
-        },
-        {
-          id: 'notifications',
-          title: text.notifications,
-          hint: text.notificationsHint,
-          route: '/profile/notifications',
-          icon: '🔔',
-          bg: BRAND.softYellow,
-        },
-      ],
+      id: 'clients',
+      title: text.clients,
+      hint: text.clientsHint,
+      route: '/profile/clients',
+      icon: '👥',
+      bg: '#dcecff',
     },
     {
-      id: 'account',
-      title: text.accountHub,
-      items: [
-        {
-          id: 'payments',
-          title: text.payments,
-          hint: text.paymentsHint,
-          route: '/profile/payments',
-          icon: '💳',
-          bg: BRAND.softBlue,
-        },
-        {
-          id: 'languageRegion',
-          title: text.languageRegion,
-          hint: text.languageRegionHint,
-          route: '/profile/language-region',
-          icon: '🌍',
-          bg: BRAND.softGreen,
-        },
-        {
-          id: 'accountSettings',
-          title: text.accountSettings,
-          hint: text.accountSettingsHint,
-          route: '/profile/settings',
-          icon: '⚙️',
-          bg: '#f2f4f7',
-        },
-      ],
+      id: 'platform',
+      title: text.platformOffers,
+      hint: text.platformOffersHint,
+      route: '/profile/platform-offers',
+      icon: '📣',
+      bg: '#fff0b8',
+    },
+  ];
+
+  const buyerActions: ListAction[] = [
+    {
+      id: 'bookings',
+      title: text.bookings,
+      hint: text.bookingsHint,
+      route: '/bookings',
+      icon: '📅',
+      bg: '#dcecff',
+    },
+    {
+      id: 'savedMasters',
+      title: text.savedMasters,
+      hint: text.savedMastersHint,
+      route: '/profile/saved-masters',
+      icon: '❤️',
+      bg: '#ffe1ec',
+    },
+    {
+      id: 'savedPlaces',
+      title: text.savedPlaces,
+      hint: text.savedPlacesHint,
+      route: '/profile/saved-places',
+      icon: '📍',
+      bg: '#d8ffdf',
+    },
+  ];
+
+  const bonusActions: ListAction[] = [
+    {
+      id: 'promotions',
+      title: text.promotions,
+      hint: text.promotionsHint,
+      route: '/profile/promotions',
+      icon: '🎁',
+      bg: '#ffe1ec',
+    },
+    {
+      id: 'invite',
+      title: text.invite,
+      hint: text.inviteHint,
+      route: '/profile/invite',
+      icon: '🎉',
+      bg: '#f0e6ff',
+    },
+    {
+      id: 'notifications',
+      title: text.notifications,
+      hint: text.notificationsHint,
+      route: '/profile/notifications',
+      icon: '🔔',
+      bg: '#fff0b8',
+    },
+  ];
+
+  const settingsActions: ListAction[] = [
+    {
+      id: 'payments',
+      title: text.payments,
+      hint: text.paymentsHint,
+      route: '/profile/payments',
+      icon: '💳',
+      bg: '#dcecff',
+    },
+    {
+      id: 'language',
+      title: text.languageRegion,
+      hint: text.languageRegionHint,
+      route: '/profile/language-region',
+      icon: '🌍',
+      bg: '#d8ffdf',
+    },
+    {
+      id: 'settings',
+      title: text.profileSettings,
+      hint: text.profileSettingsHint,
+      route: '/profile/settings',
+      icon: '⚙️',
+      bg: '#f1f4f8',
+    },
+  ];
+
+  const helpActions: ListAction[] = [
+    {
+      id: 'legal',
+      title: text.legal,
+      hint: text.legalHint,
+      route: '/profile/legal',
+      icon: '⚖️',
+      bg: '#f0e6ff',
     },
     {
       id: 'help',
-      title: text.helpHub,
-      items: [
-        {
-          id: 'legal',
-          title: text.legal,
-          hint: text.legalHint,
-          route: '/profile/legal',
-          icon: '⚖️',
-          bg: BRAND.softViolet,
-        },
-        {
-          id: 'helpCentre',
-          title: text.help,
-          hint: text.helpHint,
-          route: '/profile/help',
-          icon: '🛟',
-          bg: BRAND.softPink,
-        },
-        {
-          id: 'faq',
-          title: text.faq,
-          hint: text.faqHint,
-          route: '/profile/faq',
-          icon: '📘',
-          bg: BRAND.softBlue,
-        },
-      ],
+      title: text.help,
+      hint: text.helpHint,
+      route: '/profile/help',
+      icon: '🛟',
+      bg: '#ffe1ec',
+    },
+    {
+      id: 'faq',
+      title: text.faq,
+      hint: text.faqHint,
+      route: '/profile/faq',
+      icon: '❓',
+      bg: '#fff0b8',
     },
   ];
 
@@ -697,7 +532,7 @@ export default function ProfilePage() {
     <main
       style={{
         minHeight: '100vh',
-        background: BRAND.white,
+        background: '#ffffff',
         color: BRAND.navy,
         paddingBottom: 136,
         fontFamily: 'Arial, sans-serif',
@@ -716,17 +551,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => router.back()}
             aria-label="Back"
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 999,
-              border: `2.7px solid ${BRAND.black}`,
-              background: BRAND.white,
-              color: BRAND.navy,
-              fontSize: 25,
-              fontWeight: 900,
-              cursor: 'pointer',
-            }}
+            style={roundButtonStyle}
           >
             ←
           </button>
@@ -739,30 +564,20 @@ export default function ProfilePage() {
             type="button"
             onClick={() => router.push('/')}
             aria-label="Close"
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 999,
-              border: `2.7px solid ${BRAND.black}`,
-              background: BRAND.white,
-              color: BRAND.navy,
-              fontSize: 24,
-              fontWeight: 900,
-              cursor: 'pointer',
-            }}
+            style={roundButtonStyle}
           >
             ×
           </button>
         </header>
 
-        <section style={{ marginTop: 17 }}>
+        <section style={{ marginTop: 16 }}>
           <h1
             style={{
               margin: 0,
-              fontSize: 39,
+              fontSize: 38,
               lineHeight: 1,
               fontWeight: 900,
-              letterSpacing: '-1.5px',
+              letterSpacing: '-1.4px',
               color: BRAND.navy,
             }}
           >
@@ -786,8 +601,8 @@ export default function ProfilePage() {
           style={{
             marginTop: 17,
             borderRadius: 28,
-            border: `2.9px solid ${BRAND.black}`,
-            background: BRAND.white,
+            border: `3px solid ${BRAND.border}`,
+            background: '#ffffff',
             padding: 13,
             boxShadow: '0 10px 26px rgba(7,27,70,0.06)',
           }}
@@ -795,76 +610,68 @@ export default function ProfilePage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '100px minmax(0, 1fr) 24px',
-              gap: 13,
-              alignItems: 'start',
+              gridTemplateColumns: '100px minmax(0, 1fr) 22px',
+              gap: 12,
+              alignItems: 'center',
             }}
           >
             <div style={{ width: 100 }}>
-              <button
-                type="button"
-                onClick={() => router.push('/profile/edit')}
-                style={{
-                  position: 'relative',
-                  width: 100,
-                  height: 100,
-                  border: 'none',
-                  background: 'transparent',
-                  padding: 0,
-                  cursor: 'pointer',
-                }}
-              >
+              <div style={{ position: 'relative', width: 92, height: 92 }}>
                 <img
                   src={profile.avatar}
                   alt={profile.fullName}
                   style={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: 23,
+                    width: 92,
+                    height: 92,
+                    borderRadius: 24,
                     objectFit: 'cover',
-                    border: `2.8px solid ${BRAND.black}`,
+                    border: `3px solid ${BRAND.border}`,
                     display: 'block',
                   }}
                 />
 
-                <span
+                <button
+                  type="button"
+                  onClick={() => router.push('/profile/edit')}
                   style={{
                     position: 'absolute',
-                    right: -8,
-                    bottom: -8,
-                    width: 37,
-                    height: 37,
+                    right: -7,
+                    bottom: -7,
+                    width: 35,
+                    height: 35,
                     borderRadius: 999,
-                    border: `2.7px solid ${BRAND.black}`,
-                    background: BRAND.white,
+                    border: `3px solid ${BRAND.border}`,
+                    background: '#ffffff',
                     color: BRAND.navy,
-                    display: 'grid',
-                    placeItems: 'center',
-                    fontSize: 18,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 17,
                     boxShadow: '0 4px 0 rgba(0,0,0,0.08)',
+                    cursor: 'pointer',
                   }}
                 >
                   📷
-                </span>
-              </button>
+                </button>
+              </div>
 
               <button
                 type="button"
                 onClick={() => router.push('/profile/edit')}
                 style={{
-                  marginTop: 12,
-                  width: '100%',
-                  minHeight: 34,
+                  marginTop: 13,
+                  width: 100,
+                  height: 34,
                   borderRadius: 999,
-                  border: `2.5px solid ${BRAND.black}`,
-                  background: BRAND.white,
-                  color: BRAND.black,
+                  border: `2.5px solid ${BRAND.border}`,
+                  background: '#ffffff',
+                  color: BRAND.border,
                   fontSize: 13,
                   fontWeight: 900,
-                  display: 'inline-flex',
+                  display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 7,
+                  gap: 6,
                   cursor: 'pointer',
                 }}
               >
@@ -879,19 +686,12 @@ export default function ProfilePage() {
                 border: 'none',
                 background: 'transparent',
                 padding: 0,
+                minWidth: 0,
                 textAlign: 'left',
                 cursor: 'pointer',
-                minWidth: 0,
               }}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  minWidth: 0,
-                }}
-              >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
                 <div
                   style={{
                     fontSize: 25,
@@ -903,19 +703,16 @@ export default function ProfilePage() {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {shortName(profile.fullName)}
+                  {profile.fullName}
                 </div>
-
-                {profile.isVerified ? <VerifiedBadge /> : null}
 
                 <span
                   style={{
                     width: 14,
                     height: 14,
                     borderRadius: 999,
-                    background: '#00c733',
-                    border: `2px solid ${BRAND.white}`,
-                    boxShadow: '0 0 0 1.5px rgba(0,0,0,0.08)',
+                    background: BRAND.green,
+                    boxShadow: '0 0 0 3px rgba(36,196,90,0.18)',
                     flexShrink: 0,
                   }}
                 />
@@ -923,7 +720,7 @@ export default function ProfilePage() {
 
               <div
                 style={{
-                  marginTop: 7,
+                  marginTop: 6,
                   fontSize: 14,
                   fontWeight: 800,
                   color: BRAND.muted,
@@ -940,27 +737,16 @@ export default function ProfilePage() {
                   marginTop: 13,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 7,
+                  gap: 6,
                   flexWrap: 'wrap',
                 }}
               >
+                <span style={{ color: BRAND.yellow, fontSize: 20, letterSpacing: 1 }}>★★★★★</span>
                 <span
                   style={{
-                    color: BRAND.yellow,
-                    fontSize: 22,
-                    letterSpacing: '1px',
-                    lineHeight: 1,
-                    textShadow: '0 1px 0 rgba(0,0,0,0.12)',
-                  }}
-                >
-                  ★★★★★
-                </span>
-
-                <span
-                  style={{
-                    fontSize: 15,
+                    color: BRAND.border,
+                    fontSize: 14,
                     fontWeight: 900,
-                    color: BRAND.black,
                   }}
                 >
                   4.9 {text.rating}
@@ -974,12 +760,11 @@ export default function ProfilePage() {
               style={{
                 border: 'none',
                 background: 'transparent',
-                padding: 0,
-                fontSize: 33,
-                lineHeight: 1,
+                color: BRAND.border,
+                fontSize: 34,
                 fontWeight: 900,
-                color: BRAND.black,
                 cursor: 'pointer',
+                padding: 0,
               }}
             >
               ›
@@ -988,9 +773,9 @@ export default function ProfilePage() {
 
           <div
             style={{
-              marginTop: 15,
-              paddingTop: 13,
-              borderTop: `2.5px solid ${BRAND.black}`,
+              marginTop: 14,
+              borderTop: `3px solid ${BRAND.border}`,
+              paddingTop: 14,
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
               gap: 10,
@@ -1000,91 +785,71 @@ export default function ProfilePage() {
               type="button"
               onClick={() => router.push('/profile/wallet')}
               style={{
-                minHeight: 116,
-                borderRadius: 19,
-                border: `2.8px solid ${BRAND.black}`,
+                minHeight: 124,
+                borderRadius: 20,
+                border: `3px solid ${BRAND.border}`,
                 background: BRAND.blue,
-                color: BRAND.white,
+                color: '#ffffff',
                 padding: 12,
                 textAlign: 'left',
                 cursor: 'pointer',
+                boxShadow: '0 5px 0 rgba(0,0,0,0.12)',
                 position: 'relative',
                 overflow: 'hidden',
-                boxShadow: '0 5px 0 rgba(0,0,0,0.10)',
               }}
             >
-              <div
-                style={{
-                  position: 'absolute',
-                  right: 11,
-                  top: 32,
-                  fontSize: 44,
-                  opacity: 0.2,
-                }}
-              >
-                💼
-              </div>
+              <div style={{ fontSize: 14, fontWeight: 900 }}>{text.olamepBalance}</div>
 
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 900,
-                  lineHeight: 1.1,
-                }}
-              >
-                {text.balanceTitle}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 9,
-                  fontSize: 31,
-                  fontWeight: 900,
-                  lineHeight: 1,
-                }}
-              >
+              <div style={{ marginTop: 9, fontSize: 34, fontWeight: 900, lineHeight: 1 }}>
                 £{wallet.availableBalance.toFixed(2)}
               </div>
 
               <div
-                onClick={(event) => {
-                  event.stopPropagation();
-                  router.push('/profile/top-up');
-                }}
                 style={{
-                  marginTop: 11,
-                  minHeight: 36,
+                  marginTop: 13,
+                  height: 38,
                   borderRadius: 999,
-                  background: BRAND.white,
-                  color: BRAND.green,
+                  background: BRAND.green,
+                  color: '#ffffff',
+                  border: `2.5px solid ${BRAND.border}`,
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 8,
-                  padding: '0 12px',
+                  padding: '0 13px',
                   fontSize: 14,
                   fontWeight: 900,
-                  border: `2.2px solid ${BRAND.white}`,
-                  minWidth: 126,
                 }}
               >
                 <span
                   style={{
-                    width: 23,
-                    height: 23,
+                    width: 22,
+                    height: 22,
                     borderRadius: 999,
-                    background: BRAND.green,
-                    color: BRAND.white,
-                    display: 'grid',
-                    placeItems: 'center',
+                    background: '#ffffff',
+                    color: BRAND.green,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     fontSize: 18,
                     fontWeight: 900,
-                    lineHeight: 1,
                   }}
                 >
                   +
                 </span>
                 {text.topUp}
+              </div>
+
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: 42,
+                  fontSize: 50,
+                  opacity: 0.18,
+                }}
+              >
+                💼
               </div>
             </button>
 
@@ -1092,32 +857,22 @@ export default function ProfilePage() {
               type="button"
               onClick={() => router.push('/profile/bonuses')}
               style={{
-                minHeight: 116,
-                borderRadius: 19,
-                border: `2.8px solid ${BRAND.black}`,
+                minHeight: 124,
+                borderRadius: 20,
+                border: `3px solid ${BRAND.border}`,
                 background: BRAND.red,
-                color: BRAND.white,
+                color: '#ffffff',
                 padding: 12,
                 textAlign: 'left',
                 cursor: 'pointer',
-                position: 'relative',
-                overflow: 'hidden',
-                boxShadow: '0 5px 0 rgba(0,0,0,0.10)',
+                boxShadow: '0 5px 0 rgba(0,0,0,0.12)',
               }}
             >
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 900,
-                  lineHeight: 1.1,
-                }}
-              >
-                {text.bonusTitle}
-              </div>
+              <div style={{ fontSize: 14, fontWeight: 900 }}>{text.olamepBonuses}</div>
 
               <div
                 style={{
-                  marginTop: 9,
+                  marginTop: 8,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 9,
@@ -1125,92 +880,185 @@ export default function ProfilePage() {
               >
                 <span
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: 38,
+                    height: 38,
                     borderRadius: 999,
                     background: BRAND.yellow,
                     color: BRAND.red,
-                    display: 'grid',
-                    placeItems: 'center',
-                    fontSize: 22,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: `2.5px solid ${BRAND.border}`,
+                    fontSize: 21,
                     fontWeight: 900,
-                    border: `2px solid ${BRAND.yellow}`,
                   }}
                 >
                   ★
                 </span>
 
-                <span
-                  style={{
-                    fontSize: 30,
-                    fontWeight: 900,
-                    lineHeight: 1,
-                  }}
-                >
-                  1,240
-                </span>
+                <span style={{ fontSize: 32, fontWeight: 900, lineHeight: 1 }}>1,240</span>
               </div>
 
-              <div
-                style={{
-                  marginTop: 8,
-                  fontSize: 10.8,
-                  lineHeight: 1.2,
-                  fontWeight: 900,
-                  color: BRAND.white,
-                }}
-              >
+              <div style={{ marginTop: 7, fontSize: 11.5, fontWeight: 900 }}>
                 {text.bonusHint}
               </div>
 
               <div
                 style={{
-                  marginTop: 9,
+                  marginTop: 8,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 12,
+                  justifyContent: 'space-around',
                   color: BRAND.yellow,
-                  fontSize: 24,
+                  fontSize: 22,
                   fontWeight: 900,
                 }}
               >
-                ↪ <span style={{ fontSize: 20 }}>|</span> 👥 <span style={{ fontSize: 20 }}>|</span> 🎁
+                <span>↻</span>
+                <span>👥</span>
+                <span>🎁</span>
               </div>
             </button>
           </div>
         </section>
-
-        {sections.map((section) => (
-          <SectionCard
-            key={section.id}
-            title={section.title}
-            items={section.items}
-            onOpen={(route) => router.push(route)}
-          />
-        ))}
 
         {isOwner ? (
           <button
             type="button"
             onClick={() => router.push('/admin')}
             style={{
-              margin: '18px auto 0',
-              display: 'block',
+              margin: '12px auto 0',
               border: 'none',
               background: 'transparent',
-              color: BRAND.blue,
-              fontSize: 13,
+              color: BRAND.navy,
+              fontSize: 12,
               fontWeight: 900,
               textDecoration: 'underline',
+              display: 'block',
               cursor: 'pointer',
             }}
           >
             {text.admin}
           </button>
         ) : null}
+
+        <ProfileSection title={text.workHub} items={workActions} router={router} />
+        <ProfileSection title={text.buyerHub} items={buyerActions} router={router} />
+        <ProfileSection title={text.bonusesAndContact} items={bonusActions} router={router} />
+        <ProfileSection title={text.accountSettings} items={settingsActions} router={router} />
+        <ProfileSection title={text.helpInfo} items={helpActions} router={router} />
       </div>
 
       <BottomNav active="profile" />
     </main>
+  );
+}
+
+const roundButtonStyle = {
+  width: 48,
+  height: 48,
+  borderRadius: 999,
+  border: `2.5px solid ${BRAND.border}`,
+  background: '#ffffff',
+  color: BRAND.navy,
+  fontSize: 25,
+  fontWeight: 900,
+  cursor: 'pointer',
+} as const;
+
+function ProfileSection({
+  title,
+  items,
+  router,
+}: {
+  title: string;
+  items: ListAction[];
+  router: { push: (href: string) => void };
+}) {
+  return (
+    <>
+      <h2
+        style={{
+          margin: '21px 0 10px',
+          fontSize: 26,
+          lineHeight: 1,
+          fontWeight: 900,
+          letterSpacing: '-0.7px',
+          color: BRAND.navy,
+        }}
+      >
+        {title}
+      </h2>
+
+      <section
+        style={{
+          borderRadius: 24,
+          border: `3px solid ${BRAND.border}`,
+          background: '#ffffff',
+          overflow: 'hidden',
+          boxShadow: '0 8px 20px rgba(7,27,70,0.05)',
+        }}
+      >
+        {items.map((item, index) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => router.push(item.route)}
+            style={{
+              width: '100%',
+              minHeight: 86,
+              display: 'grid',
+              gridTemplateColumns: '56px minmax(0, 1fr) 22px',
+              gap: 13,
+              alignItems: 'center',
+              padding: '13px 14px',
+              border: 'none',
+              borderTop: index === 0 ? 'none' : `2.5px solid ${BRAND.border}`,
+              background: '#ffffff',
+              textAlign: 'left',
+              cursor: 'pointer',
+            }}
+          >
+            <IconBox icon={item.icon} bg={item.bg} />
+
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 17,
+                  lineHeight: 1.15,
+                  fontWeight: 900,
+                  color: BRAND.navy,
+                }}
+              >
+                {item.title}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 5,
+                  fontSize: 12.5,
+                  lineHeight: 1.25,
+                  fontWeight: 800,
+                  color: BRAND.muted,
+                }}
+              >
+                {item.hint}
+              </div>
+            </div>
+
+            <span
+              style={{
+                color: BRAND.border,
+                fontSize: 31,
+                lineHeight: 1,
+                fontWeight: 900,
+              }}
+            >
+              ›
+            </span>
+          </button>
+        ))}
+      </section>
+    </>
   );
 }
