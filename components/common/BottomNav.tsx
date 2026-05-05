@@ -13,11 +13,11 @@ import {
 } from '../../services/chatStore';
 
 type BottomNavProps = {
-  active?: 'home' | 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
+  active?: 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
   onAddClick?: () => void;
 };
 
-type NavKey = 'home' | 'messages' | 'add' | 'bookings' | 'profile';
+type NavKey = 'messages' | 'add' | 'bookings' | 'profile' | 'clients';
 
 type NavItem = {
   key: NavKey;
@@ -58,35 +58,35 @@ const addMenuTexts: Record<
 
 const navItems: NavItem[] = [
   {
-    key: 'home',
-    href: '/',
+    key: 'profile',
+    href: '/profile',
     label: {
-      EN: 'Home',
-      ES: 'Inicio',
-      RU: 'Главная',
-      UA: 'Головна',
-      CZ: 'Domů',
-      DE: 'Home',
-      IT: 'Home',
-      FR: 'Accueil',
-      AR: 'الرئيسية',
-      PL: 'Start',
+      EN: 'Profile',
+      ES: 'Perfil',
+      RU: 'Профиль',
+      UA: 'Профіль',
+      CZ: 'Profil',
+      DE: 'Profil',
+      IT: 'Profilo',
+      FR: 'Profil',
+      AR: 'حسابي',
+      PL: 'Profil',
     },
   },
   {
-    key: 'messages',
-    href: '/messages',
+    key: 'clients',
+    href: '/profile/clients',
     label: {
-      EN: 'Messages',
-      ES: 'Mensajes',
-      RU: 'Сообщения',
-      UA: 'Повідомл.',
-      CZ: 'Zprávy',
-      DE: 'Nachr.',
-      IT: 'Messaggi',
-      FR: 'Messages',
-      AR: 'رسائل',
-      PL: 'Wiadom.',
+      EN: 'My clients',
+      ES: 'Clientes',
+      RU: 'Мои клие...',
+      UA: 'Мої кліє...',
+      CZ: 'Klienti',
+      DE: 'Kunden',
+      IT: 'Clienti',
+      FR: 'Clients',
+      AR: 'عملائي',
+      PL: 'Klienci',
     },
   },
   {
@@ -123,19 +123,19 @@ const navItems: NavItem[] = [
     },
   },
   {
-    key: 'profile',
-    href: '/profile',
+    key: 'messages',
+    href: '/messages',
     label: {
-      EN: 'Profile',
-      ES: 'Perfil',
-      RU: 'Профиль',
-      UA: 'Профіль',
-      CZ: 'Profil',
-      DE: 'Profil',
-      IT: 'Profilo',
-      FR: 'Profil',
-      AR: 'حسابي',
-      PL: 'Profil',
+      EN: 'Messages',
+      ES: 'Mensajes',
+      RU: 'Сообщения',
+      UA: 'Повідомл.',
+      CZ: 'Zprávy',
+      DE: 'Nachr.',
+      IT: 'Messaggi',
+      FR: 'Messages',
+      AR: 'رسائل',
+      PL: 'Wiadom.',
     },
   },
 ];
@@ -151,34 +151,6 @@ function getLabel(item: NavItem, language: AppLanguage) {
 function getActiveColor(key: NavKey) {
   if (key === 'bookings') return BRAND.blue;
   return BRAND.green;
-}
-
-function HomeIcon({ active }: { active: boolean }) {
-  const color = active ? BRAND.green : BRAND.black;
-
-  return (
-    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M4 11.5L12 4L20 11.5"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M6.5 10.5V20H17.5V10.5"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M10 20V14H14V20"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
 }
 
 function CalendarIcon({ active }: { active: boolean }) {
@@ -225,11 +197,27 @@ function ProfileIcon({ active }: { active: boolean }) {
   );
 }
 
+function ClientsIcon({ active }: { active: boolean }) {
+  const color = active ? BRAND.green : BRAND.black;
+
+  return (
+    <svg width="27" height="27" viewBox="0 0 24 24" fill="none">
+      <rect x="5" y="7" width="14" height="11" rx="2.4" stroke={color} strokeWidth="2" />
+      <path
+        d="M9 7V5.8C9 4.8 9.8 4 10.8 4H13.2C14.2 4 15 4.8 15 5.8V7"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function NavIcon({ itemKey, active }: { itemKey: NavKey; active: boolean }) {
-  if (itemKey === 'home') return <HomeIcon active={active} />;
   if (itemKey === 'bookings') return <CalendarIcon active={active} />;
   if (itemKey === 'messages') return <MessageIcon active={active} />;
   if (itemKey === 'profile') return <ProfileIcon active={active} />;
+  if (itemKey === 'clients') return <ClientsIcon active={active} />;
   return null;
 }
 
@@ -357,8 +345,8 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
       return activeProp === key;
     }
 
-    if (key === 'home') return pathname === '/';
     if (key === 'profile') return pathname === '/profile';
+    if (key === 'clients') return pathname === '/profile/clients';
     if (key === 'messages') return pathname === '/messages' || pathname?.startsWith('/messages/');
 
     if (key === 'bookings') {
