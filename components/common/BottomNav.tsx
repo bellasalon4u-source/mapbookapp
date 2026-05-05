@@ -13,7 +13,7 @@ import {
 } from '../../services/chatStore';
 
 type BottomNavProps = {
-  active?: 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
+  active?: 'home' | 'clients' | 'bookings' | 'add' | 'messages' | 'profile';
   onAddClick?: () => void;
 };
 
@@ -363,8 +363,8 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
       return (
         pathname === '/add' ||
         pathname?.startsWith('/add/') ||
-        pathname?.startsWith('/profile/promotions/new') ||
-        pathname?.startsWith('/profile/deals/new')
+        pathname?.startsWith('/promotions/new') ||
+        pathname?.startsWith('/deals/new')
       );
     }
 
@@ -386,7 +386,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   };
 
   const handleCreateAd = () => {
-    pushAddRoute('/profile/promotions/new');
+    pushAddRoute('/promotions/new');
   };
 
   const handleCreateService = () => {
@@ -394,7 +394,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   };
 
   const handleCreateDeal = () => {
-    pushAddRoute('/profile/deals/new');
+    pushAddRoute('/deals/new');
   };
 
   return (
