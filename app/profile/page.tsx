@@ -23,7 +23,6 @@ type ProfileTextShape = {
   rewardsHub: string;
   accountHub: string;
   helpHub: string;
-  admin: string;
   myServices: string;
   myServicesHint: string;
   priceList: string;
@@ -75,16 +74,12 @@ type SafeWallet = {
   availableBalance: number;
 };
 
-const OWNER_EMAIL = 'olamepcom@gmail.com';
-
 const BRAND = {
   navy: '#071b46',
   blue: '#0e73d8',
   green: '#19c65a',
   red: '#f00018',
   yellow: '#ffd629',
-  orange: '#ff8a00',
-  pink: '#ff4f9a',
   border: '#050505',
   muted: '#667080',
   bg: '#ffffff',
@@ -116,7 +111,6 @@ const profileTexts: Partial<Record<AppLanguage, ProfileTextShape>> = {
     rewardsHub: 'Bonuses & contact',
     accountHub: 'Account settings',
     helpHub: 'Help & information',
-    admin: 'admin',
     myServices: 'My services',
     myServicesHint: 'Manage your offers, photos and descriptions',
     priceList: 'Price list',
@@ -162,7 +156,6 @@ const profileTexts: Partial<Record<AppLanguage, ProfileTextShape>> = {
     rewardsHub: 'Бонусы и связь',
     accountHub: 'Настройки аккаунта',
     helpHub: 'Помощь и информация',
-    admin: 'админ',
     myServices: 'Мои услуги',
     myServicesHint: 'Управляйте услугами, фото и описаниями',
     priceList: 'Прайс-лист',
@@ -208,7 +201,6 @@ const profileTexts: Partial<Record<AppLanguage, ProfileTextShape>> = {
     rewardsHub: 'Бонуси та звʼязок',
     accountHub: 'Налаштування акаунта',
     helpHub: 'Допомога та інформація',
-    admin: 'адмін',
     myServices: 'Мої послуги',
     myServicesHint: 'Керуйте послугами, фото та описами',
     priceList: 'Прайс-лист',
@@ -254,7 +246,6 @@ const profileTexts: Partial<Record<AppLanguage, ProfileTextShape>> = {
     rewardsHub: 'Bonusy a kontakt',
     accountHub: 'Nastavení účtu',
     helpHub: 'Pomoc a informace',
-    admin: 'admin',
     myServices: 'Moje služby',
     myServicesHint: 'Správa nabídek, fotek a popisů',
     priceList: 'Ceník',
@@ -366,10 +357,6 @@ function readSafeWallet(): SafeWallet {
   }
 }
 
-function isOwnerProfile(profile: SafeProfile) {
-  return String(profile.email || '').trim().toLowerCase() === OWNER_EMAIL;
-}
-
 function OlamepLogo() {
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
@@ -410,6 +397,54 @@ function OlamepLogo() {
         Olamep
       </div>
     </div>
+  );
+}
+
+function SmallAdminLogoButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Open Olamep admin"
+      style={{
+        margin: '24px auto 0',
+        width: 52,
+        height: 52,
+        borderRadius: 18,
+        border: `2.5px solid ${BRAND.border}`,
+        background: '#ffffff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        boxShadow: '0 5px 0 rgba(0,0,0,0.12)',
+      }}
+    >
+      <span
+        style={{
+          width: 29,
+          height: 35,
+          borderRadius: '50% 50% 58% 58%',
+          background:
+            'conic-gradient(from 210deg, #0e73d8 0deg, #24c45a 92deg, #ffd629 160deg, #ff4b72 230deg, #0e73d8 360deg)',
+          position: 'relative',
+          display: 'block',
+          boxShadow: '0 6px 14px rgba(14,115,216,0.22)',
+        }}
+      >
+        <span
+          style={{
+            position: 'absolute',
+            left: 7,
+            top: 7,
+            width: 15,
+            height: 15,
+            borderRadius: 999,
+            background: '#ffffff',
+          }}
+        />
+      </span>
+    </button>
   );
 }
 
@@ -476,7 +511,6 @@ export default function ProfilePage() {
   }, []);
 
   const text = useMemo(() => getText(language), [language]);
-  const isOwner = useMemo(() => isOwnerProfile(profile), [profile]);
 
   const workItems: SectionItem[] = [
     {
@@ -1096,26 +1130,7 @@ export default function ProfilePage() {
           onOpen={(route) => router.push(route)}
         />
 
-        {isOwner ? (
-          <button
-            type="button"
-            onClick={() => router.push('/admin')}
-            style={{
-              margin: '18px auto 0',
-              display: 'block',
-              border: 'none',
-              background: 'transparent',
-              color: BRAND.blue,
-              fontSize: 12,
-              fontWeight: 900,
-              textDecoration: 'underline',
-              cursor: 'pointer',
-              padding: '8px 16px',
-            }}
-          >
-            {text.admin}
-          </button>
-        ) : null}
+        <SmallAdminLogoButton onClick={() => router.push('/admin')} />
       </div>
 
       <BottomNav active="profile" />
