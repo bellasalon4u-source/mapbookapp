@@ -260,16 +260,38 @@ function levenshteinDistance(a: string, b: string) {
 }
 
 function fuzzyTokenScore(queryToken: string, targetToken: string) {
-  if (!queryToken || !targetToken) return 0;
-  if (queryToken === targetToken) return 58;
-  if (targetToken.startsWith(queryToken) || queryToken.startsWith(targetToken)) return 46;
-  if (targetToken.includes(queryToken) || queryToken.includes(targetToken)) return 38;
+  const q = normalizeText(queryToken);
+  const tValue = normalizeText(targetToken);
 
-  const maxLength = Math.max(queryToken.length, targetToken.length);
-  const distance = levenshteinDistance(queryToken, targetToken);
+  if (!q || !tValue) return 0;
 
-  if (maxLength >= 7 && distance <= 2) return 34;
-  if (maxLength >= 4 && distance <= 1) return 28;
+  if (q === tValue) return 58;
+
+  if (tValue.startsWith(q)) {
+    if (q.length >= 3) return 46;
+    return 0;
+  }
+
+  if (q.startsWith(tValue)) {
+    if (tValue.length >= 4) return 42;
+    return 0;
+  }
+
+  if (tValue.includes(q)) {
+    if (q.length >= 4) return 38;
+    return 0;
+  }
+
+  if (q.includes(tValue)) {
+    if (tValue.length >= 4) return 34;
+    return 0;
+  }
+
+  const maxLength = Math.max(q.length, tValue.length);
+  const distance = levenshteinDistance(q, tValue);
+
+  if (maxLength >= 8 && distance <= 2) return 32;
+  if (maxLength >= 5 && distance <= 1) return 26;
 
   return 0;
 }
@@ -384,7 +406,7 @@ function getCategoryLabel(category?: string, language: AppLanguage = 'EN') {
     education: { EN: 'Education', ES: 'Educación', RU: 'Обучение', CZ: 'Vzdělání', DE: 'Bildung', PL: 'Edukacja', UA: 'Освіта' },
     events: { EN: 'Events', ES: 'Eventos', RU: 'События', CZ: 'Události', DE: 'Events', PL: 'Wydarzenia', UA: 'Події' },
     activities: { EN: 'Activities', ES: 'Actividades', RU: 'Активности', CZ: 'Aktivity', DE: 'Aktivitäten', PL: 'Aktywności', UA: 'Активності' },
-    creative: { EN: 'Creative', ES: 'Creativo', RU: 'Креатив', CZ: 'Kreativa', DE: 'Kreativ', PL: 'Kreatywne', UA: 'Креатив' },
+    creative: { EN: 'Creative', ES: 'Creativo', RU: 'Креатив', CZ: 'Kreativa', DE: 'Kreatywne', PL: 'Kreatywne', UA: 'Креатив' },
   };
 
   return map[normalized]?.[language] || found.shortLabel || found.label;
@@ -2165,7 +2187,7 @@ export default function HomePage() {
           score: Math.max(keywordScore, labelScore, categoryScore, subcategoryScore),
         };
       })
-      .filter((item) => item.score >= 34)
+      .filter((item) => item.score >= 38)
       .sort((a, b) => b.score - a.score)
       .slice(0, 10)
       .map(({ item }) => ({
