@@ -134,6 +134,14 @@ type SubcategorySearchResult = Extract<SearchResult, { type: 'subcategory' }>;
 type MasterSearchResult = Extract<SearchResult, { type: 'master' }>;
 type DealFilterMode = 'none' | 'category' | 'all';
 
+type RadiusSearchConfig = {
+  enabled: boolean;
+  mode: 'near-me' | 'custom';
+  label: string;
+  center: [number, number];
+  radiusKm: number;
+};
+
 function mapCategoryToId(category: string) {
   const normalized = (category || '').toLowerCase().trim();
 
@@ -145,6 +153,52 @@ function mapCategoryToId(category: string) {
   );
 
   return found?.id || normalized || 'beauty';
+}
+
+function distanceKmBetweenPoints(pointA: [number, number], pointB: [number, number]) {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+
+  const lat1 = Number(pointA[0]);
+  const lng1 = Number(pointA[1]);
+  const lat2 = Number(pointB[0]);
+  const lng2 = Number(pointB[1]);
+
+  if (
+    !Number.isFinite(lat1) ||
+    !Number.isFinite(lng1) ||
+    !Number.isFinite(lat2) ||
+    !Number.isFinite(lng2)
+  ) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  const earthRadiusKm = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return earthRadiusKm * c;
+}
+
+function isMasterInsideRadius(master: any, radiusSearch: RadiusSearchConfig | null) {
+  if (!radiusSearch?.enabled) return true;
+
+  const lat = Number(master?.lat);
+  const lng = Number(master?.lng);
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
+
+  const distanceKm = distanceKmBetweenPoints(radiusSearch.center, [lat, lng]);
+
+  return distanceKm <= Math.max(1, Number(radiusSearch.radiusKm) || 1);
 }
 
 function listingToMaster(listing: ListingItem, index: number) {
@@ -2062,6 +2116,7 @@ export default function HomePage() {
   const [regionVersion, setRegionVersion] = useState(0);
   const [currencyVersion, setCurrencyVersion] = useState(0);
   const [quickPanelOpen, setQuickPanelOpen] = useState(false);
+  const [radiusSearch, setRadiusSearch] = useState<RadiusSearchConfig | null>(null);
 
   const [qrReceiveOpen, setQrReceiveOpen] = useState(false);
   const [qrAmount, setQrAmount] = useState('');
@@ -2391,10 +2446,18 @@ export default function HomePage() {
     return categoryFilteredMasters;
   }, [likedFilterMode, allMasters, categoryFilteredMasters, likedMasterIds]);
 
-  const mapMasters = useMemo(() => {
+  const mapMastersBeforeRadius = useMemo(() => {
     if (dealFilterMode !== 'none') return promotionMasters;
     return likedFilteredMasters;
   }, [dealFilterMode, promotionMasters, likedFilteredMasters]);
+
+  const mapMasters = useMemo(() => {
+    if (!radiusSearch?.enabled) return mapMastersBeforeRadius;
+
+    return mapMastersBeforeRadius.filter((master: any) =>
+      isMasterInsideRadius(master, radiusSearch)
+    );
+  }, [mapMastersBeforeRadius, radiusSearch]);
 
   useEffect(() => {
     setSelectedMaster(null);
@@ -3111,6 +3174,15 @@ export default function HomePage() {
                 recenterToUserTrigger={recenterToUserTrigger}
                 language={language}
                 promotionBadgeTextByMasterId={promotionBadgeTextByMasterId}
+                radiusSearch={radiusSearch}
+                onRadiusSearchApply={(config) => {
+                  setRadiusSearch(config);
+                  setSelectedMaster(null);
+                }}
+                onRadiusSearchClear={() => {
+                  setRadiusSearch(null);
+                  setSelectedMaster(null);
+                }}
                 onMasterSelect={(master) => {
                   setSelectedMaster(master);
                 }}
