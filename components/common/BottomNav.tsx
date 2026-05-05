@@ -153,37 +153,6 @@ function getActiveColor(key: NavKey) {
   return BRAND.green;
 }
 
-function isUserRegistered() {
-  if (typeof window === 'undefined') return false;
-
-  const possibleKeys = [
-    'olamepUserRegistered',
-    'mapbookUserRegistered',
-    'olamep_registered',
-    'mapbook_registered',
-    'olamep_auth_user',
-    'mapbook_auth_user',
-    'currentUser',
-    'user',
-  ];
-
-  return possibleKeys.some((key) => {
-    const value = window.localStorage.getItem(key);
-    if (!value) return false;
-
-    const normalized = value.toLowerCase().trim();
-
-    return (
-      normalized === 'yes' ||
-      normalized === 'true' ||
-      normalized === '1' ||
-      normalized.includes('email') ||
-      normalized.includes('phone') ||
-      normalized.includes('name')
-    );
-  });
-}
-
 function CalendarIcon({ active }: { active: boolean }) {
   const color = active ? BRAND.blue : BRAND.black;
 
@@ -402,17 +371,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
     return pathname?.startsWith(href);
   };
 
-  const redirectToAuth = (nextPath: string) => {
-    setAddMenuOpen(false);
-    router.push(`/auth?next=${encodeURIComponent(nextPath)}`);
-  };
-
-  const pushProtectedAddRoute = (nextPath: string) => {
-    if (!isUserRegistered()) {
-      redirectToAuth(nextPath);
-      return;
-    }
-
+  const openAddRoute = (nextPath: string) => {
     setAddMenuOpen(false);
     router.push(nextPath);
   };
@@ -427,15 +386,15 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   };
 
   const handleCreateAd = () => {
-    pushProtectedAddRoute('/profile/promotions/new');
+    openAddRoute('/profile/promotions/new');
   };
 
   const handleCreateService = () => {
-    pushProtectedAddRoute('/add');
+    openAddRoute('/add');
   };
 
   const handleCreateDeal = () => {
-    pushProtectedAddRoute('/profile/deals/new');
+    openAddRoute('/profile/deals/new');
   };
 
   return (
