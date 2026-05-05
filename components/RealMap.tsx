@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import L, { type DivIcon } from 'leaflet';
 import {
+  Circle,
   CircleMarker,
   MapContainer,
   Marker,
@@ -31,6 +32,16 @@ type MasterItem = {
   discountBadge?: string;
 };
 
+type RadiusSearchMode = 'near-me' | 'custom';
+
+export type RadiusSearchConfig = {
+  enabled: boolean;
+  mode: RadiusSearchMode;
+  label: string;
+  center: [number, number];
+  radiusKm: number;
+};
+
 type RealMapProps = {
   masters?: MasterItem[];
   mapMode?: 'map' | 'satellite';
@@ -40,6 +51,9 @@ type RealMapProps = {
   recenterToUserTrigger?: number;
   language?: string;
   promotionBadgeTextByMasterId?: Record<string, string>;
+  radiusSearch?: RadiusSearchConfig | null;
+  onRadiusSearchApply?: (config: RadiusSearchConfig) => void;
+  onRadiusSearchClear?: () => void;
   onMasterSelect?: (master: MasterItem) => void;
   onMapBackgroundClick?: () => void;
   onToggleLike?: (master: MasterItem) => void;
@@ -48,6 +62,34 @@ type RealMapProps = {
 };
 
 const LONDON_CENTER: [number, number] = [51.5078, -0.1278];
+
+const PLACE_COORDS: Record<string, [number, number]> = {
+  london: [51.5078, -0.1278],
+  londyn: [51.5078, -0.1278],
+  лондон: [51.5078, -0.1278],
+
+  paris: [48.8566, 2.3522],
+  париж: [48.8566, 2.3522],
+  paryz: [48.8566, 2.3522],
+
+  prague: [50.0755, 14.4378],
+  прага: [50.0755, 14.4378],
+  praha: [50.0755, 14.4378],
+
+  berlin: [52.52, 13.405],
+  берлин: [52.52, 13.405],
+
+  madrid: [40.4168, -3.7038],
+  мадрид: [40.4168, -3.7038],
+
+  warsaw: [52.2297, 21.0122],
+  варшава: [52.2297, 21.0122],
+
+  kyiv: [50.4501, 30.5234],
+  kiev: [50.4501, 30.5234],
+  киев: [50.4501, 30.5234],
+  київ: [50.4501, 30.5234],
+};
 
 const DEMO_MASTERS: MasterItem[] = [
   {
@@ -134,6 +176,78 @@ function fixLeafletIcons() {
 
 function normalizeCategory(value?: string) {
   return String(value || '').toLowerCase().trim();
+}
+
+function normalizePlace(value: string) {
+  return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function getPlaceCoords(value: string): [number, number] | null {
+  const normalized = normalizePlace(value);
+
+  if (!normalized) return null;
+
+  if (PLACE_COORDS[normalized]) {
+    return PLACE_COORDS[normalized];
+  }
+
+  const partialKey = Object.keys(PLACE_COORDS).find((key) => normalized.includes(key));
+
+  if (partialKey) {
+    return PLACE_COORDS[partialKey];
+  }
+
+  return null;
+}
+
+function getRadiusLabels(language?: string) {
+  const lang = String(language || '').toUpperCase();
+
+  if (lang === 'RU') {
+    return {
+      button: 'Радиус',
+      title: 'Радиус поиска',
+      nearMe: 'Рядом со мной',
+      custom: 'Свой вариант',
+      placeholder: 'Например: Париж, Лондон, Прага',
+      usePlace: 'Место поиска',
+      from: 'от выбранного места',
+      apply: 'Показать результаты',
+      clear: 'Сбросить',
+      km: 'км',
+      unknown: 'Пока не нашли город. Введите London, Paris, Prague, Berlin, Madrid, Warsaw или Kyiv.',
+    };
+  }
+
+  if (lang === 'UA') {
+    return {
+      button: 'Радіус',
+      title: 'Радіус пошуку',
+      nearMe: 'Поруч зі мною',
+      custom: 'Свій варіант',
+      placeholder: 'Наприклад: Париж, Лондон, Прага',
+      usePlace: 'Місце пошуку',
+      from: 'від вибраного місця',
+      apply: 'Показати результати',
+      clear: 'Скинути',
+      km: 'км',
+      unknown: 'Поки не знайшли місто. Введіть London, Paris, Prague, Berlin, Madrid, Warsaw або Kyiv.',
+    };
+  }
+
+  return {
+    button: 'Radius',
+    title: 'Search radius',
+    nearMe: 'Near me',
+    custom: 'Custom place',
+    placeholder: 'Example: Paris, London, Prague',
+    usePlace: 'Search place',
+    from: 'from selected place',
+    apply: 'Show results',
+    clear: 'Clear',
+    km: 'km',
+    unknown: 'City not found yet. Try London, Paris, Prague, Berlin, Madrid, Warsaw or Kyiv.',
+  };
 }
 
 function getCategoryColor(master: MasterItem, isSelected: boolean) {
@@ -296,6 +410,51 @@ function createMasterPin(
   });
 }
 
+function createRadiusCenterIcon(label: string): DivIcon {
+  return L.divIcon({
+    className: 'olamep-radius-center-pin',
+    html: `
+      <div style="
+        position:relative;
+        width:34px;
+        height:34px;
+        border-radius:999px;
+        background:#ffffff;
+        border:3px solid #0e73d8;
+        box-shadow:0 8px 18px rgba(14,115,216,0.26);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+      ">
+        <div style="
+          width:12px;
+          height:12px;
+          border-radius:999px;
+          background:#0e73d8;
+          border:3px solid #dcecff;
+        "></div>
+        <div style="
+          position:absolute;
+          left:50%;
+          top:36px;
+          transform:translateX(-50%);
+          padding:4px 8px;
+          border-radius:999px;
+          border:1.5px solid #111111;
+          background:#ffffff;
+          color:#071b46;
+          font-size:10px;
+          font-weight:900;
+          white-space:nowrap;
+          box-shadow:0 4px 10px rgba(0,0,0,0.12);
+        ">${label}</div>
+      </div>
+    `,
+    iconSize: [34, 60],
+    iconAnchor: [17, 17],
+  });
+}
+
 function MapEvents({ onMapBackgroundClick }: { onMapBackgroundClick?: () => void }) {
   useMapEvents({
     click: () => {
@@ -323,19 +482,49 @@ function ChangeView({
   return null;
 }
 
+function FitMapToRadius({
+  config,
+}: {
+  config: RadiusSearchConfig | null;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!config?.enabled) return;
+
+    const circleBounds = L.circle(config.center, {
+      radius: Math.max(1, config.radiusKm) * 1000,
+    }).getBounds();
+
+    map.fitBounds(circleBounds, {
+      paddingTopLeft: [28, 28],
+      paddingBottomRight: [28, 185],
+      maxZoom: config.radiusKm <= 3 ? 13 : config.radiusKm <= 10 ? 12 : 9,
+      animate: true,
+      duration: 0.65,
+    });
+  }, [map, config]);
+
+  return null;
+}
+
 function FitMapToResults({
   masters,
   userLocation,
   selectedMasterId,
+  disabled,
 }: {
   masters: MasterItem[];
   userLocation: [number, number] | null;
   selectedMasterId?: string | number | null;
+  disabled?: boolean;
 }) {
   const map = useMap();
   const previousKeyRef = useRef('');
 
   useEffect(() => {
+    if (disabled) return;
+
     const validMasters = masters.filter(
       (master) => Number.isFinite(master.lat) && Number.isFinite(master.lng)
     );
@@ -410,7 +599,7 @@ function FitMapToResults({
       animate: true,
       duration: 0.55,
     });
-  }, [map, masters, userLocation, selectedMasterId]);
+  }, [map, masters, userLocation, selectedMasterId, disabled]);
 
   return null;
 }
@@ -481,25 +670,452 @@ function MapUiBridge({
   return null;
 }
 
+function RadiusSearchSheet({
+  open,
+  language,
+  userLocation,
+  value,
+  onChange,
+  onApply,
+  onClear,
+  onClose,
+}: {
+  open: boolean;
+  language?: string;
+  userLocation: [number, number] | null;
+  value: {
+    mode: RadiusSearchMode;
+    place: string;
+    radiusKm: number;
+    error: string;
+  };
+  onChange: (next: Partial<{ mode: RadiusSearchMode; place: string; radiusKm: number; error: string }>) => void;
+  onApply: () => void;
+  onClear: () => void;
+  onClose: () => void;
+}) {
+  const labels = getRadiusLabels(language);
+
+  if (!open) return null;
+
+  const activeCenter =
+    value.mode === 'near-me'
+      ? userLocation || LONDON_CENTER
+      : getPlaceCoords(value.place) || null;
+
+  return (
+    <div
+      onClick={(event) => {
+        event.stopPropagation();
+      }}
+      onPointerDown={(event) => {
+        event.stopPropagation();
+      }}
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 2500,
+        display: 'flex',
+        justifyContent: 'center',
+        pointerEvents: 'auto',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 430,
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          border: '2.8px solid #111111',
+          borderBottom: 'none',
+          background: 'rgba(255,255,255,0.98)',
+          boxShadow: '0 -16px 38px rgba(0,0,0,0.2)',
+          padding: '9px 14px calc(18px + env(safe-area-inset-bottom))',
+          boxSizing: 'border-box',
+          backdropFilter: 'blur(12px)',
+        }}
+      >
+        <div
+          style={{
+            width: 48,
+            height: 5,
+            borderRadius: 999,
+            background: '#d6dbe2',
+            margin: '0 auto 11px',
+            border: '1px solid rgba(17,17,17,0.12)',
+          }}
+        />
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 38px',
+            gap: 10,
+            alignItems: 'center',
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: 21,
+                lineHeight: 1,
+                fontWeight: 900,
+                letterSpacing: '-0.4px',
+                color: '#071b46',
+              }}
+            >
+              {labels.title}
+            </div>
+
+            <div
+              style={{
+                marginTop: 5,
+                fontSize: 12,
+                fontWeight: 800,
+                color: '#667080',
+              }}
+            >
+              {value.radiusKm} {labels.km} {labels.from}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 999,
+              border: '2px solid #111111',
+              background: '#ffffff',
+              color: '#071b46',
+              fontSize: 20,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        <div
+          style={{
+            marginTop: 13,
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 0,
+            borderRadius: 18,
+            border: '2px solid #111111',
+            overflow: 'hidden',
+            background: '#ffffff',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => onChange({ mode: 'near-me', error: '' })}
+            style={{
+              minHeight: 47,
+              border: 'none',
+              borderRight: '2px solid #111111',
+              background: value.mode === 'near-me' ? '#071b46' : '#ffffff',
+              color: value.mode === 'near-me' ? '#ffffff' : '#071b46',
+              fontSize: 13,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            ⌖ {labels.nearMe}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onChange({ mode: 'custom', error: '' })}
+            style={{
+              minHeight: 47,
+              border: 'none',
+              background: value.mode === 'custom' ? '#071b46' : '#ffffff',
+              color: value.mode === 'custom' ? '#ffffff' : '#071b46',
+              fontSize: 13,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            📍 {labels.custom}
+          </button>
+        </div>
+
+        {value.mode === 'custom' ? (
+          <label
+            style={{
+              marginTop: 12,
+              display: 'grid',
+              gap: 6,
+              fontSize: 12,
+              fontWeight: 900,
+              color: '#667080',
+            }}
+          >
+            <span>{labels.usePlace}</span>
+
+            <div
+              style={{
+                minHeight: 48,
+                borderRadius: 16,
+                border: '2px solid #111111',
+                background: '#ffffff',
+                display: 'grid',
+                gridTemplateColumns: '36px 1fr 34px',
+                alignItems: 'center',
+                overflow: 'hidden',
+              }}
+            >
+              <span
+                style={{
+                  display: 'grid',
+                  placeItems: 'center',
+                  color: '#071b46',
+                  fontSize: 18,
+                  fontWeight: 900,
+                }}
+              >
+                ⌕
+              </span>
+
+              <input
+                value={value.place}
+                onChange={(event) =>
+                  onChange({
+                    place: event.target.value,
+                    error: '',
+                  })
+                }
+                placeholder={labels.placeholder}
+                style={{
+                  width: '100%',
+                  height: 48,
+                  border: 'none',
+                  outline: 'none',
+                  background: 'transparent',
+                  color: '#071b46',
+                  fontSize: 14,
+                  fontWeight: 800,
+                }}
+              />
+
+              {value.place ? (
+                <button
+                  type="button"
+                  onClick={() => onChange({ place: '', error: '' })}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#9ca3af',
+                    fontSize: 16,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  ×
+                </button>
+              ) : (
+                <span />
+              )}
+            </div>
+          </label>
+        ) : null}
+
+        <div
+          style={{
+            marginTop: 17,
+            textAlign: 'center',
+            fontSize: 28,
+            lineHeight: 1,
+            fontWeight: 900,
+            color: '#071b46',
+          }}
+        >
+          {value.radiusKm} {labels.km}
+        </div>
+
+        <div
+          style={{
+            marginTop: 13,
+            display: 'grid',
+            gridTemplateColumns: '40px 1fr 52px',
+            gap: 10,
+            alignItems: 'center',
+          }}
+        >
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 900,
+              color: '#071b46',
+            }}
+          >
+            0 {labels.km}
+          </span>
+
+          <input
+            type="range"
+            min="0"
+            max="500"
+            step="1"
+            value={value.radiusKm}
+            onChange={(event) =>
+              onChange({
+                radiusKm: Number(event.target.value),
+                error: '',
+              })
+            }
+            style={{
+              width: '100%',
+              accentColor: '#55c75f',
+              cursor: 'pointer',
+            }}
+          />
+
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 900,
+              color: '#071b46',
+              textAlign: 'right',
+            }}
+          >
+            500 {labels.km}
+          </span>
+        </div>
+
+        <div
+          aria-hidden="true"
+          style={{
+            margin: '6px 50px 0',
+            height: 10,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(11, 1fr)',
+            gap: 0,
+          }}
+        >
+          {Array.from({ length: 11 }).map((_, index) => (
+            <span
+              key={index}
+              style={{
+                width: 1,
+                height: index % 5 === 0 ? 10 : 6,
+                background: '#c8ced7',
+                justifySelf: 'center',
+              }}
+            />
+          ))}
+        </div>
+
+        {value.error ? (
+          <div
+            style={{
+              marginTop: 10,
+              borderRadius: 14,
+              border: '1.8px solid #111111',
+              background: '#fff4c7',
+              padding: '9px 10px',
+              fontSize: 11.5,
+              lineHeight: 1.3,
+              fontWeight: 800,
+              color: '#071b46',
+            }}
+          >
+            {value.error}
+          </div>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={onApply}
+          disabled={value.mode === 'custom' && !activeCenter}
+          style={{
+            marginTop: 15,
+            width: '100%',
+            minHeight: 52,
+            borderRadius: 17,
+            border: '2.5px solid #111111',
+            background: value.mode === 'custom' && !activeCenter ? '#d8dce2' : '#55c75f',
+            color: '#ffffff',
+            fontSize: 16,
+            fontWeight: 900,
+            cursor: value.mode === 'custom' && !activeCenter ? 'not-allowed' : 'pointer',
+            boxShadow:
+              value.mode === 'custom' && !activeCenter
+                ? 'none'
+                : '0 8px 18px rgba(85,199,95,0.28)',
+          }}
+        >
+          {labels.apply}
+        </button>
+
+        <button
+          type="button"
+          onClick={onClear}
+          style={{
+            marginTop: 9,
+            width: '100%',
+            minHeight: 42,
+            borderRadius: 15,
+            border: 'none',
+            background: 'transparent',
+            color: '#071b46',
+            fontSize: 13,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          {labels.clear}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function RealMap({
   masters = [],
   mapMode = 'map',
   selectedMasterId = null,
   likedMasterIds = [],
   recenterToUserTrigger = 0,
+  language,
   promotionBadgeTextByMasterId = {},
+  radiusSearch = null,
+  onRadiusSearchApply,
+  onRadiusSearchClear,
   onMasterSelect,
   onMapBackgroundClick,
 }: RealMapProps) {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   const [selectedLocalId, setSelectedLocalId] = useState<string | null>(null);
+  const [radiusSheetOpen, setRadiusSheetOpen] = useState(false);
+  const [draftRadius, setDraftRadius] = useState<{
+    mode: RadiusSearchMode;
+    place: string;
+    radiusKm: number;
+    error: string;
+  }>({
+    mode: 'near-me',
+    place: '',
+    radiusKm: 10,
+    error: '',
+  });
+  const [localRadiusSearch, setLocalRadiusSearch] = useState<RadiusSearchConfig | null>(null);
+
   const [uiActions, setUiActions] = useState<{
     locateMe: () => void;
     toggleMapMode: () => void;
   } | null>(null);
 
   const prevRecenterTrigger = useRef(recenterToUserTrigger);
+  const labels = getRadiusLabels(language);
+  const activeRadiusSearch = radiusSearch || localRadiusSearch;
 
   useEffect(() => {
     fixLeafletIcons();
@@ -554,6 +1170,17 @@ export default function RealMap({
     );
   }, [recenterToUserTrigger]);
 
+  useEffect(() => {
+    if (!radiusSearch) return;
+
+    setDraftRadius({
+      mode: radiusSearch.mode,
+      place: radiusSearch.mode === 'custom' ? radiusSearch.label : '',
+      radiusKm: radiusSearch.radiusKm,
+      error: '',
+    });
+  }, [radiusSearch]);
+
   const safeMasters = useMemo(() => {
     const filtered = masters.filter(
       (master) => Number.isFinite(master.lat) && Number.isFinite(master.lng)
@@ -594,6 +1221,65 @@ export default function RealMap({
     onMasterSelect?.(master);
   };
 
+  const applyRadiusSearch = () => {
+    const radiusKm = Math.max(0, Math.min(500, Number(draftRadius.radiusKm) || 0));
+
+    if (draftRadius.mode === 'near-me') {
+      const center = userLocation || LONDON_CENTER;
+
+      const config: RadiusSearchConfig = {
+        enabled: true,
+        mode: 'near-me',
+        label: labels.nearMe,
+        center,
+        radiusKm,
+      };
+
+      setLocalRadiusSearch(config);
+      setMapCenter(center);
+      setRadiusSheetOpen(false);
+      onRadiusSearchApply?.(config);
+      return;
+    }
+
+    const customCenter = getPlaceCoords(draftRadius.place);
+
+    if (!customCenter) {
+      setDraftRadius((prev) => ({
+        ...prev,
+        error: labels.unknown,
+      }));
+      return;
+    }
+
+    const cleanPlace = draftRadius.place.trim() || labels.custom;
+
+    const config: RadiusSearchConfig = {
+      enabled: true,
+      mode: 'custom',
+      label: cleanPlace,
+      center: customCenter,
+      radiusKm,
+    };
+
+    setLocalRadiusSearch(config);
+    setMapCenter(customCenter);
+    setRadiusSheetOpen(false);
+    onRadiusSearchApply?.(config);
+  };
+
+  const clearRadiusSearch = () => {
+    setLocalRadiusSearch(null);
+    setDraftRadius({
+      mode: 'near-me',
+      place: '',
+      radiusKm: 10,
+      error: '',
+    });
+    setRadiusSheetOpen(false);
+    onRadiusSearchClear?.();
+  };
+
   return (
     <div
       style={{
@@ -607,7 +1293,7 @@ export default function RealMap({
       <MapContainer
         center={mapCenter || LONDON_CENTER}
         zoom={13}
-        minZoom={8}
+        minZoom={3}
         maxZoom={18}
         zoomControl={false}
         style={{
@@ -636,9 +1322,35 @@ export default function RealMap({
           masters={safeMasters}
           userLocation={userLocation}
           selectedMasterId={selectedMaster?.id ?? null}
+          disabled={Boolean(activeRadiusSearch?.enabled)}
         />
 
+        <FitMapToRadius config={activeRadiusSearch?.enabled ? activeRadiusSearch : null} />
+
         <MapUiBridge initialMode={mapMode} onReady={setUiActions} />
+
+        {activeRadiusSearch?.enabled ? (
+          <>
+            <Circle
+              center={activeRadiusSearch.center}
+              radius={Math.max(1, activeRadiusSearch.radiusKm) * 1000}
+              pathOptions={{
+                color: '#0e73d8',
+                weight: 2,
+                opacity: 0.8,
+                fillColor: '#0e73d8',
+                fillOpacity: 0.14,
+              }}
+            />
+
+            <Marker
+              position={activeRadiusSearch.center}
+              icon={createRadiusCenterIcon(
+                `${activeRadiusSearch.label} • ${activeRadiusSearch.radiusKm} ${labels.km}`
+              )}
+            />
+          </>
+        ) : null}
 
         {userLocation ? (
           <>
@@ -739,7 +1451,77 @@ export default function RealMap({
         >
           ◫
         </button>
+
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setRadiusSheetOpen(true);
+          }}
+          style={{
+            minWidth: 42,
+            height: 42,
+            borderRadius: 999,
+            border: activeRadiusSearch?.enabled ? '2px solid #111111' : '1.4px solid #111111',
+            background: activeRadiusSearch?.enabled ? '#55c75f' : '#ffffff',
+            boxShadow: '0 6px 14px rgba(0,0,0,0.10)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontSize: 17,
+            color: activeRadiusSearch?.enabled ? '#ffffff' : '#071b46',
+            fontWeight: 900,
+            padding: 0,
+            position: 'relative',
+          }}
+          aria-label={labels.button}
+          title={labels.button}
+        >
+          ⌖
+          {activeRadiusSearch?.enabled ? (
+            <span
+              style={{
+                position: 'absolute',
+                right: -6,
+                top: -6,
+                minWidth: 22,
+                height: 22,
+                padding: '0 5px',
+                borderRadius: 999,
+                border: '1.5px solid #111111',
+                background: '#ffffff',
+                color: '#071b46',
+                fontSize: 9,
+                fontWeight: 900,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+              }}
+            >
+              {activeRadiusSearch.radiusKm}
+            </span>
+          ) : null}
+        </button>
       </div>
+
+      <RadiusSearchSheet
+        open={radiusSheetOpen}
+        language={language}
+        userLocation={userLocation}
+        value={draftRadius}
+        onChange={(next) => {
+          setDraftRadius((prev) => ({
+            ...prev,
+            ...next,
+          }));
+        }}
+        onApply={applyRadiusSearch}
+        onClear={clearRadiusSearch}
+        onClose={() => setRadiusSheetOpen(false)}
+      />
 
       <style jsx global>{`
         .leaflet-container {
@@ -773,7 +1555,8 @@ export default function RealMap({
           display: none !important;
         }
 
-        .mapbook-master-pin {
+        .mapbook-master-pin,
+        .olamep-radius-center-pin {
           background: transparent !important;
           border: none !important;
         }
