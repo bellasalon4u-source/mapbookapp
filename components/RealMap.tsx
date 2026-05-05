@@ -70,7 +70,6 @@ const PLACE_COORDS: Record<string, [number, number]> = {
 
   paris: [48.8566, 2.3522],
   париж: [48.8566, 2.3522],
-  paryz: [48.8566, 2.3522],
 
   prague: [50.0755, 14.4378],
   прага: [50.0755, 14.4378],
@@ -180,6 +179,11 @@ function normalizeCategory(value?: string) {
 
 function normalizePlace(value: string) {
   return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function kmToMiles(km: number) {
+  const miles = Math.round(Number(km || 0) * 0.621371);
+  return Number.isFinite(miles) ? miles : 0;
 }
 
 function getPlaceCoords(value: string): [number, number] | null {
@@ -433,24 +437,9 @@ function createRadiusCenterIcon(label: string): DivIcon {
           background:#0e73d8;
           border:3px solid #dcecff;
         "></div>
-        <div style="
-          position:absolute;
-          left:50%;
-          top:36px;
-          transform:translateX(-50%);
-          padding:4px 8px;
-          border-radius:999px;
-          border:1.5px solid #111111;
-          background:#ffffff;
-          color:#071b46;
-          font-size:10px;
-          font-weight:900;
-          white-space:nowrap;
-          box-shadow:0 4px 10px rgba(0,0,0,0.12);
-        ">${label}</div>
       </div>
     `,
-    iconSize: [34, 60],
+    iconSize: [34, 34],
     iconAnchor: [17, 17],
   });
 }
@@ -476,33 +465,55 @@ function ChangeView({
 
   useEffect(() => {
     if (!center) return;
-    map.flyTo(center, zoom ?? map.getZoom(), { duration: 0.65 });
+
+    const lat = Number(center[0]);
+    const lng = Number(center[1]);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    map.flyTo([lat, lng], zoom ?? map.getZoom(), { duration: 0.65 });
   }, [map, center, zoom]);
 
   return null;
 }
 
-function FitMapToRadius({
-  config,
-}: {
-  config: RadiusSearchConfig | null;
-}) {
+function FitMapToRadius({ config }: { config: RadiusSearchConfig | null }) {
   const map = useMap();
+  const previousKeyRef = useRef('');
 
   useEffect(() => {
     if (!config?.enabled) return;
 
-    const circleBounds = L.circle(config.center, {
-      radius: Math.max(1, config.radiusKm) * 1000,
-    }).getBounds();
+    const lat = Number(config.center?.[0]);
+    const lng = Number(config.center?.[1]);
+    const radiusKm = Number(config.radiusKm);
 
-    map.fitBounds(circleBounds, {
-      paddingTopLeft: [28, 28],
-      paddingBottomRight: [28, 185],
-      maxZoom: config.radiusKm <= 3 ? 13 : config.radiusKm <= 10 ? 12 : 9,
-      animate: true,
-      duration: 0.65,
-    });
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(radiusKm)) {
+      return;
+    }
+
+    const safeRadiusKm = Math.max(1, Math.min(500, radiusKm));
+    const key = `${lat}:${lng}:${safeRadiusKm}`;
+
+    if (previousKeyRef.current === key) return;
+    previousKeyRef.current = key;
+
+    try {
+      const bounds = L.latLng(lat, lng).toBounds(safeRadiusKm * 2000);
+
+      window.setTimeout(() => {
+        map.fitBounds(bounds, {
+          paddingTopLeft: [28, 28],
+          paddingBottomRight: [28, 185],
+          maxZoom: safeRadiusKm <= 3 ? 13 : safeRadiusKm <= 10 ? 12 : 9,
+          animate: true,
+        });
+      }, 50);
+    } catch {
+      map.flyTo([lat, lng], safeRadiusKm <= 10 ? 11 : 8, {
+        duration: 0.55,
+      });
+    }
   }, [map, config]);
 
   return null;
@@ -572,7 +583,6 @@ function FitMapToResults({
           paddingBottomRight: [42, 150],
           maxZoom: 14,
           animate: true,
-          duration: 0.55,
         });
         return;
       }
@@ -597,7 +607,6 @@ function FitMapToResults({
       paddingBottomRight: [42, 150],
       maxZoom: 14,
       animate: true,
-      duration: 0.55,
     });
   }, [map, masters, userLocation, selectedMasterId, disabled]);
 
@@ -689,7 +698,14 @@ function RadiusSearchSheet({
     radiusKm: number;
     error: string;
   };
-  onChange: (next: Partial<{ mode: RadiusSearchMode; place: string; radiusKm: number; error: string }>) => void;
+  onChange: (
+    next: Partial<{
+      mode: RadiusSearchMode;
+      place: string;
+      radiusKm: number;
+      error: string;
+    }>
+  ) => void;
   onApply: () => void;
   onClear: () => void;
   onClose: () => void;
@@ -702,6 +718,8 @@ function RadiusSearchSheet({
     value.mode === 'near-me'
       ? userLocation || LONDON_CENTER
       : getPlaceCoords(value.place) || null;
+
+  const miles = kmToMiles(value.radiusKm);
 
   return (
     <div
@@ -777,7 +795,7 @@ function RadiusSearchSheet({
                 color: '#667080',
               }}
             >
-              {value.radiusKm} {labels.km} {labels.from}
+              {value.radiusKm} {labels.km} / {miles} mi {labels.from}
             </div>
           </div>
 
@@ -936,7 +954,7 @@ function RadiusSearchSheet({
             color: '#071b46',
           }}
         >
-          {value.radiusKm} {labels.km}
+          {value.radiusKm} {labels.km} / {miles} mi
         </div>
 
         <div
@@ -1222,7 +1240,7 @@ export default function RealMap({
   };
 
   const applyRadiusSearch = () => {
-    const radiusKm = Math.max(0, Math.min(500, Number(draftRadius.radiusKm) || 0));
+    const radiusKm = Math.max(1, Math.min(500, Number(draftRadius.radiusKm) || 1));
 
     if (draftRadius.mode === 'near-me') {
       const center = userLocation || LONDON_CENTER;
