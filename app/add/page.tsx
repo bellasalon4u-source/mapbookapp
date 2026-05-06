@@ -20,6 +20,7 @@ import {
 
 type PriceMode = 'single' | 'range';
 type ServiceFormat = 'at_my_place' | 'at_client' | 'online';
+
 type PaymentMethodId =
   | 'card'
   | 'cash'
@@ -54,7 +55,7 @@ type MediaItem = {
 
 type CategoryItem = {
   id: string;
-  label: Record<string, string>;
+  label: Partial<Record<AppLanguage, string>> & { EN: string };
   icon: string;
   subcategories: string[];
 };
@@ -68,7 +69,6 @@ type Texts = {
   editHint: string;
   price: string;
   setPrice: string;
-  fromTo: string;
   paymentMethods: string;
   title: string;
   titleHint: string;
@@ -83,7 +83,6 @@ type Texts = {
   address: string;
   addressHint: string;
   continue: string;
-  publish: string;
   selectCategory: string;
   selectSubcategory: string;
   setWorkingHours: string;
@@ -92,9 +91,7 @@ type Texts = {
   online: string;
   cancel: string;
   save: string;
-  close: string;
   priceSettings: string;
-  priceType: string;
   singlePrice: string;
   priceRange: string;
   pounds: string;
@@ -122,6 +119,9 @@ type Texts = {
   addSubcategoryAlert: string;
   addPhotoAlert: string;
   published: string;
+  delete: string;
+  zoom: string;
+  rotate: string;
 };
 
 const BRAND = {
@@ -149,7 +149,6 @@ const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
     editHint: 'Move, zoom, rotate and confirm.',
     price: 'Price',
     setPrice: 'Set your price',
-    fromTo: 'from £40 to £60',
     paymentMethods: 'Payment methods',
     title: 'Title',
     titleHint: 'Add a short and clear title',
@@ -164,7 +163,6 @@ const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
     address: 'Address',
     addressHint: 'Opens a separate address form',
     continue: 'Continue',
-    publish: 'Publish service',
     selectCategory: 'Select category',
     selectSubcategory: 'Select subcategory',
     setWorkingHours: 'Set working hours',
@@ -173,9 +171,7 @@ const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
     online: 'Online',
     cancel: 'Cancel',
     save: 'Save',
-    close: 'Close',
     priceSettings: 'Price settings',
-    priceType: 'Price type',
     singlePrice: 'One price',
     priceRange: 'From — to',
     pounds: 'Pounds',
@@ -203,6 +199,9 @@ const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
     addSubcategoryAlert: 'Choose subcategory',
     addPhotoAlert: 'Add at least one photo or video',
     published: 'Service published successfully',
+    delete: 'Delete',
+    zoom: 'Zoom',
+    rotate: 'Rotate',
   },
   RU: {
     pageTitle: 'Добавить услугу',
@@ -213,7 +212,6 @@ const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
     editHint: 'Двигайте, увеличивайте, поворачивайте и подтверждайте.',
     price: 'Цена',
     setPrice: 'Установите цену',
-    fromTo: 'от £40 до £60',
     paymentMethods: 'Методы оплаты',
     title: 'Заголовок',
     titleHint: 'Добавьте короткий и понятный заголовок',
@@ -228,7 +226,6 @@ const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
     address: 'Адрес',
     addressHint: 'Открывается отдельная форма адреса',
     continue: 'Продолжить',
-    publish: 'Опубликовать услугу',
     selectCategory: 'Выберите категорию',
     selectSubcategory: 'Выберите подкатегорию',
     setWorkingHours: 'Установить часы работы',
@@ -237,9 +234,7 @@ const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
     online: 'Онлайн',
     cancel: 'Отмена',
     save: 'Сохранить',
-    close: 'Закрыть',
     priceSettings: 'Настройки цены',
-    priceType: 'Тип цены',
     singlePrice: 'Одна цена',
     priceRange: 'От — до',
     pounds: 'Фунты',
@@ -267,6 +262,9 @@ const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
     addSubcategoryAlert: 'Выберите подкатегорию',
     addPhotoAlert: 'Добавьте хотя бы одно фото или видео',
     published: 'Услуга успешно опубликована',
+    delete: 'Удалить',
+    zoom: 'Увеличение',
+    rotate: 'Поворот',
   },
   UA: {
     pageTitle: 'Додати послугу',
@@ -277,7 +275,6 @@ const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
     editHint: 'Рухайте, збільшуйте, повертайте і підтверджуйте.',
     price: 'Ціна',
     setPrice: 'Встановіть ціну',
-    fromTo: 'від £40 до £60',
     paymentMethods: 'Методи оплати',
     title: 'Заголовок',
     titleHint: 'Додайте короткий і зрозумілий заголовок',
@@ -292,7 +289,6 @@ const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
     address: 'Адреса',
     addressHint: 'Відкривається окрема форма адреси',
     continue: 'Продовжити',
-    publish: 'Опублікувати послугу',
     selectCategory: 'Оберіть категорію',
     selectSubcategory: 'Оберіть підкатегорію',
     setWorkingHours: 'Встановити години роботи',
@@ -301,9 +297,7 @@ const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
     online: 'Онлайн',
     cancel: 'Скасувати',
     save: 'Зберегти',
-    close: 'Закрити',
     priceSettings: 'Налаштування ціни',
-    priceType: 'Тип ціни',
     singlePrice: 'Одна ціна',
     priceRange: 'Від — до',
     pounds: 'Фунти',
@@ -331,6 +325,9 @@ const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
     addSubcategoryAlert: 'Оберіть підкатегорію',
     addPhotoAlert: 'Додайте хоча б одне фото або відео',
     published: 'Послугу успішно опубліковано',
+    delete: 'Видалити',
+    zoom: 'Збільшення',
+    rotate: 'Поворот',
   },
 };
 
@@ -431,7 +428,7 @@ function getText(language: AppLanguage) {
   return textsByLanguage[language] || textsByLanguage.EN!;
 }
 
-function langLabel(item: CategoryItem, language: AppLanguage) {
+function getCategoryLabel(item: CategoryItem, language: AppLanguage) {
   return item.label[language] || item.label.EN || item.id;
 }
 
@@ -453,9 +450,17 @@ function inputStyle(): CSSProperties {
 
 function textareaStyle(): CSSProperties {
   return {
-    ...inputStyle(),
-    height: 130,
-    padding: '16px',
+    width: '100%',
+    minHeight: 130,
+    borderRadius: 18,
+    border: `2px solid ${BRAND.black}`,
+    background: '#ffffff',
+    color: BRAND.navy,
+    padding: 16,
+    fontSize: 16,
+    fontWeight: 900,
+    outline: 'none',
+    boxSizing: 'border-box',
     resize: 'none',
     fontFamily: 'Arial, sans-serif',
     lineHeight: 1.45,
@@ -817,11 +822,9 @@ function PillButton({
 
 export default function AddServicePage() {
   const router = useRouter();
-
   const mediaInputRef = useRef<HTMLInputElement | null>(null);
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
-
   const [media, setMedia] = useState<MediaItem[]>([]);
 
   const [priceMode, setPriceMode] = useState<PriceMode>('range');
@@ -867,12 +870,13 @@ export default function AddServicePage() {
 
   const [activeSheet, setActiveSheet] = useState<
     | null
+    | 'title'
+    | 'description'
     | 'price'
     | 'payments'
     | 'category'
     | 'subcategory'
     | 'hours'
-    | 'format'
     | 'contacts'
     | 'address'
     | 'editor'
@@ -902,7 +906,6 @@ export default function AddServicePage() {
     return () => {
       media.forEach((item) => URL.revokeObjectURL(item.preview));
     };
-    // cleanup on unmount only
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -926,6 +929,8 @@ export default function AddServicePage() {
     const parts = [address.city, address.district, address.street, address.postcode].filter(Boolean);
     return parts.length ? parts.join(', ') : text.addressHint;
   }, [address, text.addressHint]);
+
+  const editingMedia = media.find((item) => item.id === editingMediaId) || null;
 
   const openMediaPicker = () => {
     mediaInputRef.current?.click();
@@ -1084,8 +1089,6 @@ export default function AddServicePage() {
     alert(text.published);
     router.push('/');
   };
-
-  const editingMedia = media.find((item) => item.id === editingMediaId) || null;
 
   return (
     <>
@@ -1523,6 +1526,7 @@ export default function AddServicePage() {
                   >
                     {selectedPayments.slice(0, 4).map((id) => {
                       const method = paymentMethods.find((item) => item.id === id);
+
                       return (
                         <span
                           key={id}
@@ -1557,10 +1561,7 @@ export default function AddServicePage() {
               bg={BRAND.softYellow}
               title={text.title}
               value={title || text.titleHint}
-              onClick={() => {
-                const next = prompt(text.title, title);
-                if (next !== null) setTitle(next);
-              }}
+              onClick={() => setActiveSheet('title')}
             />
 
             <RowButton
@@ -1568,17 +1569,14 @@ export default function AddServicePage() {
               bg={BRAND.softBlue}
               title={text.description}
               value={description || text.descriptionHint}
-              onClick={() => {
-                const next = prompt(text.description, description);
-                if (next !== null) setDescription(next);
-              }}
+              onClick={() => setActiveSheet('description')}
             />
 
             <RowButton
               icon="🏷️"
               bg="#f3eeff"
               title={text.category}
-              value={langLabel(currentCategory, language)}
+              value={getCategoryLabel(currentCategory, language)}
               onClick={() => setActiveSheet('category')}
             />
 
@@ -1750,6 +1748,64 @@ export default function AddServicePage() {
           </div>
         </div>
       </main>
+
+      {activeSheet === 'title' ? (
+        <BottomSheet title={text.title} onClose={() => setActiveSheet(null)}>
+          <div style={{ display: 'grid', gap: 12 }}>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={text.titleHint}
+              style={inputStyle()}
+            />
+
+            <button
+              type="button"
+              onClick={() => setActiveSheet(null)}
+              style={{
+                height: 58,
+                borderRadius: 20,
+                border: `2px solid ${BRAND.black}`,
+                background: BRAND.green,
+                color: '#ffffff',
+                fontSize: 18,
+                fontWeight: 900,
+              }}
+            >
+              {text.save}
+            </button>
+          </div>
+        </BottomSheet>
+      ) : null}
+
+      {activeSheet === 'description' ? (
+        <BottomSheet title={text.description} onClose={() => setActiveSheet(null)}>
+          <div style={{ display: 'grid', gap: 12 }}>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={text.descriptionHint}
+              style={textareaStyle()}
+            />
+
+            <button
+              type="button"
+              onClick={() => setActiveSheet(null)}
+              style={{
+                height: 58,
+                borderRadius: 20,
+                border: `2px solid ${BRAND.black}`,
+                background: BRAND.green,
+                color: '#ffffff',
+                fontSize: 18,
+                fontWeight: 900,
+              }}
+            >
+              {text.save}
+            </button>
+          </div>
+        </BottomSheet>
+      ) : null}
 
       {activeSheet === 'price' ? (
         <BottomSheet title={text.priceSettings} onClose={() => setActiveSheet(null)}>
@@ -1965,7 +2021,7 @@ export default function AddServicePage() {
                   onClick={() => {
                     setCategoryId(item.id);
                     setSubcategory(item.subcategories[0] || '');
-                    setActiveSheet(null);
+                    setActiveSheet('subcategory');
                   }}
                   style={{
                     minHeight: 72,
@@ -1979,7 +2035,7 @@ export default function AddServicePage() {
                   }}
                 >
                   <span style={{ marginRight: 8 }}>{item.icon}</span>
-                  {langLabel(item, language)}
+                  {getCategoryLabel(item, language)}
                 </button>
               );
             })}
@@ -2240,7 +2296,7 @@ export default function AddServicePage() {
             </div>
 
             <div>
-              <div style={{ fontWeight: 900, marginBottom: 6 }}>Zoom</div>
+              <div style={{ fontWeight: 900, marginBottom: 6 }}>{text.zoom}</div>
               <input
                 type="range"
                 min={1}
@@ -2253,7 +2309,7 @@ export default function AddServicePage() {
             </div>
 
             <div>
-              <div style={{ fontWeight: 900, marginBottom: 6 }}>Rotate</div>
+              <div style={{ fontWeight: 900, marginBottom: 6 }}>{text.rotate}</div>
               <input
                 type="range"
                 min={-180}
@@ -2282,7 +2338,7 @@ export default function AddServicePage() {
                   fontWeight: 900,
                 }}
               >
-                Delete
+                {text.delete}
               </button>
 
               <button
