@@ -38,7 +38,6 @@ type Sheet =
 type MediaItem = {
   id: string;
   preview: string;
-  kind: 'photo' | 'video';
 };
 
 const categories = [
@@ -242,7 +241,8 @@ function SheetBox({
 
 export default function AddServicePage() {
   const router = useRouter();
-  const mediaInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
 
   const [, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [media, setMedia] = useState<MediaItem[]>([]);
@@ -283,18 +283,17 @@ export default function AddServicePage() {
     [categoryId]
   );
 
-  const handleMediaSelected = (event: ChangeEvent<HTMLInputElement>) => {
+  const handlePhotosSelected = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
     const selected = files.slice(0, 50 - media.length);
 
     const next = selected
-      .filter((file) => file.type.startsWith('image/') || file.type.startsWith('video/'))
+      .filter((file) => file.type.startsWith('image/'))
       .map((file, index) => ({
         id: `${file.name}-${file.size}-${Date.now()}-${index}`,
         preview: URL.createObjectURL(file),
-        kind: file.type.startsWith('video/') ? ('video' as const) : ('photo' as const),
       }));
 
     setMedia((prev) => [...prev, ...next]);
@@ -401,11 +400,20 @@ export default function AddServicePage() {
           }}
         >
           <input
-            ref={mediaInputRef}
+            ref={fileInputRef}
             type="file"
-            accept="image/*,video/*"
+            accept="image/*"
             multiple
-            onChange={handleMediaSelected}
+            onChange={handlePhotosSelected}
+            style={{ display: 'none' }}
+          />
+
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handlePhotosSelected}
             style={{ display: 'none' }}
           />
 
@@ -423,48 +431,70 @@ export default function AddServicePage() {
               <div style={{ fontSize: 18, fontWeight: 900, color: BRAND.muted }}>{media.length}/50</div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => mediaInputRef.current?.click()}
+            <div
               style={{
                 width: '100%',
-                height: 220,
+                minHeight: 220,
                 borderRadius: 22,
                 border: '2px dashed #9aa3b1',
                 background: '#fff',
                 color: BRAND.navy,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 14,
-                cursor: 'pointer',
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 12,
+                padding: 16,
+                boxSizing: 'border-box',
               }}
             >
-              <div
+              <button
+                type="button"
+                onClick={() => cameraInputRef.current?.click()}
                 style={{
-                  width: 62,
-                  height: 62,
-                  borderRadius: 999,
-                  border: `3px solid ${BRAND.green}`,
-                  color: BRAND.green,
+                  borderRadius: 20,
+                  border: `2px solid ${BRAND.black}`,
+                  background: BRAND.softBlue,
+                  color: BRAND.navy,
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 44,
-                  fontWeight: 500,
+                  gap: 10,
+                  cursor: 'pointer',
+                  fontSize: 18,
+                  fontWeight: 900,
                 }}
               >
-                +
-              </div>
+                <span style={{ fontSize: 36 }}>📷</span>
+                Camera
+              </button>
 
-              <div style={{ fontSize: 22, fontWeight: 900 }}>Add photo / video</div>
-            </button>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  borderRadius: 20,
+                  border: `2px solid ${BRAND.black}`,
+                  background: BRAND.softGreen,
+                  color: BRAND.navy,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 10,
+                  cursor: 'pointer',
+                  fontSize: 18,
+                  fontWeight: 900,
+                }}
+              >
+                <span style={{ fontSize: 36 }}>🖼️</span>
+                Files
+              </button>
+            </div>
 
             <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '36px 1fr', gap: 8 }}>
               <div style={{ fontSize: 26 }}>🖼️</div>
               <div style={{ fontSize: 16, lineHeight: 1.35, color: BRAND.muted, fontWeight: 900 }}>
-                Add photos and videos from your files.
+                Add up to 50 photos from camera, gallery or files.
               </div>
             </div>
 
@@ -674,10 +704,252 @@ export default function AddServicePage() {
               fontWeight: 900,
             }}
           >
-            Publication goes live only after payment.
+            No payment to publish. £1 is only blocked when you confirm a booking.
+          </div>
+        </div>
+
+        <div
+          style={{
+            position: 'fixed',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 80,
+            background: 'rgba(255,255,255,0.96)',
+            borderTop: '1px solid #e2e7f0',
+            padding: '12px 18px calc(12px + env(safe-area-inset-bottom))',
+          }}
+        >
+          <div style={{ maxWidth: 430, margin: '0 auto' }}>
+            <button
+              type="button"
+              style={{
+                width: '100%',
+                height: 68,
+                borderRadius: 24,
+                border: `2px solid ${BRAND.black}`,
+                background: BRAND.green,
+                color: '#fff',
+                fontSize: 24,
+                fontWeight: 900,
+              }}
+            >
+              Continue
+            </button>
           </div>
         </div>
       </main>
+
+      {sheet === 'title' ? (
+        <SheetBox title="Title" onClose={() => setSheet(null)}>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Add a short and clear title"
+            style={{
+              width: '100%',
+              height: 58,
+              borderRadius: 18,
+              border: `2px solid ${BRAND.black}`,
+              padding: '0 16px',
+              fontSize: 16,
+              fontWeight: 900,
+            }}
+          />
+        </SheetBox>
+      ) : null}
+
+      {sheet === 'description' ? (
+        <SheetBox title="Description" onClose={() => setSheet(null)}>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe your service in detail"
+            style={{
+              width: '100%',
+              height: 150,
+              borderRadius: 18,
+              border: `2px solid ${BRAND.black}`,
+              padding: 16,
+              fontSize: 16,
+              fontWeight: 900,
+              resize: 'none',
+              fontFamily: 'Arial, sans-serif',
+            }}
+          />
+        </SheetBox>
+      ) : null}
+
+      {sheet === 'category' ? (
+        <SheetBox title="Choose category" onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {categories.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  setCategoryId(item.id);
+                  setSubcategory(item.subcategories[0]);
+                  setSheet(null);
+                }}
+                style={{
+                  minHeight: 70,
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.black}`,
+                  background: item.id === categoryId ? BRAND.blue : '#fff',
+                  color: item.id === categoryId ? '#fff' : BRAND.navy,
+                  fontSize: 18,
+                  fontWeight: 900,
+                }}
+              >
+                {item.icon} {item.label}
+              </button>
+            ))}
+          </div>
+        </SheetBox>
+      ) : null}
+
+      {sheet === 'subcategory' ? (
+        <SheetBox title="Choose subcategory" onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {currentCategory.subcategories.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => {
+                  setSubcategory(item);
+                  setSheet(null);
+                }}
+                style={{
+                  minHeight: 58,
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.black}`,
+                  background: item === subcategory ? BRAND.blue : '#fff',
+                  color: item === subcategory ? '#fff' : BRAND.navy,
+                  fontSize: 18,
+                  fontWeight: 900,
+                }}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </SheetBox>
+      ) : null}
+
+      {sheet === 'hours' ? (
+        <SheetBox title="Working hours" onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <input type="time" value={hoursFrom} onChange={(e) => setHoursFrom(e.target.value)} />
+            <input type="time" value={hoursTo} onChange={(e) => setHoursTo(e.target.value)} />
+          </div>
+        </SheetBox>
+      ) : null}
+
+      {sheet === 'payments' ? (
+        <SheetBox title="Payment methods" onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {paymentMethods.map((method) => (
+              <button
+                key={method.id}
+                type="button"
+                onClick={() => togglePayment(method.id)}
+                style={{
+                  minHeight: 62,
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.black}`,
+                  background: selectedPayments.includes(method.id) ? BRAND.softBlue : '#fff',
+                  display: 'grid',
+                  gridTemplateColumns: '48px 1fr 32px',
+                  gap: 12,
+                  alignItems: 'center',
+                  padding: '10px 14px',
+                  textAlign: 'left',
+                }}
+              >
+                <span style={{ fontSize: 24 }}>{method.icon}</span>
+                <span style={{ fontSize: 18, fontWeight: 900 }}>{method.title}</span>
+                <span>{selectedPayments.includes(method.id) ? '✓' : ''}</span>
+              </button>
+            ))}
+          </div>
+        </SheetBox>
+      ) : null}
+
+      {sheet === 'price' ? (
+        <SheetBox title="Price" onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 12 }}>
+            <input
+              value={pricePounds}
+              onChange={(e) => setPricePounds(e.target.value.replace(/[^\d]/g, ''))}
+              placeholder="Pounds"
+              style={{ height: 58, borderRadius: 18, border: `2px solid ${BRAND.black}`, padding: 16 }}
+            />
+            <input
+              value={pricePence}
+              onChange={(e) => setPricePence(e.target.value.replace(/[^\d]/g, '').slice(0, 2))}
+              placeholder="Pence"
+              style={{ height: 58, borderRadius: 18, border: `2px solid ${BRAND.black}`, padding: 16 }}
+            />
+            <input
+              value={priceFrom}
+              onChange={(e) => setPriceFrom(e.target.value.replace(/[^\d]/g, ''))}
+              placeholder="From"
+              style={{ height: 58, borderRadius: 18, border: `2px solid ${BRAND.black}`, padding: 16 }}
+            />
+            <input
+              value={priceTo}
+              onChange={(e) => setPriceTo(e.target.value.replace(/[^\d]/g, ''))}
+              placeholder="To"
+              style={{ height: 58, borderRadius: 18, border: `2px solid ${BRAND.black}`, padding: 16 }}
+            />
+          </div>
+        </SheetBox>
+      ) : null}
+
+      {sheet === 'contacts' ? (
+        <SheetBox title="Contact details" onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {['Phone', 'WhatsApp', 'Telegram', 'Viber', 'Instagram', 'Email', 'Website'].map((item) => (
+              <input
+                key={item}
+                placeholder={item}
+                style={{
+                  width: '100%',
+                  height: 58,
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.black}`,
+                  padding: '0 16px',
+                  fontSize: 16,
+                  fontWeight: 900,
+                }}
+              />
+            ))}
+          </div>
+        </SheetBox>
+      ) : null}
+
+      {sheet === 'address' ? (
+        <SheetBox title="Address" onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {['City', 'District / area', 'Street, building, studio, floor', 'Postcode'].map((item) => (
+              <input
+                key={item}
+                placeholder={item}
+                style={{
+                  width: '100%',
+                  height: 58,
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.black}`,
+                  padding: '0 16px',
+                  fontSize: 16,
+                  fontWeight: 900,
+                }}
+              />
+            ))}
+          </div>
+        </SheetBox>
+      ) : null}
     </>
   );
 }
