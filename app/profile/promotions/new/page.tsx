@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
-  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -16,1039 +16,817 @@ import {
 } from '../../../../services/i18n';
 import { categories } from '../../../../services/categories';
 
-type RadiusOption = {
-  id: '10' | '50' | '100';
-  label: string;
-  km: number;
-  pricePerDay: number;
-  color: string;
-  bg: string;
-};
-
-type PhotoLayout = 'single' | 'grid';
-type BadgeMode = 'none' | 'discount' | 'top' | 'new';
-
-type PaymentMethod = {
-  id: string;
-  title: string;
-  subtitle: string;
-  icon: string;
-};
-
-type PromotionTexts = {
-  pageTitle: string;
-  pageSubtitle: string;
-  category: string;
-  subcategory: string;
-  chooseCategory: string;
-  chooseSubcategory: string;
-  title: string;
-  titlePlaceholder: string;
-  description: string;
-  descriptionPlaceholder: string;
-  badgeText: string;
-  badgeNone: string;
-  badgeDiscount: string;
-  badgeTop: string;
-  badgeNew: string;
-  discountValue: string;
-  discountValuePlaceholder: string;
-  visibility: string;
-  visibilityHint: string;
-  radius: string;
-  perDay: string;
-  duration: string;
-  durationHint: string;
-  days: string;
-  photo: string;
-  photoHint: string;
-  addPhoto: string;
-  photoAdded: string;
-  photoSource: string;
-  gallery: string;
-  camera: string;
-  files: string;
-  layout: string;
-  layoutSingle: string;
-  layoutGrid: string;
-  summary: string;
-  total: string;
-  continueToPayment: string;
-  done: string;
-  enterCategory: string;
-  enterSubcategory: string;
-  enterTitle: string;
-  enterDescription: string;
-  addPhotoAlert: string;
-  close: string;
-  paymentHint: string;
-  firstAdBonus: string;
-  photosCount: string;
-  adjustPhoto: string;
-  photoEditorHint: string;
-  resetPhoto: string;
-  applyPhoto: string;
-  cancel: string;
-  miniVideo: string;
-  miniVideoHint: string;
-  addMiniVideo: string;
-  replaceMiniVideo: string;
-  miniVideoAdded: string;
-  removeMiniVideo: string;
-  videoTooLong: string;
-  invalidVideo: string;
-  livePreview: string;
-  sponsored: string;
-  openAd: string;
-  removeVideoFirst: string;
-  removePhotosFirst: string;
-  choosePaymentMethod: string;
-  paymentMethodsHint: string;
-  selectedPaymentMethod: string;
-  confirmPayment: string;
-  required: string;
-  maxPhotos: string;
-  adWillGoLive: string;
-};
-
 type PhotoItem = {
   id: string;
   name: string;
   preview: string;
+  type: 'image' | 'video';
   scale: number;
+  rotate: number;
   offsetX: number;
   offsetY: number;
+  confirmed: boolean;
 };
 
-type VideoItem = {
-  name: string;
-  preview: string;
+type SheetMode =
+  | null
+  | 'title'
+  | 'description'
+  | 'category'
+  | 'subcategory'
+  | 'price'
+  | 'payment'
+  | 'hours'
+  | 'format'
+  | 'contacts'
+  | 'address';
+
+type PaymentMethod = {
+  id: string;
+  label: string;
+  icon: string;
 };
 
-const MIN_SCALE = 1;
-const MAX_SCALE = 3;
-const MAX_VIDEO_SECONDS = 5;
-const MAX_PHOTOS = 9;
-
-const enTexts: PromotionTexts = {
-  pageTitle: 'Add advertisement',
-  pageSubtitle: 'Create a bright ad to get more views and clients.',
-  category: 'Category',
-  subcategory: 'Subcategory',
-  chooseCategory: 'Choose category',
-  chooseSubcategory: 'Choose subcategory',
-  title: 'Ad title',
-  titlePlaceholder: 'Enter ad title',
-  description: 'Description',
-  descriptionPlaceholder: 'Enter ad description...',
-  badgeText: 'Badge / promo text',
-  badgeNone: 'None',
-  badgeDiscount: 'Discount',
-  badgeTop: 'TOP',
-  badgeNew: 'NEW',
-  discountValue: 'Discount value',
-  discountValuePlaceholder: '20',
-  visibility: 'Ad visibility',
-  visibilityHint:
-    'The ad will be shown inside the selected radius from the current search point.',
-  radius: 'Radius',
-  perDay: 'per day',
-  duration: 'Ad duration',
-  durationHint: 'From 10 to 30 days',
-  days: 'Days',
-  photo: 'Photos',
-  photoHint: 'Add one or several photos for the ad.',
-  addPhoto: 'Add photos',
-  photoAdded: 'Photos added',
-  photoSource: 'Photo source',
-  gallery: 'Gallery',
-  camera: 'Camera',
-  files: 'Files',
-  layout: 'Display layout',
-  layoutSingle: '1 photo',
-  layoutGrid: 'Grid 2–9',
-  summary: 'Ad summary',
-  total: 'Total',
-  continueToPayment: 'Continue to payment',
-  done: 'Payment confirmed. Advertisement will go live after payment.',
-  enterCategory: 'Choose category',
-  enterSubcategory: 'Choose subcategory',
-  enterTitle: 'Enter ad title',
-  enterDescription: 'Enter ad description',
-  addPhotoAlert: 'Add at least one photo or one mini video',
-  close: 'Close',
-  paymentHint: 'Publication goes live only after payment confirmation.',
-  firstAdBonus: 'First ad can be free for 7 days for new users after confirmation.',
-  photosCount: 'Photos',
-  adjustPhoto: 'Adjust photo',
-  photoEditorHint: 'Move with one finger. Zoom with slider.',
-  resetPhoto: 'Reset',
-  applyPhoto: 'Apply',
-  cancel: 'Cancel',
-  miniVideo: 'Mini video',
-  miniVideoHint: 'Optional. Add 1 short loop video up to 5 seconds.',
-  addMiniVideo: 'Add mini video',
-  replaceMiniVideo: 'Replace video',
-  miniVideoAdded: 'Mini video added',
-  removeMiniVideo: 'Remove video',
-  videoTooLong: 'Mini video must be 5 seconds or shorter',
-  invalidVideo: 'Please choose a valid video file',
-  livePreview: 'Live preview',
-  sponsored: 'Sponsored',
-  openAd: 'Open ad',
-  removeVideoFirst: 'Remove the mini video first',
-  removePhotosFirst: 'Remove photos first',
-  choosePaymentMethod: 'Choose payment method',
-  paymentMethodsHint: 'Select one method to continue payment',
-  selectedPaymentMethod: 'Selected method',
-  confirmPayment: 'Pay now',
-  required: 'Required',
-  maxPhotos: 'JPG / PNG / WEBP · max 9',
-  adWillGoLive: 'Your ad will be published only after payment.',
+const BRAND = {
+  navy: '#061b49',
+  black: '#111111',
+  blue: '#087BFF',
+  green: '#23C552',
+  red: '#F0182D',
+  yellow: '#FFF3B8',
+  cream: '#FFFDF8',
+  softBlue: '#EAF2FF',
+  softPink: '#FFF1F7',
+  softGreen: '#EFFFF3',
+  gray: '#707988',
 };
 
-const textByLanguage: Record<AppLanguage, PromotionTexts> = {
-  EN: enTexts,
+const MAX_PHOTOS = 50;
+
+const TEXT: Partial<
+  Record<
+    AppLanguage,
+    {
+      pageTitle: string;
+      pageSubtitle: string;
+      photos: string;
+      addPhotoVideo: string;
+      photoHint: string;
+      toolsHint: string;
+      price: string;
+      setPrice: string;
+      fromTo: string;
+      paymentMethods: string;
+      title: string;
+      titleHint: string;
+      description: string;
+      descriptionHint: string;
+      category: string;
+      subcategory: string;
+      workingHours: string;
+      hoursHint: string;
+      serviceFormat: string;
+      contactDetails: string;
+      contactsHint: string;
+      address: string;
+      addressHint: string;
+      continue: string;
+      save: string;
+      close: string;
+      back: string;
+      chooseCategory: string;
+      chooseSubcategory: string;
+      enterTitle: string;
+      enterDescription: string;
+      priceType: string;
+      fixedPrice: string;
+      priceRange: string;
+      minPrice: string;
+      maxPrice: string;
+      pounds: string;
+      pennies: string;
+      from: string;
+      to: string;
+      card: string;
+      cash: string;
+      applePay: string;
+      googlePay: string;
+      paypal: string;
+      bankTransfer: string;
+      olamepBalance: string;
+      crypto: string;
+      fromTime: string;
+      toTime: string;
+      atMyPlace: string;
+      atClient: string;
+      online: string;
+      phone: string;
+      whatsapp: string;
+      businessWhatsapp: string;
+      telegram: string;
+      viber: string;
+      instagram: string;
+      email: string;
+      website: string;
+      city: string;
+      district: string;
+      street: string;
+      building: string;
+      floor: string;
+      flat: string;
+      publishOnlyAfterPayment: string;
+      alertTitle: string;
+      alertDescription: string;
+      alertCategory: string;
+      alertSubcategory: string;
+      alertPhoto: string;
+      ready: string;
+    }
+  >
+> = {
+  EN: {
+    pageTitle: 'Add advertisement',
+    pageSubtitle: 'Create a bright listing for clients nearby',
+    photos: 'Photos',
+    addPhotoVideo: 'Add photo / video',
+    photoHint: 'Add photos and videos from your files.',
+    toolsHint: 'Move, zoom, rotate and confirm.',
+    price: 'Price',
+    setPrice: 'Set your price',
+    fromTo: 'from £40 to £60',
+    paymentMethods: 'Payment methods',
+    title: 'Title',
+    titleHint: 'Add a short and clear title',
+    description: 'Description',
+    descriptionHint: 'Describe your advertisement in detail',
+    category: 'Category',
+    subcategory: 'Subcategory',
+    workingHours: 'Working hours',
+    hoursHint: '09:00 — 20:00',
+    serviceFormat: 'Service format',
+    contactDetails: 'Contact details',
+    contactsHint: 'Opens a separate sheet of channels',
+    address: 'Address',
+    addressHint: 'Opens a separate address form',
+    continue: 'Continue',
+    save: 'Save',
+    close: 'Close',
+    back: 'Back',
+    chooseCategory: 'Choose category',
+    chooseSubcategory: 'Choose subcategory',
+    enterTitle: 'Enter title',
+    enterDescription: 'Enter description',
+    priceType: 'Price type',
+    fixedPrice: 'Fixed price',
+    priceRange: 'Price range',
+    minPrice: 'Min price',
+    maxPrice: 'Max price',
+    pounds: 'Pounds',
+    pennies: 'Pennies',
+    from: 'From',
+    to: 'To',
+    card: 'Card',
+    cash: 'Cash',
+    applePay: 'Apple Pay',
+    googlePay: 'Google Pay',
+    paypal: 'PayPal',
+    bankTransfer: 'Bank transfer',
+    olamepBalance: 'Olamep balance',
+    crypto: 'Crypto wallet',
+    fromTime: 'From',
+    toTime: 'To',
+    atMyPlace: 'At my place',
+    atClient: 'At client',
+    online: 'Online',
+    phone: 'Phone',
+    whatsapp: 'WhatsApp',
+    businessWhatsapp: 'Business WhatsApp',
+    telegram: 'Telegram',
+    viber: 'Viber',
+    instagram: 'Instagram',
+    email: 'Email',
+    website: 'Website',
+    city: 'City',
+    district: 'District / area',
+    street: 'Street',
+    building: 'Building',
+    floor: 'Floor',
+    flat: 'Flat / studio',
+    publishOnlyAfterPayment: 'Publication goes live only after payment.',
+    alertTitle: 'Please add title',
+    alertDescription: 'Please add description',
+    alertCategory: 'Please choose category',
+    alertSubcategory: 'Please choose subcategory',
+    alertPhoto: 'Please add at least one photo or video',
+    ready: 'Ready',
+  },
   RU: {
-    ...enTexts,
     pageTitle: 'Добавить рекламу',
-    pageSubtitle: 'Создайте яркую рекламу, чтобы получить больше просмотров и клиентов.',
+    pageSubtitle: 'Создайте яркое объявление, чтобы клиенты нашли вас рядом',
+    photos: 'Фото',
+    addPhotoVideo: 'Добавить фото / видео',
+    photoHint: 'Добавьте фото и видео из файлов.',
+    toolsHint: 'Двигайте, увеличивайте, поворачивайте и фиксируйте.',
+    price: 'Цена',
+    setPrice: 'Установите цену',
+    fromTo: 'от £40 до £60',
+    paymentMethods: 'Способы оплаты',
+    title: 'Заголовок',
+    titleHint: 'Добавьте короткий и понятный заголовок',
+    description: 'Описание',
+    descriptionHint: 'Опишите рекламу подробно',
     category: 'Категория',
     subcategory: 'Подкатегория',
+    workingHours: 'Часы работы',
+    hoursHint: '09:00 — 20:00',
+    serviceFormat: 'Формат услуги',
+    contactDetails: 'Контактные данные',
+    contactsHint: 'Открывается отдельное окно каналов связи',
+    address: 'Адрес',
+    addressHint: 'Открывается отдельная форма адреса',
+    continue: 'Продолжить',
+    save: 'Сохранить',
+    close: 'Закрыть',
+    back: 'Назад',
     chooseCategory: 'Выберите категорию',
     chooseSubcategory: 'Выберите подкатегорию',
-    title: 'Название рекламы',
-    titlePlaceholder: 'Введите название рекламы',
-    description: 'Описание',
-    descriptionPlaceholder: 'Введите описание рекламы...',
-    badgeText: 'Бейдж / промо текст',
-    badgeNone: 'Ничего',
-    badgeDiscount: 'Скидка',
-    badgeTop: 'TOP',
-    badgeNew: 'NEW',
-    discountValue: 'Размер скидки',
-    discountValuePlaceholder: '20',
-    visibility: 'Видимость рекламы',
-    visibilityHint:
-      'Реклама будет показываться в выбранном радиусе от текущей точки поиска услуг.',
-    radius: 'Радиус',
-    perDay: 'в день',
-    duration: 'Срок рекламы',
-    durationHint: 'От 10 до 30 дней',
-    days: 'Дни',
-    photo: 'Фото',
-    photoHint: 'Добавьте одно или несколько фото для рекламы.',
-    addPhoto: 'Добавить фото',
-    photoAdded: 'Фото добавлены',
-    photoSource: 'Источник файла',
-    gallery: 'Галерея',
-    camera: 'Камера',
-    files: 'Файлы',
-    layout: 'Вид показа',
-    layoutSingle: '1 фото',
-    layoutGrid: 'Сетка 2–9',
-    summary: 'Итог рекламы',
-    total: 'Итого',
-    continueToPayment: 'Перейти к оплате',
-    done: 'Оплата подтверждена. Реклама будет опубликована после оплаты.',
-    enterCategory: 'Выберите категорию',
-    enterSubcategory: 'Выберите подкатегорию',
-    enterTitle: 'Введите название рекламы',
-    enterDescription: 'Введите описание рекламы',
-    addPhotoAlert: 'Добавьте хотя бы одно фото или одно мини видео',
-    close: 'Закрыть',
-    paymentHint: 'Публикация выйдет только после подтверждения оплаты.',
-    firstAdBonus:
-      'Первая реклама может быть бесплатной на 7 дней для новых пользователей после подтверждения.',
-    photosCount: 'Фото',
-    adjustPhoto: 'Настроить фото',
-    photoEditorHint: 'Перемещай одним пальцем. Увеличивай ползунком.',
-    resetPhoto: 'Сбросить',
-    applyPhoto: 'Применить',
-    cancel: 'Отмена',
-    miniVideo: 'Мини видео',
-    miniVideoHint: 'Необязательно. Добавьте 1 короткое видео до 5 секунд.',
-    addMiniVideo: 'Добавить мини видео',
-    replaceMiniVideo: 'Заменить видео',
-    miniVideoAdded: 'Мини видео добавлено',
-    removeMiniVideo: 'Удалить видео',
-    videoTooLong: 'Мини видео должно быть не длиннее 5 секунд',
-    invalidVideo: 'Выберите корректный видеофайл',
-    livePreview: 'Предварительный просмотр',
-    sponsored: 'Реклама',
-    openAd: 'Открыть',
-    removeVideoFirst: 'Сначала удалите мини видео',
-    removePhotosFirst: 'Сначала удалите фото',
-    choosePaymentMethod: 'Выберите способ оплаты',
-    paymentMethodsHint: 'Выберите один способ для продолжения оплаты',
-    selectedPaymentMethod: 'Выбранный способ',
-    confirmPayment: 'Оплатить',
-    required: 'Обязательно',
-    maxPhotos: 'JPG / PNG / WEBP · максимум 9',
-    adWillGoLive: 'Реклама будет опубликована только после оплаты.',
-  },
-  UA: {
-    ...enTexts,
-    pageTitle: 'Додати рекламу',
-    pageSubtitle: 'Створіть яскраву рекламу, щоб отримати більше переглядів і клієнтів.',
-    category: 'Категорія',
-    subcategory: 'Підкатегорія',
-    chooseCategory: 'Оберіть категорію',
-    chooseSubcategory: 'Оберіть підкатегорію',
-    title: 'Назва реклами',
-    titlePlaceholder: 'Введіть назву реклами',
-    description: 'Опис',
-    descriptionPlaceholder: 'Введіть опис реклами...',
-    badgeText: 'Бейдж / промо текст',
-    badgeNone: 'Немає',
-    badgeDiscount: 'Знижка',
-    discountValue: 'Розмір знижки',
-    visibility: 'Видимість реклами',
-    radius: 'Радіус',
-    perDay: 'на день',
-    duration: 'Тривалість реклами',
-    durationHint: 'Від 10 до 30 днів',
-    days: 'Дні',
-    photo: 'Фото',
-    photoHint: 'Додайте одне або кілька фото для реклами.',
-    addPhoto: 'Додати фото',
-    photoSource: 'Джерело файлу',
-    gallery: 'Галерея',
-    camera: 'Камера',
-    files: 'Файли',
-    layout: 'Вигляд показу',
-    layoutSingle: '1 фото',
-    layoutGrid: 'Сітка 2–9',
-    summary: 'Підсумок реклами',
-    total: 'Разом',
-    continueToPayment: 'Перейти до оплати',
-    done: 'Оплата підтверджена. Реклама буде опублікована після оплати.',
-    choosePaymentMethod: 'Оберіть спосіб оплати',
-    paymentMethodsHint: 'Оберіть один спосіб для продовження оплати',
-    confirmPayment: 'Оплатити',
-    paymentHint: 'Публікація буде доступна тільки після підтвердження оплати.',
-    firstAdBonus:
-      'Перша реклама може бути безкоштовною на 7 днів для нових користувачів після підтвердження.',
-    required: 'Обовʼязково',
-    adWillGoLive: 'Реклама буде опублікована тільки після оплати.',
-  },
-  ES: {
-    ...enTexts,
-    pageTitle: 'Añadir publicidad',
-    pageSubtitle: 'Crea un anuncio llamativo para conseguir más vistas y clientes.',
-    category: 'Categoría',
-    subcategory: 'Subcategoría',
-    chooseCategory: 'Elegir categoría',
-    chooseSubcategory: 'Elegir subcategoría',
-    title: 'Título del anuncio',
-    titlePlaceholder: 'Introduce el título del anuncio',
-    description: 'Descripción',
-    descriptionPlaceholder: 'Introduce la descripción del anuncio...',
-    badgeText: 'Texto promocional',
-    badgeNone: 'Ninguno',
-    badgeDiscount: 'Descuento',
-    discountValue: 'Valor del descuento',
-    visibility: 'Visibilidad del anuncio',
-    visibilityHint: 'El anuncio se mostrará dentro del radio seleccionado.',
-    radius: 'Radio',
-    perDay: 'por día',
-    duration: 'Duración',
-    durationHint: 'De 10 a 30 días',
-    days: 'Días',
-    photo: 'Fotos',
-    photoHint: 'Añade una o varias fotos para el anuncio.',
-    addPhoto: 'Añadir fotos',
-    photoSource: 'Fuente del archivo',
-    gallery: 'Galería',
-    camera: 'Cámara',
-    files: 'Archivos',
-    layout: 'Diseño',
-    layoutSingle: '1 foto',
-    layoutGrid: 'Cuadrícula 2–9',
-    summary: 'Resumen del anuncio',
-    total: 'Total',
-    continueToPayment: 'Continuar al pago',
-    done: 'Pago confirmado. El anuncio se publicará después del pago.',
-    choosePaymentMethod: 'Elegir método de pago',
-    confirmPayment: 'Pagar ahora',
-    paymentHint: 'La publicación se activa solo después del pago.',
-    firstAdBonus:
-      'El primer anuncio puede ser gratis durante 7 días para nuevos usuarios tras la confirmación.',
-    required: 'Obligatorio',
-    adWillGoLive: 'Tu anuncio se publicará solo después del pago.',
-  },
-  CZ: {
-    ...enTexts,
-    pageTitle: 'Přidat reklamu',
-    pageSubtitle: 'Vytvořte výraznou reklamu pro více zobrazení a klientů.',
-    category: 'Kategorie',
-    subcategory: 'Podkategorie',
-    chooseCategory: 'Vyberte kategorii',
-    chooseSubcategory: 'Vyberte podkategorii',
-    title: 'Název reklamy',
-    titlePlaceholder: 'Zadejte název reklamy',
-    description: 'Popis',
-    descriptionPlaceholder: 'Zadejte popis reklamy...',
-    badgeText: 'Štítek / promo text',
-    badgeNone: 'Žádný',
-    badgeDiscount: 'Sleva',
-    visibility: 'Viditelnost reklamy',
-    visibilityHint: 'Reklama se zobrazí ve vybraném okruhu od místa hledání.',
-    radius: 'Okruh',
-    perDay: 'za den',
-    duration: 'Délka reklamy',
-    durationHint: 'Od 10 do 30 dnů',
-    days: 'Dny',
-    photo: 'Fotky',
-    photoHint: 'Přidejte jednu nebo více fotek pro reklamu.',
-    addPhoto: 'Přidat fotky',
-    photoSource: 'Zdroj souboru',
-    gallery: 'Galerie',
-    camera: 'Kamera',
-    files: 'Soubory',
-    layout: 'Zobrazení',
-    layoutSingle: '1 fotka',
-    layoutGrid: 'Mřížka 2–9',
-    summary: 'Shrnutí reklamy',
-    total: 'Celkem',
-    continueToPayment: 'Pokračovat k platbě',
-    done: 'Platba potvrzena. Reklama bude zveřejněna po platbě.',
-    choosePaymentMethod: 'Vyberte způsob platby',
-    confirmPayment: 'Zaplatit',
-    paymentHint: 'Reklama se zveřejní až po potvrzení platby.',
-    firstAdBonus:
-      'První reklama může být pro nové uživatele zdarma na 7 dní po potvrzení.',
-    required: 'Povinné',
-    adWillGoLive: 'Reklama bude zveřejněna pouze po platbě.',
-  },
-  DE: {
-    ...enTexts,
-    pageTitle: 'Anzeige hinzufügen',
-    pageSubtitle: 'Erstelle eine auffällige Anzeige für mehr Aufrufe und Kunden.',
-    category: 'Kategorie',
-    subcategory: 'Unterkategorie',
-    chooseCategory: 'Kategorie wählen',
-    chooseSubcategory: 'Unterkategorie wählen',
-    title: 'Anzeigentitel',
-    titlePlaceholder: 'Anzeigentitel eingeben',
-    description: 'Beschreibung',
-    descriptionPlaceholder: 'Beschreibung eingeben...',
-    badgeText: 'Badge / Promo-Text',
-    badgeNone: 'Keine',
-    badgeDiscount: 'Rabatt',
-    visibility: 'Sichtbarkeit',
-    visibilityHint: 'Die Anzeige wird im ausgewählten Radius angezeigt.',
-    radius: 'Radius',
-    perDay: 'pro Tag',
-    duration: 'Dauer',
-    durationHint: 'Von 10 bis 30 Tagen',
-    days: 'Tage',
-    photo: 'Fotos',
-    photoHint: 'Füge ein oder mehrere Fotos hinzu.',
-    addPhoto: 'Fotos hinzufügen',
-    gallery: 'Galerie',
-    camera: 'Kamera',
-    files: 'Dateien',
-    layout: 'Layout',
-    layoutSingle: '1 Foto',
-    layoutGrid: 'Raster 2–9',
-    summary: 'Zusammenfassung',
-    total: 'Gesamt',
-    continueToPayment: 'Weiter zur Zahlung',
-    done: 'Zahlung bestätigt. Die Anzeige wird nach der Zahlung veröffentlicht.',
-    choosePaymentMethod: 'Zahlungsmethode wählen',
-    confirmPayment: 'Jetzt zahlen',
-    paymentHint: 'Veröffentlichung nur nach Zahlungsbestätigung.',
-    firstAdBonus:
-      'Die erste Anzeige kann für neue Nutzer nach Bestätigung 7 Tage kostenlos sein.',
-    required: 'Pflichtfeld',
-    adWillGoLive: 'Die Anzeige wird erst nach der Zahlung veröffentlicht.',
-  },
-  PL: {
-    ...enTexts,
-    pageTitle: 'Dodaj reklamę',
-    pageSubtitle: 'Stwórz wyraźną reklamę, aby zdobyć więcej wyświetleń i klientów.',
-    category: 'Kategoria',
-    subcategory: 'Podkategoria',
-    chooseCategory: 'Wybierz kategorię',
-    chooseSubcategory: 'Wybierz podkategorię',
-    title: 'Tytuł reklamy',
-    titlePlaceholder: 'Wpisz tytuł reklamy',
-    description: 'Opis',
-    descriptionPlaceholder: 'Wpisz opis reklamy...',
-    badgeText: 'Etykieta / promo',
-    badgeNone: 'Brak',
-    badgeDiscount: 'Zniżka',
-    visibility: 'Widoczność reklamy',
-    radius: 'Promień',
-    perDay: 'za dzień',
-    duration: 'Czas trwania',
-    durationHint: 'Od 10 do 30 dni',
-    days: 'Dni',
-    photo: 'Zdjęcia',
-    addPhoto: 'Dodaj zdjęcia',
-    gallery: 'Galeria',
-    camera: 'Kamera',
-    files: 'Pliki',
-    layout: 'Układ',
-    layoutSingle: '1 zdjęcie',
-    layoutGrid: 'Siatka 2–9',
-    summary: 'Podsumowanie reklamy',
-    total: 'Razem',
-    continueToPayment: 'Przejdź do płatności',
-    done: 'Płatność potwierdzona. Reklama zostanie opublikowana po płatności.',
-    choosePaymentMethod: 'Wybierz metodę płatności',
-    confirmPayment: 'Zapłać',
-    paymentHint: 'Publikacja nastąpi tylko po potwierdzeniu płatności.',
-    required: 'Wymagane',
-    adWillGoLive: 'Reklama zostanie opublikowana tylko po płatności.',
-  },
-  IT: {
-    ...enTexts,
-    pageTitle: 'Aggiungi pubblicità',
-    pageSubtitle: 'Crea un annuncio brillante per ottenere più visite e clienti.',
-    category: 'Categoria',
-    subcategory: 'Sottocategoria',
-    chooseCategory: 'Scegli categoria',
-    chooseSubcategory: 'Scegli sottocategoria',
-    title: 'Titolo annuncio',
-    titlePlaceholder: 'Inserisci il titolo',
-    description: 'Descrizione',
-    descriptionPlaceholder: 'Inserisci descrizione...',
-    badgeText: 'Badge / testo promo',
-    badgeNone: 'Nessuno',
-    badgeDiscount: 'Sconto',
-    visibility: 'Visibilità annuncio',
-    radius: 'Raggio',
-    perDay: 'al giorno',
-    duration: 'Durata',
-    days: 'Giorni',
-    photo: 'Foto',
-    addPhoto: 'Aggiungi foto',
-    gallery: 'Galleria',
-    camera: 'Camera',
-    files: 'File',
-    layout: 'Layout',
-    layoutSingle: '1 foto',
-    layoutGrid: 'Griglia 2–9',
-    summary: 'Riepilogo',
-    total: 'Totale',
-    continueToPayment: 'Continua al pagamento',
-    done: 'Pagamento confermato. L’annuncio sarà pubblicato dopo il pagamento.',
-    choosePaymentMethod: 'Scegli metodo di pagamento',
-    confirmPayment: 'Paga ora',
-    paymentHint: 'Pubblicazione solo dopo conferma del pagamento.',
-    required: 'Obbligatorio',
-    adWillGoLive: 'Il tuo annuncio sarà pubblicato solo dopo il pagamento.',
-  },
-  FR: {
-    ...enTexts,
-    pageTitle: 'Ajouter une publicité',
-    pageSubtitle: 'Créez une publicité visible pour obtenir plus de vues et de clients.',
-    category: 'Catégorie',
-    subcategory: 'Sous-catégorie',
-    chooseCategory: 'Choisir une catégorie',
-    chooseSubcategory: 'Choisir une sous-catégorie',
-    title: 'Titre de la publicité',
-    titlePlaceholder: 'Entrez le titre',
-    description: 'Description',
-    descriptionPlaceholder: 'Entrez la description...',
-    badgeText: 'Badge / texte promo',
-    badgeNone: 'Aucun',
-    badgeDiscount: 'Réduction',
-    visibility: 'Visibilité',
-    radius: 'Rayon',
-    perDay: 'par jour',
-    duration: 'Durée',
-    days: 'Jours',
-    photo: 'Photos',
-    addPhoto: 'Ajouter des photos',
-    gallery: 'Galerie',
-    camera: 'Caméra',
-    files: 'Fichiers',
-    layout: 'Affichage',
-    layoutSingle: '1 photo',
-    layoutGrid: 'Grille 2–9',
-    summary: 'Résumé',
-    total: 'Total',
-    continueToPayment: 'Continuer au paiement',
-    done: 'Paiement confirmé. La publicité sera publiée après le paiement.',
-    choosePaymentMethod: 'Choisir le moyen de paiement',
-    confirmPayment: 'Payer',
-    paymentHint: 'Publication uniquement après confirmation du paiement.',
-    required: 'Obligatoire',
-    adWillGoLive: 'Votre publicité sera publiée uniquement après le paiement.',
-  },
-  AR: {
-    ...enTexts,
-    pageTitle: 'إضافة إعلان',
-    pageSubtitle: 'أنشئ إعلاناً واضحاً للحصول على مشاهدات وعملاء أكثر.',
-    category: 'الفئة',
-    subcategory: 'الفئة الفرعية',
-    chooseCategory: 'اختر الفئة',
-    chooseSubcategory: 'اختر الفئة الفرعية',
-    title: 'عنوان الإعلان',
-    titlePlaceholder: 'أدخل عنوان الإعلان',
-    description: 'الوصف',
-    descriptionPlaceholder: 'أدخل وصف الإعلان...',
-    badgeText: 'شارة / نص ترويجي',
-    badgeNone: 'لا يوجد',
-    badgeDiscount: 'خصم',
-    visibility: 'ظهور الإعلان',
-    radius: 'النطاق',
-    perDay: 'في اليوم',
-    duration: 'مدة الإعلان',
-    days: 'أيام',
-    photo: 'الصور',
-    addPhoto: 'إضافة صور',
-    gallery: 'المعرض',
-    camera: 'الكاميرا',
-    files: 'الملفات',
-    layout: 'طريقة العرض',
-    layoutSingle: 'صورة واحدة',
-    layoutGrid: 'شبكة 2–9',
-    summary: 'ملخص الإعلان',
-    total: 'الإجمالي',
-    continueToPayment: 'المتابعة للدفع',
-    done: 'تم تأكيد الدفع. سيتم نشر الإعلان بعد الدفع.',
-    choosePaymentMethod: 'اختر طريقة الدفع',
-    confirmPayment: 'ادفع الآن',
-    paymentHint: 'يتم النشر فقط بعد تأكيد الدفع.',
-    required: 'مطلوب',
-    adWillGoLive: 'سيتم نشر إعلانك فقط بعد الدفع.',
+    enterTitle: 'Введите заголовок',
+    enterDescription: 'Введите описание',
+    priceType: 'Тип цены',
+    fixedPrice: 'Одна цена',
+    priceRange: 'Цена от и до',
+    minPrice: 'Цена от',
+    maxPrice: 'Цена до',
+    pounds: 'Фунты',
+    pennies: 'Пенсы',
+    from: 'От',
+    to: 'До',
+    card: 'Карта',
+    cash: 'Наличные',
+    applePay: 'Apple Pay',
+    googlePay: 'Google Pay',
+    paypal: 'PayPal',
+    bankTransfer: 'Банк',
+    olamepBalance: 'Баланс Olamep',
+    crypto: 'Криптокошелёк',
+    fromTime: 'С',
+    toTime: 'До',
+    atMyPlace: 'У меня',
+    atClient: 'Выезд к клиенту',
+    online: 'Онлайн',
+    phone: 'Телефон',
+    whatsapp: 'WhatsApp',
+    businessWhatsapp: 'Business WhatsApp',
+    telegram: 'Telegram',
+    viber: 'Viber',
+    instagram: 'Instagram',
+    email: 'Email',
+    website: 'Сайт',
+    city: 'Город',
+    district: 'Район / зона',
+    street: 'Улица',
+    building: 'Дом',
+    floor: 'Этаж',
+    flat: 'Квартира / студия',
+    publishOnlyAfterPayment: 'Публикация выйдет только после оплаты.',
+    alertTitle: 'Добавьте заголовок',
+    alertDescription: 'Добавьте описание',
+    alertCategory: 'Выберите категорию',
+    alertSubcategory: 'Выберите подкатегорию',
+    alertPhoto: 'Добавьте хотя бы одно фото или видео',
+    ready: 'Готово',
   },
 };
 
-function getRadiusOptions(language: AppLanguage): RadiusOption[] {
-  const kmLabel = language === 'RU' || language === 'UA' ? 'км' : 'km';
-
-  return [
-    { id: '10', label: `10 ${kmLabel}`, km: 10, pricePerDay: 1, color: '#2f8c67', bg: '#edf9ef' },
-    { id: '50', label: `50 ${kmLabel}`, km: 50, pricePerDay: 2, color: '#c69212', bg: '#fff7d6' },
-    { id: '100', label: `100 ${kmLabel}`, km: 100, pricePerDay: 3.5, color: '#e44b4b', bg: '#ffe6e6' },
-  ];
+function getText(language: AppLanguage) {
+  return TEXT[language] || TEXT.EN!;
 }
 
-function getPaymentMethods(language: AppLanguage): PaymentMethod[] {
-  if (language === 'RU') {
-    return [
-      { id: 'card', title: 'Банковская карта', subtitle: 'Visa / Mastercard', icon: '💳' },
-      { id: 'wallet', title: 'Баланс Olamep', subtitle: 'Оплата со счёта приложения', icon: '👛' },
-      { id: 'paypal', title: 'PayPal', subtitle: 'Быстрая оплата', icon: '🅿️' },
-      { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Мгновенная оплата', icon: '' },
-      { id: 'google-pay', title: 'Google Pay', subtitle: 'Мгновенная оплата', icon: 'G' },
-      { id: 'crypto', title: 'Криптокошелёк', subtitle: 'USDT / USDC', icon: '₿' },
-      { id: 'bank', title: 'Банковский перевод', subtitle: 'Ручной перевод', icon: '🏦' },
-    ];
-  }
-
-  if (language === 'UA') {
-    return [
-      { id: 'card', title: 'Банківська карта', subtitle: 'Visa / Mastercard', icon: '💳' },
-      { id: 'wallet', title: 'Баланс Olamep', subtitle: 'Оплата з балансу додатка', icon: '👛' },
-      { id: 'paypal', title: 'PayPal', subtitle: 'Швидка оплата', icon: '🅿️' },
-      { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Миттєва оплата', icon: '' },
-      { id: 'google-pay', title: 'Google Pay', subtitle: 'Миттєва оплата', icon: 'G' },
-      { id: 'crypto', title: 'Криптогаманець', subtitle: 'USDT / USDC', icon: '₿' },
-      { id: 'bank', title: 'Банківський переказ', subtitle: 'Ручний переказ', icon: '🏦' },
-    ];
-  }
-
-  if (language === 'ES') {
-    return [
-      { id: 'card', title: 'Tarjeta bancaria', subtitle: 'Visa / Mastercard', icon: '💳' },
-      { id: 'wallet', title: 'Saldo Olamep', subtitle: 'Pagar desde el saldo', icon: '👛' },
-      { id: 'paypal', title: 'PayPal', subtitle: 'Pago rápido', icon: '🅿️' },
-      { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Pago instantáneo', icon: '' },
-      { id: 'google-pay', title: 'Google Pay', subtitle: 'Pago instantáneo', icon: 'G' },
-      { id: 'crypto', title: 'Billetera cripto', subtitle: 'USDT / USDC', icon: '₿' },
-      { id: 'bank', title: 'Transferencia bancaria', subtitle: 'Transferencia manual', icon: '🏦' },
-    ];
-  }
-
-  return [
-    { id: 'card', title: 'Bank card', subtitle: 'Visa / Mastercard', icon: '💳' },
-    { id: 'wallet', title: 'Olamep balance', subtitle: 'Pay from app balance', icon: '👛' },
-    { id: 'paypal', title: 'PayPal', subtitle: 'Fast checkout', icon: '🅿️' },
-    { id: 'apple-pay', title: 'Apple Pay', subtitle: 'Instant pay', icon: '' },
-    { id: 'google-pay', title: 'Google Pay', subtitle: 'Instant pay', icon: 'G' },
-    { id: 'crypto', title: 'Crypto wallet', subtitle: 'USDT / USDC', icon: '₿' },
-    { id: 'bank', title: 'Bank transfer', subtitle: 'Manual transfer', icon: '🏦' },
-  ];
+function uid() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-function getSafeScale(value: number) {
-  return clamp(Number.isFinite(value) ? value : 1, MIN_SCALE, MAX_SCALE);
+function ShellCard({
+  children,
+  style,
+}: {
+  children: ReactNode;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <div
+      style={{
+        border: `2px solid ${BRAND.black}`,
+        borderRadius: 22,
+        background: '#fff',
+        boxShadow: '0 3px 0 rgba(0,0,0,0.06)',
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
 }
 
-function getBadgeLabel(mode: BadgeMode, discountValue: string, text: PromotionTexts) {
-  if (mode === 'discount') {
-    const clean = discountValue.replace(/[^\d]/g, '');
-    return clean ? `-${clean}%` : '-20%';
-  }
-  if (mode === 'top') return text.badgeTop;
-  if (mode === 'new') return text.badgeNew;
-  return '';
+function IconBox({
+  icon,
+  bg = '#F5F7FF',
+}: {
+  icon: string;
+  bg?: string;
+}) {
+  return (
+    <div
+      style={{
+        width: 50,
+        height: 50,
+        borderRadius: 12,
+        border: `1.8px solid ${BRAND.black}`,
+        background: bg,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 27,
+        flexShrink: 0,
+      }}
+    >
+      {icon}
+    </div>
+  );
 }
 
-function translateCategoryLabel(categoryId: string, language: AppLanguage, fallback?: string) {
-  const map: Record<string, Partial<Record<AppLanguage, string>>> = {
-    beauty: { EN: 'Beauty', RU: 'Красота', UA: 'Краса', ES: 'Belleza', CZ: 'Krása', DE: 'Beauty', PL: 'Uroda', FR: 'Beauté', IT: 'Beauty', AR: 'الجمال' },
-    barber: { EN: 'Barber', RU: 'Барбер', UA: 'Барбер', ES: 'Barbero', CZ: 'Barber', DE: 'Barber', PL: 'Barber', FR: 'Barbier', IT: 'Barber', AR: 'حلاقة' },
-    wellness: { EN: 'Wellness', RU: 'Велнес', UA: 'Велнес', ES: 'Bienestar', CZ: 'Wellness', DE: 'Wellness', PL: 'Wellness', FR: 'Bien-être', IT: 'Benessere', AR: 'عافية' },
-    home: { EN: 'Home', RU: 'Дом', UA: 'Дім', ES: 'Hogar', CZ: 'Domov', DE: 'Zuhause', PL: 'Dom', FR: 'Maison', IT: 'Casa', AR: 'المنزل' },
-    repairs: { EN: 'Repairs', RU: 'Ремонт', UA: 'Ремонт', ES: 'Reparaciones', CZ: 'Opravy', DE: 'Reparaturen', PL: 'Naprawy', FR: 'Réparations', IT: 'Riparazioni', AR: 'إصلاحات' },
-    tech: { EN: 'Tech', RU: 'Техника', UA: 'Техніка', ES: 'Tecnología', CZ: 'Technika', DE: 'Technik', PL: 'Technika', FR: 'Tech', IT: 'Tech', AR: 'تقنية' },
-    fashion: { EN: 'Fashion', RU: 'Мода', UA: 'Мода', ES: 'Moda', CZ: 'Móda', DE: 'Mode', PL: 'Moda', FR: 'Mode', IT: 'Moda', AR: 'موضة' },
-    pets: { EN: 'Pets', RU: 'Питомцы', UA: 'Тварини', ES: 'Mascotas', CZ: 'Mazlíčci', DE: 'Haustiere', PL: 'Zwierzęta', FR: 'Animaux', IT: 'Animali', AR: 'حيوانات' },
-    auto: { EN: 'Auto', RU: 'Авто', UA: 'Авто', ES: 'Auto', CZ: 'Auto', DE: 'Auto', PL: 'Auto', FR: 'Auto', IT: 'Auto', AR: 'سيارات' },
-    moving: { EN: 'Moving', RU: 'Переезд', UA: 'Переїзд', ES: 'Mudanza', CZ: 'Stěhování', DE: 'Umzug', PL: 'Przeprowadzka', FR: 'Déménagement', IT: 'Trasloco', AR: 'نقل' },
-    fitness: { EN: 'Fitness', RU: 'Фитнес', UA: 'Фітнес', ES: 'Fitness', CZ: 'Fitness', DE: 'Fitness', PL: 'Fitness', FR: 'Fitness', IT: 'Fitness', AR: 'لياقة' },
-    education: { EN: 'Education', RU: 'Обучение', UA: 'Навчання', ES: 'Educación', CZ: 'Vzdělání', DE: 'Bildung', PL: 'Edukacja', FR: 'Éducation', IT: 'Formazione', AR: 'تعليم' },
-    events: { EN: 'Events', RU: 'События', UA: 'Події', ES: 'Eventos', CZ: 'Události', DE: 'Events', PL: 'Wydarzenia', FR: 'Événements', IT: 'Eventi', AR: 'فعاليات' },
-    activities: { EN: 'Activities', RU: 'Активности', UA: 'Активності', ES: 'Actividades', CZ: 'Aktivity', DE: 'Aktivitäten', PL: 'Aktywności', FR: 'Activités', IT: 'Attività', AR: 'أنشطة' },
-    creative: { EN: 'Creative', RU: 'Креатив', UA: 'Креатив', ES: 'Creativo', CZ: 'Kreativa', DE: 'Kreativ', PL: 'Kreatywne', FR: 'Créatif', IT: 'Creativo', AR: 'إبداعي' },
-  };
+function RowButton({
+  icon,
+  iconBg,
+  title,
+  subtitle,
+  right,
+  onClick,
+}: {
+  icon: string;
+  iconBg?: string;
+  title: string;
+  subtitle?: string;
+  right?: ReactNode;
+  onClick?: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        width: '100%',
+        minHeight: 72,
+        border: `2px solid ${BRAND.black}`,
+        borderRadius: 16,
+        background: '#fff',
+        display: 'grid',
+        gridTemplateColumns: '56px 1fr auto',
+        alignItems: 'center',
+        gap: 12,
+        padding: '10px 12px',
+        textAlign: 'left',
+        cursor: 'pointer',
+      }}
+    >
+      <IconBox icon={icon} bg={iconBg} />
 
-  return map[categoryId]?.[language] || fallback || categoryId;
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 17,
+            fontWeight: 950,
+            color: BRAND.navy,
+            lineHeight: 1.15,
+          }}
+        >
+          {title}
+        </div>
+
+        {subtitle ? (
+          <div
+            style={{
+              marginTop: 4,
+              fontSize: 13,
+              fontWeight: 800,
+              color: BRAND.gray,
+              lineHeight: 1.25,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {subtitle}
+          </div>
+        ) : null}
+      </div>
+
+      {right || (
+        <div
+          style={{
+            fontSize: 34,
+            fontWeight: 900,
+            color: BRAND.black,
+            lineHeight: 1,
+          }}
+        >
+          ›
+        </div>
+      )}
+    </button>
+  );
 }
 
-function translateSubcategory(value: string, language: AppLanguage) {
-  const dict: Record<string, Partial<Record<AppLanguage, string>>> = {
-    Hair: { RU: 'Волосы', UA: 'Волосся', ES: 'Cabello', CZ: 'Vlasy', DE: 'Haare', PL: 'Włosy', FR: 'Cheveux', IT: 'Capelli', AR: 'الشعر' },
-    Nails: { RU: 'Ногти', UA: 'Нігті', ES: 'Uñas', CZ: 'Nehty', DE: 'Nägel', PL: 'Paznokcie', FR: 'Ongles', IT: 'Unghie', AR: 'الأظافر' },
-    Makeup: { RU: 'Макияж', UA: 'Макіяж', ES: 'Maquillaje', CZ: 'Make-up', DE: 'Make-up', PL: 'Makijaż', FR: 'Maquillage', IT: 'Make-up', AR: 'مكياج' },
-    Massage: { RU: 'Массаж', UA: 'Масаж', ES: 'Masaje', CZ: 'Masáž', DE: 'Massage', PL: 'Masaż', FR: 'Massage', IT: 'Massaggio', AR: 'مساج' },
-    Cleaning: { RU: 'Уборка', UA: 'Прибирання', ES: 'Limpieza', CZ: 'Úklid', DE: 'Reinigung', PL: 'Sprzątanie', FR: 'Nettoyage', IT: 'Pulizia', AR: 'تنظيف' },
-    'Phone Repair': { RU: 'Ремонт телефона', UA: 'Ремонт телефону', ES: 'Reparación de teléfono', CZ: 'Oprava telefonu', DE: 'Handyreparatur', PL: 'Naprawa telefonu', FR: 'Réparation téléphone', IT: 'Riparazione telefono', AR: 'إصلاح الهاتف' },
-    'Computer Repair': { RU: 'Ремонт компьютера', UA: 'Ремонт компʼютера', ES: 'Reparación de ordenador', CZ: 'Oprava počítače', DE: 'Computerreparatur', PL: 'Naprawa komputera', FR: 'Réparation ordinateur', IT: 'Riparazione computer', AR: 'إصلاح الكمبيوتر' },
-    'Dog Walking': { RU: 'Выгул собак', UA: 'Вигул собак', ES: 'Paseo de perros', CZ: 'Venčení psů', DE: 'Gassi-Service', PL: 'Wyprowadzanie psów', FR: 'Promenade de chiens', IT: 'Passeggiata cani', AR: 'تمشية الكلاب' },
-    'Pet Sitting': { RU: 'Передержка питомцев', UA: 'Перетримка тварин', ES: 'Cuidado de mascotas', CZ: 'Hlídání mazlíčků', DE: 'Tiersitting', PL: 'Opieka nad zwierzętami', FR: 'Garde d’animaux', IT: 'Pet sitting', AR: 'رعاية الحيوانات' },
-    'Car Wash': { RU: 'Мойка авто', UA: 'Мийка авто', ES: 'Lavado de coche', CZ: 'Mytí auta', DE: 'Autowäsche', PL: 'Mycie auta', FR: 'Lavage auto', IT: 'Lavaggio auto', AR: 'غسيل السيارة' },
-    Courier: { RU: 'Курьер', UA: 'Курʼєр', ES: 'Mensajería', CZ: 'Kurýr', DE: 'Kurier', PL: 'Kurier', FR: 'Coursier', IT: 'Corriere', AR: 'توصيل' },
-    Yoga: { RU: 'Йога', UA: 'Йога', ES: 'Yoga', CZ: 'Jóga', DE: 'Yoga', PL: 'Joga', FR: 'Yoga', IT: 'Yoga', AR: 'يوغا' },
-    Tutoring: { RU: 'Репетиторство', UA: 'Репетиторство', ES: 'Tutoría', CZ: 'Doučování', DE: 'Nachhilfe', PL: 'Korepetycje', FR: 'Tutorat', IT: 'Tutoraggio', AR: 'دروس خصوصية' },
-    Photography: { RU: 'Фотография', UA: 'Фотографія', ES: 'Fotografía', CZ: 'Fotografie', DE: 'Fotografie', PL: 'Fotografia', FR: 'Photographie', IT: 'Fotografia', AR: 'تصوير' },
-    Other: { RU: 'Другое', UA: 'Інше', ES: 'Otro', CZ: 'Jiné', DE: 'Andere', PL: 'Inne', FR: 'Autre', IT: 'Altro', AR: 'أخرى' },
-  };
+function Field({
+  label,
+  value,
+  placeholder,
+  onChange,
+  multiline,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  onChange: (next: string) => void;
+  multiline?: boolean;
+}) {
+  return (
+    <div style={{ display: 'grid', gap: 8 }}>
+      <div
+        style={{
+          fontSize: 16,
+          fontWeight: 950,
+          color: BRAND.navy,
+        }}
+      >
+        {label}
+      </div>
 
-  return dict[value]?.[language] || value;
+      {multiline ? (
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          rows={5}
+          style={{
+            width: '100%',
+            border: `2px solid ${BRAND.black}`,
+            borderRadius: 18,
+            padding: '14px 16px',
+            fontSize: 17,
+            fontWeight: 800,
+            outline: 'none',
+            resize: 'none',
+            boxSizing: 'border-box',
+            fontFamily: 'Arial, sans-serif',
+            color: BRAND.navy,
+          }}
+        />
+      ) : (
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          style={{
+            width: '100%',
+            height: 58,
+            border: `2px solid ${BRAND.black}`,
+            borderRadius: 18,
+            padding: '0 16px',
+            fontSize: 17,
+            fontWeight: 850,
+            outline: 'none',
+            boxSizing: 'border-box',
+            color: BRAND.navy,
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function Sheet({
+  title,
+  children,
+  onClose,
+}: {
+  title: string;
+  children: ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.32)',
+        zIndex: 500,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: 430,
+          maxHeight: '86vh',
+          overflowY: 'auto',
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
+          border: `2px solid ${BRAND.black}`,
+          borderBottom: 'none',
+          background: '#fff',
+          padding: '18px 16px calc(18px + env(safe-area-inset-bottom))',
+          boxSizing: 'border-box',
+        }}
+      >
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '48px 1fr 48px',
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: 16,
+          }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 999,
+              border: `2px solid ${BRAND.black}`,
+              background: '#fff',
+              color: BRAND.navy,
+              fontSize: 24,
+              fontWeight: 950,
+              cursor: 'pointer',
+            }}
+          >
+            ←
+          </button>
+
+          <div
+            style={{
+              textAlign: 'center',
+              fontSize: 24,
+              fontWeight: 950,
+              color: BRAND.navy,
+              lineHeight: 1.1,
+            }}
+          >
+            {title}
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 999,
+              border: `2px solid ${BRAND.black}`,
+              background: '#fff',
+              color: BRAND.navy,
+              fontSize: 26,
+              fontWeight: 950,
+              cursor: 'pointer',
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        {children}
+      </div>
+    </div>
+  );
 }
 
 export default function NewPromotionPage() {
   const router = useRouter();
-
-  const galleryInputRef = useRef<HTMLInputElement | null>(null);
-  const cameraInputRef = useRef<HTMLInputElement | null>(null);
-  const filesInputRef = useRef<HTMLInputElement | null>(null);
-  const galleryVideoInputRef = useRef<HTMLInputElement | null>(null);
-  const cameraVideoInputRef = useRef<HTMLInputElement | null>(null);
-  const filesVideoInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
-  const [categoryId, setCategoryId] = useState('');
-  const [subcategory, setSubcategory] = useState('');
+  const text = getText(language);
+
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [activePhotoId, setActivePhotoId] = useState<string | null>(null);
+
+  const [sheet, setSheet] = useState<SheetMode>(null);
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [badgeMode, setBadgeMode] = useState<BadgeMode>('none');
-  const [badgeDiscountValue, setBadgeDiscountValue] = useState('20');
-  const [days, setDays] = useState(10);
-  const [radius, setRadius] = useState<RadiusOption['id']>('10');
-  const [layout, setLayout] = useState<PhotoLayout>('single');
-  const [showPhotoSourceMenu, setShowPhotoSourceMenu] = useState(false);
-  const [showVideoSourceMenu, setShowVideoSourceMenu] = useState(false);
-  const [showPaymentSheet, setShowPaymentSheet] = useState(false);
-  const [selectedPayment, setSelectedPayment] = useState('card');
-  const [photos, setPhotos] = useState<PhotoItem[]>([]);
-  const [miniVideo, setMiniVideo] = useState<VideoItem | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
 
-  const [editorPhotoId, setEditorPhotoId] = useState<string | null>(null);
-  const [editorScale, setEditorScale] = useState(1);
-  const [editorOffsetX, setEditorOffsetX] = useState(0);
-  const [editorOffsetY, setEditorOffsetY] = useState(0);
+  const [categoryId, setCategoryId] = useState('');
+  const [subcategory, setSubcategory] = useState('');
 
-  const dragRef = useRef<{
-    pointerId: number | null;
-    startX: number;
-    startY: number;
-    startOffsetX: number;
-    startOffsetY: number;
-  }>({
-    pointerId: null,
-    startX: 0,
-    startY: 0,
-    startOffsetX: 0,
-    startOffsetY: 0,
+  const [priceMode, setPriceMode] = useState<'fixed' | 'range'>('range');
+  const [pricePounds, setPricePounds] = useState('45');
+  const [pricePennies, setPricePennies] = useState('00');
+  const [minPrice, setMinPrice] = useState('40');
+  const [maxPrice, setMaxPrice] = useState('60');
+
+  const [fromTime, setFromTime] = useState('09:00');
+  const [toTime, setToTime] = useState('20:00');
+
+  const [formats, setFormats] = useState({
+    atMyPlace: true,
+    atClient: true,
+    online: false,
+  });
+
+  const [payments, setPayments] = useState<string[]>([
+    'card',
+    'cash',
+    'applePay',
+    'googlePay',
+    'paypal',
+    'bank',
+  ]);
+
+  const [contacts, setContacts] = useState({
+    phone: '',
+    whatsapp: '',
+    businessWhatsapp: '',
+    telegram: '',
+    viber: '',
+    instagram: '',
+    email: '',
+    website: '',
+  });
+
+  const [address, setAddress] = useState({
+    city: '',
+    district: '',
+    street: '',
+    building: '',
+    floor: '',
+    flat: '',
   });
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
-
-    const unsubLanguage = subscribeToLanguageChange((nextLanguage) => {
+    const unsub = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
 
-    return () => {
-      unsubLanguage();
-    };
+    return () => unsub();
   }, []);
 
   useEffect(() => {
     return () => {
-      photos.forEach((photo) => {
-        if (photo.preview) URL.revokeObjectURL(photo.preview);
-      });
-
-      if (miniVideo?.preview) {
-        URL.revokeObjectURL(miniVideo.preview);
-      }
+      photos.forEach((item) => URL.revokeObjectURL(item.preview));
     };
-  }, [photos, miniVideo]);
-
-  const text = textByLanguage[language] || textByLanguage.EN;
-  const radiusOptions = getRadiusOptions(language);
-  const paymentMethods = getPaymentMethods(language);
-  const selectedRadius = radiusOptions.find((item) => item.id === radius) || radiusOptions[0];
+  }, [photos]);
 
   const localizedCategories = useMemo(() => {
-    return categories.map((item) => ({
-      ...item,
-      localizedLabel: translateCategoryLabel(item.id, language, item.label),
-      localizedShortLabel: translateCategoryLabel(item.id, language, item.shortLabel || item.label),
-      localizedSubcategories: item.subcategories.map((sub) => ({
-        value: sub,
-        label: translateSubcategory(sub, language),
-      })),
+    return (categories as any[]).map((item) => ({
+      id: item.id,
+      label: item.label || item.shortLabel || item.id,
+      icon: item.icon || '📍',
+      subcategories: item.subcategories || [],
     }));
-  }, [language]);
+  }, []);
 
-  const currentCategory = localizedCategories.find((item) => item.id === categoryId) || null;
-  const subcategoryOptions = currentCategory?.localizedSubcategories || [];
+  const currentCategory = localizedCategories.find((item) => item.id === categoryId);
+  const subcategoryOptions = currentCategory?.subcategories || [];
 
-  const totalPrice = useMemo(
-    () => Number((selectedRadius.pricePerDay * days).toFixed(2)),
-    [selectedRadius.pricePerDay, days]
-  );
+  const activePhoto = photos.find((item) => item.id === activePhotoId) || photos[0] || null;
 
-  const editorPhoto = useMemo(
-    () => photos.find((photo) => photo.id === editorPhotoId) || null,
-    [photos, editorPhotoId]
-  );
+  const paymentOptions: PaymentMethod[] = [
+    { id: 'card', label: text.card, icon: '💳' },
+    { id: 'cash', label: text.cash, icon: '💵' },
+    { id: 'applePay', label: text.applePay, icon: '' },
+    { id: 'googlePay', label: text.googlePay, icon: 'G' },
+    { id: 'paypal', label: text.paypal, icon: '🅿️' },
+    { id: 'bank', label: text.bankTransfer, icon: '🏦' },
+    { id: 'wallet', label: text.olamepBalance, icon: '👛' },
+    { id: 'crypto', label: text.crypto, icon: '₿' },
+  ];
 
-  const selectedPaymentMethod =
-    paymentMethods.find((item) => item.id === selectedPayment) || paymentMethods[0];
+  const contactRows = [
+    { key: 'phone', label: text.phone, icon: '📞', placeholder: '+44 7000 000000' },
+    { key: 'whatsapp', label: text.whatsapp, icon: '🟢', placeholder: '+44 7000 000000' },
+    { key: 'businessWhatsapp', label: text.businessWhatsapp, icon: '💼', placeholder: '+44 7000 000000' },
+    { key: 'telegram', label: text.telegram, icon: '✈️', placeholder: '@username' },
+    { key: 'viber', label: text.viber, icon: '🟣', placeholder: '+44 7000 000000' },
+    { key: 'instagram', label: text.instagram, icon: '📸', placeholder: '@instagram' },
+    { key: 'email', label: text.email, icon: '✉️', placeholder: 'you@email.com' },
+    { key: 'website', label: text.website, icon: '🌐', placeholder: 'yourwebsite.com' },
+  ] as const;
 
-  const previewBadge = getBadgeLabel(badgeMode, badgeDiscountValue, text);
-
-  const openEditor = (photoId: string) => {
-    const current = photos.find((photo) => photo.id === photoId);
-    if (!current) return;
-
-    setEditorPhotoId(photoId);
-    setEditorScale(getSafeScale(current.scale));
-    setEditorOffsetX(current.offsetX || 0);
-    setEditorOffsetY(current.offsetY || 0);
-  };
-
-  const closeEditor = () => {
-    dragRef.current = {
-      pointerId: null,
-      startX: 0,
-      startY: 0,
-      startOffsetX: 0,
-      startOffsetY: 0,
-    };
-    setEditorPhotoId(null);
-  };
-
-  const applyEditor = () => {
-    if (!editorPhotoId) return;
-
-    setPhotos((prev) =>
-      prev.map((photo) =>
-        photo.id === editorPhotoId
-          ? {
-              ...photo,
-              scale: getSafeScale(editorScale),
-              offsetX: editorOffsetX,
-              offsetY: editorOffsetY,
-            }
-          : photo
-      )
-    );
-
-    closeEditor();
-  };
-
-  const resetEditor = () => {
-    setEditorScale(1);
-    setEditorOffsetX(0);
-    setEditorOffsetY(0);
-  };
-
-  const handleEditorPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    dragRef.current = {
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      startOffsetX: editorOffsetX,
-      startOffsetY: editorOffsetY,
-    };
-  };
-
-  const handleEditorPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (dragRef.current.pointerId !== event.pointerId) return;
-
-    const deltaX = event.clientX - dragRef.current.startX;
-    const deltaY = event.clientY - dragRef.current.startY;
-
-    setEditorOffsetX(dragRef.current.startOffsetX + deltaX);
-    setEditorOffsetY(dragRef.current.startOffsetY + deltaY);
-  };
-
-  const handleEditorPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (dragRef.current.pointerId !== event.pointerId) return;
-    dragRef.current.pointerId = null;
+  const openFilePicker = () => {
+    fileInputRef.current?.click();
   };
 
   const handleFilesSelected = (event: ChangeEvent<HTMLInputElement>) => {
-    if (miniVideo) {
-      alert(text.removeVideoFirst);
-      event.target.value = '';
-      return;
-    }
-
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
-    const remainingSlots = Math.max(0, MAX_PHOTOS - photos.length);
-    const selected = files.slice(0, remainingSlots);
+    const remaining = Math.max(0, MAX_PHOTOS - photos.length);
+    const selected = files.slice(0, remaining);
 
-    const nextPhotos: PhotoItem[] = selected.map((file, index) => ({
-      id: `${file.name}-${file.size}-${Date.now()}-${index}`,
-      name: file.name,
-      preview: URL.createObjectURL(file),
-      scale: 1,
-      offsetX: 0,
-      offsetY: 0,
-    }));
-
-    setPhotos((prev) => [...prev, ...nextPhotos]);
-    event.target.value = '';
-    setShowPhotoSourceMenu(false);
-  };
-
-  const handleVideoSelected = (event: ChangeEvent<HTMLInputElement>) => {
-    if (photos.length > 0) {
-      alert(text.removePhotosFirst);
-      event.target.value = '';
-      return;
-    }
-
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('video/')) {
-      alert(text.invalidVideo);
-      event.target.value = '';
-      return;
-    }
-
-    const preview = URL.createObjectURL(file);
-    const video = document.createElement('video');
-
-    video.preload = 'metadata';
-    video.src = preview;
-
-    video.onloadedmetadata = () => {
-      if (video.duration > MAX_VIDEO_SECONDS) {
-        URL.revokeObjectURL(preview);
-        alert(text.videoTooLong);
-        event.target.value = '';
-        return;
-      }
-
-      if (miniVideo?.preview) {
-        URL.revokeObjectURL(miniVideo.preview);
-      }
-
-      setMiniVideo({
+    const next: PhotoItem[] = selected
+      .filter((file) => file.type.startsWith('image/') || file.type.startsWith('video/'))
+      .map((file) => ({
+        id: uid(),
         name: file.name,
-        preview,
-      });
+        preview: URL.createObjectURL(file),
+        type: file.type.startsWith('video/') ? 'video' : 'image',
+        scale: 1,
+        rotate: 0,
+        offsetX: 0,
+        offsetY: 0,
+        confirmed: false,
+      }));
 
-      setShowVideoSourceMenu(false);
-      event.target.value = '';
-    };
-
-    video.onerror = () => {
-      URL.revokeObjectURL(preview);
-      alert(text.invalidVideo);
-      event.target.value = '';
-    };
-  };
-
-  const handleRemovePhoto = (id: string) => {
     setPhotos((prev) => {
-      const found = prev.find((photo) => photo.id === id);
-      if (found?.preview) URL.revokeObjectURL(found.preview);
-      return prev.filter((photo) => photo.id !== id);
+      const merged = [...prev, ...next];
+      if (!activePhotoId && merged[0]) setActivePhotoId(merged[0].id);
+      return merged;
     });
 
-    if (editorPhotoId === id) {
-      closeEditor();
-    }
+    event.target.value = '';
   };
 
-  const handleRemoveVideo = () => {
-    if (miniVideo?.preview) {
-      URL.revokeObjectURL(miniVideo.preview);
-    }
+  const updateActivePhoto = (patch: Partial<PhotoItem>) => {
+    if (!activePhoto) return;
 
-    setMiniVideo(null);
+    setPhotos((prev) =>
+      prev.map((item) => (item.id === activePhoto.id ? { ...item, ...patch } : item))
+    );
   };
 
-  const handleContinueToPayment = () => {
-    if (!categoryId) {
-      alert(text.enterCategory);
-      return;
-    }
+  const handleRemoveActivePhoto = () => {
+    if (!activePhoto) return;
 
-    if (!subcategory) {
-      alert(text.enterSubcategory);
+    setPhotos((prev) => {
+      const found = prev.find((item) => item.id === activePhoto.id);
+      if (found) URL.revokeObjectURL(found.preview);
+
+      const next = prev.filter((item) => item.id !== activePhoto.id);
+      setActivePhotoId(next[0]?.id || null);
+      return next;
+    });
+  };
+
+  const togglePayment = (id: string) => {
+    setPayments((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const selectedPaymentLabels = paymentOptions
+    .filter((item) => payments.includes(item.id))
+    .slice(0, 3)
+    .map((item) => item.label)
+    .join(', ');
+
+  const priceSummary =
+    priceMode === 'fixed'
+      ? `£${pricePounds || '0'}.${pricePennies || '00'}`
+      : `${text.from} £${minPrice || '0'} ${text.to.toLowerCase()} £${maxPrice || '0'}`;
+
+  const handleContinue = () => {
+    if (photos.length === 0) {
+      alert(text.alertPhoto);
       return;
     }
 
     if (!title.trim()) {
-      alert(text.enterTitle);
+      alert(text.alertTitle);
+      setSheet('title');
       return;
     }
 
     if (!description.trim()) {
-      alert(text.enterDescription);
+      alert(text.alertDescription);
+      setSheet('description');
       return;
     }
 
-    if (photos.length === 0 && !miniVideo) {
-      alert(text.addPhotoAlert);
+    if (!categoryId) {
+      alert(text.alertCategory);
+      setSheet('category');
       return;
     }
 
-    setShowPaymentSheet(true);
-  };
+    if (!subcategory) {
+      alert(text.alertSubcategory);
+      setSheet('subcategory');
+      return;
+    }
 
-  const handleConfirmPayment = () => {
-    setShowPaymentSheet(false);
-    setIsSuccess(true);
-
-    setTimeout(() => {
-      router.push('/profile/payments');
-    }, 700);
+    alert(text.publishOnlyAfterPayment);
   };
 
   return (
@@ -1056,19 +834,34 @@ export default function NewPromotionPage() {
       <main
         style={{
           minHeight: '100vh',
-          background: '#f7f4ee',
-          padding: '20px 16px 120px',
+          background: '#ffffff',
           fontFamily: 'Arial, sans-serif',
+          color: BRAND.navy,
+          paddingBottom: 116,
         }}
       >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*,video/*"
+          multiple
+          onChange={handleFilesSelected}
+          style={{ display: 'none' }}
+        />
+
         <div style={{ maxWidth: 430, margin: '0 auto' }}>
-          <div
+          <header
             style={{
+              position: 'sticky',
+              top: 0,
+              zIndex: 60,
+              background: 'rgba(255,255,255,0.98)',
+              borderBottom: '1px solid #E5E8EF',
+              padding: '18px 16px 14px',
               display: 'grid',
-              gridTemplateColumns: '54px 1fr',
-              gap: 14,
+              gridTemplateColumns: '54px 1fr 54px',
+              gap: 10,
               alignItems: 'start',
-              marginBottom: 16,
             }}
           >
             <button
@@ -1078,24 +871,53 @@ export default function NewPromotionPage() {
                 width: 54,
                 height: 54,
                 borderRadius: 999,
-                border: '2px solid #111111',
+                border: `2px solid ${BRAND.black}`,
                 background: '#fff',
-                fontSize: 28,
-                fontWeight: 900,
-                color: '#17130f',
+                color: BRAND.navy,
+                fontSize: 30,
+                fontWeight: 950,
                 cursor: 'pointer',
               }}
             >
               ←
             </button>
 
-            <div>
+            <div style={{ textAlign: 'center' }}>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 8,
+                }}
+              >
+                <div
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 999,
+                    background:
+                      'conic-gradient(from 25deg, #ff255d, #ffcb05, #22c55e, #087BFF, #6d28d9, #ff255d)',
+                    border: '1.5px solid rgba(0,0,0,0.12)',
+                  }}
+                />
+                <div
+                  style={{
+                    fontSize: 25,
+                    fontWeight: 950,
+                    color: BRAND.navy,
+                  }}
+                >
+                  Olamep
+                </div>
+              </div>
+
               <div
                 style={{
                   fontSize: 30,
-                  fontWeight: 900,
-                  color: '#17130f',
-                  lineHeight: 1.1,
+                  fontWeight: 950,
+                  lineHeight: 0.98,
+                  color: BRAND.navy,
                 }}
               >
                 {text.pageTitle}
@@ -1104,1998 +926,539 @@ export default function NewPromotionPage() {
               <div
                 style={{
                   marginTop: 8,
-                  fontSize: 15,
-                  lineHeight: 1.5,
-                  color: '#6f675f',
-                  fontWeight: 700,
+                  fontSize: 14,
+                  fontWeight: 850,
+                  color: BRAND.gray,
+                  lineHeight: 1.25,
                 }}
               >
                 {text.pageSubtitle}
               </div>
             </div>
-          </div>
-
-          <div
-            style={{
-              borderRadius: 26,
-              border: '2px solid #111111',
-              background: '#fff7d6',
-              padding: '12px 14px',
-              marginBottom: 16,
-              fontSize: 14,
-              fontWeight: 900,
-              color: '#17130f',
-              lineHeight: 1.4,
-            }}
-          >
-            {text.adWillGoLive}
-          </div>
-
-          <div
-            style={{
-              borderRadius: 30,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
-            }}
-          >
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 12,
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 900,
-                    color: '#17130f',
-                    marginBottom: 12,
-                  }}
-                >
-                  {text.category} <span style={{ color: '#ef4444' }}>*</span>
-                </div>
-
-                <select
-                  value={categoryId}
-                  onChange={(e) => {
-                    setCategoryId(e.target.value);
-                    setSubcategory('');
-                  }}
-                  style={{
-                    width: '100%',
-                    height: 58,
-                    borderRadius: 18,
-                    border: '1.5px solid #111111',
-                    background: '#fff',
-                    padding: '0 14px',
-                    fontSize: 16,
-                    color: '#17130f',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    fontWeight: 800,
-                  }}
-                >
-                  <option value="">{text.chooseCategory}</option>
-                  {localizedCategories.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.localizedLabel}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 900,
-                    color: '#17130f',
-                    marginBottom: 12,
-                  }}
-                >
-                  {text.subcategory} <span style={{ color: '#ef4444' }}>*</span>
-                </div>
-
-                <select
-                  value={subcategory}
-                  onChange={(e) => setSubcategory(e.target.value)}
-                  disabled={!categoryId}
-                  style={{
-                    width: '100%',
-                    height: 58,
-                    borderRadius: 18,
-                    border: '1.5px solid #111111',
-                    background: '#fff',
-                    padding: '0 14px',
-                    fontSize: 16,
-                    color: '#17130f',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    fontWeight: 800,
-                    opacity: categoryId ? 1 : 0.6,
-                  }}
-                >
-                  <option value="">{text.chooseSubcategory}</option>
-                  {subcategoryOptions.map((item) => (
-                    <option key={item.value} value={item.value}>
-                      {item.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 18,
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 12,
-              }}
-            >
-              {text.title} <span style={{ color: '#ef4444' }}>*</span>
-            </div>
-
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={text.titlePlaceholder}
-              style={{
-                width: '100%',
-                height: 58,
-                borderRadius: 18,
-                border: '1.5px solid #111111',
-                background: '#fff',
-                padding: '0 16px',
-                fontSize: 16,
-                color: '#17130f',
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
-            />
-
-            <div
-              style={{
-                marginTop: 18,
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 12,
-              }}
-            >
-              {text.description} <span style={{ color: '#ef4444' }}>*</span>
-            </div>
-
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={text.descriptionPlaceholder}
-              rows={4}
-              style={{
-                width: '100%',
-                borderRadius: 18,
-                border: '1.5px solid #111111',
-                background: '#fff',
-                padding: '14px 16px',
-                fontSize: 16,
-                color: '#17130f',
-                outline: 'none',
-                boxSizing: 'border-box',
-                resize: 'none',
-                fontFamily: 'Arial, sans-serif',
-              }}
-            />
-
-            <div
-              style={{
-                marginTop: 18,
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 12,
-              }}
-            >
-              {text.badgeText}
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-              }}
-            >
-              {([
-                ['none', text.badgeNone],
-                ['discount', text.badgeDiscount],
-                ['top', text.badgeTop],
-                ['new', text.badgeNew],
-              ] as [BadgeMode, string][]).map(([mode, label]) => {
-                const active = badgeMode === mode;
-
-                return (
-                  <button
-                    key={mode}
-                    type="button"
-                    onClick={() => setBadgeMode(mode)}
-                    style={{
-                      minHeight: 48,
-                      borderRadius: 16,
-                      border: '2px solid #111111',
-                      background: active ? '#17130f' : '#fff',
-                      color: active ? '#fff' : '#17130f',
-                      fontSize: 15,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-
-            {badgeMode === 'discount' ? (
-              <div style={{ marginTop: 12 }}>
-                <div
-                  style={{
-                    fontSize: 15,
-                    fontWeight: 800,
-                    color: '#17130f',
-                    marginBottom: 8,
-                  }}
-                >
-                  {text.discountValue}
-                </div>
-
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 42px',
-                    gap: 10,
-                    alignItems: 'center',
-                  }}
-                >
-                  <input
-                    value={badgeDiscountValue}
-                    onChange={(e) =>
-                      setBadgeDiscountValue(e.target.value.replace(/[^\d]/g, ''))
-                    }
-                    placeholder={text.discountValuePlaceholder}
-                    style={{
-                      width: '100%',
-                      height: 52,
-                      borderRadius: 16,
-                      border: '1.5px solid #111111',
-                      background: '#fff',
-                      padding: '0 14px',
-                      fontSize: 18,
-                      fontWeight: 900,
-                      color: '#17130f',
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                    }}
-                  />
-
-                  <div
-                    style={{
-                      fontSize: 24,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
-                    %
-                  </div>
-                </div>
-              </div>
-            ) : null}
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
-              borderRadius: 30,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 8,
-              }}
-            >
-              {text.photo} <span style={{ color: '#ef4444' }}>*</span>
-            </div>
-
-            <div
-              style={{
-                fontSize: 14,
-                lineHeight: 1.5,
-                color: '#7b7268',
-                fontWeight: 700,
-                marginBottom: 14,
-              }}
-            >
-              {text.photoHint}
-            </div>
-
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 12,
-              }}
-            >
-              {text.layout}
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-                marginBottom: 14,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setLayout('single')}
-                style={{
-                  minHeight: 54,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: layout === 'single' ? '#17130f' : '#fff',
-                  color: layout === 'single' ? '#fff' : '#17130f',
-                  fontSize: 15,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.layoutSingle}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setLayout('grid')}
-                style={{
-                  minHeight: 54,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: layout === 'grid' ? '#17130f' : '#fff',
-                  color: layout === 'grid' ? '#fff' : '#17130f',
-                  fontSize: 15,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.layoutGrid}
-              </button>
-            </div>
-
-            <input
-              ref={galleryInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFilesSelected}
-              style={{ display: 'none' }}
-            />
-
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              multiple
-              onChange={handleFilesSelected}
-              style={{ display: 'none' }}
-            />
-
-            <input
-              ref={filesInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFilesSelected}
-              style={{ display: 'none' }}
-            />
 
             <button
               type="button"
-              onClick={() => setShowPhotoSourceMenu(true)}
+              onClick={() => router.push('/')}
               style={{
-                width: '100%',
-                minHeight: 92,
-                borderRadius: 22,
-                border: '1.5px solid #111111',
+                width: 54,
+                height: 54,
+                borderRadius: 999,
+                border: `2px solid ${BRAND.black}`,
                 background: '#fff',
-                padding: 14,
-                display: 'grid',
-                gridTemplateColumns: '72px 1fr',
-                gap: 14,
-                alignItems: 'center',
+                color: BRAND.navy,
+                fontSize: 28,
+                fontWeight: 950,
                 cursor: 'pointer',
-                textAlign: 'left',
               }}
             >
+              ×
+            </button>
+          </header>
+
+          <section
+            style={{
+              padding: '14px 12px 0',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 10,
+            }}
+          >
+            <ShellCard style={{ padding: 10 }}>
               <div
                 style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: 22,
-                  border: '2px solid #c69212',
-                  background: '#fff7d6',
-                  color: '#c69212',
                   display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 8,
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 42,
-                  fontWeight: 700,
+                  marginBottom: 9,
                 }}
               >
-                +
-              </div>
-
-              <div>
                 <div
                   style={{
                     fontSize: 18,
-                    fontWeight: 900,
-                    color: '#17130f',
+                    fontWeight: 950,
+                    color: BRAND.navy,
                   }}
                 >
-                  {text.addPhoto}
+                  {text.photos}
                 </div>
-
                 <div
                   style={{
-                    marginTop: 6,
-                    fontSize: 14,
-                    color: '#7b7268',
-                    fontWeight: 700,
+                    fontSize: 13,
+                    fontWeight: 950,
+                    color: BRAND.gray,
                   }}
                 >
-                  {text.maxPhotos}
+                  {photos.length}/{MAX_PHOTOS}
                 </div>
               </div>
-            </button>
 
-            {photos.length > 0 ? (
-              <>
-                <div
-                  style={{
-                    marginTop: 14,
-                    fontSize: 16,
-                    fontWeight: 900,
-                    color: '#17130f',
-                  }}
-                >
-                  {text.photoAdded}: {photos.length}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 12,
-                    display: 'grid',
-                    gridTemplateColumns: layout === 'single' ? '1fr' : '1fr 1fr',
-                    gap: 10,
-                  }}
-                >
-                  {(layout === 'single' ? [photos[0]] : photos).map((photo) => {
-                    if (!photo) return null;
-
-                    return (
-                      <div
-                        key={photo.id}
-                        style={{
-                          borderRadius: 22,
-                          border: '1.5px solid #111111',
-                          overflow: 'hidden',
-                          background: '#fff',
-                          position: 'relative',
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: '100%',
-                            height: layout === 'single' ? 220 : 150,
-                            overflow: 'hidden',
-                            position: 'relative',
-                            background: '#f4f1ea',
-                          }}
-                        >
-                          <img
-                            src={photo.preview}
-                            alt={photo.name}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                              display: 'block',
-                              transform: `translate(${photo.offsetX}px, ${photo.offsetY}px) scale(${photo.scale})`,
-                              transformOrigin: 'center center',
-                            }}
-                          />
-                        </div>
-
-                        <div
-                          style={{
-                            position: 'absolute',
-                            top: 10,
-                            right: 10,
-                            display: 'flex',
-                            gap: 8,
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => openEditor(photo.id)}
-                            style={{
-                              minWidth: 34,
-                              height: 34,
-                              borderRadius: 999,
-                              border: '1.5px solid #111111',
-                              background: '#ffffff',
-                              color: '#17130f',
-                              fontSize: 12,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                              padding: '0 10px',
-                            }}
-                          >
-                            ↔
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleRemovePhoto(photo.id)}
-                            style={{
-                              minWidth: 34,
-                              height: 34,
-                              borderRadius: 999,
-                              border: '1.5px solid #111111',
-                              background: '#ffffff',
-                              color: '#17130f',
-                              fontSize: 18,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                              padding: '0 10px',
-                            }}
-                          >
-                            ×
-                          </button>
-                        </div>
-
-                        <div
-                          style={{
-                            padding: '10px 12px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: 10,
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: 13,
-                              color: '#7b7268',
-                              fontWeight: 700,
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              flex: 1,
-                            }}
-                          >
-                            {photo.name}
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => openEditor(photo.id)}
-                            style={{
-                              height: 34,
-                              borderRadius: 12,
-                              border: '1.5px solid #111111',
-                              background: '#fff',
-                              color: '#17130f',
-                              padding: '0 10px',
-                              fontSize: 12,
-                              fontWeight: 900,
-                              cursor: 'pointer',
-                              flexShrink: 0,
-                            }}
-                          >
-                            {text.adjustPhoto}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            ) : null}
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
-              borderRadius: 30,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 8,
-              }}
-            >
-              {text.miniVideo}
-            </div>
-
-            <div
-              style={{
-                fontSize: 14,
-                lineHeight: 1.5,
-                color: '#7b7268',
-                fontWeight: 700,
-                marginBottom: 14,
-              }}
-            >
-              {text.miniVideoHint}
-            </div>
-
-            <input
-              ref={galleryVideoInputRef}
-              type="file"
-              accept="video/*"
-              onChange={handleVideoSelected}
-              style={{ display: 'none' }}
-            />
-
-            <input
-              ref={cameraVideoInputRef}
-              type="file"
-              accept="video/*"
-              capture="environment"
-              onChange={handleVideoSelected}
-              style={{ display: 'none' }}
-            />
-
-            <input
-              ref={filesVideoInputRef}
-              type="file"
-              accept="video/*"
-              onChange={handleVideoSelected}
-              style={{ display: 'none' }}
-            />
-
-            {!miniVideo ? (
               <button
                 type="button"
-                onClick={() => setShowVideoSourceMenu(true)}
+                onClick={openFilePicker}
                 style={{
                   width: '100%',
-                  minHeight: 92,
-                  borderRadius: 22,
-                  border: '1.5px solid #111111',
-                  background: '#fff',
-                  padding: 14,
-                  display: 'grid',
-                  gridTemplateColumns: '72px 1fr',
-                  gap: 14,
+                  minHeight: 178,
+                  borderRadius: 18,
+                  border: `2px dashed ${photos.length ? BRAND.blue : '#8B94A3'}`,
+                  background: photos.length ? BRAND.softBlue : '#ffffff',
+                  display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
+                  flexDirection: 'column',
+                  gap: 8,
+                  cursor: 'pointer',
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}
+              >
+                {activePhoto ? (
+                  activePhoto.type === 'video' ? (
+                    <video
+                      src={activePhoto.preview}
+                      muted
+                      loop
+                      autoPlay
+                      playsInline
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        transform: `translate(${activePhoto.offsetX}px, ${activePhoto.offsetY}px) scale(${activePhoto.scale}) rotate(${activePhoto.rotate}deg)`,
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={activePhoto.preview}
+                      alt={activePhoto.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        transform: `translate(${activePhoto.offsetX}px, ${activePhoto.offsetY}px) scale(${activePhoto.scale}) rotate(${activePhoto.rotate}deg)`,
+                      }}
+                    />
+                  )
+                ) : (
+                  <>
+                    <div
+                      style={{
+                        width: 54,
+                        height: 54,
+                        borderRadius: 999,
+                        border: `2px solid ${BRAND.green}`,
+                        color: BRAND.green,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 42,
+                        fontWeight: 500,
+                        lineHeight: 1,
+                      }}
+                    >
+                      +
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 950,
+                        color: BRAND.navy,
+                        textAlign: 'center',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {text.addPhotoVideo}
+                    </div>
+                  </>
+                )}
+
+                {activePhoto?.confirmed ? (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 8,
+                      top: 8,
+                      width: 34,
+                      height: 34,
+                      borderRadius: 999,
+                      background: BRAND.green,
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 22,
+                      fontWeight: 950,
+                      border: `2px solid ${BRAND.black}`,
+                    }}
+                  >
+                    ✓
+                  </div>
+                ) : null}
+              </button>
+
+              <div
+                style={{
+                  marginTop: 9,
+                  display: 'flex',
+                  gap: 6,
+                  alignItems: 'flex-start',
+                  color: BRAND.gray,
+                  fontSize: 12,
+                  fontWeight: 850,
+                  lineHeight: 1.25,
+                }}
+              >
+                <span style={{ color: BRAND.navy, fontSize: 17 }}>🖼️</span>
+                <span>{text.photoHint}</span>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 10,
+                  border: `1.7px solid ${BRAND.blue}`,
+                  borderRadius: 14,
+                  background: '#E7F1FF',
+                  padding: '9px 6px',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(5, 1fr)',
+                  gap: 4,
+                  alignItems: 'center',
+                  textAlign: 'center',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateActivePhoto({
+                      offsetX: activePhoto ? activePhoto.offsetX - 8 : 0,
+                    })
+                  }
+                  style={toolButtonStyle()}
+                >
+                  ↔
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateActivePhoto({
+                      scale: activePhoto ? clamp(activePhoto.scale + 0.1, 1, 3) : 1,
+                    })
+                  }
+                  style={toolButtonStyle()}
+                >
+                  ⌕+
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateActivePhoto({
+                      rotate: activePhoto ? activePhoto.rotate + 90 : 0,
+                    })
+                  }
+                  style={toolButtonStyle()}
+                >
+                  ↻
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateActivePhoto({
+                      offsetX: activePhoto ? activePhoto.offsetX + 8 : 0,
+                    })
+                  }
+                  style={toolButtonStyle()}
+                >
+                  →
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateActivePhoto({
+                      confirmed: true,
+                    })
+                  }
+                  style={{
+                    ...toolButtonStyle(),
+                    background: BRAND.green,
+                    color: '#fff',
+                    borderRadius: 999,
+                  }}
+                >
+                  ✓
+                </button>
+
+                <div
+                  style={{
+                    gridColumn: '1 / -1',
+                    fontSize: 12,
+                    fontWeight: 950,
+                    color: BRAND.navy,
+                    marginTop: 2,
+                  }}
+                >
+                  {text.toolsHint}
+                </div>
+              </div>
+
+              {activePhoto ? (
+                <button
+                  type="button"
+                  onClick={handleRemoveActivePhoto}
+                  style={{
+                    marginTop: 8,
+                    width: '100%',
+                    height: 34,
+                    borderRadius: 12,
+                    border: `1.7px solid ${BRAND.black}`,
+                    background: '#fff',
+                    color: BRAND.red,
+                    fontSize: 13,
+                    fontWeight: 950,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Remove
+                </button>
+              ) : null}
+            </ShellCard>
+
+            <ShellCard style={{ padding: 10, overflow: 'hidden' }}>
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 950,
+                  color: BRAND.navy,
+                  marginBottom: 8,
+                }}
+              >
+                {text.price}
+              </div>
+
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 850,
+                  color: BRAND.gray,
+                  marginBottom: 8,
+                }}
+              >
+                {text.setPrice}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSheet('price')}
+                style={{
+                  width: '100%',
+                  border: 'none',
+                  background: 'transparent',
+                  padding: 0,
+                  cursor: 'pointer',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '44px 1fr 48px',
+                    gap: 6,
+                    alignItems: 'center',
+                  }}
+                >
+                  <div style={priceBoxStyle(false)}>£</div>
+                  <div style={priceBoxStyle(true)}>{pricePounds || '0'}</div>
+                  <div style={priceBoxStyle(true)}>{pricePennies || '00'}</div>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 10,
+                    height: 38,
+                    border: `2px solid ${BRAND.black}`,
+                    borderRadius: 13,
+                    display: 'grid',
+                    gridTemplateColumns: '28px 1fr 22px',
+                    alignItems: 'center',
+                    gap: 4,
+                    padding: '0 8px',
+                    color: BRAND.navy,
+                    fontSize: 13,
+                    fontWeight: 950,
+                  }}
+                >
+                  <span>🏷️</span>
+                  <span>{priceSummary}</span>
+                  <span style={{ fontSize: 25, lineHeight: 1 }}>›</span>
+                </div>
+              </button>
+
+              <div
+                style={{
+                  height: 2,
+                  background: BRAND.black,
+                  margin: '12px -10px 10px',
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={() => setSheet('payment')}
+                style={{
+                  width: '100%',
+                  border: 'none',
+                  background: 'transparent',
+                  padding: 0,
                   cursor: 'pointer',
                   textAlign: 'left',
                 }}
               >
                 <div
                   style={{
-                    width: 72,
-                    height: 72,
-                    borderRadius: 22,
-                    border: '2px solid #2f7cf6',
-                    background: '#edf4ff',
-                    color: '#2f7cf6',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 34,
-                    fontWeight: 700,
-                  }}
-                >
-                  ▶
-                </div>
-
-                <div>
-                  <div
-                    style={{
-                      fontSize: 18,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
-                    {text.addMiniVideo}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 6,
-                      fontSize: 14,
-                      color: '#7b7268',
-                      fontWeight: 700,
-                    }}
-                  >
-                    MP4 / MOV / WEBM · max 5 sec
-                  </div>
-                </div>
-              </button>
-            ) : (
-              <div
-                style={{
-                  borderRadius: 22,
-                  border: '1.5px solid #111111',
-                  overflow: 'hidden',
-                  background: '#fff',
-                }}
-              >
-                <video
-                  src={miniVideo.preview}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  style={{
-                    width: '100%',
-                    height: 220,
-                    objectFit: 'cover',
-                    display: 'block',
-                    background: '#000',
-                  }}
-                />
-
-                <div
-                  style={{
-                    padding: '12px 14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 10,
-                  }}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 900,
-                        color: '#17130f',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {text.miniVideoAdded}
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: 4,
-                        fontSize: 13,
-                        color: '#7b7268',
-                        fontWeight: 700,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {miniVideo.name}
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                    <button
-                      type="button"
-                      onClick={() => setShowVideoSourceMenu(true)}
-                      style={{
-                        height: 40,
-                        borderRadius: 14,
-                        border: '1.5px solid #111111',
-                        background: '#ffffff',
-                        color: '#17130f',
-                        padding: '0 14px',
-                        fontSize: 14,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {text.replaceMiniVideo}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleRemoveVideo}
-                      style={{
-                        height: 40,
-                        borderRadius: 14,
-                        border: '1.5px solid #111111',
-                        background: '#ffffff',
-                        color: '#17130f',
-                        padding: '0 14px',
-                        fontSize: 14,
-                        fontWeight: 900,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {text.removeMiniVideo}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
-              borderRadius: 30,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 8,
-              }}
-            >
-              {text.visibility}
-            </div>
-
-            <div
-              style={{
-                fontSize: 14,
-                lineHeight: 1.5,
-                color: '#7b7268',
-                fontWeight: 700,
-                marginBottom: 14,
-              }}
-            >
-              {text.visibilityHint}
-            </div>
-
-            <div style={{ display: 'grid', gap: 10 }}>
-              {radiusOptions.map((option) => {
-                const active = radius === option.id;
-
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => setRadius(option.id)}
-                    style={{
-                      width: '100%',
-                      borderRadius: 22,
-                      border: '2px solid #111111',
-                      background: active ? option.bg : '#fff',
-                      padding: '14px 16px',
-                      display: 'grid',
-                      gridTemplateColumns: '1fr auto auto',
-                      gap: 12,
-                      alignItems: 'center',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                    }}
-                  >
-                    <div>
-                      <div
-                        style={{
-                          fontSize: 18,
-                          fontWeight: 900,
-                          color: '#17130f',
-                        }}
-                      >
-                        {text.radius} {option.label}
-                      </div>
-
-                      <div
-                        style={{
-                          marginTop: 4,
-                          fontSize: 14,
-                          color: '#7b7268',
-                          fontWeight: 700,
-                        }}
-                      >
-                        £{option.pricePerDay} {text.perDay}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        borderRadius: 999,
-                        border: '1.5px solid #111111',
-                        background: option.bg,
-                        color: option.color,
-                        padding: '8px 12px',
-                        fontSize: 13,
-                        fontWeight: 900,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {option.label}
-                    </div>
-
-                    <div
-                      style={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: 999,
-                        border: '2px solid #111111',
-                        background: active ? option.color : '#fff',
-                        color: '#fff',
-                        fontSize: 14,
-                        fontWeight: 900,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      {active ? '✓' : ''}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
-              borderRadius: 30,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
-            }}
-          >
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 110px',
-                gap: 12,
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 900,
-                    color: '#17130f',
-                    marginBottom: 12,
-                  }}
-                >
-                  {text.duration}
-                </div>
-
-                <div
-                  style={{
-                    fontSize: 14,
-                    lineHeight: 1.45,
-                    color: '#7b7268',
-                    fontWeight: 700,
-                    marginBottom: 12,
-                  }}
-                >
-                  {text.durationHint}
-                </div>
-              </div>
-
-              <div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 900,
-                    color: '#17130f',
-                    marginBottom: 12,
-                  }}
-                >
-                  {text.days}
-                </div>
-
-                <select
-                  value={days}
-                  onChange={(e) => setDays(Number(e.target.value))}
-                  style={{
-                    width: '100%',
-                    height: 58,
-                    borderRadius: 18,
-                    border: '1.5px solid #111111',
-                    background: '#fff',
-                    padding: '0 12px',
-                    fontSize: 16,
-                    color: '#17130f',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    fontWeight: 900,
-                  }}
-                >
-                  {Array.from({ length: 21 }, (_, index) => index + 10).map((day) => (
-                    <option key={day} value={day}>
-                      {day}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
-              borderRadius: 30,
-              border: '2px solid #111111',
-              background: '#fff',
-              padding: 18,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 14,
-              }}
-            >
-              {text.livePreview}
-            </div>
-
-            <div
-              style={{
-                borderRadius: 26,
-                border: '2px solid #111111',
-                overflow: 'hidden',
-                background: '#fff',
-              }}
-            >
-              <div
-                style={{
-                  position: 'relative',
-                  height: 320,
-                  background: '#ebe6da',
-                }}
-              >
-                {miniVideo ? (
-                  <video
-                    src={miniVideo.preview}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
-                    }}
-                  />
-                ) : photos[0] ? (
-                  <img
-                    src={photos[0].preview}
-                    alt={photos[0].name}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
-                      transform: `translate(${photos[0].offsetX}px, ${photos[0].offsetY}px) scale(${photos[0].scale})`,
-                      transformOrigin: 'center center',
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#8a8177',
-                      fontSize: 18,
-                      fontWeight: 800,
-                    }}
-                  >
-                    Preview
-                  </div>
-                )}
-
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 16,
-                    left: 16,
-                    display: 'flex',
-                    gap: 10,
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div
-                    style={{
-                      height: 42,
-                      borderRadius: 999,
-                      border: '2px solid #111111',
-                      background: '#ffe44d',
-                      color: '#17130f',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '0 16px',
-                      fontSize: 14,
-                      fontWeight: 900,
-                    }}
-                  >
-                    {text.sponsored}
-                  </div>
-
-                  {previewBadge ? (
-                    <div
-                      style={{
-                        height: 42,
-                        borderRadius: 999,
-                        border: '2px solid #111111',
-                        background: '#fff',
-                        color: '#17130f',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: '0 16px',
-                        fontSize: 14,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {previewBadge}
-                    </div>
-                  ) : null}
-                </div>
-
-                {miniVideo ? (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 16,
-                      right: 16,
-                      width: 44,
-                      height: 44,
-                      borderRadius: 999,
-                      border: '2px solid #111111',
-                      background: 'rgba(255,255,255,0.92)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 900,
-                    }}
-                  >
-                    ▶
-                  </div>
-                ) : null}
-              </div>
-
-              <div style={{ padding: 16 }}>
-                <div
-                  style={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    gap: 12,
+                    gap: 8,
                     alignItems: 'center',
+                    marginBottom: 9,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: 18,
-                      fontWeight: 900,
-                      color: '#17130f',
+                      fontSize: 16,
+                      fontWeight: 950,
+                      color: BRAND.navy,
                     }}
                   >
-                    {title || text.titlePlaceholder}
+                    {text.paymentMethods}
                   </div>
-
                   <div
                     style={{
-                      flexShrink: 0,
-                      borderRadius: 999,
-                      border: '2px solid #111111',
-                      background: '#fff7d6',
-                      color: '#c69212',
-                      padding: '8px 14px',
-                      fontSize: 14,
-                      fontWeight: 900,
+                      fontSize: 27,
+                      fontWeight: 950,
+                      color: BRAND.black,
+                      lineHeight: 1,
                     }}
                   >
-                    {selectedRadius.label}
+                    ›
                   </div>
                 </div>
 
                 <div
                   style={{
-                    marginTop: 10,
-                    fontSize: 15,
-                    lineHeight: 1.5,
-                    color: '#6f675f',
-                    fontWeight: 700,
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: 7,
                   }}
                 >
-                  {description || text.descriptionPlaceholder}
-                </div>
+                  {paymentOptions.slice(0, 6).map((method) => {
+                    const active = payments.includes(method.id);
 
-                <div
-                  style={{
-                    marginTop: 14,
-                    display: 'flex',
-                    gap: 10,
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div
-                    style={{
-                      borderRadius: 999,
-                      border: '2px solid #111111',
-                      background: '#fff',
-                      padding: '10px 14px',
-                      fontSize: 14,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
-                    {days} {text.days}
-                  </div>
-
-                  <div
-                    style={{
-                      borderRadius: 999,
-                      border: '2px solid #111111',
-                      background: '#fff',
-                      padding: '10px 14px',
-                      fontSize: 14,
-                      fontWeight: 900,
-                      color: '#17130f',
-                    }}
-                  >
-                    £{totalPrice}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  style={{
-                    marginTop: 16,
-                    width: '100%',
-                    height: 56,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: '#17130f',
-                    color: '#fff',
-                    fontSize: 18,
-                    fontWeight: 900,
-                    cursor: 'default',
-                  }}
-                >
-                  {text.openAd}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: 16,
-              borderRadius: 24,
-              border: '2px solid #111111',
-              background: selectedRadius.bg,
-              padding: 16,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 900,
-                color: '#17130f',
-                marginBottom: 8,
-              }}
-            >
-              {text.summary}
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gap: 6,
-                fontSize: 15,
-                fontWeight: 800,
-                color: '#17130f',
-              }}
-            >
-              <div>
-                {text.category}: {currentCategory?.localizedLabel || '—'}
-              </div>
-
-              <div>
-                {text.subcategory}:{' '}
-                {subcategoryOptions.find((item) => item.value === subcategory)?.label || '—'}
-              </div>
-
-              <div>
-                {text.radius}: {selectedRadius.label}
-              </div>
-
-              <div>
-                {text.duration}: {days}
-              </div>
-
-              <div>
-                £{selectedRadius.pricePerDay} / {text.perDay}
-              </div>
-
-              <div>
-                {text.photosCount}: {photos.length}
-              </div>
-
-              <div>
-                {text.miniVideo}: {miniVideo ? '1' : '0'}
-              </div>
-
-              <div>
-                {text.badgeText}: {previewBadge || text.badgeNone}
-              </div>
-
-              <div
-                style={{
-                  color: selectedRadius.color,
-                  fontSize: 18,
-                }}
-              >
-                {text.total}: £{totalPrice}
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 12,
-                borderRadius: 16,
-                border: '1.5px solid #111111',
-                background: '#fff',
-                padding: '12px 14px',
-                fontSize: 14,
-                fontWeight: 800,
-                lineHeight: 1.45,
-                color: '#17130f',
-              }}
-            >
-              {text.paymentHint}
-              <div style={{ marginTop: 6, color: '#2f7cf6' }}>{text.firstAdBonus}</div>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleContinueToPayment}
-            style={{
-              marginTop: 16,
-              width: '100%',
-              height: 60,
-              borderRadius: 22,
-              border: '2px solid #111111',
-              background: '#ffe44d',
-              color: '#17130f',
-              fontSize: 18,
-              fontWeight: 900,
-              cursor: 'pointer',
-              boxShadow: '0 6px 0 rgba(17,17,17,0.08)',
-            }}
-          >
-            {text.continueToPayment} · £{totalPrice}
-          </button>
-
-          {isSuccess ? (
-            <div
-              style={{
-                marginTop: 16,
-                borderRadius: 22,
-                border: '2px solid #111111',
-                background: '#edf4ff',
-                color: '#2f7cf6',
-                padding: '14px 16px',
-                fontSize: 18,
-                fontWeight: 900,
-                textAlign: 'center',
-              }}
-            >
-              {text.done}
-            </div>
-          ) : null}
-        </div>
-      </main>
-
-      {showPhotoSourceMenu ? (
-        <div
-          onClick={() => setShowPhotoSourceMenu(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(20,20,20,0.18)',
-            zIndex: 120,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              padding: '0 14px calc(24px + env(safe-area-inset-bottom))',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                border: '2px solid #111111',
-                borderRadius: 26,
-                background: '#ffffff',
-                boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                style={{
-                  padding: '16px 16px 10px',
-                  fontSize: 18,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.photoSource}
-              </div>
-
-              <div style={{ display: 'grid', gap: 10, padding: '0 14px 14px' }}>
-                <button
-                  type="button"
-                  onClick={() => galleryInputRef.current?.click()}
-                  style={{
-                    minHeight: 54,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    color: '#17130f',
-                    fontSize: 16,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  🖼 {text.gallery}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => cameraInputRef.current?.click()}
-                  style={{
-                    minHeight: 54,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    color: '#17130f',
-                    fontSize: 16,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  📷 {text.camera}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => filesInputRef.current?.click()}
-                  style={{
-                    minHeight: 54,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    color: '#17130f',
-                    fontSize: 16,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  📁 {text.files}
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowPhotoSourceMenu(false)}
-                style={{
-                  width: '100%',
-                  height: 54,
-                  border: 'none',
-                  borderTop: '2px solid #111111',
-                  background: '#ffffff',
-                  color: '#17130f',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                ✕ {text.close}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {showVideoSourceMenu ? (
-        <div
-          onClick={() => setShowVideoSourceMenu(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(20,20,20,0.18)',
-            zIndex: 130,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              padding: '0 14px calc(24px + env(safe-area-inset-bottom))',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                border: '2px solid #111111',
-                borderRadius: 26,
-                background: '#ffffff',
-                boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                style={{
-                  padding: '16px 16px 10px',
-                  fontSize: 18,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                {text.miniVideo}
-              </div>
-
-              <div style={{ display: 'grid', gap: 10, padding: '0 14px 14px' }}>
-                <button
-                  type="button"
-                  onClick={() => galleryVideoInputRef.current?.click()}
-                  style={{
-                    minHeight: 54,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    color: '#17130f',
-                    fontSize: 16,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  🖼 {text.gallery}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => cameraVideoInputRef.current?.click()}
-                  style={{
-                    minHeight: 54,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    color: '#17130f',
-                    fontSize: 16,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  📷 {text.camera}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => filesVideoInputRef.current?.click()}
-                  style={{
-                    minHeight: 54,
-                    borderRadius: 18,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    color: '#17130f',
-                    fontSize: 16,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  📁 {text.files}
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowVideoSourceMenu(false)}
-                style={{
-                  width: '100%',
-                  height: 54,
-                  border: 'none',
-                  borderTop: '2px solid #111111',
-                  background: '#ffffff',
-                  color: '#17130f',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                ✕ {text.close}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {showPaymentSheet ? (
-        <div
-          onClick={() => setShowPaymentSheet(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(17,17,17,0.38)',
-            zIndex: 500,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-            padding: 12,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              maxHeight: 'calc(100vh - 40px)',
-              overflowY: 'auto',
-              borderRadius: 28,
-              border: '2px solid #111111',
-              background: '#ffffff',
-              padding: 18,
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 24,
-                fontWeight: 900,
-                color: '#17130f',
-                textAlign: 'center',
-              }}
-            >
-              {text.choosePaymentMethod}
-            </div>
-
-            <div
-              style={{
-                marginTop: 8,
-                fontSize: 14,
-                lineHeight: 1.45,
-                color: '#7b7268',
-                fontWeight: 700,
-                textAlign: 'center',
-              }}
-            >
-              {text.paymentMethodsHint}
-            </div>
-
-            <div
-              style={{
-                marginTop: 16,
-                display: 'grid',
-                gap: 10,
-              }}
-            >
-              {paymentMethods.map((method) => {
-                const active = selectedPayment === method.id;
-
-                return (
-                  <button
-                    key={method.id}
-                    type="button"
-                    onClick={() => setSelectedPayment(method.id)}
-                    style={{
-                      width: '100%',
-                      minHeight: 72,
-                      borderRadius: 18,
-                      border: '2px solid #111111',
-                      background: active ? '#f8f7f3' : '#fff',
-                      padding: '12px 14px',
-                      display: 'grid',
-                      gridTemplateColumns: '36px 1fr 26px',
-                      gap: 14,
-                      alignItems: 'center',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 12,
-                        border: '2px solid #111111',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 20,
-                        fontWeight: 900,
-                        background: '#fff',
-                        color: '#17130f',
-                      }}
-                    >
-                      {method.icon}
-                    </div>
-
-                    <div>
+                    return (
                       <div
+                        key={method.id}
                         style={{
-                          fontSize: 16,
-                          fontWeight: 900,
-                          color: '#17130f',
+                          minHeight: 52,
+                          border: `1.7px solid ${BRAND.black}`,
+                          borderRadius: 12,
+                          background: active ? '#F8FBFF' : '#fff',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 3,
+                          color: BRAND.navy,
                         }}
                       >
-                        {method.title}
+                        <div
+                          style={{
+                            fontSize: 23,
+                            fontWeight: 950,
+                            color: method.id === 'googlePay' ? BRAND.blue : BRAND.navy,
+                          }}
+                        >
+                          {method.icon}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 950,
+                            textAlign: 'center',
+                            lineHeight: 1.05,
+                          }}
+                        >
+                          {method.label}
+                        </div>
                       </div>
-
-                      <div
-                        style={{
-                          marginTop: 2,
-                          fontSize: 12,
-                          fontWeight: 700,
-                          color: '#7b7268',
-                        }}
-                      >
-                        {method.subtitle}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: 999,
-                        border: '2px solid #111111',
-                        background: active ? '#17130f' : '#fff',
-                        color: '#fff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 12,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {active ? '✓' : ''}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div
-              style={{
-                marginTop: 14,
-                borderRadius: 16,
-                border: '1.5px solid #111111',
-                background: '#fff',
-                padding: '12px 14px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 10,
-                alignItems: 'center',
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 700,
-                    color: '#7b7268',
-                  }}
-                >
-                  {text.selectedPaymentMethod}
+                    );
+                  })}
                 </div>
-
-                <div
-                  style={{
-                    marginTop: 2,
-                    fontSize: 16,
-                    fontWeight: 900,
-                    color: '#17130f',
-                  }}
-                >
-                  {selectedPaymentMethod?.title}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 900,
-                  color: '#17130f',
-                }}
-              >
-                £{totalPrice}
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 14,
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setShowPaymentSheet(false)}
-                style={{
-                  height: 54,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#fff',
-                  color: '#17130f',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.cancel}
               </button>
+            </ShellCard>
+          </section>
 
-              <button
-                type="button"
-                onClick={handleConfirmPayment}
-                style={{
-                  height: 54,
-                  borderRadius: 18,
-                  border: '2px solid #111111',
-                  background: '#17130f',
-                  color: '#fff',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                }}
-              >
-                {text.confirmPayment} · £{totalPrice}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+          <section style={{ padding: '12px 12px 0', display: 'grid', gap: 8 }}>
+            <RowButton
+              icon="📝"
+              iconBg="#FFF4C7"
+              title={text.title}
+              subtitle={title || text.titleHint}
+              onClick={() => setSheet('title')}
+            />
 
-      {editorPhoto ? (
-        <div
-          onClick={closeEditor}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(17,17,17,0.42)',
-            zIndex: 300,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              padding: '0 14px calc(20px + env(safe-area-inset-bottom))',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                border: '2px solid #111111',
-                borderRadius: 26,
-                background: '#ffffff',
-                boxShadow: '0 18px 34px rgba(0,0,0,0.18)',
-                overflow: 'hidden',
-              }}
-            >
+            <RowButton
+              icon="T"
+              iconBg="#E9F7FF"
+              title={text.description}
+              subtitle={description || text.descriptionHint}
+              onClick={() => setSheet('description')}
+            />
+
+            <RowButton
+              icon="🏷️"
+              iconBg="#F5E8FF"
+              title={text.category}
+              subtitle={currentCategory?.label || text.chooseCategory}
+              onClick={() => setSheet('category')}
+            />
+
+            <RowButton
+              icon="⌘"
+              iconBg="#FFE8FA"
+              title={text.subcategory}
+              subtitle={subcategory || text.chooseSubcategory}
+              onClick={() => setSheet('subcategory')}
+            />
+
+            <RowButton
+              icon="🕘"
+              iconBg="#EFFFF3"
+              title={text.workingHours}
+              subtitle={`${fromTime} — ${toTime}`}
+              onClick={() => setSheet('hours')}
+            />
+
+            <ShellCard style={{ padding: 10 }}>
               <div
                 style={{
-                  padding: '16px 16px 8px',
-                  fontSize: 18,
-                  fontWeight: 900,
-                  color: '#17130f',
+                  display: 'grid',
+                  gridTemplateColumns: '56px 1fr',
+                  gap: 12,
+                  alignItems: 'center',
+                  marginBottom: 10,
                 }}
               >
-                {text.adjustPhoto}
-              </div>
-
-              <div
-                style={{
-                  padding: '0 16px 14px',
-                  fontSize: 14,
-                  lineHeight: 1.45,
-                  color: '#7b7268',
-                  fontWeight: 700,
-                }}
-              >
-                {text.photoEditorHint}
-              </div>
-
-              <div style={{ padding: '0 16px 14px' }}>
+                <IconBox icon="🏠" bg="#EEF4FF" />
                 <div
-                  onPointerDown={handleEditorPointerDown}
-                  onPointerMove={handleEditorPointerMove}
-                  onPointerUp={handleEditorPointerUp}
-                  onPointerCancel={handleEditorPointerUp}
                   style={{
-                    width: '100%',
-                    aspectRatio: '1 / 1',
-                    borderRadius: 22,
-                    border: '2px solid #111111',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    background: '#f4f1ea',
-                    touchAction: 'none',
+                    fontSize: 17,
+                    fontWeight: 950,
+                    color: BRAND.navy,
                   }}
                 >
-                  <img
-                    src={editorPhoto.preview}
-                    alt={editorPhoto.name}
-                    draggable={false}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
-                      userSelect: 'none',
-                      transform: `translate(${editorOffsetX}px, ${editorOffsetY}px) scale(${editorScale})`,
-                      transformOrigin: 'center center',
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginTop: 14 }}>
-                  <input
-                    type="range"
-                    min={MIN_SCALE}
-                    max={MAX_SCALE}
-                    step={0.01}
-                    value={editorScale}
-                    onChange={(e) => setEditorScale(getSafeScale(Number(e.target.value)))}
-                    style={{ width: '100%' }}
-                  />
+                  {text.serviceFormat}
                 </div>
               </div>
 
@@ -3103,65 +1466,623 @@ export default function NewPromotionPage() {
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr 1fr',
-                  gap: 10,
-                  padding: '0 16px 16px',
+                  gap: 8,
                 }}
               >
-                <button
-                  type="button"
-                  onClick={resetEditor}
-                  style={{
-                    height: 50,
-                    borderRadius: 16,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    color: '#17130f',
-                    fontSize: 15,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {text.resetPhoto}
-                </button>
+                {[
+                  ['atMyPlace', text.atMyPlace, '🏠'],
+                  ['atClient', text.atClient, '👤'],
+                  ['online', text.online, '🌐'],
+                ].map(([key, label, icon]) => {
+                  const active = formats[key as keyof typeof formats];
 
-                <button
-                  type="button"
-                  onClick={closeEditor}
-                  style={{
-                    height: 50,
-                    borderRadius: 16,
-                    border: '2px solid #111111',
-                    background: '#fff',
-                    color: '#17130f',
-                    fontSize: 15,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {text.cancel}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={applyEditor}
-                  style={{
-                    height: 50,
-                    borderRadius: 16,
-                    border: '2px solid #111111',
-                    background: '#17130f',
-                    color: '#fff',
-                    fontSize: 15,
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {text.applyPhoto}
-                </button>
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() =>
+                        setFormats((prev) => ({
+                          ...prev,
+                          [key]: !prev[key as keyof typeof prev],
+                        }))
+                      }
+                      style={{
+                        minHeight: 48,
+                        borderRadius: 13,
+                        border: `2px solid ${BRAND.black}`,
+                        background: active ? BRAND.green : '#fff',
+                        color: active ? '#fff' : BRAND.navy,
+                        fontSize: 13,
+                        fontWeight: 950,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <span style={{ marginRight: 4 }}>{icon}</span>
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
-            </div>
-          </div>
+            </ShellCard>
+
+            <RowButton
+              icon="📞"
+              iconBg="#EFFFF3"
+              title={text.contactDetails}
+              subtitle={selectedPaymentLabels ? text.contactsHint : text.contactsHint}
+              right={
+                <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                  {['🟢', '✈️', '🟣', '📸', '✉️', '🌐'].map((icon) => (
+                    <div
+                      key={icon}
+                      style={{
+                        width: 31,
+                        height: 31,
+                        borderRadius: 9,
+                        border: `1.5px solid ${BRAND.black}`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 17,
+                        background: '#fff',
+                      }}
+                    >
+                      {icon}
+                    </div>
+                  ))}
+                </div>
+              }
+              onClick={() => setSheet('contacts')}
+            />
+
+            <RowButton
+              icon="📍"
+              iconBg="#FFECEC"
+              title={text.address}
+              subtitle={
+                [address.city, address.district, address.street].filter(Boolean).join(', ') ||
+                text.addressHint
+              }
+              onClick={() => setSheet('address')}
+            />
+
+            <ShellCard
+              style={{
+                padding: '12px 14px',
+                background: '#FFF8D7',
+                fontSize: 14,
+                fontWeight: 900,
+                color: BRAND.navy,
+                lineHeight: 1.35,
+              }}
+            >
+              {text.publishOnlyAfterPayment}
+            </ShellCard>
+          </section>
         </div>
+      </main>
+
+      <div
+        style={{
+          position: 'fixed',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 80,
+          background: 'rgba(255,255,255,0.98)',
+          borderTop: '1px solid #E5E8EF',
+          padding: '12px 16px calc(12px + env(safe-area-inset-bottom))',
+        }}
+      >
+        <div style={{ maxWidth: 430, margin: '0 auto' }}>
+          <button
+            type="button"
+            onClick={handleContinue}
+            style={{
+              width: '100%',
+              height: 64,
+              borderRadius: 22,
+              border: `2px solid ${BRAND.black}`,
+              background: BRAND.green,
+              color: '#fff',
+              fontSize: 22,
+              fontWeight: 950,
+              cursor: 'pointer',
+              boxShadow: '0 6px 0 rgba(0,0,0,0.10)',
+            }}
+          >
+            {text.continue}
+          </button>
+        </div>
+      </div>
+
+      {sheet === 'title' ? (
+        <Sheet title={text.title} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 14 }}>
+            <Field
+              label={text.title}
+              value={title}
+              onChange={setTitle}
+              placeholder={text.enterTitle}
+            />
+            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
+              {text.save}
+            </button>
+          </div>
+        </Sheet>
+      ) : null}
+
+      {sheet === 'description' ? (
+        <Sheet title={text.description} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 14 }}>
+            <Field
+              label={text.description}
+              value={description}
+              onChange={setDescription}
+              placeholder={text.enterDescription}
+              multiline
+            />
+            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
+              {text.save}
+            </button>
+          </div>
+        </Sheet>
+      ) : null}
+
+      {sheet === 'category' ? (
+        <Sheet title={text.category} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {localizedCategories.map((item) => {
+              const active = item.id === categoryId;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setCategoryId(item.id);
+                    setSubcategory('');
+                    setSheet('subcategory');
+                  }}
+                  style={{
+                    minHeight: 62,
+                    borderRadius: 18,
+                    border: `2px solid ${BRAND.black}`,
+                    background: active ? BRAND.blue : '#fff',
+                    color: active ? '#fff' : BRAND.navy,
+                    display: 'grid',
+                    gridTemplateColumns: '44px 1fr 30px',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 14px',
+                    fontSize: 18,
+                    fontWeight: 950,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span style={{ fontSize: 27 }}>{item.icon}</span>
+                  <span>{item.label}</span>
+                  <span>{active ? '✓' : '›'}</span>
+                </button>
+              );
+            })}
+          </div>
+        </Sheet>
+      ) : null}
+
+      {sheet === 'subcategory' ? (
+        <Sheet title={text.subcategory} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {!categoryId ? (
+              <button
+                type="button"
+                onClick={() => setSheet('category')}
+                style={primaryButtonStyle()}
+              >
+                {text.chooseCategory}
+              </button>
+            ) : null}
+
+            {subcategoryOptions.map((item: string) => {
+              const active = item === subcategory;
+
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => {
+                    setSubcategory(item);
+                    setSheet(null);
+                  }}
+                  style={{
+                    minHeight: 58,
+                    borderRadius: 18,
+                    border: `2px solid ${BRAND.black}`,
+                    background: active ? BRAND.blue : '#fff',
+                    color: active ? '#fff' : BRAND.navy,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 10,
+                    padding: '10px 14px',
+                    fontSize: 18,
+                    fontWeight: 950,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span>{item}</span>
+                  <span>{active ? '✓' : '›'}</span>
+                </button>
+              );
+            })}
+          </div>
+        </Sheet>
+      ) : null}
+
+      {sheet === 'price' ? (
+        <Sheet title={text.price} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 14 }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
+              }}
+            >
+              {[
+                ['fixed', text.fixedPrice],
+                ['range', text.priceRange],
+              ].map(([mode, label]) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setPriceMode(mode as 'fixed' | 'range')}
+                  style={{
+                    height: 54,
+                    borderRadius: 18,
+                    border: `2px solid ${BRAND.black}`,
+                    background: priceMode === mode ? BRAND.blue : '#fff',
+                    color: priceMode === mode ? '#fff' : BRAND.navy,
+                    fontSize: 16,
+                    fontWeight: 950,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {priceMode === 'fixed' ? (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 10,
+                }}
+              >
+                <Field
+                  label={text.pounds}
+                  value={pricePounds}
+                  onChange={(next) => setPricePounds(next.replace(/[^\d]/g, '').slice(0, 5))}
+                  placeholder="45"
+                />
+                <Field
+                  label={text.pennies}
+                  value={pricePennies}
+                  onChange={(next) => setPricePennies(next.replace(/[^\d]/g, '').slice(0, 2))}
+                  placeholder="00"
+                />
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 10,
+                }}
+              >
+                <Field
+                  label={text.minPrice}
+                  value={minPrice}
+                  onChange={(next) => setMinPrice(next.replace(/[^\d]/g, '').slice(0, 5))}
+                  placeholder="40"
+                />
+                <Field
+                  label={text.maxPrice}
+                  value={maxPrice}
+                  onChange={(next) => setMaxPrice(next.replace(/[^\d]/g, '').slice(0, 5))}
+                  placeholder="60"
+                />
+              </div>
+            )}
+
+            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
+              {text.save}
+            </button>
+          </div>
+        </Sheet>
+      ) : null}
+
+      {sheet === 'payment' ? (
+        <Sheet title={text.paymentMethods} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {paymentOptions.map((method) => {
+              const active = payments.includes(method.id);
+
+              return (
+                <button
+                  key={method.id}
+                  type="button"
+                  onClick={() => togglePayment(method.id)}
+                  style={{
+                    minHeight: 64,
+                    borderRadius: 18,
+                    border: `2px solid ${BRAND.black}`,
+                    background: active ? BRAND.softBlue : '#fff',
+                    display: 'grid',
+                    gridTemplateColumns: '48px 1fr 32px',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '10px 14px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <IconBox icon={method.icon} bg="#fff" />
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 950,
+                      color: BRAND.navy,
+                    }}
+                  >
+                    {method.label}
+                  </div>
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 999,
+                      border: `2px solid ${BRAND.black}`,
+                      background: active ? BRAND.green : '#fff',
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 16,
+                      fontWeight: 950,
+                    }}
+                  >
+                    {active ? '✓' : ''}
+                  </div>
+                </button>
+              );
+            })}
+
+            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
+              {text.save}
+            </button>
+          </div>
+        </Sheet>
+      ) : null}
+
+      {sheet === 'hours' ? (
+        <Sheet title={text.workingHours} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 14 }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
+              }}
+            >
+              <Field label={text.fromTime} value={fromTime} onChange={setFromTime} placeholder="09:00" />
+              <Field label={text.toTime} value={toTime} onChange={setToTime} placeholder="20:00" />
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: 8,
+              }}
+            >
+              {['09:00', '10:00', '12:00', '18:00', '20:00', '22:00'].map((time) => (
+                <button
+                  key={time}
+                  type="button"
+                  onClick={() => setFromTime(time)}
+                  style={{
+                    height: 44,
+                    borderRadius: 14,
+                    border: `2px solid ${BRAND.black}`,
+                    background: '#fff',
+                    color: BRAND.navy,
+                    fontSize: 15,
+                    fontWeight: 950,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {time}
+                </button>
+              ))}
+            </div>
+
+            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
+              {text.save}
+            </button>
+          </div>
+        </Sheet>
+      ) : null}
+
+      {sheet === 'contacts' ? (
+        <Sheet title={text.contactDetails} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {contactRows.map((row) => (
+              <div
+                key={row.key}
+                style={{
+                  border: `2px solid ${BRAND.black}`,
+                  borderRadius: 20,
+                  background: '#fff',
+                  padding: 12,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '44px 1fr',
+                    gap: 10,
+                    alignItems: 'center',
+                    marginBottom: 10,
+                  }}
+                >
+                  <IconBox icon={row.icon} bg="#F7FAFF" />
+                  <div
+                    style={{
+                      fontSize: 17,
+                      fontWeight: 950,
+                      color: BRAND.navy,
+                    }}
+                  >
+                    {row.label}
+                  </div>
+                </div>
+
+                <input
+                  value={contacts[row.key]}
+                  onChange={(e) =>
+                    setContacts((prev) => ({
+                      ...prev,
+                      [row.key]: e.target.value,
+                    }))
+                  }
+                  placeholder={row.placeholder}
+                  style={{
+                    width: '100%',
+                    height: 54,
+                    border: `2px solid ${BRAND.black}`,
+                    borderRadius: 17,
+                    padding: '0 14px',
+                    fontSize: 16,
+                    fontWeight: 850,
+                    color: BRAND.navy,
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+            ))}
+
+            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
+              {text.save}
+            </button>
+          </div>
+        </Sheet>
+      ) : null}
+
+      {sheet === 'address' ? (
+        <Sheet title={text.address} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 14 }}>
+            <Field
+              label={text.city}
+              value={address.city}
+              onChange={(next) => setAddress((prev) => ({ ...prev, city: next }))}
+              placeholder="London"
+            />
+            <Field
+              label={text.district}
+              value={address.district}
+              onChange={(next) => setAddress((prev) => ({ ...prev, district: next }))}
+              placeholder="Camden, Chelsea, Mayfair..."
+            />
+            <Field
+              label={text.street}
+              value={address.street}
+              onChange={(next) => setAddress((prev) => ({ ...prev, street: next }))}
+              placeholder="Street"
+            />
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: 10,
+              }}
+            >
+              <Field
+                label={text.building}
+                value={address.building}
+                onChange={(next) => setAddress((prev) => ({ ...prev, building: next }))}
+                placeholder="12"
+              />
+              <Field
+                label={text.floor}
+                value={address.floor}
+                onChange={(next) => setAddress((prev) => ({ ...prev, floor: next }))}
+                placeholder="2"
+              />
+              <Field
+                label={text.flat}
+                value={address.flat}
+                onChange={(next) => setAddress((prev) => ({ ...prev, flat: next }))}
+                placeholder="5"
+              />
+            </div>
+
+            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
+              {text.save}
+            </button>
+          </div>
+        </Sheet>
       ) : null}
     </>
   );
+}
+
+function toolButtonStyle(): React.CSSProperties {
+  return {
+    width: '100%',
+    height: 36,
+    border: 'none',
+    background: 'transparent',
+    color: '#061b49',
+    fontSize: 25,
+    fontWeight: 950,
+    cursor: 'pointer',
+    lineHeight: 1,
+  };
+}
+
+function priceBoxStyle(isNumber: boolean): React.CSSProperties {
+  return {
+    height: 58,
+    borderRadius: 13,
+    border: '1.7px solid #C8CCD4',
+    background: '#fff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: isNumber ? 27 : 24,
+    fontWeight: 950,
+    color: isNumber ? '#F0182D' : '#23C552',
+    boxSizing: 'border-box',
+  };
+}
+
+function primaryButtonStyle(): React.CSSProperties {
+  return {
+    width: '100%',
+    height: 58,
+    borderRadius: 20,
+    border: '2px solid #111111',
+    background: '#23C552',
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 950,
+    cursor: 'pointer',
+    boxShadow: '0 5px 0 rgba(0,0,0,0.10)',
+  };
 }
