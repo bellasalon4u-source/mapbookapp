@@ -22,7 +22,18 @@ const BRAND = {
 };
 
 type PaymentMethodId = 'card' | 'cash' | 'apple-pay' | 'google-pay' | 'paypal' | 'bank';
-type Sheet = null | 'title' | 'description' | 'category' | 'subcategory' | 'hours' | 'contacts' | 'address' | 'payments' | 'price';
+
+type Sheet =
+  | null
+  | 'title'
+  | 'description'
+  | 'category'
+  | 'subcategory'
+  | 'hours'
+  | 'contacts'
+  | 'address'
+  | 'payments'
+  | 'price';
 
 type MediaItem = {
   id: string;
@@ -101,14 +112,12 @@ function Row({
   value,
   bg,
   onClick,
-  children,
 }: {
   icon: string;
   title: string;
   value?: string;
   bg: string;
   onClick?: () => void;
-  children?: ReactNode;
 }) {
   return (
     <button
@@ -121,12 +130,13 @@ function Row({
         border: `2px solid ${BRAND.black}`,
         background: '#fff',
         display: 'grid',
-        gridTemplateColumns: '54px 1fr auto',
+        gridTemplateColumns: '54px minmax(0, 1fr) auto',
         gap: 14,
         alignItems: 'center',
         padding: '10px 16px 10px 12px',
         textAlign: 'left',
         cursor: 'pointer',
+        boxSizing: 'border-box',
       }}
     >
       <span
@@ -162,7 +172,6 @@ function Row({
             {value}
           </div>
         ) : null}
-        {children}
       </span>
 
       <span style={{ fontSize: 34, fontWeight: 900, color: BRAND.navy }}>›</span>
@@ -235,7 +244,7 @@ export default function AddServicePage() {
   const router = useRouter();
   const mediaInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
+  const [, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [sheet, setSheet] = useState<Sheet>(null);
 
@@ -285,7 +294,7 @@ export default function AddServicePage() {
       .map((file, index) => ({
         id: `${file.name}-${file.size}-${Date.now()}-${index}`,
         preview: URL.createObjectURL(file),
-        kind: file.type.startsWith('video/') ? 'video' as const : 'photo' as const,
+        kind: file.type.startsWith('video/') ? ('video' as const) : ('photo' as const),
       }));
 
     setMedia((prev) => [...prev, ...next]);
@@ -307,6 +316,7 @@ export default function AddServicePage() {
           fontFamily: 'Arial, sans-serif',
           color: BRAND.navy,
           paddingBottom: 112,
+          overflowX: 'hidden',
         }}
       >
         <header
@@ -380,7 +390,17 @@ export default function AddServicePage() {
           </div>
         </header>
 
-        <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px', display: 'grid', gap: 12 }}>
+        <div
+          style={{
+            maxWidth: 430,
+            margin: '0 auto',
+            padding: '18px',
+            display: 'grid',
+            gap: 12,
+            boxSizing: 'border-box',
+            overflowX: 'hidden',
+          }}
+        >
           <input
             ref={mediaInputRef}
             type="file"
@@ -390,13 +410,24 @@ export default function AddServicePage() {
             style={{ display: 'none' }}
           />
 
-          <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <section
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+              gap: 10,
+              width: '100%',
+              boxSizing: 'border-box',
+              overflow: 'hidden',
+            }}
+          >
             <div
               style={{
                 border: `2px solid ${BRAND.black}`,
                 borderRadius: 24,
                 background: '#fff',
                 padding: 12,
+                minWidth: 0,
+                boxSizing: 'border-box',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -461,15 +492,15 @@ export default function AddServicePage() {
                   textAlign: 'center',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-around', fontSize: 30, fontWeight: 900 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-around', fontSize: 26, fontWeight: 900 }}>
                   <span>↔</span>
                   <span>⌕+</span>
                   <span>↻</span>
                   <span>→</span>
                   <span
                     style={{
-                      width: 42,
-                      height: 42,
+                      width: 38,
+                      height: 38,
                       borderRadius: 999,
                       background: BRAND.green,
                       color: '#fff',
@@ -494,6 +525,8 @@ export default function AddServicePage() {
                 borderRadius: 24,
                 background: '#fff',
                 overflow: 'hidden',
+                minWidth: 0,
+                boxSizing: 'border-box',
               }}
             >
               <div style={{ padding: 12 }}>
@@ -507,7 +540,7 @@ export default function AddServicePage() {
                   onClick={() => setSheet('price')}
                   style={{ width: '100%', border: 'none', background: 'transparent', padding: 0 }}
                 >
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
                     <div
                       style={{
                         height: 76,
@@ -517,7 +550,7 @@ export default function AddServicePage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: BRAND.green,
-                        fontSize: 34,
+                        fontSize: 32,
                         fontWeight: 900,
                       }}
                     >
@@ -533,7 +566,7 @@ export default function AddServicePage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: BRAND.red,
-                        fontSize: 34,
+                        fontSize: 32,
                         fontWeight: 900,
                       }}
                     >
@@ -549,7 +582,7 @@ export default function AddServicePage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: BRAND.red,
-                        fontSize: 34,
+                        fontSize: 32,
                         fontWeight: 900,
                       }}
                     >
@@ -560,20 +593,21 @@ export default function AddServicePage() {
                   <div
                     style={{
                       marginTop: 10,
-                      height: 50,
+                      minHeight: 50,
                       borderRadius: 16,
                       border: `2px solid ${BRAND.black}`,
                       display: 'grid',
-                      gridTemplateColumns: '34px 1fr 24px',
+                      gridTemplateColumns: '28px minmax(0, 1fr) 20px',
                       alignItems: 'center',
-                      padding: '0 12px',
+                      padding: '0 8px',
+                      gap: 6,
                     }}
                   >
-                    <span style={{ fontSize: 22 }}>🏷️</span>
-                    <span style={{ fontSize: 17, fontWeight: 900 }}>
+                    <span style={{ fontSize: 20 }}>🏷️</span>
+                    <span style={{ fontSize: 15, fontWeight: 900, lineHeight: 1.1 }}>
                       From £{priceFrom} to £{priceTo}
                     </span>
-                    <span style={{ fontSize: 30, fontWeight: 900 }}>›</span>
+                    <span style={{ fontSize: 26, fontWeight: 900 }}>›</span>
                   </div>
                 </button>
               </div>
@@ -590,47 +624,45 @@ export default function AddServicePage() {
                   cursor: 'pointer',
                   textAlign: 'left',
                   display: 'grid',
-                  gridTemplateColumns: '52px 1fr auto',
-                  gap: 12,
+                  gridTemplateColumns: '42px minmax(0, 1fr) auto',
+                  gap: 10,
                   alignItems: 'center',
                 }}
               >
                 <span
                   style={{
-                    width: 46,
-                    height: 46,
+                    width: 40,
+                    height: 40,
                     borderRadius: 14,
                     border: `2px solid ${BRAND.black}`,
                     background: BRAND.softBlue,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 25,
+                    fontSize: 23,
                   }}
                 >
                   💳
                 </span>
 
-                <span>
-                  <div style={{ fontSize: 22, fontWeight: 900 }}>Payment methods</div>
+                <span style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 21, fontWeight: 900, lineHeight: 1.05 }}>
+                    Payment methods
+                  </div>
                   <div style={{ marginTop: 5, fontSize: 13, color: BRAND.muted, fontWeight: 900 }}>
                     Tap to choose
                   </div>
                 </span>
 
-                <span style={{ fontSize: 34, fontWeight: 900 }}>›</span>
+                <span style={{ fontSize: 32, fontWeight: 900 }}>›</span>
               </button>
             </div>
           </section>
 
           <Row icon="📝" bg={BRAND.softYellow} title="Title" value={title || 'Add a short and clear title'} onClick={() => setSheet('title')} />
-
           <Row icon="T" bg={BRAND.softBlue} title="Description" value={description || 'Describe your service in detail'} onClick={() => setSheet('description')} />
-
           <Row icon="🏷️" bg={BRAND.softPink} title="Category" value={currentCategory.label} onClick={() => setSheet('category')} />
-
           <Row icon="⌘" bg={BRAND.softPink} title="Subcategory" value={subcategory} onClick={() => setSheet('subcategory')} />
-
           <Row icon="🕘" bg={BRAND.softGreen} title="Working hours" value={`${hoursFrom} — ${hoursTo}`} onClick={() => setSheet('hours')} />
 
           <div
@@ -639,9 +671,10 @@ export default function AddServicePage() {
               border: `2px solid ${BRAND.black}`,
               background: '#fff',
               padding: 12,
+              boxSizing: 'border-box',
             }}
           >
-            <div style={{ display: 'grid', gridTemplateColumns: '54px 1fr', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '54px minmax(0, 1fr)', gap: 14 }}>
               <span
                 style={{
                   width: 48,
@@ -658,7 +691,7 @@ export default function AddServicePage() {
                 🏠
               </span>
 
-              <span>
+              <span style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 10 }}>Service format</div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
