@@ -6,13 +6,15 @@ const BRAND = { navy: '#071b46', black: '#111111', green: '#24c45a', blue: '#167
 
 type PaymentMethodId = 'card' | 'cash' | 'apple-pay' | 'google-pay' | 'paypal' | 'bank';
 
-type Sheet = | null | 'title' | 'description' | 'category' | 'subcategory' | 'hours' | 'contacts' | 'address' | 'payments' | 'price';
+type Sheet = | null | 'title' | 'description' | 'category' | 'hours' | 'contacts' | 'address' | 'payments' | 'price' | 'preview';
 
 type MediaItem = { id: string; preview: string; };
 
-const categories = [ { id: 'beauty', icon: '💄', label: 'Beauty', subcategories: ['Hair & Styling', 'Nails', 'Brows', 'Lashes', 'Makeup', 'Hair extensions'], }, { id: 'barber', icon: '✂️', label: 'Barber', subcategories: ['Haircut', 'Beard', 'Shaving', 'Kids haircut'], }, { id: 'wellness', icon: '🧘', label: 'Wellness', subcategories: ['Massage', 'SPA', 'Yoga', 'Pilates', 'Facial massage'], }, { id: 'home', icon: '🏠', label: 'Home', subcategories: ['Cleaning', 'Deep cleaning', 'Cooking', 'Furniture assembly'], }, { id: 'food', icon: '🍽️', label: 'Food', subcategories: ['Chef at home', 'Catering', 'Restaurant booking', 'Cake'], }, { id: 'fashion', icon: '👗', label: 'Fashion', subcategories: ['Stylist', 'Tailoring', 'Dress rental', 'Personal shopping'], }, ];
+const categories = [ { id: 'beauty', icon: '💄', label: 'Beauty', subcategories: ['Hair & Styling', 'Nails', 'Brows', 'Lashes', 'Makeup', 'Hair extensions'], }, { id: 'barber', icon: '✂️', label: 'Barber', subcategories: ['Haircut', 'Beard', 'Shaving', 'Kids haircut'], }, { id: 'wellness', icon: '🧘', label: 'Wellness', subcategories: ['Massage', 'SPA', 'Yoga', 'Pilates', 'Facial massage'], }, { id: 'home', icon: '🏠', label: 'Home', subcategories: ['Cleaning', 'Deep cleaning', 'Cooking', 'Furniture assembly'], }, { id: 'food', icon: '🍽️', label: 'Food', subcategories: ['Chef at home', 'Catering', 'Restaurant booking', 'Cake'], }, { id: 'fashion', icon: '👗', label: 'Fashion', subcategories: ['Stylist', 'Tailoring', 'Dress rental', 'Personal shopping'], }, { id: 'pets', icon: '🐾', label: 'Pets', subcategories: ['Dog walking', 'Pet sitting', 'Grooming', 'Training'], }, { id: 'events', icon: '🎉', label: 'Events', subcategories: ['Photographer', 'Host', 'Decor', 'Makeup for event'], }, ];
 
 const paymentMethods: { id: PaymentMethodId; icon: string; title: string }[] = [ { id: 'card', icon: '💳', title: 'Card' }, { id: 'cash', icon: '💵', title: 'Cash' }, { id: 'apple-pay', icon: '', title: 'Apple Pay' }, { id: 'google-pay', icon: 'G', title: 'Google Pay' }, { id: 'paypal', icon: '🅿️', title: 'PayPal' }, { id: 'bank', icon: '🏦', title: 'Bank transfer' }, ];
+
+const contactFields = [ { key: 'phone', icon: '📞', label: 'Phone', placeholder: '+44 phone number' }, { key: 'whatsapp', icon: '🟢', label: 'WhatsApp', placeholder: '+44 WhatsApp number' }, { key: 'telegram', icon: '✈️', label: 'Telegram', placeholder: '@username' }, { key: 'viber', icon: '🟣', label: 'Viber', placeholder: '+44 Viber number' }, { key: 'instagram', icon: '📸', label: 'Instagram', placeholder: '@instagram' }, { key: 'email', icon: '✉️', label: 'Email', placeholder: 'you@email.com' }, { key: 'website', icon: '🌐', label: 'Website', placeholder: 'yourwebsite.com' }, ];
 
 function Logo() { return ( <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}> <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'conic-gradient(from 20deg, #ff2456, #ffe44d, #24c45a, #1677ff, #7b2cff, #ff2456)', }} /> <span style={{ fontSize: 34, fontWeight: 900, color: BRAND.navy }}>Olamep</span> </div> ); }
 
@@ -42,7 +44,9 @@ function Row({ icon, title, value, bg, onClick, }: { icon: string; title: string
 
 ); }
 
-function SheetBox({ title, onClose, children, }: { title: string; onClose: () => void; children: ReactNode; }) { return ( <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(17,17,17,0.34)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', }} > <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 430, maxHeight: 'calc(100vh - 50px)', overflowY: 'auto', background: '#fff', borderRadius: '30px 30px 0 0', border: 2px solid ${BRAND.black}, padding: '18px 18px calc(20px + env(safe-area-inset-bottom))', boxSizing: 'border-box', }} > <div style={{ display: 'grid', gridTemplateColumns: '1fr 46px', gap: 10, marginBottom: 16, }} > <div style={{ fontSize: 28, fontWeight: 900, color: BRAND.navy }}>{title}</div> <button type="button" onClick={onClose} style={{ width: 46, height: 46, borderRadius: 999, border: 2px solid ${BRAND.black}, background: '#fff', color: BRAND.navy, fontSize: 26, fontWeight: 900, }} > × </button> </div> {children} </div> </div> ); }
+function SheetBox({ title, onClose, children, }: { title: string; onClose: () => void; children: ReactNode; }) { return ( <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(17,17,17,0.34)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', }} > <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 430, maxHeight: 'calc(100vh - 48px)', overflowY: 'auto', background: '#fff', borderRadius: '30px 30px 0 0', border: 2px solid ${BRAND.black}, padding: '18px 18px calc(20px + env(safe-area-inset-bottom))', boxSizing: 'border-box', }} > <div style={{ display: 'grid', gridTemplateColumns: '1fr 46px', gap: 10, marginBottom: 16, alignItems: 'center', }} > <div style={{ fontSize: 28, fontWeight: 900, color: BRAND.navy }}>{title}</div> <button type="button" onClick={onClose} style={{ width: 46, height: 46, borderRadius: 999, border: 2px solid ${BRAND.black}, background: '#fff', color: BRAND.navy, fontSize: 26, fontWeight: 900, }} > × </button> </div> {children} </div> </div> ); }
+
+function inputBoxStyle(): React.CSSProperties { return { width: '100%', height: 58, borderRadius: 18, border: 2px solid ${BRAND.black}, padding: '0 16px', fontSize: 16, fontWeight: 900, color: BRAND.navy, boxSizing: 'border-box', }; }
 
 export default function AddServicePage() { const router = useRouter(); const fileInputRef = useRef<HTMLInputElement | null>(null); const cameraInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -54,11 +58,15 @@ const [selectedPayments, setSelectedPayments] = useState<PaymentMethodId[]>([ 'c
 
 const [title, setTitle] = useState(''); const [description, setDescription] = useState(''); const [categoryId, setCategoryId] = useState('beauty'); const [subcategory, setSubcategory] = useState('Hair & Styling'); const [hoursFrom, setHoursFrom] = useState('09:00'); const [hoursTo, setHoursTo] = useState('20:00');
 
+const [contacts, setContacts] = useState<Record<string, string>>({}); const [address, setAddress] = useState<Record<string, string>>({});
+
 useEffect(() => { setLanguage(getSavedLanguage()); const unsub = subscribeToLanguageChange((next) => setLanguage(next)); return () => unsub(); }, []);
 
 useEffect(() => { return () => { media.forEach((item) => URL.revokeObjectURL(item.preview)); }; }, [media]);
 
 const currentCategory = useMemo( () => categories.find((item) => item.id === categoryId) || categories[0], [categoryId] );
+
+const selectedPaymentTitles = useMemo(() => { return paymentMethods .filter((method) => selectedPayments.includes(method.id)) .map((method) => method.title) .join(', '); }, [selectedPayments]);
 
 const handlePhotosSelected = (event: ChangeEvent<HTMLInputElement>) => { const files = Array.from(event.target.files || []); if (!files.length) return;
 
@@ -77,6 +85,8 @@ event.target.value = '';
 };
 
 const togglePayment = (id: PaymentMethodId) => { setSelectedPayments((prev) => prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id] ); };
+
+const publishService = () => { alert('Service published'); router.push('/'); };
 
 return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily: 'Arial, sans-serif', color: BRAND.navy, paddingBottom: 112, overflowX: 'hidden', }} > <header style={{ padding: '22px 24px 26px', borderBottom: '1px solid #e2e7f0', background: '#ffffff', position: 'sticky', top: 0, zIndex: 30, }} > <div style={{ maxWidth: 430, margin: '0 auto', position: 'relative', textAlign: 'center' }}> <button type="button" onClick={() => router.back()} style={{ position: 'absolute', left: 0, top: 0, width: 54, height: 54, borderRadius: 999, border: 2px solid ${BRAND.black}, background: '#fff', color: BRAND.navy, fontSize: 30, fontWeight: 900, }} > ← </button>
 
@@ -339,22 +349,37 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
 
             <div
               style={{
-                marginTop: 10,
-                minHeight: 54,
-                borderRadius: 16,
-                border: `2px solid ${BRAND.black}`,
+                marginTop: 12,
                 display: 'grid',
-                gridTemplateColumns: '34px minmax(0, 1fr) 24px',
-                alignItems: 'center',
-                padding: '0 12px',
-                gap: 8,
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
               }}
             >
-              <span style={{ fontSize: 22 }}>🏷️</span>
-              <span style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.1 }}>
-                From £{priceFrom} to £{priceTo}
-              </span>
-              <span style={{ fontSize: 30, fontWeight: 900 }}>›</span>
+              <div
+                style={{
+                  borderRadius: 16,
+                  border: `2px solid ${BRAND.black}`,
+                  padding: '12px 10px',
+                  background: BRAND.softBlue,
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ fontSize: 13, fontWeight: 900, color: BRAND.muted }}>From</div>
+                <div style={{ fontSize: 24, fontWeight: 900, color: BRAND.navy }}>£{priceFrom}</div>
+              </div>
+
+              <div
+                style={{
+                  borderRadius: 16,
+                  border: `2px solid ${BRAND.black}`,
+                  padding: '12px 10px',
+                  background: BRAND.softGreen,
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ fontSize: 13, fontWeight: 900, color: BRAND.muted }}>To</div>
+                <div style={{ fontSize: 24, fontWeight: 900, color: BRAND.navy }}>£{priceTo}</div>
+              </div>
             </div>
           </button>
         </div>
@@ -395,7 +420,7 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
           <span style={{ minWidth: 0 }}>
             <div style={{ fontSize: 24, fontWeight: 900, lineHeight: 1.05 }}>Payment methods</div>
             <div style={{ marginTop: 5, fontSize: 14, color: BRAND.muted, fontWeight: 900 }}>
-              Tap to choose
+              {selectedPaymentTitles || 'Tap to choose'}
             </div>
           </span>
 
@@ -406,8 +431,8 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
       <Row icon="📝" bg={BRAND.softYellow} title="Title" value={title || 'Add a short and clear title'} onClick={() => setSheet('title')} />
       <Row icon="T" bg={BRAND.softBlue} title="Description" value={description || 'Describe your service in detail'} onClick={() => setSheet('description')} />
       <Row icon="🏷️" bg={BRAND.softPink} title="Category" value={currentCategory.label} onClick={() => setSheet('category')} />
-      <Row icon="⌘" bg={BRAND.softPink} title="Subcategory" value={subcategory} onClick={() => setSheet('subcategory')} />
-      <Row icon="🕘" bg={BRAND.softGreen} title="Working hours" value={`${hoursFrom} — ${hoursTo}`} onClick={() => setSheet('hours')} />
+      <Row icon="⌘" bg={BRAND.softPink} title="Subcategory" value={subcategory} onClick={() => setSheet('category')} />
+      <Row icon="🕘" bg={BRAND.softGreen} title="Working hours" value={`${hoursFrom || '09:00'} — ${hoursTo || '20:00'}`} onClick={() => setSheet('hours')} />
 
       <Row
         icon="📞"
@@ -454,6 +479,7 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
       <div style={{ maxWidth: 430, margin: '0 auto' }}>
         <button
           type="button"
+          onClick={() => setSheet('preview')}
           style={{
             width: '100%',
             height: 68,
@@ -465,7 +491,7 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
             fontWeight: 900,
           }}
         >
-          Continue
+          Preview
         </button>
       </div>
     </div>
@@ -477,15 +503,7 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Add a short and clear title"
-        style={{
-          width: '100%',
-          height: 58,
-          borderRadius: 18,
-          border: `2px solid ${BRAND.black}`,
-          padding: '0 16px',
-          fontSize: 16,
-          fontWeight: 900,
-        }}
+        style={inputBoxStyle()}
       />
     </SheetBox>
   ) : null}
@@ -506,6 +524,7 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
           fontWeight: 900,
           resize: 'none',
           fontFamily: 'Arial, sans-serif',
+          boxSizing: 'border-box',
         }}
       />
     </SheetBox>
@@ -513,57 +532,115 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
 
   {sheet === 'category' ? (
     <SheetBox title="Choose category" onClose={() => setSheet(null)}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        {categories.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => {
-              setCategoryId(item.id);
-              setSubcategory(item.subcategories[0]);
-              setSheet(null);
-            }}
-            style={{
-              minHeight: 70,
-              borderRadius: 18,
-              border: `2px solid ${BRAND.black}`,
-              background: item.id === categoryId ? BRAND.blue : '#fff',
-              color: item.id === categoryId ? '#fff' : BRAND.navy,
-              fontSize: 18,
-              fontWeight: 900,
-            }}
-          >
-            {item.icon} {item.label}
-          </button>
-        ))}
-      </div>
-    </SheetBox>
-  ) : null}
+      <div style={{ display: 'grid', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          {categories.map((item) => {
+            const active = item.id === categoryId;
 
-  {sheet === 'subcategory' ? (
-    <SheetBox title="Choose subcategory" onClose={() => setSheet(null)}>
-      <div style={{ display: 'grid', gap: 10 }}>
-        {currentCategory.subcategories.map((item) => (
-          <button
-            key={item}
-            type="button"
-            onClick={() => {
-              setSubcategory(item);
-              setSheet(null);
-            }}
-            style={{
-              minHeight: 58,
-              borderRadius: 18,
-              border: `2px solid ${BRAND.black}`,
-              background: item === subcategory ? BRAND.blue : '#fff',
-              color: item === subcategory ? '#fff' : BRAND.navy,
-              fontSize: 18,
-              fontWeight: 900,
-            }}
-          >
-            {item}
-          </button>
-        ))}
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  setCategoryId(item.id);
+                  setSubcategory('');
+                }}
+                style={{
+                  minHeight: 70,
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.black}`,
+                  background: active ? BRAND.blue : '#fff',
+                  color: active ? '#fff' : BRAND.navy,
+                  fontSize: 18,
+                  fontWeight: 900,
+                  position: 'relative',
+                }}
+              >
+                <span style={{ marginRight: 8 }}>{item.icon}</span>
+                {item.label}
+                {active ? (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      right: 8,
+                      top: 8,
+                      width: 26,
+                      height: 26,
+                      borderRadius: 999,
+                      background: BRAND.green,
+                      color: '#fff',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 18,
+                      fontWeight: 900,
+                    }}
+                  >
+                    ✓
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          style={{
+            borderTop: `2px solid ${BRAND.black}`,
+            paddingTop: 14,
+            display: 'grid',
+            gap: 10,
+          }}
+        >
+          <div style={{ fontSize: 22, fontWeight: 900, color: BRAND.navy }}>
+            Choose subcategory
+          </div>
+
+          {currentCategory.subcategories.map((item) => {
+            const active = item === subcategory;
+
+            return (
+              <button
+                key={item}
+                type="button"
+                onClick={() => {
+                  setSubcategory(item);
+                  setSheet(null);
+                }}
+                style={{
+                  minHeight: 58,
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.black}`,
+                  background: active ? BRAND.softGreen : '#fff',
+                  color: BRAND.navy,
+                  fontSize: 18,
+                  fontWeight: 900,
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 34px',
+                  alignItems: 'center',
+                  padding: '0 14px',
+                  textAlign: 'left',
+                }}
+              >
+                <span>{item}</span>
+                <span
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 999,
+                    background: active ? BRAND.green : '#fff',
+                    color: '#fff',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {active ? '✓' : ''}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </SheetBox>
   ) : null}
@@ -571,8 +648,18 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
   {sheet === 'hours' ? (
     <SheetBox title="Working hours" onClose={() => setSheet(null)}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        <input type="time" value={hoursFrom} onChange={(e) => setHoursFrom(e.target.value)} />
-        <input type="time" value={hoursTo} onChange={(e) => setHoursTo(e.target.value)} />
+        <input
+          type="time"
+          value={hoursFrom}
+          onChange={(e) => setHoursFrom(e.target.value)}
+          style={inputBoxStyle()}
+        />
+        <input
+          type="time"
+          value={hoursTo}
+          onChange={(e) => setHoursTo(e.target.value)}
+          style={inputBoxStyle()}
+        />
       </div>
     </SheetBox>
   ) : null}
@@ -580,29 +667,47 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
   {sheet === 'payments' ? (
     <SheetBox title="Payment methods" onClose={() => setSheet(null)}>
       <div style={{ display: 'grid', gap: 10 }}>
-        {paymentMethods.map((method) => (
-          <button
-            key={method.id}
-            type="button"
-            onClick={() => togglePayment(method.id)}
-            style={{
-              minHeight: 62,
-              borderRadius: 18,
-              border: `2px solid ${BRAND.black}`,
-              background: selectedPayments.includes(method.id) ? BRAND.softBlue : '#fff',
-              display: 'grid',
-              gridTemplateColumns: '48px 1fr 32px',
-              gap: 12,
-              alignItems: 'center',
-              padding: '10px 14px',
-              textAlign: 'left',
-            }}
-          >
-            <span style={{ fontSize: 24 }}>{method.icon}</span>
-            <span style={{ fontSize: 18, fontWeight: 900 }}>{method.title}</span>
-            <span>{selectedPayments.includes(method.id) ? '✓' : ''}</span>
-          </button>
-        ))}
+        {paymentMethods.map((method) => {
+          const active = selectedPayments.includes(method.id);
+
+          return (
+            <button
+              key={method.id}
+              type="button"
+              onClick={() => togglePayment(method.id)}
+              style={{
+                minHeight: 62,
+                borderRadius: 18,
+                border: `2px solid ${BRAND.black}`,
+                background: active ? BRAND.softBlue : '#fff',
+                display: 'grid',
+                gridTemplateColumns: '48px 1fr 32px',
+                gap: 12,
+                alignItems: 'center',
+                padding: '10px 14px',
+                textAlign: 'left',
+              }}
+            >
+              <span style={{ fontSize: 24 }}>{method.icon}</span>
+              <span style={{ fontSize: 18, fontWeight: 900 }}>{method.title}</span>
+              <span
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 999,
+                  background: active ? BRAND.green : '#fff',
+                  color: '#fff',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 900,
+                }}
+              >
+                {active ? '✓' : ''}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </SheetBox>
   ) : null}
@@ -610,30 +715,47 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
   {sheet === 'price' ? (
     <SheetBox title="Price" onClose={() => setSheet(null)}>
       <div style={{ display: 'grid', gap: 12 }}>
-        <input
-          value={pricePounds}
-          onChange={(e) => setPricePounds(e.target.value.replace(/[^\d]/g, ''))}
-          placeholder="Pounds"
-          style={{ height: 58, borderRadius: 18, border: `2px solid ${BRAND.black}`, padding: 16 }}
-        />
-        <input
-          value={pricePence}
-          onChange={(e) => setPricePence(e.target.value.replace(/[^\d]/g, '').slice(0, 2))}
-          placeholder="Pence"
-          style={{ height: 58, borderRadius: 18, border: `2px solid ${BRAND.black}`, padding: 16 }}
-        />
-        <input
-          value={priceFrom}
-          onChange={(e) => setPriceFrom(e.target.value.replace(/[^\d]/g, ''))}
-          placeholder="From"
-          style={{ height: 58, borderRadius: 18, border: `2px solid ${BRAND.black}`, padding: 16 }}
-        />
-        <input
-          value={priceTo}
-          onChange={(e) => setPriceTo(e.target.value.replace(/[^\d]/g, ''))}
-          placeholder="To"
-          style={{ height: 58, borderRadius: 18, border: `2px solid ${BRAND.black}`, padding: 16 }}
-        />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 8 }}>From</div>
+            <input
+              value={priceFrom}
+              onChange={(e) => setPriceFrom(e.target.value.replace(/[^\d]/g, ''))}
+              placeholder="From"
+              style={inputBoxStyle()}
+            />
+          </div>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 8 }}>To</div>
+            <input
+              value={priceTo}
+              onChange={(e) => setPriceTo(e.target.value.replace(/[^\d]/g, ''))}
+              placeholder="To"
+              style={inputBoxStyle()}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 8 }}>Main price</div>
+            <input
+              value={pricePounds}
+              onChange={(e) => setPricePounds(e.target.value.replace(/[^\d]/g, ''))}
+              placeholder="Pounds"
+              style={inputBoxStyle()}
+            />
+          </div>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 8 }}>Pence</div>
+            <input
+              value={pricePence}
+              onChange={(e) => setPricePence(e.target.value.replace(/[^\d]/g, '').slice(0, 2))}
+              placeholder="Pence"
+              style={inputBoxStyle()}
+            />
+          </div>
+        </div>
       </div>
     </SheetBox>
   ) : null}
@@ -641,20 +763,53 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
   {sheet === 'contacts' ? (
     <SheetBox title="Contact details" onClose={() => setSheet(null)}>
       <div style={{ display: 'grid', gap: 10 }}>
-        {['Phone', 'WhatsApp', 'Telegram', 'Viber', 'Instagram', 'Email', 'Website'].map((item) => (
-          <input
-            key={item}
-            placeholder={item}
+        {contactFields.map((item) => (
+          <label
+            key={item.key}
             style={{
-              width: '100%',
-              height: 58,
+              display: 'grid',
+              gridTemplateColumns: '48px 1fr',
+              gap: 10,
+              alignItems: 'center',
               borderRadius: 18,
               border: `2px solid ${BRAND.black}`,
-              padding: '0 16px',
-              fontSize: 16,
-              fontWeight: 900,
+              padding: 10,
             }}
-          />
+          >
+            <span
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 14,
+                border: `1.5px solid ${BRAND.black}`,
+                background: BRAND.softBlue,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 23,
+              }}
+            >
+              {item.icon}
+            </span>
+            <input
+              value={contacts[item.key] || ''}
+              onChange={(e) =>
+                setContacts((prev) => ({
+                  ...prev,
+                  [item.key]: e.target.value,
+                }))
+              }
+              placeholder={item.placeholder}
+              style={{
+                border: 'none',
+                outline: 'none',
+                fontSize: 16,
+                fontWeight: 900,
+                color: BRAND.navy,
+                minWidth: 0,
+              }}
+            />
+          </label>
         ))}
       </div>
     </SheetBox>
@@ -663,21 +818,88 @@ return ( <> <main style={{ minHeight: '100vh', background: '#ffffff', fontFamily
   {sheet === 'address' ? (
     <SheetBox title="Address" onClose={() => setSheet(null)}>
       <div style={{ display: 'grid', gap: 10 }}>
-        {['City', 'District / area', 'Street, building, studio, floor', 'Postcode'].map((item) => (
+        {[
+          ['city', 'City'],
+          ['district', 'District / area'],
+          ['street', 'Street, building, studio, floor'],
+          ['postcode', 'Postcode'],
+        ].map(([key, label]) => (
           <input
-            key={item}
-            placeholder={item}
-            style={{
-              width: '100%',
-              height: 58,
-              borderRadius: 18,
-              border: `2px solid ${BRAND.black}`,
-              padding: '0 16px',
-              fontSize: 16,
-              fontWeight: 900,
-            }}
+            key={key}
+            value={address[key] || ''}
+            onChange={(e) =>
+              setAddress((prev) => ({
+                ...prev,
+                [key]: e.target.value,
+              }))
+            }
+            placeholder={label}
+            style={inputBoxStyle()}
           />
         ))}
+      </div>
+    </SheetBox>
+  ) : null}
+
+  {sheet === 'preview' ? (
+    <SheetBox title="Preview listing" onClose={() => setSheet(null)}>
+      <div style={{ display: 'grid', gap: 12 }}>
+        <div
+          style={{
+            borderRadius: 24,
+            border: `2px solid ${BRAND.black}`,
+            background: '#fff',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              height: 170,
+              background: media[0] ? `url(${media[0].preview}) center/cover` : BRAND.softBlue,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 48,
+            }}
+          >
+            {media[0] ? null : '🖼️'}
+          </div>
+
+          <div style={{ padding: 14 }}>
+            <div style={{ fontSize: 24, fontWeight: 900, color: BRAND.navy }}>
+              {title || 'Your service title'}
+            </div>
+            <div style={{ marginTop: 6, fontSize: 15, fontWeight: 900, color: BRAND.muted }}>
+              {currentCategory.label} • {subcategory || 'Subcategory'}
+            </div>
+            <div style={{ marginTop: 10, fontSize: 16, fontWeight: 900, color: BRAND.navy }}>
+              From £{priceFrom} to £{priceTo}
+            </div>
+            <div style={{ marginTop: 10, fontSize: 14, fontWeight: 800, color: BRAND.muted }}>
+              {description || 'Your description will appear here.'}
+            </div>
+            <div style={{ marginTop: 10, fontSize: 14, fontWeight: 900, color: BRAND.navy }}>
+              Payment: {selectedPaymentTitles || 'Not selected'}
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={publishService}
+          style={{
+            width: '100%',
+            height: 62,
+            borderRadius: 22,
+            border: `2px solid ${BRAND.black}`,
+            background: BRAND.green,
+            color: '#fff',
+            fontSize: 22,
+            fontWeight: 900,
+          }}
+        >
+          Publish
+        </button>
       </div>
     </SheetBox>
   ) : null}
