@@ -7,6 +7,7 @@ import {
   useState,
   type ChangeEvent,
   type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
@@ -17,82 +18,96 @@ import {
   type AppLanguage,
 } from '../../services/i18n';
 
-type PhotoItem = {
+type PriceMode = 'single' | 'range';
+type ServiceFormat = 'at_my_place' | 'at_client' | 'online';
+type PaymentMethodId =
+  | 'card'
+  | 'cash'
+  | 'apple-pay'
+  | 'google-pay'
+  | 'paypal'
+  | 'bank'
+  | 'wallet'
+  | 'crypto';
+
+type ContactKey =
+  | 'phone'
+  | 'whatsapp'
+  | 'businessWhatsapp'
+  | 'telegram'
+  | 'viber'
+  | 'instagram'
+  | 'website'
+  | 'email';
+
+type MediaItem = {
   id: string;
-  name: string;
+  file: File;
   preview: string;
+  kind: 'photo' | 'video';
+  scale: number;
+  rotate: number;
+  offsetX: number;
+  offsetY: number;
+  confirmed: boolean;
 };
 
-type PhoneValue = {
-  countryCode: string;
-  number: string;
-};
-
-type ContactValue = {
-  phone: PhoneValue;
-  whatsapp: PhoneValue;
-  businessWhatsapp: PhoneValue;
-  telegram: string;
-  viber: PhoneValue;
-  instagram: string;
-  website: string;
-  email: string;
-};
-
-type CategoryConfig = {
+type CategoryItem = {
   id: string;
+  label: Record<string, string>;
   icon: string;
-  label: Partial<Record<AppLanguage, string>>;
-  subcategories: {
-    id: string;
-    label: Partial<Record<AppLanguage, string>>;
-  }[];
+  subcategories: string[];
 };
 
 type Texts = {
-  title: string;
-  subtitle: string;
-  back: string;
-  required: string;
+  pageTitle: string;
+  pageSubtitle: string;
   photos: string;
-  photosHint: string;
-  addPhotos: string;
-  photoSource: string;
-  gallery: string;
-  camera: string;
-  files: string;
-  mainPhoto: string;
-  tapMainPhoto: string;
-  serviceInfo: string;
-  serviceTitle: string;
-  serviceTitlePlaceholder: string;
+  addPhotoVideo: string;
+  mediaHint: string;
+  editHint: string;
+  price: string;
+  setPrice: string;
+  fromTo: string;
+  paymentMethods: string;
+  title: string;
+  titleHint: string;
   description: string;
-  descriptionPlaceholder: string;
+  descriptionHint: string;
   category: string;
   subcategory: string;
-  price: string;
-  pricePlaceholder: string;
-  location: string;
-  city: string;
-  cityPlaceholder: string;
-  district: string;
-  districtPlaceholder: string;
+  workingHours: string;
+  serviceFormat: string;
+  contactDetails: string;
+  contactHint: string;
   address: string;
-  addressPlaceholder: string;
-  hours: string;
-  hoursPlaceholder: string;
-  availability: string;
-  availableToday: string;
-  serviceModes: string;
-  atClient: string;
+  addressHint: string;
+  continue: string;
+  publish: string;
+  selectCategory: string;
+  selectSubcategory: string;
+  setWorkingHours: string;
   atMyPlace: string;
+  atClient: string;
   online: string;
-  paymentMethods: string;
-  cash: string;
-  card: string;
-  wallet: string;
+  cancel: string;
+  save: string;
+  close: string;
+  priceSettings: string;
+  priceType: string;
+  singlePrice: string;
+  priceRange: string;
+  pounds: string;
+  pence: string;
+  minPrice: string;
+  maxPrice: string;
+  choosePaymentMethods: string;
   contacts: string;
-  contactsHint: string;
+  addressDetails: string;
+  city: string;
+  district: string;
+  street: string;
+  postcode: string;
   phone: string;
   whatsapp: string;
   businessWhatsapp: string;
@@ -101,263 +116,143 @@ type Texts = {
   instagram: string;
   website: string;
   email: string;
-  country: string;
-  phoneNumber: string;
-  publish: string;
-  close: string;
+  addTitleAlert: string;
+  addDescriptionAlert: string;
+  addCategoryAlert: string;
+  addSubcategoryAlert: string;
+  addPhotoAlert: string;
   published: string;
-  enterTitle: string;
-  enterDescription: string;
-  enterPrice: string;
-  enterCity: string;
-  enterDistrict: string;
 };
 
 const BRAND = {
   navy: '#071b46',
-  blue: '#2578ff',
-  green: '#55c75f',
-  yellow: '#ffe44d',
-  coral: '#ff4b52',
-  pink: '#ff4fa0',
-  cream: '#fffdf8',
-  bg: '#f7f4ee',
   black: '#111111',
-  muted: '#737b86',
+  green: '#24c45a',
+  blue: '#1677ff',
+  red: '#ff2456',
+  yellow: '#ffe44d',
+  cream: '#fffdf8',
+  softBlue: '#eef5ff',
+  softGreen: '#eaffef',
+  softPink: '#fff0f7',
+  softYellow: '#fff8d9',
+  muted: '#6f7887',
 };
 
-const countries = [
-  { code: 'GB', dial: '+44', flag: '🇬🇧', name: 'United Kingdom' },
-  { code: 'CZ', dial: '+420', flag: '🇨🇿', name: 'Czech Republic' },
-  { code: 'DE', dial: '+49', flag: '🇩🇪', name: 'Germany' },
-  { code: 'ES', dial: '+34', flag: '🇪🇸', name: 'Spain' },
-  { code: 'PL', dial: '+48', flag: '🇵🇱', name: 'Poland' },
-  { code: 'UA', dial: '+380', flag: '🇺🇦', name: 'Ukraine' },
-  { code: 'FR', dial: '+33', flag: '🇫🇷', name: 'France' },
-  { code: 'IT', dial: '+39', flag: '🇮🇹', name: 'Italy' },
-  { code: 'US', dial: '+1', flag: '🇺🇸', name: 'United States' },
-];
-
-const categories: CategoryConfig[] = [
-  {
-    id: 'beauty',
-    icon: '💄',
-    label: { EN: 'Beauty', RU: 'Красота', UA: 'Краса', ES: 'Belleza', CZ: 'Krása' },
-    subcategories: [
-      { id: 'Hair', label: { EN: 'Hair', RU: 'Волосы', UA: 'Волосся' } },
-      { id: 'Nails', label: { EN: 'Nails', RU: 'Ногти', UA: 'Нігті' } },
-      { id: 'Lashes', label: { EN: 'Lashes', RU: 'Ресницы', UA: 'Вії' } },
-      { id: 'Brows', label: { EN: 'Brows', RU: 'Брови', UA: 'Брови' } },
-      { id: 'Makeup', label: { EN: 'Makeup', RU: 'Макияж', UA: 'Макіяж' } },
-      { id: 'Hair Extensions', label: { EN: 'Hair Extensions', RU: 'Наращивание волос', UA: 'Нарощування волосся' } },
-      { id: 'Laser Hair Removal', label: { EN: 'Laser Hair Removal', RU: 'Лазерная эпиляция', UA: 'Лазерна епіляція' } },
-    ],
+const textsByLanguage: Partial<Record<AppLanguage, Texts>> = {
+  EN: {
+    pageTitle: 'Add your service',
+    pageSubtitle: 'Create a strong listing for clients nearby',
+    photos: 'Photos',
+    addPhotoVideo: 'Add photo / video',
+    mediaHint: 'Add photos and videos from your files.',
+    editHint: 'Move, zoom, rotate and confirm.',
+    price: 'Price',
+    setPrice: 'Set your price',
+    fromTo: 'from £40 to £60',
+    paymentMethods: 'Payment methods',
+    title: 'Title',
+    titleHint: 'Add a short and clear title',
+    description: 'Description',
+    descriptionHint: 'Describe your service in detail',
+    category: 'Category',
+    subcategory: 'Subcategory',
+    workingHours: 'Working hours',
+    serviceFormat: 'Service format',
+    contactDetails: 'Contact details',
+    contactHint: 'Opens a separate sheet of channels',
+    address: 'Address',
+    addressHint: 'Opens a separate address form',
+    continue: 'Continue',
+    publish: 'Publish service',
+    selectCategory: 'Select category',
+    selectSubcategory: 'Select subcategory',
+    setWorkingHours: 'Set working hours',
+    atMyPlace: 'At my place',
+    atClient: 'At client',
+    online: 'Online',
+    cancel: 'Cancel',
+    save: 'Save',
+    close: 'Close',
+    priceSettings: 'Price settings',
+    priceType: 'Price type',
+    singlePrice: 'One price',
+    priceRange: 'From — to',
+    pounds: 'Pounds',
+    pence: 'Pence',
+    minPrice: 'From',
+    maxPrice: 'To',
+    choosePaymentMethods: 'Choose payment methods',
+    contacts: 'Contacts',
+    addressDetails: 'Address details',
+    city: 'City',
+    district: 'District / area',
+    street: 'Street, building, studio, floor',
+    postcode: 'Postcode',
+    phone: 'Phone',
+    whatsapp: 'WhatsApp',
+    businessWhatsapp: 'Business WhatsApp',
+    telegram: 'Telegram',
+    viber: 'Viber',
+    instagram: 'Instagram',
+    website: 'Website',
+    email: 'Email',
+    addTitleAlert: 'Add service title',
+    addDescriptionAlert: 'Add service description',
+    addCategoryAlert: 'Choose category',
+    addSubcategoryAlert: 'Choose subcategory',
+    addPhotoAlert: 'Add at least one photo or video',
+    published: 'Service published successfully',
   },
-  {
-    id: 'barber',
-    icon: '✂️',
-    label: { EN: 'Barber', RU: 'Барбер', UA: 'Барбер' },
-    subcategories: [
-      { id: 'Haircut', label: { EN: 'Haircut', RU: 'Стрижка', UA: 'Стрижка' } },
-      { id: 'Beard', label: { EN: 'Beard', RU: 'Борода', UA: 'Борода' } },
-      { id: 'Fade', label: { EN: 'Fade', RU: 'Фейд', UA: 'Фейд' } },
-    ],
-  },
-  {
-    id: 'wellness',
-    icon: '🧘',
-    label: { EN: 'Wellness', RU: 'Велнес', UA: 'Велнес' },
-    subcategories: [
-      { id: 'Massage', label: { EN: 'Massage', RU: 'Массаж', UA: 'Масаж' } },
-      { id: 'SPA', label: { EN: 'SPA', RU: 'SPA', UA: 'SPA' } },
-      { id: 'Yoga', label: { EN: 'Yoga', RU: 'Йога', UA: 'Йога' } },
-      { id: 'Fitness', label: { EN: 'Fitness', RU: 'Фитнес', UA: 'Фітнес' } },
-    ],
-  },
-  {
-    id: 'home',
-    icon: '🏠',
-    label: { EN: 'Home', RU: 'Дом', UA: 'Дім' },
-    subcategories: [
-      { id: 'Cleaning', label: { EN: 'Cleaning', RU: 'Уборка', UA: 'Прибирання' } },
-      { id: 'Handyman', label: { EN: 'Handyman', RU: 'Мастер на дом', UA: 'Майстер додому' } },
-      { id: 'Carpet Cleaning', label: { EN: 'Carpet Cleaning', RU: 'Чистка ковров', UA: 'Чистка килимів' } },
-      { id: 'Private Chef', label: { EN: 'Private Chef', RU: 'Шеф-повар на дом', UA: 'Шеф-кухар додому' } },
-    ],
-  },
-  {
-    id: 'repairs',
-    icon: '🛠️',
-    label: { EN: 'Repairs', RU: 'Ремонт', UA: 'Ремонт' },
-    subcategories: [
-      { id: 'Electrician', label: { EN: 'Electrician', RU: 'Электрик', UA: 'Електрик' } },
-      { id: 'Plumber', label: { EN: 'Plumber', RU: 'Сантехник', UA: 'Сантехнік' } },
-      { id: 'Furniture Assembly', label: { EN: 'Furniture Assembly', RU: 'Сборка мебели', UA: 'Збірка меблів' } },
-    ],
-  },
-  {
-    id: 'tech',
-    icon: '📱',
-    label: { EN: 'Tech', RU: 'Техника', UA: 'Техніка' },
-    subcategories: [
-      { id: 'Phone Repair', label: { EN: 'Phone Repair', RU: 'Ремонт телефона', UA: 'Ремонт телефону' } },
-      { id: 'Laptop Repair', label: { EN: 'Laptop Repair', RU: 'Ремонт ноутбука', UA: 'Ремонт ноутбука' } },
-      { id: 'Setup', label: { EN: 'Setup', RU: 'Настройка техники', UA: 'Налаштування техніки' } },
-    ],
-  },
-  {
-    id: 'pets',
-    icon: '🐾',
-    label: { EN: 'Pets', RU: 'Питомцы', UA: 'Тварини' },
-    subcategories: [
-      { id: 'Dog Grooming', label: { EN: 'Dog Grooming', RU: 'Груминг собак', UA: 'Грумінг собак' } },
-      { id: 'Dog Walking', label: { EN: 'Dog Walking', RU: 'Выгул собак', UA: 'Вигул собак' } },
-      { id: 'Pet Sitting', label: { EN: 'Pet Sitting', RU: 'Передержка питомцев', UA: 'Перетримка тварин' } },
-    ],
-  },
-  {
-    id: 'events',
-    icon: '🎉',
-    label: { EN: 'Events', RU: 'События', UA: 'Події' },
-    subcategories: [
-      { id: 'Photographer', label: { EN: 'Photographer', RU: 'Фотограф', UA: 'Фотограф' } },
-      { id: 'Event DJ', label: { EN: 'Event DJ', RU: 'DJ на мероприятие', UA: 'DJ на подію' } },
-      { id: 'Decor', label: { EN: 'Decor', RU: 'Декор', UA: 'Декор' } },
-    ],
-  },
-  {
-    id: 'food',
-    icon: '🍽️',
-    label: { EN: 'Food', RU: 'Еда', UA: 'Їжа' },
-    subcategories: [
-      { id: 'Chef at Home', label: { EN: 'Chef at Home', RU: 'Шеф-повар на дом', UA: 'Шеф-кухар додому' } },
-      { id: 'Restaurant Table Booking', label: { EN: 'Restaurant Table Booking', RU: 'Бронь столика', UA: 'Бронь столика' } },
-      { id: 'Catering', label: { EN: 'Catering', RU: 'Кейтеринг', UA: 'Кейтеринг' } },
-    ],
-  },
-  {
-    id: 'fashion',
-    icon: '👗',
-    label: { EN: 'Fashion', RU: 'Мода', UA: 'Мода' },
-    subcategories: [
-      { id: 'Stylist', label: { EN: 'Stylist', RU: 'Стилист', UA: 'Стиліст' } },
-      { id: 'Tailoring', label: { EN: 'Tailoring', RU: 'Пошив одежды', UA: 'Пошиття одягу' } },
-      { id: 'Piercing', label: { EN: 'Piercing', RU: 'Пирсинг', UA: 'Пірсинг' } },
-      { id: 'Tattoo', label: { EN: 'Tattoo', RU: 'Тату', UA: 'Тату' } },
-      { id: 'Tattoo Removal', label: { EN: 'Tattoo Removal', RU: 'Удаление тату', UA: 'Видалення тату' } },
-    ],
-  },
-];
-
-const baseTexts: Texts = {
-  title: 'Add your service',
-  subtitle: 'Create a strong listing for clients nearby',
-  back: 'Back',
-  required: 'Required fields',
-  photos: 'Photos',
-  photosHint: 'Add up to 20 photos. The first photo will be shown as the main one.',
-  addPhotos: 'Add photos',
-  photoSource: 'Photo source',
-  gallery: 'Gallery',
-  camera: 'Camera',
-  files: 'Files',
-  mainPhoto: 'Main',
-  tapMainPhoto: 'Tap a photo to make it main',
-  serviceInfo: 'Service info',
-  serviceTitle: 'Service title',
-  serviceTitlePlaceholder: 'For example: Hair extensions, massage, cleaning',
-  description: 'Description',
-  descriptionPlaceholder: 'Describe your service, experience, what is included...',
-  category: 'Category',
-  subcategory: 'Subcategory',
-  price: 'Price',
-  pricePlaceholder: 'For example: £45',
-  location: 'Location',
-  city: 'City / town',
-  cityPlaceholder: 'London',
-  district: 'District / area',
-  districtPlaceholder: 'Camden, Chelsea, Mayfair...',
-  address: 'Address details',
-  addressPlaceholder: 'Street, building, studio, floor...',
-  hours: 'Working hours',
-  hoursPlaceholder: 'For example: 09:00 - 20:00',
-  availability: 'Availability',
-  availableToday: 'Available today',
-  serviceModes: 'Service format',
-  atClient: 'At client',
-  atMyPlace: 'At my place',
-  online: 'Online',
-  paymentMethods: 'Payment methods',
-  cash: 'Cash',
-  card: 'Card',
-  wallet: 'OlaCash',
-  contacts: 'Contacts',
-  contactsHint: 'Add contact channels separately. They will be used for bookings and trust.',
-  phone: 'Phone',
-  whatsapp: 'WhatsApp',
-  businessWhatsapp: 'Business WhatsApp',
-  telegram: 'Telegram',
-  viber: 'Viber',
-  instagram: 'Instagram',
-  website: 'Website',
-  email: 'Email',
-  country: 'Country',
-  phoneNumber: 'Phone number',
-  publish: 'Publish service',
-  close: 'Close',
-  published: 'Service published successfully',
-  enterTitle: 'Please enter service title',
-  enterDescription: 'Please enter description',
-  enterPrice: 'Please enter price',
-  enterCity: 'Please enter city / town',
-  enterDistrict: 'Please enter district / area',
-};
-
-const textOverrides: Partial<Record<AppLanguage, Partial<Texts>>> = {
   RU: {
-    title: 'Добавить услугу',
-    subtitle: 'Создайте красивое объявление, чтобы клиенты нашли вас рядом',
-    back: 'Назад',
-    required: 'Обязательные поля',
+    pageTitle: 'Добавить услугу',
+    pageSubtitle: 'Создайте красивое объявление, чтобы клиенты нашли вас рядом',
     photos: 'Фото',
-    photosHint: 'Добавьте до 20 фото. Первое фото будет главным.',
-    addPhotos: 'Добавить фото',
-    photoSource: 'Источник фото',
-    gallery: 'Галерея',
-    camera: 'Камера',
-    files: 'Файлы',
-    mainPhoto: 'Главное',
-    tapMainPhoto: 'Нажмите на фото, чтобы сделать его главным',
-    serviceInfo: 'Информация об услуге',
-    serviceTitle: 'Название услуги',
-    serviceTitlePlaceholder: 'Например: наращивание волос, массаж, уборка',
+    addPhotoVideo: 'Добавить фото / видео',
+    mediaHint: 'Добавьте фото и видео из файлов.',
+    editHint: 'Двигайте, увеличивайте, поворачивайте и подтверждайте.',
+    price: 'Цена',
+    setPrice: 'Установите цену',
+    fromTo: 'от £40 до £60',
+    paymentMethods: 'Методы оплаты',
+    title: 'Заголовок',
+    titleHint: 'Добавьте короткий и понятный заголовок',
     description: 'Описание',
-    descriptionPlaceholder: 'Опишите услугу, опыт, что входит в цену...',
+    descriptionHint: 'Подробно опишите услугу',
     category: 'Категория',
     subcategory: 'Подкатегория',
-    price: 'Цена',
-    pricePlaceholder: 'Например: £45',
-    location: 'Локация',
-    city: 'Город / населённый пункт',
-    cityPlaceholder: 'London',
-    district: 'Район / зона',
-    districtPlaceholder: 'Camden, Chelsea, Mayfair...',
-    address: 'Подробный адрес',
-    addressPlaceholder: 'Улица, дом, студия, этаж...',
-    hours: 'Часы работы',
-    hoursPlaceholder: 'Например: 09:00 - 20:00',
-    availability: 'Доступность',
-    availableToday: 'Доступно сегодня',
-    serviceModes: 'Формат услуги',
-    atClient: 'У клиента',
+    workingHours: 'Часы работы',
+    serviceFormat: 'Формат услуги',
+    contactDetails: 'Контактные данные',
+    contactHint: 'Открывается отдельное окно каналов связи',
+    address: 'Адрес',
+    addressHint: 'Открывается отдельная форма адреса',
+    continue: 'Продолжить',
+    publish: 'Опубликовать услугу',
+    selectCategory: 'Выберите категорию',
+    selectSubcategory: 'Выберите подкатегорию',
+    setWorkingHours: 'Установить часы работы',
     atMyPlace: 'У меня',
+    atClient: 'Выезд к клиенту',
     online: 'Онлайн',
-    paymentMethods: 'Способы оплаты',
-    cash: 'Наличные',
-    card: 'Карта',
-    wallet: 'OlaCash',
+    cancel: 'Отмена',
+    save: 'Сохранить',
+    close: 'Закрыть',
+    priceSettings: 'Настройки цены',
+    priceType: 'Тип цены',
+    singlePrice: 'Одна цена',
+    priceRange: 'От — до',
+    pounds: 'Фунты',
+    pence: 'Пенсы',
+    minPrice: 'От',
+    maxPrice: 'До',
+    choosePaymentMethods: 'Выберите методы оплаты',
     contacts: 'Контакты',
-    contactsHint: 'Добавьте каждый канал связи отдельно. Это нужно для бронирований и доверия.',
+    addressDetails: 'Адрес',
+    city: 'Город',
+    district: 'Район / зона',
+    street: 'Улица, дом, студия, этаж',
+    postcode: 'Почтовый индекс',
     phone: 'Телефон',
     whatsapp: 'WhatsApp',
     businessWhatsapp: 'Business WhatsApp',
@@ -366,1368 +261,2049 @@ const textOverrides: Partial<Record<AppLanguage, Partial<Texts>>> = {
     instagram: 'Instagram',
     website: 'Сайт',
     email: 'Email',
-    country: 'Страна',
-    phoneNumber: 'Номер телефона',
-    publish: 'Опубликовать услугу',
-    close: 'Закрыть',
+    addTitleAlert: 'Добавьте заголовок услуги',
+    addDescriptionAlert: 'Добавьте описание услуги',
+    addCategoryAlert: 'Выберите категорию',
+    addSubcategoryAlert: 'Выберите подкатегорию',
+    addPhotoAlert: 'Добавьте хотя бы одно фото или видео',
     published: 'Услуга успешно опубликована',
-    enterTitle: 'Введите название услуги',
-    enterDescription: 'Введите описание',
-    enterPrice: 'Введите цену',
-    enterCity: 'Введите город / населённый пункт',
-    enterDistrict: 'Введите район / зону',
   },
   UA: {
-    title: 'Додати послугу',
-    subtitle: 'Створіть гарне оголошення, щоб клієнти знайшли вас поруч',
-    required: 'Обов’язкові поля',
+    pageTitle: 'Додати послугу',
+    pageSubtitle: 'Створіть гарне оголошення, щоб клієнти знайшли вас поруч',
     photos: 'Фото',
-    addPhotos: 'Додати фото',
-    serviceInfo: 'Інформація про послугу',
-    serviceTitle: 'Назва послуги',
+    addPhotoVideo: 'Додати фото / відео',
+    mediaHint: 'Додайте фото та відео з файлів.',
+    editHint: 'Рухайте, збільшуйте, повертайте і підтверджуйте.',
+    price: 'Ціна',
+    setPrice: 'Встановіть ціну',
+    fromTo: 'від £40 до £60',
+    paymentMethods: 'Методи оплати',
+    title: 'Заголовок',
+    titleHint: 'Додайте короткий і зрозумілий заголовок',
     description: 'Опис',
+    descriptionHint: 'Детально опишіть послугу',
     category: 'Категорія',
     subcategory: 'Підкатегорія',
-    price: 'Ціна',
-    location: 'Локація',
-    city: 'Місто / населений пункт',
-    district: 'Район / зона',
-    address: 'Детальна адреса',
-    hours: 'Години роботи',
-    availability: 'Доступність',
-    availableToday: 'Доступно сьогодні',
-    serviceModes: 'Формат послуги',
-    atClient: 'У клієнта',
-    atMyPlace: 'У мене',
-    online: 'Онлайн',
-    paymentMethods: 'Способи оплати',
-    cash: 'Готівка',
-    card: 'Картка',
-    contacts: 'Контакти',
+    workingHours: 'Години роботи',
+    serviceFormat: 'Формат послуги',
+    contactDetails: 'Контактні дані',
+    contactHint: 'Відкривається окреме вікно каналів звʼязку',
+    address: 'Адреса',
+    addressHint: 'Відкривається окрема форма адреси',
+    continue: 'Продовжити',
     publish: 'Опублікувати послугу',
+    selectCategory: 'Оберіть категорію',
+    selectSubcategory: 'Оберіть підкатегорію',
+    setWorkingHours: 'Встановити години роботи',
+    atMyPlace: 'У мене',
+    atClient: 'Виїзд до клієнта',
+    online: 'Онлайн',
+    cancel: 'Скасувати',
+    save: 'Зберегти',
     close: 'Закрити',
+    priceSettings: 'Налаштування ціни',
+    priceType: 'Тип ціни',
+    singlePrice: 'Одна ціна',
+    priceRange: 'Від — до',
+    pounds: 'Фунти',
+    pence: 'Пенси',
+    minPrice: 'Від',
+    maxPrice: 'До',
+    choosePaymentMethods: 'Оберіть методи оплати',
+    contacts: 'Контакти',
+    addressDetails: 'Адреса',
+    city: 'Місто',
+    district: 'Район / зона',
+    street: 'Вулиця, будинок, студія, поверх',
+    postcode: 'Поштовий індекс',
+    phone: 'Телефон',
+    whatsapp: 'WhatsApp',
+    businessWhatsapp: 'Business WhatsApp',
+    telegram: 'Telegram',
+    viber: 'Viber',
+    instagram: 'Instagram',
+    website: 'Сайт',
+    email: 'Email',
+    addTitleAlert: 'Додайте заголовок послуги',
+    addDescriptionAlert: 'Додайте опис послуги',
+    addCategoryAlert: 'Оберіть категорію',
+    addSubcategoryAlert: 'Оберіть підкатегорію',
+    addPhotoAlert: 'Додайте хоча б одне фото або відео',
     published: 'Послугу успішно опубліковано',
   },
 };
 
-function getTexts(language: AppLanguage): Texts {
-  return {
-    ...baseTexts,
-    ...(textOverrides[language] || {}),
-  };
+const categories: CategoryItem[] = [
+  {
+    id: 'beauty',
+    icon: '💄',
+    label: { EN: 'Beauty', RU: 'Красота', UA: 'Краса' },
+    subcategories: ['Hair & Styling', 'Nails', 'Brows', 'Lashes', 'Makeup', 'Hair extensions'],
+  },
+  {
+    id: 'barber',
+    icon: '✂️',
+    label: { EN: 'Barber', RU: 'Барбер', UA: 'Барбер' },
+    subcategories: ['Haircut', 'Beard', 'Shaving', 'Kids haircut'],
+  },
+  {
+    id: 'wellness',
+    icon: '🧘',
+    label: { EN: 'Wellness', RU: 'Велнес', UA: 'Велнес' },
+    subcategories: ['Massage', 'SPA', 'Yoga', 'Pilates', 'Facial massage'],
+  },
+  {
+    id: 'home',
+    icon: '🏠',
+    label: { EN: 'Home', RU: 'Дом', UA: 'Дім' },
+    subcategories: ['Cleaning', 'Deep cleaning', 'Cooking', 'Furniture assembly'],
+  },
+  {
+    id: 'repairs',
+    icon: '🛠️',
+    label: { EN: 'Repairs', RU: 'Ремонт', UA: 'Ремонт' },
+    subcategories: ['Electrician', 'Plumber', 'Handyman', 'Painting'],
+  },
+  {
+    id: 'tech',
+    icon: '📱',
+    label: { EN: 'Tech', RU: 'Техника', UA: 'Техніка' },
+    subcategories: ['Phone repair', 'Laptop repair', 'Setup', 'Smart home'],
+  },
+  {
+    id: 'pets',
+    icon: '🐾',
+    label: { EN: 'Pets', RU: 'Питомцы', UA: 'Тварини' },
+    subcategories: ['Dog walking', 'Pet sitting', 'Grooming', 'Training'],
+  },
+  {
+    id: 'events',
+    icon: '🎉',
+    label: { EN: 'Events', RU: 'События', UA: 'Події' },
+    subcategories: ['Photographer', 'Host', 'Decor', 'Makeup for event'],
+  },
+  {
+    id: 'food',
+    icon: '🍽️',
+    label: { EN: 'Food', RU: 'Еда', UA: 'Їжа' },
+    subcategories: ['Chef at home', 'Catering', 'Restaurant booking', 'Cake'],
+  },
+  {
+    id: 'fashion',
+    icon: '👗',
+    label: { EN: 'Fashion', RU: 'Мода', UA: 'Мода' },
+    subcategories: ['Stylist', 'Tailoring', 'Dress rental', 'Personal shopping'],
+  },
+];
+
+const paymentMethods: {
+  id: PaymentMethodId;
+  icon: string;
+  title: string;
+}[] = [
+  { id: 'card', icon: '💳', title: 'Card' },
+  { id: 'cash', icon: '💵', title: 'Cash' },
+  { id: 'apple-pay', icon: '', title: 'Apple Pay' },
+  { id: 'google-pay', icon: 'G', title: 'Google Pay' },
+  { id: 'paypal', icon: '🅿️', title: 'PayPal' },
+  { id: 'bank', icon: '🏦', title: 'Bank transfer' },
+  { id: 'wallet', icon: '👛', title: 'OlaCash' },
+  { id: 'crypto', icon: '₿', title: 'Crypto' },
+];
+
+const contactItems: {
+  key: ContactKey;
+  icon: string;
+  bg: string;
+}[] = [
+  { key: 'phone', icon: '📞', bg: '#fff8d9' },
+  { key: 'whatsapp', icon: '🟢', bg: '#eaffef' },
+  { key: 'businessWhatsapp', icon: '💼', bg: '#fff8d9' },
+  { key: 'telegram', icon: '✈️', bg: '#eef5ff' },
+  { key: 'viber', icon: '🟣', bg: '#f3eeff' },
+  { key: 'instagram', icon: '📸', bg: '#fff0f7' },
+  { key: 'email', icon: '✉️', bg: '#eef5ff' },
+  { key: 'website', icon: '🌐', bg: '#eaffef' },
+];
+
+function getText(language: AppLanguage) {
+  return textsByLanguage[language] || textsByLanguage.EN!;
 }
 
-function getLabel(
-  value: Partial<Record<AppLanguage, string>>,
-  language: AppLanguage,
-  fallback: string
-) {
-  return value[language] || value.EN || fallback;
+function langLabel(item: CategoryItem, language: AppLanguage) {
+  return item.label[language] || item.label.EN || item.id;
 }
 
-function fieldStyle(): CSSProperties {
+function inputStyle(): CSSProperties {
   return {
     width: '100%',
-    minHeight: 58,
-    borderRadius: 20,
+    height: 58,
+    borderRadius: 18,
     border: `2px solid ${BRAND.black}`,
     background: '#ffffff',
     color: BRAND.navy,
-    outline: 'none',
     padding: '0 16px',
     fontSize: 16,
-    fontWeight: 800,
+    fontWeight: 900,
+    outline: 'none',
     boxSizing: 'border-box',
   };
 }
 
 function textareaStyle(): CSSProperties {
   return {
-    ...fieldStyle(),
-    minHeight: 126,
+    ...inputStyle(),
+    height: 130,
     padding: '16px',
     resize: 'none',
     fontFamily: 'Arial, sans-serif',
-    lineHeight: 1.4,
+    lineHeight: 1.45,
   };
 }
 
-function SectionCard({
-  title,
-  children,
-  required,
-  accent = 'white',
-}: {
-  title: string;
-  children: ReactNode;
-  required?: boolean;
-  accent?: 'white' | 'yellow' | 'blue' | 'green' | 'pink';
-}) {
-  const bg =
-    accent === 'yellow'
-      ? '#fff7d6'
-      : accent === 'blue'
-      ? '#eef4ff'
-      : accent === 'green'
-      ? '#effbf2'
-      : accent === 'pink'
-      ? '#fff1f7'
-      : '#ffffff';
-
+function OlamepLogo({ size = 42 }: { size?: number }) {
   return (
-    <section
+    <div
       style={{
-        borderRadius: 30,
-        border: `3px solid ${BRAND.black}`,
-        background: bg,
-        padding: 16,
-        boxShadow: '0 6px 0 rgba(17,17,17,0.06)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 10,
+        color: BRAND.navy,
+        fontWeight: 900,
       }}
     >
       <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          marginBottom: 14,
+          width: size,
+          height: size,
+          borderRadius: '50% 50% 50% 10%',
+          transform: 'rotate(-45deg)',
+          background:
+            'conic-gradient(from 20deg, #ff2456, #ffe44d, #24c45a, #1677ff, #7b2cff, #ff2456)',
+          border: '1.5px solid rgba(7,27,70,0.12)',
+          boxShadow: '0 8px 22px rgba(22,119,255,0.18)',
+          position: 'relative',
+          flexShrink: 0,
         }}
       >
-        <h2
+        <div
           style={{
-            margin: 0,
-            fontSize: 22,
-            lineHeight: 1.1,
-            fontWeight: 900,
-            color: BRAND.navy,
-            letterSpacing: '-0.4px',
+            position: 'absolute',
+            inset: '28%',
+            borderRadius: 999,
+            background: '#ffffff',
           }}
-        >
-          {title}
-        </h2>
-
-        {required ? (
-          <span style={{ color: BRAND.coral, fontSize: 22, fontWeight: 900 }}>*</span>
-        ) : null}
+        />
       </div>
 
-      {children}
-    </section>
+      <span style={{ fontSize: 34, lineHeight: 1 }}>Olamep</span>
+    </div>
   );
 }
 
-function FieldLabel({
-  children,
-  required,
+function TopHeader({
+  text,
+  onBack,
+  onClose,
 }: {
-  children: ReactNode;
-  required?: boolean;
+  text: Texts;
+  onBack: () => void;
+  onClose: () => void;
 }) {
   return (
-    <label
+    <header
       style={{
-        display: 'flex',
-        gap: 6,
-        alignItems: 'center',
-        marginBottom: 8,
-        fontSize: 15,
-        fontWeight: 900,
-        color: BRAND.black,
+        padding: '22px 24px 26px',
+        borderBottom: '1px solid #e2e7f0',
+        background: '#ffffff',
+        position: 'sticky',
+        top: 0,
+        zIndex: 30,
       }}
     >
-      <span>{children}</span>
-      {required ? <span style={{ color: BRAND.coral }}>*</span> : null}
-    </label>
+      <div
+        style={{
+          maxWidth: 430,
+          margin: '0 auto',
+          position: 'relative',
+        }}
+      >
+        <button
+          type="button"
+          onClick={onBack}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: 54,
+            height: 54,
+            borderRadius: 999,
+            border: `2px solid ${BRAND.black}`,
+            background: '#fff',
+            color: BRAND.navy,
+            fontSize: 30,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          ←
+        </button>
+
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            width: 54,
+            height: 54,
+            borderRadius: 999,
+            border: `2px solid ${BRAND.black}`,
+            background: '#fff',
+            color: BRAND.navy,
+            fontSize: 28,
+            fontWeight: 900,
+            cursor: 'pointer',
+          }}
+        >
+          ×
+        </button>
+
+        <div style={{ textAlign: 'center', paddingTop: 2 }}>
+          <OlamepLogo size={38} />
+
+          <h1
+            style={{
+              margin: '18px 0 0',
+              fontSize: 44,
+              lineHeight: 0.95,
+              fontWeight: 900,
+              color: BRAND.navy,
+              letterSpacing: -1,
+            }}
+          >
+            {text.pageTitle}
+          </h1>
+
+          <div
+            style={{
+              marginTop: 12,
+              fontSize: 18,
+              lineHeight: 1.2,
+              fontWeight: 900,
+              color: BRAND.muted,
+            }}
+          >
+            {text.pageSubtitle}
+          </div>
+        </div>
+      </div>
+    </header>
   );
 }
 
-function ChipButton({
-  active,
-  children,
-  onClick,
+function RowButton({
   icon,
+  bg,
+  title,
+  value,
+  onClick,
+  children,
 }: {
-  active: boolean;
-  children: ReactNode;
-  onClick: () => void;
-  icon?: string;
+  icon: string;
+  bg: string;
+  title: string;
+  value?: string;
+  onClick?: () => void;
+  children?: ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       style={{
-        minHeight: 50,
-        borderRadius: 18,
+        width: '100%',
+        minHeight: 72,
+        borderRadius: 20,
         border: `2px solid ${BRAND.black}`,
-        background: active ? BRAND.green : '#ffffff',
-        color: active ? '#ffffff' : BRAND.navy,
-        fontSize: 14,
-        fontWeight: 900,
-        cursor: 'pointer',
-        padding: '10px 12px',
-        display: 'inline-flex',
+        background: '#ffffff',
+        display: 'grid',
+        gridTemplateColumns: '54px 1fr auto',
+        gap: 14,
         alignItems: 'center',
-        justifyContent: 'center',
-        gap: 7,
-        boxShadow: active ? '0 6px 14px rgba(85,199,95,0.24)' : 'none',
+        padding: '10px 16px 10px 12px',
+        cursor: 'pointer',
+        textAlign: 'left',
       }}
     >
-      {icon ? <span>{icon}</span> : null}
-      <span>{children}</span>
+      <div
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: 14,
+          border: `1.5px solid ${BRAND.black}`,
+          background: bg,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 25,
+          fontWeight: 900,
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </div>
+
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 20,
+            fontWeight: 900,
+            color: BRAND.navy,
+            lineHeight: 1.1,
+          }}
+        >
+          {title}
+        </div>
+
+        {value ? (
+          <div
+            style={{
+              marginTop: 5,
+              fontSize: 14,
+              lineHeight: 1.25,
+              fontWeight: 900,
+              color: BRAND.muted,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {value}
+          </div>
+        ) : null}
+
+        {children}
+      </div>
+
+      <div
+        style={{
+          color: BRAND.navy,
+          fontSize: 34,
+          fontWeight: 900,
+          lineHeight: 1,
+        }}
+      >
+        ›
+      </div>
     </button>
   );
 }
 
-function PhoneInput({
-  label,
-  icon,
-  value,
-  onChange,
-  text,
+function BottomSheet({
+  title,
+  children,
+  onClose,
 }: {
-  label: string;
-  icon: string;
-  value: PhoneValue;
-  onChange: (value: PhoneValue) => void;
-  text: Texts;
+  title: string;
+  children: ReactNode;
+  onClose: () => void;
 }) {
-  const selected = countries.find((item) => item.code === value.countryCode) || countries[0];
-
   return (
     <div
+      onClick={onClose}
       style={{
-        borderRadius: 22,
-        border: `2px solid ${BRAND.black}`,
-        background: '#ffffff',
-        padding: 12,
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(17,17,17,0.34)',
+        zIndex: 200,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
       }}
     >
       <div
+        onClick={(e) => e.stopPropagation()}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          marginBottom: 10,
-          color: BRAND.navy,
-          fontSize: 15,
-          fontWeight: 900,
+          width: '100%',
+          maxWidth: 430,
+          maxHeight: 'calc(100vh - 52px)',
+          overflowY: 'auto',
+          background: '#ffffff',
+          borderRadius: '30px 30px 0 0',
+          border: `2px solid ${BRAND.black}`,
+          padding: '18px 18px calc(20px + env(safe-area-inset-bottom))',
+          boxSizing: 'border-box',
         }}
       >
-        <span
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 12,
-            border: `2px solid ${BRAND.black}`,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: '#fff7d6',
-          }}
-        >
-          {icon}
-        </span>
-        {label}
-      </div>
-
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '124px 1fr',
-          gap: 8,
-        }}
-      >
-        <select
-          value={value.countryCode}
-          onChange={(event) =>
-            onChange({
-              ...value,
-              countryCode: event.target.value,
-            })
-          }
-          aria-label={text.country}
-          style={{
-            ...fieldStyle(),
-            minHeight: 54,
-            padding: '0 8px',
-            fontSize: 14,
-          }}
-        >
-          {countries.map((country) => (
-            <option key={country.code} value={country.code}>
-              {country.flag} {country.dial}
-            </option>
-          ))}
-        </select>
-
-        <input
-          value={value.number}
-          onChange={(event) =>
-            onChange({
-              ...value,
-              number: event.target.value,
-            })
-          }
-          placeholder={text.phoneNumber}
-          inputMode="tel"
-          style={{
-            ...fieldStyle(),
-            minHeight: 54,
-          }}
-        />
-      </div>
-
-      {value.number.trim() ? (
         <div
           style={{
-            marginTop: 8,
-            fontSize: 12,
-            fontWeight: 800,
-            color: BRAND.muted,
+            display: 'grid',
+            gridTemplateColumns: '1fr 46px',
+            gap: 10,
+            alignItems: 'center',
+            marginBottom: 16,
           }}
         >
-          {selected.flag} {selected.name}
+          <div
+            style={{
+              fontSize: 28,
+              fontWeight: 900,
+              color: BRAND.navy,
+              lineHeight: 1.05,
+            }}
+          >
+            {title}
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 999,
+              border: `2px solid ${BRAND.black}`,
+              background: '#fff',
+              color: BRAND.navy,
+              fontSize: 26,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            ×
+          </button>
         </div>
-      ) : null}
+
+        {children}
+      </div>
     </div>
   );
 }
 
-function ContactInput({
-  label,
-  icon,
-  value,
-  onChange,
-  placeholder,
-  type = 'text',
+function PillButton({
+  active,
+  children,
+  onClick,
+  color = BRAND.green,
 }: {
-  label: string;
-  icon: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  type?: string;
+  active: boolean;
+  children: ReactNode;
+  onClick: () => void;
+  color?: string;
 }) {
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       style={{
-        borderRadius: 22,
+        minHeight: 52,
+        borderRadius: 18,
         border: `2px solid ${BRAND.black}`,
-        background: '#ffffff',
-        padding: 12,
+        background: active ? color : '#ffffff',
+        color: active ? '#ffffff' : BRAND.navy,
+        padding: '10px 12px',
+        fontSize: 16,
+        fontWeight: 900,
+        cursor: 'pointer',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          marginBottom: 10,
-          color: BRAND.navy,
-          fontSize: 15,
-          fontWeight: 900,
-        }}
-      >
-        <span
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 12,
-            border: `2px solid ${BRAND.black}`,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: '#eef4ff',
-          }}
-        >
-          {icon}
-        </span>
-        {label}
-      </div>
-
-      <input
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        type={type}
-        autoCapitalize="none"
-        autoCorrect="off"
-        spellCheck={false}
-        style={{
-          ...fieldStyle(),
-          minHeight: 54,
-        }}
-      />
-    </div>
+      {children}
+    </button>
   );
 }
 
 export default function AddServicePage() {
   const router = useRouter();
 
-  const galleryInputRef = useRef<HTMLInputElement | null>(null);
-  const cameraInputRef = useRef<HTMLInputElement | null>(null);
-  const filesInputRef = useRef<HTMLInputElement | null>(null);
+  const mediaInputRef = useRef<HTMLInputElement | null>(null);
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
-  const [showPhotoSource, setShowPhotoSource] = useState(false);
 
-  const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [media, setMedia] = useState<MediaItem[]>([]);
+
+  const [priceMode, setPriceMode] = useState<PriceMode>('range');
+  const [pricePounds, setPricePounds] = useState('45');
+  const [pricePence, setPricePence] = useState('00');
+  const [priceFrom, setPriceFrom] = useState('40');
+  const [priceTo, setPriceTo] = useState('60');
+
+  const [selectedPayments, setSelectedPayments] = useState<PaymentMethodId[]>([
+    'card',
+    'cash',
+    'apple-pay',
+  ]);
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+
   const [categoryId, setCategoryId] = useState('beauty');
-  const [subcategory, setSubcategory] = useState('Hair');
-  const [price, setPrice] = useState('');
-  const [city, setCity] = useState('');
-  const [district, setDistrict] = useState('');
-  const [address, setAddress] = useState('');
-  const [hours, setHours] = useState('');
-  const [availableToday, setAvailableToday] = useState(true);
+  const [subcategory, setSubcategory] = useState('Hair & Styling');
 
-  const [atClient, setAtClient] = useState(true);
-  const [atMyPlace, setAtMyPlace] = useState(false);
-  const [online, setOnline] = useState(false);
+  const [hoursFrom, setHoursFrom] = useState('09:00');
+  const [hoursTo, setHoursTo] = useState('20:00');
 
-  const [cash, setCash] = useState(true);
-  const [card, setCard] = useState(true);
-  const [wallet, setWallet] = useState(false);
+  const [formats, setFormats] = useState<ServiceFormat[]>(['at_client']);
 
-  const [contacts, setContacts] = useState<ContactValue>({
-    phone: { countryCode: 'GB', number: '' },
-    whatsapp: { countryCode: 'GB', number: '' },
-    businessWhatsapp: { countryCode: 'GB', number: '' },
+  const [contacts, setContacts] = useState<Record<ContactKey, string>>({
+    phone: '',
+    whatsapp: '',
+    businessWhatsapp: '',
     telegram: '',
-    viber: { countryCode: 'GB', number: '' },
+    viber: '',
     instagram: '',
     website: '',
     email: '',
   });
 
+  const [address, setAddress] = useState({
+    city: '',
+    district: '',
+    street: '',
+    postcode: '',
+  });
+
+  const [activeSheet, setActiveSheet] = useState<
+    | null
+    | 'price'
+    | 'payments'
+    | 'category'
+    | 'subcategory'
+    | 'hours'
+    | 'format'
+    | 'contacts'
+    | 'address'
+    | 'editor'
+  >(null);
+
+  const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
+  const [editorScale, setEditorScale] = useState(1);
+  const [editorRotate, setEditorRotate] = useState(0);
+  const [editorOffsetX, setEditorOffsetX] = useState(0);
+  const [editorOffsetY, setEditorOffsetY] = useState(0);
+
+  const dragRef = useRef({
+    pointerId: null as number | null,
+    startX: 0,
+    startY: 0,
+    startOffsetX: 0,
+    startOffsetY: 0,
+  });
+
   useEffect(() => {
     setLanguage(getSavedLanguage());
-
-    const unsub = subscribeToLanguageChange((nextLanguage) => {
-      setLanguage(nextLanguage);
-    });
-
-    return () => {
-      unsub();
-    };
+    const unsub = subscribeToLanguageChange((next) => setLanguage(next));
+    return () => unsub();
   }, []);
 
   useEffect(() => {
     return () => {
-      photos.forEach((photo) => {
-        URL.revokeObjectURL(photo.preview);
-      });
+      media.forEach((item) => URL.revokeObjectURL(item.preview));
     };
-  }, [photos]);
+    // cleanup on unmount only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const text = useMemo(() => getTexts(language), [language]);
+  const text = getText(language);
 
-  const selectedCategory = useMemo(() => {
+  const currentCategory = useMemo(() => {
     return categories.find((item) => item.id === categoryId) || categories[0];
   }, [categoryId]);
 
-  const selectedSubcategories = selectedCategory.subcategories;
+  const priceSummary =
+    priceMode === 'range'
+      ? `£${priceFrom} — £${priceTo}`
+      : `£${pricePounds}.${pricePence.padStart(2, '0').slice(0, 2)}`;
 
-  useEffect(() => {
-    if (!selectedSubcategories.some((item) => item.id === subcategory)) {
-      setSubcategory(selectedSubcategories[0]?.id || '');
-    }
-  }, [selectedSubcategories, subcategory]);
+  const contactPreview = useMemo(() => {
+    const filled = Object.entries(contacts).filter(([, value]) => value.trim()).length;
+    return filled ? `${filled} channels added` : text.contactHint;
+  }, [contacts, text.contactHint]);
 
-  const formatPhone = (value: PhoneValue) => {
-    const country = countries.find((item) => item.code === value.countryCode) || countries[0];
-    const number = value.number.trim();
+  const addressPreview = useMemo(() => {
+    const parts = [address.city, address.district, address.street, address.postcode].filter(Boolean);
+    return parts.length ? parts.join(', ') : text.addressHint;
+  }, [address, text.addressHint]);
 
-    if (!number) return '';
-
-    return `${country.dial} ${number}`;
+  const openMediaPicker = () => {
+    mediaInputRef.current?.click();
   };
 
-  const normalizeInstagram = (value: string) => {
-    const clean = value.trim();
-    if (!clean) return '';
-    if (clean.startsWith('@')) return clean;
-    if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
-    return `@${clean.replace(/^@+/, '')}`;
-  };
+  const handleMediaSelected = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
 
-  const normalizeWebsite = (value: string) => {
-    const clean = value.trim();
-    if (!clean) return '';
-    if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
-    return `https://${clean}`;
-  };
+    const remaining = Math.max(0, 50 - media.length);
+    const selected = files.slice(0, remaining);
 
-  const handleFilesSelected = (event: ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(event.target.files || []);
-    if (!selectedFiles.length) return;
+    const mapped: MediaItem[] = selected
+      .filter((file) => file.type.startsWith('image/') || file.type.startsWith('video/'))
+      .map((file, index) => ({
+        id: `${file.name}-${file.size}-${Date.now()}-${index}`,
+        file,
+        preview: URL.createObjectURL(file),
+        kind: file.type.startsWith('video/') ? 'video' : 'photo',
+        scale: 1,
+        rotate: 0,
+        offsetX: 0,
+        offsetY: 0,
+        confirmed: false,
+      }));
 
-    const imageFiles = selectedFiles.filter((file) => file.type.startsWith('image/'));
-    const freeSlots = Math.max(0, 20 - photos.length);
-
-    const nextPhotos = imageFiles.slice(0, freeSlots).map((file, index) => ({
-      id: `${file.name}-${file.size}-${Date.now()}-${index}`,
-      name: file.name,
-      preview: URL.createObjectURL(file),
-    }));
-
-    setPhotos((prev) => [...prev, ...nextPhotos]);
-    setShowPhotoSource(false);
+    setMedia((prev) => [...prev, ...mapped]);
     event.target.value = '';
   };
 
-  const removePhoto = (photoId: string) => {
-    setPhotos((prev) => {
-      const found = prev.find((photo) => photo.id === photoId);
+  const openEditor = (item: MediaItem) => {
+    setEditingMediaId(item.id);
+    setEditorScale(item.scale);
+    setEditorRotate(item.rotate);
+    setEditorOffsetX(item.offsetX);
+    setEditorOffsetY(item.offsetY);
+    setActiveSheet('editor');
+  };
+
+  const applyEditor = () => {
+    if (!editingMediaId) return;
+
+    setMedia((prev) =>
+      prev.map((item) =>
+        item.id === editingMediaId
+          ? {
+              ...item,
+              scale: editorScale,
+              rotate: editorRotate,
+              offsetX: editorOffsetX,
+              offsetY: editorOffsetY,
+              confirmed: true,
+            }
+          : item
+      )
+    );
+
+    setActiveSheet(null);
+    setEditingMediaId(null);
+  };
+
+  const removeMedia = (id: string) => {
+    setMedia((prev) => {
+      const found = prev.find((item) => item.id === id);
       if (found) URL.revokeObjectURL(found.preview);
-      return prev.filter((photo) => photo.id !== photoId);
+      return prev.filter((item) => item.id !== id);
     });
   };
 
-  const makeMainPhoto = (photoId: string) => {
-    setPhotos((prev) => {
-      const index = prev.findIndex((photo) => photo.id === photoId);
-      if (index <= 0) return prev;
-
-      const next = [...prev];
-      const [selected] = next.splice(index, 1);
-      next.unshift(selected);
-      return next;
-    });
+  const togglePayment = (id: PaymentMethodId) => {
+    setSelectedPayments((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
   };
 
-  const updatePhoneContact = (key: keyof Pick<ContactValue, 'phone' | 'whatsapp' | 'businessWhatsapp' | 'viber'>, value: PhoneValue) => {
-    setContacts((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+  const toggleFormat = (id: ServiceFormat) => {
+    setFormats((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+  };
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startOffsetX: editorOffsetX,
+      startOffsetY: editorOffsetY,
+    };
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragRef.current.pointerId !== event.pointerId) return;
+
+    setEditorOffsetX(dragRef.current.startOffsetX + event.clientX - dragRef.current.startX);
+    setEditorOffsetY(dragRef.current.startOffsetY + event.clientY - dragRef.current.startY);
+  };
+
+  const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragRef.current.pointerId !== event.pointerId) return;
+    dragRef.current.pointerId = null;
   };
 
   const handlePublish = () => {
+    if (!media.length) {
+      alert(text.addPhotoAlert);
+      return;
+    }
+
     if (!title.trim()) {
-      alert(text.enterTitle);
+      alert(text.addTitleAlert);
       return;
     }
 
     if (!description.trim()) {
-      alert(text.enterDescription);
+      alert(text.addDescriptionAlert);
       return;
     }
 
-    if (!price.trim()) {
-      alert(text.enterPrice);
+    if (!categoryId) {
+      alert(text.addCategoryAlert);
       return;
     }
 
-    if (!city.trim()) {
-      alert(text.enterCity);
+    if (!subcategory) {
+      alert(text.addSubcategoryAlert);
       return;
     }
 
-    if (!district.trim()) {
-      alert(text.enterDistrict);
-      return;
-    }
-
-    const selectedCategoryLabel = getLabel(selectedCategory.label, language, selectedCategory.id);
-    const selectedSubcategoryLabel =
-      selectedSubcategories.find((item) => item.id === subcategory)?.label || {};
-
-    const location = [city.trim(), district.trim(), address.trim()].filter(Boolean).join(', ');
+    const location = [address.city, address.district, address.street, address.postcode]
+      .filter(Boolean)
+      .join(', ');
 
     addListing({
       title: title.trim(),
       description: description.trim(),
-      category: selectedCategory.id,
-      subcategory: getLabel(selectedSubcategoryLabel, language, subcategory),
-      price: price.trim(),
+      category: currentCategory?.label.EN || categoryId,
+      subcategory,
+      price: priceSummary,
       location,
-      hours: hours.trim(),
-      availableToday,
-      serviceModes: [
-        atClient ? 'at_client' : null,
-        atMyPlace ? 'at_my_place' : null,
-        online ? 'online' : null,
-      ].filter(Boolean) as ('at_client' | 'at_my_place' | 'online')[],
-      paymentMethods: [
-        cash ? 'cash' : null,
-        card ? 'card' : null,
-        wallet ? 'wallet' : null,
-      ].filter(Boolean) as ('cash' | 'card' | 'wallet')[],
+      hours: `${hoursFrom} - ${hoursTo}`,
+      availableToday: true,
+      serviceModes: formats,
+      paymentMethods: selectedPayments as any,
       contact: {
-        phone: formatPhone(contacts.phone),
-        whatsapp: formatPhone(contacts.whatsapp),
-        businessWhatsapp: formatPhone(contacts.businessWhatsapp),
-        telegram: contacts.telegram.trim(),
-        viber: formatPhone(contacts.viber),
-        instagram: normalizeInstagram(contacts.instagram),
-        website: normalizeWebsite(contacts.website),
-        email: contacts.email.trim().toLowerCase(),
+        phone: contacts.phone,
+        whatsapp: contacts.whatsapp,
+        businessWhatsapp: contacts.businessWhatsapp,
+        telegram: contacts.telegram,
+        viber: contacts.viber,
+        instagram: contacts.instagram,
+        website: contacts.website,
+        email: contacts.email,
       } as any,
-      photos: photos.map((photo) => photo.preview),
-      searchText: [
-        title,
-        description,
-        selectedCategory.id,
-        selectedCategoryLabel,
-        subcategory,
-        getLabel(selectedSubcategoryLabel, language, subcategory),
-        city,
-        district,
-        address,
-      ].join(' '),
-    } as any);
+      photos: media.map((item) => item.preview),
+    });
 
     alert(text.published);
     router.push('/');
   };
 
+  const editingMedia = media.find((item) => item.id === editingMediaId) || null;
+
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        background:
-          'linear-gradient(180deg, #eef4ff 0%, #fffdf8 34%, #fff1f7 100%)',
-        fontFamily: 'Arial, sans-serif',
-        color: BRAND.black,
-        paddingBottom: 126,
-      }}
-    >
-      <div style={{ maxWidth: 430, margin: '0 auto' }}>
-        <header
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 60,
-            background: 'rgba(238,244,255,0.96)',
-            backdropFilter: 'blur(12px)',
-            borderBottom: `2px solid rgba(17,17,17,0.12)`,
-            padding: '18px 16px 14px',
-          }}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '58px 58px 1fr',
-              gap: 12,
-              alignItems: 'center',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => router.push('/')}
-              aria-label={text.back}
-              style={{
-                width: 58,
-                height: 58,
-                borderRadius: 999,
-                border: `3px solid ${BRAND.black}`,
-                background: '#ffffff',
-                color: BRAND.navy,
-                fontSize: 32,
-                fontWeight: 900,
-                cursor: 'pointer',
-                display: 'grid',
-                placeItems: 'center',
-                lineHeight: 1,
-              }}
-            >
-              ×
-            </button>
-
-            <div
-              style={{
-                width: 58,
-                height: 58,
-                borderRadius: 18,
-                border: `3px solid ${BRAND.black}`,
-                background: '#ffffff',
-                display: 'grid',
-                placeItems: 'center',
-                overflow: 'hidden',
-              }}
-            >
-              <img
-                src="/ui/logo/logo.png"
-                alt="Olamep"
-                style={{
-                  width: 44,
-                  height: 44,
-                  objectFit: 'contain',
-                  display: 'block',
-                }}
-              />
-            </div>
-
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 30,
-                  lineHeight: 1,
-                  fontWeight: 900,
-                  color: BRAND.navy,
-                  letterSpacing: '-1px',
-                }}
-              >
-                {text.title}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 7,
-                  fontSize: 14,
-                  lineHeight: 1.35,
-                  fontWeight: 800,
-                  color: BRAND.muted,
-                }}
-              >
-                {text.subtitle}
-              </div>
-            </div>
-          </div>
-        </header>
+    <>
+      <main
+        style={{
+          minHeight: '100vh',
+          background: '#ffffff',
+          fontFamily: 'Arial, sans-serif',
+          color: BRAND.navy,
+          paddingBottom: 112,
+        }}
+      >
+        <TopHeader text={text} onBack={() => router.back()} onClose={() => router.push('/')} />
 
         <div
           style={{
-            display: 'grid',
-            gap: 16,
-            padding: '16px 14px 0',
+            maxWidth: 430,
+            margin: '0 auto',
+            padding: '18px 18px 0',
           }}
         >
-          <SectionCard title={text.photos} required accent="yellow">
+          <input
+            ref={mediaInputRef}
+            type="file"
+            accept="image/*,video/*"
+            multiple
+            onChange={handleMediaSelected}
+            style={{ display: 'none' }}
+          />
+
+          <section
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 12,
+              marginBottom: 12,
+            }}
+          >
             <div
               style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 12,
-                marginBottom: 14,
-                alignItems: 'flex-start',
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  color: BRAND.muted,
-                  fontSize: 14,
-                  lineHeight: 1.4,
-                  fontWeight: 800,
-                }}
-              >
-                {text.photosHint}
-              </p>
-
-              <span
-                style={{
-                  flexShrink: 0,
-                  borderRadius: 999,
-                  border: `2px solid ${BRAND.black}`,
-                  background: '#ffffff',
-                  padding: '7px 10px',
-                  fontSize: 12,
-                  fontWeight: 900,
-                  color: BRAND.navy,
-                }}
-              >
-                {photos.length}/20
-              </span>
-            </div>
-
-            <input
-              ref={galleryInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFilesSelected}
-              style={{ display: 'none' }}
-            />
-
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              multiple
-              onChange={handleFilesSelected}
-              style={{ display: 'none' }}
-            />
-
-            <input
-              ref={filesInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFilesSelected}
-              style={{ display: 'none' }}
-            />
-
-            <button
-              type="button"
-              onClick={() => setShowPhotoSource(true)}
-              style={{
-                width: '100%',
-                minHeight: 94,
+                border: `2px solid ${BRAND.black}`,
                 borderRadius: 24,
-                border: `3px solid ${BRAND.black}`,
                 background: '#ffffff',
-                display: 'grid',
-                gridTemplateColumns: '74px 1fr',
-                gap: 14,
-                alignItems: 'center',
                 padding: 12,
-                cursor: 'pointer',
-                textAlign: 'left',
-                boxShadow: '0 5px 0 rgba(17,17,17,0.06)',
+                minHeight: 360,
               }}
             >
-              <span
+              <div
                 style={{
-                  width: 74,
-                  height: 74,
-                  borderRadius: 22,
-                  border: `3px solid ${BRAND.green}`,
-                  background: '#effbf2',
-                  color: BRAND.green,
-                  display: 'grid',
-                  placeItems: 'center',
-                  fontSize: 46,
-                  fontWeight: 900,
-                  lineHeight: 1,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 12,
                 }}
               >
-                +
-              </span>
+                <div style={{ fontSize: 22, fontWeight: 900 }}>{text.photos}</div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: BRAND.muted }}>
+                  {media.length}/50
+                </div>
+              </div>
 
-              <span>
-                <span
-                  style={{
-                    display: 'block',
-                    fontSize: 24,
-                    fontWeight: 900,
-                    color: '#2f8c67',
-                    lineHeight: 1.05,
-                  }}
-                >
-                  {text.addPhotos}
-                </span>
-
-                <span
-                  style={{
-                    display: 'block',
-                    marginTop: 8,
-                    fontSize: 13,
-                    fontWeight: 800,
-                    color: BRAND.muted,
-                  }}
-                >
-                  JPG / PNG / WEBP
-                </span>
-              </span>
-            </button>
-
-            {photos.length > 0 ? (
-              <>
+              <button
+                type="button"
+                onClick={openMediaPicker}
+                style={{
+                  width: '100%',
+                  height: 206,
+                  borderRadius: 22,
+                  border: '2px dashed #9aa3b1',
+                  background: '#ffffff',
+                  color: BRAND.navy,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 14,
+                  cursor: 'pointer',
+                }}
+              >
                 <div
                   style={{
-                    marginTop: 12,
-                    color: BRAND.muted,
-                    fontSize: 13,
-                    fontWeight: 800,
+                    width: 58,
+                    height: 58,
+                    borderRadius: 999,
+                    border: `3px solid ${BRAND.green}`,
+                    color: BRAND.green,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 42,
+                    fontWeight: 500,
+                    lineHeight: 1,
                   }}
                 >
-                  {text.tapMainPhoto}
+                  +
                 </div>
 
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 900,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {text.addPhotoVideo}
+                </div>
+              </button>
+
+              <div
+                style={{
+                  marginTop: 10,
+                  display: 'grid',
+                  gridTemplateColumns: '32px 1fr',
+                  gap: 8,
+                  alignItems: 'start',
+                }}
+              >
+                <div style={{ fontSize: 24 }}>🖼️</div>
+                <div
+                  style={{
+                    fontSize: 15,
+                    lineHeight: 1.35,
+                    color: BRAND.muted,
+                    fontWeight: 900,
+                  }}
+                >
+                  {text.mediaHint}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 12,
+                  border: `2px solid ${BRAND.blue}`,
+                  borderRadius: 18,
+                  background: '#e8f2ff',
+                  padding: 10,
+                  textAlign: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    alignItems: 'center',
+                    color: BRAND.navy,
+                    fontSize: 30,
+                    fontWeight: 900,
+                  }}
+                >
+                  <span>↔</span>
+                  <span>⌕+</span>
+                  <span>↻</span>
+                  <span>→</span>
+                  <span
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: 999,
+                      background: BRAND.green,
+                      color: '#ffffff',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 32,
+                    }}
+                  >
+                    ✓
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 8,
+                    color: BRAND.navy,
+                    fontSize: 15,
+                    fontWeight: 900,
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {text.editHint}
+                </div>
+              </div>
+
+              {media.length > 0 ? (
                 <div
                   style={{
                     marginTop: 12,
                     display: 'grid',
                     gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: 10,
+                    gap: 8,
                   }}
                 >
-                  {photos.map((photo, index) => (
-                    <div
-                      key={photo.id}
+                  {media.slice(0, 6).map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => openEditor(item)}
                       style={{
-                        position: 'relative',
-                        borderRadius: 18,
-                        border:
-                          index === 0
-                            ? `3px solid ${BRAND.green}`
-                            : `2px solid ${BRAND.black}`,
-                        background: '#ffffff',
-                        overflow: 'hidden',
                         aspectRatio: '1 / 1',
+                        borderRadius: 14,
+                        border: `2px solid ${BRAND.black}`,
+                        overflow: 'hidden',
+                        padding: 0,
+                        background: '#ffffff',
+                        position: 'relative',
+                        cursor: 'pointer',
                       }}
                     >
-                      <button
-                        type="button"
-                        onClick={() => makeMainPhoto(photo.id)}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          border: 'none',
-                          padding: 0,
-                          background: 'transparent',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <img
-                          src={photo.preview}
-                          alt={photo.name}
+                      {item.kind === 'video' ? (
+                        <video
+                          src={item.preview}
+                          muted
+                          playsInline
                           style={{
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
-                            display: 'block',
                           }}
                         />
-                      </button>
+                      ) : (
+                        <img
+                          src={item.preview}
+                          alt=""
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            transform: `translate(${item.offsetX}px, ${item.offsetY}px) scale(${item.scale}) rotate(${item.rotate}deg)`,
+                          }}
+                        />
+                      )}
 
-                      {index === 0 ? (
+                      {item.confirmed ? (
                         <span
                           style={{
                             position: 'absolute',
-                            left: 6,
-                            bottom: 6,
+                            right: 4,
+                            bottom: 4,
+                            width: 24,
+                            height: 24,
                             borderRadius: 999,
-                            border: `2px solid ${BRAND.black}`,
                             background: BRAND.green,
                             color: '#ffffff',
-                            padding: '5px 8px',
-                            fontSize: 10,
+                            fontSize: 18,
+                            fontWeight: 900,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          ✓
+                        </span>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            <div
+              style={{
+                border: `2px solid ${BRAND.black}`,
+                borderRadius: 24,
+                background: '#ffffff',
+                overflow: 'hidden',
+                minHeight: 360,
+              }}
+            >
+              <div style={{ padding: 12 }}>
+                <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 14 }}>
+                  {text.price}
+                </div>
+
+                <div
+                  style={{
+                    color: BRAND.muted,
+                    fontSize: 15,
+                    fontWeight: 900,
+                    marginBottom: 12,
+                  }}
+                >
+                  {text.setPrice}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveSheet('price')}
+                  style={{
+                    width: '100%',
+                    border: 'none',
+                    background: 'transparent',
+                    padding: 0,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr 1fr',
+                      gap: 8,
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: 76,
+                        borderRadius: 16,
+                        border: '1.5px solid #c9ced7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: BRAND.green,
+                        fontSize: 34,
+                        fontWeight: 900,
+                      }}
+                    >
+                      £
+                    </div>
+
+                    <div
+                      style={{
+                        height: 76,
+                        borderRadius: 16,
+                        border: '1.5px solid #c9ced7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: BRAND.red,
+                        fontSize: 34,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {pricePounds || '0'}
+                    </div>
+
+                    <div
+                      style={{
+                        height: 76,
+                        borderRadius: 16,
+                        border: '1.5px solid #c9ced7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: BRAND.red,
+                        fontSize: 34,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {pricePence.padStart(2, '0').slice(0, 2)}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 10,
+                      height: 50,
+                      borderRadius: 16,
+                      border: `2px solid ${BRAND.black}`,
+                      display: 'grid',
+                      gridTemplateColumns: '34px 1fr 24px',
+                      gap: 8,
+                      alignItems: 'center',
+                      padding: '0 12px',
+                      color: BRAND.navy,
+                    }}
+                  >
+                    <span style={{ fontSize: 22 }}>🏷️</span>
+                    <span
+                      style={{
+                        fontSize: 17,
+                        lineHeight: 1.05,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {priceMode === 'range' ? `From £${priceFrom} to £${priceTo}` : priceSummary}
+                    </span>
+                    <span style={{ fontSize: 30, fontWeight: 900 }}>›</span>
+                  </div>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveSheet('payments')}
+                style={{
+                  width: '100%',
+                  border: 'none',
+                  borderTop: `2px solid ${BRAND.black}`,
+                  background: '#ffffff',
+                  padding: 14,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  display: 'grid',
+                  gridTemplateColumns: '52px 1fr auto',
+                  gap: 12,
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    width: 46,
+                    height: 46,
+                    borderRadius: 14,
+                    border: `2px solid ${BRAND.black}`,
+                    background: BRAND.softBlue,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 25,
+                  }}
+                >
+                  💳
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 22,
+                      fontWeight: 900,
+                      lineHeight: 1.05,
+                      color: BRAND.navy,
+                    }}
+                  >
+                    {text.paymentMethods}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 5,
+                      display: 'flex',
+                      gap: 6,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    {selectedPayments.slice(0, 4).map((id) => {
+                      const method = paymentMethods.find((item) => item.id === id);
+                      return (
+                        <span
+                          key={id}
+                          style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: 10,
+                            border: `1.5px solid ${BRAND.black}`,
+                            background: '#ffffff',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 18,
                             fontWeight: 900,
                           }}
                         >
-                          {text.mainPhoto}
+                          {method?.icon}
                         </span>
-                      ) : null}
-
-                      <button
-                        type="button"
-                        onClick={() => removePhoto(photo.id)}
-                        style={{
-                          position: 'absolute',
-                          top: 6,
-                          right: 6,
-                          width: 30,
-                          height: 30,
-                          borderRadius: 999,
-                          border: `2px solid ${BRAND.black}`,
-                          background: '#ffffff',
-                          color: BRAND.black,
-                          fontSize: 18,
-                          fontWeight: 900,
-                          cursor: 'pointer',
-                          lineHeight: 1,
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                      );
+                    })}
+                  </div>
                 </div>
-              </>
-            ) : null}
-          </SectionCard>
 
-          <SectionCard title={text.serviceInfo} required accent="white">
-            <FieldLabel required>{text.serviceTitle}</FieldLabel>
-            <input
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder={text.serviceTitlePlaceholder}
-              style={{ ...fieldStyle(), marginBottom: 16 }}
+                <span style={{ fontSize: 34, fontWeight: 900, color: BRAND.navy }}>›</span>
+              </button>
+            </div>
+          </section>
+
+          <section style={{ display: 'grid', gap: 8 }}>
+            <RowButton
+              icon="📋"
+              bg={BRAND.softYellow}
+              title={text.title}
+              value={title || text.titleHint}
+              onClick={() => {
+                const next = prompt(text.title, title);
+                if (next !== null) setTitle(next);
+              }}
             />
 
-            <FieldLabel required>{text.description}</FieldLabel>
-            <textarea
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder={text.descriptionPlaceholder}
-              style={textareaStyle()}
+            <RowButton
+              icon="🔤"
+              bg={BRAND.softBlue}
+              title={text.description}
+              value={description || text.descriptionHint}
+              onClick={() => {
+                const next = prompt(text.description, description);
+                if (next !== null) setDescription(next);
+              }}
             />
-          </SectionCard>
 
-          <SectionCard title={text.category} required accent="blue">
-            <FieldLabel required>{text.category}</FieldLabel>
+            <RowButton
+              icon="🏷️"
+              bg="#f3eeff"
+              title={text.category}
+              value={langLabel(currentCategory, language)}
+              onClick={() => setActiveSheet('category')}
+            />
+
+            <RowButton
+              icon="▦"
+              bg={BRAND.softPink}
+              title={text.subcategory}
+              value={subcategory || text.selectSubcategory}
+              onClick={() => setActiveSheet('subcategory')}
+            />
+
+            <RowButton
+              icon="🕘"
+              bg={BRAND.softGreen}
+              title={text.workingHours}
+              value={`${hoursFrom} — ${hoursTo}`}
+              onClick={() => setActiveSheet('hours')}
+            />
+
+            <div
+              style={{
+                borderRadius: 20,
+                border: `2px solid ${BRAND.black}`,
+                background: '#ffffff',
+                padding: 12,
+                display: 'grid',
+                gridTemplateColumns: '54px 1fr',
+                gap: 14,
+                alignItems: 'start',
+              }}
+            >
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 14,
+                  border: `1.5px solid ${BRAND.black}`,
+                  background: BRAND.softBlue,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 25,
+                }}
+              >
+                🏠
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 900,
+                    color: BRAND.navy,
+                    marginBottom: 10,
+                  }}
+                >
+                  {text.serviceFormat}
+                </div>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr 1fr',
+                    gap: 8,
+                  }}
+                >
+                  <PillButton
+                    active={formats.includes('at_my_place')}
+                    onClick={() => toggleFormat('at_my_place')}
+                  >
+                    🏠 {text.atMyPlace}
+                  </PillButton>
+
+                  <PillButton
+                    active={formats.includes('at_client')}
+                    onClick={() => toggleFormat('at_client')}
+                  >
+                    👤 {text.atClient}
+                  </PillButton>
+
+                  <PillButton
+                    active={formats.includes('online')}
+                    onClick={() => toggleFormat('online')}
+                  >
+                    🌐 {text.online}
+                  </PillButton>
+                </div>
+              </div>
+            </div>
+
+            <RowButton
+              icon="📞"
+              bg={BRAND.softGreen}
+              title={text.contactDetails}
+              value={contactPreview}
+              onClick={() => setActiveSheet('contacts')}
+            >
+              <div
+                style={{
+                  marginTop: 8,
+                  display: 'flex',
+                  gap: 6,
+                  overflow: 'hidden',
+                }}
+              >
+                {contactItems.map((item) => (
+                  <span
+                    key={item.key}
+                    style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: 10,
+                      border: `1.5px solid ${BRAND.black}`,
+                      background: item.bg,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 17,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {item.icon}
+                  </span>
+                ))}
+              </div>
+            </RowButton>
+
+            <RowButton
+              icon="📍"
+              bg="#ffe6e6"
+              title={text.address}
+              value={addressPreview}
+              onClick={() => setActiveSheet('address')}
+            />
+          </section>
+        </div>
+
+        <div
+          style={{
+            position: 'fixed',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 80,
+            background: 'rgba(255,255,255,0.96)',
+            borderTop: '1px solid #e2e7f0',
+            padding: '12px 18px calc(12px + env(safe-area-inset-bottom))',
+          }}
+        >
+          <div style={{ maxWidth: 430, margin: '0 auto' }}>
+            <button
+              type="button"
+              onClick={handlePublish}
+              style={{
+                width: '100%',
+                height: 68,
+                borderRadius: 24,
+                border: `2px solid ${BRAND.black}`,
+                background: BRAND.green,
+                color: '#ffffff',
+                fontSize: 24,
+                fontWeight: 900,
+                cursor: 'pointer',
+                boxShadow: '0 8px 0 rgba(17,17,17,0.08)',
+              }}
+            >
+              {text.continue}
+            </button>
+          </div>
+        </div>
+      </main>
+
+      {activeSheet === 'price' ? (
+        <BottomSheet title={text.priceSettings} onClose={() => setActiveSheet(null)}>
+          <div style={{ display: 'grid', gap: 14 }}>
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: 9,
-                marginBottom: 16,
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
               }}
             >
-              {categories.map((item) => {
-                const active = categoryId === item.id;
+              <PillButton
+                active={priceMode === 'single'}
+                onClick={() => setPriceMode('single')}
+                color={BRAND.blue}
+              >
+                {text.singlePrice}
+              </PillButton>
 
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => {
-                      setCategoryId(item.id);
-                      setSubcategory(item.subcategories[0]?.id || '');
-                    }}
+              <PillButton
+                active={priceMode === 'range'}
+                onClick={() => setPriceMode('range')}
+                color={BRAND.blue}
+              >
+                {text.priceRange}
+              </PillButton>
+            </div>
+
+            {priceMode === 'single' ? (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 10,
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 900, marginBottom: 8 }}>{text.pounds}</div>
+                  <input
+                    value={pricePounds}
+                    onChange={(e) => setPricePounds(e.target.value.replace(/[^\d]/g, ''))}
+                    inputMode="numeric"
                     style={{
-                      minHeight: 64,
-                      borderRadius: 20,
-                      border: `2px solid ${BRAND.black}`,
-                      background: active ? BRAND.blue : '#ffffff',
-                      color: active ? '#ffffff' : BRAND.navy,
-                      fontSize: 14,
-                      fontWeight: 900,
-                      cursor: 'pointer',
+                      ...inputStyle(),
+                      color: BRAND.red,
+                      fontSize: 30,
+                      textAlign: 'center',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <div style={{ fontWeight: 900, marginBottom: 8 }}>{text.pence}</div>
+                  <input
+                    value={pricePence}
+                    onChange={(e) =>
+                      setPricePence(e.target.value.replace(/[^\d]/g, '').slice(0, 2))
+                    }
+                    inputMode="numeric"
+                    style={{
+                      ...inputStyle(),
+                      color: BRAND.red,
+                      fontSize: 30,
+                      textAlign: 'center',
+                    }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 10,
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 900, marginBottom: 8 }}>{text.minPrice}</div>
+                  <input
+                    value={priceFrom}
+                    onChange={(e) => setPriceFrom(e.target.value.replace(/[^\d]/g, ''))}
+                    inputMode="numeric"
+                    style={{
+                      ...inputStyle(),
+                      color: BRAND.red,
+                      fontSize: 30,
+                      textAlign: 'center',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <div style={{ fontWeight: 900, marginBottom: 8 }}>{text.maxPrice}</div>
+                  <input
+                    value={priceTo}
+                    onChange={(e) => setPriceTo(e.target.value.replace(/[^\d]/g, ''))}
+                    inputMode="numeric"
+                    style={{
+                      ...inputStyle(),
+                      color: BRAND.red,
+                      fontSize: 30,
+                      textAlign: 'center',
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setActiveSheet(null)}
+              style={{
+                height: 58,
+                borderRadius: 20,
+                border: `2px solid ${BRAND.black}`,
+                background: BRAND.green,
+                color: '#fff',
+                fontSize: 18,
+                fontWeight: 900,
+              }}
+            >
+              {text.save}
+            </button>
+          </div>
+        </BottomSheet>
+      ) : null}
+
+      {activeSheet === 'payments' ? (
+        <BottomSheet title={text.choosePaymentMethods} onClose={() => setActiveSheet(null)}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {paymentMethods.map((method) => {
+              const active = selectedPayments.includes(method.id);
+
+              return (
+                <button
+                  key={method.id}
+                  type="button"
+                  onClick={() => togglePayment(method.id)}
+                  style={{
+                    minHeight: 62,
+                    borderRadius: 18,
+                    border: `2px solid ${BRAND.black}`,
+                    background: active ? BRAND.softBlue : '#ffffff',
+                    display: 'grid',
+                    gridTemplateColumns: '48px 1fr 32px',
+                    gap: 12,
+                    alignItems: 'center',
+                    padding: '10px 14px',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 14,
+                      border: `1.5px solid ${BRAND.black}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: 8,
-                      padding: 10,
+                      fontSize: 23,
+                      fontWeight: 900,
+                      background: '#ffffff',
                     }}
                   >
-                    <span style={{ fontSize: 22 }}>{item.icon}</span>
-                    <span>{getLabel(item.label, language, item.id)}</span>
-                  </button>
-                );
-              })}
-            </div>
+                    {method.icon}
+                  </span>
 
-            <FieldLabel required>{text.subcategory}</FieldLabel>
-            <select
-              value={subcategory}
-              onChange={(event) => setSubcategory(event.target.value)}
-              style={fieldStyle()}
-            >
-              {selectedSubcategories.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {getLabel(item.label, language, item.id)}
-                </option>
-              ))}
-            </select>
-          </SectionCard>
+                  <span
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 900,
+                      color: BRAND.navy,
+                    }}
+                  >
+                    {method.title}
+                  </span>
 
-          <SectionCard title={text.price} required accent="green">
-            <FieldLabel required>{text.price}</FieldLabel>
-            <input
-              value={price}
-              onChange={(event) => setPrice(event.target.value)}
-              placeholder={text.pricePlaceholder}
-              style={fieldStyle()}
-            />
-          </SectionCard>
+                  <span
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 999,
+                      border: `2px solid ${BRAND.black}`,
+                      background: active ? BRAND.green : '#ffffff',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 900,
+                    }}
+                  >
+                    {active ? '✓' : ''}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </BottomSheet>
+      ) : null}
 
-          <SectionCard title={text.location} required accent="pink">
-            <FieldLabel required>{text.city}</FieldLabel>
-            <input
-              value={city}
-              onChange={(event) => setCity(event.target.value)}
-              placeholder={text.cityPlaceholder}
-              style={{ ...fieldStyle(), marginBottom: 16 }}
-            />
+      {activeSheet === 'category' ? (
+        <BottomSheet title={text.selectCategory} onClose={() => setActiveSheet(null)}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {categories.map((item) => {
+              const active = categoryId === item.id;
 
-            <FieldLabel required>{text.district}</FieldLabel>
-            <input
-              value={district}
-              onChange={(event) => setDistrict(event.target.value)}
-              placeholder={text.districtPlaceholder}
-              style={{ ...fieldStyle(), marginBottom: 16 }}
-            />
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setCategoryId(item.id);
+                    setSubcategory(item.subcategories[0] || '');
+                    setActiveSheet(null);
+                  }}
+                  style={{
+                    minHeight: 72,
+                    borderRadius: 20,
+                    border: `2px solid ${BRAND.black}`,
+                    background: active ? BRAND.blue : '#ffffff',
+                    color: active ? '#ffffff' : BRAND.navy,
+                    fontSize: 18,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span style={{ marginRight: 8 }}>{item.icon}</span>
+                  {langLabel(item, language)}
+                </button>
+              );
+            })}
+          </div>
+        </BottomSheet>
+      ) : null}
 
-            <FieldLabel>{text.address}</FieldLabel>
-            <textarea
-              value={address}
-              onChange={(event) => setAddress(event.target.value)}
-              placeholder={text.addressPlaceholder}
-              style={{ ...textareaStyle(), minHeight: 96 }}
-            />
-          </SectionCard>
+      {activeSheet === 'subcategory' ? (
+        <BottomSheet title={text.selectSubcategory} onClose={() => setActiveSheet(null)}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {currentCategory.subcategories.map((item) => {
+              const active = subcategory === item;
 
-          <SectionCard title={text.hours} accent="white">
-            <FieldLabel>{text.hours}</FieldLabel>
-            <input
-              value={hours}
-              onChange={(event) => setHours(event.target.value)}
-              placeholder={text.hoursPlaceholder}
-              style={fieldStyle()}
-            />
-          </SectionCard>
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => {
+                    setSubcategory(item);
+                    setActiveSheet(null);
+                  }}
+                  style={{
+                    minHeight: 58,
+                    borderRadius: 18,
+                    border: `2px solid ${BRAND.black}`,
+                    background: active ? BRAND.blue : '#ffffff',
+                    color: active ? '#ffffff' : BRAND.navy,
+                    fontSize: 18,
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    padding: '0 16px',
+                  }}
+                >
+                  {item}
+                </button>
+              );
+            })}
+          </div>
+        </BottomSheet>
+      ) : null}
 
-          <SectionCard title={text.availability} accent="yellow">
-            <ChipButton
-              active={availableToday}
-              icon="⚡"
-              onClick={() => setAvailableToday((prev) => !prev)}
-            >
-              {text.availableToday}
-            </ChipButton>
-
-            <div style={{ height: 16 }} />
-
-            <FieldLabel>{text.serviceModes}</FieldLabel>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: 9,
-              }}
-            >
-              <ChipButton active={atClient} onClick={() => setAtClient((prev) => !prev)}>
-                {text.atClient}
-              </ChipButton>
-              <ChipButton active={atMyPlace} onClick={() => setAtMyPlace((prev) => !prev)}>
-                {text.atMyPlace}
-              </ChipButton>
-              <ChipButton active={online} onClick={() => setOnline((prev) => !prev)}>
-                {text.online}
-              </ChipButton>
-            </div>
-          </SectionCard>
-
-          <SectionCard title={text.paymentMethods} accent="blue">
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: 9,
-              }}
-            >
-              <ChipButton active={cash} icon="💵" onClick={() => setCash((prev) => !prev)}>
-                {text.cash}
-              </ChipButton>
-              <ChipButton active={card} icon="💳" onClick={() => setCard((prev) => !prev)}>
-                {text.card}
-              </ChipButton>
-              <ChipButton active={wallet} icon="👛" onClick={() => setWallet((prev) => !prev)}>
-                {text.wallet}
-              </ChipButton>
-            </div>
-          </SectionCard>
-
-          <SectionCard title={text.contacts} accent="white">
-            <p
-              style={{
-                margin: '0 0 14px',
-                color: BRAND.muted,
-                fontSize: 14,
-                lineHeight: 1.4,
-                fontWeight: 800,
-              }}
-            >
-              {text.contactsHint}
-            </p>
-
-            <div style={{ display: 'grid', gap: 12 }}>
-              <PhoneInput
-                label={text.phone}
-                icon="📞"
-                value={contacts.phone}
-                onChange={(value) => updatePhoneContact('phone', value)}
-                text={text}
-              />
-
-              <PhoneInput
-                label={text.whatsapp}
-                icon="🟢"
-                value={contacts.whatsapp}
-                onChange={(value) => updatePhoneContact('whatsapp', value)}
-                text={text}
-              />
-
-              <PhoneInput
-                label={text.businessWhatsapp}
-                icon="💼"
-                value={contacts.businessWhatsapp}
-                onChange={(value) => updatePhoneContact('businessWhatsapp', value)}
-                text={text}
-              />
-
-              <ContactInput
-                label={text.telegram}
-                icon="✈️"
-                value={contacts.telegram}
-                onChange={(value) => setContacts((prev) => ({ ...prev, telegram: value }))}
-                placeholder="@username"
-              />
-
-              <PhoneInput
-                label={text.viber}
-                icon="🟣"
-                value={contacts.viber}
-                onChange={(value) => updatePhoneContact('viber', value)}
-                text={text}
-              />
-
-              <ContactInput
-                label={text.instagram}
-                icon="📸"
-                value={contacts.instagram}
-                onChange={(value) => setContacts((prev) => ({ ...prev, instagram: value }))}
-                placeholder="@instagram"
-              />
-
-              <ContactInput
-                label={text.website}
-                icon="🌐"
-                value={contacts.website}
-                onChange={(value) => setContacts((prev) => ({ ...prev, website: value }))}
-                placeholder="yourwebsite.com"
-              />
-
-              <ContactInput
-                label={text.email}
-                icon="✉️"
-                value={contacts.email}
-                onChange={(value) => setContacts((prev) => ({ ...prev, email: value }))}
-                placeholder="you@email.com"
-                type="email"
+      {activeSheet === 'hours' ? (
+        <BottomSheet title={text.setWorkingHours} onClose={() => setActiveSheet(null)}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <div style={{ fontWeight: 900, marginBottom: 8 }}>{text.minPrice}</div>
+              <input
+                type="time"
+                value={hoursFrom}
+                onChange={(e) => setHoursFrom(e.target.value)}
+                style={inputStyle()}
               />
             </div>
-          </SectionCard>
-        </div>
-      </div>
 
-      <div
-        style={{
-          position: 'fixed',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 80,
-          background: 'rgba(255,253,248,0.96)',
-          backdropFilter: 'blur(14px)',
-          borderTop: `2px solid rgba(17,17,17,0.12)`,
-          padding: '12px 14px calc(12px + env(safe-area-inset-bottom))',
-        }}
-      >
-        <div style={{ maxWidth: 430, margin: '0 auto' }}>
-          <button
-            type="button"
-            onClick={handlePublish}
-            style={{
-              width: '100%',
-              minHeight: 62,
-              borderRadius: 24,
-              border: `3px solid ${BRAND.black}`,
-              background: BRAND.green,
-              color: '#ffffff',
-              fontSize: 20,
-              fontWeight: 900,
-              cursor: 'pointer',
-              boxShadow: '0 8px 0 rgba(17,17,17,0.10)',
-            }}
-          >
-            {text.publish}
-          </button>
-        </div>
-      </div>
-
-      {showPhotoSource ? (
-        <div
-          onClick={() => setShowPhotoSource(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 200,
-            background: 'rgba(17,17,17,0.35)',
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-            padding: '0 14px calc(18px + env(safe-area-inset-bottom))',
-            boxSizing: 'border-box',
-          }}
-        >
-          <div
-            onClick={(event) => event.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: 430,
-              borderRadius: 28,
-              border: `3px solid ${BRAND.black}`,
-              background: '#ffffff',
-              overflow: 'hidden',
-              boxShadow: '0 18px 38px rgba(0,0,0,0.24)',
-            }}
-          >
-            <div
-              style={{
-                padding: '18px 16px 12px',
-                fontSize: 22,
-                fontWeight: 900,
-                color: BRAND.navy,
-              }}
-            >
-              {text.photoSource}
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gap: 10,
-                padding: '0 14px 14px',
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => galleryInputRef.current?.click()}
-                style={sourceButtonStyle()}
-              >
-                🖼 {text.gallery}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => cameraInputRef.current?.click()}
-                style={sourceButtonStyle()}
-              >
-                📷 {text.camera}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => filesInputRef.current?.click()}
-                style={sourceButtonStyle()}
-              >
-                📁 {text.files}
-              </button>
+            <div>
+              <div style={{ fontWeight: 900, marginBottom: 8 }}>{text.maxPrice}</div>
+              <input
+                type="time"
+                value={hoursTo}
+                onChange={(e) => setHoursTo(e.target.value)}
+                style={inputStyle()}
+              />
             </div>
 
             <button
               type="button"
-              onClick={() => setShowPhotoSource(false)}
+              onClick={() => setActiveSheet(null)}
               style={{
-                width: '100%',
-                minHeight: 56,
-                border: 'none',
-                borderTop: `3px solid ${BRAND.black}`,
-                background: '#ffffff',
-                color: BRAND.black,
-                fontSize: 17,
+                gridColumn: '1 / -1',
+                height: 58,
+                borderRadius: 20,
+                border: `2px solid ${BRAND.black}`,
+                background: BRAND.green,
+                color: '#ffffff',
+                fontSize: 18,
                 fontWeight: 900,
-                cursor: 'pointer',
               }}
             >
-              × {text.close}
+              {text.save}
             </button>
           </div>
-        </div>
+        </BottomSheet>
       ) : null}
-    </main>
-  );
-}
 
-function sourceButtonStyle(): CSSProperties {
-  return {
-    minHeight: 58,
-    borderRadius: 20,
-    border: `2px solid ${BRAND.black}`,
-    background: '#fff7d6',
-    color: BRAND.navy,
-    fontSize: 17,
-    fontWeight: 900,
-    cursor: 'pointer',
-  };
+      {activeSheet === 'contacts' ? (
+        <BottomSheet title={text.contacts} onClose={() => setActiveSheet(null)}>
+          <div style={{ display: 'grid', gap: 10 }}>
+            {contactItems.map((item) => (
+              <div
+                key={item.key}
+                style={{
+                  borderRadius: 20,
+                  border: `2px solid ${BRAND.black}`,
+                  background: '#ffffff',
+                  padding: 12,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    marginBottom: 10,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: 14,
+                      border: `1.5px solid ${BRAND.black}`,
+                      background: item.bg,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 23,
+                    }}
+                  >
+                    {item.icon}
+                  </span>
+
+                  <span
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 900,
+                      color: BRAND.navy,
+                    }}
+                  >
+                    {text[item.key]}
+                  </span>
+                </div>
+
+                <input
+                  value={contacts[item.key]}
+                  onChange={(e) =>
+                    setContacts((prev) => ({
+                      ...prev,
+                      [item.key]: e.target.value,
+                    }))
+                  }
+                  placeholder={text[item.key]}
+                  style={inputStyle()}
+                />
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => setActiveSheet(null)}
+              style={{
+                height: 58,
+                borderRadius: 20,
+                border: `2px solid ${BRAND.black}`,
+                background: BRAND.green,
+                color: '#ffffff',
+                fontSize: 18,
+                fontWeight: 900,
+              }}
+            >
+              {text.save}
+            </button>
+          </div>
+        </BottomSheet>
+      ) : null}
+
+      {activeSheet === 'address' ? (
+        <BottomSheet title={text.addressDetails} onClose={() => setActiveSheet(null)}>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {[
+              ['city', text.city],
+              ['district', text.district],
+              ['street', text.street],
+              ['postcode', text.postcode],
+            ].map(([key, label]) => (
+              <div key={key}>
+                <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 8 }}>{label}</div>
+                <input
+                  value={address[key as keyof typeof address]}
+                  onChange={(e) =>
+                    setAddress((prev) => ({
+                      ...prev,
+                      [key]: e.target.value,
+                    }))
+                  }
+                  placeholder={label}
+                  style={inputStyle()}
+                />
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => setActiveSheet(null)}
+              style={{
+                height: 58,
+                borderRadius: 20,
+                border: `2px solid ${BRAND.black}`,
+                background: BRAND.green,
+                color: '#ffffff',
+                fontSize: 18,
+                fontWeight: 900,
+              }}
+            >
+              {text.save}
+            </button>
+          </div>
+        </BottomSheet>
+      ) : null}
+
+      {activeSheet === 'editor' && editingMedia ? (
+        <BottomSheet title={text.editHint} onClose={() => setActiveSheet(null)}>
+          <div style={{ display: 'grid', gap: 14 }}>
+            <div
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
+              style={{
+                width: '100%',
+                aspectRatio: '1 / 1',
+                borderRadius: 24,
+                border: `2px solid ${BRAND.black}`,
+                overflow: 'hidden',
+                background: '#eef5ff',
+                touchAction: 'none',
+                position: 'relative',
+              }}
+            >
+              {editingMedia.kind === 'video' ? (
+                <video
+                  src={editingMedia.preview}
+                  muted
+                  loop
+                  autoPlay
+                  playsInline
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    transform: `translate(${editorOffsetX}px, ${editorOffsetY}px) scale(${editorScale}) rotate(${editorRotate}deg)`,
+                  }}
+                />
+              ) : (
+                <img
+                  src={editingMedia.preview}
+                  alt=""
+                  draggable={false}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    transform: `translate(${editorOffsetX}px, ${editorOffsetY}px) scale(${editorScale}) rotate(${editorRotate}deg)`,
+                    userSelect: 'none',
+                  }}
+                />
+              )}
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 900, marginBottom: 6 }}>Zoom</div>
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.01}
+                value={editorScale}
+                onChange={(e) => setEditorScale(Number(e.target.value))}
+                style={{ width: '100%' }}
+              />
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 900, marginBottom: 6 }}>Rotate</div>
+              <input
+                type="range"
+                min={-180}
+                max={180}
+                step={1}
+                value={editorRotate}
+                onChange={(e) => setEditorRotate(Number(e.target.value))}
+                style={{ width: '100%' }}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  removeMedia(editingMedia.id);
+                  setActiveSheet(null);
+                }}
+                style={{
+                  height: 56,
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.black}`,
+                  background: '#ffffff',
+                  color: BRAND.red,
+                  fontSize: 17,
+                  fontWeight: 900,
+                }}
+              >
+                Delete
+              </button>
+
+              <button
+                type="button"
+                onClick={applyEditor}
+                style={{
+                  height: 56,
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.black}`,
+                  background: BRAND.green,
+                  color: '#ffffff',
+                  fontSize: 17,
+                  fontWeight: 900,
+                }}
+              >
+                ✓ {text.save}
+              </button>
+            </div>
+          </div>
+        </BottomSheet>
+      ) : null}
+    </>
+  );
 }
