@@ -7,6 +7,7 @@ import {
   useState,
   type ChangeEvent,
   type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
@@ -54,6 +55,12 @@ type ContactKey =
   | 'email'
   | 'website';
 
+type ContactEntry = {
+  id: string;
+  countryCode: string;
+  value: string;
+};
+
 type CategoryView = {
   id: string;
   label: string;
@@ -66,6 +73,7 @@ const BRAND = {
   navy: '#061b49',
   black: '#111111',
   green: '#24c85a',
+  greenDark: '#17a84a',
   blue: '#087bff',
   red: '#ff244f',
   yellow: '#fff3b8',
@@ -75,6 +83,7 @@ const BRAND = {
   softPink: '#fff1f7',
   softYellow: '#fff8d9',
   gray: '#707988',
+  dark: '#080f1f',
 };
 
 const PRICE_PER_DAY = 2;
@@ -83,7 +92,7 @@ const FIRST_AD_FREE = true;
 const TEXT = {
   EN: {
     pageTitle: 'Add advertisement',
-    pageSubtitle: 'Create a bright ad that clients notice nearby',
+    pageSubtitle: 'Create a premium ad that clients notice nearby',
     media: 'Photo / video',
     chooseMedia: 'Choose media',
     mediaHint: '1 photo, 2–4 photo collage, or 1 short video',
@@ -101,17 +110,20 @@ const TEXT = {
     chooseCategory: 'Choose category',
     chooseSubcategory: 'Choose subcategory',
     days: 'Advertising days',
-    daysHint: 'Tap to choose days and price',
+    daysHint: '1 day = £2',
     firstDayFree: 'First day free',
-    enhance: 'Improve ad',
+    enhance: 'Ad Style Studio',
     enhanceHint: 'Sticker and visual style',
     contacts: 'Contact details',
     contactsHint: 'Phone, WhatsApp, Telegram, Viber, Instagram',
     address: 'Address',
     addressHint: 'Where this ad should be shown',
-    preview: 'Preview',
+    preview: 'Premium preview',
     continue: 'Continue to payment',
     save: 'Save',
+    done: 'Done',
+    cancel: 'Cancel',
+    replace: 'Replace photo',
     total: 'Total',
     free: 'Free',
     payment: 'Payment',
@@ -122,10 +134,13 @@ const TEXT = {
     alertCategory: 'Please choose category and subcategory.',
     alertPhone: 'Please add phone number.',
     registerFirst: 'Please register before payment.',
+    profile: 'Profile',
+    book: 'Book',
+    addNumber: 'Add number',
   },
   RU: {
     pageTitle: 'Добавить рекламу',
-    pageSubtitle: 'Создайте яркую рекламу, которую клиенты заметят рядом',
+    pageSubtitle: 'Создайте премиальную рекламу, которую клиенты заметят рядом',
     media: 'Фото / видео',
     chooseMedia: 'Выбрать медиа',
     mediaHint: '1 фото, коллаж 2–4 фото или 1 короткое видео',
@@ -143,17 +158,20 @@ const TEXT = {
     chooseCategory: 'Выбрать категорию',
     chooseSubcategory: 'Выбрать подкатегорию',
     days: 'Дни рекламы',
-    daysHint: 'Тапните, чтобы выбрать дни и цену',
+    daysHint: '1 день = £2',
     firstDayFree: 'Первый день бесплатно',
-    enhance: 'Улучшить рекламу',
+    enhance: 'Стиль рекламы',
     enhanceHint: 'Наклейка и визуальный стиль',
     contacts: 'Контактные данные',
     contactsHint: 'Телефон, WhatsApp, Telegram, Viber, Instagram',
     address: 'Адрес',
     addressHint: 'Где показывать рекламу',
-    preview: 'Предпросмотр',
+    preview: 'Премиум предпросмотр',
     continue: 'Перейти к оплате',
     save: 'Сохранить',
+    done: 'Готово',
+    cancel: 'Отмена',
+    replace: 'Заменить фото',
     total: 'Итого',
     free: 'Бесплатно',
     payment: 'Оплата',
@@ -164,6 +182,9 @@ const TEXT = {
     alertCategory: 'Выберите категорию и подкатегорию.',
     alertPhone: 'Добавьте номер телефона.',
     registerFirst: 'Перед оплатой нужно зарегистрироваться.',
+    profile: 'Профиль',
+    book: 'Забронировать',
+    addNumber: 'Добавить номер',
   },
 };
 
@@ -197,7 +218,7 @@ function ShellCard({
     <div
       style={{
         border: `2px solid ${BRAND.black}`,
-        borderRadius: 22,
+        borderRadius: 24,
         background: '#fff',
         boxShadow: '0 4px 0 rgba(0,0,0,0.06)',
         ...style,
@@ -297,9 +318,9 @@ function RowButton({
       onClick={onClick}
       style={{
         width: '100%',
-        minHeight: 76,
+        minHeight: 78,
         border: `2px solid ${BRAND.black}`,
-        borderRadius: 19,
+        borderRadius: 20,
         background: '#fff',
         display: 'grid',
         gridTemplateColumns: '62px 1fr 26px',
@@ -486,6 +507,7 @@ export default function NewPromotionPage() {
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const videoInputRef = useRef<HTMLInputElement | null>(null);
+  const replaceInputRef = useRef<HTMLInputElement | null>(null);
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const text = getText(language);
@@ -494,6 +516,8 @@ export default function NewPromotionPage() {
 
   const [mediaMode, setMediaMode] = useState<MediaMode>('single');
   const [media, setMedia] = useState<MediaItem[]>([]);
+  const [dragMediaId, setDragMediaId] = useState<string | null>(null);
+  const [editorMediaId, setEditorMediaId] = useState<string | null>(null);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -505,18 +529,16 @@ export default function NewPromotionPage() {
   const [sticker, setSticker] = useState('today');
   const [visualStyle, setVisualStyle] = useState('classic');
 
-  const [contacts, setContacts] = useState<Record<ContactKey, string>>({
-    phone: '',
-    whatsapp: '',
-    businessWhatsapp: '',
-    telegram: '',
-    viber: '',
-    instagram: '',
-    email: '',
-    website: '',
+  const [contacts, setContacts] = useState<Record<ContactKey, ContactEntry[]>>({
+    phone: [{ id: uid(), countryCode: '+44', value: '' }],
+    whatsapp: [{ id: uid(), countryCode: '+44', value: '' }],
+    businessWhatsapp: [{ id: uid(), countryCode: '+44', value: '' }],
+    telegram: [{ id: uid(), countryCode: '', value: '' }],
+    viber: [{ id: uid(), countryCode: '+44', value: '' }],
+    instagram: [{ id: uid(), countryCode: '', value: '' }],
+    email: [{ id: uid(), countryCode: '', value: '' }],
+    website: [{ id: uid(), countryCode: '', value: '' }],
   });
-
-  const [countryCode, setCountryCode] = useState('+44');
 
   const [address, setAddress] = useState({
     city: '',
@@ -559,6 +581,7 @@ export default function NewPromotionPage() {
 
   const currentCategory = localizedCategories.find((item) => item.id === categoryId);
   const subcategoryOptions = currentCategory?.subcategories || [];
+  const editorMedia = media.find((item) => item.id === editorMediaId) || null;
 
   const adPrice = FIRST_AD_FREE ? Math.max(0, days - 1) * PRICE_PER_DAY : days * PRICE_PER_DAY;
 
@@ -600,15 +623,74 @@ export default function NewPromotionPage() {
     { id: 'apple', label: 'Apple Pay', icon: '' },
   ];
 
-  const contactOptions: { key: ContactKey; label: string; icon: string; placeholder: string }[] = [
-    { key: 'phone', label: language === 'RU' ? 'Телефон' : 'Phone', icon: '📞', placeholder: '7000 000000' },
-    { key: 'whatsapp', label: 'WhatsApp', icon: '🟢', placeholder: '7000 000000' },
-    { key: 'businessWhatsapp', label: 'Business WhatsApp', icon: '💼', placeholder: '7000 000000' },
-    { key: 'telegram', label: 'Telegram', icon: '✈️', placeholder: '@username' },
-    { key: 'viber', label: 'Viber', icon: '🟣', placeholder: '7000 000000' },
-    { key: 'instagram', label: 'Instagram', icon: '📸', placeholder: '@username' },
-    { key: 'email', label: 'Email', icon: '✉️', placeholder: 'you@email.com' },
-    { key: 'website', label: 'Website', icon: '🌐', placeholder: 'yourwebsite.com' },
+  const contactOptions: {
+    key: ContactKey;
+    label: string;
+    icon: string;
+    brand: string;
+    placeholder: string;
+    phoneLike?: boolean;
+  }[] = [
+    {
+      key: 'phone',
+      label: language === 'RU' ? 'Телефон' : 'Phone',
+      icon: '☎',
+      brand: '#0f172a',
+      placeholder: '7000 000000',
+      phoneLike: true,
+    },
+    {
+      key: 'whatsapp',
+      label: 'WhatsApp',
+      icon: 'WA',
+      brand: '#25D366',
+      placeholder: '7000 000000',
+      phoneLike: true,
+    },
+    {
+      key: 'businessWhatsapp',
+      label: 'Business WhatsApp',
+      icon: 'WB',
+      brand: '#128C7E',
+      placeholder: '7000 000000',
+      phoneLike: true,
+    },
+    {
+      key: 'telegram',
+      label: 'Telegram',
+      icon: 'TG',
+      brand: '#229ED9',
+      placeholder: '@username',
+    },
+    {
+      key: 'viber',
+      label: 'Viber',
+      icon: 'VB',
+      brand: '#7360F2',
+      placeholder: '7000 000000',
+      phoneLike: true,
+    },
+    {
+      key: 'instagram',
+      label: 'Instagram',
+      icon: 'IG',
+      brand: '#E4405F',
+      placeholder: '@username',
+    },
+    {
+      key: 'email',
+      label: 'Email',
+      icon: '@',
+      brand: '#087bff',
+      placeholder: 'you@email.com',
+    },
+    {
+      key: 'website',
+      label: 'Website',
+      icon: 'www',
+      brand: '#061b49',
+      placeholder: 'yourwebsite.com',
+    },
   ];
 
   const handleMediaPick = (mode: MediaMode, source: 'camera' | 'gallery' | 'files' | 'video') => {
@@ -665,6 +747,41 @@ export default function NewPromotionPage() {
     event.target.value = '';
   };
 
+  const handleReplaceSelected = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file || !editorMediaId) return;
+
+    const isOk = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+
+    if (!isOk) {
+      alert(language === 'RU' ? 'Выберите JPG, PNG или WEBP.' : 'Choose JPG, PNG or WEBP.');
+      event.target.value = '';
+      return;
+    }
+
+    setMedia((prev) =>
+      prev.map((item) => {
+        if (item.id !== editorMediaId) return item;
+
+        URL.revokeObjectURL(item.preview);
+
+        return {
+          ...item,
+          name: file.name,
+          preview: URL.createObjectURL(file),
+          type: 'image',
+          scale: 1,
+          rotate: 0,
+          offsetX: 0,
+          offsetY: 0,
+        };
+      })
+    );
+
+    event.target.value = '';
+  };
+
   const removeMediaItem = (id: string) => {
     setMedia((prev) => {
       const found = prev.find((item) => item.id === id);
@@ -676,6 +793,55 @@ export default function NewPromotionPage() {
   const updateMediaItem = (id: string, patch: Partial<MediaItem>) => {
     setMedia((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   };
+
+  const reorderMedia = (targetId: string) => {
+    if (!dragMediaId || dragMediaId === targetId) return;
+
+    setMedia((prev) => {
+      const fromIndex = prev.findIndex((item) => item.id === dragMediaId);
+      const toIndex = prev.findIndex((item) => item.id === targetId);
+
+      if (fromIndex < 0 || toIndex < 0) return prev;
+
+      const next = [...prev];
+      const [removed] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, removed);
+
+      return next;
+    });
+
+    setDragMediaId(null);
+  };
+
+  const updateContactEntry = (key: ContactKey, id: string, patch: Partial<ContactEntry>) => {
+    setContacts((prev) => ({
+      ...prev,
+      [key]: prev[key].map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)),
+    }));
+  };
+
+  const addContactEntry = (key: ContactKey, phoneLike?: boolean) => {
+    setContacts((prev) => ({
+      ...prev,
+      [key]: [
+        ...prev[key],
+        {
+          id: uid(),
+          countryCode: phoneLike ? '+44' : '',
+          value: '',
+        },
+      ],
+    }));
+  };
+
+  const removeContactEntry = (key: ContactKey, id: string) => {
+    setContacts((prev) => ({
+      ...prev,
+      [key]: prev[key].length > 1 ? prev[key].filter((entry) => entry.id !== id) : prev[key],
+    }));
+  };
+
+  const primaryPhone = contacts.phone[0]?.value || '';
 
   const handleContinue = () => {
     if (!media.length) {
@@ -702,7 +868,7 @@ export default function NewPromotionPage() {
       return;
     }
 
-    if (!contacts.phone.trim()) {
+    if (!primaryPhone.trim()) {
       alert(text.alertPhone);
       setSheet('contacts');
       return;
@@ -760,6 +926,14 @@ export default function NewPromotionPage() {
           type="file"
           accept="video/mp4,video/webm,video/quicktime"
           onChange={(event) => handleMediaSelected(event, 'video')}
+          style={{ display: 'none' }}
+        />
+
+        <input
+          ref={replaceInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleReplaceSelected}
           style={{ display: 'none' }}
         />
 
@@ -842,8 +1016,8 @@ export default function NewPromotionPage() {
                 onClick={() => setSheet('media')}
                 style={{
                   width: '100%',
-                  minHeight: 220,
-                  borderRadius: 20,
+                  minHeight: 238,
+                  borderRadius: 22,
                   border: `2px dashed ${BRAND.green}`,
                   background: media.length ? '#ffffff' : BRAND.softGreen,
                   cursor: 'pointer',
@@ -857,12 +1031,14 @@ export default function NewPromotionPage() {
                     media={media}
                     mode={mediaMode}
                     onRemove={removeMediaItem}
-                    onUpdate={updateMediaItem}
+                    onOpenEditor={setEditorMediaId}
+                    onDragStart={setDragMediaId}
+                    onDropItem={reorderMedia}
                   />
                 ) : (
                   <div
                     style={{
-                      minHeight: 220,
+                      minHeight: 238,
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
@@ -939,7 +1115,7 @@ export default function NewPromotionPage() {
             <RowButton
               icon="📞"
               title={text.contacts}
-              subtitle={contacts.phone ? `${countryCode} ${contacts.phone}` : text.contactsHint}
+              subtitle={primaryPhone ? `${contacts.phone[0].countryCode} ${primaryPhone}` : text.contactsHint}
               onClick={() => setSheet('contacts')}
             />
 
@@ -964,6 +1140,17 @@ export default function NewPromotionPage() {
             >
               ⭐ {text.publishOnlyAfterPayment}
             </ShellCard>
+
+            <AdPreviewCard
+              title={title}
+              description={description}
+              media={media}
+              mediaMode={mediaMode}
+              chosenSticker={chosenSticker}
+              chosenStyle={chosenStyle}
+              language={language}
+              text={text}
+            />
           </section>
         </div>
       </main>
@@ -981,11 +1168,7 @@ export default function NewPromotionPage() {
         }}
       >
         <div style={{ maxWidth: 430, margin: '0 auto' }}>
-          <button
-            type="button"
-            onClick={handleContinue}
-            style={primaryButtonStyle()}
-          >
+          <button type="button" onClick={handleContinue} style={primaryButtonStyle()}>
             {text.continue}
           </button>
         </div>
@@ -1219,7 +1402,7 @@ export default function NewPromotionPage() {
               <ShellCard
                 style={{
                   padding: 14,
-                  background: '#ff284d',
+                  background: BRAND.red,
                   color: '#fff',
                   animation: 'pulseGift 1.4s infinite',
                 }}
@@ -1336,91 +1519,105 @@ export default function NewPromotionPage() {
       {sheet === 'contacts' ? (
         <Sheet title={text.contacts} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 12 }}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '105px 1fr',
-                gap: 10,
-                alignItems: 'center',
-              }}
-            >
-              <select
-                value={countryCode}
-                onChange={(event) => setCountryCode(event.target.value)}
-                style={{
-                  height: 58,
-                  borderRadius: 18,
-                  border: `2px solid ${BRAND.black}`,
-                  background: '#fff',
-                  color: BRAND.navy,
-                  fontSize: 16,
-                  fontWeight: 950,
-                  padding: '0 10px',
-                }}
-              >
-                <option value="+44">🇬🇧 +44</option>
-                <option value="+380">🇺🇦 +380</option>
-                <option value="+420">🇨🇿 +420</option>
-                <option value="+48">🇵🇱 +48</option>
-                <option value="+49">🇩🇪 +49</option>
-                <option value="+33">🇫🇷 +33</option>
-                <option value="+39">🇮🇹 +39</option>
-              </select>
-
-              <input
-                value={contacts.phone}
-                onChange={(event) =>
-                  setContacts((prev) => ({ ...prev, phone: event.target.value.replace(/[^\d ]/g, '') }))
-                }
-                placeholder="7000 000000"
-                style={{
-                  height: 58,
-                  borderRadius: 18,
-                  border: `2px solid ${BRAND.black}`,
-                  padding: '0 14px',
-                  fontSize: 17,
-                  fontWeight: 850,
-                  color: BRAND.navy,
-                  outline: 'none',
-                }}
-              />
-            </div>
-
-            {contactOptions
-              .filter((item) => item.key !== 'phone')
-              .map((item) => (
-                <label
-                  key={item.key}
+            {contactOptions.map((option) => (
+              <ShellCard key={option.key} style={{ padding: 12 }}>
+                <div
                   style={{
-                    minHeight: 64,
-                    borderRadius: 18,
-                    border: `2px solid ${BRAND.black}`,
-                    background: '#fff',
                     display: 'grid',
                     gridTemplateColumns: '52px 1fr',
-                    alignItems: 'center',
                     gap: 10,
-                    padding: '8px 12px',
+                    alignItems: 'center',
+                    marginBottom: 10,
                   }}
                 >
-                  <IconBox icon={item.icon} bg={BRAND.softGreen} />
-                  <input
-                    value={contacts[item.key]}
-                    onChange={(event) =>
-                      setContacts((prev) => ({ ...prev, [item.key]: event.target.value }))
-                    }
-                    placeholder={`${item.label}: ${item.placeholder}`}
-                    style={{
-                      border: 'none',
-                      outline: 'none',
-                      color: BRAND.navy,
-                      fontSize: 16,
-                      fontWeight: 850,
-                      minWidth: 0,
-                    }}
-                  />
-                </label>
-              ))}
+                  <BrandIcon label={option.icon} color={option.brand} />
+                  <div>
+                    <div style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>
+                      {option.label}
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 850, color: BRAND.gray }}>
+                      {contacts[option.key].filter((item) => item.value.trim()).length > 0
+                        ? '✓ Added'
+                        : option.placeholder}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gap: 8 }}>
+                  {contacts[option.key].map((entry) => (
+                    <div
+                      key={entry.id}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: option.phoneLike ? '104px 1fr 34px' : '1fr 34px',
+                        gap: 8,
+                        alignItems: 'center',
+                      }}
+                    >
+                      {option.phoneLike ? (
+                        <select
+                          value={entry.countryCode}
+                          onChange={(event) =>
+                            updateContactEntry(option.key, entry.id, {
+                              countryCode: event.target.value,
+                            })
+                          }
+                          style={contactSelectStyle()}
+                        >
+                          <option value="+44">🇬🇧 +44</option>
+                          <option value="+380">🇺🇦 +380</option>
+                          <option value="+420">🇨🇿 +420</option>
+                          <option value="+48">🇵🇱 +48</option>
+                          <option value="+49">🇩🇪 +49</option>
+                          <option value="+33">🇫🇷 +33</option>
+                          <option value="+39">🇮🇹 +39</option>
+                        </select>
+                      ) : null}
+
+                      <input
+                        value={entry.value}
+                        onChange={(event) =>
+                          updateContactEntry(option.key, entry.id, {
+                            value: option.phoneLike
+                              ? event.target.value.replace(/[^\d ]/g, '')
+                              : event.target.value,
+                          })
+                        }
+                        placeholder={option.placeholder}
+                        style={contactInputStyle()}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => removeContactEntry(option.key, entry.id)}
+                        style={miniRemoveButtonStyle()}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => addContactEntry(option.key, option.phoneLike)}
+                  style={{
+                    marginTop: 10,
+                    width: '100%',
+                    height: 44,
+                    borderRadius: 16,
+                    border: `2px solid ${BRAND.black}`,
+                    background: BRAND.softGreen,
+                    color: BRAND.navy,
+                    fontSize: 15,
+                    fontWeight: 950,
+                    cursor: 'pointer',
+                  }}
+                >
+                  + {text.addNumber}
+                </button>
+              </ShellCard>
+            ))}
 
             <button type="button" onClick={() => setSheet('address')} style={primaryButtonStyle()}>
               {language === 'RU' ? 'Далее →' : 'Next →'}
@@ -1513,10 +1710,20 @@ export default function NewPromotionPage() {
         </Sheet>
       ) : null}
 
+      {editorMedia ? (
+        <PhotoEditor
+          item={editorMedia}
+          text={text}
+          onChange={(patch) => updateMediaItem(editorMedia.id, patch)}
+          onClose={() => setEditorMediaId(null)}
+          onReplace={() => replaceInputRef.current?.click()}
+        />
+      ) : null}
+
       <style jsx global>{`
         @keyframes pulseGift {
           0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,36,79,0.0); }
-          50% { transform: scale(1.015); box-shadow: 0 0 20px rgba(255,36,79,0.35); }
+          50% { transform: scale(1.015); box-shadow: 0 0 22px rgba(255,36,79,0.36); }
           100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,36,79,0.0); }
         }
 
@@ -1534,16 +1741,20 @@ function MediaPreview({
   media,
   mode,
   onRemove,
-  onUpdate,
+  onOpenEditor,
+  onDragStart,
+  onDropItem,
 }: {
   media: MediaItem[];
   mode: MediaMode;
   onRemove: (id: string) => void;
-  onUpdate: (id: string, patch: Partial<MediaItem>) => void;
+  onOpenEditor: (id: string) => void;
+  onDragStart: (id: string) => void;
+  onDropItem: (id: string) => void;
 }) {
   if (mode === 'video') {
     return (
-      <div style={{ height: 220, position: 'relative' }}>
+      <div style={{ height: 238, position: 'relative' }}>
         <video
           src={media[0]?.preview}
           muted
@@ -1552,7 +1763,7 @@ function MediaPreview({
           playsInline
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
-        <MediaTools item={media[0]} onRemove={onRemove} onUpdate={onUpdate} />
+        {media[0] ? <CleanRemoveButton id={media[0].id} onRemove={onRemove} /> : null}
       </div>
     );
   }
@@ -1563,24 +1774,46 @@ function MediaPreview({
     return (
       <div
         style={{
-          height: 220,
+          height: 238,
           display: 'grid',
           gridTemplateColumns: count === 3 ? '1.2fr 0.8fr' : '1fr 1fr',
           gridTemplateRows: count === 2 ? '1fr' : '1fr 1fr',
-          gap: 4,
-          padding: 4,
+          gap: 5,
+          padding: 5,
           boxSizing: 'border-box',
         }}
       >
         {media.map((item, index) => (
-          <div
+          <button
             key={item.id}
+            type="button"
+            draggable
+            onDragStart={(event) => {
+              event.stopPropagation();
+              onDragStart(item.id);
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onDropItem(item.id);
+            }}
+            onClick={(event) => {
+              event.stopPropagation();
+              onOpenEditor(item.id);
+            }}
             style={{
               position: 'relative',
               overflow: 'hidden',
-              borderRadius: 15,
+              borderRadius: 16,
               border: '1.5px solid #111111',
               gridRow: count === 3 && index === 0 ? '1 / span 2' : 'auto',
+              background: '#fff',
+              padding: 0,
+              cursor: 'pointer',
             }}
           >
             <img
@@ -1593,15 +1826,31 @@ function MediaPreview({
                 transform: `translate(${item.offsetX}px, ${item.offsetY}px) scale(${item.scale}) rotate(${item.rotate}deg)`,
               }}
             />
-            <MediaTools item={item} onRemove={onRemove} onUpdate={onUpdate} compact />
-          </div>
+            <CleanRemoveButton id={item.id} onRemove={onRemove} compact />
+          </button>
         ))}
       </div>
     );
   }
 
   return (
-    <div style={{ height: 220, position: 'relative', overflow: 'hidden' }}>
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation();
+        if (media[0]) onOpenEditor(media[0].id);
+      }}
+      style={{
+        height: 238,
+        width: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+        background: '#fff',
+        border: 'none',
+        padding: 0,
+        cursor: 'pointer',
+      }}
+    >
       <img
         src={media[0]?.preview}
         alt={media[0]?.name}
@@ -1612,121 +1861,356 @@ function MediaPreview({
           transform: `translate(${media[0]?.offsetX || 0}px, ${media[0]?.offsetY || 0}px) scale(${media[0]?.scale || 1}) rotate(${media[0]?.rotate || 0}deg)`,
         }}
       />
-      <MediaTools item={media[0]} onRemove={onRemove} onUpdate={onUpdate} />
-    </div>
+      {media[0] ? <CleanRemoveButton id={media[0].id} onRemove={onRemove} /> : null}
+    </button>
   );
 }
 
-function MediaTools({
-  item,
+function CleanRemoveButton({
+  id,
   onRemove,
-  onUpdate,
   compact,
 }: {
-  item?: MediaItem;
+  id: string;
   onRemove: (id: string) => void;
-  onUpdate: (id: string, patch: Partial<MediaItem>) => void;
   compact?: boolean;
 }) {
-  if (!item) return null;
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation();
+        onRemove(id);
+      }}
+      style={{
+        position: 'absolute',
+        top: 7,
+        right: 7,
+        width: compact ? 27 : 34,
+        height: compact ? 27 : 34,
+        borderRadius: 999,
+        border: '2px solid #111111',
+        background: '#ffffff',
+        color: '#ff244f',
+        fontSize: compact ? 16 : 21,
+        fontWeight: 950,
+        display: 'grid',
+        placeItems: 'center',
+        zIndex: 5,
+      }}
+    >
+      ×
+    </button>
+  );
+}
+
+function PhotoEditor({
+  item,
+  text,
+  onChange,
+  onClose,
+  onReplace,
+}: {
+  item: MediaItem;
+  text: typeof TEXT.EN;
+  onChange: (patch: Partial<MediaItem>) => void;
+  onClose: () => void;
+  onReplace: () => void;
+}) {
+  const [isDragging, setIsDragging] = useState(false);
+  const lastPointRef = useRef<{ x: number; y: number } | null>(null);
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    lastPointRef.current = { x: event.clientX, y: event.clientY };
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!isDragging || !lastPointRef.current) return;
+
+    const dx = event.clientX - lastPointRef.current.x;
+    const dy = event.clientY - lastPointRef.current.y;
+
+    onChange({
+      offsetX: item.offsetX + dx,
+      offsetY: item.offsetY + dy,
+    });
+
+    lastPointRef.current = { x: event.clientX, y: event.clientY };
+  };
+
+  const stopDrag = () => {
+    setIsDragging(false);
+    lastPointRef.current = null;
+  };
 
   return (
     <div
       style={{
-        position: 'absolute',
-        inset: 6,
-        pointerEvents: 'none',
+        position: 'fixed',
+        inset: 0,
+        zIndex: 900,
+        background: 'rgba(5,10,20,0.96)',
+        color: '#fff',
+        display: 'grid',
+        gridTemplateRows: '72px 1fr auto',
       }}
     >
-      <button
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation();
-          onRemove(item.id);
-        }}
+      <div
         style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: compact ? 28 : 34,
-          height: compact ? 28 : 34,
-          borderRadius: 999,
-          border: '2px solid #111111',
-          background: '#ffffff',
-          color: '#ff244f',
-          fontSize: compact ? 16 : 20,
-          fontWeight: 950,
-          pointerEvents: 'auto',
+          padding: '14px 16px',
+          display: 'grid',
+          gridTemplateColumns: '52px 1fr 52px',
+          gap: 10,
+          alignItems: 'center',
         }}
       >
-        ×
-      </button>
+        <button type="button" onClick={onClose} style={darkRoundButtonStyle()}>
+          ←
+        </button>
+        <div style={{ textAlign: 'center', fontSize: 22, fontWeight: 950 }}>
+          {text.media}
+        </div>
+        <button type="button" onClick={onClose} style={darkRoundButtonStyle()}>
+          ×
+        </button>
+      </div>
 
-      <button
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation();
-          onUpdate(item.id, { rotate: item.rotate + 90 });
-        }}
+      <div
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={stopDrag}
+        onPointerCancel={stopDrag}
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: compact ? 28 : 34,
-          height: compact ? 28 : 34,
-          borderRadius: 999,
-          border: '2px solid #111111',
-          background: '#ffffff',
-          color: '#061b49',
-          fontSize: compact ? 15 : 19,
-          fontWeight: 950,
-          pointerEvents: 'auto',
+          margin: '0 16px',
+          borderRadius: 28,
+          border: '2px solid rgba(255,255,255,0.6)',
+          overflow: 'hidden',
+          background: '#111',
+          display: 'grid',
+          placeItems: 'center',
+          touchAction: 'none',
         }}
       >
-        ↻
-      </button>
+        <img
+          src={item.preview}
+          alt={item.name}
+          style={{
+            maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: 'contain',
+            transform: `translate(${item.offsetX}px, ${item.offsetY}px) scale(${item.scale}) rotate(${item.rotate}deg)`,
+          }}
+        />
+      </div>
 
       <div
         style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: 'flex',
-          justifyContent: 'center',
-          gap: 4,
-          pointerEvents: 'auto',
+          padding: '16px 16px calc(18px + env(safe-area-inset-bottom))',
+          display: 'grid',
+          gap: 12,
         }}
       >
-        {[
-          ['−', { scale: Math.max(1, item.scale - 0.1) }],
-          ['+', { scale: Math.min(3, item.scale + 0.1) }],
-          ['←', { offsetX: item.offsetX - 8 }],
-          ['→', { offsetX: item.offsetX + 8 }],
-        ].map(([label, patch]) => (
-          <button
-            key={label as string}
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onUpdate(item.id, patch as Partial<MediaItem>);
-            }}
+        <label style={{ display: 'grid', gap: 7 }}>
+          <span style={{ fontSize: 13, fontWeight: 900 }}>Zoom</span>
+          <input
+            type="range"
+            min="1"
+            max="3"
+            step="0.05"
+            value={item.scale}
+            onChange={(event) => onChange({ scale: Number(event.target.value) })}
+          />
+        </label>
+
+        <label style={{ display: 'grid', gap: 7 }}>
+          <span style={{ fontSize: 13, fontWeight: 900 }}>Rotate</span>
+          <input
+            type="range"
+            min="-180"
+            max="180"
+            step="1"
+            value={item.rotate}
+            onChange={(event) => onChange({ rotate: Number(event.target.value) })}
+          />
+        </label>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <button type="button" onClick={onReplace} style={secondaryDarkButtonStyle()}>
+            {text.replace}
+          </button>
+          <button type="button" onClick={onClose} style={greenDarkButtonStyle()}>
+            {text.done}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BrandIcon({ label, color }: { label: string; color: string }) {
+  return (
+    <div
+      style={{
+        width: 46,
+        height: 46,
+        borderRadius: 15,
+        border: `2px solid ${BRAND.black}`,
+        background: color,
+        color: '#fff',
+        display: 'grid',
+        placeItems: 'center',
+        fontSize: label.length > 2 ? 11 : 15,
+        fontWeight: 950,
+        letterSpacing: '-0.4px',
+      }}
+    >
+      {label}
+    </div>
+  );
+}
+
+function AdPreviewCard({
+  title,
+  description,
+  media,
+  mediaMode,
+  chosenSticker,
+  chosenStyle,
+  language,
+  text,
+}: {
+  title: string;
+  description: string;
+  media: MediaItem[];
+  mediaMode: MediaMode;
+  chosenSticker: { label: string; emoji: string };
+  chosenStyle: { label: string; emoji: string };
+  language: AppLanguage;
+  text: typeof TEXT.EN;
+}) {
+  return (
+    <ShellCard style={{ padding: 12 }}>
+      <div style={{ fontSize: 22, fontWeight: 950, marginBottom: 10 }}>
+        {text.preview}
+      </div>
+
+      <div
+        style={{
+          border: `2px solid ${BRAND.black}`,
+          borderRadius: 22,
+          overflow: 'hidden',
+          background: '#fff',
+        }}
+      >
+        <div
+          style={{
+            height: 158,
+            background: BRAND.softGreen,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {media[0] ? (
+            mediaMode === 'video' ? (
+              <video
+                src={media[0].preview}
+                muted
+                loop
+                autoPlay
+                playsInline
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <img
+                src={media[0].preview}
+                alt=""
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            )
+          ) : (
+            <div
+              style={{
+                height: '100%',
+                display: 'grid',
+                placeItems: 'center',
+                fontSize: 42,
+              }}
+            >
+              🖼️
+            </div>
+          )}
+
+          <div
             style={{
-              width: compact ? 25 : 32,
-              height: compact ? 25 : 32,
+              position: 'absolute',
+              left: 10,
+              top: 10,
+              border: `2px solid ${BRAND.black}`,
               borderRadius: 999,
-              border: '1.5px solid #111111',
-              background: 'rgba(255,255,255,0.92)',
-              color: '#061b49',
-              fontSize: compact ? 13 : 17,
+              background: BRAND.yellow,
+              color: BRAND.navy,
+              padding: '6px 10px',
+              fontSize: 13,
+              fontWeight: 950,
+              animation: 'glowEmoji 1.5s infinite',
+            }}
+          >
+            {chosenSticker.emoji} {chosenSticker.label}
+          </div>
+
+          <div
+            style={{
+              position: 'absolute',
+              right: 10,
+              bottom: 10,
+              border: `2px solid ${BRAND.black}`,
+              borderRadius: 999,
+              background: '#fff',
+              color: BRAND.navy,
+              padding: '6px 10px',
+              fontSize: 12,
               fontWeight: 950,
             }}
           >
-            {label as string}
-          </button>
-        ))}
+            {chosenStyle.emoji} {chosenStyle.label}
+          </div>
+        </div>
+
+        <div style={{ padding: 13 }}>
+          <div style={{ fontSize: 21, fontWeight: 950, color: BRAND.navy }}>
+            {title || text.titleHint}
+          </div>
+          <div
+            style={{
+              marginTop: 5,
+              fontSize: 13,
+              fontWeight: 850,
+              color: BRAND.gray,
+              lineHeight: 1.35,
+            }}
+          >
+            {description || text.descriptionHint}
+          </div>
+
+          <div
+            style={{
+              marginTop: 11,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 8,
+            }}
+          >
+            <button type="button" style={previewButtonStyle('#fff', BRAND.navy)}>
+              {text.profile}
+            </button>
+            <button type="button" style={previewButtonStyle(BRAND.green, '#fff')}>
+              {text.book}
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </ShellCard>
   );
 }
 
@@ -1750,7 +2234,7 @@ function primaryButtonStyle(): CSSProperties {
     height: 64,
     borderRadius: 22,
     border: '2px solid #111111',
-    background: '#24c85a',
+    background: 'linear-gradient(180deg, #24c85a 0%, #17a84a 100%)',
     color: '#fff',
     fontSize: 20,
     fontWeight: 950,
@@ -1784,5 +2268,99 @@ function glowChipStyle(active: boolean): CSSProperties {
     fontWeight: 950,
     cursor: 'pointer',
     boxShadow: active ? '0 0 16px rgba(36,200,90,0.25)' : 'none',
+  };
+}
+
+function contactSelectStyle(): CSSProperties {
+  return {
+    height: 50,
+    borderRadius: 16,
+    border: `2px solid ${BRAND.black}`,
+    background: '#fff',
+    color: BRAND.navy,
+    fontSize: 14,
+    fontWeight: 950,
+    padding: '0 7px',
+  };
+}
+
+function contactInputStyle(): CSSProperties {
+  return {
+    height: 50,
+    borderRadius: 16,
+    border: `2px solid ${BRAND.black}`,
+    padding: '0 12px',
+    fontSize: 15,
+    fontWeight: 850,
+    color: BRAND.navy,
+    outline: 'none',
+    minWidth: 0,
+  };
+}
+
+function miniRemoveButtonStyle(): CSSProperties {
+  return {
+    width: 34,
+    height: 34,
+    borderRadius: 999,
+    border: `2px solid ${BRAND.black}`,
+    background: '#fff',
+    color: BRAND.red,
+    fontSize: 20,
+    fontWeight: 950,
+    cursor: 'pointer',
+  };
+}
+
+function darkRoundButtonStyle(): CSSProperties {
+  return {
+    width: 48,
+    height: 48,
+    borderRadius: 999,
+    border: '2px solid rgba(255,255,255,0.75)',
+    background: 'rgba(255,255,255,0.08)',
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 950,
+    cursor: 'pointer',
+  };
+}
+
+function secondaryDarkButtonStyle(): CSSProperties {
+  return {
+    height: 56,
+    borderRadius: 18,
+    border: '2px solid rgba(255,255,255,0.75)',
+    background: 'rgba(255,255,255,0.08)',
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 950,
+    cursor: 'pointer',
+  };
+}
+
+function greenDarkButtonStyle(): CSSProperties {
+  return {
+    height: 56,
+    borderRadius: 18,
+    border: '2px solid #111111',
+    background: BRAND.green,
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 950,
+    cursor: 'pointer',
+  };
+}
+
+function previewButtonStyle(bg: string, color: string): CSSProperties {
+  return {
+    height: 46,
+    borderRadius: 16,
+    border: '2px solid #111111',
+    background: bg,
+    color,
+    fontSize: 15,
+    fontWeight: 950,
+    cursor: 'pointer',
   };
 }
