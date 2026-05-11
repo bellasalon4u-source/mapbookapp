@@ -17,17 +17,15 @@ import {
   type AppLanguage,
 } from '../../../../services/i18n';
 import { categories } from '../../../../services/categories';
-import { isAuthenticated } from '../../../../services/authStore';
 
 type MediaMode = 'single' | 'collage' | 'video';
-
 type SheetMode =
   | null
   | 'media'
-  | 'category'
-  | 'subcategory'
   | 'title'
   | 'description'
+  | 'category'
+  | 'subcategory'
   | 'days'
   | 'enhance'
   | 'contacts'
@@ -72,18 +70,15 @@ type CategoryView = {
 const BRAND = {
   navy: '#061b49',
   black: '#111111',
-  green: '#24c85a',
-  greenDark: '#17a84a',
-  blue: '#087bff',
-  red: '#ff244f',
-  yellow: '#fff3b8',
+  green: '#22c55e',
+  greenDark: '#16a34a',
+  red: '#ff2456',
+  blue: '#0b7cff',
   cream: '#fffdf8',
+  soft: '#f7f8fb',
   softGreen: '#eaffef',
-  softBlue: '#eef5ff',
-  softPink: '#fff1f7',
-  softYellow: '#fff8d9',
   gray: '#707988',
-  dark: '#080f1f',
+  dark: '#070b14',
 };
 
 const PRICE_PER_DAY = 2;
@@ -92,99 +87,87 @@ const FIRST_AD_FREE = true;
 const TEXT = {
   EN: {
     pageTitle: 'Add advertisement',
-    pageSubtitle: 'Create a premium ad that clients notice nearby',
+    pageSubtitle: 'Create a bright premium ad that clients notice nearby',
     media: 'Photo / video',
     chooseMedia: 'Choose media',
-    mediaHint: '1 photo, 2–4 photo collage, or 1 short video',
-    singlePhoto: '1 photo',
-    collage: 'Collage',
-    video: 'Mini video',
-    camera: 'Camera',
-    gallery: 'Gallery',
-    files: 'Files',
+    mediaHint: '1 photo, collage 2–4 photos or 1 short video',
     title: 'Title',
     titleHint: 'Short catchy ad title',
     description: 'Description',
-    descriptionHint: 'What makes this offer special?',
+    descriptionHint: 'Tell clients about the offer',
     category: 'Category',
-    chooseCategory: 'Choose category',
-    chooseSubcategory: 'Choose subcategory',
+    categoryHint: 'Choose category and subcategory',
     days: 'Advertising days',
-    daysHint: '1 day = £2',
-    firstDayFree: 'First day free',
-    enhance: 'Ad Style Studio',
-    enhanceHint: 'Sticker and visual style',
+    daysHint: 'Choose number of days',
+    enhance: 'Improve advertisement',
+    enhanceHint: 'Stickers and ad style',
     contacts: 'Contact details',
-    contactsHint: 'Phone, WhatsApp, Telegram, Viber, Instagram',
+    contactsHint: 'Add contact methods',
     address: 'Address',
-    addressHint: 'Where this ad should be shown',
-    preview: 'Premium preview',
+    addressHint: 'City, district, street',
     continue: 'Continue to payment',
     save: 'Save',
     done: 'Done',
     cancel: 'Cancel',
-    replace: 'Replace photo',
+    replace: 'Replace',
+    chooseCategory: 'Choose category',
+    chooseSubcategory: 'Choose subcategory',
+    firstDayFree: 'First day free',
     total: 'Total',
     free: 'Free',
     payment: 'Payment',
-    publishOnlyAfterPayment: 'Advertisement is published only after payment.',
+    profile: 'Profile',
+    book: 'Book',
+    addNumber: 'Add number',
+    addUsername: 'Add username',
     alertMedia: 'Please add photo or video.',
     alertTitle: 'Please add title.',
     alertDescription: 'Please add description.',
     alertCategory: 'Please choose category and subcategory.',
     alertPhone: 'Please add phone number.',
     registerFirst: 'Please register before payment.',
-    profile: 'Profile',
-    book: 'Book',
-    addNumber: 'Add number',
   },
   RU: {
     pageTitle: 'Добавить рекламу',
-    pageSubtitle: 'Создайте премиальную рекламу, которую клиенты заметят рядом',
+    pageSubtitle: 'Создайте яркую премиальную рекламу, которую клиенты заметят рядом',
     media: 'Фото / видео',
     chooseMedia: 'Выбрать медиа',
     mediaHint: '1 фото, коллаж 2–4 фото или 1 короткое видео',
-    singlePhoto: '1 фото',
-    collage: 'Коллаж',
-    video: 'Мини-видео',
-    camera: 'Камера',
-    gallery: 'Галерея',
-    files: 'Файлы',
     title: 'Заголовок',
     titleHint: 'Короткий цепляющий заголовок',
     description: 'Описание',
-    descriptionHint: 'Что особенного в этом предложении?',
+    descriptionHint: 'Расскажите клиентам о предложении',
     category: 'Категория',
-    chooseCategory: 'Выбрать категорию',
-    chooseSubcategory: 'Выбрать подкатегорию',
+    categoryHint: 'Выберите категорию и подкатегорию',
     days: 'Дни рекламы',
-    daysHint: '1 день = £2',
-    firstDayFree: 'Первый день бесплатно',
-    enhance: 'Стиль рекламы',
-    enhanceHint: 'Наклейка и визуальный стиль',
+    daysHint: 'Выберите количество дней',
+    enhance: 'Улучшить рекламу',
+    enhanceHint: 'Стикеры и вид рекламы',
     contacts: 'Контактные данные',
-    contactsHint: 'Телефон, WhatsApp, Telegram, Viber, Instagram',
+    contactsHint: 'Добавьте способы связи',
     address: 'Адрес',
-    addressHint: 'Где показывать рекламу',
-    preview: 'Премиум предпросмотр',
+    addressHint: 'Город, район, улица',
     continue: 'Перейти к оплате',
     save: 'Сохранить',
     done: 'Готово',
     cancel: 'Отмена',
-    replace: 'Заменить фото',
+    replace: 'Заменить',
+    chooseCategory: 'Выберите категорию',
+    chooseSubcategory: 'Выберите подкатегорию',
+    firstDayFree: 'Первый день бесплатно',
     total: 'Итого',
     free: 'Бесплатно',
     payment: 'Оплата',
-    publishOnlyAfterPayment: 'Реклама публикуется только после оплаты.',
+    profile: 'Профиль',
+    book: 'Забронировать',
+    addNumber: 'Добавить номер',
+    addUsername: 'Добавить username',
     alertMedia: 'Добавьте фото или видео.',
     alertTitle: 'Добавьте заголовок.',
     alertDescription: 'Добавьте описание.',
     alertCategory: 'Выберите категорию и подкатегорию.',
     alertPhone: 'Добавьте номер телефона.',
     registerFirst: 'Перед оплатой нужно зарегистрироваться.',
-    profile: 'Профиль',
-    book: 'Забронировать',
-    addNumber: 'Добавить номер',
   },
 };
 
@@ -198,13 +181,30 @@ function uid() {
 
 function localizeLabel(value: unknown, language: AppLanguage) {
   if (typeof value === 'string') return value;
-
   if (value && typeof value === 'object') {
     const map = value as Record<string, string>;
     return map[language] || map.EN || map.RU || Object.values(map)[0] || '';
   }
-
   return '';
+}
+
+function isUserRegistered() {
+  if (typeof window === 'undefined') return false;
+
+  const keys = [
+    'mapbook_user_profile',
+    'olamep_user_profile',
+    'mapbook_auth_user',
+    'olamep_auth_user',
+  ];
+
+  return keys.some((key) => {
+    try {
+      return Boolean(localStorage.getItem(key));
+    } catch {
+      return false;
+    }
+  });
 }
 
 function ShellCard({
@@ -217,10 +217,10 @@ function ShellCard({
   return (
     <div
       style={{
-        border: `2px solid ${BRAND.black}`,
-        borderRadius: 24,
-        background: '#fff',
-        boxShadow: '0 4px 0 rgba(0,0,0,0.06)',
+        border: `1.8px solid ${BRAND.black}`,
+        borderRadius: 22,
+        background: '#ffffff',
+        boxShadow: '0 8px 22px rgba(6,27,73,0.07)',
         ...style,
       }}
     >
@@ -236,18 +236,20 @@ function AppLogo() {
         src="/ui/logo/app-icon.svg"
         alt="Olamep"
         style={{
-          width: 54,
-          height: 54,
-          borderRadius: 16,
+          width: 48,
+          height: 48,
+          borderRadius: 14,
           objectFit: 'contain',
+          border: `1.5px solid ${BRAND.black}`,
+          background: '#fff',
         }}
       />
       <span
         style={{
-          color: BRAND.navy,
-          fontSize: 32,
+          fontSize: 30,
           fontWeight: 950,
-          lineHeight: 1,
+          color: BRAND.navy,
+          letterSpacing: '-1px',
         }}
       >
         Olamep
@@ -267,7 +269,7 @@ function RoundButton({ children, onClick }: { children: ReactNode; onClick: () =
 function IconBox({
   icon,
   image,
-  bg = '#ffffff',
+  bg = BRAND.softGreen,
 }: {
   icon?: string;
   image?: string;
@@ -276,14 +278,13 @@ function IconBox({
   return (
     <div
       style={{
-        width: 54,
-        height: 54,
-        borderRadius: 16,
-        border: `1.8px solid ${BRAND.black}`,
+        width: 50,
+        height: 50,
+        borderRadius: 14,
+        border: `1.6px solid ${BRAND.black}`,
         background: bg,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        display: 'grid',
+        placeItems: 'center',
         overflow: 'hidden',
         flexShrink: 0,
       }}
@@ -291,7 +292,7 @@ function IconBox({
       {image ? (
         <img src={image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       ) : (
-        <span style={{ fontSize: 28 }}>{icon || '📍'}</span>
+        <span style={{ fontSize: 25 }}>{icon || '📍'}</span>
       )}
     </div>
   );
@@ -302,14 +303,14 @@ function RowButton({
   image,
   title,
   subtitle,
-  secondLine,
+  right,
   onClick,
 }: {
-  icon: string;
+  icon?: string;
   image?: string;
   title: string;
   subtitle: string;
-  secondLine?: string;
+  right?: ReactNode;
   onClick: () => void;
 }) {
   return (
@@ -318,67 +319,54 @@ function RowButton({
       onClick={onClick}
       style={{
         width: '100%',
-        minHeight: 78,
-        border: `2px solid ${BRAND.black}`,
-        borderRadius: 20,
-        background: '#fff',
+        minHeight: 72,
+        border: `1.8px solid ${BRAND.black}`,
+        borderRadius: 18,
+        background: '#ffffff',
         display: 'grid',
-        gridTemplateColumns: '62px 1fr 26px',
+        gridTemplateColumns: '56px 1fr auto',
+        gap: 10,
         alignItems: 'center',
-        gap: 12,
-        padding: '10px 14px',
+        padding: '10px 12px',
         textAlign: 'left',
         cursor: 'pointer',
+        boxShadow: '0 5px 15px rgba(6,27,73,0.05)',
       }}
     >
-      <IconBox icon={icon} image={image} bg={BRAND.softGreen} />
+      <IconBox icon={icon} image={image} />
 
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 20, fontWeight: 950, color: BRAND.navy, lineHeight: 1.1 }}>
+        <div style={{ fontSize: 19, fontWeight: 950, color: BRAND.navy, lineHeight: 1.1 }}>
           {title}
         </div>
         <div
           style={{
             marginTop: 4,
-            fontSize: 14,
-            fontWeight: 850,
+            fontSize: 13,
+            fontWeight: 800,
             color: BRAND.gray,
-            lineHeight: 1.2,
+            whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
           }}
         >
           {subtitle}
         </div>
-        {secondLine ? (
-          <div
-            style={{
-              marginTop: 3,
-              fontSize: 13,
-              fontWeight: 900,
-              color: BRAND.green,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {secondLine}
-          </div>
-        ) : null}
       </div>
 
-      <span style={{ fontSize: 32, fontWeight: 950, color: BRAND.black }}>›</span>
+      {right || <span style={{ fontSize: 30, fontWeight: 950, color: BRAND.black }}>›</span>}
     </button>
   );
 }
 
 function Sheet({
   title,
+  dark,
   children,
   onClose,
 }: {
   title: string;
+  dark?: boolean;
   children: ReactNode;
   onClose: () => void;
 }) {
@@ -400,38 +388,42 @@ function Sheet({
         style={{
           width: '100%',
           maxWidth: 430,
-          maxHeight: '86vh',
+          maxHeight: '88vh',
           overflowY: 'auto',
-          background: '#fff',
-          border: `2px solid ${BRAND.black}`,
+          background: dark ? BRAND.dark : '#fff',
+          color: dark ? '#fff' : BRAND.navy,
+          border: `2px solid ${dark ? '#ffffff' : BRAND.black}`,
           borderBottom: 'none',
-          borderRadius: '30px 30px 0 0',
-          padding: '18px 16px calc(18px + env(safe-area-inset-bottom))',
+          borderRadius: '28px 28px 0 0',
+          padding: '16px 16px calc(18px + env(safe-area-inset-bottom))',
           boxSizing: 'border-box',
         }}
       >
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '48px 1fr 48px',
-            gap: 10,
+            gridTemplateColumns: '44px 1fr 44px',
+            gap: 8,
             alignItems: 'center',
             marginBottom: 16,
           }}
         >
-          <RoundButton onClick={onClose}>←</RoundButton>
+          <button type="button" onClick={onClose} style={sheetRoundStyle(dark)}>
+            ←
+          </button>
           <div
             style={{
               textAlign: 'center',
-              color: BRAND.navy,
-              fontSize: 26,
+              fontSize: 22,
               fontWeight: 950,
               lineHeight: 1.05,
             }}
           >
             {title}
           </div>
-          <RoundButton onClick={onClose}>×</RoundButton>
+          <button type="button" onClick={onClose} style={sheetRoundStyle(dark)}>
+            ×
+          </button>
         </div>
 
         {children}
@@ -455,45 +447,21 @@ function Field({
 }) {
   return (
     <label style={{ display: 'grid', gap: 8 }}>
-      <span style={{ fontSize: 16, fontWeight: 950, color: BRAND.navy }}>{label}</span>
-
+      <span style={{ fontSize: 15, fontWeight: 950, color: BRAND.navy }}>{label}</span>
       {multiline ? (
         <textarea
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           rows={5}
-          style={{
-            width: '100%',
-            border: `2px solid ${BRAND.black}`,
-            borderRadius: 18,
-            padding: 14,
-            fontSize: 17,
-            fontWeight: 800,
-            color: BRAND.navy,
-            outline: 'none',
-            resize: 'none',
-            fontFamily: 'Arial, sans-serif',
-            boxSizing: 'border-box',
-          }}
+          style={fieldStyle(true)}
         />
       ) : (
         <input
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
-          style={{
-            width: '100%',
-            height: 58,
-            border: `2px solid ${BRAND.black}`,
-            borderRadius: 18,
-            padding: '0 16px',
-            fontSize: 17,
-            fontWeight: 850,
-            color: BRAND.navy,
-            outline: 'none',
-            boxSizing: 'border-box',
-          }}
+          style={fieldStyle(false)}
         />
       )}
     </label>
@@ -526,8 +494,8 @@ export default function NewPromotionPage() {
   const [subcategory, setSubcategory] = useState('');
 
   const [days, setDays] = useState(1);
-  const [sticker, setSticker] = useState('today');
-  const [visualStyle, setVisualStyle] = useState('classic');
+  const [sticker, setSticker] = useState('top');
+  const [visualStyle, setVisualStyle] = useState('premium');
 
   const [contacts, setContacts] = useState<Record<ContactKey, ContactEntry[]>>({
     phone: [{ id: uid(), countryCode: '+44', value: '' }],
@@ -550,11 +518,7 @@ export default function NewPromotionPage() {
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
-
-    const unsubscribe = subscribeToLanguageChange((nextLanguage) => {
-      setLanguage(nextLanguage);
-    });
-
+    const unsubscribe = subscribeToLanguageChange((nextLanguage) => setLanguage(nextLanguage));
     return () => unsubscribe();
   }, []);
 
@@ -587,15 +551,8 @@ export default function NewPromotionPage() {
 
   const daysSummary =
     language === 'RU'
-      ? `${days} дн. • ${adPrice === 0 ? text.free : `£${adPrice}`}`
-      : `${days} days • ${adPrice === 0 ? text.free : `£${adPrice}`}`;
-
-  const mediaSummary =
-    mediaMode === 'single'
-      ? text.singlePhoto
-      : mediaMode === 'collage'
-        ? `${text.collage} ${media.length ? media.length : '2–4'}`
-        : text.video;
+      ? `${days} дн.  £${adPrice}`
+      : `${days} days  £${adPrice}`;
 
   const stickerOptions = [
     { id: 'today', label: language === 'RU' ? 'Сегодня' : 'Today', emoji: '⚡' },
@@ -607,14 +564,93 @@ export default function NewPromotionPage() {
   ];
 
   const styleOptions = [
-    { id: 'classic', label: language === 'RU' ? 'Классик' : 'Classic', emoji: '🎯' },
-    { id: 'flyer', label: language === 'RU' ? 'Флаер' : 'Flyer', emoji: '🎨' },
-    { id: 'premium', label: language === 'RU' ? 'Премиум' : 'Premium', emoji: '👑' },
-    { id: 'neon', label: language === 'RU' ? 'Сияние' : 'Glow', emoji: '💫' },
+    { id: 'classic', label: 'Classic', image: 'linear-gradient(135deg,#f7d6e0,#dbeafe)' },
+    { id: 'flyer', label: 'Flyer', image: 'linear-gradient(135deg,#fde68a,#bfdbfe)' },
+    { id: 'premium', label: 'Premium', image: 'linear-gradient(135deg,#fbbf24,#111827)' },
+    { id: 'glow', label: 'Glow', image: 'linear-gradient(135deg,#312e81,#ec4899)' },
   ];
 
-  const chosenSticker = stickerOptions.find((item) => item.id === sticker) || stickerOptions[0];
-  const chosenStyle = styleOptions.find((item) => item.id === visualStyle) || styleOptions[0];
+  const chosenSticker = stickerOptions.find((item) => item.id === sticker) || stickerOptions[1];
+  const chosenStyle = styleOptions.find((item) => item.id === visualStyle) || styleOptions[2];
+
+  const contactOptions: {
+    key: ContactKey;
+    label: string;
+    icon: string;
+    color: string;
+    placeholder: string;
+    phoneLike?: boolean;
+    addText: string;
+  }[] = [
+    {
+      key: 'phone',
+      label: language === 'RU' ? 'Телефон' : 'Phone',
+      icon: '☎',
+      color: '#111827',
+      placeholder: '7000 000000',
+      phoneLike: true,
+      addText: text.addNumber,
+    },
+    {
+      key: 'whatsapp',
+      label: 'WhatsApp',
+      icon: '☘',
+      color: '#25D366',
+      placeholder: '7000 000000',
+      phoneLike: true,
+      addText: text.addNumber,
+    },
+    {
+      key: 'businessWhatsapp',
+      label: 'Business WhatsApp',
+      icon: 'B',
+      color: '#128C7E',
+      placeholder: '7000 000000',
+      phoneLike: true,
+      addText: text.addNumber,
+    },
+    {
+      key: 'telegram',
+      label: 'Telegram',
+      icon: '✈',
+      color: '#229ED9',
+      placeholder: '@username',
+      addText: text.addUsername,
+    },
+    {
+      key: 'viber',
+      label: 'Viber',
+      icon: '☎',
+      color: '#7360F2',
+      placeholder: '7000 000000',
+      phoneLike: true,
+      addText: text.addNumber,
+    },
+    {
+      key: 'instagram',
+      label: 'Instagram',
+      icon: '◎',
+      color: '#E4405F',
+      placeholder: '@username',
+      addText: text.addUsername,
+    },
+    {
+      key: 'email',
+      label: 'Email',
+      icon: '@',
+      color: '#0b7cff',
+      placeholder: 'you@email.com',
+      addText: language === 'RU' ? 'Добавить email' : 'Add email',
+    },
+    {
+      key: 'website',
+      label: 'Website',
+      icon: 'www',
+      color: '#061b49',
+      placeholder: 'yourwebsite.com',
+      addText: language === 'RU' ? 'Добавить сайт' : 'Add website',
+    },
+  ];
 
   const paymentOptions = [
     { id: 'card', label: language === 'RU' ? 'Карта' : 'Card', icon: '💳' },
@@ -623,75 +659,8 @@ export default function NewPromotionPage() {
     { id: 'apple', label: 'Apple Pay', icon: '' },
   ];
 
-  const contactOptions: {
-    key: ContactKey;
-    label: string;
-    icon: string;
-    brand: string;
-    placeholder: string;
-    phoneLike?: boolean;
-  }[] = [
-    {
-      key: 'phone',
-      label: language === 'RU' ? 'Телефон' : 'Phone',
-      icon: '☎',
-      brand: '#0f172a',
-      placeholder: '7000 000000',
-      phoneLike: true,
-    },
-    {
-      key: 'whatsapp',
-      label: 'WhatsApp',
-      icon: 'WA',
-      brand: '#25D366',
-      placeholder: '7000 000000',
-      phoneLike: true,
-    },
-    {
-      key: 'businessWhatsapp',
-      label: 'Business WhatsApp',
-      icon: 'WB',
-      brand: '#128C7E',
-      placeholder: '7000 000000',
-      phoneLike: true,
-    },
-    {
-      key: 'telegram',
-      label: 'Telegram',
-      icon: 'TG',
-      brand: '#229ED9',
-      placeholder: '@username',
-    },
-    {
-      key: 'viber',
-      label: 'Viber',
-      icon: 'VB',
-      brand: '#7360F2',
-      placeholder: '7000 000000',
-      phoneLike: true,
-    },
-    {
-      key: 'instagram',
-      label: 'Instagram',
-      icon: 'IG',
-      brand: '#E4405F',
-      placeholder: '@username',
-    },
-    {
-      key: 'email',
-      label: 'Email',
-      icon: '@',
-      brand: '#087bff',
-      placeholder: 'you@email.com',
-    },
-    {
-      key: 'website',
-      label: 'Website',
-      icon: 'www',
-      brand: '#061b49',
-      placeholder: 'yourwebsite.com',
-    },
-  ];
+  const primaryPhone = contacts.phone[0]?.value || '';
+  const contactCount = Object.values(contacts).flat().filter((item) => item.value.trim()).length;
 
   const handleMediaPick = (mode: MediaMode, source: 'camera' | 'gallery' | 'files' | 'video') => {
     setMediaMode(mode);
@@ -709,8 +678,8 @@ export default function NewPromotionPage() {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
-    const minRequired = mode === 'collage' ? 2 : 1;
     const limit = mode === 'collage' ? 4 : 1;
+    const min = mode === 'collage' ? 2 : 1;
 
     const allowed = files
       .filter((file) => {
@@ -719,7 +688,7 @@ export default function NewPromotionPage() {
       })
       .slice(0, limit);
 
-    if (allowed.length < minRequired) {
+    if (allowed.length < min) {
       alert(
         language === 'RU'
           ? 'Для коллажа выберите минимум 2 фото. HEIC/HEIF не поддерживается.'
@@ -731,19 +700,20 @@ export default function NewPromotionPage() {
 
     media.forEach((item) => URL.revokeObjectURL(item.preview));
 
-    const next = allowed.map((file) => ({
-      id: uid(),
-      name: file.name,
-      preview: URL.createObjectURL(file),
-      type: mode === 'video' ? ('video' as const) : ('image' as const),
-      scale: 1,
-      rotate: 0,
-      offsetX: 0,
-      offsetY: 0,
-    }));
+    setMedia(
+      allowed.map((file) => ({
+        id: uid(),
+        name: file.name,
+        preview: URL.createObjectURL(file),
+        type: mode === 'video' ? 'video' : 'image',
+        scale: 1,
+        rotate: 0,
+        offsetX: 0,
+        offsetY: 0,
+      }))
+    );
 
     setMediaMode(mode);
-    setMedia(next);
     event.target.value = '';
   };
 
@@ -752,9 +722,9 @@ export default function NewPromotionPage() {
 
     if (!file || !editorMediaId) return;
 
-    const isOk = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+    const ok = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
 
-    if (!isOk) {
+    if (!ok) {
       alert(language === 'RU' ? 'Выберите JPG, PNG или WEBP.' : 'Choose JPG, PNG or WEBP.');
       event.target.value = '';
       return;
@@ -763,9 +733,7 @@ export default function NewPromotionPage() {
     setMedia((prev) =>
       prev.map((item) => {
         if (item.id !== editorMediaId) return item;
-
         URL.revokeObjectURL(item.preview);
-
         return {
           ...item,
           name: file.name,
@@ -782,16 +750,16 @@ export default function NewPromotionPage() {
     event.target.value = '';
   };
 
+  const updateMediaItem = (id: string, patch: Partial<MediaItem>) => {
+    setMedia((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+  };
+
   const removeMediaItem = (id: string) => {
     setMedia((prev) => {
       const found = prev.find((item) => item.id === id);
       if (found) URL.revokeObjectURL(found.preview);
       return prev.filter((item) => item.id !== id);
     });
-  };
-
-  const updateMediaItem = (id: string, patch: Partial<MediaItem>) => {
-    setMedia((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   };
 
   const reorderMedia = (targetId: string) => {
@@ -804,8 +772,8 @@ export default function NewPromotionPage() {
       if (fromIndex < 0 || toIndex < 0) return prev;
 
       const next = [...prev];
-      const [removed] = next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, removed);
+      const [item] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, item);
 
       return next;
     });
@@ -823,14 +791,7 @@ export default function NewPromotionPage() {
   const addContactEntry = (key: ContactKey, phoneLike?: boolean) => {
     setContacts((prev) => ({
       ...prev,
-      [key]: [
-        ...prev[key],
-        {
-          id: uid(),
-          countryCode: phoneLike ? '+44' : '',
-          value: '',
-        },
-      ],
+      [key]: [...prev[key], { id: uid(), countryCode: phoneLike ? '+44' : '', value: '' }],
     }));
   };
 
@@ -840,8 +801,6 @@ export default function NewPromotionPage() {
       [key]: prev[key].length > 1 ? prev[key].filter((entry) => entry.id !== id) : prev[key],
     }));
   };
-
-  const primaryPhone = contacts.phone[0]?.value || '';
 
   const handleContinue = () => {
     if (!media.length) {
@@ -874,7 +833,7 @@ export default function NewPromotionPage() {
       return;
     }
 
-    if (!isAuthenticated()) {
+    if (!isUserRegistered()) {
       alert(text.registerFirst);
       router.push(`/auth?returnTo=${encodeURIComponent('/profile/promotions/new')}`);
       return;
@@ -889,9 +848,9 @@ export default function NewPromotionPage() {
         style={{
           minHeight: '100vh',
           background: '#ffffff',
-          fontFamily: 'Arial, sans-serif',
           color: BRAND.navy,
-          paddingBottom: 118,
+          fontFamily: 'Arial, sans-serif',
+          paddingBottom: 116,
         }}
       >
         <input
@@ -942,14 +901,15 @@ export default function NewPromotionPage() {
             style={{
               position: 'sticky',
               top: 0,
-              zIndex: 60,
-              background: 'rgba(255,255,255,0.98)',
-              borderBottom: '1px solid #e8ebf0',
-              padding: '18px 16px 14px',
+              zIndex: 70,
+              background: 'rgba(255,255,255,0.97)',
+              padding: '18px 16px 12px',
               display: 'grid',
-              gridTemplateColumns: '54px 1fr 54px',
+              gridTemplateColumns: '48px 1fr 48px',
               gap: 10,
               alignItems: 'start',
+              borderBottom: '1px solid rgba(6,27,73,0.08)',
+              backdropFilter: 'blur(16px)',
             }}
           >
             <RoundButton onClick={() => router.back()}>←</RoundButton>
@@ -959,10 +919,11 @@ export default function NewPromotionPage() {
 
               <div
                 style={{
-                  marginTop: 14,
-                  fontSize: 33,
+                  marginTop: 26,
+                  fontSize: 31,
                   fontWeight: 950,
-                  lineHeight: 0.98,
+                  lineHeight: 1.02,
+                  letterSpacing: '-1.3px',
                   color: BRAND.navy,
                 }}
               >
@@ -971,11 +932,11 @@ export default function NewPromotionPage() {
 
               <div
                 style={{
-                  marginTop: 8,
-                  fontSize: 14,
+                  marginTop: 7,
+                  fontSize: 13,
+                  lineHeight: 1.28,
                   fontWeight: 850,
                   color: BRAND.gray,
-                  lineHeight: 1.25,
                 }}
               >
                 {text.pageSubtitle}
@@ -996,34 +957,43 @@ export default function NewPromotionPage() {
                   marginBottom: 10,
                 }}
               >
-                <div style={{ fontSize: 22, fontWeight: 950 }}>{text.media}</div>
-                <div
+                <div style={{ fontSize: 21, fontWeight: 950, color: BRAND.navy }}>
+                  {text.media}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSheet('media')}
                   style={{
-                    border: `2px solid ${BRAND.black}`,
+                    border: `1.8px solid ${BRAND.black}`,
+                    background: BRAND.softGreen,
                     borderRadius: 999,
-                    padding: '5px 10px',
+                    padding: '6px 12px',
                     fontSize: 13,
                     fontWeight: 950,
-                    background: BRAND.softGreen,
+                    color: BRAND.navy,
+                    cursor: 'pointer',
                   }}
                 >
-                  {mediaSummary}
-                </div>
+                  {mediaMode === 'single'
+                    ? '1 фото'
+                    : mediaMode === 'collage'
+                      ? `Коллаж ${media.length || 3}`
+                      : 'Видео'}
+                </button>
               </div>
 
               <button
                 type="button"
-                onClick={() => setSheet('media')}
+                onClick={() => (media.length ? undefined : setSheet('media'))}
                 style={{
                   width: '100%',
-                  minHeight: 238,
-                  borderRadius: 22,
-                  border: `2px dashed ${BRAND.green}`,
-                  background: media.length ? '#ffffff' : BRAND.softGreen,
-                  cursor: 'pointer',
+                  minHeight: 252,
+                  border: media.length ? 'none' : `1.8px dashed ${BRAND.green}`,
+                  borderRadius: 20,
+                  background: media.length ? '#fff' : BRAND.softGreen,
+                  cursor: media.length ? 'default' : 'pointer',
                   overflow: 'hidden',
-                  position: 'relative',
-                  padding: 0,
+                  padding: media.length ? 0 : 16,
                 }}
               >
                 {media.length ? (
@@ -1038,36 +1008,42 @@ export default function NewPromotionPage() {
                 ) : (
                   <div
                     style={{
-                      minHeight: 238,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 10,
+                      minHeight: 216,
+                      display: 'grid',
+                      placeItems: 'center',
+                      textAlign: 'center',
                     }}
                   >
-                    <div
-                      style={{
-                        width: 62,
-                        height: 62,
-                        borderRadius: 999,
-                        border: `2.5px solid ${BRAND.green}`,
-                        color: BRAND.green,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 44,
-                        fontWeight: 800,
-                        lineHeight: 1,
-                      }}
-                    >
-                      +
-                    </div>
-                    <div style={{ fontSize: 20, fontWeight: 950, color: BRAND.navy }}>
-                      {text.chooseMedia}
-                    </div>
-                    <div style={{ fontSize: 13, fontWeight: 850, color: BRAND.gray }}>
-                      {text.mediaHint}
+                    <div>
+                      <div
+                        style={{
+                          width: 72,
+                          height: 72,
+                          borderRadius: 999,
+                          border: `3px solid ${BRAND.green}`,
+                          color: BRAND.green,
+                          display: 'grid',
+                          placeItems: 'center',
+                          margin: '0 auto 12px',
+                          fontSize: 48,
+                          fontWeight: 800,
+                        }}
+                      >
+                        +
+                      </div>
+                      <div style={{ fontSize: 22, fontWeight: 950, color: BRAND.navy }}>
+                        {text.chooseMedia}
+                      </div>
+                      <div
+                        style={{
+                          marginTop: 8,
+                          fontSize: 14,
+                          fontWeight: 850,
+                          color: BRAND.gray,
+                        }}
+                      >
+                        {text.mediaHint}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1092,8 +1068,11 @@ export default function NewPromotionPage() {
               icon={currentCategory?.icon || '🏷️'}
               image={currentCategory?.image}
               title={text.category}
-              subtitle={currentCategory?.label || text.chooseCategory}
-              secondLine={subcategory || ''}
+              subtitle={
+                currentCategory
+                  ? `${currentCategory.label}${subcategory ? ` • ${subcategory}` : ''}`
+                  : text.categoryHint
+              }
               onClick={() => setSheet('category')}
             />
 
@@ -1101,21 +1080,48 @@ export default function NewPromotionPage() {
               icon="📅"
               title={text.days}
               subtitle={text.daysHint}
-              secondLine={daysSummary}
+              right={
+                <div
+                  style={{
+                    textAlign: 'right',
+                    color: BRAND.green,
+                    fontSize: 14,
+                    fontWeight: 950,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  <div>{language === 'RU' ? `${days} дн.` : `${days} days`}</div>
+                  <div>{adPrice === 0 ? text.free : `£${adPrice}`}</div>
+                </div>
+              }
               onClick={() => setSheet('days')}
             />
 
             <RowButton
-              icon={chosenSticker.emoji}
+              icon="⭐"
               title={text.enhance}
               subtitle={`${chosenSticker.label} • ${chosenStyle.label}`}
+              right={
+                <div
+                  style={{
+                    border: `1.6px solid ${BRAND.green}`,
+                    borderRadius: 999,
+                    padding: '6px 12px',
+                    color: BRAND.green,
+                    fontSize: 13,
+                    fontWeight: 950,
+                  }}
+                >
+                  {chosenSticker.label}
+                </div>
+              }
               onClick={() => setSheet('enhance')}
             />
 
             <RowButton
               icon="📞"
               title={text.contacts}
-              subtitle={primaryPhone ? `${contacts.phone[0].countryCode} ${primaryPhone}` : text.contactsHint}
+              subtitle={contactCount ? `${contactCount} способа` : text.contactsHint}
               onClick={() => setSheet('contacts')}
             />
 
@@ -1129,26 +1135,12 @@ export default function NewPromotionPage() {
               onClick={() => setSheet('address')}
             />
 
-            <ShellCard
-              style={{
-                padding: 12,
-                background: BRAND.softYellow,
-                fontSize: 14,
-                fontWeight: 900,
-                lineHeight: 1.35,
-              }}
-            >
-              ⭐ {text.publishOnlyAfterPayment}
-            </ShellCard>
-
             <AdPreviewCard
               title={title}
               description={description}
               media={media}
-              mediaMode={mediaMode}
-              chosenSticker={chosenSticker}
-              chosenStyle={chosenStyle}
-              language={language}
+              mode={mediaMode}
+              sticker={chosenSticker}
               text={text}
             />
           </section>
@@ -1161,26 +1153,28 @@ export default function NewPromotionPage() {
           left: 0,
           right: 0,
           bottom: 0,
-          zIndex: 80,
-          background: 'rgba(255,255,255,0.98)',
-          borderTop: '1px solid #e8ebf0',
-          padding: '12px 16px calc(12px + env(safe-area-inset-bottom))',
+          zIndex: 90,
+          background: 'rgba(255,255,255,0.96)',
+          borderTop: '1px solid rgba(6,27,73,0.08)',
+          padding: '10px 16px calc(12px + env(safe-area-inset-bottom))',
+          backdropFilter: 'blur(16px)',
         }}
       >
         <div style={{ maxWidth: 430, margin: '0 auto' }}>
           <button type="button" onClick={handleContinue} style={primaryButtonStyle()}>
-            {text.continue}
+            <span>{text.continue}</span>
+            <span style={{ fontSize: 24 }}>›</span>
           </button>
         </div>
       </div>
 
       {sheet === 'media' ? (
         <Sheet title={text.chooseMedia} onClose={() => setSheet(null)}>
-          <div style={{ display: 'grid', gap: 12 }}>
+          <div style={{ display: 'grid', gap: 10 }}>
             {[
-              { mode: 'single' as const, title: text.singlePhoto, hint: 'JPG / PNG / WEBP' },
-              { mode: 'collage' as const, title: text.collage, hint: '2–4 photos in one ad image' },
-              { mode: 'video' as const, title: text.video, hint: 'Up to 5 seconds recommended' },
+              { mode: 'single' as const, title: '1 фото', hint: 'JPG / PNG / WEBP' },
+              { mode: 'collage' as const, title: 'Коллаж 2–4', hint: 'Несколько фото в одной рекламе' },
+              { mode: 'video' as const, title: 'Мини-видео', hint: 'Короткое видео до 5 секунд' },
             ].map((item) => {
               const active = mediaMode === item.mode;
 
@@ -1190,14 +1184,14 @@ export default function NewPromotionPage() {
                   type="button"
                   onClick={() => setMediaMode(item.mode)}
                   style={{
-                    minHeight: 62,
+                    minHeight: 64,
                     borderRadius: 18,
-                    border: `2px solid ${BRAND.black}`,
+                    border: `1.8px solid ${active ? BRAND.green : BRAND.black}`,
                     background: active ? BRAND.softGreen : '#fff',
                     display: 'grid',
-                    gridTemplateColumns: '1fr 32px',
-                    alignItems: 'center',
+                    gridTemplateColumns: '1fr 30px',
                     gap: 10,
+                    alignItems: 'center',
                     padding: '10px 14px',
                     textAlign: 'left',
                     cursor: 'pointer',
@@ -1207,20 +1201,21 @@ export default function NewPromotionPage() {
                     <div style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>
                       {item.title}
                     </div>
-                    <div style={{ marginTop: 3, fontSize: 13, fontWeight: 850, color: BRAND.gray }}>
+                    <div style={{ marginTop: 3, fontSize: 13, fontWeight: 800, color: BRAND.gray }}>
                       {item.hint}
                     </div>
                   </span>
                   <span
                     style={{
-                      width: 28,
-                      height: 28,
+                      width: 26,
+                      height: 26,
                       borderRadius: 999,
-                      border: `2px solid ${BRAND.black}`,
                       background: active ? BRAND.green : '#fff',
                       color: '#fff',
+                      border: `1.6px solid ${BRAND.black}`,
                       display: 'grid',
                       placeItems: 'center',
+                      fontSize: 15,
                       fontWeight: 950,
                     }}
                   >
@@ -1234,18 +1229,16 @@ export default function NewPromotionPage() {
               <button
                 type="button"
                 onClick={() => handleMediaPick(mediaMode, 'camera')}
-                style={smallChoiceStyle()}
+                style={mediaPickButtonStyle()}
               >
-                📷<br />
-                {text.camera}
+                📷<br />Камера
               </button>
               <button
                 type="button"
                 onClick={() => handleMediaPick(mediaMode, 'gallery')}
-                style={smallChoiceStyle()}
+                style={mediaPickButtonStyle()}
               >
-                🖼️<br />
-                {text.gallery}
+                🖼️<br />Галерея
               </button>
               <button
                 type="button"
@@ -1254,10 +1247,9 @@ export default function NewPromotionPage() {
                     ? handleMediaPick('video', 'video')
                     : handleMediaPick(mediaMode, 'files')
                 }
-                style={smallChoiceStyle()}
+                style={mediaPickButtonStyle()}
               >
-                📁<br />
-                {text.files}
+                📁<br />Файлы
               </button>
             </div>
           </div>
@@ -1269,7 +1261,8 @@ export default function NewPromotionPage() {
           <div style={{ display: 'grid', gap: 14 }}>
             <Field label={text.title} value={title} onChange={setTitle} placeholder={text.titleHint} />
             <button type="button" onClick={() => setSheet('description')} style={primaryButtonStyle()}>
-              {language === 'RU' ? 'Далее →' : 'Next →'}
+              <span>Далее</span>
+              <span>›</span>
             </button>
           </div>
         </Sheet>
@@ -1286,7 +1279,8 @@ export default function NewPromotionPage() {
               multiline
             />
             <button type="button" onClick={() => setSheet('category')} style={primaryButtonStyle()}>
-              {language === 'RU' ? 'Далее →' : 'Next →'}
+              <span>Далее</span>
+              <span>›</span>
             </button>
           </div>
         </Sheet>
@@ -1308,12 +1302,12 @@ export default function NewPromotionPage() {
                     setSheet('subcategory');
                   }}
                   style={{
-                    minHeight: 78,
+                    minHeight: 76,
                     borderRadius: 18,
-                    border: `2px solid ${active ? BRAND.green : BRAND.black}`,
+                    border: `1.8px solid ${active ? BRAND.green : BRAND.black}`,
                     background: active ? BRAND.softGreen : '#fff',
                     display: 'grid',
-                    gridTemplateColumns: '62px 1fr 28px',
+                    gridTemplateColumns: '58px 1fr 24px',
                     alignItems: 'center',
                     gap: 12,
                     padding: '10px 14px',
@@ -1324,16 +1318,15 @@ export default function NewPromotionPage() {
                   <IconBox icon={item.icon} image={item.image} bg="#fff" />
 
                   <span>
-                    <div style={{ fontSize: 20, fontWeight: 950, color: BRAND.navy }}>
+                    <div style={{ fontSize: 19, fontWeight: 950, color: BRAND.navy }}>
                       {item.label}
                     </div>
-                    <div style={{ marginTop: 4, fontSize: 13, fontWeight: 850, color: BRAND.gray }}>
-                      {item.subcategories.length}{' '}
-                      {language === 'RU' ? 'подкатегорий' : 'subcategories'}
+                    <div style={{ marginTop: 4, fontSize: 13, fontWeight: 800, color: BRAND.gray }}>
+                      {item.subcategories.length} подкатегорий
                     </div>
                   </span>
 
-                  <span style={{ fontSize: 30, fontWeight: 950 }}>{active ? '✓' : '›'}</span>
+                  <span style={{ fontSize: 28, fontWeight: 950 }}>{active ? '✓' : '›'}</span>
                 </button>
               );
             })}
@@ -1343,7 +1336,7 @@ export default function NewPromotionPage() {
 
       {sheet === 'subcategory' ? (
         <Sheet title={text.chooseSubcategory} onClose={() => setSheet(null)}>
-          <div style={{ display: 'grid', gap: 10 }}>
+          <div style={{ display: 'grid', gap: 9 }}>
             {subcategoryOptions.map((item) => {
               const active = item === subcategory;
 
@@ -1356,38 +1349,24 @@ export default function NewPromotionPage() {
                     setSheet('days');
                   }}
                   style={{
-                    minHeight: 58,
-                    borderRadius: 18,
-                    border: `2px solid ${active ? BRAND.green : BRAND.black}`,
+                    minHeight: 56,
+                    borderRadius: 17,
+                    border: `1.8px solid ${active ? BRAND.green : BRAND.black}`,
                     background: active ? BRAND.softGreen : '#fff',
                     color: BRAND.navy,
                     display: 'grid',
-                    gridTemplateColumns: '1fr 32px',
+                    gridTemplateColumns: '1fr 28px',
+                    gap: 10,
                     alignItems: 'center',
-                    gap: 12,
                     padding: '10px 14px',
-                    fontSize: 18,
+                    fontSize: 17,
                     fontWeight: 950,
                     textAlign: 'left',
                     cursor: 'pointer',
                   }}
                 >
                   <span>{item}</span>
-                  <span
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 999,
-                      background: active ? BRAND.green : '#fff',
-                      color: '#fff',
-                      border: `2px solid ${BRAND.black}`,
-                      display: 'grid',
-                      placeItems: 'center',
-                      fontSize: 16,
-                    }}
-                  >
-                    {active ? '✓' : ''}
-                  </span>
+                  <span>{active ? '✓' : '›'}</span>
                 </button>
               );
             })}
@@ -1399,33 +1378,30 @@ export default function NewPromotionPage() {
         <Sheet title={text.days} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 14 }}>
             {FIRST_AD_FREE ? (
-              <ShellCard
+              <div
                 style={{
-                  padding: 14,
+                  borderRadius: 20,
+                  border: `1.8px solid ${BRAND.black}`,
                   background: BRAND.red,
                   color: '#fff',
-                  animation: 'pulseGift 1.4s infinite',
+                  padding: 14,
+                  boxShadow: '0 0 20px rgba(255,36,86,0.25)',
                 }}
               >
-                <div style={{ fontSize: 22, fontWeight: 950 }}>
-                  🎁 {text.firstDayFree}
+                <div style={{ fontSize: 21, fontWeight: 950 }}>🎁 {text.firstDayFree}</div>
+                <div style={{ marginTop: 4, fontSize: 13, fontWeight: 850 }}>
+                  Только для первой рекламы
                 </div>
-                <div style={{ marginTop: 5, fontSize: 14, fontWeight: 850 }}>
-                  {language === 'RU'
-                    ? 'Только для первой рекламы'
-                    : 'Only for the first advertisement'}
-                </div>
-              </ShellCard>
+              </div>
             ) : null}
 
             <select
               value={days}
               onChange={(event) => setDays(Number(event.target.value))}
               style={{
-                width: '100%',
-                height: 70,
+                height: 68,
                 borderRadius: 20,
-                border: `2px solid ${BRAND.black}`,
+                border: `1.8px solid ${BRAND.black}`,
                 background: '#fff',
                 color: BRAND.navy,
                 padding: '0 16px',
@@ -1434,83 +1410,100 @@ export default function NewPromotionPage() {
               }}
             >
               {Array.from({ length: 365 }, (_, index) => index + 1).map((day) => {
-                const price = FIRST_AD_FREE
-                  ? Math.max(0, day - 1) * PRICE_PER_DAY
-                  : day * PRICE_PER_DAY;
-
+                const price = FIRST_AD_FREE ? Math.max(0, day - 1) * PRICE_PER_DAY : day * PRICE_PER_DAY;
                 return (
                   <option key={day} value={day}>
-                    {language === 'RU'
-                      ? `${day} дн. — ${price === 0 ? 'бесплатно' : `£${price}`}`
-                      : `${day} days — ${price === 0 ? 'free' : `£${price}`}`}
+                    {day} дн. — {price === 0 ? 'бесплатно' : `£${price}`}
                   </option>
                 );
               })}
             </select>
 
             <ShellCard style={{ padding: 14 }}>
-              <div style={{ fontSize: 14, fontWeight: 850, color: BRAND.gray }}>
-                {text.total}
-              </div>
-              <div style={{ marginTop: 4, fontSize: 34, fontWeight: 950, color: BRAND.green }}>
+              <div style={{ fontSize: 14, fontWeight: 850, color: BRAND.gray }}>{text.total}</div>
+              <div style={{ marginTop: 4, fontSize: 32, fontWeight: 950, color: BRAND.green }}>
                 {adPrice === 0 ? text.free : `£${adPrice}`}
               </div>
             </ShellCard>
 
             <button type="button" onClick={() => setSheet('enhance')} style={primaryButtonStyle()}>
-              {language === 'RU' ? 'Далее →' : 'Next →'}
+              <span>Далее</span>
+              <span>›</span>
             </button>
           </div>
         </Sheet>
       ) : null}
 
       {sheet === 'enhance' ? (
-        <Sheet title={text.enhance} onClose={() => setSheet(null)}>
-          <div style={{ display: 'grid', gap: 16 }}>
+        <Sheet title={text.enhance} dark onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 18 }}>
             <div>
-              <div style={{ fontSize: 18, fontWeight: 950, marginBottom: 10 }}>
-                {language === 'RU' ? 'Наклейка' : 'Sticker'}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                {stickerOptions.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setSticker(item.id)}
-                    style={glowChipStyle(sticker === item.id)}
-                  >
-                    <span style={{ animation: sticker === item.id ? 'glowEmoji 1.2s infinite' : 'none' }}>
-                      {item.emoji}
-                    </span>{' '}
-                    {item.label}
-                  </button>
-                ))}
+              <div style={{ fontSize: 15, fontWeight: 900, marginBottom: 10 }}>Вид рекламы</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                {styleOptions.map((item) => {
+                  const active = visualStyle === item.id;
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setVisualStyle(item.id)}
+                      style={{
+                        minHeight: 92,
+                        borderRadius: 14,
+                        border: `2px solid ${active ? BRAND.green : 'rgba(255,255,255,0.25)'}`,
+                        background: '#101827',
+                        color: '#fff',
+                        overflow: 'hidden',
+                        padding: 0,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <div style={{ height: 56, background: item.image }} />
+                      <div style={{ padding: '7px 4px', fontSize: 11, fontWeight: 900 }}>
+                        {item.label}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             <div>
-              <div style={{ fontSize: 18, fontWeight: 950, marginBottom: 10 }}>
-                {language === 'RU' ? 'Вид рекламы' : 'Ad style'}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                {styleOptions.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setVisualStyle(item.id)}
-                    style={glowChipStyle(visualStyle === item.id)}
-                  >
-                    <span style={{ animation: visualStyle === item.id ? 'glowEmoji 1.2s infinite' : 'none' }}>
-                      {item.emoji}
-                    </span>{' '}
-                    {item.label}
-                  </button>
-                ))}
+              <div style={{ fontSize: 15, fontWeight: 900, marginBottom: 10 }}>Стикер</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 7 }}>
+                {stickerOptions.map((item) => {
+                  const active = sticker === item.id;
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setSticker(item.id)}
+                      style={{
+                        minHeight: 42,
+                        borderRadius: 11,
+                        border: `2px solid ${active ? BRAND.green : 'rgba(255,255,255,0.35)'}`,
+                        background: active ? '#fff' : 'rgba(255,255,255,0.09)',
+                        color: active ? BRAND.navy : '#fff',
+                        fontSize: 12,
+                        fontWeight: 950,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <span style={{ display: 'block', filter: active ? 'drop-shadow(0 0 6px #22c55e)' : 'none' }}>
+                        {item.emoji}
+                      </span>
+                      {item.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             <button type="button" onClick={() => setSheet('contacts')} style={primaryButtonStyle()}>
-              {language === 'RU' ? 'Далее →' : 'Next →'}
+              <span>Далее</span>
+              <span>›</span>
             </button>
           </div>
         </Sheet>
@@ -1518,39 +1511,38 @@ export default function NewPromotionPage() {
 
       {sheet === 'contacts' ? (
         <Sheet title={text.contacts} onClose={() => setSheet(null)}>
-          <div style={{ display: 'grid', gap: 12 }}>
+          <div style={{ display: 'grid', gap: 10 }}>
             {contactOptions.map((option) => (
-              <ShellCard key={option.key} style={{ padding: 12 }}>
+              <div
+                key={option.key}
+                style={{
+                  borderBottom: '1px solid #e5e7eb',
+                  paddingBottom: 12,
+                }}
+              >
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '52px 1fr',
+                    gridTemplateColumns: '36px 1fr',
                     gap: 10,
                     alignItems: 'center',
-                    marginBottom: 10,
+                    marginBottom: 8,
                   }}
                 >
-                  <BrandIcon label={option.icon} color={option.brand} />
-                  <div>
-                    <div style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>
-                      {option.label}
-                    </div>
-                    <div style={{ fontSize: 12, fontWeight: 850, color: BRAND.gray }}>
-                      {contacts[option.key].filter((item) => item.value.trim()).length > 0
-                        ? '✓ Added'
-                        : option.placeholder}
-                    </div>
+                  <BrandIcon label={option.icon} color={option.color} />
+                  <div style={{ fontSize: 16, fontWeight: 950, color: BRAND.navy }}>
+                    {option.label}
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gap: 8 }}>
+                <div style={{ display: 'grid', gap: 7 }}>
                   {contacts[option.key].map((entry) => (
                     <div
                       key={entry.id}
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: option.phoneLike ? '104px 1fr 34px' : '1fr 34px',
-                        gap: 8,
+                        gridTemplateColumns: option.phoneLike ? '112px 1fr 26px' : '1fr 26px',
+                        gap: 7,
                         alignItems: 'center',
                       }}
                     >
@@ -1587,13 +1579,40 @@ export default function NewPromotionPage() {
                         style={contactInputStyle()}
                       />
 
-                      <button
-                        type="button"
-                        onClick={() => removeContactEntry(option.key, entry.id)}
-                        style={miniRemoveButtonStyle()}
+                      <span
+                        style={{
+                          width: 22,
+                          height: 22,
+                          borderRadius: 999,
+                          background: entry.value.trim() ? BRAND.green : '#d1d5db',
+                          color: '#fff',
+                          display: 'grid',
+                          placeItems: 'center',
+                          fontSize: 13,
+                          fontWeight: 950,
+                        }}
                       >
-                        ×
-                      </button>
+                        ✓
+                      </span>
+
+                      {contacts[option.key].length > 1 ? (
+                        <button
+                          type="button"
+                          onClick={() => removeContactEntry(option.key, entry.id)}
+                          style={{
+                            gridColumn: option.phoneLike ? '2 / 4' : '1 / 3',
+                            justifySelf: 'start',
+                            border: 'none',
+                            background: 'transparent',
+                            color: BRAND.red,
+                            fontSize: 12,
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          удалить
+                        </button>
+                      ) : null}
                     </div>
                   ))}
                 </div>
@@ -1602,25 +1621,26 @@ export default function NewPromotionPage() {
                   type="button"
                   onClick={() => addContactEntry(option.key, option.phoneLike)}
                   style={{
-                    marginTop: 10,
-                    width: '100%',
-                    height: 44,
-                    borderRadius: 16,
-                    border: `2px solid ${BRAND.black}`,
-                    background: BRAND.softGreen,
-                    color: BRAND.navy,
-                    fontSize: 15,
+                    marginTop: 8,
+                    height: 34,
+                    borderRadius: 10,
+                    border: `1.5px solid ${BRAND.green}`,
+                    background: '#fff',
+                    color: BRAND.green,
+                    fontSize: 13,
                     fontWeight: 950,
                     cursor: 'pointer',
+                    padding: '0 12px',
                   }}
                 >
-                  + {text.addNumber}
+                  + {option.addText}
                 </button>
-              </ShellCard>
+              </div>
             ))}
 
             <button type="button" onClick={() => setSheet('address')} style={primaryButtonStyle()}>
-              {language === 'RU' ? 'Далее →' : 'Next →'}
+              <span>Далее</span>
+              <span>›</span>
             </button>
           </div>
         </Sheet>
@@ -1629,26 +1649,12 @@ export default function NewPromotionPage() {
       {sheet === 'address' ? (
         <Sheet title={text.address} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 14 }}>
-            <Field
-              label={language === 'RU' ? 'Город' : 'City'}
-              value={address.city}
-              onChange={(next) => setAddress((prev) => ({ ...prev, city: next }))}
-              placeholder="London"
-            />
-            <Field
-              label={language === 'RU' ? 'Район' : 'District'}
-              value={address.district}
-              onChange={(next) => setAddress((prev) => ({ ...prev, district: next }))}
-              placeholder="Camden, Chelsea, Mayfair"
-            />
-            <Field
-              label={language === 'RU' ? 'Улица' : 'Street'}
-              value={address.street}
-              onChange={(next) => setAddress((prev) => ({ ...prev, street: next }))}
-              placeholder="Street"
-            />
+            <Field label="Город" value={address.city} onChange={(next) => setAddress((prev) => ({ ...prev, city: next }))} placeholder="London" />
+            <Field label="Район" value={address.district} onChange={(next) => setAddress((prev) => ({ ...prev, district: next }))} placeholder="Camden, Chelsea, Mayfair" />
+            <Field label="Улица" value={address.street} onChange={(next) => setAddress((prev) => ({ ...prev, street: next }))} placeholder="Street" />
             <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
-              {text.save}
+              <span>{text.save}</span>
+              <span>✓</span>
             </button>
           </div>
         </Sheet>
@@ -1656,9 +1662,9 @@ export default function NewPromotionPage() {
 
       {sheet === 'payment' ? (
         <Sheet title={text.payment} onClose={() => setSheet(null)}>
-          <div style={{ display: 'grid', gap: 12 }}>
+          <div style={{ display: 'grid', gap: 10 }}>
             {paymentOptions.map((item) => {
-              const active = item.id === paymentMethod;
+              const active = paymentMethod === item.id;
 
               return (
                 <button
@@ -1666,32 +1672,28 @@ export default function NewPromotionPage() {
                   type="button"
                   onClick={() => setPaymentMethod(item.id)}
                   style={{
-                    minHeight: 64,
+                    minHeight: 62,
                     borderRadius: 18,
-                    border: `2px solid ${active ? BRAND.green : BRAND.black}`,
+                    border: `1.8px solid ${active ? BRAND.green : BRAND.black}`,
                     background: active ? BRAND.softGreen : '#fff',
                     display: 'grid',
-                    gridTemplateColumns: '52px 1fr 32px',
+                    gridTemplateColumns: '48px 1fr 26px',
+                    gap: 10,
                     alignItems: 'center',
-                    gap: 12,
                     padding: '10px 14px',
                     textAlign: 'left',
                     cursor: 'pointer',
                   }}
                 >
                   <IconBox icon={item.icon} bg="#fff" />
-                  <span style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>
-                    {item.label}
-                  </span>
+                  <span style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>{item.label}</span>
                   <span>{active ? '✓' : ''}</span>
                 </button>
               );
             })}
 
-            <ShellCard style={{ padding: 14, background: BRAND.softYellow }}>
-              <div style={{ fontSize: 14, fontWeight: 850, color: BRAND.gray }}>
-                {text.total}
-              </div>
+            <ShellCard style={{ padding: 14 }}>
+              <div style={{ fontSize: 14, fontWeight: 850, color: BRAND.gray }}>{text.total}</div>
               <div style={{ marginTop: 4, fontSize: 34, fontWeight: 950, color: BRAND.green }}>
                 {adPrice === 0 ? text.free : `£${adPrice}`}
               </div>
@@ -1699,12 +1701,11 @@ export default function NewPromotionPage() {
 
             <button
               type="button"
-              onClick={() => {
-                alert(language === 'RU' ? 'Оплата подключается следующим шагом.' : 'Payment will be connected next.');
-              }}
+              onClick={() => alert('Payment will be connected next.')}
               style={primaryButtonStyle()}
             >
-              {language === 'RU' ? 'Оплатить и опубликовать' : 'Pay and publish'}
+              <span>Оплатить и опубликовать</span>
+              <span>✓</span>
             </button>
           </div>
         </Sheet>
@@ -1719,20 +1720,6 @@ export default function NewPromotionPage() {
           onReplace={() => replaceInputRef.current?.click()}
         />
       ) : null}
-
-      <style jsx global>{`
-        @keyframes pulseGift {
-          0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,36,79,0.0); }
-          50% { transform: scale(1.015); box-shadow: 0 0 22px rgba(255,36,79,0.36); }
-          100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,36,79,0.0); }
-        }
-
-        @keyframes glowEmoji {
-          0% { filter: drop-shadow(0 0 0 rgba(36,200,90,0)); transform: scale(1); }
-          50% { filter: drop-shadow(0 0 10px rgba(36,200,90,0.75)); transform: scale(1.14); }
-          100% { filter: drop-shadow(0 0 0 rgba(36,200,90,0)); transform: scale(1); }
-        }
-      `}</style>
     </>
   );
 }
@@ -1754,15 +1741,8 @@ function MediaPreview({
 }) {
   if (mode === 'video') {
     return (
-      <div style={{ height: 238, position: 'relative' }}>
-        <video
-          src={media[0]?.preview}
-          muted
-          loop
-          autoPlay
-          playsInline
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
+      <div style={{ height: 252, position: 'relative', overflow: 'hidden', borderRadius: 18 }}>
+        <video src={media[0]?.preview} muted loop autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         {media[0] ? <CleanRemoveButton id={media[0].id} onRemove={onRemove} /> : null}
       </div>
     );
@@ -1774,13 +1754,12 @@ function MediaPreview({
     return (
       <div
         style={{
-          height: 238,
+          height: 252,
           display: 'grid',
-          gridTemplateColumns: count === 3 ? '1.2fr 0.8fr' : '1fr 1fr',
+          gridTemplateColumns: count === 3 ? '1.32fr 0.8fr' : '1fr 1fr',
           gridTemplateRows: count === 2 ? '1fr' : '1fr 1fr',
-          gap: 5,
-          padding: 5,
-          boxSizing: 'border-box',
+          gap: 6,
+          background: '#fff',
         }}
       >
         {media.map((item, index) => (
@@ -1808,12 +1787,12 @@ function MediaPreview({
             style={{
               position: 'relative',
               overflow: 'hidden',
-              borderRadius: 16,
-              border: '1.5px solid #111111',
-              gridRow: count === 3 && index === 0 ? '1 / span 2' : 'auto',
-              background: '#fff',
+              borderRadius: 15,
+              border: `1.5px solid ${BRAND.black}`,
               padding: 0,
+              background: '#fff',
               cursor: 'pointer',
+              gridRow: count === 3 && index === 0 ? '1 / span 2' : 'auto',
             }}
           >
             <img
@@ -1841,12 +1820,13 @@ function MediaPreview({
         if (media[0]) onOpenEditor(media[0].id);
       }}
       style={{
-        height: 238,
         width: '100%',
+        height: 252,
         position: 'relative',
         overflow: 'hidden',
-        background: '#fff',
         border: 'none',
+        borderRadius: 18,
+        background: '#fff',
         padding: 0,
         cursor: 'pointer',
       }}
@@ -1886,17 +1866,18 @@ function CleanRemoveButton({
         position: 'absolute',
         top: 7,
         right: 7,
-        width: compact ? 27 : 34,
-        height: compact ? 27 : 34,
+        width: compact ? 28 : 34,
+        height: compact ? 28 : 34,
         borderRadius: 999,
-        border: '2px solid #111111',
-        background: '#ffffff',
-        color: '#ff244f',
-        fontSize: compact ? 16 : 21,
+        border: `1.7px solid ${BRAND.black}`,
+        background: 'rgba(255,255,255,0.95)',
+        color: BRAND.red,
+        fontSize: compact ? 17 : 22,
         fontWeight: 950,
         display: 'grid',
         placeItems: 'center',
-        zIndex: 5,
+        zIndex: 6,
+        cursor: 'pointer',
       }}
     >
       ×
@@ -1912,21 +1893,21 @@ function PhotoEditor({
   onReplace,
 }: {
   item: MediaItem;
-  text: typeof TEXT.EN;
+  text: typeof TEXT.RU;
   onChange: (patch: Partial<MediaItem>) => void;
   onClose: () => void;
   onReplace: () => void;
 }) {
-  const [isDragging, setIsDragging] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    setIsDragging(true);
+    setDragging(true);
     lastPointRef.current = { x: event.clientX, y: event.clientY };
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!isDragging || !lastPointRef.current) return;
+    if (!dragging || !lastPointRef.current) return;
 
     const dx = event.clientX - lastPointRef.current.x;
     const dy = event.clientY - lastPointRef.current.y;
@@ -1940,7 +1921,7 @@ function PhotoEditor({
   };
 
   const stopDrag = () => {
-    setIsDragging(false);
+    setDragging(false);
     lastPointRef.current = null;
   };
 
@@ -1950,29 +1931,29 @@ function PhotoEditor({
         position: 'fixed',
         inset: 0,
         zIndex: 900,
-        background: 'rgba(5,10,20,0.96)',
+        background: '#080b12',
         color: '#fff',
         display: 'grid',
-        gridTemplateRows: '72px 1fr auto',
+        gridTemplateRows: '68px 1fr auto',
       }}
     >
       <div
         style={{
-          padding: '14px 16px',
           display: 'grid',
-          gridTemplateColumns: '52px 1fr 52px',
-          gap: 10,
+          gridTemplateColumns: '44px 1fr 44px',
           alignItems: 'center',
+          gap: 8,
+          padding: '12px 16px',
         }}
       >
-        <button type="button" onClick={onClose} style={darkRoundButtonStyle()}>
+        <button type="button" onClick={onClose} style={darkIconButtonStyle()}>
           ←
         </button>
-        <div style={{ textAlign: 'center', fontSize: 22, fontWeight: 950 }}>
-          {text.media}
+        <div style={{ textAlign: 'center', fontSize: 18, fontWeight: 950 }}>
+          Редактирование фото
         </div>
-        <button type="button" onClick={onClose} style={darkRoundButtonStyle()}>
-          ×
+        <button type="button" onClick={onClose} style={darkIconButtonStyle()}>
+          ⛶
         </button>
       </div>
 
@@ -1983,8 +1964,7 @@ function PhotoEditor({
         onPointerCancel={stopDrag}
         style={{
           margin: '0 16px',
-          borderRadius: 28,
-          border: '2px solid rgba(255,255,255,0.6)',
+          borderRadius: 20,
           overflow: 'hidden',
           background: '#111',
           display: 'grid',
@@ -2006,40 +1986,49 @@ function PhotoEditor({
 
       <div
         style={{
-          padding: '16px 16px calc(18px + env(safe-area-inset-bottom))',
+          padding: '14px 16px calc(18px + env(safe-area-inset-bottom))',
           display: 'grid',
           gap: 12,
         }}
       >
-        <label style={{ display: 'grid', gap: 7 }}>
-          <span style={{ fontSize: 13, fontWeight: 900 }}>Zoom</span>
-          <input
-            type="range"
-            min="1"
-            max="3"
-            step="0.05"
-            value={item.scale}
-            onChange={(event) => onChange({ scale: Number(event.target.value) })}
-          />
-        </label>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+          <button type="button" onClick={() => onChange({ rotate: item.rotate + 90 })} style={editorToolStyle()}>
+            ↻<br />Повернуть
+          </button>
+          <button type="button" onClick={() => onChange({ scale: item.scale * -1 })} style={editorToolStyle()}>
+            ⇋<br />Отразить
+          </button>
+          <button type="button" onClick={() => onChange({ scale: 1, rotate: 0, offsetX: 0, offsetY: 0 })} style={editorToolStyle()}>
+            ☐<br />Сбросить
+          </button>
+          <button type="button" onClick={onReplace} style={editorToolStyle()}>
+            🖼<br />Заменить
+          </button>
+        </div>
 
-        <label style={{ display: 'grid', gap: 7 }}>
-          <span style={{ fontSize: 13, fontWeight: 900 }}>Rotate</span>
-          <input
-            type="range"
-            min="-180"
-            max="180"
-            step="1"
-            value={item.rotate}
-            onChange={(event) => onChange({ rotate: Number(event.target.value) })}
-          />
-        </label>
+        <input
+          type="range"
+          min="1"
+          max="3"
+          step="0.05"
+          value={Math.abs(item.scale)}
+          onChange={(event) => onChange({ scale: Number(event.target.value) })}
+        />
+
+        <input
+          type="range"
+          min="-180"
+          max="180"
+          step="1"
+          value={item.rotate}
+          onChange={(event) => onChange({ rotate: Number(event.target.value) })}
+        />
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <button type="button" onClick={onReplace} style={secondaryDarkButtonStyle()}>
-            {text.replace}
+          <button type="button" onClick={onClose} style={darkSecondaryButtonStyle()}>
+            {text.cancel}
           </button>
-          <button type="button" onClick={onClose} style={greenDarkButtonStyle()}>
+          <button type="button" onClick={onClose} style={darkGreenButtonStyle()}>
             {text.done}
           </button>
         </div>
@@ -2052,17 +2041,15 @@ function BrandIcon({ label, color }: { label: string; color: string }) {
   return (
     <div
       style={{
-        width: 46,
-        height: 46,
-        borderRadius: 15,
-        border: `2px solid ${BRAND.black}`,
+        width: 34,
+        height: 34,
+        borderRadius: 999,
         background: color,
         color: '#fff',
         display: 'grid',
         placeItems: 'center',
-        fontSize: label.length > 2 ? 11 : 15,
+        fontSize: label.length > 2 ? 9 : 15,
         fontWeight: 950,
-        letterSpacing: '-0.4px',
       }}
     >
       {label}
@@ -2074,133 +2061,74 @@ function AdPreviewCard({
   title,
   description,
   media,
-  mediaMode,
-  chosenSticker,
-  chosenStyle,
-  language,
+  mode,
+  sticker,
   text,
 }: {
   title: string;
   description: string;
   media: MediaItem[];
-  mediaMode: MediaMode;
-  chosenSticker: { label: string; emoji: string };
-  chosenStyle: { label: string; emoji: string };
-  language: AppLanguage;
-  text: typeof TEXT.EN;
+  mode: MediaMode;
+  sticker: { label: string; emoji: string };
+  text: typeof TEXT.RU;
 }) {
   return (
-    <ShellCard style={{ padding: 12 }}>
-      <div style={{ fontSize: 22, fontWeight: 950, marginBottom: 10 }}>
-        {text.preview}
-      </div>
-
+    <ShellCard style={{ padding: 12, marginBottom: 12 }}>
       <div
         style={{
-          border: `2px solid ${BRAND.black}`,
-          borderRadius: 22,
+          border: `1.8px solid ${BRAND.black}`,
+          borderRadius: 20,
           overflow: 'hidden',
           background: '#fff',
+          display: 'grid',
+          gridTemplateColumns: '42% 1fr',
+          minHeight: 154,
         }}
       >
-        <div
-          style={{
-            height: 158,
-            background: BRAND.softGreen,
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
+        <div style={{ position: 'relative', overflow: 'hidden', background: BRAND.softGreen }}>
           {media[0] ? (
-            mediaMode === 'video' ? (
-              <video
-                src={media[0].preview}
-                muted
-                loop
-                autoPlay
-                playsInline
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+            mode === 'video' ? (
+              <video src={media[0].preview} muted loop autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
-              <img
-                src={media[0].preview}
-                alt=""
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+              <img src={media[0].preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             )
           ) : (
-            <div
-              style={{
-                height: '100%',
-                display: 'grid',
-                placeItems: 'center',
-                fontSize: 42,
-              }}
-            >
-              🖼️
-            </div>
+            <div style={{ height: '100%', display: 'grid', placeItems: 'center', fontSize: 36 }}>🖼️</div>
           )}
 
           <div
             style={{
               position: 'absolute',
-              left: 10,
-              top: 10,
-              border: `2px solid ${BRAND.black}`,
+              left: 8,
+              top: 8,
               borderRadius: 999,
-              background: BRAND.yellow,
-              color: BRAND.navy,
-              padding: '6px 10px',
-              fontSize: 13,
-              fontWeight: 950,
-              animation: 'glowEmoji 1.5s infinite',
-            }}
-          >
-            {chosenSticker.emoji} {chosenSticker.label}
-          </div>
-
-          <div
-            style={{
-              position: 'absolute',
-              right: 10,
-              bottom: 10,
-              border: `2px solid ${BRAND.black}`,
-              borderRadius: 999,
-              background: '#fff',
-              color: BRAND.navy,
-              padding: '6px 10px',
+              background: BRAND.red,
+              color: '#fff',
+              padding: '6px 9px',
               fontSize: 12,
               fontWeight: 950,
             }}
           >
-            {chosenStyle.emoji} {chosenStyle.label}
+            {sticker.label}
           </div>
         </div>
 
-        <div style={{ padding: 13 }}>
-          <div style={{ fontSize: 21, fontWeight: 950, color: BRAND.navy }}>
-            {title || text.titleHint}
-          </div>
-          <div
-            style={{
-              marginTop: 5,
-              fontSize: 13,
-              fontWeight: 850,
-              color: BRAND.gray,
-              lineHeight: 1.35,
-            }}
-          >
-            {description || text.descriptionHint}
+        <div style={{ padding: 12, position: 'relative' }}>
+          <div style={{ position: 'absolute', right: 12, top: 10, fontSize: 23 }}>♡</div>
+
+          <div style={{ paddingRight: 28, fontSize: 19, fontWeight: 950, color: BRAND.navy, lineHeight: 1.15 }}>
+            {title || 'Стрижка собак и уход'}
           </div>
 
-          <div
-            style={{
-              marginTop: 11,
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 8,
-            }}
-          >
+          <div style={{ marginTop: 8, fontSize: 12, fontWeight: 850, color: BRAND.gray }}>
+            ⭐ 4.9 (128) <span style={{ marginLeft: 12 }}>1.2 км 📍</span>
+          </div>
+
+          <div style={{ marginTop: 9, fontSize: 18, fontWeight: 950, color: BRAND.green }}>
+            от £25
+          </div>
+
+          <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
             <button type="button" style={previewButtonStyle('#fff', BRAND.navy)}>
               {text.profile}
             </button>
@@ -2208,6 +2136,12 @@ function AdPreviewCard({
               {text.book}
             </button>
           </div>
+
+          {description ? (
+            <div style={{ marginTop: 8, fontSize: 11, fontWeight: 800, color: BRAND.gray, lineHeight: 1.3 }}>
+              {description.slice(0, 70)}
+            </div>
+          ) : null}
         </div>
       </div>
     </ShellCard>
@@ -2216,13 +2150,27 @@ function AdPreviewCard({
 
 function roundButtonStyle(): CSSProperties {
   return {
-    width: 54,
-    height: 54,
+    width: 48,
+    height: 48,
     borderRadius: 999,
-    border: '2px solid #111111',
-    background: '#ffffff',
-    color: '#061b49',
-    fontSize: 28,
+    border: `1.8px solid ${BRAND.black}`,
+    background: '#fff',
+    color: BRAND.navy,
+    fontSize: 27,
+    fontWeight: 950,
+    cursor: 'pointer',
+  };
+}
+
+function sheetRoundStyle(dark?: boolean): CSSProperties {
+  return {
+    width: 44,
+    height: 44,
+    borderRadius: 999,
+    border: `1.8px solid ${dark ? 'rgba(255,255,255,0.7)' : BRAND.black}`,
+    background: dark ? 'rgba(255,255,255,0.06)' : '#fff',
+    color: dark ? '#fff' : BRAND.navy,
+    fontSize: 25,
     fontWeight: 950,
     cursor: 'pointer',
   };
@@ -2231,25 +2179,46 @@ function roundButtonStyle(): CSSProperties {
 function primaryButtonStyle(): CSSProperties {
   return {
     width: '100%',
-    height: 64,
-    borderRadius: 22,
-    border: '2px solid #111111',
-    background: 'linear-gradient(180deg, #24c85a 0%, #17a84a 100%)',
+    height: 60,
+    borderRadius: 18,
+    border: `1.8px solid ${BRAND.black}`,
+    background: 'linear-gradient(180deg, #22c55e 0%, #16a34a 100%)',
     color: '#fff',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 950,
     cursor: 'pointer',
-    boxShadow: '0 5px 0 rgba(0,0,0,0.10)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    boxShadow: '0 8px 18px rgba(34,197,94,0.25)',
   };
 }
 
-function smallChoiceStyle(): CSSProperties {
+function fieldStyle(multiline: boolean): CSSProperties {
   return {
-    minHeight: 74,
+    width: '100%',
+    height: multiline ? 140 : 54,
     borderRadius: 18,
-    border: '2px solid #111111',
-    background: '#ffffff',
-    color: '#061b49',
+    border: `1.8px solid ${BRAND.black}`,
+    padding: multiline ? 14 : '0 14px',
+    fontSize: 16,
+    fontWeight: 850,
+    color: BRAND.navy,
+    outline: 'none',
+    resize: 'none',
+    boxSizing: 'border-box',
+    fontFamily: 'Arial, sans-serif',
+  };
+}
+
+function mediaPickButtonStyle(): CSSProperties {
+  return {
+    minHeight: 72,
+    borderRadius: 18,
+    border: `1.8px solid ${BRAND.black}`,
+    background: '#fff',
+    color: BRAND.navy,
     fontSize: 14,
     fontWeight: 950,
     cursor: 'pointer',
@@ -2257,81 +2226,67 @@ function smallChoiceStyle(): CSSProperties {
   };
 }
 
-function glowChipStyle(active: boolean): CSSProperties {
-  return {
-    minHeight: 58,
-    borderRadius: 18,
-    border: `2px solid ${active ? BRAND.green : BRAND.black}`,
-    background: active ? BRAND.softGreen : '#fff',
-    color: BRAND.navy,
-    fontSize: 16,
-    fontWeight: 950,
-    cursor: 'pointer',
-    boxShadow: active ? '0 0 16px rgba(36,200,90,0.25)' : 'none',
-  };
-}
-
 function contactSelectStyle(): CSSProperties {
   return {
-    height: 50,
-    borderRadius: 16,
-    border: `2px solid ${BRAND.black}`,
+    height: 38,
+    borderRadius: 9,
+    border: '1px solid #d1d5db',
     background: '#fff',
     color: BRAND.navy,
-    fontSize: 14,
-    fontWeight: 950,
-    padding: '0 7px',
+    fontSize: 13,
+    fontWeight: 900,
+    padding: '0 6px',
   };
 }
 
 function contactInputStyle(): CSSProperties {
   return {
-    height: 50,
-    borderRadius: 16,
-    border: `2px solid ${BRAND.black}`,
-    padding: '0 12px',
-    fontSize: 15,
-    fontWeight: 850,
-    color: BRAND.navy,
-    outline: 'none',
-    minWidth: 0,
-  };
-}
-
-function miniRemoveButtonStyle(): CSSProperties {
-  return {
-    width: 34,
-    height: 34,
-    borderRadius: 999,
-    border: `2px solid ${BRAND.black}`,
+    height: 38,
+    borderRadius: 9,
+    border: '1px solid #d1d5db',
     background: '#fff',
-    color: BRAND.red,
-    fontSize: 20,
-    fontWeight: 950,
-    cursor: 'pointer',
+    color: BRAND.navy,
+    fontSize: 14,
+    fontWeight: 850,
+    padding: '0 10px',
+    minWidth: 0,
+    outline: 'none',
   };
 }
 
-function darkRoundButtonStyle(): CSSProperties {
+function darkIconButtonStyle(): CSSProperties {
   return {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     borderRadius: 999,
-    border: '2px solid rgba(255,255,255,0.75)',
-    background: 'rgba(255,255,255,0.08)',
+    border: 'none',
+    background: 'transparent',
     color: '#fff',
-    fontSize: 24,
-    fontWeight: 950,
+    fontSize: 26,
+    fontWeight: 900,
     cursor: 'pointer',
   };
 }
 
-function secondaryDarkButtonStyle(): CSSProperties {
+function editorToolStyle(): CSSProperties {
   return {
-    height: 56,
+    minHeight: 54,
+    border: 'none',
+    background: 'transparent',
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 850,
+    cursor: 'pointer',
+    lineHeight: 1.3,
+  };
+}
+
+function darkSecondaryButtonStyle(): CSSProperties {
+  return {
+    height: 54,
     borderRadius: 18,
-    border: '2px solid rgba(255,255,255,0.75)',
-    background: 'rgba(255,255,255,0.08)',
+    border: '1px solid rgba(255,255,255,0.35)',
+    background: 'rgba(255,255,255,0.06)',
     color: '#fff',
     fontSize: 16,
     fontWeight: 950,
@@ -2339,14 +2294,14 @@ function secondaryDarkButtonStyle(): CSSProperties {
   };
 }
 
-function greenDarkButtonStyle(): CSSProperties {
+function darkGreenButtonStyle(): CSSProperties {
   return {
-    height: 56,
+    height: 54,
     borderRadius: 18,
-    border: '2px solid #111111',
+    border: 'none',
     background: BRAND.green,
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 950,
     cursor: 'pointer',
   };
@@ -2354,12 +2309,12 @@ function greenDarkButtonStyle(): CSSProperties {
 
 function previewButtonStyle(bg: string, color: string): CSSProperties {
   return {
-    height: 46,
-    borderRadius: 16,
-    border: '2px solid #111111',
+    height: 38,
+    borderRadius: 13,
+    border: `1.6px solid ${BRAND.black}`,
     background: bg,
     color,
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: 950,
     cursor: 'pointer',
   };
