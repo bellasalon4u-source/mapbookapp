@@ -33,27 +33,30 @@ const BRAND = {
   cream: '#fffdf8',
   border: '#111111',
   pink: '#ff4fa0',
+  yellow: '#ffe44d',
+  red: '#ff4b52',
 };
 
 const addMenuTexts: Record<
   AppLanguage,
   {
-    ad: string;
+    adTitle: string;
+    adSubtitle: string;
     service: string;
     deal: string;
     close: string;
   }
 > = {
-  EN: { ad: 'Ad', service: 'Service', deal: 'Deal', close: 'Close' },
-  ES: { ad: 'Anuncio', service: 'Servicio', deal: 'Descuento', close: 'Cerrar' },
-  RU: { ad: 'Реклама', service: 'Услуга', deal: 'Скидка', close: 'Закрыть' },
-  UA: { ad: 'Реклама', service: 'Послуга', deal: 'Знижка', close: 'Закрити' },
-  CZ: { ad: 'Reklama', service: 'Služba', deal: 'Sleva', close: 'Zavřít' },
-  DE: { ad: 'Anzeige', service: 'Service', deal: 'Rabatt', close: 'Schließen' },
-  IT: { ad: 'Pubblicità', service: 'Servizio', deal: 'Sconto', close: 'Chiudi' },
-  FR: { ad: 'Pub', service: 'Service', deal: 'Réduction', close: 'Fermer' },
-  AR: { ad: 'إعلان', service: 'خدمة', deal: 'خصم', close: 'إغلاق' },
-  PL: { ad: 'Reklama', service: 'Usługa', deal: 'Zniżka', close: 'Zamknij' },
+  EN: { adTitle: 'Promote', adSubtitle: 'Get seen', service: 'Service', deal: 'Deal', close: 'Close' },
+  ES: { adTitle: 'Promocionar', adSubtitle: 'Más vistas', service: 'Servicio', deal: 'Descuento', close: 'Cerrar' },
+  RU: { adTitle: 'Продвинуть', adSubtitle: 'Больше просмотров', service: 'Услуга', deal: 'Скидка', close: 'Закрыть' },
+  UA: { adTitle: 'Просунути', adSubtitle: 'Більше переглядів', service: 'Послуга', deal: 'Знижка', close: 'Закрити' },
+  CZ: { adTitle: 'Propagovat', adSubtitle: 'Více zobrazení', service: 'Služba', deal: 'Sleva', close: 'Zavřít' },
+  DE: { adTitle: 'Bewerben', adSubtitle: 'Mehr Sichtbarkeit', service: 'Service', deal: 'Rabatt', close: 'Schließen' },
+  IT: { adTitle: 'Promuovi', adSubtitle: 'Più visibilità', service: 'Servizio', deal: 'Sconto', close: 'Chiudi' },
+  FR: { adTitle: 'Promouvoir', adSubtitle: 'Plus de vues', service: 'Service', deal: 'Réduction', close: 'Fermer' },
+  AR: { adTitle: 'روّج', adSubtitle: 'مشاهدات أكثر', service: 'خدمة', deal: 'خصم', close: 'إغلاق' },
+  PL: { adTitle: 'Promuj', adSubtitle: 'Więcej wyświetleń', service: 'Usługa', deal: 'Zniżka', close: 'Zamknij' },
 };
 
 const navItems: NavItem[] = [
@@ -388,7 +391,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   };
 
   const handleCreateAd = () => {
-    pushAddRoute('/promotions/new');
+    pushAddRoute('/profile/promotions/new');
   };
 
   const handleCreateService = () => {
@@ -396,7 +399,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   };
 
   const handleCreateDeal = () => {
-    pushAddRoute('/deals/new');
+    pushAddRoute('/profile/deals/new');
   };
 
   return (
@@ -440,8 +443,28 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
                 onClick={handleCreateAd}
                 style={addTileStyle('#ffe44d', BRAND.black, true)}
               >
-                <span style={{ fontSize: 32 }}>📣</span>
-                <span>{addText.ad}</span>
+                <span style={{ fontSize: 34, lineHeight: 1 }}>📣</span>
+                <span
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 900,
+                    lineHeight: 1,
+                    textAlign: 'center',
+                  }}
+                >
+                  {addText.adTitle}
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 900,
+                    lineHeight: 1,
+                    opacity: 0.72,
+                    textAlign: 'center',
+                  }}
+                >
+                  {addText.adSubtitle}
+                </span>
               </button>
 
               <button
@@ -759,6 +782,6 @@ function addTileStyle(bg: string, color: string, withRightBorder: boolean): CSSP
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 9,
+    gap: 6,
   };
 }
