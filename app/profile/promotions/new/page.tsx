@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type CSSProperties,
   type ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
@@ -15,194 +16,141 @@ import {
   type AppLanguage,
 } from '../../../../services/i18n';
 import { categories } from '../../../../services/categories';
+import { isAuthenticated } from '../../../../services/authStore';
 
-type PhotoItem = {
+type MediaMode = 'single' | 'collage' | 'video';
+type SheetMode =
+  | null
+  | 'media'
+  | 'category'
+  | 'subcategory'
+  | 'title'
+  | 'description'
+  | 'days'
+  | 'enhance'
+  | 'contacts'
+  | 'address'
+  | 'payment';
+
+type MediaItem = {
   id: string;
   name: string;
   preview: string;
   type: 'image' | 'video';
-  scale: number;
-  rotate: number;
-  offsetX: number;
-  offsetY: number;
-  confirmed: boolean;
 };
 
-type SheetMode =
-  | null
-  | 'title'
-  | 'description'
-  | 'category'
-  | 'subcategory'
-  | 'price'
-  | 'payment'
-  | 'hours'
-  | 'format'
-  | 'contacts'
-  | 'address';
-
-type PaymentMethod = {
+type CategoryView = {
   id: string;
   label: string;
   icon: string;
+  image?: string;
+  subcategories: string[];
 };
 
 const BRAND = {
   navy: '#061b49',
   black: '#111111',
-  blue: '#087BFF',
-  green: '#23C552',
-  red: '#F0182D',
-  yellow: '#FFF3B8',
-  cream: '#FFFDF8',
-  softBlue: '#EAF2FF',
-  softPink: '#FFF1F7',
-  softGreen: '#EFFFF3',
+  green: '#24c85a',
+  blue: '#087bff',
+  red: '#ff255d',
+  yellow: '#fff3b8',
+  cream: '#fffdf8',
+  softGreen: '#eaffef',
+  softBlue: '#eef5ff',
+  softPink: '#fff1f7',
+  softYellow: '#fff8d9',
   gray: '#707988',
 };
 
-const MAX_PHOTOS = 50;
+const FIRST_AD_FREE = true;
+const PRICE_PER_DAY = 2;
 
 const TEXT = {
   EN: {
     pageTitle: 'Add advertisement',
-    pageSubtitle: 'Create a bright listing for clients nearby',
-    photos: 'Photos',
-    addPhotoVideo: 'Add photo / video',
-    photoHint: 'Add photos and videos from your files.',
-    toolsHint: 'Move, zoom, rotate and confirm.',
-    price: 'Price',
-    setPrice: 'Set your price',
-    paymentMethods: 'Payment methods',
+    pageSubtitle: 'Create a bright ad that clients notice nearby',
+    media: 'Photo / video',
+    mediaHint: '1 photo, 4-photo collage, or 1 short video',
+    chooseMedia: 'Choose media',
+    singlePhoto: '1 photo',
+    collage: '4-photo collage',
+    video: 'Mini video',
+    camera: 'Camera',
+    gallery: 'Gallery',
+    files: 'Files',
     title: 'Title',
-    titleHint: 'Add a short and clear title',
+    titleHint: 'Short catchy ad title',
     description: 'Description',
-    descriptionHint: 'Describe your advertisement in detail',
+    descriptionHint: 'What makes this offer special?',
     category: 'Category',
-    subcategory: 'Subcategory',
-    workingHours: 'Working hours',
-    serviceFormat: 'Service format',
-    contactDetails: 'Contact details',
-    contactsHint: 'Opens a separate sheet of channels',
-    address: 'Address',
-    addressHint: 'Opens a separate address form',
-    continue: 'Continue',
-    save: 'Save',
     chooseCategory: 'Choose category',
     chooseSubcategory: 'Choose subcategory',
-    enterTitle: 'Enter title',
-    enterDescription: 'Enter description',
-    fixedPrice: 'Fixed price',
-    priceRange: 'Price range',
-    minPrice: 'Min price',
-    maxPrice: 'Max price',
-    pounds: 'Pounds',
-    pennies: 'Pennies',
-    from: 'From',
-    to: 'To',
-    card: 'Card',
-    cash: 'Cash',
-    applePay: 'Apple Pay',
-    googlePay: 'Google Pay',
-    paypal: 'PayPal',
-    bankTransfer: 'Bank transfer',
-    olamepBalance: 'Olamep balance',
-    crypto: 'Crypto wallet',
-    fromTime: 'From',
-    toTime: 'To',
-    atMyPlace: 'At my place',
-    atClient: 'At client',
-    online: 'Online',
-    phone: 'Phone',
-    whatsapp: 'WhatsApp',
-    businessWhatsapp: 'Business WhatsApp',
-    telegram: 'Telegram',
-    viber: 'Viber',
-    instagram: 'Instagram',
-    email: 'Email',
-    website: 'Website',
-    city: 'City',
-    district: 'District / area',
-    street: 'Street',
-    building: 'Building',
-    floor: 'Floor',
-    flat: 'Flat / studio',
-    publishOnlyAfterPayment: 'Publication goes live only after payment.',
-    alertTitle: 'Please add title',
-    alertDescription: 'Please add description',
-    alertCategory: 'Please choose category',
-    alertSubcategory: 'Please choose subcategory',
-    alertPhoto: 'Please add at least one photo or video',
+    days: 'Advertising days',
+    daysHint: '1 day free for first ad',
+    enhance: 'Improve ad',
+    enhanceHint: 'Sticker and visual style',
+    contacts: 'Contact details',
+    contactsHint: 'Phone number for clients',
+    address: 'Address',
+    addressHint: 'Where this ad should be shown',
+    payment: 'Payment',
+    paymentHint: 'Pay only before publishing',
+    preview: 'Preview',
+    continue: 'Continue to payment',
+    save: 'Save',
+    firstDayFree: 'First day free',
+    total: 'Total',
+    free: 'Free',
+    publishOnlyAfterPayment: 'Advertisement is published only after payment.',
+    alertMedia: 'Please add photo or video.',
+    alertTitle: 'Please add title.',
+    alertDescription: 'Please add description.',
+    alertCategory: 'Please choose category and subcategory.',
+    alertPhone: 'Please add phone number.',
+    registerFirst: 'Please register before payment.',
   },
   RU: {
     pageTitle: 'Добавить рекламу',
-    pageSubtitle: 'Создайте яркое объявление, чтобы клиенты нашли вас рядом',
-    photos: 'Фото',
-    addPhotoVideo: 'Добавить фото / видео',
-    photoHint: 'Добавьте фото и видео из файлов.',
-    toolsHint: 'Двигайте, увеличивайте, поворачивайте и фиксируйте.',
-    price: 'Цена',
-    setPrice: 'Установите цену',
-    paymentMethods: 'Способы оплаты',
+    pageSubtitle: 'Создайте яркую рекламу, которую клиенты заметят рядом',
+    media: 'Фото / видео',
+    mediaHint: '1 фото, коллаж из 4 фото или 1 короткое видео',
+    chooseMedia: 'Выбрать медиа',
+    singlePhoto: '1 фото',
+    collage: 'Коллаж 4 фото',
+    video: 'Мини-видео',
+    camera: 'Камера',
+    gallery: 'Галерея',
+    files: 'Файлы',
     title: 'Заголовок',
-    titleHint: 'Добавьте короткий и понятный заголовок',
+    titleHint: 'Короткий цепляющий заголовок',
     description: 'Описание',
-    descriptionHint: 'Опишите рекламу подробно',
+    descriptionHint: 'Что особенного в этом предложении?',
     category: 'Категория',
-    subcategory: 'Подкатегория',
-    workingHours: 'Часы работы',
-    serviceFormat: 'Формат услуги',
-    contactDetails: 'Контактные данные',
-    contactsHint: 'Открывается отдельное окно каналов связи',
+    chooseCategory: 'Выбрать категорию',
+    chooseSubcategory: 'Выбрать подкатегорию',
+    days: 'Дни рекламы',
+    daysHint: 'Первый день бесплатно для первой рекламы',
+    enhance: 'Улучшить рекламу',
+    enhanceHint: 'Наклейка и визуальный стиль',
+    contacts: 'Контактные данные',
+    contactsHint: 'Телефон для клиентов',
     address: 'Адрес',
-    addressHint: 'Открывается отдельная форма адреса',
-    continue: 'Продолжить',
+    addressHint: 'Где показывать рекламу',
+    payment: 'Оплата',
+    paymentHint: 'Оплата только перед публикацией',
+    preview: 'Предпросмотр',
+    continue: 'Перейти к оплате',
     save: 'Сохранить',
-    chooseCategory: 'Выберите категорию',
-    chooseSubcategory: 'Выберите подкатегорию',
-    enterTitle: 'Введите заголовок',
-    enterDescription: 'Введите описание',
-    fixedPrice: 'Одна цена',
-    priceRange: 'Цена от и до',
-    minPrice: 'Цена от',
-    maxPrice: 'Цена до',
-    pounds: 'Фунты',
-    pennies: 'Пенсы',
-    from: 'От',
-    to: 'До',
-    card: 'Карта',
-    cash: 'Наличные',
-    applePay: 'Apple Pay',
-    googlePay: 'Google Pay',
-    paypal: 'PayPal',
-    bankTransfer: 'Банк',
-    olamepBalance: 'Баланс Olamep',
-    crypto: 'Криптокошелёк',
-    fromTime: 'С',
-    toTime: 'До',
-    atMyPlace: 'У меня',
-    atClient: 'Выезд к клиенту',
-    online: 'Онлайн',
-    phone: 'Телефон',
-    whatsapp: 'WhatsApp',
-    businessWhatsapp: 'Business WhatsApp',
-    telegram: 'Telegram',
-    viber: 'Viber',
-    instagram: 'Instagram',
-    email: 'Email',
-    website: 'Сайт',
-    city: 'Город',
-    district: 'Район / зона',
-    street: 'Улица',
-    building: 'Дом',
-    floor: 'Этаж',
-    flat: 'Квартира / студия',
-    publishOnlyAfterPayment: 'Публикация выйдет только после оплаты.',
-    alertTitle: 'Добавьте заголовок',
-    alertDescription: 'Добавьте описание',
-    alertCategory: 'Выберите категорию',
-    alertSubcategory: 'Выберите подкатегорию',
-    alertPhoto: 'Добавьте хотя бы одно фото или видео',
+    firstDayFree: 'Первый день бесплатно',
+    total: 'Итого',
+    free: 'Бесплатно',
+    publishOnlyAfterPayment: 'Реклама публикуется только после оплаты.',
+    alertMedia: 'Добавьте фото или видео.',
+    alertTitle: 'Добавьте заголовок.',
+    alertDescription: 'Добавьте описание.',
+    alertCategory: 'Выберите категорию и подкатегорию.',
+    alertPhone: 'Добавьте номер телефона.',
+    registerFirst: 'Перед оплатой нужно зарегистрироваться.',
   },
 };
 
@@ -212,10 +160,6 @@ function getText(language: AppLanguage) {
 
 function uid() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
 }
 
 function localizeLabel(value: unknown, language: AppLanguage) {
@@ -234,7 +178,7 @@ function ShellCard({
   style,
 }: {
   children: ReactNode;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }) {
   return (
     <div
@@ -242,7 +186,7 @@ function ShellCard({
         border: `2px solid ${BRAND.black}`,
         borderRadius: 22,
         background: '#fff',
-        boxShadow: '0 3px 0 rgba(0,0,0,0.06)',
+        boxShadow: '0 4px 0 rgba(0,0,0,0.06)',
         ...style,
       }}
     >
@@ -251,41 +195,88 @@ function ShellCard({
   );
 }
 
-function IconBox({ icon, bg = '#F5F7FF' }: { icon: string; bg?: string }) {
+function AppLogo() {
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+      <img
+        src="/ui/logo/app-icon.svg"
+        alt="Olamep"
+        style={{
+          width: 54,
+          height: 54,
+          borderRadius: 16,
+          objectFit: 'contain',
+        }}
+      />
+      <span
+        style={{
+          color: BRAND.navy,
+          fontSize: 32,
+          fontWeight: 950,
+          lineHeight: 1,
+        }}
+      >
+        Olamep
+      </span>
+    </div>
+  );
+}
+
+function RoundButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} style={roundButtonStyle()}>
+      {children}
+    </button>
+  );
+}
+
+function IconBox({
+  icon,
+  image,
+  bg = '#ffffff',
+}: {
+  icon?: string;
+  image?: string;
+  bg?: string;
+}) {
   return (
     <div
       style={{
-        width: 50,
-        height: 50,
-        borderRadius: 12,
+        width: 54,
+        height: 54,
+        borderRadius: 16,
         border: `1.8px solid ${BRAND.black}`,
         background: bg,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: 27,
+        overflow: 'hidden',
         flexShrink: 0,
       }}
     >
-      {icon}
+      {image ? (
+        <img src={image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      ) : (
+        <span style={{ fontSize: 28 }}>{icon || '📍'}</span>
+      )}
     </div>
   );
 }
 
 function RowButton({
   icon,
-  iconBg,
+  image,
   title,
   subtitle,
-  right,
+  secondLine,
   onClick,
 }: {
   icon: string;
-  iconBg?: string;
+  image?: string;
   title: string;
-  subtitle?: string;
-  right?: ReactNode;
-  onClick?: () => void;
+  subtitle: string;
+  secondLine?: string;
+  onClick: () => void;
 }) {
   return (
     <button
@@ -293,132 +284,58 @@ function RowButton({
       onClick={onClick}
       style={{
         width: '100%',
-        minHeight: 72,
+        minHeight: 76,
         border: `2px solid ${BRAND.black}`,
-        borderRadius: 16,
+        borderRadius: 19,
         background: '#fff',
         display: 'grid',
-        gridTemplateColumns: '56px 1fr auto',
+        gridTemplateColumns: '62px 1fr 26px',
         alignItems: 'center',
         gap: 12,
-        padding: '10px 12px',
+        padding: '10px 14px',
         textAlign: 'left',
         cursor: 'pointer',
       }}
     >
-      <IconBox icon={icon} bg={iconBg} />
+      <IconBox icon={icon} image={image} bg={BRAND.softGreen} />
 
       <div style={{ minWidth: 0 }}>
-        <div
-          style={{
-            fontSize: 17,
-            fontWeight: 950,
-            color: BRAND.navy,
-            lineHeight: 1.15,
-          }}
-        >
+        <div style={{ fontSize: 20, fontWeight: 950, color: BRAND.navy, lineHeight: 1.1 }}>
           {title}
         </div>
-
-        {subtitle ? (
+        <div
+          style={{
+            marginTop: 4,
+            fontSize: 14,
+            fontWeight: 850,
+            color: BRAND.gray,
+            lineHeight: 1.2,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {subtitle}
+        </div>
+        {secondLine ? (
           <div
             style={{
-              marginTop: 4,
+              marginTop: 3,
               fontSize: 13,
-              fontWeight: 800,
-              color: BRAND.gray,
-              lineHeight: 1.25,
-              whiteSpace: 'nowrap',
+              fontWeight: 900,
+              color: BRAND.green,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
             }}
           >
-            {subtitle}
+            {secondLine}
           </div>
         ) : null}
       </div>
 
-      {right || (
-        <div
-          style={{
-            fontSize: 34,
-            fontWeight: 900,
-            color: BRAND.black,
-            lineHeight: 1,
-          }}
-        >
-          ›
-        </div>
-      )}
+      <span style={{ fontSize: 32, fontWeight: 950, color: BRAND.black }}>›</span>
     </button>
-  );
-}
-
-function Field({
-  label,
-  value,
-  placeholder,
-  onChange,
-  multiline,
-}: {
-  label: string;
-  value: string;
-  placeholder: string;
-  onChange: (next: string) => void;
-  multiline?: boolean;
-}) {
-  return (
-    <div style={{ display: 'grid', gap: 8 }}>
-      <div
-        style={{
-          fontSize: 16,
-          fontWeight: 950,
-          color: BRAND.navy,
-        }}
-      >
-        {label}
-      </div>
-
-      {multiline ? (
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          rows={5}
-          style={{
-            width: '100%',
-            border: `2px solid ${BRAND.black}`,
-            borderRadius: 18,
-            padding: '14px 16px',
-            fontSize: 17,
-            fontWeight: 800,
-            outline: 'none',
-            resize: 'none',
-            boxSizing: 'border-box',
-            fontFamily: 'Arial, sans-serif',
-            color: BRAND.navy,
-          }}
-        />
-      ) : (
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          style={{
-            width: '100%',
-            height: 58,
-            border: `2px solid ${BRAND.black}`,
-            borderRadius: 18,
-            padding: '0 16px',
-            fontSize: 17,
-            fontWeight: 850,
-            outline: 'none',
-            boxSizing: 'border-box',
-            color: BRAND.navy,
-          }}
-        />
-      )}
-    </div>
   );
 }
 
@@ -437,25 +354,24 @@ function Sheet({
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0,0,0,0.32)',
         zIndex: 500,
+        background: 'rgba(0,0,0,0.34)',
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'center',
       }}
     >
       <div
-        onClick={(e) => e.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
         style={{
           width: '100%',
           maxWidth: 430,
           maxHeight: '86vh',
           overflowY: 'auto',
-          borderTopLeftRadius: 30,
-          borderTopRightRadius: 30,
+          background: '#fff',
           border: `2px solid ${BRAND.black}`,
           borderBottom: 'none',
-          background: '#fff',
+          borderRadius: '30px 30px 0 0',
           padding: '18px 16px calc(18px + env(safe-area-inset-bottom))',
           boxSizing: 'border-box',
         }}
@@ -464,58 +380,24 @@ function Sheet({
           style={{
             display: 'grid',
             gridTemplateColumns: '48px 1fr 48px',
-            alignItems: 'center',
             gap: 10,
+            alignItems: 'center',
             marginBottom: 16,
           }}
         >
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 999,
-              border: `2px solid ${BRAND.black}`,
-              background: '#fff',
-              color: BRAND.navy,
-              fontSize: 24,
-              fontWeight: 950,
-              cursor: 'pointer',
-            }}
-          >
-            ←
-          </button>
-
+          <RoundButton onClick={onClose}>←</RoundButton>
           <div
             style={{
               textAlign: 'center',
-              fontSize: 24,
-              fontWeight: 950,
               color: BRAND.navy,
-              lineHeight: 1.1,
+              fontSize: 26,
+              fontWeight: 950,
+              lineHeight: 1.05,
             }}
           >
             {title}
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 999,
-              border: `2px solid ${BRAND.black}`,
-              background: '#fff',
-              color: BRAND.navy,
-              fontSize: 26,
-              fontWeight: 950,
-              cursor: 'pointer',
-            }}
-          >
-            ×
-          </button>
+          <RoundButton onClick={onClose}>×</RoundButton>
         </div>
 
         {children}
@@ -524,17 +406,81 @@ function Sheet({
   );
 }
 
+function Field({
+  label,
+  value,
+  placeholder,
+  onChange,
+  multiline,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  onChange: (next: string) => void;
+  multiline?: boolean;
+}) {
+  return (
+    <label style={{ display: 'grid', gap: 8 }}>
+      <span style={{ fontSize: 16, fontWeight: 950, color: BRAND.navy }}>{label}</span>
+
+      {multiline ? (
+        <textarea
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          rows={5}
+          style={{
+            width: '100%',
+            border: `2px solid ${BRAND.black}`,
+            borderRadius: 18,
+            padding: 14,
+            fontSize: 17,
+            fontWeight: 800,
+            color: BRAND.navy,
+            outline: 'none',
+            resize: 'none',
+            fontFamily: 'Arial, sans-serif',
+            boxSizing: 'border-box',
+          }}
+        />
+      ) : (
+        <input
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          style={{
+            width: '100%',
+            height: 58,
+            border: `2px solid ${BRAND.black}`,
+            borderRadius: 18,
+            padding: '0 16px',
+            fontSize: 17,
+            fontWeight: 850,
+            color: BRAND.navy,
+            outline: 'none',
+            boxSizing: 'border-box',
+          }}
+        />
+      )}
+    </label>
+  );
+}
+
 export default function NewPromotionPage() {
   const router = useRouter();
+
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoInputRef = useRef<HTMLInputElement | null>(null);
 
   const [language, setLanguage] = useState<AppLanguage>(getSavedLanguage());
   const text = getText(language);
 
-  const [photos, setPhotos] = useState<PhotoItem[]>([]);
-  const [activePhotoId, setActivePhotoId] = useState<string | null>(null);
-
   const [sheet, setSheet] = useState<SheetMode>(null);
+
+  const [mediaMode, setMediaMode] = useState<MediaMode>('single');
+  const [media, setMedia] = useState<MediaItem[]>([]);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -542,67 +488,36 @@ export default function NewPromotionPage() {
   const [categoryId, setCategoryId] = useState('');
   const [subcategory, setSubcategory] = useState('');
 
-  const [priceMode, setPriceMode] = useState<'fixed' | 'range'>('range');
-  const [pricePounds, setPricePounds] = useState('45');
-  const [pricePennies, setPricePennies] = useState('00');
-  const [minPrice, setMinPrice] = useState('40');
-  const [maxPrice, setMaxPrice] = useState('60');
+  const [days, setDays] = useState(1);
+  const [sticker, setSticker] = useState('today');
+  const [visualStyle, setVisualStyle] = useState('classic');
 
-  const [fromTime, setFromTime] = useState('09:00');
-  const [toTime, setToTime] = useState('20:00');
-
-  const [formats, setFormats] = useState({
-    atMyPlace: true,
-    atClient: true,
-    online: false,
-  });
-
-  const [payments, setPayments] = useState<string[]>([
-    'card',
-    'cash',
-    'applePay',
-    'googlePay',
-    'paypal',
-    'bank',
-  ]);
-
-  const [contacts, setContacts] = useState({
-    phone: '',
-    whatsapp: '',
-    businessWhatsapp: '',
-    telegram: '',
-    viber: '',
-    instagram: '',
-    email: '',
-    website: '',
-  });
-
+  const [phone, setPhone] = useState('');
   const [address, setAddress] = useState({
     city: '',
     district: '',
     street: '',
-    building: '',
-    floor: '',
-    flat: '',
   });
+
+  const [paymentMethod, setPaymentMethod] = useState('card');
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
 
-    const unsub = subscribeToLanguageChange((nextLanguage) => {
+    const unsubscribe = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
 
-    return () => unsub();
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     return () => {
-      photos.forEach((item) => URL.revokeObjectURL(item.preview));
+      media.forEach((item) => URL.revokeObjectURL(item.preview));
     };
-  }, [photos]);
+  }, [media]);
 
-  const localizedCategories = useMemo(() => {
+  const localizedCategories = useMemo<CategoryView[]>(() => {
     return (categories as any[]).map((item) => ({
       id: String(item.id || ''),
       label:
@@ -610,6 +525,7 @@ export default function NewPromotionPage() {
         localizeLabel(item.shortLabel, language) ||
         String(item.id || 'Category'),
       icon: String(item.icon || '📍'),
+      image: item.image || item.imageUrl || item.src || item.photo || '',
       subcategories: Array.isArray(item.subcategories)
         ? item.subcategories.map((sub: unknown) => localizeLabel(sub, language) || String(sub))
         : [],
@@ -619,105 +535,99 @@ export default function NewPromotionPage() {
   const currentCategory = localizedCategories.find((item) => item.id === categoryId);
   const subcategoryOptions = currentCategory?.subcategories || [];
 
-  const activePhoto = photos.find((item) => item.id === activePhotoId) || photos[0] || null;
+  const adPrice = FIRST_AD_FREE ? Math.max(0, days - 1) * PRICE_PER_DAY : days * PRICE_PER_DAY;
 
-  const paymentOptions: PaymentMethod[] = [
-    { id: 'card', label: text.card, icon: '💳' },
-    { id: 'cash', label: text.cash, icon: '💵' },
-    { id: 'applePay', label: text.applePay, icon: '' },
-    { id: 'googlePay', label: text.googlePay, icon: 'G' },
-    { id: 'paypal', label: text.paypal, icon: '🅿️' },
-    { id: 'bank', label: text.bankTransfer, icon: '🏦' },
-    { id: 'wallet', label: text.olamepBalance, icon: '👛' },
-    { id: 'crypto', label: text.crypto, icon: '₿' },
+  const daysSummary =
+    language === 'RU'
+      ? `${days} дн. • ${adPrice === 0 ? text.free : `£${adPrice}`}`
+      : `${days} days • ${adPrice === 0 ? text.free : `£${adPrice}`}`;
+
+  const mediaSummary =
+    mediaMode === 'single'
+      ? text.singlePhoto
+      : mediaMode === 'collage'
+        ? text.collage
+        : text.video;
+
+  const stickerOptions = [
+    { id: 'today', label: language === 'RU' ? 'Сегодня' : 'Today', emoji: '⚡' },
+    { id: 'top', label: 'TOP', emoji: '⭐' },
+    { id: 'new', label: 'NEW', emoji: '✨' },
+    { id: 'sale', label: language === 'RU' ? 'Скидка' : 'Sale', emoji: '🏷️' },
+    { id: 'lux', label: 'LUX', emoji: '💎' },
+    { id: 'hot', label: language === 'RU' ? 'Горячее' : 'Hot', emoji: '🔥' },
   ];
 
-  const contactRows = [
-    { key: 'phone', label: text.phone, icon: '📞', placeholder: '+44 7000 000000' },
-    { key: 'whatsapp', label: text.whatsapp, icon: '🟢', placeholder: '+44 7000 000000' },
-    { key: 'businessWhatsapp', label: text.businessWhatsapp, icon: '💼', placeholder: '+44 7000 000000' },
-    { key: 'telegram', label: text.telegram, icon: '✈️', placeholder: '@username' },
-    { key: 'viber', label: text.viber, icon: '🟣', placeholder: '+44 7000 000000' },
-    { key: 'instagram', label: text.instagram, icon: '📸', placeholder: '@instagram' },
-    { key: 'email', label: text.email, icon: '✉️', placeholder: 'you@email.com' },
-    { key: 'website', label: text.website, icon: '🌐', placeholder: 'yourwebsite.com' },
-  ] as const;
+  const styleOptions = [
+    { id: 'classic', label: language === 'RU' ? 'Классик' : 'Classic', emoji: '🎯' },
+    { id: 'flyer', label: language === 'RU' ? 'Флаер' : 'Flyer', emoji: '🎨' },
+    { id: 'premium', label: language === 'RU' ? 'Премиум' : 'Premium', emoji: '👑' },
+    { id: 'neon', label: language === 'RU' ? 'Сияние' : 'Glow', emoji: '💫' },
+  ];
 
-  const openFilePicker = () => {
-    fileInputRef.current?.click();
+  const chosenSticker = stickerOptions.find((item) => item.id === sticker) || stickerOptions[0];
+  const chosenStyle = styleOptions.find((item) => item.id === visualStyle) || styleOptions[0];
+
+  const paymentOptions = [
+    { id: 'card', label: language === 'RU' ? 'Карта' : 'Card', icon: '💳' },
+    { id: 'balance', label: language === 'RU' ? 'Баланс' : 'Balance', icon: '👛' },
+    { id: 'paypal', label: 'PayPal', icon: '🅿️' },
+    { id: 'apple', label: 'Apple Pay', icon: '' },
+  ];
+
+  const handleMediaPick = (mode: MediaMode, source: 'camera' | 'gallery' | 'files' | 'video') => {
+    setMediaMode(mode);
+    setSheet(null);
+
+    setTimeout(() => {
+      if (source === 'camera') cameraInputRef.current?.click();
+      if (source === 'gallery') galleryInputRef.current?.click();
+      if (source === 'files') fileInputRef.current?.click();
+      if (source === 'video') videoInputRef.current?.click();
+    }, 50);
   };
 
-  const handleFilesSelected = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleMediaSelected = (event: ChangeEvent<HTMLInputElement>, mode: MediaMode) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
-    const remaining = Math.max(0, MAX_PHOTOS - photos.length);
-    const selected = files.slice(0, remaining);
+    const limit = mode === 'collage' ? 4 : 1;
 
-    const next: PhotoItem[] = selected
-      .filter((file) => file.type.startsWith('image/') || file.type.startsWith('video/'))
-      .map((file) => ({
-        id: uid(),
-        name: file.name,
-        preview: URL.createObjectURL(file),
-        type: file.type.startsWith('video/') ? 'video' : 'image',
-        scale: 1,
-        rotate: 0,
-        offsetX: 0,
-        offsetY: 0,
-        confirmed: false,
-      }));
+    const allowed = files
+      .filter((file) => {
+        if (mode === 'video') return file.type.startsWith('video/');
+        return file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+      })
+      .slice(0, limit);
 
-    setPhotos((prev) => {
-      const merged = [...prev, ...next];
-      if (!activePhotoId && merged[0]) setActivePhotoId(merged[0].id);
-      return merged;
-    });
+    if (!allowed.length) {
+      alert(
+        language === 'RU'
+          ? 'Для рекламы используйте JPG, PNG, WEBP или короткое видео. HEIC/HEIF часто не отображается в браузере.'
+          : 'Please use JPG, PNG, WEBP or short video. HEIC/HEIF may not display in browser.'
+      );
+      event.target.value = '';
+      return;
+    }
 
+    media.forEach((item) => URL.revokeObjectURL(item.preview));
+
+    const next = allowed.map((file) => ({
+      id: uid(),
+      name: file.name,
+      preview: URL.createObjectURL(file),
+      type: mode === 'video' ? ('video' as const) : ('image' as const),
+    }));
+
+    setMediaMode(mode);
+    setMedia(next);
     event.target.value = '';
   };
 
-  const updateActivePhoto = (patch: Partial<PhotoItem>) => {
-    if (!activePhoto) return;
-
-    setPhotos((prev) =>
-      prev.map((item) => (item.id === activePhoto.id ? { ...item, ...patch } : item))
-    );
-  };
-
-  const handleRemoveActivePhoto = () => {
-    if (!activePhoto) return;
-
-    setPhotos((prev) => {
-      const found = prev.find((item) => item.id === activePhoto.id);
-      if (found) URL.revokeObjectURL(found.preview);
-
-      const next = prev.filter((item) => item.id !== activePhoto.id);
-      setActivePhotoId(next[0]?.id || null);
-      return next;
-    });
-  };
-
-  const togglePayment = (id: string) => {
-    setPayments((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  const selectedPaymentLabels = paymentOptions
-    .filter((item) => payments.includes(item.id))
-    .slice(0, 3)
-    .map((item) => item.label)
-    .join(', ');
-
-  const priceSummary =
-    priceMode === 'fixed'
-      ? `£${pricePounds || '0'}.${pricePennies || '00'}`
-      : `${text.from} £${minPrice || '0'} ${text.to.toLowerCase()} £${maxPrice || '0'}`;
-
   const handleContinue = () => {
-    if (photos.length === 0) {
-      alert(text.alertPhoto);
+    if (!media.length) {
+      alert(text.alertMedia);
+      setSheet('media');
       return;
     }
 
@@ -733,19 +643,25 @@ export default function NewPromotionPage() {
       return;
     }
 
-    if (!categoryId) {
+    if (!categoryId || !subcategory) {
       alert(text.alertCategory);
       setSheet('category');
       return;
     }
 
-    if (!subcategory) {
-      alert(text.alertSubcategory);
-      setSheet('subcategory');
+    if (!phone.trim()) {
+      alert(text.alertPhone);
+      setSheet('contacts');
       return;
     }
 
-    alert(text.publishOnlyAfterPayment);
+    if (!isAuthenticated()) {
+      alert(text.registerFirst);
+      router.push(`/auth?returnTo=${encodeURIComponent('/profile/promotions/new')}`);
+      return;
+    }
+
+    setSheet('payment');
   };
 
   return (
@@ -756,15 +672,41 @@ export default function NewPromotionPage() {
           background: '#ffffff',
           fontFamily: 'Arial, sans-serif',
           color: BRAND.navy,
-          paddingBottom: 116,
+          paddingBottom: 118,
         }}
       >
         <input
+          ref={galleryInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          onChange={(event) => handleMediaSelected(event, mediaMode)}
+          style={{ display: 'none' }}
+        />
+
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          capture="environment"
+          onChange={(event) => handleMediaSelected(event, mediaMode)}
+          style={{ display: 'none' }}
+        />
+
+        <input
           ref={fileInputRef}
           type="file"
-          accept="image/*,video/*"
+          accept="image/jpeg,image/png,image/webp"
           multiple
-          onChange={handleFilesSelected}
+          onChange={(event) => handleMediaSelected(event, mediaMode)}
+          style={{ display: 'none' }}
+        />
+
+        <input
+          ref={videoInputRef}
+          type="file"
+          accept="video/mp4,video/webm,video/quicktime"
+          onChange={(event) => handleMediaSelected(event, 'video')}
           style={{ display: 'none' }}
         />
 
@@ -775,7 +717,7 @@ export default function NewPromotionPage() {
               top: 0,
               zIndex: 60,
               background: 'rgba(255,255,255,0.98)',
-              borderBottom: '1px solid #E5E8EF',
+              borderBottom: '1px solid #e8ebf0',
               padding: '18px 16px 14px',
               display: 'grid',
               gridTemplateColumns: '54px 1fr 54px',
@@ -783,47 +725,15 @@ export default function NewPromotionPage() {
               alignItems: 'start',
             }}
           >
-            <button
-              type="button"
-              onClick={() => router.back()}
-              style={roundButtonStyle()}
-            >
-              ←
-            </button>
+            <RoundButton onClick={() => router.back()}>←</RoundButton>
 
             <div style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  marginBottom: 8,
-                }}
-              >
-                <div
-                  style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: 999,
-                    background:
-                      'conic-gradient(from 25deg, #ff255d, #ffcb05, #22c55e, #087BFF, #6d28d9, #ff255d)',
-                    border: '1.5px solid rgba(0,0,0,0.12)',
-                  }}
-                />
-                <div
-                  style={{
-                    fontSize: 25,
-                    fontWeight: 950,
-                    color: BRAND.navy,
-                  }}
-                >
-                  Olamep
-                </div>
-              </div>
+              <AppLogo />
 
               <div
                 style={{
-                  fontSize: 30,
+                  marginTop: 14,
+                  fontSize: 33,
                   fontWeight: 950,
                   lineHeight: 0.98,
                   color: BRAND.navy,
@@ -845,467 +755,330 @@ export default function NewPromotionPage() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => router.push('/')}
-              style={roundButtonStyle()}
-            >
-              ×
-            </button>
+            <RoundButton onClick={() => router.push('/')}>×</RoundButton>
           </header>
 
           <section
             style={{
               padding: '14px 12px 0',
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
               gap: 10,
             }}
           >
-            <ShellCard style={{ padding: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', marginBottom: 9 }}>
-                <div style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>
-                  {text.photos}
-                </div>
-                <div style={{ fontSize: 13, fontWeight: 950, color: BRAND.gray }}>
-                  {photos.length}/{MAX_PHOTOS}
+            <ShellCard style={{ padding: 12 }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  alignItems: 'center',
+                  gap: 10,
+                  marginBottom: 10,
+                }}
+              >
+                <div style={{ fontSize: 22, fontWeight: 950 }}>{text.media}</div>
+                <div
+                  style={{
+                    border: `2px solid ${BRAND.black}`,
+                    borderRadius: 999,
+                    padding: '5px 10px',
+                    fontSize: 13,
+                    fontWeight: 950,
+                    background: BRAND.softGreen,
+                  }}
+                >
+                  {mediaSummary}
                 </div>
               </div>
 
               <button
                 type="button"
-                onClick={openFilePicker}
+                onClick={() => setSheet('media')}
                 style={{
                   width: '100%',
-                  minHeight: 178,
-                  borderRadius: 18,
-                  border: `2px dashed ${photos.length ? BRAND.blue : '#8B94A3'}`,
-                  background: photos.length ? BRAND.softBlue : '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexDirection: 'column',
-                  gap: 8,
+                  minHeight: 194,
+                  borderRadius: 20,
+                  border: `2px dashed ${BRAND.green}`,
+                  background: media.length ? '#ffffff' : BRAND.softGreen,
                   cursor: 'pointer',
                   overflow: 'hidden',
                   position: 'relative',
+                  padding: 0,
                 }}
               >
-                {activePhoto ? (
-                  activePhoto.type === 'video' ? (
+                {media.length ? (
+                  mediaMode === 'collage' ? (
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gridTemplateRows: '1fr 1fr',
+                        gap: 4,
+                        height: 194,
+                        padding: 4,
+                        boxSizing: 'border-box',
+                      }}
+                    >
+                      {media.map((item) => (
+                        <img
+                          key={item.id}
+                          src={item.preview}
+                          alt={item.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            borderRadius: 14,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ) : mediaMode === 'video' ? (
                     <video
-                      src={activePhoto.preview}
+                      src={media[0].preview}
                       muted
                       loop
                       autoPlay
                       playsInline
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        transform: `translate(${activePhoto.offsetX}px, ${activePhoto.offsetY}px) scale(${activePhoto.scale}) rotate(${activePhoto.rotate}deg)`,
-                      }}
+                      style={{ width: '100%', height: 194, objectFit: 'cover' }}
                     />
                   ) : (
                     <img
-                      src={activePhoto.preview}
-                      alt={activePhoto.name}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        transform: `translate(${activePhoto.offsetX}px, ${activePhoto.offsetY}px) scale(${activePhoto.scale}) rotate(${activePhoto.rotate}deg)`,
-                      }}
+                      src={media[0].preview}
+                      alt={media[0].name}
+                      style={{ width: '100%', height: 194, objectFit: 'cover' }}
                     />
                   )
                 ) : (
-                  <>
+                  <div
+                    style={{
+                      minHeight: 194,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 10,
+                    }}
+                  >
                     <div
                       style={{
-                        width: 54,
-                        height: 54,
+                        width: 62,
+                        height: 62,
                         borderRadius: 999,
-                        border: `2px solid ${BRAND.green}`,
+                        border: `2.5px solid ${BRAND.green}`,
                         color: BRAND.green,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 42,
-                        fontWeight: 500,
+                        fontSize: 44,
+                        fontWeight: 800,
                         lineHeight: 1,
                       }}
                     >
                       +
                     </div>
-
-                    <div
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 950,
-                        color: BRAND.navy,
-                        textAlign: 'center',
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {text.addPhotoVideo}
+                    <div style={{ fontSize: 20, fontWeight: 950, color: BRAND.navy }}>
+                      {text.chooseMedia}
                     </div>
-                  </>
+                    <div style={{ fontSize: 13, fontWeight: 850, color: BRAND.gray }}>
+                      {text.mediaHint}
+                    </div>
+                  </div>
                 )}
 
-                {activePhoto?.confirmed ? (
-                  <div
+                {media.length ? (
+                  <span
                     style={{
                       position: 'absolute',
-                      right: 8,
                       top: 8,
+                      right: 8,
                       width: 34,
                       height: 34,
                       borderRadius: 999,
+                      border: `2px solid ${BRAND.black}`,
                       background: BRAND.green,
                       color: '#fff',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 22,
+                      fontSize: 20,
                       fontWeight: 950,
-                      border: `2px solid ${BRAND.black}`,
                     }}
                   >
                     ✓
-                  </div>
+                  </span>
                 ) : null}
               </button>
-
-              <div
-                style={{
-                  marginTop: 9,
-                  display: 'flex',
-                  gap: 6,
-                  alignItems: 'flex-start',
-                  color: BRAND.gray,
-                  fontSize: 12,
-                  fontWeight: 850,
-                  lineHeight: 1.25,
-                }}
-              >
-                <span style={{ color: BRAND.navy, fontSize: 17 }}>🖼️</span>
-                <span>{text.photoHint}</span>
-              </div>
-
-              <div
-                style={{
-                  marginTop: 10,
-                  border: `1.7px solid ${BRAND.blue}`,
-                  borderRadius: 14,
-                  background: '#E7F1FF',
-                  padding: '9px 6px',
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(5, 1fr)',
-                  gap: 4,
-                  alignItems: 'center',
-                  textAlign: 'center',
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateActivePhoto({
-                      offsetX: activePhoto ? activePhoto.offsetX - 8 : 0,
-                    })
-                  }
-                  style={toolButtonStyle()}
-                >
-                  ↔
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateActivePhoto({
-                      scale: activePhoto ? clamp(activePhoto.scale + 0.1, 1, 3) : 1,
-                    })
-                  }
-                  style={toolButtonStyle()}
-                >
-                  ⌕+
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateActivePhoto({
-                      rotate: activePhoto ? activePhoto.rotate + 90 : 0,
-                    })
-                  }
-                  style={toolButtonStyle()}
-                >
-                  ↻
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateActivePhoto({
-                      offsetX: activePhoto ? activePhoto.offsetX + 8 : 0,
-                    })
-                  }
-                  style={toolButtonStyle()}
-                >
-                  →
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateActivePhoto({
-                      confirmed: true,
-                    })
-                  }
-                  style={{
-                    ...toolButtonStyle(),
-                    background: BRAND.green,
-                    color: '#fff',
-                    borderRadius: 999,
-                  }}
-                >
-                  ✓
-                </button>
-
-                <div
-                  style={{
-                    gridColumn: '1 / -1',
-                    fontSize: 12,
-                    fontWeight: 950,
-                    color: BRAND.navy,
-                    marginTop: 2,
-                  }}
-                >
-                  {text.toolsHint}
-                </div>
-              </div>
-
-              {activePhoto ? (
-                <button
-                  type="button"
-                  onClick={handleRemoveActivePhoto}
-                  style={{
-                    marginTop: 8,
-                    width: '100%',
-                    height: 34,
-                    borderRadius: 12,
-                    border: `1.7px solid ${BRAND.black}`,
-                    background: '#fff',
-                    color: BRAND.red,
-                    fontSize: 13,
-                    fontWeight: 950,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Remove
-                </button>
-              ) : null}
-            </ShellCard>
-
-            <ShellCard style={{ padding: 10, overflow: 'hidden' }}>
-              <div style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy, marginBottom: 8 }}>
-                {text.price}
-              </div>
-
-              <div style={{ fontSize: 12, fontWeight: 850, color: BRAND.gray, marginBottom: 8 }}>
-                {text.setPrice}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setSheet('price')}
-                style={{ width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
-              >
-                <div style={{ display: 'grid', gridTemplateColumns: '44px 1fr 48px', gap: 6, alignItems: 'center' }}>
-                  <div style={priceBoxStyle(false)}>£</div>
-                  <div style={priceBoxStyle(true)}>{pricePounds || '0'}</div>
-                  <div style={priceBoxStyle(true)}>{pricePennies || '00'}</div>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 10,
-                    height: 38,
-                    border: `2px solid ${BRAND.black}`,
-                    borderRadius: 13,
-                    display: 'grid',
-                    gridTemplateColumns: '28px 1fr 22px',
-                    alignItems: 'center',
-                    gap: 4,
-                    padding: '0 8px',
-                    color: BRAND.navy,
-                    fontSize: 13,
-                    fontWeight: 950,
-                  }}
-                >
-                  <span>🏷️</span>
-                  <span>{priceSummary}</span>
-                  <span style={{ fontSize: 25, lineHeight: 1 }}>›</span>
-                </div>
-              </button>
-
-              <div style={{ height: 2, background: BRAND.black, margin: '12px -10px 10px' }} />
-
-              <button
-                type="button"
-                onClick={() => setSheet('payment')}
-                style={{
-                  width: '100%',
-                  border: 'none',
-                  background: 'transparent',
-                  padding: 0,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', marginBottom: 9 }}>
-                  <div style={{ fontSize: 16, fontWeight: 950, color: BRAND.navy }}>
-                    {text.paymentMethods}
-                  </div>
-                  <div style={{ fontSize: 27, fontWeight: 950, color: BRAND.black, lineHeight: 1 }}>
-                    ›
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 7 }}>
-                  {paymentOptions.slice(0, 6).map((method) => {
-                    const active = payments.includes(method.id);
-
-                    return (
-                      <div
-                        key={method.id}
-                        style={{
-                          minHeight: 52,
-                          border: `1.7px solid ${BRAND.black}`,
-                          borderRadius: 12,
-                          background: active ? '#F8FBFF' : '#fff',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: 3,
-                          color: BRAND.navy,
-                        }}
-                      >
-                        <div style={{ fontSize: 23, fontWeight: 950, color: method.id === 'googlePay' ? BRAND.blue : BRAND.navy }}>
-                          {method.icon}
-                        </div>
-                        <div style={{ fontSize: 10, fontWeight: 950, textAlign: 'center', lineHeight: 1.05 }}>
-                          {method.label}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </button>
-            </ShellCard>
-          </section>
-
-          <section style={{ padding: '12px 12px 0', display: 'grid', gap: 8 }}>
-            <RowButton icon="📝" iconBg="#FFF4C7" title={text.title} subtitle={title || text.titleHint} onClick={() => setSheet('title')} />
-            <RowButton icon="T" iconBg="#E9F7FF" title={text.description} subtitle={description || text.descriptionHint} onClick={() => setSheet('description')} />
-            <RowButton icon="🏷️" iconBg="#F5E8FF" title={text.category} subtitle={currentCategory?.label || text.chooseCategory} onClick={() => setSheet('category')} />
-            <RowButton icon="⌘" iconBg="#FFE8FA" title={text.subcategory} subtitle={subcategory || text.chooseSubcategory} onClick={() => setSheet('subcategory')} />
-            <RowButton icon="🕘" iconBg="#EFFFF3" title={text.workingHours} subtitle={`${fromTime} — ${toTime}`} onClick={() => setSheet('hours')} />
-
-            <ShellCard style={{ padding: 10 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr', gap: 12, alignItems: 'center', marginBottom: 10 }}>
-                <IconBox icon="🏠" bg="#EEF4FF" />
-                <div style={{ fontSize: 17, fontWeight: 950, color: BRAND.navy }}>
-                  {text.serviceFormat}
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-                {[
-                  ['atMyPlace', text.atMyPlace, '🏠'],
-                  ['atClient', text.atClient, '👤'],
-                  ['online', text.online, '🌐'],
-                ].map(([key, label, icon]) => {
-                  const active = formats[key as keyof typeof formats];
-
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() =>
-                        setFormats((prev) => ({
-                          ...prev,
-                          [key]: !prev[key as keyof typeof prev],
-                        }))
-                      }
-                      style={{
-                        minHeight: 48,
-                        borderRadius: 13,
-                        border: `2px solid ${BRAND.black}`,
-                        background: active ? BRAND.green : '#fff',
-                        color: active ? '#fff' : BRAND.navy,
-                        fontSize: 13,
-                        fontWeight: 950,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <span style={{ marginRight: 4 }}>{icon}</span>
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
             </ShellCard>
 
             <RowButton
+              icon="📝"
+              title={text.title}
+              subtitle={title || text.titleHint}
+              onClick={() => setSheet('title')}
+            />
+
+            <RowButton
+              icon="T"
+              title={text.description}
+              subtitle={description || text.descriptionHint}
+              onClick={() => setSheet('description')}
+            />
+
+            <RowButton
+              icon={currentCategory?.icon || '🏷️'}
+              image={currentCategory?.image}
+              title={text.category}
+              subtitle={currentCategory?.label || text.chooseCategory}
+              secondLine={subcategory || ''}
+              onClick={() => setSheet('category')}
+            />
+
+            <RowButton
+              icon="📅"
+              title={text.days}
+              subtitle={text.daysHint}
+              secondLine={daysSummary}
+              onClick={() => setSheet('days')}
+            />
+
+            <RowButton
+              icon={chosenSticker.emoji}
+              title={text.enhance}
+              subtitle={`${chosenSticker.label} • ${chosenStyle.label}`}
+              onClick={() => setSheet('enhance')}
+            />
+
+            <RowButton
               icon="📞"
-              iconBg="#EFFFF3"
-              title={text.contactDetails}
-              subtitle={text.contactsHint}
-              right={
-                <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-                  {['🟢', '✈️', '🟣', '📸', '✉️', '🌐'].map((icon) => (
-                    <div
-                      key={icon}
-                      style={{
-                        width: 31,
-                        height: 31,
-                        borderRadius: 9,
-                        border: `1.5px solid ${BRAND.black}`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 17,
-                        background: '#fff',
-                      }}
-                    >
-                      {icon}
-                    </div>
-                  ))}
-                </div>
-              }
+              title={text.contacts}
+              subtitle={phone || text.contactsHint}
               onClick={() => setSheet('contacts')}
             />
 
             <RowButton
               icon="📍"
-              iconBg="#FFECEC"
               title={text.address}
-              subtitle={[address.city, address.district, address.street].filter(Boolean).join(', ') || text.addressHint}
+              subtitle={
+                [address.city, address.district, address.street].filter(Boolean).join(', ') ||
+                text.addressHint
+              }
               onClick={() => setSheet('address')}
             />
 
             <ShellCard
               style={{
-                padding: '12px 14px',
-                background: '#FFF8D7',
+                padding: 12,
+                background: BRAND.softYellow,
                 fontSize: 14,
                 fontWeight: 900,
-                color: BRAND.navy,
                 lineHeight: 1.35,
               }}
             >
-              {text.publishOnlyAfterPayment}
+              ⭐ {text.publishOnlyAfterPayment}
+            </ShellCard>
+
+            <ShellCard style={{ padding: 12 }}>
+              <div style={{ fontSize: 22, fontWeight: 950, marginBottom: 10 }}>
+                {text.preview}
+              </div>
+
+              <div
+                style={{
+                  border: `2px solid ${BRAND.black}`,
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  background: '#fff',
+                }}
+              >
+                <div
+                  style={{
+                    height: 134,
+                    background: BRAND.softGreen,
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {media[0] ? (
+                    media[0].type === 'video' ? (
+                      <video
+                        src={media[0].preview}
+                        muted
+                        loop
+                        autoPlay
+                        playsInline
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <img
+                        src={media[0].preview}
+                        alt=""
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    )
+                  ) : (
+                    <div
+                      style={{
+                        height: '100%',
+                        display: 'grid',
+                        placeItems: 'center',
+                        fontSize: 42,
+                      }}
+                    >
+                      🖼️
+                    </div>
+                  )}
+
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: 10,
+                      top: 10,
+                      border: `2px solid ${BRAND.black}`,
+                      borderRadius: 999,
+                      background: BRAND.yellow,
+                      color: BRAND.navy,
+                      padding: '6px 10px',
+                      fontSize: 13,
+                      fontWeight: 950,
+                    }}
+                  >
+                    {chosenSticker.emoji} {chosenSticker.label}
+                  </div>
+                </div>
+
+                <div style={{ padding: 12 }}>
+                  <div style={{ fontSize: 20, fontWeight: 950, color: BRAND.navy }}>
+                    {title || text.titleHint}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 5,
+                      fontSize: 13,
+                      fontWeight: 850,
+                      color: BRAND.gray,
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {description || text.descriptionHint}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 10,
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: 8,
+                    }}
+                  >
+                    <button type="button" style={previewButtonStyle(BRAND.blue)}>
+                      {language === 'RU' ? 'Профиль' : 'Profile'}
+                    </button>
+                    <button type="button" style={previewButtonStyle(BRAND.green)}>
+                      {language === 'RU' ? 'Забронировать' : 'Book'}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </ShellCard>
           </section>
         </div>
@@ -1319,7 +1092,7 @@ export default function NewPromotionPage() {
           bottom: 0,
           zIndex: 80,
           background: 'rgba(255,255,255,0.98)',
-          borderTop: '1px solid #E5E8EF',
+          borderTop: '1px solid #e8ebf0',
           padding: '12px 16px calc(12px + env(safe-area-inset-bottom))',
         }}
       >
@@ -1345,10 +1118,100 @@ export default function NewPromotionPage() {
         </div>
       </div>
 
+      {sheet === 'media' ? (
+        <Sheet title={text.chooseMedia} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {[
+              { mode: 'single' as const, title: text.singlePhoto, hint: 'JPG / PNG / WEBP' },
+              { mode: 'collage' as const, title: text.collage, hint: '4 images in one collage' },
+              { mode: 'video' as const, title: text.video, hint: 'Up to 5 seconds recommended' },
+            ].map((item) => {
+              const active = mediaMode === item.mode;
+
+              return (
+                <button
+                  key={item.mode}
+                  type="button"
+                  onClick={() => setMediaMode(item.mode)}
+                  style={{
+                    minHeight: 62,
+                    borderRadius: 18,
+                    border: `2px solid ${BRAND.black}`,
+                    background: active ? BRAND.softGreen : '#fff',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 32px',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 14px',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span>
+                    <div style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>
+                      {item.title}
+                    </div>
+                    <div style={{ marginTop: 3, fontSize: 13, fontWeight: 850, color: BRAND.gray }}>
+                      {item.hint}
+                    </div>
+                  </span>
+                  <span
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 999,
+                      border: `2px solid ${BRAND.black}`,
+                      background: active ? BRAND.green : '#fff',
+                      color: '#fff',
+                      display: 'grid',
+                      placeItems: 'center',
+                      fontWeight: 950,
+                    }}
+                  >
+                    {active ? '✓' : ''}
+                  </span>
+                </button>
+              );
+            })}
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              <button
+                type="button"
+                onClick={() => handleMediaPick(mediaMode, 'camera')}
+                style={smallChoiceStyle()}
+              >
+                📷<br />
+                {text.camera}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleMediaPick(mediaMode, 'gallery')}
+                style={smallChoiceStyle()}
+              >
+                🖼️<br />
+                {text.gallery}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  mediaMode === 'video'
+                    ? handleMediaPick('video', 'video')
+                    : handleMediaPick(mediaMode, 'files')
+                }
+                style={smallChoiceStyle()}
+              >
+                📁<br />
+                {text.files}
+              </button>
+            </div>
+          </div>
+        </Sheet>
+      ) : null}
+
       {sheet === 'title' ? (
         <Sheet title={text.title} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 14 }}>
-            <Field label={text.title} value={title} onChange={setTitle} placeholder={text.enterTitle} />
+            <Field label={text.title} value={title} onChange={setTitle} placeholder={text.titleHint} />
             <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
               {text.save}
             </button>
@@ -1359,7 +1222,13 @@ export default function NewPromotionPage() {
       {sheet === 'description' ? (
         <Sheet title={text.description} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 14 }}>
-            <Field label={text.description} value={description} onChange={setDescription} placeholder={text.enterDescription} multiline />
+            <Field
+              label={text.description}
+              value={description}
+              onChange={setDescription}
+              placeholder={text.descriptionHint}
+              multiline
+            />
             <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
               {text.save}
             </button>
@@ -1368,7 +1237,7 @@ export default function NewPromotionPage() {
       ) : null}
 
       {sheet === 'category' ? (
-        <Sheet title={text.category} onClose={() => setSheet(null)}>
+        <Sheet title={text.chooseCategory} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 10 }}>
             {localizedCategories.map((item) => {
               const active = item.id === categoryId;
@@ -1383,25 +1252,32 @@ export default function NewPromotionPage() {
                     setSheet('subcategory');
                   }}
                   style={{
-                    minHeight: 62,
+                    minHeight: 78,
                     borderRadius: 18,
-                    border: `2px solid ${BRAND.black}`,
-                    background: active ? BRAND.blue : '#fff',
-                    color: active ? '#fff' : BRAND.navy,
+                    border: `2px solid ${active ? BRAND.green : BRAND.black}`,
+                    background: active ? BRAND.softGreen : '#fff',
                     display: 'grid',
-                    gridTemplateColumns: '44px 1fr 30px',
+                    gridTemplateColumns: '62px 1fr 28px',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 12,
                     padding: '10px 14px',
-                    fontSize: 18,
-                    fontWeight: 950,
                     textAlign: 'left',
                     cursor: 'pointer',
                   }}
                 >
-                  <span style={{ fontSize: 27 }}>{item.icon}</span>
-                  <span>{item.label}</span>
-                  <span>{active ? '✓' : '›'}</span>
+                  <IconBox icon={item.icon} image={item.image} bg="#fff" />
+
+                  <span>
+                    <div style={{ fontSize: 20, fontWeight: 950, color: BRAND.navy }}>
+                      {item.label}
+                    </div>
+                    <div style={{ marginTop: 4, fontSize: 13, fontWeight: 850, color: BRAND.gray }}>
+                      {item.subcategories.length}{' '}
+                      {language === 'RU' ? 'подкатегорий' : 'subcategories'}
+                    </div>
+                  </span>
+
+                  <span style={{ fontSize: 30, fontWeight: 950 }}>{active ? '✓' : '›'}</span>
                 </button>
               );
             })}
@@ -1410,15 +1286,9 @@ export default function NewPromotionPage() {
       ) : null}
 
       {sheet === 'subcategory' ? (
-        <Sheet title={text.subcategory} onClose={() => setSheet(null)}>
+        <Sheet title={text.chooseSubcategory} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 10 }}>
-            {!categoryId ? (
-              <button type="button" onClick={() => setSheet('category')} style={primaryButtonStyle()}>
-                {text.chooseCategory}
-              </button>
-            ) : null}
-
-            {subcategoryOptions.map((item: string) => {
+            {subcategoryOptions.map((item) => {
               const active = item === subcategory;
 
               return (
@@ -1432,13 +1302,13 @@ export default function NewPromotionPage() {
                   style={{
                     minHeight: 58,
                     borderRadius: 18,
-                    border: `2px solid ${BRAND.black}`,
-                    background: active ? BRAND.blue : '#fff',
-                    color: active ? '#fff' : BRAND.navy,
-                    display: 'flex',
+                    border: `2px solid ${active ? BRAND.green : BRAND.black}`,
+                    background: active ? BRAND.softGreen : '#fff',
+                    color: BRAND.navy,
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 32px',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 10,
+                    gap: 12,
                     padding: '10px 14px',
                     fontSize: 18,
                     fontWeight: 950,
@@ -1447,110 +1317,78 @@ export default function NewPromotionPage() {
                   }}
                 >
                   <span>{item}</span>
-                  <span>{active ? '✓' : '›'}</span>
-                </button>
-              );
-            })}
-          </div>
-        </Sheet>
-      ) : null}
-
-      {sheet === 'price' ? (
-        <Sheet title={text.price} onClose={() => setSheet(null)}>
-          <div style={{ display: 'grid', gap: 14 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {[
-                ['fixed', text.fixedPrice],
-                ['range', text.priceRange],
-              ].map(([mode, label]) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setPriceMode(mode as 'fixed' | 'range')}
-                  style={{
-                    height: 54,
-                    borderRadius: 18,
-                    border: `2px solid ${BRAND.black}`,
-                    background: priceMode === mode ? BRAND.blue : '#fff',
-                    color: priceMode === mode ? '#fff' : BRAND.navy,
-                    fontSize: 16,
-                    fontWeight: 950,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {priceMode === 'fixed' ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <Field label={text.pounds} value={pricePounds} onChange={(next) => setPricePounds(next.replace(/[^\d]/g, '').slice(0, 5))} placeholder="45" />
-                <Field label={text.pennies} value={pricePennies} onChange={(next) => setPricePennies(next.replace(/[^\d]/g, '').slice(0, 2))} placeholder="00" />
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <Field label={text.minPrice} value={minPrice} onChange={(next) => setMinPrice(next.replace(/[^\d]/g, '').slice(0, 5))} placeholder="40" />
-                <Field label={text.maxPrice} value={maxPrice} onChange={(next) => setMaxPrice(next.replace(/[^\d]/g, '').slice(0, 5))} placeholder="60" />
-              </div>
-            )}
-
-            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
-              {text.save}
-            </button>
-          </div>
-        </Sheet>
-      ) : null}
-
-      {sheet === 'payment' ? (
-        <Sheet title={text.paymentMethods} onClose={() => setSheet(null)}>
-          <div style={{ display: 'grid', gap: 10 }}>
-            {paymentOptions.map((method) => {
-              const active = payments.includes(method.id);
-
-              return (
-                <button
-                  key={method.id}
-                  type="button"
-                  onClick={() => togglePayment(method.id)}
-                  style={{
-                    minHeight: 64,
-                    borderRadius: 18,
-                    border: `2px solid ${BRAND.black}`,
-                    background: active ? BRAND.softBlue : '#fff',
-                    display: 'grid',
-                    gridTemplateColumns: '48px 1fr 32px',
-                    alignItems: 'center',
-                    gap: 12,
-                    padding: '10px 14px',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                >
-                  <IconBox icon={method.icon} bg="#fff" />
-                  <div style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>
-                    {method.label}
-                  </div>
-                  <div
+                  <span
                     style={{
                       width: 28,
                       height: 28,
                       borderRadius: 999,
-                      border: `2px solid ${BRAND.black}`,
                       background: active ? BRAND.green : '#fff',
                       color: '#fff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      border: `2px solid ${BRAND.black}`,
+                      display: 'grid',
+                      placeItems: 'center',
                       fontSize: 16,
-                      fontWeight: 950,
                     }}
                   >
                     {active ? '✓' : ''}
-                  </div>
+                  </span>
                 </button>
               );
             })}
+          </div>
+        </Sheet>
+      ) : null}
+
+      {sheet === 'days' ? (
+        <Sheet title={text.days} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 14 }}>
+            <ShellCard style={{ padding: 14, background: BRAND.softGreen }}>
+              <div style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>
+                {text.firstDayFree}
+              </div>
+              <div style={{ marginTop: 5, fontSize: 14, fontWeight: 850, color: BRAND.gray }}>
+                £{PRICE_PER_DAY} / day
+              </div>
+            </ShellCard>
+
+            <select
+              value={days}
+              onChange={(event) => setDays(Number(event.target.value))}
+              style={{
+                width: '100%',
+                height: 64,
+                borderRadius: 20,
+                border: `2px solid ${BRAND.black}`,
+                background: '#fff',
+                color: BRAND.navy,
+                padding: '0 16px',
+                fontSize: 22,
+                fontWeight: 950,
+              }}
+            >
+              {Array.from({ length: 365 }, (_, index) => index + 1).map((day) => {
+                const price = FIRST_AD_FREE
+                  ? Math.max(0, day - 1) * PRICE_PER_DAY
+                  : day * PRICE_PER_DAY;
+
+                return (
+                  <option key={day} value={day}>
+                    {language === 'RU'
+                      ? `${day} дн. — ${price === 0 ? 'бесплатно' : `£${price}`}`
+                      : `${day} days — ${price === 0 ? 'free' : `£${price}`}`}
+                  </option>
+                );
+              })}
+            </select>
+
+            <ShellCard style={{ padding: 14 }}>
+              <div style={{ fontSize: 14, fontWeight: 850, color: BRAND.gray }}>
+                {text.total}
+              </div>
+              <div style={{ marginTop: 4, fontSize: 34, fontWeight: 950, color: BRAND.green }}>
+                {adPrice === 0 ? text.free : `£${adPrice}`}
+              </div>
+            </ShellCard>
 
             <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
               {text.save}
@@ -1559,12 +1397,43 @@ export default function NewPromotionPage() {
         </Sheet>
       ) : null}
 
-      {sheet === 'hours' ? (
-        <Sheet title={text.workingHours} onClose={() => setSheet(null)}>
-          <div style={{ display: 'grid', gap: 14 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <Field label={text.fromTime} value={fromTime} onChange={setFromTime} placeholder="09:00" />
-              <Field label={text.toTime} value={toTime} onChange={setToTime} placeholder="20:00" />
+      {sheet === 'enhance' ? (
+        <Sheet title={text.enhance} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 950, marginBottom: 10 }}>
+                {language === 'RU' ? 'Наклейка' : 'Sticker'}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                {stickerOptions.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setSticker(item.id)}
+                    style={chipStyle(sticker === item.id)}
+                  >
+                    {item.emoji} {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 950, marginBottom: 10 }}>
+                {language === 'RU' ? 'Вид рекламы' : 'Ad style'}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                {styleOptions.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setVisualStyle(item.id)}
+                    style={chipStyle(visualStyle === item.id)}
+                  >
+                    {item.emoji} {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
@@ -1575,42 +1444,14 @@ export default function NewPromotionPage() {
       ) : null}
 
       {sheet === 'contacts' ? (
-        <Sheet title={text.contactDetails} onClose={() => setSheet(null)}>
-          <div style={{ display: 'grid', gap: 12 }}>
-            {contactRows.map((row) => (
-              <div key={row.key} style={{ border: `2px solid ${BRAND.black}`, borderRadius: 20, background: '#fff', padding: 12 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '44px 1fr', gap: 10, alignItems: 'center', marginBottom: 10 }}>
-                  <IconBox icon={row.icon} bg="#F7FAFF" />
-                  <div style={{ fontSize: 17, fontWeight: 950, color: BRAND.navy }}>
-                    {row.label}
-                  </div>
-                </div>
-
-                <input
-                  value={contacts[row.key]}
-                  onChange={(e) =>
-                    setContacts((prev) => ({
-                      ...prev,
-                      [row.key]: e.target.value,
-                    }))
-                  }
-                  placeholder={row.placeholder}
-                  style={{
-                    width: '100%',
-                    height: 54,
-                    border: `2px solid ${BRAND.black}`,
-                    borderRadius: 17,
-                    padding: '0 14px',
-                    fontSize: 16,
-                    fontWeight: 850,
-                    color: BRAND.navy,
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-            ))}
-
+        <Sheet title={text.contacts} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 14 }}>
+            <Field
+              label={language === 'RU' ? 'Телефон' : 'Phone'}
+              value={phone}
+              onChange={setPhone}
+              placeholder="+44 7000 000000"
+            />
             <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
               {text.save}
             </button>
@@ -1621,18 +1462,82 @@ export default function NewPromotionPage() {
       {sheet === 'address' ? (
         <Sheet title={text.address} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 14 }}>
-            <Field label={text.city} value={address.city} onChange={(next) => setAddress((prev) => ({ ...prev, city: next }))} placeholder="London" />
-            <Field label={text.district} value={address.district} onChange={(next) => setAddress((prev) => ({ ...prev, district: next }))} placeholder="Camden, Chelsea, Mayfair..." />
-            <Field label={text.street} value={address.street} onChange={(next) => setAddress((prev) => ({ ...prev, street: next }))} placeholder="Street" />
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-              <Field label={text.building} value={address.building} onChange={(next) => setAddress((prev) => ({ ...prev, building: next }))} placeholder="12" />
-              <Field label={text.floor} value={address.floor} onChange={(next) => setAddress((prev) => ({ ...prev, floor: next }))} placeholder="2" />
-              <Field label={text.flat} value={address.flat} onChange={(next) => setAddress((prev) => ({ ...prev, flat: next }))} placeholder="5" />
-            </div>
-
+            <Field
+              label={language === 'RU' ? 'Город' : 'City'}
+              value={address.city}
+              onChange={(next) => setAddress((prev) => ({ ...prev, city: next }))}
+              placeholder="London"
+            />
+            <Field
+              label={language === 'RU' ? 'Район' : 'District'}
+              value={address.district}
+              onChange={(next) => setAddress((prev) => ({ ...prev, district: next }))}
+              placeholder="Camden, Chelsea, Mayfair"
+            />
+            <Field
+              label={language === 'RU' ? 'Улица' : 'Street'}
+              value={address.street}
+              onChange={(next) => setAddress((prev) => ({ ...prev, street: next }))}
+              placeholder="Street"
+            />
             <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
               {text.save}
+            </button>
+          </div>
+        </Sheet>
+      ) : null}
+
+      {sheet === 'payment' ? (
+        <Sheet title={text.payment} onClose={() => setSheet(null)}>
+          <div style={{ display: 'grid', gap: 12 }}>
+            {paymentOptions.map((item) => {
+              const active = item.id === paymentMethod;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setPaymentMethod(item.id)}
+                  style={{
+                    minHeight: 64,
+                    borderRadius: 18,
+                    border: `2px solid ${active ? BRAND.green : BRAND.black}`,
+                    background: active ? BRAND.softGreen : '#fff',
+                    display: 'grid',
+                    gridTemplateColumns: '52px 1fr 32px',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '10px 14px',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <IconBox icon={item.icon} bg="#fff" />
+                  <span style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>
+                    {item.label}
+                  </span>
+                  <span>{active ? '✓' : ''}</span>
+                </button>
+              );
+            })}
+
+            <ShellCard style={{ padding: 14, background: BRAND.softYellow }}>
+              <div style={{ fontSize: 14, fontWeight: 850, color: BRAND.gray }}>
+                {text.total}
+              </div>
+              <div style={{ marginTop: 4, fontSize: 34, fontWeight: 950, color: BRAND.green }}>
+                {adPrice === 0 ? text.free : `£${adPrice}`}
+              </div>
+            </ShellCard>
+
+            <button
+              type="button"
+              onClick={() => {
+                alert(language === 'RU' ? 'Оплата подключается следующим шагом.' : 'Payment will be connected next.');
+              }}
+              style={primaryButtonStyle()}
+            >
+              {language === 'RU' ? 'Оплатить и опубликовать' : 'Pay and publish'}
             </button>
           </div>
         </Sheet>
@@ -1641,13 +1546,13 @@ export default function NewPromotionPage() {
   );
 }
 
-function roundButtonStyle(): React.CSSProperties {
+function roundButtonStyle(): CSSProperties {
   return {
     width: 54,
     height: 54,
     borderRadius: 999,
     border: '2px solid #111111',
-    background: '#fff',
+    background: '#ffffff',
     color: '#061b49',
     fontSize: 28,
     fontWeight: 950,
@@ -1655,47 +1560,57 @@ function roundButtonStyle(): React.CSSProperties {
   };
 }
 
-function toolButtonStyle(): React.CSSProperties {
-  return {
-    width: '100%',
-    height: 36,
-    border: 'none',
-    background: 'transparent',
-    color: '#061b49',
-    fontSize: 25,
-    fontWeight: 950,
-    cursor: 'pointer',
-    lineHeight: 1,
-  };
-}
-
-function priceBoxStyle(isNumber: boolean): React.CSSProperties {
-  return {
-    height: 58,
-    borderRadius: 13,
-    border: '1.7px solid #C8CCD4',
-    background: '#fff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: isNumber ? 27 : 24,
-    fontWeight: 950,
-    color: isNumber ? '#F0182D' : '#23C552',
-    boxSizing: 'border-box',
-  };
-}
-
-function primaryButtonStyle(): React.CSSProperties {
+function primaryButtonStyle(): CSSProperties {
   return {
     width: '100%',
     height: 58,
     borderRadius: 20,
     border: '2px solid #111111',
-    background: '#23C552',
+    background: '#24c85a',
     color: '#fff',
     fontSize: 18,
     fontWeight: 950,
     cursor: 'pointer',
     boxShadow: '0 5px 0 rgba(0,0,0,0.10)',
+  };
+}
+
+function smallChoiceStyle(): CSSProperties {
+  return {
+    minHeight: 74,
+    borderRadius: 18,
+    border: '2px solid #111111',
+    background: '#ffffff',
+    color: '#061b49',
+    fontSize: 14,
+    fontWeight: 950,
+    cursor: 'pointer',
+    lineHeight: 1.35,
+  };
+}
+
+function chipStyle(active: boolean): CSSProperties {
+  return {
+    minHeight: 54,
+    borderRadius: 18,
+    border: `2px solid ${active ? BRAND.green : BRAND.black}`,
+    background: active ? BRAND.softGreen : '#fff',
+    color: BRAND.navy,
+    fontSize: 16,
+    fontWeight: 950,
+    cursor: 'pointer',
+  };
+}
+
+function previewButtonStyle(bg: string): CSSProperties {
+  return {
+    height: 44,
+    borderRadius: 16,
+    border: '2px solid #111111',
+    background: bg,
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: 950,
+    cursor: 'pointer',
   };
 }
