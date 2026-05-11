@@ -391,7 +391,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   };
 
   const handleCreateAd = () => {
-    pushAddRoute('/profile/promotions/new');
+    pushAddRoute('/promotions/new');
   };
 
   const handleCreateService = () => {
@@ -399,7 +399,7 @@ export default function BottomNav({ active: activeProp, onAddClick }: BottomNavP
   };
 
   const handleCreateDeal = () => {
-    pushAddRoute('/profile/deals/new');
+    pushAddRoute('/deals/new');
   };
 
   return (
