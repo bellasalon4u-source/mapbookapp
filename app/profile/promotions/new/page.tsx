@@ -63,87 +63,7 @@ const BRAND = {
 
 const MAX_PHOTOS = 50;
 
-const TEXT: Partial<
-  Record<
-    AppLanguage,
-    {
-      pageTitle: string;
-      pageSubtitle: string;
-      photos: string;
-      addPhotoVideo: string;
-      photoHint: string;
-      toolsHint: string;
-      price: string;
-      setPrice: string;
-      fromTo: string;
-      paymentMethods: string;
-      title: string;
-      titleHint: string;
-      description: string;
-      descriptionHint: string;
-      category: string;
-      subcategory: string;
-      workingHours: string;
-      hoursHint: string;
-      serviceFormat: string;
-      contactDetails: string;
-      contactsHint: string;
-      address: string;
-      addressHint: string;
-      continue: string;
-      save: string;
-      close: string;
-      back: string;
-      chooseCategory: string;
-      chooseSubcategory: string;
-      enterTitle: string;
-      enterDescription: string;
-      priceType: string;
-      fixedPrice: string;
-      priceRange: string;
-      minPrice: string;
-      maxPrice: string;
-      pounds: string;
-      pennies: string;
-      from: string;
-      to: string;
-      card: string;
-      cash: string;
-      applePay: string;
-      googlePay: string;
-      paypal: string;
-      bankTransfer: string;
-      olamepBalance: string;
-      crypto: string;
-      fromTime: string;
-      toTime: string;
-      atMyPlace: string;
-      atClient: string;
-      online: string;
-      phone: string;
-      whatsapp: string;
-      businessWhatsapp: string;
-      telegram: string;
-      viber: string;
-      instagram: string;
-      email: string;
-      website: string;
-      city: string;
-      district: string;
-      street: string;
-      building: string;
-      floor: string;
-      flat: string;
-      publishOnlyAfterPayment: string;
-      alertTitle: string;
-      alertDescription: string;
-      alertCategory: string;
-      alertSubcategory: string;
-      alertPhoto: string;
-      ready: string;
-    }
-  >
-> = {
+const TEXT = {
   EN: {
     pageTitle: 'Add advertisement',
     pageSubtitle: 'Create a bright listing for clients nearby',
@@ -153,7 +73,6 @@ const TEXT: Partial<
     toolsHint: 'Move, zoom, rotate and confirm.',
     price: 'Price',
     setPrice: 'Set your price',
-    fromTo: 'from £40 to £60',
     paymentMethods: 'Payment methods',
     title: 'Title',
     titleHint: 'Add a short and clear title',
@@ -162,7 +81,6 @@ const TEXT: Partial<
     category: 'Category',
     subcategory: 'Subcategory',
     workingHours: 'Working hours',
-    hoursHint: '09:00 — 20:00',
     serviceFormat: 'Service format',
     contactDetails: 'Contact details',
     contactsHint: 'Opens a separate sheet of channels',
@@ -170,13 +88,10 @@ const TEXT: Partial<
     addressHint: 'Opens a separate address form',
     continue: 'Continue',
     save: 'Save',
-    close: 'Close',
-    back: 'Back',
     chooseCategory: 'Choose category',
     chooseSubcategory: 'Choose subcategory',
     enterTitle: 'Enter title',
     enterDescription: 'Enter description',
-    priceType: 'Price type',
     fixedPrice: 'Fixed price',
     priceRange: 'Price range',
     minPrice: 'Min price',
@@ -218,7 +133,6 @@ const TEXT: Partial<
     alertCategory: 'Please choose category',
     alertSubcategory: 'Please choose subcategory',
     alertPhoto: 'Please add at least one photo or video',
-    ready: 'Ready',
   },
   RU: {
     pageTitle: 'Добавить рекламу',
@@ -229,7 +143,6 @@ const TEXT: Partial<
     toolsHint: 'Двигайте, увеличивайте, поворачивайте и фиксируйте.',
     price: 'Цена',
     setPrice: 'Установите цену',
-    fromTo: 'от £40 до £60',
     paymentMethods: 'Способы оплаты',
     title: 'Заголовок',
     titleHint: 'Добавьте короткий и понятный заголовок',
@@ -238,7 +151,6 @@ const TEXT: Partial<
     category: 'Категория',
     subcategory: 'Подкатегория',
     workingHours: 'Часы работы',
-    hoursHint: '09:00 — 20:00',
     serviceFormat: 'Формат услуги',
     contactDetails: 'Контактные данные',
     contactsHint: 'Открывается отдельное окно каналов связи',
@@ -246,13 +158,10 @@ const TEXT: Partial<
     addressHint: 'Открывается отдельная форма адреса',
     continue: 'Продолжить',
     save: 'Сохранить',
-    close: 'Закрыть',
-    back: 'Назад',
     chooseCategory: 'Выберите категорию',
     chooseSubcategory: 'Выберите подкатегорию',
     enterTitle: 'Введите заголовок',
     enterDescription: 'Введите описание',
-    priceType: 'Тип цены',
     fixedPrice: 'Одна цена',
     priceRange: 'Цена от и до',
     minPrice: 'Цена от',
@@ -294,12 +203,11 @@ const TEXT: Partial<
     alertCategory: 'Выберите категорию',
     alertSubcategory: 'Выберите подкатегорию',
     alertPhoto: 'Добавьте хотя бы одно фото или видео',
-    ready: 'Готово',
   },
 };
 
 function getText(language: AppLanguage) {
-  return TEXT[language] || TEXT.EN!;
+  return language === 'RU' ? TEXT.RU : TEXT.EN;
 }
 
 function uid() {
@@ -308,6 +216,17 @@ function uid() {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
+}
+
+function localizeLabel(value: unknown, language: AppLanguage) {
+  if (typeof value === 'string') return value;
+
+  if (value && typeof value === 'object') {
+    const map = value as Record<string, string>;
+    return map[language] || map.EN || map.RU || Object.values(map)[0] || '';
+  }
+
+  return '';
 }
 
 function ShellCard({
@@ -332,13 +251,7 @@ function ShellCard({
   );
 }
 
-function IconBox({
-  icon,
-  bg = '#F5F7FF',
-}: {
-  icon: string;
-  bg?: string;
-}) {
+function IconBox({ icon, bg = '#F5F7FF' }: { icon: string; bg?: string }) {
   return (
     <div
       style={{
@@ -675,6 +588,7 @@ export default function NewPromotionPage() {
 
   useEffect(() => {
     setLanguage(getSavedLanguage());
+
     const unsub = subscribeToLanguageChange((nextLanguage) => {
       setLanguage(nextLanguage);
     });
@@ -690,12 +604,17 @@ export default function NewPromotionPage() {
 
   const localizedCategories = useMemo(() => {
     return (categories as any[]).map((item) => ({
-      id: item.id,
-      label: item.label || item.shortLabel || item.id,
-      icon: item.icon || '📍',
-      subcategories: item.subcategories || [],
+      id: String(item.id || ''),
+      label:
+        localizeLabel(item.label, language) ||
+        localizeLabel(item.shortLabel, language) ||
+        String(item.id || 'Category'),
+      icon: String(item.icon || '📍'),
+      subcategories: Array.isArray(item.subcategories)
+        ? item.subcategories.map((sub: unknown) => localizeLabel(sub, language) || String(sub))
+        : [],
     }));
-  }, []);
+  }, [language]);
 
   const currentCategory = localizedCategories.find((item) => item.id === categoryId);
   const subcategoryOptions = currentCategory?.subcategories || [];
@@ -867,17 +786,7 @@ export default function NewPromotionPage() {
             <button
               type="button"
               onClick={() => router.back()}
-              style={{
-                width: 54,
-                height: 54,
-                borderRadius: 999,
-                border: `2px solid ${BRAND.black}`,
-                background: '#fff',
-                color: BRAND.navy,
-                fontSize: 30,
-                fontWeight: 950,
-                cursor: 'pointer',
-              }}
+              style={roundButtonStyle()}
             >
               ←
             </button>
@@ -939,17 +848,7 @@ export default function NewPromotionPage() {
             <button
               type="button"
               onClick={() => router.push('/')}
-              style={{
-                width: 54,
-                height: 54,
-                borderRadius: 999,
-                border: `2px solid ${BRAND.black}`,
-                background: '#fff',
-                color: BRAND.navy,
-                fontSize: 28,
-                fontWeight: 950,
-                cursor: 'pointer',
-              }}
+              style={roundButtonStyle()}
             >
               ×
             </button>
@@ -964,31 +863,11 @@ export default function NewPromotionPage() {
             }}
           >
             <ShellCard style={{ padding: 10 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 8,
-                  alignItems: 'center',
-                  marginBottom: 9,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 950,
-                    color: BRAND.navy,
-                  }}
-                >
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', marginBottom: 9 }}>
+                <div style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>
                   {text.photos}
                 </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 950,
-                    color: BRAND.gray,
-                  }}
-                >
+                <div style={{ fontSize: 13, fontWeight: 950, color: BRAND.gray }}>
                   {photos.length}/{MAX_PHOTOS}
                 </div>
               </div>
@@ -1228,47 +1107,20 @@ export default function NewPromotionPage() {
             </ShellCard>
 
             <ShellCard style={{ padding: 10, overflow: 'hidden' }}>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 950,
-                  color: BRAND.navy,
-                  marginBottom: 8,
-                }}
-              >
+              <div style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy, marginBottom: 8 }}>
                 {text.price}
               </div>
 
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 850,
-                  color: BRAND.gray,
-                  marginBottom: 8,
-                }}
-              >
+              <div style={{ fontSize: 12, fontWeight: 850, color: BRAND.gray, marginBottom: 8 }}>
                 {text.setPrice}
               </div>
 
               <button
                 type="button"
                 onClick={() => setSheet('price')}
-                style={{
-                  width: '100%',
-                  border: 'none',
-                  background: 'transparent',
-                  padding: 0,
-                  cursor: 'pointer',
-                }}
+                style={{ width: '100%', border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
               >
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '44px 1fr 48px',
-                    gap: 6,
-                    alignItems: 'center',
-                  }}
-                >
+                <div style={{ display: 'grid', gridTemplateColumns: '44px 1fr 48px', gap: 6, alignItems: 'center' }}>
                   <div style={priceBoxStyle(false)}>£</div>
                   <div style={priceBoxStyle(true)}>{pricePounds || '0'}</div>
                   <div style={priceBoxStyle(true)}>{pricePennies || '00'}</div>
@@ -1296,13 +1148,7 @@ export default function NewPromotionPage() {
                 </div>
               </button>
 
-              <div
-                style={{
-                  height: 2,
-                  background: BRAND.black,
-                  margin: '12px -10px 10px',
-                }}
-              />
+              <div style={{ height: 2, background: BRAND.black, margin: '12px -10px 10px' }} />
 
               <button
                 type="button"
@@ -1316,43 +1162,16 @@ export default function NewPromotionPage() {
                   textAlign: 'left',
                 }}
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    gap: 8,
-                    alignItems: 'center',
-                    marginBottom: 9,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 950,
-                      color: BRAND.navy,
-                    }}
-                  >
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', marginBottom: 9 }}>
+                  <div style={{ fontSize: 16, fontWeight: 950, color: BRAND.navy }}>
                     {text.paymentMethods}
                   </div>
-                  <div
-                    style={{
-                      fontSize: 27,
-                      fontWeight: 950,
-                      color: BRAND.black,
-                      lineHeight: 1,
-                    }}
-                  >
+                  <div style={{ fontSize: 27, fontWeight: 950, color: BRAND.black, lineHeight: 1 }}>
                     ›
                   </div>
                 </div>
 
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 1fr)',
-                    gap: 7,
-                  }}
-                >
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 7 }}>
                   {paymentOptions.slice(0, 6).map((method) => {
                     const active = payments.includes(method.id);
 
@@ -1372,23 +1191,10 @@ export default function NewPromotionPage() {
                           color: BRAND.navy,
                         }}
                       >
-                        <div
-                          style={{
-                            fontSize: 23,
-                            fontWeight: 950,
-                            color: method.id === 'googlePay' ? BRAND.blue : BRAND.navy,
-                          }}
-                        >
+                        <div style={{ fontSize: 23, fontWeight: 950, color: method.id === 'googlePay' ? BRAND.blue : BRAND.navy }}>
                           {method.icon}
                         </div>
-                        <div
-                          style={{
-                            fontSize: 10,
-                            fontWeight: 950,
-                            textAlign: 'center',
-                            lineHeight: 1.05,
-                          }}
-                        >
+                        <div style={{ fontSize: 10, fontWeight: 950, textAlign: 'center', lineHeight: 1.05 }}>
                           {method.label}
                         </div>
                       </div>
@@ -1400,75 +1206,21 @@ export default function NewPromotionPage() {
           </section>
 
           <section style={{ padding: '12px 12px 0', display: 'grid', gap: 8 }}>
-            <RowButton
-              icon="📝"
-              iconBg="#FFF4C7"
-              title={text.title}
-              subtitle={title || text.titleHint}
-              onClick={() => setSheet('title')}
-            />
-
-            <RowButton
-              icon="T"
-              iconBg="#E9F7FF"
-              title={text.description}
-              subtitle={description || text.descriptionHint}
-              onClick={() => setSheet('description')}
-            />
-
-            <RowButton
-              icon="🏷️"
-              iconBg="#F5E8FF"
-              title={text.category}
-              subtitle={currentCategory?.label || text.chooseCategory}
-              onClick={() => setSheet('category')}
-            />
-
-            <RowButton
-              icon="⌘"
-              iconBg="#FFE8FA"
-              title={text.subcategory}
-              subtitle={subcategory || text.chooseSubcategory}
-              onClick={() => setSheet('subcategory')}
-            />
-
-            <RowButton
-              icon="🕘"
-              iconBg="#EFFFF3"
-              title={text.workingHours}
-              subtitle={`${fromTime} — ${toTime}`}
-              onClick={() => setSheet('hours')}
-            />
+            <RowButton icon="📝" iconBg="#FFF4C7" title={text.title} subtitle={title || text.titleHint} onClick={() => setSheet('title')} />
+            <RowButton icon="T" iconBg="#E9F7FF" title={text.description} subtitle={description || text.descriptionHint} onClick={() => setSheet('description')} />
+            <RowButton icon="🏷️" iconBg="#F5E8FF" title={text.category} subtitle={currentCategory?.label || text.chooseCategory} onClick={() => setSheet('category')} />
+            <RowButton icon="⌘" iconBg="#FFE8FA" title={text.subcategory} subtitle={subcategory || text.chooseSubcategory} onClick={() => setSheet('subcategory')} />
+            <RowButton icon="🕘" iconBg="#EFFFF3" title={text.workingHours} subtitle={`${fromTime} — ${toTime}`} onClick={() => setSheet('hours')} />
 
             <ShellCard style={{ padding: 10 }}>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '56px 1fr',
-                  gap: 12,
-                  alignItems: 'center',
-                  marginBottom: 10,
-                }}
-              >
+              <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr', gap: 12, alignItems: 'center', marginBottom: 10 }}>
                 <IconBox icon="🏠" bg="#EEF4FF" />
-                <div
-                  style={{
-                    fontSize: 17,
-                    fontWeight: 950,
-                    color: BRAND.navy,
-                  }}
-                >
+                <div style={{ fontSize: 17, fontWeight: 950, color: BRAND.navy }}>
                   {text.serviceFormat}
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 1fr',
-                  gap: 8,
-                }}
-              >
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
                 {[
                   ['atMyPlace', text.atMyPlace, '🏠'],
                   ['atClient', text.atClient, '👤'],
@@ -1509,7 +1261,7 @@ export default function NewPromotionPage() {
               icon="📞"
               iconBg="#EFFFF3"
               title={text.contactDetails}
-              subtitle={selectedPaymentLabels ? text.contactsHint : text.contactsHint}
+              subtitle={text.contactsHint}
               right={
                 <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                   {['🟢', '✈️', '🟣', '📸', '✉️', '🌐'].map((icon) => (
@@ -1539,10 +1291,7 @@ export default function NewPromotionPage() {
               icon="📍"
               iconBg="#FFECEC"
               title={text.address}
-              subtitle={
-                [address.city, address.district, address.street].filter(Boolean).join(', ') ||
-                text.addressHint
-              }
+              subtitle={[address.city, address.district, address.street].filter(Boolean).join(', ') || text.addressHint}
               onClick={() => setSheet('address')}
             />
 
@@ -1599,12 +1348,7 @@ export default function NewPromotionPage() {
       {sheet === 'title' ? (
         <Sheet title={text.title} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 14 }}>
-            <Field
-              label={text.title}
-              value={title}
-              onChange={setTitle}
-              placeholder={text.enterTitle}
-            />
+            <Field label={text.title} value={title} onChange={setTitle} placeholder={text.enterTitle} />
             <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
               {text.save}
             </button>
@@ -1615,13 +1359,7 @@ export default function NewPromotionPage() {
       {sheet === 'description' ? (
         <Sheet title={text.description} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 14 }}>
-            <Field
-              label={text.description}
-              value={description}
-              onChange={setDescription}
-              placeholder={text.enterDescription}
-              multiline
-            />
+            <Field label={text.description} value={description} onChange={setDescription} placeholder={text.enterDescription} multiline />
             <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
               {text.save}
             </button>
@@ -1675,11 +1413,7 @@ export default function NewPromotionPage() {
         <Sheet title={text.subcategory} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 10 }}>
             {!categoryId ? (
-              <button
-                type="button"
-                onClick={() => setSheet('category')}
-                style={primaryButtonStyle()}
-              >
+              <button type="button" onClick={() => setSheet('category')} style={primaryButtonStyle()}>
                 {text.chooseCategory}
               </button>
             ) : null}
@@ -1724,13 +1458,7 @@ export default function NewPromotionPage() {
       {sheet === 'price' ? (
         <Sheet title={text.price} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 14 }}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-              }}
-            >
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {[
                 ['fixed', text.fixedPrice],
                 ['range', text.priceRange],
@@ -1756,46 +1484,14 @@ export default function NewPromotionPage() {
             </div>
 
             {priceMode === 'fixed' ? (
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: 10,
-                }}
-              >
-                <Field
-                  label={text.pounds}
-                  value={pricePounds}
-                  onChange={(next) => setPricePounds(next.replace(/[^\d]/g, '').slice(0, 5))}
-                  placeholder="45"
-                />
-                <Field
-                  label={text.pennies}
-                  value={pricePennies}
-                  onChange={(next) => setPricePennies(next.replace(/[^\d]/g, '').slice(0, 2))}
-                  placeholder="00"
-                />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <Field label={text.pounds} value={pricePounds} onChange={(next) => setPricePounds(next.replace(/[^\d]/g, '').slice(0, 5))} placeholder="45" />
+                <Field label={text.pennies} value={pricePennies} onChange={(next) => setPricePennies(next.replace(/[^\d]/g, '').slice(0, 2))} placeholder="00" />
               </div>
             ) : (
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: 10,
-                }}
-              >
-                <Field
-                  label={text.minPrice}
-                  value={minPrice}
-                  onChange={(next) => setMinPrice(next.replace(/[^\d]/g, '').slice(0, 5))}
-                  placeholder="40"
-                />
-                <Field
-                  label={text.maxPrice}
-                  value={maxPrice}
-                  onChange={(next) => setMaxPrice(next.replace(/[^\d]/g, '').slice(0, 5))}
-                  placeholder="60"
-                />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <Field label={text.minPrice} value={minPrice} onChange={(next) => setMinPrice(next.replace(/[^\d]/g, '').slice(0, 5))} placeholder="40" />
+                <Field label={text.maxPrice} value={maxPrice} onChange={(next) => setMaxPrice(next.replace(/[^\d]/g, '').slice(0, 5))} placeholder="60" />
               </div>
             )}
 
@@ -1832,13 +1528,7 @@ export default function NewPromotionPage() {
                   }}
                 >
                   <IconBox icon={method.icon} bg="#fff" />
-                  <div
-                    style={{
-                      fontSize: 18,
-                      fontWeight: 950,
-                      color: BRAND.navy,
-                    }}
-                  >
+                  <div style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>
                     {method.label}
                   </div>
                   <div
@@ -1872,43 +1562,9 @@ export default function NewPromotionPage() {
       {sheet === 'hours' ? (
         <Sheet title={text.workingHours} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 14 }}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-              }}
-            >
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <Field label={text.fromTime} value={fromTime} onChange={setFromTime} placeholder="09:00" />
               <Field label={text.toTime} value={toTime} onChange={setToTime} placeholder="20:00" />
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: 8,
-              }}
-            >
-              {['09:00', '10:00', '12:00', '18:00', '20:00', '22:00'].map((time) => (
-                <button
-                  key={time}
-                  type="button"
-                  onClick={() => setFromTime(time)}
-                  style={{
-                    height: 44,
-                    borderRadius: 14,
-                    border: `2px solid ${BRAND.black}`,
-                    background: '#fff',
-                    color: BRAND.navy,
-                    fontSize: 15,
-                    fontWeight: 950,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {time}
-                </button>
-              ))}
             </div>
 
             <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
@@ -1922,32 +1578,10 @@ export default function NewPromotionPage() {
         <Sheet title={text.contactDetails} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 12 }}>
             {contactRows.map((row) => (
-              <div
-                key={row.key}
-                style={{
-                  border: `2px solid ${BRAND.black}`,
-                  borderRadius: 20,
-                  background: '#fff',
-                  padding: 12,
-                }}
-              >
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '44px 1fr',
-                    gap: 10,
-                    alignItems: 'center',
-                    marginBottom: 10,
-                  }}
-                >
+              <div key={row.key} style={{ border: `2px solid ${BRAND.black}`, borderRadius: 20, background: '#fff', padding: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '44px 1fr', gap: 10, alignItems: 'center', marginBottom: 10 }}>
                   <IconBox icon={row.icon} bg="#F7FAFF" />
-                  <div
-                    style={{
-                      fontSize: 17,
-                      fontWeight: 950,
-                      color: BRAND.navy,
-                    }}
-                  >
+                  <div style={{ fontSize: 17, fontWeight: 950, color: BRAND.navy }}>
                     {row.label}
                   </div>
                 </div>
@@ -1987,49 +1621,14 @@ export default function NewPromotionPage() {
       {sheet === 'address' ? (
         <Sheet title={text.address} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 14 }}>
-            <Field
-              label={text.city}
-              value={address.city}
-              onChange={(next) => setAddress((prev) => ({ ...prev, city: next }))}
-              placeholder="London"
-            />
-            <Field
-              label={text.district}
-              value={address.district}
-              onChange={(next) => setAddress((prev) => ({ ...prev, district: next }))}
-              placeholder="Camden, Chelsea, Mayfair..."
-            />
-            <Field
-              label={text.street}
-              value={address.street}
-              onChange={(next) => setAddress((prev) => ({ ...prev, street: next }))}
-              placeholder="Street"
-            />
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: 10,
-              }}
-            >
-              <Field
-                label={text.building}
-                value={address.building}
-                onChange={(next) => setAddress((prev) => ({ ...prev, building: next }))}
-                placeholder="12"
-              />
-              <Field
-                label={text.floor}
-                value={address.floor}
-                onChange={(next) => setAddress((prev) => ({ ...prev, floor: next }))}
-                placeholder="2"
-              />
-              <Field
-                label={text.flat}
-                value={address.flat}
-                onChange={(next) => setAddress((prev) => ({ ...prev, flat: next }))}
-                placeholder="5"
-              />
+            <Field label={text.city} value={address.city} onChange={(next) => setAddress((prev) => ({ ...prev, city: next }))} placeholder="London" />
+            <Field label={text.district} value={address.district} onChange={(next) => setAddress((prev) => ({ ...prev, district: next }))} placeholder="Camden, Chelsea, Mayfair..." />
+            <Field label={text.street} value={address.street} onChange={(next) => setAddress((prev) => ({ ...prev, street: next }))} placeholder="Street" />
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+              <Field label={text.building} value={address.building} onChange={(next) => setAddress((prev) => ({ ...prev, building: next }))} placeholder="12" />
+              <Field label={text.floor} value={address.floor} onChange={(next) => setAddress((prev) => ({ ...prev, floor: next }))} placeholder="2" />
+              <Field label={text.flat} value={address.flat} onChange={(next) => setAddress((prev) => ({ ...prev, flat: next }))} placeholder="5" />
             </div>
 
             <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
@@ -2040,6 +1639,20 @@ export default function NewPromotionPage() {
       ) : null}
     </>
   );
+}
+
+function roundButtonStyle(): React.CSSProperties {
+  return {
+    width: 54,
+    height: 54,
+    borderRadius: 999,
+    border: '2px solid #111111',
+    background: '#fff',
+    color: '#061b49',
+    fontSize: 28,
+    fontWeight: 950,
+    cursor: 'pointer',
+  };
 }
 
 function toolButtonStyle(): React.CSSProperties {
