@@ -19,6 +19,7 @@ import { categories } from '../../../../services/categories';
 import { isAuthenticated } from '../../../../services/authStore';
 
 type MediaMode = 'single' | 'collage' | 'video';
+
 type SheetMode =
   | null
   | 'media'
@@ -37,7 +38,21 @@ type MediaItem = {
   name: string;
   preview: string;
   type: 'image' | 'video';
+  scale: number;
+  rotate: number;
+  offsetX: number;
+  offsetY: number;
 };
+
+type ContactKey =
+  | 'phone'
+  | 'whatsapp'
+  | 'businessWhatsapp'
+  | 'telegram'
+  | 'viber'
+  | 'instagram'
+  | 'email'
+  | 'website';
 
 type CategoryView = {
   id: string;
@@ -52,7 +67,7 @@ const BRAND = {
   black: '#111111',
   green: '#24c85a',
   blue: '#087bff',
-  red: '#ff255d',
+  red: '#ff244f',
   yellow: '#fff3b8',
   cream: '#fffdf8',
   softGreen: '#eaffef',
@@ -62,18 +77,18 @@ const BRAND = {
   gray: '#707988',
 };
 
-const FIRST_AD_FREE = true;
 const PRICE_PER_DAY = 2;
+const FIRST_AD_FREE = true;
 
 const TEXT = {
   EN: {
     pageTitle: 'Add advertisement',
     pageSubtitle: 'Create a bright ad that clients notice nearby',
     media: 'Photo / video',
-    mediaHint: '1 photo, 4-photo collage, or 1 short video',
     chooseMedia: 'Choose media',
+    mediaHint: '1 photo, 2–4 photo collage, or 1 short video',
     singlePhoto: '1 photo',
-    collage: '4-photo collage',
+    collage: 'Collage',
     video: 'Mini video',
     camera: 'Camera',
     gallery: 'Gallery',
@@ -86,21 +101,20 @@ const TEXT = {
     chooseCategory: 'Choose category',
     chooseSubcategory: 'Choose subcategory',
     days: 'Advertising days',
-    daysHint: '1 day free for first ad',
+    daysHint: 'Tap to choose days and price',
+    firstDayFree: 'First day free',
     enhance: 'Improve ad',
     enhanceHint: 'Sticker and visual style',
     contacts: 'Contact details',
-    contactsHint: 'Phone number for clients',
+    contactsHint: 'Phone, WhatsApp, Telegram, Viber, Instagram',
     address: 'Address',
     addressHint: 'Where this ad should be shown',
-    payment: 'Payment',
-    paymentHint: 'Pay only before publishing',
     preview: 'Preview',
     continue: 'Continue to payment',
     save: 'Save',
-    firstDayFree: 'First day free',
     total: 'Total',
     free: 'Free',
+    payment: 'Payment',
     publishOnlyAfterPayment: 'Advertisement is published only after payment.',
     alertMedia: 'Please add photo or video.',
     alertTitle: 'Please add title.',
@@ -113,10 +127,10 @@ const TEXT = {
     pageTitle: 'Добавить рекламу',
     pageSubtitle: 'Создайте яркую рекламу, которую клиенты заметят рядом',
     media: 'Фото / видео',
-    mediaHint: '1 фото, коллаж из 4 фото или 1 короткое видео',
     chooseMedia: 'Выбрать медиа',
+    mediaHint: '1 фото, коллаж 2–4 фото или 1 короткое видео',
     singlePhoto: '1 фото',
-    collage: 'Коллаж 4 фото',
+    collage: 'Коллаж',
     video: 'Мини-видео',
     camera: 'Камера',
     gallery: 'Галерея',
@@ -129,21 +143,20 @@ const TEXT = {
     chooseCategory: 'Выбрать категорию',
     chooseSubcategory: 'Выбрать подкатегорию',
     days: 'Дни рекламы',
-    daysHint: 'Первый день бесплатно для первой рекламы',
+    daysHint: 'Тапните, чтобы выбрать дни и цену',
+    firstDayFree: 'Первый день бесплатно',
     enhance: 'Улучшить рекламу',
     enhanceHint: 'Наклейка и визуальный стиль',
     contacts: 'Контактные данные',
-    contactsHint: 'Телефон для клиентов',
+    contactsHint: 'Телефон, WhatsApp, Telegram, Viber, Instagram',
     address: 'Адрес',
     addressHint: 'Где показывать рекламу',
-    payment: 'Оплата',
-    paymentHint: 'Оплата только перед публикацией',
     preview: 'Предпросмотр',
     continue: 'Перейти к оплате',
     save: 'Сохранить',
-    firstDayFree: 'Первый день бесплатно',
     total: 'Итого',
     free: 'Бесплатно',
+    payment: 'Оплата',
     publishOnlyAfterPayment: 'Реклама публикуется только после оплаты.',
     alertMedia: 'Добавьте фото или видео.',
     alertTitle: 'Добавьте заголовок.',
@@ -492,7 +505,19 @@ export default function NewPromotionPage() {
   const [sticker, setSticker] = useState('today');
   const [visualStyle, setVisualStyle] = useState('classic');
 
-  const [phone, setPhone] = useState('');
+  const [contacts, setContacts] = useState<Record<ContactKey, string>>({
+    phone: '',
+    whatsapp: '',
+    businessWhatsapp: '',
+    telegram: '',
+    viber: '',
+    instagram: '',
+    email: '',
+    website: '',
+  });
+
+  const [countryCode, setCountryCode] = useState('+44');
+
   const [address, setAddress] = useState({
     city: '',
     district: '',
@@ -546,7 +571,7 @@ export default function NewPromotionPage() {
     mediaMode === 'single'
       ? text.singlePhoto
       : mediaMode === 'collage'
-        ? text.collage
+        ? `${text.collage} ${media.length ? media.length : '2–4'}`
         : text.video;
 
   const stickerOptions = [
@@ -575,6 +600,17 @@ export default function NewPromotionPage() {
     { id: 'apple', label: 'Apple Pay', icon: '' },
   ];
 
+  const contactOptions: { key: ContactKey; label: string; icon: string; placeholder: string }[] = [
+    { key: 'phone', label: language === 'RU' ? 'Телефон' : 'Phone', icon: '📞', placeholder: '7000 000000' },
+    { key: 'whatsapp', label: 'WhatsApp', icon: '🟢', placeholder: '7000 000000' },
+    { key: 'businessWhatsapp', label: 'Business WhatsApp', icon: '💼', placeholder: '7000 000000' },
+    { key: 'telegram', label: 'Telegram', icon: '✈️', placeholder: '@username' },
+    { key: 'viber', label: 'Viber', icon: '🟣', placeholder: '7000 000000' },
+    { key: 'instagram', label: 'Instagram', icon: '📸', placeholder: '@username' },
+    { key: 'email', label: 'Email', icon: '✉️', placeholder: 'you@email.com' },
+    { key: 'website', label: 'Website', icon: '🌐', placeholder: 'yourwebsite.com' },
+  ];
+
   const handleMediaPick = (mode: MediaMode, source: 'camera' | 'gallery' | 'files' | 'video') => {
     setMediaMode(mode);
     setSheet(null);
@@ -591,6 +627,7 @@ export default function NewPromotionPage() {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
+    const minRequired = mode === 'collage' ? 2 : 1;
     const limit = mode === 'collage' ? 4 : 1;
 
     const allowed = files
@@ -600,11 +637,11 @@ export default function NewPromotionPage() {
       })
       .slice(0, limit);
 
-    if (!allowed.length) {
+    if (allowed.length < minRequired) {
       alert(
         language === 'RU'
-          ? 'Для рекламы используйте JPG, PNG, WEBP или короткое видео. HEIC/HEIF часто не отображается в браузере.'
-          : 'Please use JPG, PNG, WEBP or short video. HEIC/HEIF may not display in browser.'
+          ? 'Для коллажа выберите минимум 2 фото. HEIC/HEIF не поддерживается.'
+          : 'For collage choose at least 2 photos. HEIC/HEIF is not supported.'
       );
       event.target.value = '';
       return;
@@ -617,11 +654,27 @@ export default function NewPromotionPage() {
       name: file.name,
       preview: URL.createObjectURL(file),
       type: mode === 'video' ? ('video' as const) : ('image' as const),
+      scale: 1,
+      rotate: 0,
+      offsetX: 0,
+      offsetY: 0,
     }));
 
     setMediaMode(mode);
     setMedia(next);
     event.target.value = '';
+  };
+
+  const removeMediaItem = (id: string) => {
+    setMedia((prev) => {
+      const found = prev.find((item) => item.id === id);
+      if (found) URL.revokeObjectURL(found.preview);
+      return prev.filter((item) => item.id !== id);
+    });
+  };
+
+  const updateMediaItem = (id: string, patch: Partial<MediaItem>) => {
+    setMedia((prev) => prev.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   };
 
   const handleContinue = () => {
@@ -649,7 +702,7 @@ export default function NewPromotionPage() {
       return;
     }
 
-    if (!phone.trim()) {
+    if (!contacts.phone.trim()) {
       alert(text.alertPhone);
       setSheet('contacts');
       return;
@@ -758,13 +811,7 @@ export default function NewPromotionPage() {
             <RoundButton onClick={() => router.push('/')}>×</RoundButton>
           </header>
 
-          <section
-            style={{
-              padding: '14px 12px 0',
-              display: 'grid',
-              gap: 10,
-            }}
-          >
+          <section style={{ padding: '14px 12px 0', display: 'grid', gap: 10 }}>
             <ShellCard style={{ padding: 12 }}>
               <div
                 style={{
@@ -795,7 +842,7 @@ export default function NewPromotionPage() {
                 onClick={() => setSheet('media')}
                 style={{
                   width: '100%',
-                  minHeight: 194,
+                  minHeight: 220,
                   borderRadius: 20,
                   border: `2px dashed ${BRAND.green}`,
                   background: media.length ? '#ffffff' : BRAND.softGreen,
@@ -806,52 +853,16 @@ export default function NewPromotionPage() {
                 }}
               >
                 {media.length ? (
-                  mediaMode === 'collage' ? (
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1fr 1fr',
-                        gridTemplateRows: '1fr 1fr',
-                        gap: 4,
-                        height: 194,
-                        padding: 4,
-                        boxSizing: 'border-box',
-                      }}
-                    >
-                      {media.map((item) => (
-                        <img
-                          key={item.id}
-                          src={item.preview}
-                          alt={item.name}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            borderRadius: 14,
-                          }}
-                        />
-                      ))}
-                    </div>
-                  ) : mediaMode === 'video' ? (
-                    <video
-                      src={media[0].preview}
-                      muted
-                      loop
-                      autoPlay
-                      playsInline
-                      style={{ width: '100%', height: 194, objectFit: 'cover' }}
-                    />
-                  ) : (
-                    <img
-                      src={media[0].preview}
-                      alt={media[0].name}
-                      style={{ width: '100%', height: 194, objectFit: 'cover' }}
-                    />
-                  )
+                  <MediaPreview
+                    media={media}
+                    mode={mediaMode}
+                    onRemove={removeMediaItem}
+                    onUpdate={updateMediaItem}
+                  />
                 ) : (
                   <div
                     style={{
-                      minHeight: 194,
+                      minHeight: 220,
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
@@ -884,29 +895,6 @@ export default function NewPromotionPage() {
                     </div>
                   </div>
                 )}
-
-                {media.length ? (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: 8,
-                      right: 8,
-                      width: 34,
-                      height: 34,
-                      borderRadius: 999,
-                      border: `2px solid ${BRAND.black}`,
-                      background: BRAND.green,
-                      color: '#fff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 20,
-                      fontWeight: 950,
-                    }}
-                  >
-                    ✓
-                  </span>
-                ) : null}
               </button>
             </ShellCard>
 
@@ -951,7 +939,7 @@ export default function NewPromotionPage() {
             <RowButton
               icon="📞"
               title={text.contacts}
-              subtitle={phone || text.contactsHint}
+              subtitle={contacts.phone ? `${countryCode} ${contacts.phone}` : text.contactsHint}
               onClick={() => setSheet('contacts')}
             />
 
@@ -976,110 +964,6 @@ export default function NewPromotionPage() {
             >
               ⭐ {text.publishOnlyAfterPayment}
             </ShellCard>
-
-            <ShellCard style={{ padding: 12 }}>
-              <div style={{ fontSize: 22, fontWeight: 950, marginBottom: 10 }}>
-                {text.preview}
-              </div>
-
-              <div
-                style={{
-                  border: `2px solid ${BRAND.black}`,
-                  borderRadius: 20,
-                  overflow: 'hidden',
-                  background: '#fff',
-                }}
-              >
-                <div
-                  style={{
-                    height: 134,
-                    background: BRAND.softGreen,
-                    position: 'relative',
-                    overflow: 'hidden',
-                  }}
-                >
-                  {media[0] ? (
-                    media[0].type === 'video' ? (
-                      <video
-                        src={media[0].preview}
-                        muted
-                        loop
-                        autoPlay
-                        playsInline
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <img
-                        src={media[0].preview}
-                        alt=""
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    )
-                  ) : (
-                    <div
-                      style={{
-                        height: '100%',
-                        display: 'grid',
-                        placeItems: 'center',
-                        fontSize: 42,
-                      }}
-                    >
-                      🖼️
-                    </div>
-                  )}
-
-                  <div
-                    style={{
-                      position: 'absolute',
-                      left: 10,
-                      top: 10,
-                      border: `2px solid ${BRAND.black}`,
-                      borderRadius: 999,
-                      background: BRAND.yellow,
-                      color: BRAND.navy,
-                      padding: '6px 10px',
-                      fontSize: 13,
-                      fontWeight: 950,
-                    }}
-                  >
-                    {chosenSticker.emoji} {chosenSticker.label}
-                  </div>
-                </div>
-
-                <div style={{ padding: 12 }}>
-                  <div style={{ fontSize: 20, fontWeight: 950, color: BRAND.navy }}>
-                    {title || text.titleHint}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 5,
-                      fontSize: 13,
-                      fontWeight: 850,
-                      color: BRAND.gray,
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {description || text.descriptionHint}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 10,
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr',
-                      gap: 8,
-                    }}
-                  >
-                    <button type="button" style={previewButtonStyle(BRAND.blue)}>
-                      {language === 'RU' ? 'Профиль' : 'Profile'}
-                    </button>
-                    <button type="button" style={previewButtonStyle(BRAND.green)}>
-                      {language === 'RU' ? 'Забронировать' : 'Book'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </ShellCard>
           </section>
         </div>
       </main>
@@ -1100,18 +984,7 @@ export default function NewPromotionPage() {
           <button
             type="button"
             onClick={handleContinue}
-            style={{
-              width: '100%',
-              height: 64,
-              borderRadius: 22,
-              border: `2px solid ${BRAND.black}`,
-              background: BRAND.green,
-              color: '#fff',
-              fontSize: 22,
-              fontWeight: 950,
-              cursor: 'pointer',
-              boxShadow: '0 6px 0 rgba(0,0,0,0.10)',
-            }}
+            style={primaryButtonStyle()}
           >
             {text.continue}
           </button>
@@ -1123,7 +996,7 @@ export default function NewPromotionPage() {
           <div style={{ display: 'grid', gap: 12 }}>
             {[
               { mode: 'single' as const, title: text.singlePhoto, hint: 'JPG / PNG / WEBP' },
-              { mode: 'collage' as const, title: text.collage, hint: '4 images in one collage' },
+              { mode: 'collage' as const, title: text.collage, hint: '2–4 photos in one ad image' },
               { mode: 'video' as const, title: text.video, hint: 'Up to 5 seconds recommended' },
             ].map((item) => {
               const active = mediaMode === item.mode;
@@ -1212,8 +1085,8 @@ export default function NewPromotionPage() {
         <Sheet title={text.title} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 14 }}>
             <Field label={text.title} value={title} onChange={setTitle} placeholder={text.titleHint} />
-            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
-              {text.save}
+            <button type="button" onClick={() => setSheet('description')} style={primaryButtonStyle()}>
+              {language === 'RU' ? 'Далее →' : 'Next →'}
             </button>
           </div>
         </Sheet>
@@ -1229,8 +1102,8 @@ export default function NewPromotionPage() {
               placeholder={text.descriptionHint}
               multiline
             />
-            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
-              {text.save}
+            <button type="button" onClick={() => setSheet('category')} style={primaryButtonStyle()}>
+              {language === 'RU' ? 'Далее →' : 'Next →'}
             </button>
           </div>
         </Sheet>
@@ -1297,7 +1170,7 @@ export default function NewPromotionPage() {
                   type="button"
                   onClick={() => {
                     setSubcategory(item);
-                    setSheet(null);
+                    setSheet('days');
                   }}
                   style={{
                     minHeight: 58,
@@ -1342,21 +1215,32 @@ export default function NewPromotionPage() {
       {sheet === 'days' ? (
         <Sheet title={text.days} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 14 }}>
-            <ShellCard style={{ padding: 14, background: BRAND.softGreen }}>
-              <div style={{ fontSize: 18, fontWeight: 950, color: BRAND.navy }}>
-                {text.firstDayFree}
-              </div>
-              <div style={{ marginTop: 5, fontSize: 14, fontWeight: 850, color: BRAND.gray }}>
-                £{PRICE_PER_DAY} / day
-              </div>
-            </ShellCard>
+            {FIRST_AD_FREE ? (
+              <ShellCard
+                style={{
+                  padding: 14,
+                  background: '#ff284d',
+                  color: '#fff',
+                  animation: 'pulseGift 1.4s infinite',
+                }}
+              >
+                <div style={{ fontSize: 22, fontWeight: 950 }}>
+                  🎁 {text.firstDayFree}
+                </div>
+                <div style={{ marginTop: 5, fontSize: 14, fontWeight: 850 }}>
+                  {language === 'RU'
+                    ? 'Только для первой рекламы'
+                    : 'Only for the first advertisement'}
+                </div>
+              </ShellCard>
+            ) : null}
 
             <select
               value={days}
               onChange={(event) => setDays(Number(event.target.value))}
               style={{
                 width: '100%',
-                height: 64,
+                height: 70,
                 borderRadius: 20,
                 border: `2px solid ${BRAND.black}`,
                 background: '#fff',
@@ -1390,8 +1274,8 @@ export default function NewPromotionPage() {
               </div>
             </ShellCard>
 
-            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
-              {text.save}
+            <button type="button" onClick={() => setSheet('enhance')} style={primaryButtonStyle()}>
+              {language === 'RU' ? 'Далее →' : 'Next →'}
             </button>
           </div>
         </Sheet>
@@ -1410,9 +1294,12 @@ export default function NewPromotionPage() {
                     key={item.id}
                     type="button"
                     onClick={() => setSticker(item.id)}
-                    style={chipStyle(sticker === item.id)}
+                    style={glowChipStyle(sticker === item.id)}
                   >
-                    {item.emoji} {item.label}
+                    <span style={{ animation: sticker === item.id ? 'glowEmoji 1.2s infinite' : 'none' }}>
+                      {item.emoji}
+                    </span>{' '}
+                    {item.label}
                   </button>
                 ))}
               </div>
@@ -1428,16 +1315,19 @@ export default function NewPromotionPage() {
                     key={item.id}
                     type="button"
                     onClick={() => setVisualStyle(item.id)}
-                    style={chipStyle(visualStyle === item.id)}
+                    style={glowChipStyle(visualStyle === item.id)}
                   >
-                    {item.emoji} {item.label}
+                    <span style={{ animation: visualStyle === item.id ? 'glowEmoji 1.2s infinite' : 'none' }}>
+                      {item.emoji}
+                    </span>{' '}
+                    {item.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
-              {text.save}
+            <button type="button" onClick={() => setSheet('contacts')} style={primaryButtonStyle()}>
+              {language === 'RU' ? 'Далее →' : 'Next →'}
             </button>
           </div>
         </Sheet>
@@ -1445,15 +1335,95 @@ export default function NewPromotionPage() {
 
       {sheet === 'contacts' ? (
         <Sheet title={text.contacts} onClose={() => setSheet(null)}>
-          <div style={{ display: 'grid', gap: 14 }}>
-            <Field
-              label={language === 'RU' ? 'Телефон' : 'Phone'}
-              value={phone}
-              onChange={setPhone}
-              placeholder="+44 7000 000000"
-            />
-            <button type="button" onClick={() => setSheet(null)} style={primaryButtonStyle()}>
-              {text.save}
+          <div style={{ display: 'grid', gap: 12 }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '105px 1fr',
+                gap: 10,
+                alignItems: 'center',
+              }}
+            >
+              <select
+                value={countryCode}
+                onChange={(event) => setCountryCode(event.target.value)}
+                style={{
+                  height: 58,
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.black}`,
+                  background: '#fff',
+                  color: BRAND.navy,
+                  fontSize: 16,
+                  fontWeight: 950,
+                  padding: '0 10px',
+                }}
+              >
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+380">🇺🇦 +380</option>
+                <option value="+420">🇨🇿 +420</option>
+                <option value="+48">🇵🇱 +48</option>
+                <option value="+49">🇩🇪 +49</option>
+                <option value="+33">🇫🇷 +33</option>
+                <option value="+39">🇮🇹 +39</option>
+              </select>
+
+              <input
+                value={contacts.phone}
+                onChange={(event) =>
+                  setContacts((prev) => ({ ...prev, phone: event.target.value.replace(/[^\d ]/g, '') }))
+                }
+                placeholder="7000 000000"
+                style={{
+                  height: 58,
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.black}`,
+                  padding: '0 14px',
+                  fontSize: 17,
+                  fontWeight: 850,
+                  color: BRAND.navy,
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            {contactOptions
+              .filter((item) => item.key !== 'phone')
+              .map((item) => (
+                <label
+                  key={item.key}
+                  style={{
+                    minHeight: 64,
+                    borderRadius: 18,
+                    border: `2px solid ${BRAND.black}`,
+                    background: '#fff',
+                    display: 'grid',
+                    gridTemplateColumns: '52px 1fr',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '8px 12px',
+                  }}
+                >
+                  <IconBox icon={item.icon} bg={BRAND.softGreen} />
+                  <input
+                    value={contacts[item.key]}
+                    onChange={(event) =>
+                      setContacts((prev) => ({ ...prev, [item.key]: event.target.value }))
+                    }
+                    placeholder={`${item.label}: ${item.placeholder}`}
+                    style={{
+                      border: 'none',
+                      outline: 'none',
+                      color: BRAND.navy,
+                      fontSize: 16,
+                      fontWeight: 850,
+                      minWidth: 0,
+                    }}
+                  />
+                </label>
+              ))}
+
+            <button type="button" onClick={() => setSheet('address')} style={primaryButtonStyle()}>
+              {language === 'RU' ? 'Далее →' : 'Next →'}
             </button>
           </div>
         </Sheet>
@@ -1542,7 +1512,221 @@ export default function NewPromotionPage() {
           </div>
         </Sheet>
       ) : null}
+
+      <style jsx global>{`
+        @keyframes pulseGift {
+          0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,36,79,0.0); }
+          50% { transform: scale(1.015); box-shadow: 0 0 20px rgba(255,36,79,0.35); }
+          100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,36,79,0.0); }
+        }
+
+        @keyframes glowEmoji {
+          0% { filter: drop-shadow(0 0 0 rgba(36,200,90,0)); transform: scale(1); }
+          50% { filter: drop-shadow(0 0 10px rgba(36,200,90,0.75)); transform: scale(1.14); }
+          100% { filter: drop-shadow(0 0 0 rgba(36,200,90,0)); transform: scale(1); }
+        }
+      `}</style>
     </>
+  );
+}
+
+function MediaPreview({
+  media,
+  mode,
+  onRemove,
+  onUpdate,
+}: {
+  media: MediaItem[];
+  mode: MediaMode;
+  onRemove: (id: string) => void;
+  onUpdate: (id: string, patch: Partial<MediaItem>) => void;
+}) {
+  if (mode === 'video') {
+    return (
+      <div style={{ height: 220, position: 'relative' }}>
+        <video
+          src={media[0]?.preview}
+          muted
+          loop
+          autoPlay
+          playsInline
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+        <MediaTools item={media[0]} onRemove={onRemove} onUpdate={onUpdate} />
+      </div>
+    );
+  }
+
+  if (mode === 'collage') {
+    const count = media.length;
+
+    return (
+      <div
+        style={{
+          height: 220,
+          display: 'grid',
+          gridTemplateColumns: count === 3 ? '1.2fr 0.8fr' : '1fr 1fr',
+          gridTemplateRows: count === 2 ? '1fr' : '1fr 1fr',
+          gap: 4,
+          padding: 4,
+          boxSizing: 'border-box',
+        }}
+      >
+        {media.map((item, index) => (
+          <div
+            key={item.id}
+            style={{
+              position: 'relative',
+              overflow: 'hidden',
+              borderRadius: 15,
+              border: '1.5px solid #111111',
+              gridRow: count === 3 && index === 0 ? '1 / span 2' : 'auto',
+            }}
+          >
+            <img
+              src={item.preview}
+              alt={item.name}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transform: `translate(${item.offsetX}px, ${item.offsetY}px) scale(${item.scale}) rotate(${item.rotate}deg)`,
+              }}
+            />
+            <MediaTools item={item} onRemove={onRemove} onUpdate={onUpdate} compact />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ height: 220, position: 'relative', overflow: 'hidden' }}>
+      <img
+        src={media[0]?.preview}
+        alt={media[0]?.name}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          transform: `translate(${media[0]?.offsetX || 0}px, ${media[0]?.offsetY || 0}px) scale(${media[0]?.scale || 1}) rotate(${media[0]?.rotate || 0}deg)`,
+        }}
+      />
+      <MediaTools item={media[0]} onRemove={onRemove} onUpdate={onUpdate} />
+    </div>
+  );
+}
+
+function MediaTools({
+  item,
+  onRemove,
+  onUpdate,
+  compact,
+}: {
+  item?: MediaItem;
+  onRemove: (id: string) => void;
+  onUpdate: (id: string, patch: Partial<MediaItem>) => void;
+  compact?: boolean;
+}) {
+  if (!item) return null;
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 6,
+        pointerEvents: 'none',
+      }}
+    >
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onRemove(item.id);
+        }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: compact ? 28 : 34,
+          height: compact ? 28 : 34,
+          borderRadius: 999,
+          border: '2px solid #111111',
+          background: '#ffffff',
+          color: '#ff244f',
+          fontSize: compact ? 16 : 20,
+          fontWeight: 950,
+          pointerEvents: 'auto',
+        }}
+      >
+        ×
+      </button>
+
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onUpdate(item.id, { rotate: item.rotate + 90 });
+        }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: compact ? 28 : 34,
+          height: compact ? 28 : 34,
+          borderRadius: 999,
+          border: '2px solid #111111',
+          background: '#ffffff',
+          color: '#061b49',
+          fontSize: compact ? 15 : 19,
+          fontWeight: 950,
+          pointerEvents: 'auto',
+        }}
+      >
+        ↻
+      </button>
+
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: 'flex',
+          justifyContent: 'center',
+          gap: 4,
+          pointerEvents: 'auto',
+        }}
+      >
+        {[
+          ['−', { scale: Math.max(1, item.scale - 0.1) }],
+          ['+', { scale: Math.min(3, item.scale + 0.1) }],
+          ['←', { offsetX: item.offsetX - 8 }],
+          ['→', { offsetX: item.offsetX + 8 }],
+        ].map(([label, patch]) => (
+          <button
+            key={label as string}
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onUpdate(item.id, patch as Partial<MediaItem>);
+            }}
+            style={{
+              width: compact ? 25 : 32,
+              height: compact ? 25 : 32,
+              borderRadius: 999,
+              border: '1.5px solid #111111',
+              background: 'rgba(255,255,255,0.92)',
+              color: '#061b49',
+              fontSize: compact ? 13 : 17,
+              fontWeight: 950,
+            }}
+          >
+            {label as string}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -1563,12 +1747,12 @@ function roundButtonStyle(): CSSProperties {
 function primaryButtonStyle(): CSSProperties {
   return {
     width: '100%',
-    height: 58,
-    borderRadius: 20,
+    height: 64,
+    borderRadius: 22,
     border: '2px solid #111111',
     background: '#24c85a',
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 950,
     cursor: 'pointer',
     boxShadow: '0 5px 0 rgba(0,0,0,0.10)',
@@ -1589,9 +1773,9 @@ function smallChoiceStyle(): CSSProperties {
   };
 }
 
-function chipStyle(active: boolean): CSSProperties {
+function glowChipStyle(active: boolean): CSSProperties {
   return {
-    minHeight: 54,
+    minHeight: 58,
     borderRadius: 18,
     border: `2px solid ${active ? BRAND.green : BRAND.black}`,
     background: active ? BRAND.softGreen : '#fff',
@@ -1599,18 +1783,6 @@ function chipStyle(active: boolean): CSSProperties {
     fontSize: 16,
     fontWeight: 950,
     cursor: 'pointer',
-  };
-}
-
-function previewButtonStyle(bg: string): CSSProperties {
-  return {
-    height: 44,
-    borderRadius: 16,
-    border: '2px solid #111111',
-    background: bg,
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: 950,
-    cursor: 'pointer',
+    boxShadow: active ? '0 0 16px rgba(36,200,90,0.25)' : 'none',
   };
 }
