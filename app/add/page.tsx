@@ -312,7 +312,7 @@ export default function AddServicePage() {
     if (!description.trim()) return 'Add description';
     if (!categoryId || !subcategory) return 'Choose category';
     if (!pricePounds || selectedPayments.length === 0) return 'Set price';
-    return 'Continue';
+    return 'Publish service';
   }, [media.length, title, description, categoryId, subcategory, pricePounds, selectedPayments.length]);
 
   const handleContinue = () => {
@@ -341,7 +341,7 @@ export default function AddServicePage() {
       return;
     }
 
-    setSheet('contacts');
+    alert('Your service is now live');
   };
 
   const handleMediaSelected = (event: ChangeEvent<HTMLInputElement>) => {
@@ -796,8 +796,6 @@ export default function AddServicePage() {
 
           <Row icon="🏷️" bg={BRAND.softPink} title="Category" value={currentCategory.label} onClick={() => setSheet('category')} />
 
-          <Row icon="⌘" bg={BRAND.softPink} title="Subcategory" value={subcategory} onClick={() => setSheet('subcategory')} />
-
           <Row icon="🕘" bg={BRAND.softGreen} title="Working hours" value={`${hoursFrom} — ${hoursTo}`} onClick={() => setSheet('hours')} />
 
           <div
@@ -869,15 +867,143 @@ export default function AddServicePage() {
 
           <div
             style={{
-              borderRadius: 20,
+              borderRadius: 28,
               border: `2px solid ${BRAND.black}`,
-              background: BRAND.softYellow,
-              padding: 16,
-              fontSize: 16,
-              fontWeight: 900,
+              background: '#fff',
+              overflow: 'hidden',
+              boxShadow: '0 10px 24px rgba(0,0,0,0.08)',
             }}
           >
-            Publication goes live only after payment.
+            <div
+              style={{
+                position: 'relative',
+                height: 220,
+                background: '#f3f4f6',
+                overflow: 'hidden',
+              }}
+            >
+              <img
+                src={
+                  media[0]?.preview ||
+                  'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=80'
+                }
+                alt="Preview"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 12,
+                  top: 12,
+                  background: '#ffe44d',
+                  border: `2px solid ${BRAND.black}`,
+                  borderRadius: 999,
+                  padding: '6px 12px',
+                  fontSize: 12,
+                  fontWeight: 900,
+                }}
+              >
+                PREVIEW
+              </div>
+
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: 12,
+                  width: 42,
+                  height: 42,
+                  borderRadius: 999,
+                  border: `2px solid ${BRAND.black}`,
+                  background: 'rgba(255,255,255,0.95)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                }}
+              >
+                ♡
+              </div>
+
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  padding: '48px 14px 14px',
+                  background:
+                    'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.78) 100%)',
+                }}
+              >
+                <div
+                  style={{
+                    color: '#fff',
+                    fontSize: 24,
+                    fontWeight: 900,
+                    lineHeight: 1.05,
+                  }}
+                >
+                  {title || 'Your service title'}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    color: '#fff',
+                    fontSize: 14,
+                    fontWeight: 900,
+                  }}
+                >
+                  <span>★ 4.9</span>
+                  <span>📍 1.2 km</span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                padding: 14,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 30,
+                  fontWeight: 900,
+                  color: BRAND.blue,
+                }}
+              >
+                from £{priceFrom}
+              </div>
+
+              <button
+                type="button"
+                style={{
+                  height: 52,
+                  padding: '0 22px',
+                  borderRadius: 18,
+                  border: `2px solid ${BRAND.black}`,
+                  background: BRAND.blue,
+                  color: '#fff',
+                  fontSize: 18,
+                  fontWeight: 900,
+                }}
+              >
+                View
+              </button>
+            </div>
           </div>
         </div>
 
@@ -903,11 +1029,11 @@ export default function AddServicePage() {
                 height: 62,
                 borderRadius: 22,
                 border: `2px solid ${BRAND.black}`,
-                background: BRAND.green,
+                background: BRAND.blue,
                 color: '#fff',
                 fontSize: 23,
                 fontWeight: 900,
-                boxShadow: '0 8px 22px rgba(36,196,90,0.22)',
+                boxShadow: '0 8px 22px rgba(22,119,255,0.22)',
               }}
             >
               {nextStepLabel} ›
@@ -1012,7 +1138,7 @@ export default function AddServicePage() {
 
       {sheet === 'category' ? (
         <SheetBox title="Choose category" subtitle="Pick the main category for your service." onClose={() => setSheet(null)}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gap: 10 }}>
             {categories.map((item) => (
               <button
                 key={item.id}
@@ -1020,19 +1146,32 @@ export default function AddServicePage() {
                 onClick={() => {
                   setCategoryId(item.id);
                   setSubcategory(item.subcategories[0]);
-                  setSheet(null);
+                  setSheet('subcategory');
                 }}
                 style={{
-                  minHeight: 70,
+                  minHeight: 64,
                   borderRadius: 18,
                   border: `2px solid ${BRAND.black}`,
-                  background: item.id === categoryId ? BRAND.blue : '#fff',
-                  color: item.id === categoryId ? '#fff' : BRAND.navy,
+                  background: item.id === categoryId ? BRAND.softBlue : '#fff',
+                  color: BRAND.navy,
+                  display: 'grid',
+                  gridTemplateColumns: '44px 1fr auto',
+                  gap: 12,
+                  alignItems: 'center',
+                  padding: '10px 14px',
+                  textAlign: 'left',
                   fontSize: 18,
                   fontWeight: 900,
                 }}
               >
-                {item.icon} {item.label}
+                <span style={{ fontSize: 26 }}>{item.icon}</span>
+                <span>
+                  <div>{item.label}</div>
+                  <div style={{ marginTop: 3, fontSize: 12, color: BRAND.muted }}>
+                    {item.subcategories.length} services
+                  </div>
+                </span>
+                <span style={{ fontSize: 28 }}>›</span>
               </button>
             ))}
           </div>
@@ -1040,7 +1179,7 @@ export default function AddServicePage() {
       ) : null}
 
       {sheet === 'subcategory' ? (
-        <SheetBox title="Choose subcategory" subtitle="Choose the closest service type." onClose={() => setSheet(null)}>
+        <SheetBox title="Choose subcategory" subtitle={`Choose service type in ${currentCategory.label}.`} onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 10 }}>
             {currentCategory.subcategories.map((item) => (
               <button
