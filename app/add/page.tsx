@@ -23,7 +23,19 @@ const BRAND = {
 };
 
 type PaymentMethodId = 'card' | 'cash' | 'apple-pay' | 'google-pay' | 'paypal' | 'bank';
-type Sheet = null | 'title' | 'description' | 'category' | 'subcategory' | 'hours' | 'contacts' | 'address' | 'payments' | 'price';
+type ServiceFormatId = 'all' | 'my-place' | 'client-place' | 'online';
+
+type Sheet =
+  | null
+  | 'title'
+  | 'description'
+  | 'category'
+  | 'subcategory'
+  | 'hours'
+  | 'contacts'
+  | 'address'
+  | 'payments'
+  | 'price';
 
 type MediaItem = {
   id: string;
@@ -77,6 +89,13 @@ const paymentMethods: { id: PaymentMethodId; icon: string; title: string }[] = [
   { id: 'google-pay', icon: 'G', title: 'Google Pay' },
   { id: 'paypal', icon: '🅿️', title: 'PayPal' },
   { id: 'bank', icon: '🏦', title: 'Bank transfer' },
+];
+
+const serviceFormats: { id: ServiceFormatId; icon: string; title: string }[] = [
+  { id: 'all', icon: '✨', title: 'All' },
+  { id: 'my-place', icon: '🏠', title: 'At my place' },
+  { id: 'client-place', icon: '👤', title: 'At client' },
+  { id: 'online', icon: '🌐', title: 'Online' },
 ];
 
 function Logo() {
@@ -178,11 +197,13 @@ function SheetBox({
   title,
   subtitle,
   onClose,
+  onBack,
   children,
 }: {
   title: string;
   subtitle?: string;
   onClose: () => void;
+  onBack?: () => void;
   children: ReactNode;
 }) {
   return (
@@ -213,13 +234,48 @@ function SheetBox({
           boxShadow: '0 -18px 36px rgba(0,0,0,0.18)',
         }}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 46px', gap: 10, marginBottom: 14 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: onBack ? '46px 1fr 46px' : '1fr 46px',
+            gap: 10,
+            alignItems: 'start',
+            marginBottom: 14,
+          }}
+        >
+          {onBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              style={{
+                width: 46,
+                height: 46,
+                borderRadius: 999,
+                border: `2px solid ${BRAND.black}`,
+                background: '#fff',
+                color: BRAND.navy,
+                fontSize: 24,
+                fontWeight: 900,
+              }}
+            >
+              ←
+            </button>
+          ) : null}
+
           <div>
             <div style={{ fontSize: 28, fontWeight: 900, color: BRAND.navy, lineHeight: 1 }}>
               {title}
             </div>
             {subtitle ? (
-              <div style={{ marginTop: 7, fontSize: 13, fontWeight: 900, color: BRAND.muted, lineHeight: 1.3 }}>
+              <div
+                style={{
+                  marginTop: 7,
+                  fontSize: 13,
+                  fontWeight: 900,
+                  color: BRAND.muted,
+                  lineHeight: 1.3,
+                }}
+              >
                 {subtitle}
               </div>
             ) : null}
@@ -268,6 +324,8 @@ export default function AddServicePage() {
     'apple-pay',
   ]);
 
+  const [serviceFormat, setServiceFormat] = useState<ServiceFormatId>('client-place');
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('beauty');
@@ -306,21 +364,21 @@ export default function AddServicePage() {
   const completedSteps = progressItems.filter((item) => item.done).length;
   const progressPercent = Math.round((completedSteps / progressItems.length) * 100);
 
-  const nextStepLabel = useMemo(() => {
-    if (media.length === 0) return 'Add media';
-    if (!title.trim()) return 'Add title';
-    if (!description.trim()) return 'Add description';
-    if (!categoryId || !subcategory) return 'Choose category';
-    if (!pricePounds || selectedPayments.length === 0) return 'Set price';
-    return 'Publish service';
-  }, [media.length, title, description, categoryId, subcategory, pricePounds, selectedPayments.length]);
-
-  const handleContinue = () => {
-    if (media.length === 0) {
-      mediaInputRef.current?.click();
+  const handleBack = () => {
+    if (sheet === 'subcategory') {
+      setSheet('category');
       return;
     }
 
+    if (sheet) {
+      setSheet(null);
+      return;
+    }
+
+    router.back();
+  };
+
+  const handlePublish = () => {
     if (!title.trim()) {
       setSheet('title');
       return;
@@ -355,7 +413,7 @@ export default function AddServicePage() {
       .map((file, index) => ({
         id: `${file.name}-${file.size}-${Date.now()}-${index}`,
         preview: URL.createObjectURL(file),
-        kind: file.type.startsWith('video/') ? 'video' as const : 'photo' as const,
+        kind: file.type.startsWith('video/') ? ('video' as const) : ('photo' as const),
       }));
 
     setMedia((prev) => [...prev, ...next]);
@@ -400,7 +458,7 @@ export default function AddServicePage() {
           <div style={{ maxWidth: 430, margin: '0 auto', position: 'relative', textAlign: 'center' }}>
             <button
               type="button"
-              onClick={() => router.back()}
+              onClick={handleBack}
               style={{
                 position: 'absolute',
                 left: 0,
@@ -453,7 +511,15 @@ export default function AddServicePage() {
               Add your service
             </h1>
 
-            <div style={{ marginTop: 8, fontSize: 16, lineHeight: 1.25, fontWeight: 900, color: BRAND.muted }}>
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 16,
+                lineHeight: 1.25,
+                fontWeight: 900,
+                color: BRAND.muted,
+              }}
+            >
               Create a strong listing for clients nearby
             </div>
 
@@ -493,7 +559,15 @@ export default function AddServicePage() {
           </div>
         </header>
 
-        <div style={{ maxWidth: 430, margin: '0 auto', padding: '14px 18px 18px', display: 'grid', gap: 12 }}>
+        <div
+          style={{
+            maxWidth: 430,
+            margin: '0 auto',
+            padding: '14px 18px 18px',
+            display: 'grid',
+            gap: 12,
+          }}
+        >
           <input
             ref={mediaInputRef}
             type="file"
@@ -790,13 +864,37 @@ export default function AddServicePage() {
             </div>
           </section>
 
-          <Row icon="📝" bg={BRAND.softYellow} title="Title" value={title || 'Add a short and clear title'} onClick={() => setSheet('title')} />
+          <Row
+            icon="📝"
+            bg={BRAND.softYellow}
+            title="Title"
+            value={title || 'Add a short and clear title'}
+            onClick={() => setSheet('title')}
+          />
 
-          <Row icon="T" bg={BRAND.softBlue} title="Description" value={description || 'Describe your service in detail'} onClick={() => setSheet('description')} />
+          <Row
+            icon="T"
+            bg={BRAND.softBlue}
+            title="Description"
+            value={description || 'Describe your service in detail'}
+            onClick={() => setSheet('description')}
+          />
 
-          <Row icon="🏷️" bg={BRAND.softPink} title="Category" value={currentCategory.label} onClick={() => setSheet('category')} />
+          <Row
+            icon="🏷️"
+            bg={BRAND.softPink}
+            title="Category"
+            value={`${currentCategory.label} • ${subcategory}`}
+            onClick={() => setSheet('category')}
+          />
 
-          <Row icon="🕘" bg={BRAND.softGreen} title="Working hours" value={`${hoursFrom} — ${hoursTo}`} onClick={() => setSheet('hours')} />
+          <Row
+            icon="🕘"
+            bg={BRAND.softGreen}
+            title="Working hours"
+            value={`${hoursFrom} — ${hoursTo}`}
+            onClick={() => setSheet('hours')}
+          />
 
           <div
             style={{
@@ -826,24 +924,30 @@ export default function AddServicePage() {
               <span>
                 <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 10 }}>Service format</div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-                  {['🏠 At my place', '👤 At client', '🌐 Online'].map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      style={{
-                        minHeight: 52,
-                        borderRadius: 16,
-                        border: `2px solid ${BRAND.black}`,
-                        background: item.includes('client') ? BRAND.green : '#fff',
-                        color: item.includes('client') ? '#fff' : BRAND.navy,
-                        fontSize: 14,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {item}
-                    </button>
-                  ))}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {serviceFormats.map((item) => {
+                    const active = serviceFormat === item.id;
+
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setServiceFormat(item.id)}
+                        style={{
+                          minHeight: 48,
+                          borderRadius: 16,
+                          border: `2px solid ${BRAND.black}`,
+                          background: active ? BRAND.green : '#fff',
+                          color: active ? '#fff' : BRAND.navy,
+                          fontSize: 13,
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {item.icon} {item.title}
+                      </button>
+                    );
+                  })}
                 </div>
               </span>
             </div>
@@ -864,6 +968,20 @@ export default function AddServicePage() {
             value="Opens a separate address form"
             onClick={() => setSheet('address')}
           />
+
+          <div
+            style={{
+              borderRadius: 20,
+              border: `2px solid ${BRAND.black}`,
+              background: BRAND.softYellow,
+              padding: 16,
+              fontSize: 16,
+              lineHeight: 1.25,
+              fontWeight: 900,
+            }}
+          >
+            Free publication. £1 is charged only when you confirm a booking.
+          </div>
 
           <div
             style={{
@@ -1023,7 +1141,7 @@ export default function AddServicePage() {
           <div style={{ maxWidth: 430, margin: '0 auto' }}>
             <button
               type="button"
-              onClick={handleContinue}
+              onClick={handlePublish}
               style={{
                 width: '100%',
                 height: 62,
@@ -1036,14 +1154,18 @@ export default function AddServicePage() {
                 boxShadow: '0 8px 22px rgba(22,119,255,0.22)',
               }}
             >
-              {nextStepLabel} ›
+              Publish service ›
             </button>
           </div>
         </div>
       </main>
 
       {sheet === 'title' ? (
-        <SheetBox title="Title" subtitle="Use a short, clear title that clients understand fast." onClose={() => setSheet(null)}>
+        <SheetBox
+          title="Title"
+          subtitle="Use a short, clear title that clients understand fast."
+          onClose={() => setSheet(null)}
+        >
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -1081,7 +1203,11 @@ export default function AddServicePage() {
       ) : null}
 
       {sheet === 'description' ? (
-        <SheetBox title="Description" subtitle="Tell clients what you do, what is included, and why they should book." onClose={() => setSheet(null)}>
+        <SheetBox
+          title="Description"
+          subtitle="Tell clients what you do, what is included, and why they should book."
+          onClose={() => setSheet(null)}
+        >
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -1137,7 +1263,11 @@ export default function AddServicePage() {
       ) : null}
 
       {sheet === 'category' ? (
-        <SheetBox title="Choose category" subtitle="Pick the main category for your service." onClose={() => setSheet(null)}>
+        <SheetBox
+          title="Choose category"
+          subtitle="Pick the main category for your service."
+          onClose={() => setSheet(null)}
+        >
           <div style={{ display: 'grid', gap: 10 }}>
             {categories.map((item) => (
               <button
@@ -1179,7 +1309,12 @@ export default function AddServicePage() {
       ) : null}
 
       {sheet === 'subcategory' ? (
-        <SheetBox title="Choose subcategory" subtitle={`Choose service type in ${currentCategory.label}.`} onClose={() => setSheet(null)}>
+        <SheetBox
+          title="Choose subcategory"
+          subtitle={`Choose service type in ${currentCategory.label}.`}
+          onClose={() => setSheet(null)}
+          onBack={() => setSheet('category')}
+        >
           <div style={{ display: 'grid', gap: 10 }}>
             {currentCategory.subcategories.map((item) => (
               <button
@@ -1353,7 +1488,11 @@ export default function AddServicePage() {
       ) : null}
 
       {sheet === 'contacts' ? (
-        <SheetBox title="Contact details" subtitle="Add channels clients can use after booking." onClose={() => setSheet(null)}>
+        <SheetBox
+          title="Contact details"
+          subtitle="Add channels clients can use after booking."
+          onClose={() => setSheet(null)}
+        >
           <div style={{ display: 'grid', gap: 10 }}>
             {['Phone', 'WhatsApp', 'Telegram', 'Viber', 'Instagram', 'Email', 'Website'].map((item) => (
               <input
