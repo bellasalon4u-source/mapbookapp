@@ -903,44 +903,69 @@ function PromoCard({
   onOpen: () => void;
   onBook: () => void;
 }) {
+  void onBook;
+
   const anyPromo = promo as any;
   const discountBadge = extractPromotionDiscountBadge(promo);
-  const bookLabel =
+
+  const viewLabel =
     language === 'RU'
-      ? 'Бронь'
+      ? 'Просмотр'
       : language === 'UA'
-      ? 'Бронь'
+      ? 'Перегляд'
       : language === 'CZ'
-      ? 'Rezervovat'
+      ? 'Zobrazit'
       : language === 'ES'
-      ? 'Reservar'
-      : 'Book';
+      ? 'Ver'
+      : 'View';
+
+  const price =
+    anyPromo.price ||
+    anyPromo.priceFrom ||
+    anyPromo.startingPrice ||
+    anyPromo.fromPrice ||
+    '25';
+
+  const distance = anyPromo.distance || anyPromo.distanceKm || '1.2 km';
+  const rating = anyPromo.rating || '4.9';
 
   return (
     <button
       type="button"
       onClick={onOpen}
       style={{
-        minWidth: 150,
-        maxWidth: 150,
+        minWidth: 188,
+        maxWidth: 188,
         border: '2px solid #111111',
-        borderRadius: 16,
+        borderRadius: 24,
         background: '#ffffff',
         overflow: 'hidden',
         flexShrink: 0,
         padding: 0,
         textAlign: 'left',
         cursor: 'pointer',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+        boxShadow: '0 10px 24px rgba(0,0,0,0.14)',
       }}
     >
-      <div style={{ position: 'relative' }}>
+      <div
+        style={{
+          position: 'relative',
+          height: 208,
+          overflow: 'hidden',
+          background: '#f3f4f6',
+        }}
+      >
         <img
-          src={anyPromo.image}
-          alt={anyPromo.title}
+          src={
+            anyPromo.image ||
+            anyPromo.photo ||
+            anyPromo.cover ||
+            'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80'
+          }
+          alt={anyPromo.title || 'Promotion'}
           style={{
             width: '100%',
-            height: 92,
+            height: '100%',
             objectFit: 'cover',
             display: 'block',
           }}
@@ -949,78 +974,134 @@ function PromoCard({
         <div
           style={{
             position: 'absolute',
-            top: 6,
-            left: 6,
+            top: 9,
+            left: 9,
             background: '#ffe44d',
-            color: '#17130f',
-            border: '1.5px solid #111111',
+            color: '#111111',
+            border: '1.7px solid #111111',
             borderRadius: 999,
-            padding: '4px 8px',
-            fontSize: 9,
+            padding: '5px 10px',
+            fontSize: 10,
             fontWeight: 900,
-            boxShadow: '0 2px 6px rgba(0,0,0,0.07)',
+            boxShadow: '0 3px 10px rgba(0,0,0,0.16)',
           }}
         >
           {discountBadge}
         </div>
-      </div>
 
-      <div style={{ padding: '8px 10px 10px' }}>
         <div
           style={{
-            fontSize: 12,
-            fontWeight: 800,
-            color: '#151515',
-            lineHeight: 1.2,
-            minHeight: 30,
+            position: 'absolute',
+            right: 9,
+            top: 9,
+            width: 34,
+            height: 34,
+            borderRadius: 999,
+            border: '1.7px solid #111111',
+            background: 'rgba(255,255,255,0.96)',
+            display: 'grid',
+            placeItems: 'center',
+            fontSize: 17,
+            fontWeight: 900,
+            color: '#111111',
+            backdropFilter: 'blur(6px)',
           }}
         >
-          {anyPromo.title}
+          ♡
         </div>
 
         <div
           style={{
-            marginTop: 8,
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            gap: 8,
-            alignItems: 'center',
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            padding: '42px 12px 12px',
+            background:
+              'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.78) 100%)',
           }}
         >
+          <div
+            style={{
+              fontSize: 16,
+              fontWeight: 900,
+              lineHeight: 1.12,
+              color: '#ffffff',
+              textShadow: '0 2px 6px rgba(0,0,0,0.34)',
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+            }}
+          >
+            {anyPromo.title || 'Premium nearby service'}
+          </div>
+
+          <div
+            style={{
+              marginTop: 7,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              flexWrap: 'wrap',
+              color: '#ffffff',
+              fontSize: 11,
+              fontWeight: 800,
+            }}
+          >
+            <span>★ {rating}</span>
+            <span>📍 {distance}</span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          padding: '10px 11px 12px',
+          background: '#ffffff',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 19,
+              fontWeight: 900,
+              color: '#1ec95b',
+              lineHeight: 1,
+            }}
+          >
+            {language === 'RU' ? 'от' : 'from'} £
+            {String(price).replace(/[^\d.]/g, '') || '25'}
+          </div>
+
           <button
             type="button"
             onClick={(event) => {
               event.stopPropagation();
-              onBook();
+              onOpen();
             }}
             style={{
-              height: 30,
-              borderRadius: 12,
-              border: '1.5px solid #111111',
-              background: '#1f6fff',
+              height: 38,
+              padding: '0 16px',
+              borderRadius: 14,
+              border: '1.8px solid #111111',
+              background: '#24c85a',
               color: '#ffffff',
-              fontSize: 11,
+              fontSize: 13,
               fontWeight: 900,
               cursor: 'pointer',
-              boxShadow: '0 5px 12px rgba(31,111,255,0.24)',
+              boxShadow: '0 6px 14px rgba(36,200,90,0.24)',
             }}
           >
-            {bookLabel}
+            {viewLabel}
           </button>
-
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: '#151515',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-            }}
-          >
-            <span style={{ fontSize: 12 }}>◉</span>
-            <span>{anyPromo.views || 0}</span>
-          </div>
         </div>
       </div>
     </button>
@@ -2356,6 +2437,47 @@ export default function HomePage() {
     return promotions;
   }, [promotions, dealFilterMode, activeCategory]);
 
+  const demoHotPromotions = useMemo(() => {
+    return [
+      {
+        id: 'demo-barber',
+        title: 'Luxury barber fade',
+        image:
+          'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80',
+        price: '25',
+        rating: '4.9',
+        distance: '1.2 km',
+        views: 145,
+        discountBadge: 'TOP',
+      },
+      {
+        id: 'demo-beauty',
+        title: 'Beauty master nearby',
+        image:
+          'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=900&q=80',
+        price: '40',
+        rating: '4.8',
+        distance: '0.8 km',
+        views: 93,
+        discountBadge: 'TODAY',
+      },
+      {
+        id: 'demo-massage',
+        title: 'Massage & wellness',
+        image:
+          'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=900&q=80',
+        price: '55',
+        rating: '5.0',
+        distance: '2.0 km',
+        views: 61,
+        discountBadge: 'LUX',
+      },
+    ] as unknown as PromotionItem[];
+  }, []);
+
+  const visibleHotPromotions =
+    filteredPromotions.length > 0 ? filteredPromotions : demoHotPromotions;
+
   const promotionMasters = useMemo(() => {
     if (dealFilterMode !== 'none') {
       const sourcePromotions =
@@ -3201,7 +3323,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {filteredPromotions.length > 0 && (
+        {visibleHotPromotions.length > 0 && (
           <section style={{ padding: '20px 0 0' }}>
             <div style={{ background: pageBackground, padding: '0 0 12px' }}>
               <div
@@ -3251,16 +3373,16 @@ export default function HomePage() {
                 style={{
                   marginTop: 12,
                   display: 'flex',
-                  gap: 10,
+                  gap: 12,
                   overflowX: 'auto',
                   overflowY: 'hidden',
-                  padding: '0 12px 4px',
+                  padding: '0 12px 6px',
                   WebkitOverflowScrolling: 'touch',
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none',
                 }}
               >
-                {filteredPromotions.slice(0, 8).map((promo) => (
+                {visibleHotPromotions.slice(0, 8).map((promo) => (
                   <div
                     key={promo.id}
                     ref={(node) => {
