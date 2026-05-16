@@ -14,7 +14,8 @@ const BRAND = {
   green: '#24c45a',
   blue: '#1677ff',
   red: '#ff2456',
-  muted: '#6f7887',
+  muted: '#5f6877',
+  lightMuted: '#8b95a3',
   softBlue: '#eef5ff',
   softGreen: '#eaffef',
   softPink: '#fff0f7',
@@ -80,17 +81,20 @@ const paymentMethods: { id: PaymentMethodId; icon: string; title: string }[] = [
 
 function Logo() {
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9 }}>
       <div
         style={{
-          width: 44,
-          height: 44,
+          width: 38,
+          height: 38,
           borderRadius: '50%',
           background:
             'conic-gradient(from 20deg, #ff2456, #ffe44d, #24c45a, #1677ff, #7b2cff, #ff2456)',
+          boxShadow: '0 4px 12px rgba(22,119,255,0.16)',
         }}
       />
-      <span style={{ fontSize: 34, fontWeight: 900, color: BRAND.navy }}>Olamep</span>
+      <span style={{ fontSize: 30, fontWeight: 900, color: BRAND.navy, letterSpacing: '-1px' }}>
+        Olamep
+      </span>
     </div>
   );
 }
@@ -116,7 +120,7 @@ function Row({
       onClick={onClick}
       style={{
         width: '100%',
-        minHeight: 72,
+        minHeight: 68,
         borderRadius: 20,
         border: `2px solid ${BRAND.black}`,
         background: '#fff',
@@ -124,7 +128,7 @@ function Row({
         gridTemplateColumns: '54px 1fr auto',
         gap: 14,
         alignItems: 'center',
-        padding: '10px 16px 10px 12px',
+        padding: '9px 16px 9px 12px',
         textAlign: 'left',
         cursor: 'pointer',
       }}
@@ -146,7 +150,7 @@ function Row({
       </span>
 
       <span style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 20, fontWeight: 900, color: BRAND.navy }}>{title}</div>
+        <div style={{ fontSize: 19, fontWeight: 900, color: BRAND.navy }}>{title}</div>
         {value ? (
           <div
             style={{
@@ -172,10 +176,12 @@ function Row({
 
 function SheetBox({
   title,
+  subtitle,
   onClose,
   children,
 }: {
   title: string;
+  subtitle?: string;
   onClose: () => void;
   children: ReactNode;
 }) {
@@ -185,7 +191,7 @@ function SheetBox({
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(17,17,17,0.34)',
+        background: 'rgba(17,17,17,0.36)',
         zIndex: 200,
         display: 'flex',
         alignItems: 'flex-end',
@@ -197,17 +203,28 @@ function SheetBox({
         style={{
           width: '100%',
           maxWidth: 430,
-          maxHeight: 'calc(100vh - 50px)',
+          maxHeight: 'calc(100vh - 70px)',
           overflowY: 'auto',
           background: '#fff',
           borderRadius: '30px 30px 0 0',
           border: `2px solid ${BRAND.black}`,
           padding: '18px 18px calc(20px + env(safe-area-inset-bottom))',
           boxSizing: 'border-box',
+          boxShadow: '0 -18px 36px rgba(0,0,0,0.18)',
         }}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 46px', gap: 10, marginBottom: 16 }}>
-          <div style={{ fontSize: 28, fontWeight: 900, color: BRAND.navy }}>{title}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 46px', gap: 10, marginBottom: 14 }}>
+          <div>
+            <div style={{ fontSize: 28, fontWeight: 900, color: BRAND.navy, lineHeight: 1 }}>
+              {title}
+            </div>
+            {subtitle ? (
+              <div style={{ marginTop: 7, fontSize: 13, fontWeight: 900, color: BRAND.muted, lineHeight: 1.3 }}>
+                {subtitle}
+              </div>
+            ) : null}
+          </div>
+
           <button
             type="button"
             onClick={onClose}
@@ -225,6 +242,7 @@ function SheetBox({
             ×
           </button>
         </div>
+
         {children}
       </div>
     </div>
@@ -274,6 +292,58 @@ export default function AddServicePage() {
     [categoryId]
   );
 
+  const progressItems = useMemo(
+    () => [
+      { key: 'media', done: media.length > 0 },
+      { key: 'title', done: title.trim().length > 0 },
+      { key: 'description', done: description.trim().length > 0 },
+      { key: 'category', done: Boolean(categoryId && subcategory) },
+      { key: 'price', done: Boolean(pricePounds && selectedPayments.length > 0) },
+    ],
+    [media.length, title, description, categoryId, subcategory, pricePounds, selectedPayments.length]
+  );
+
+  const completedSteps = progressItems.filter((item) => item.done).length;
+  const progressPercent = Math.round((completedSteps / progressItems.length) * 100);
+
+  const nextStepLabel = useMemo(() => {
+    if (media.length === 0) return 'Add media';
+    if (!title.trim()) return 'Add title';
+    if (!description.trim()) return 'Add description';
+    if (!categoryId || !subcategory) return 'Choose category';
+    if (!pricePounds || selectedPayments.length === 0) return 'Set price';
+    return 'Continue';
+  }, [media.length, title, description, categoryId, subcategory, pricePounds, selectedPayments.length]);
+
+  const handleContinue = () => {
+    if (media.length === 0) {
+      mediaInputRef.current?.click();
+      return;
+    }
+
+    if (!title.trim()) {
+      setSheet('title');
+      return;
+    }
+
+    if (!description.trim()) {
+      setSheet('description');
+      return;
+    }
+
+    if (!categoryId || !subcategory) {
+      setSheet('category');
+      return;
+    }
+
+    if (!pricePounds || selectedPayments.length === 0) {
+      setSheet('price');
+      return;
+    }
+
+    setSheet('contacts');
+  };
+
   const handleMediaSelected = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
@@ -292,6 +362,14 @@ export default function AddServicePage() {
     event.target.value = '';
   };
 
+  const removeMedia = (id: string) => {
+    setMedia((prev) => {
+      const removed = prev.find((item) => item.id === id);
+      if (removed) URL.revokeObjectURL(removed.preview);
+      return prev.filter((item) => item.id !== id);
+    });
+  };
+
   const togglePayment = (id: PaymentMethodId) => {
     setSelectedPayments((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
@@ -306,12 +384,12 @@ export default function AddServicePage() {
           background: '#ffffff',
           fontFamily: 'Arial, sans-serif',
           color: BRAND.navy,
-          paddingBottom: 112,
+          paddingBottom: 108,
         }}
       >
         <header
           style={{
-            padding: '22px 24px 26px',
+            padding: '14px 20px 12px',
             borderBottom: '1px solid #e2e7f0',
             background: '#ffffff',
             position: 'sticky',
@@ -327,13 +405,13 @@ export default function AddServicePage() {
                 position: 'absolute',
                 left: 0,
                 top: 0,
-                width: 54,
-                height: 54,
+                width: 48,
+                height: 48,
                 borderRadius: 999,
                 border: `2px solid ${BRAND.black}`,
                 background: '#fff',
                 color: BRAND.navy,
-                fontSize: 30,
+                fontSize: 28,
                 fontWeight: 900,
               }}
             >
@@ -347,13 +425,13 @@ export default function AddServicePage() {
                 position: 'absolute',
                 right: 0,
                 top: 0,
-                width: 54,
-                height: 54,
+                width: 48,
+                height: 48,
                 borderRadius: 999,
                 border: `2px solid ${BRAND.black}`,
                 background: '#fff',
                 color: BRAND.navy,
-                fontSize: 28,
+                fontSize: 26,
                 fontWeight: 900,
               }}
             >
@@ -364,23 +442,58 @@ export default function AddServicePage() {
 
             <h1
               style={{
-                margin: '18px 0 0',
-                fontSize: 44,
-                lineHeight: 0.95,
+                margin: '10px 0 0',
+                fontSize: 42,
+                lineHeight: 0.94,
                 fontWeight: 900,
                 color: BRAND.navy,
+                letterSpacing: '-1.8px',
               }}
             >
               Add your service
             </h1>
 
-            <div style={{ marginTop: 12, fontSize: 18, fontWeight: 900, color: BRAND.muted }}>
+            <div style={{ marginTop: 8, fontSize: 16, lineHeight: 1.25, fontWeight: 900, color: BRAND.muted }}>
               Create a strong listing for clients nearby
+            </div>
+
+            <div
+              style={{
+                margin: '12px auto 0',
+                maxWidth: 320,
+                display: 'grid',
+                gridTemplateColumns: '1fr auto',
+                gap: 10,
+                alignItems: 'center',
+              }}
+            >
+              <div
+                style={{
+                  height: 10,
+                  borderRadius: 999,
+                  border: `1.5px solid ${BRAND.black}`,
+                  background: '#ffffff',
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    width: `${progressPercent}%`,
+                    height: '100%',
+                    background: BRAND.green,
+                    transition: 'width 0.25s ease',
+                  }}
+                />
+              </div>
+
+              <div style={{ fontSize: 12, fontWeight: 900, color: BRAND.navy }}>
+                {completedSteps}/{progressItems.length}
+              </div>
             </div>
           </div>
         </header>
 
-        <div style={{ maxWidth: 430, margin: '0 auto', padding: '18px', display: 'grid', gap: 12 }}>
+        <div style={{ maxWidth: 430, margin: '0 auto', padding: '14px 18px 18px', display: 'grid', gap: 12 }}>
           <input
             ref={mediaInputRef}
             type="file"
@@ -397,63 +510,115 @@ export default function AddServicePage() {
                 borderRadius: 24,
                 background: '#fff',
                 padding: 12,
+                minWidth: 0,
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                <div style={{ fontSize: 22, fontWeight: 900 }}>Photos</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                <div style={{ fontSize: 21, fontWeight: 900 }}>Photos</div>
                 <div style={{ fontSize: 16, fontWeight: 900, color: BRAND.muted }}>
                   {media.length}/50
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => mediaInputRef.current?.click()}
-                style={{
-                  width: '100%',
-                  height: 206,
-                  borderRadius: 22,
-                  border: '2px dashed #9aa3b1',
-                  background: '#fff',
-                  color: BRAND.navy,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 14,
-                  cursor: 'pointer',
-                }}
-              >
+              {media.length > 0 ? (
                 <div
                   style={{
-                    width: 58,
-                    height: 58,
-                    borderRadius: 999,
-                    border: `3px solid ${BRAND.green}`,
-                    color: BRAND.green,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 42,
-                    fontWeight: 500,
+                    display: 'grid',
+                    gridTemplateColumns: media.length === 1 ? '1fr' : '1fr 1fr',
+                    gap: 8,
                   }}
                 >
-                  +
+                  {media.slice(0, 4).map((item, index) => (
+                    <div
+                      key={item.id}
+                      style={{
+                        position: 'relative',
+                        height: index === 0 && media.length > 1 ? 138 : 96,
+                        gridRow: index === 0 && media.length > 1 ? 'span 2' : 'auto',
+                        borderRadius: 18,
+                        border: `1.8px solid ${BRAND.black}`,
+                        overflow: 'hidden',
+                        background: '#f3f6fb',
+                      }}
+                    >
+                      {item.kind === 'video' ? (
+                        <video src={item.preview} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <img src={item.preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => removeMedia(item.id)}
+                        style={{
+                          position: 'absolute',
+                          right: 6,
+                          top: 6,
+                          width: 26,
+                          height: 26,
+                          borderRadius: 999,
+                          border: `1.5px solid ${BRAND.black}`,
+                          background: '#fff',
+                          color: BRAND.red,
+                          fontSize: 16,
+                          fontWeight: 900,
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
                 </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => mediaInputRef.current?.click()}
+                  style={{
+                    width: '100%',
+                    height: 176,
+                    borderRadius: 22,
+                    border: '2px dashed #9aa3b1',
+                    background: '#fff',
+                    color: BRAND.navy,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 12,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 54,
+                      height: 54,
+                      borderRadius: 999,
+                      border: `3px solid ${BRAND.green}`,
+                      color: BRAND.green,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 40,
+                      fontWeight: 500,
+                    }}
+                  >
+                    +
+                  </div>
 
-                <div style={{ fontSize: 18, fontWeight: 900 }}>Add photo / video</div>
-              </button>
+                  <div style={{ fontSize: 17, fontWeight: 900 }}>Add photo / video</div>
+                </button>
+              )}
 
-              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '32px 1fr', gap: 8 }}>
-                <div style={{ fontSize: 24 }}>🖼️</div>
-                <div style={{ fontSize: 15, lineHeight: 1.35, color: BRAND.muted, fontWeight: 900 }}>
+              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '30px 1fr', gap: 8 }}>
+                <div style={{ fontSize: 23 }}>🖼️</div>
+                <div style={{ fontSize: 14, lineHeight: 1.35, color: BRAND.muted, fontWeight: 900 }}>
                   Add photos and videos from your files.
                 </div>
               </div>
 
               <div
                 style={{
-                  marginTop: 12,
+                  marginTop: 11,
                   border: `2px solid ${BRAND.blue}`,
                   borderRadius: 18,
                   background: '#e8f2ff',
@@ -461,15 +626,15 @@ export default function AddServicePage() {
                   textAlign: 'center',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-around', fontSize: 30, fontWeight: 900 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-around', fontSize: 25, fontWeight: 900 }}>
                   <span>↔</span>
                   <span>⌕+</span>
                   <span>↻</span>
                   <span>→</span>
                   <span
                     style={{
-                      width: 42,
-                      height: 42,
+                      width: 36,
+                      height: 36,
                       borderRadius: 999,
                       background: BRAND.green,
                       color: '#fff',
@@ -482,7 +647,7 @@ export default function AddServicePage() {
                   </span>
                 </div>
 
-                <div style={{ marginTop: 8, fontSize: 15, fontWeight: 900 }}>
+                <div style={{ marginTop: 8, fontSize: 14, fontWeight: 900 }}>
                   Move, zoom, rotate and confirm.
                 </div>
               </div>
@@ -494,11 +659,12 @@ export default function AddServicePage() {
                 borderRadius: 24,
                 background: '#fff',
                 overflow: 'hidden',
+                minWidth: 0,
               }}
             >
               <div style={{ padding: 12 }}>
-                <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 14 }}>Price</div>
-                <div style={{ color: BRAND.muted, fontSize: 15, fontWeight: 900, marginBottom: 12 }}>
+                <div style={{ fontSize: 21, fontWeight: 900, marginBottom: 10 }}>Price</div>
+                <div style={{ color: BRAND.muted, fontSize: 14, fontWeight: 900, marginBottom: 10 }}>
                   Set your price
                 </div>
 
@@ -507,17 +673,17 @@ export default function AddServicePage() {
                   onClick={() => setSheet('price')}
                   style={{ width: '100%', border: 'none', background: 'transparent', padding: 0 }}
                 >
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '0.75fr 1fr 1fr', gap: 7 }}>
                     <div
                       style={{
-                        height: 76,
-                        borderRadius: 16,
+                        height: 64,
+                        borderRadius: 15,
                         border: '1.5px solid #c9ced7',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: BRAND.green,
-                        fontSize: 34,
+                        fontSize: 30,
                         fontWeight: 900,
                       }}
                     >
@@ -526,14 +692,14 @@ export default function AddServicePage() {
 
                     <div
                       style={{
-                        height: 76,
-                        borderRadius: 16,
+                        height: 64,
+                        borderRadius: 15,
                         border: '1.5px solid #c9ced7',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: BRAND.red,
-                        fontSize: 34,
+                        fontSize: 30,
                         fontWeight: 900,
                       }}
                     >
@@ -542,14 +708,14 @@ export default function AddServicePage() {
 
                     <div
                       style={{
-                        height: 76,
-                        borderRadius: 16,
+                        height: 64,
+                        borderRadius: 15,
                         border: '1.5px solid #c9ced7',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: BRAND.red,
-                        fontSize: 34,
+                        fontSize: 30,
                         fontWeight: 900,
                       }}
                     >
@@ -560,20 +726,21 @@ export default function AddServicePage() {
                   <div
                     style={{
                       marginTop: 10,
-                      height: 50,
+                      minHeight: 48,
                       borderRadius: 16,
                       border: `2px solid ${BRAND.black}`,
                       display: 'grid',
-                      gridTemplateColumns: '34px 1fr 24px',
+                      gridTemplateColumns: '30px 1fr 22px',
                       alignItems: 'center',
-                      padding: '0 12px',
+                      padding: '8px 10px',
+                      boxSizing: 'border-box',
                     }}
                   >
-                    <span style={{ fontSize: 22 }}>🏷️</span>
-                    <span style={{ fontSize: 17, fontWeight: 900 }}>
+                    <span style={{ fontSize: 20 }}>🏷️</span>
+                    <span style={{ fontSize: 15, fontWeight: 900, lineHeight: 1.15 }}>
                       From £{priceFrom} to £{priceTo}
                     </span>
-                    <span style={{ fontSize: 30, fontWeight: 900 }}>›</span>
+                    <span style={{ fontSize: 28, fontWeight: 900 }}>›</span>
                   </div>
                 </button>
               </div>
@@ -586,39 +753,39 @@ export default function AddServicePage() {
                   border: 'none',
                   borderTop: `2px solid ${BRAND.black}`,
                   background: '#fff',
-                  padding: 14,
+                  padding: 12,
                   cursor: 'pointer',
                   textAlign: 'left',
                   display: 'grid',
-                  gridTemplateColumns: '52px 1fr auto',
-                  gap: 12,
+                  gridTemplateColumns: '46px 1fr auto',
+                  gap: 10,
                   alignItems: 'center',
                 }}
               >
                 <span
                   style={{
-                    width: 46,
-                    height: 46,
+                    width: 42,
+                    height: 42,
                     borderRadius: 14,
                     border: `2px solid ${BRAND.black}`,
                     background: BRAND.softBlue,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 25,
+                    fontSize: 23,
                   }}
                 >
                   💳
                 </span>
 
-                <span>
-                  <div style={{ fontSize: 22, fontWeight: 900 }}>Payment methods</div>
-                  <div style={{ marginTop: 5, fontSize: 13, color: BRAND.muted, fontWeight: 900 }}>
-                    Tap to choose
+                <span style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 18, fontWeight: 900, lineHeight: 1.05 }}>Payment</div>
+                  <div style={{ marginTop: 5, fontSize: 12, color: BRAND.muted, fontWeight: 900 }}>
+                    {selectedPayments.length} selected
                   </div>
                 </span>
 
-                <span style={{ fontSize: 34, fontWeight: 900 }}>›</span>
+                <span style={{ fontSize: 30, fontWeight: 900 }}>›</span>
               </button>
             </div>
           </section>
@@ -723,35 +890,38 @@ export default function AddServicePage() {
             zIndex: 80,
             background: 'rgba(255,255,255,0.96)',
             borderTop: '1px solid #e2e7f0',
-            padding: '12px 18px calc(12px + env(safe-area-inset-bottom))',
+            padding: '10px 18px calc(10px + env(safe-area-inset-bottom))',
+            boxShadow: '0 -10px 26px rgba(7,27,70,0.08)',
           }}
         >
           <div style={{ maxWidth: 430, margin: '0 auto' }}>
             <button
               type="button"
+              onClick={handleContinue}
               style={{
                 width: '100%',
-                height: 68,
-                borderRadius: 24,
+                height: 62,
+                borderRadius: 22,
                 border: `2px solid ${BRAND.black}`,
                 background: BRAND.green,
                 color: '#fff',
-                fontSize: 24,
+                fontSize: 23,
                 fontWeight: 900,
+                boxShadow: '0 8px 22px rgba(36,196,90,0.22)',
               }}
             >
-              Continue
+              {nextStepLabel} ›
             </button>
           </div>
         </div>
       </main>
 
       {sheet === 'title' ? (
-        <SheetBox title="Title" onClose={() => setSheet(null)}>
+        <SheetBox title="Title" subtitle="Use a short, clear title that clients understand fast." onClose={() => setSheet(null)}>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Add a short and clear title"
+            placeholder="Example: Hair extensions in London"
             style={{
               width: '100%',
               height: 58,
@@ -760,20 +930,39 @@ export default function AddServicePage() {
               padding: '0 16px',
               fontSize: 16,
               fontWeight: 900,
+              boxSizing: 'border-box',
             }}
           />
+
+          <button
+            type="button"
+            onClick={() => setSheet(null)}
+            style={{
+              marginTop: 14,
+              width: '100%',
+              height: 56,
+              borderRadius: 18,
+              border: `2px solid ${BRAND.black}`,
+              background: BRAND.green,
+              color: '#fff',
+              fontSize: 20,
+              fontWeight: 900,
+            }}
+          >
+            Done
+          </button>
         </SheetBox>
       ) : null}
 
       {sheet === 'description' ? (
-        <SheetBox title="Description" onClose={() => setSheet(null)}>
+        <SheetBox title="Description" subtitle="Tell clients what you do, what is included, and why they should book." onClose={() => setSheet(null)}>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe your service in detail"
+            placeholder="Example: I offer professional hair extensions with consultation, colour matching and aftercare advice."
             style={{
               width: '100%',
-              height: 150,
+              height: 132,
               borderRadius: 18,
               border: `2px solid ${BRAND.black}`,
               padding: 16,
@@ -781,13 +970,48 @@ export default function AddServicePage() {
               fontWeight: 900,
               resize: 'none',
               fontFamily: 'Arial, sans-serif',
+              boxSizing: 'border-box',
             }}
           />
+
+          <div
+            style={{
+              marginTop: 12,
+              borderRadius: 18,
+              border: `2px solid ${BRAND.black}`,
+              background: BRAND.softBlue,
+              padding: 12,
+              fontSize: 13,
+              lineHeight: 1.35,
+              fontWeight: 900,
+              color: BRAND.navy,
+            }}
+          >
+            Tip: mention service type, duration, location, materials and what makes your work special.
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setSheet(null)}
+            style={{
+              marginTop: 14,
+              width: '100%',
+              height: 56,
+              borderRadius: 18,
+              border: `2px solid ${BRAND.black}`,
+              background: BRAND.green,
+              color: '#fff',
+              fontSize: 20,
+              fontWeight: 900,
+            }}
+          >
+            Done
+          </button>
         </SheetBox>
       ) : null}
 
       {sheet === 'category' ? (
-        <SheetBox title="Choose category" onClose={() => setSheet(null)}>
+        <SheetBox title="Choose category" subtitle="Pick the main category for your service." onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             {categories.map((item) => (
               <button
@@ -816,7 +1040,7 @@ export default function AddServicePage() {
       ) : null}
 
       {sheet === 'subcategory' ? (
-        <SheetBox title="Choose subcategory" onClose={() => setSheet(null)}>
+        <SheetBox title="Choose subcategory" subtitle="Choose the closest service type." onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 10 }}>
             {currentCategory.subcategories.map((item) => (
               <button
@@ -844,16 +1068,40 @@ export default function AddServicePage() {
       ) : null}
 
       {sheet === 'hours' ? (
-        <SheetBox title="Working hours" onClose={() => setSheet(null)}>
+        <SheetBox title="Working hours" subtitle="Set when clients can book you." onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <input type="time" value={hoursFrom} onChange={(e) => setHoursFrom(e.target.value)} />
-            <input type="time" value={hoursTo} onChange={(e) => setHoursTo(e.target.value)} />
+            <input
+              type="time"
+              value={hoursFrom}
+              onChange={(e) => setHoursFrom(e.target.value)}
+              style={{
+                height: 58,
+                borderRadius: 18,
+                border: `2px solid ${BRAND.black}`,
+                padding: '0 14px',
+                fontSize: 18,
+                fontWeight: 900,
+              }}
+            />
+            <input
+              type="time"
+              value={hoursTo}
+              onChange={(e) => setHoursTo(e.target.value)}
+              style={{
+                height: 58,
+                borderRadius: 18,
+                border: `2px solid ${BRAND.black}`,
+                padding: '0 14px',
+                fontSize: 18,
+                fontWeight: 900,
+              }}
+            />
           </div>
         </SheetBox>
       ) : null}
 
       {sheet === 'payments' ? (
-        <SheetBox title="Payment methods" onClose={() => setSheet(null)}>
+        <SheetBox title="Payment methods" subtitle="Choose how clients can pay you." onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 10 }}>
             {paymentMethods.map((method) => (
               <button
@@ -875,7 +1123,9 @@ export default function AddServicePage() {
               >
                 <span style={{ fontSize: 24 }}>{method.icon}</span>
                 <span style={{ fontSize: 18, fontWeight: 900 }}>{method.title}</span>
-                <span>{selectedPayments.includes(method.id) ? '✓' : ''}</span>
+                <span style={{ fontSize: 22, fontWeight: 900, color: BRAND.green }}>
+                  {selectedPayments.includes(method.id) ? '✓' : ''}
+                </span>
               </button>
             ))}
           </div>
@@ -883,18 +1133,88 @@ export default function AddServicePage() {
       ) : null}
 
       {sheet === 'price' ? (
-        <SheetBox title="Price" onClose={() => setSheet(null)}>
+        <SheetBox title="Price" subtitle="Set your main price and optional price range." onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <input value={pricePounds} onChange={(e) => setPricePounds(e.target.value)} />
-            <input value={pricePence} onChange={(e) => setPricePence(e.target.value)} />
-            <input value={priceFrom} onChange={(e) => setPriceFrom(e.target.value)} />
-            <input value={priceTo} onChange={(e) => setPriceTo(e.target.value)} />
+            <input
+              value={pricePounds}
+              onChange={(e) => setPricePounds(e.target.value)}
+              placeholder="Pounds"
+              inputMode="numeric"
+              style={{
+                height: 58,
+                borderRadius: 18,
+                border: `2px solid ${BRAND.black}`,
+                padding: '0 14px',
+                fontSize: 18,
+                fontWeight: 900,
+              }}
+            />
+            <input
+              value={pricePence}
+              onChange={(e) => setPricePence(e.target.value)}
+              placeholder="Pence"
+              inputMode="numeric"
+              style={{
+                height: 58,
+                borderRadius: 18,
+                border: `2px solid ${BRAND.black}`,
+                padding: '0 14px',
+                fontSize: 18,
+                fontWeight: 900,
+              }}
+            />
+            <input
+              value={priceFrom}
+              onChange={(e) => setPriceFrom(e.target.value)}
+              placeholder="From"
+              inputMode="numeric"
+              style={{
+                height: 58,
+                borderRadius: 18,
+                border: `2px solid ${BRAND.black}`,
+                padding: '0 14px',
+                fontSize: 18,
+                fontWeight: 900,
+              }}
+            />
+            <input
+              value={priceTo}
+              onChange={(e) => setPriceTo(e.target.value)}
+              placeholder="To"
+              inputMode="numeric"
+              style={{
+                height: 58,
+                borderRadius: 18,
+                border: `2px solid ${BRAND.black}`,
+                padding: '0 14px',
+                fontSize: 18,
+                fontWeight: 900,
+              }}
+            />
           </div>
+
+          <button
+            type="button"
+            onClick={() => setSheet(null)}
+            style={{
+              marginTop: 14,
+              width: '100%',
+              height: 56,
+              borderRadius: 18,
+              border: `2px solid ${BRAND.black}`,
+              background: BRAND.green,
+              color: '#fff',
+              fontSize: 20,
+              fontWeight: 900,
+            }}
+          >
+            Done
+          </button>
         </SheetBox>
       ) : null}
 
       {sheet === 'contacts' ? (
-        <SheetBox title="Contact details" onClose={() => setSheet(null)}>
+        <SheetBox title="Contact details" subtitle="Add channels clients can use after booking." onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 10 }}>
             {['Phone', 'WhatsApp', 'Telegram', 'Viber', 'Instagram', 'Email', 'Website'].map((item) => (
               <input
@@ -908,6 +1228,7 @@ export default function AddServicePage() {
                   padding: '0 16px',
                   fontSize: 16,
                   fontWeight: 900,
+                  boxSizing: 'border-box',
                 }}
               />
             ))}
@@ -916,7 +1237,7 @@ export default function AddServicePage() {
       ) : null}
 
       {sheet === 'address' ? (
-        <SheetBox title="Address" onClose={() => setSheet(null)}>
+        <SheetBox title="Address" subtitle="Tell clients where the service is available." onClose={() => setSheet(null)}>
           <div style={{ display: 'grid', gap: 10 }}>
             {['City', 'District / area', 'Street, building, studio, floor', 'Postcode'].map((item) => (
               <input
@@ -930,6 +1251,7 @@ export default function AddServicePage() {
                   padding: '0 16px',
                   fontSize: 16,
                   fontWeight: 900,
+                  boxSizing: 'border-box',
                 }}
               />
             ))}
