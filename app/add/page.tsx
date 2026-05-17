@@ -47,39 +47,75 @@ type MediaItem = {
 const categories = [
   {
     id: 'beauty',
-    icon: '💄',
+    icon: '🪞',
     label: 'Beauty',
     subcategories: ['Hair & Styling', 'Nails', 'Brows', 'Lashes', 'Makeup', 'Hair extensions'],
   },
   {
     id: 'barber',
-    icon: '✂️',
+    icon: '💈',
     label: 'Barber',
     subcategories: ['Haircut', 'Beard', 'Shaving', 'Kids haircut'],
   },
   {
     id: 'wellness',
-    icon: '🧘',
+    icon: '🪷',
     label: 'Wellness',
     subcategories: ['Massage', 'SPA', 'Yoga', 'Pilates', 'Facial massage'],
   },
   {
+    id: 'food',
+    icon: '🍽️',
+    label: 'Food & Restaurants',
+    subcategories: ['Chef at home', 'Catering', 'Restaurant booking', 'Cake'],
+  },
+  {
     id: 'home',
-    icon: '🏠',
+    icon: '🏡',
     label: 'Home',
     subcategories: ['Cleaning', 'Deep cleaning', 'Cooking', 'Furniture assembly'],
   },
   {
-    id: 'food',
-    icon: '🍽️',
-    label: 'Food',
-    subcategories: ['Chef at home', 'Catering', 'Restaurant booking', 'Cake'],
+    id: 'repairs',
+    icon: '🛠️',
+    label: 'Repairs',
+    subcategories: ['Phone repair', 'Laptop repair', 'Appliance repair', 'Furniture repair'],
+  },
+  {
+    id: 'tech',
+    icon: '💻',
+    label: 'Tech',
+    subcategories: ['Phone setup', 'Laptop setup', 'Website help', 'Smart home'],
   },
   {
     id: 'fashion',
-    icon: '👗',
-    label: 'Fashion',
+    icon: '👜',
+    label: 'Fashion & Tailoring',
     subcategories: ['Stylist', 'Tailoring', 'Dress rental', 'Personal shopping'],
+  },
+  {
+    id: 'pets',
+    icon: '🐾',
+    label: 'Pets',
+    subcategories: ['Dog grooming', 'Pet sitting', 'Dog walking', 'Training'],
+  },
+  {
+    id: 'auto',
+    icon: '🚗',
+    label: 'Auto',
+    subcategories: ['Car wash', 'Diagnostics', 'Tyres', 'Mobile mechanic'],
+  },
+  {
+    id: 'moving',
+    icon: '📦',
+    label: 'Moving & Delivery',
+    subcategories: ['Moving help', 'Courier', 'Furniture delivery', 'Man with van'],
+  },
+  {
+    id: 'fitness',
+    icon: '🏋️',
+    label: 'Fitness',
+    subcategories: ['Personal trainer', 'Pilates', 'Yoga', 'Nutrition'],
   },
 ];
 
@@ -99,45 +135,50 @@ const serviceFormats: { id: ServiceFormatId; icon: string; title: string }[] = [
   { id: 'online', icon: '🌐', title: 'Online' },
 ];
 
-function Logo() {
+function BrandLogo() {
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
       <div
         style={{
-          width: 48,
-          height: 48,
-          borderRadius: 14,
-          border: `2px solid ${BRAND.black}`,
-          background: '#ffffff',
-          display: 'grid',
-          placeItems: 'center',
-          boxShadow: '0 4px 0 rgba(0,0,0,0.04)',
-          overflow: 'hidden',
+          width: 54,
+          height: 54,
+          borderRadius: 999,
+          background:
+            'radial-gradient(circle at 48% 48%, #ffffff 0 18%, transparent 19%), conic-gradient(from 35deg, #ff2456, #ff8a00, #ffe44d, #24c45a, #18b6ff, #7b2cff, #ff2456)',
+          boxShadow: '0 8px 18px rgba(22,119,255,0.18)',
         }}
-      >
-        <img
-          src="/ui/logo/logo.png"
-          alt="Olamep"
-          style={{
-            width: 38,
-            height: 38,
-            objectFit: 'contain',
-            display: 'block',
-          }}
-        />
-      </div>
-
+      />
       <span
         style={{
-          fontSize: 30,
+          fontSize: 32,
           fontWeight: 900,
           color: BRAND.navy,
-          letterSpacing: '-1px',
+          letterSpacing: '-1.2px',
         }}
       >
         Olamep
       </span>
     </div>
+  );
+}
+
+function CategoryIcon({ icon }: { icon: string }) {
+  return (
+    <span
+      style={{
+        width: 58,
+        height: 58,
+        borderRadius: 18,
+        border: `2px solid ${BRAND.black}`,
+        background: '#ffffff',
+        display: 'grid',
+        placeItems: 'center',
+        fontSize: 30,
+        boxShadow: '0 4px 0 rgba(0,0,0,0.04)',
+      }}
+    >
+      {icon}
+    </span>
   );
 }
 
@@ -171,6 +212,7 @@ function Row({
         padding: '9px 16px 9px 12px',
         textAlign: 'left',
         cursor: 'pointer',
+        boxSizing: 'border-box',
       }}
     >
       <span
@@ -235,23 +277,25 @@ function SheetBox({
         background: 'rgba(17,17,17,0.36)',
         zIndex: 200,
         display: 'flex',
-        alignItems: 'flex-end',
+        alignItems: 'center',
         justifyContent: 'center',
+        padding: '18px 12px',
+        boxSizing: 'border-box',
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: '100%',
+          width: 'calc(100% - 8px)',
           maxWidth: 430,
-          maxHeight: 'calc(100vh - 70px)',
+          maxHeight: 'calc(100vh - 54px)',
           overflowY: 'auto',
           background: '#fff',
-          borderRadius: '30px 30px 0 0',
+          borderRadius: 30,
           border: `2px solid ${BRAND.black}`,
           padding: '18px 18px calc(20px + env(safe-area-inset-bottom))',
           boxSizing: 'border-box',
-          boxShadow: '0 -18px 36px rgba(0,0,0,0.18)',
+          boxShadow: '0 18px 38px rgba(0,0,0,0.22)',
         }}
       >
         <div
@@ -479,7 +523,7 @@ export default function AddServicePage() {
       >
         <header
           style={{
-            padding: '10px 20px 12px',
+            padding: '8px 20px 10px',
             borderBottom: '1px solid #e2e7f0',
             background: '#ffffff',
             position: 'sticky',
@@ -528,12 +572,12 @@ export default function AddServicePage() {
               ×
             </button>
 
-            <Logo />
+            <BrandLogo />
 
             <h1
               style={{
-                margin: '8px 0 0',
-                fontSize: 36,
+                margin: '6px 0 0',
+                fontSize: 34,
                 lineHeight: 0.98,
                 fontWeight: 900,
                 color: BRAND.navy,
@@ -545,8 +589,8 @@ export default function AddServicePage() {
 
             <div
               style={{
-                marginTop: 7,
-                fontSize: 15,
+                marginTop: 6,
+                fontSize: 14,
                 lineHeight: 1.25,
                 fontWeight: 900,
                 color: BRAND.muted,
@@ -557,7 +601,7 @@ export default function AddServicePage() {
 
             <div
               style={{
-                margin: '10px auto 0',
+                margin: '9px auto 0',
                 maxWidth: 320,
                 display: 'grid',
                 gridTemplateColumns: '1fr auto',
@@ -915,6 +959,7 @@ export default function AddServicePage() {
               type="button"
               onClick={openMediaPicker}
               style={{
+                width: '100%',
                 minHeight: 68,
                 borderRadius: 20,
                 border: `2px solid ${BRAND.black}`,
@@ -925,6 +970,7 @@ export default function AddServicePage() {
                 alignItems: 'center',
                 padding: 12,
                 textAlign: 'left',
+                boxSizing: 'border-box',
               }}
             >
               <span style={{ fontSize: 30 }}>📷</span>
@@ -1007,6 +1053,7 @@ export default function AddServicePage() {
                   type="button"
                   onClick={() => setPriceMode(item.id)}
                   style={{
+                    width: '100%',
                     height: 58,
                     borderRadius: 18,
                     border: `2px solid ${BRAND.black}`,
@@ -1014,6 +1061,7 @@ export default function AddServicePage() {
                     color: priceMode === item.id ? '#fff' : BRAND.navy,
                     fontSize: 17,
                     fontWeight: 900,
+                    boxSizing: 'border-box',
                   }}
                 >
                   {item.title}
@@ -1028,6 +1076,7 @@ export default function AddServicePage() {
                 placeholder="Fixed price"
                 inputMode="numeric"
                 style={{
+                  width: '100%',
                   height: 62,
                   borderRadius: 20,
                   border: `2px solid ${BRAND.black}`,
@@ -1045,6 +1094,7 @@ export default function AddServicePage() {
                   placeholder="From"
                   inputMode="numeric"
                   style={{
+                    width: '100%',
                     height: 62,
                     borderRadius: 20,
                     border: `2px solid ${BRAND.black}`,
@@ -1060,6 +1110,7 @@ export default function AddServicePage() {
                   placeholder="To"
                   inputMode="numeric"
                   style={{
+                    width: '100%',
                     height: 62,
                     borderRadius: 20,
                     border: `2px solid ${BRAND.black}`,
@@ -1084,6 +1135,7 @@ export default function AddServicePage() {
                 color: '#fff',
                 fontSize: 20,
                 fontWeight: 900,
+                boxSizing: 'border-box',
               }}
             >
               Done
@@ -1123,6 +1175,7 @@ export default function AddServicePage() {
               color: '#fff',
               fontSize: 20,
               fontWeight: 900,
+              boxSizing: 'border-box',
             }}
           >
             Done
@@ -1163,6 +1216,7 @@ export default function AddServicePage() {
               color: '#fff',
               fontSize: 20,
               fontWeight: 900,
+              boxSizing: 'border-box',
             }}
           >
             Done
@@ -1183,26 +1237,28 @@ export default function AddServicePage() {
                   setSheet('subcategory');
                 }}
                 style={{
-                  minHeight: 64,
-                  borderRadius: 18,
+                  width: '100%',
+                  minHeight: 76,
+                  borderRadius: 22,
                   border: `2px solid ${BRAND.black}`,
                   background: item.id === categoryId ? BRAND.softBlue : '#fff',
                   color: BRAND.navy,
                   display: 'grid',
-                  gridTemplateColumns: '44px 1fr auto',
+                  gridTemplateColumns: '68px 1fr auto',
                   gap: 12,
                   alignItems: 'center',
                   padding: '10px 14px',
                   textAlign: 'left',
                   fontSize: 18,
                   fontWeight: 900,
+                  boxSizing: 'border-box',
                 }}
               >
-                <span style={{ fontSize: 26 }}>{item.icon}</span>
+                <CategoryIcon icon={item.icon} />
                 <span>
                   <div>{item.label}</div>
                   <div style={{ marginTop: 3, fontSize: 12, color: BRAND.muted }}>
-                    {item.subcategories.length} services
+                    {item.subcategories.length} subcategories
                   </div>
                 </span>
                 <span style={{ fontSize: 28 }}>›</span>
@@ -1229,6 +1285,7 @@ export default function AddServicePage() {
                   setSheet(null);
                 }}
                 style={{
+                  width: '100%',
                   minHeight: 58,
                   borderRadius: 18,
                   border: `2px solid ${BRAND.black}`,
@@ -1236,6 +1293,7 @@ export default function AddServicePage() {
                   color: item === subcategory ? '#fff' : BRAND.navy,
                   fontSize: 18,
                   fontWeight: 900,
+                  boxSizing: 'border-box',
                 }}
               >
                 {item}
@@ -1253,12 +1311,14 @@ export default function AddServicePage() {
               value={hoursFrom}
               onChange={(e) => setHoursFrom(e.target.value)}
               style={{
+                width: '100%',
                 height: 58,
                 borderRadius: 18,
                 border: `2px solid ${BRAND.black}`,
                 padding: '0 14px',
                 fontSize: 18,
                 fontWeight: 900,
+                boxSizing: 'border-box',
               }}
             />
             <input
@@ -1266,12 +1326,14 @@ export default function AddServicePage() {
               value={hoursTo}
               onChange={(e) => setHoursTo(e.target.value)}
               style={{
+                width: '100%',
                 height: 58,
                 borderRadius: 18,
                 border: `2px solid ${BRAND.black}`,
                 padding: '0 14px',
                 fontSize: 18,
                 fontWeight: 900,
+                boxSizing: 'border-box',
               }}
             />
           </div>
@@ -1287,6 +1349,7 @@ export default function AddServicePage() {
                 type="button"
                 onClick={() => togglePayment(method.id)}
                 style={{
+                  width: '100%',
                   minHeight: 62,
                   borderRadius: 18,
                   border: `2px solid ${BRAND.black}`,
@@ -1297,6 +1360,7 @@ export default function AddServicePage() {
                   alignItems: 'center',
                   padding: '10px 14px',
                   textAlign: 'left',
+                  boxSizing: 'border-box',
                 }}
               >
                 <span style={{ fontSize: 24 }}>{method.icon}</span>
