@@ -41,7 +41,8 @@ type Sheet =
 type MediaItem = {
   id: string;
   preview: string;
-  kind: 'photo' | 'video';
+  name: string;
+  kind: 'photo' | 'video' | 'file';
   scale: number;
   rotate: number;
 };
@@ -598,9 +599,17 @@ export default function AddServicePage() {
     router.back();
   };
 
+  const openNativeMediaPicker = () => {
+    mediaInputRef.current?.click();
+  };
+
+  const openFilePicker = () => {
+    filesInputRef.current?.click();
+  };
+
   const handlePublish = () => {
     if (media.length === 0) {
-      setSheet('media');
+      openNativeMediaPicker();
       return;
     }
 
@@ -633,17 +642,22 @@ export default function AddServicePage() {
 
     const selected = files.slice(0, 50 - media.length);
 
-    const next = selected
-      .filter((file) => file.type.startsWith('image/') || file.type.startsWith('video/'))
-      .map((file, index) => ({
+    const next = selected.map((file, index) => {
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+
+      return {
         id: `${file.name}-${file.size}-${Date.now()}-${index}`,
         preview: URL.createObjectURL(file),
-        kind: file.type.startsWith('video/') ? ('video' as const) : ('photo' as const),
+        name: file.name,
+        kind: isVideo ? ('video' as const) : isImage ? ('photo' as const) : ('file' as const),
         scale: 1,
         rotate: 0,
-      }));
+      };
+    });
 
     setMedia((prev) => [...prev, ...next]);
+    setSheet('media');
     event.target.value = '';
   };
 
@@ -741,15 +755,7 @@ export default function AddServicePage() {
               ←
             </button>
 
-            <div
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: 0,
-                display: 'flex',
-                gap: 6,
-              }}
-            >
+            <div style={{ position: 'absolute', right: 0, top: 0, display: 'flex', gap: 6 }}>
               <button
                 type="button"
                 onClick={goHome}
@@ -862,7 +868,6 @@ export default function AddServicePage() {
           <input
             ref={filesInputRef}
             type="file"
-            accept="image/*,video/*"
             multiple
             onChange={handleMediaSelected}
             style={{ display: 'none' }}
@@ -872,11 +877,53 @@ export default function AddServicePage() {
             icon="＋"
             bg="#ffffff"
             title="Photos"
-            value={media.length > 0 ? `${media.length}/50 selected` : 'Add photos or videos'}
+            value={media.length > 0 ? `${media.length}/50 selected` : 'Tap to open camera, gallery or video'}
             done={media.length > 0}
             attention={media.length === 0}
-            onClick={() => setSheet('media')}
+            onClick={openNativeMediaPicker}
           />
+
+          <button
+            type="button"
+            onClick={openFilePicker}
+            style={{
+              width: '100%',
+              minHeight: 58,
+              borderRadius: 20,
+              border: `2px solid ${BRAND.black}`,
+              background: '#fff',
+              display: 'grid',
+              gridTemplateColumns: '54px 1fr auto',
+              gap: 14,
+              alignItems: 'center',
+              padding: '8px 14px 8px 12px',
+              textAlign: 'left',
+              cursor: 'pointer',
+              boxSizing: 'border-box',
+            }}
+          >
+            <span
+              style={{
+                width: 46,
+                height: 46,
+                borderRadius: 14,
+                border: `1.5px solid ${BRAND.black}`,
+                background: BRAND.softYellow,
+                display: 'grid',
+                placeItems: 'center',
+                fontSize: 25,
+              }}
+            >
+              📁
+            </span>
+            <span>
+              <div style={{ fontSize: 18, fontWeight: 900, color: BRAND.navy }}>Choose file</div>
+              <div style={{ marginTop: 4, fontSize: 13, fontWeight: 900, color: BRAND.muted }}>
+                Any file from your phone
+              </div>
+            </span>
+            <span style={{ fontSize: 24, fontWeight: 900 }}>＋</span>
+          </button>
 
           <Row
             icon="£"
@@ -1012,130 +1059,6 @@ export default function AddServicePage() {
             <span style={{ color: BRAND.green }}>✓ Free publication.</span>{' '}
             <span style={{ color: BRAND.navy }}>£1 is charged only when you confirm a booking.</span>
           </div>
-
-          <div
-            style={{
-              borderRadius: 28,
-              border: `2px solid ${BRAND.black}`,
-              background: '#fff',
-              overflow: 'hidden',
-              boxShadow: '0 10px 24px rgba(0,0,0,0.08)',
-            }}
-          >
-            <div
-              style={{
-                position: 'relative',
-                height: 200,
-                background: '#f3f4f6',
-                overflow: 'hidden',
-              }}
-            >
-              <img
-                src={
-                  media[0]?.preview ||
-                  'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=80'
-                }
-                alt="Preview"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 12,
-                  top: 12,
-                  background: '#ffe44d',
-                  border: `2px solid ${BRAND.black}`,
-                  borderRadius: 999,
-                  padding: '6px 12px',
-                  fontSize: 12,
-                  fontWeight: 900,
-                }}
-              >
-                PREVIEW
-              </div>
-
-              <div
-                style={{
-                  position: 'absolute',
-                  right: 12,
-                  top: 12,
-                  width: 42,
-                  height: 42,
-                  borderRadius: 999,
-                  border: `2px solid ${BRAND.black}`,
-                  background: 'rgba(255,255,255,0.95)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 22,
-                }}
-              >
-                ♡
-              </div>
-
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  padding: '48px 14px 14px',
-                  background:
-                    'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.78) 100%)',
-                }}
-              >
-                <div style={{ color: '#fff', fontSize: 23, fontWeight: 900, lineHeight: 1.05 }}>
-                  {title || 'Your service title'}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    color: '#fff',
-                    fontSize: 14,
-                    fontWeight: 900,
-                  }}
-                >
-                  <span>★ 4.9</span>
-                  <span>📍 1.2 km</span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                padding: 14,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-              }}
-            >
-              <div style={{ fontSize: 30, fontWeight: 900, color: BRAND.blue }}>
-                {priceMode === 'fixed' ? `£${priceFixed}` : `from £${priceFrom}`}
-              </div>
-
-              <button
-                type="button"
-                style={{
-                  height: 52,
-                  padding: '0 22px',
-                  borderRadius: 18,
-                  border: `2px solid ${BRAND.black}`,
-                  background: BRAND.blue,
-                  color: '#fff',
-                  fontSize: 18,
-                  fontWeight: 900,
-                }}
-              >
-                View
-              </button>
-            </div>
-          </div>
         </div>
 
         <div
@@ -1176,7 +1099,7 @@ export default function AddServicePage() {
       {sheet === 'media' ? (
         <SheetBox
           title="Photos"
-          subtitle="Add up to 50 photos or videos. Tap a photo to edit."
+          subtitle="Tap photo to edit. Use camera, gallery or choose any file."
           onClose={closeToStart}
           onBack={goPreviousSheet}
           onHome={goHome}
@@ -1230,7 +1153,7 @@ export default function AddServicePage() {
 
             <button
               type="button"
-              onClick={() => filesInputRef.current?.click()}
+              onClick={openFilePicker}
               style={{
                 width: '100%',
                 minHeight: 64,
@@ -1247,24 +1170,9 @@ export default function AddServicePage() {
               }}
             >
               <span style={{ fontSize: 26 }}>📁</span>
-              <span style={{ fontSize: 18, fontWeight: 900, color: BRAND.navy }}>Choose files</span>
+              <span style={{ fontSize: 18, fontWeight: 900, color: BRAND.navy }}>Choose file</span>
               <span style={{ fontSize: 26, fontWeight: 900 }}>＋</span>
             </button>
-
-            <div
-              style={{
-                borderRadius: 20,
-                border: `2px solid ${BRAND.black}`,
-                background: BRAND.softBlue,
-                padding: 12,
-                fontSize: 13,
-                lineHeight: 1.35,
-                fontWeight: 900,
-                color: BRAND.navy,
-              }}
-            >
-              After upload: tap photo, zoom, rotate and confirm your position.
-            </div>
 
             {media.length > 0 ? (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -1272,7 +1180,7 @@ export default function AddServicePage() {
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => setEditingMediaId(item.id)}
+                    onClick={() => item.kind === 'file' ? undefined : setEditingMediaId(item.id)}
                     style={{
                       position: 'relative',
                       height: 150,
@@ -1293,7 +1201,7 @@ export default function AddServicePage() {
                           transform: `scale(${item.scale}) rotate(${item.rotate}deg)`,
                         }}
                       />
-                    ) : (
+                    ) : item.kind === 'photo' ? (
                       <img
                         src={item.preview}
                         alt=""
@@ -1304,6 +1212,25 @@ export default function AddServicePage() {
                           transform: `scale(${item.scale}) rotate(${item.rotate}deg)`,
                         }}
                       />
+                    ) : (
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          display: 'grid',
+                          placeItems: 'center',
+                          padding: 12,
+                          boxSizing: 'border-box',
+                          textAlign: 'center',
+                          fontWeight: 900,
+                          color: BRAND.navy,
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontSize: 42 }}>📁</div>
+                          <div style={{ fontSize: 12, marginTop: 6 }}>{item.name}</div>
+                        </div>
+                      </div>
                     )}
 
                     <span
@@ -1384,15 +1311,7 @@ export default function AddServicePage() {
               )}
             </div>
 
-            <div
-              style={{
-                borderRadius: 20,
-                border: `2px solid ${BRAND.black}`,
-                padding: 12,
-                display: 'grid',
-                gap: 10,
-              }}
-            >
+            <div style={{ borderRadius: 20, border: `2px solid ${BRAND.black}`, padding: 12, display: 'grid', gap: 10 }}>
               <div style={{ fontSize: 16, fontWeight: 900 }}>Zoom</div>
               <input
                 type="range"
@@ -1406,11 +1325,7 @@ export default function AddServicePage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <button
                   type="button"
-                  onClick={() =>
-                    updateMediaTransform(editingMedia.id, {
-                      rotate: editingMedia.rotate - 90,
-                    })
-                  }
+                  onClick={() => updateMediaTransform(editingMedia.id, { rotate: editingMedia.rotate - 90 })}
                   style={{
                     height: 52,
                     borderRadius: 18,
@@ -1426,11 +1341,7 @@ export default function AddServicePage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    updateMediaTransform(editingMedia.id, {
-                      rotate: editingMedia.rotate + 90,
-                    })
-                  }
+                  onClick={() => updateMediaTransform(editingMedia.id, { rotate: editingMedia.rotate + 90 })}
                   style={{
                     height: 52,
                     borderRadius: 18,
@@ -1464,488 +1375,6 @@ export default function AddServicePage() {
             </button>
 
             <GreenDoneButton onClick={() => setEditingMediaId(null)}>✓ Done</GreenDoneButton>
-          </div>
-        </SheetBox>
-      ) : null}
-
-      {sheet === 'price' ? (
-        <SheetBox title="Price" subtitle="Choose fixed price or price range." onClose={closeToStart} onBack={goPreviousSheet} onHome={goHome}>
-          <div style={{ display: 'grid', gap: 12 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {[
-                { id: 'fixed' as PriceMode, title: 'Fixed price' },
-                { id: 'range' as PriceMode, title: 'From / To' },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setPriceMode(item.id)}
-                  style={{
-                    width: '100%',
-                    height: 58,
-                    borderRadius: 18,
-                    border: `2px solid ${BRAND.black}`,
-                    background: priceMode === item.id ? BRAND.blue : '#fff',
-                    color: priceMode === item.id ? '#fff' : BRAND.navy,
-                    fontSize: 17,
-                    fontWeight: 900,
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  {item.title}
-                </button>
-              ))}
-            </div>
-
-            {priceMode === 'fixed' ? (
-              <input
-                value={priceFixed}
-                onChange={(e) => setPriceFixed(e.target.value)}
-                placeholder="Fixed price"
-                inputMode="numeric"
-                style={{
-                  width: '100%',
-                  height: 62,
-                  borderRadius: 20,
-                  border: `2px solid ${BRAND.black}`,
-                  padding: '0 16px',
-                  fontSize: 24,
-                  fontWeight: 900,
-                  boxSizing: 'border-box',
-                }}
-              />
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <input
-                  value={priceFrom}
-                  onChange={(e) => setPriceFrom(e.target.value)}
-                  placeholder="From"
-                  inputMode="numeric"
-                  style={{
-                    width: '100%',
-                    height: 62,
-                    borderRadius: 20,
-                    border: `2px solid ${BRAND.black}`,
-                    padding: '0 16px',
-                    fontSize: 24,
-                    fontWeight: 900,
-                    boxSizing: 'border-box',
-                  }}
-                />
-                <input
-                  value={priceTo}
-                  onChange={(e) => setPriceTo(e.target.value)}
-                  placeholder="To"
-                  inputMode="numeric"
-                  style={{
-                    width: '100%',
-                    height: 62,
-                    borderRadius: 20,
-                    border: `2px solid ${BRAND.black}`,
-                    padding: '0 16px',
-                    fontSize: 24,
-                    fontWeight: 900,
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-            )}
-
-            <GreenDoneButton onClick={goNextSheet}>✓ Done</GreenDoneButton>
-          </div>
-        </SheetBox>
-      ) : null}
-
-      {sheet === 'title' ? (
-        <SheetBox title="Title" subtitle="Use a short, clear title." onClose={closeToStart} onBack={goPreviousSheet} onHome={goHome}>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Example: Hair extensions in London"
-            style={{
-              width: '100%',
-              height: 58,
-              borderRadius: 18,
-              border: `2px solid ${BRAND.black}`,
-              padding: '0 16px',
-              fontSize: 16,
-              fontWeight: 900,
-              boxSizing: 'border-box',
-            }}
-          />
-
-          <div style={{ marginTop: 14 }}>
-            <GreenDoneButton onClick={goNextSheet}>✓ Done</GreenDoneButton>
-          </div>
-        </SheetBox>
-      ) : null}
-
-      {sheet === 'description' ? (
-        <SheetBox title="Description" subtitle="Tell clients what you do." onClose={closeToStart} onBack={goPreviousSheet} onHome={goHome}>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe your service in detail"
-            style={{
-              width: '100%',
-              height: 132,
-              borderRadius: 18,
-              border: `2px solid ${BRAND.black}`,
-              padding: 16,
-              fontSize: 16,
-              fontWeight: 900,
-              resize: 'none',
-              fontFamily: 'Arial, sans-serif',
-              boxSizing: 'border-box',
-            }}
-          />
-
-          <div style={{ marginTop: 14 }}>
-            <GreenDoneButton onClick={goNextSheet}>✓ Done</GreenDoneButton>
-          </div>
-        </SheetBox>
-      ) : null}
-
-      {sheet === 'category' ? (
-        <SheetBox title="Choose category" subtitle="Pick the main category." onClose={closeToStart} onBack={goPreviousSheet} onHome={goHome}>
-          <div style={{ display: 'grid', gap: 10 }}>
-            {categories.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  setCategoryId(item.id);
-                  setSubcategory(item.subcategories[0]);
-                  setSheet('subcategory');
-                }}
-                style={{
-                  width: '100%',
-                  minHeight: 76,
-                  borderRadius: 22,
-                  border: `2px solid ${BRAND.black}`,
-                  background: item.id === categoryId ? BRAND.softBlue : '#fff',
-                  color: BRAND.navy,
-                  display: 'grid',
-                  gridTemplateColumns: '68px 1fr auto',
-                  gap: 12,
-                  alignItems: 'center',
-                  padding: '10px 14px',
-                  textAlign: 'left',
-                  fontSize: 18,
-                  fontWeight: 900,
-                  boxSizing: 'border-box',
-                }}
-              >
-                <CategoryIcon icon={item.icon} />
-                <span>
-                  <div>{item.label}</div>
-                  <div style={{ marginTop: 3, fontSize: 12, color: BRAND.muted }}>
-                    {item.subcategories.length} subcategories
-                  </div>
-                </span>
-                <span style={{ fontSize: 28 }}>›</span>
-              </button>
-            ))}
-          </div>
-        </SheetBox>
-      ) : null}
-
-      {sheet === 'subcategory' ? (
-        <SheetBox
-          title="Choose subcategory"
-          subtitle={`Choose service type in ${currentCategory.label}.`}
-          onClose={closeToStart}
-          onBack={() => setSheet('category')}
-          onHome={goHome}
-        >
-          <div style={{ display: 'grid', gap: 10 }}>
-            {currentCategory.subcategories.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => {
-                  setSubcategory(item);
-                  setSheet('hours');
-                }}
-                style={{
-                  width: '100%',
-                  minHeight: 58,
-                  borderRadius: 18,
-                  border: `2px solid ${BRAND.black}`,
-                  background: item === subcategory ? BRAND.blue : '#fff',
-                  color: item === subcategory ? '#fff' : BRAND.navy,
-                  fontSize: 18,
-                  fontWeight: 900,
-                  boxSizing: 'border-box',
-                }}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        </SheetBox>
-      ) : null}
-
-      {sheet === 'hours' ? (
-        <SheetBox title="Working hours" subtitle="Use digital time format." onClose={closeToStart} onBack={goPreviousSheet} onHome={goHome}>
-          <div style={{ display: 'grid', gap: 12 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <label style={{ display: 'grid', gap: 6 }}>
-                <span style={{ fontSize: 13, fontWeight: 900, color: BRAND.muted }}>From</span>
-                <input
-                  value={hoursFrom}
-                  onChange={(e) => setHoursFrom(e.target.value)}
-                  placeholder="09:00"
-                  inputMode="numeric"
-                  style={{
-                    width: '100%',
-                    height: 62,
-                    borderRadius: 20,
-                    border: `2px solid ${BRAND.black}`,
-                    padding: '0 14px',
-                    fontSize: 26,
-                    fontWeight: 900,
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </label>
-
-              <label style={{ display: 'grid', gap: 6 }}>
-                <span style={{ fontSize: 13, fontWeight: 900, color: BRAND.muted }}>To</span>
-                <input
-                  value={hoursTo}
-                  onChange={(e) => setHoursTo(e.target.value)}
-                  placeholder="20:00"
-                  inputMode="numeric"
-                  style={{
-                    width: '100%',
-                    height: 62,
-                    borderRadius: 20,
-                    border: `2px solid ${BRAND.black}`,
-                    padding: '0 14px',
-                    fontSize: 26,
-                    fontWeight: 900,
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </label>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-              {[
-                ['09:00', '18:00'],
-                ['10:00', '20:00'],
-                ['00:00', '24:00'],
-              ].map(([from, to]) => (
-                <button
-                  key={`${from}-${to}`}
-                  type="button"
-                  onClick={() => {
-                    setHoursFrom(from);
-                    setHoursTo(to);
-                  }}
-                  style={{
-                    minHeight: 46,
-                    borderRadius: 16,
-                    border: `2px solid ${BRAND.black}`,
-                    background: '#fff',
-                    color: BRAND.navy,
-                    fontSize: 13,
-                    fontWeight: 900,
-                  }}
-                >
-                  {from}
-                  <br />
-                  {to}
-                </button>
-              ))}
-            </div>
-
-            <GreenDoneButton onClick={goNextSheet}>✓ Done</GreenDoneButton>
-          </div>
-        </SheetBox>
-      ) : null}
-
-      {sheet === 'contacts' ? (
-        <SheetBox title="Contact details" subtitle="Add several numbers for each contact type." onClose={closeToStart} onBack={goPreviousSheet} onHome={goHome}>
-          <div style={{ display: 'grid', gap: 12 }}>
-            {contactChannels.map((channel) => (
-              <div
-                key={channel.id}
-                style={{
-                  borderRadius: 22,
-                  border: `2px solid ${BRAND.black}`,
-                  background: '#fff',
-                  padding: 12,
-                  display: 'grid',
-                  gap: 10,
-                }}
-              >
-                <div style={{ display: 'grid', gridTemplateColumns: '46px 1fr auto', gap: 10, alignItems: 'center' }}>
-                  <span
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 14,
-                      border: `2px solid ${BRAND.black}`,
-                      background: '#fff',
-                      display: 'grid',
-                      placeItems: 'center',
-                      fontSize: 23,
-                    }}
-                  >
-                    {channel.icon}
-                  </span>
-                  <span style={{ fontSize: 18, fontWeight: 900, color: BRAND.navy }}>{channel.title}</span>
-                  <button
-                    type="button"
-                    onClick={() => addContactEntry(channel.id)}
-                    style={{
-                      height: 38,
-                      borderRadius: 14,
-                      border: `2px solid ${BRAND.black}`,
-                      background: BRAND.green,
-                      color: '#fff',
-                      fontSize: 13,
-                      fontWeight: 900,
-                      padding: '0 10px',
-                    }}
-                  >
-                    + Add
-                  </button>
-                </div>
-
-                {contacts[channel.id].map((entry) => {
-                  const withCode = !['instagram', 'email', 'website'].includes(channel.id);
-
-                  return (
-                    <div
-                      key={entry.id}
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: withCode ? '74px 1fr 36px' : '1fr 36px',
-                        gap: 8,
-                        alignItems: 'center',
-                      }}
-                    >
-                      {withCode ? (
-                        <input
-                          value={entry.code}
-                          onChange={(e) => updateContactEntry(channel.id, entry.id, { code: e.target.value })}
-                          placeholder="+44"
-                          style={{
-                            width: '100%',
-                            height: 50,
-                            borderRadius: 16,
-                            border: `2px solid ${BRAND.black}`,
-                            padding: '0 10px',
-                            fontSize: 15,
-                            fontWeight: 900,
-                            boxSizing: 'border-box',
-                          }}
-                        />
-                      ) : null}
-
-                      <input
-                        value={entry.value}
-                        onChange={(e) => updateContactEntry(channel.id, entry.id, { value: e.target.value })}
-                        placeholder={channel.placeholder}
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          borderRadius: 16,
-                          border: `2px solid ${BRAND.black}`,
-                          padding: '0 12px',
-                          fontSize: 15,
-                          fontWeight: 900,
-                          boxSizing: 'border-box',
-                        }}
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => removeContactEntry(channel.id, entry.id)}
-                        style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: 999,
-                          border: `2px solid ${BRAND.black}`,
-                          background: '#fff',
-                          color: BRAND.red,
-                          fontSize: 18,
-                          fontWeight: 900,
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-
-            <GreenDoneButton onClick={goNextSheet}>✓ Done</GreenDoneButton>
-          </div>
-        </SheetBox>
-      ) : null}
-
-      {sheet === 'payments' ? (
-        <SheetBox title="Payment methods" subtitle="Choose how clients can pay you." onClose={closeToStart} onBack={goPreviousSheet} onHome={goHome}>
-          <div style={{ display: 'grid', gap: 10 }}>
-            {paymentMethods.map((method) => (
-              <button
-                key={method.id}
-                type="button"
-                onClick={() => togglePayment(method.id)}
-                style={{
-                  width: '100%',
-                  minHeight: 62,
-                  borderRadius: 18,
-                  border: `2px solid ${BRAND.black}`,
-                  background: selectedPayments.includes(method.id) ? BRAND.softBlue : '#fff',
-                  display: 'grid',
-                  gridTemplateColumns: '48px 1fr 32px',
-                  gap: 12,
-                  alignItems: 'center',
-                  padding: '10px 14px',
-                  textAlign: 'left',
-                  boxSizing: 'border-box',
-                }}
-              >
-                <span style={{ fontSize: 24 }}>{method.icon}</span>
-                <span style={{ fontSize: 18, fontWeight: 900 }}>{method.title}</span>
-                <span style={{ fontSize: 22, fontWeight: 900, color: BRAND.green }}>
-                  {selectedPayments.includes(method.id) ? '✓' : ''}
-                </span>
-              </button>
-            ))}
-
-            <GreenDoneButton onClick={goNextSheet}>✓ Done</GreenDoneButton>
-          </div>
-        </SheetBox>
-      ) : null}
-
-      {sheet === 'address' ? (
-        <SheetBox title="Address" subtitle="Tell clients where the service is available." onClose={closeToStart} onBack={goPreviousSheet} onHome={goHome}>
-          <div style={{ display: 'grid', gap: 10 }}>
-            {['City', 'District / area', 'Street, building, studio, floor', 'Postcode'].map((item) => (
-              <input
-                key={item}
-                placeholder={item}
-                style={{
-                  width: '100%',
-                  height: 58,
-                  borderRadius: 18,
-                  border: `2px solid ${BRAND.black}`,
-                  padding: '0 16px',
-                  fontSize: 16,
-                  fontWeight: 900,
-                  boxSizing: 'border-box',
-                }}
-              />
-            ))}
-
-            <GreenDoneButton onClick={goNextSheet}>✓ Done</GreenDoneButton>
           </div>
         </SheetBox>
       ) : null}
